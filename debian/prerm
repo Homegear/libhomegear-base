@@ -4,7 +4,6 @@ case "$1" in
 	remove|purge|abort-install|abort-upgrade)
 		# This package is being removed, but its configuration has not yet
 		# been purged.
-		service homegear stop
 		;;
 
 	disappear)

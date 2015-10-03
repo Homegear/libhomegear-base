@@ -83,7 +83,7 @@ void Settings::reset()
 	_serverSettingsPath = "/etc/homegear/rpcservers.conf";
 	_mqttSettingsPath = "/etc/homegear/mqtt.conf";
 	_physicalInterfaceSettingsPath = "/etc/homegear/physicalinterfaces.conf";
-	_modulePath = "/usr/share/homegear/modules/";
+	_modulePath = "/var/lib/homegear/modules/";
 	_scriptPath = "/var/lib/homegear/scripts/";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
@@ -384,7 +384,7 @@ void Settings::load(std::string filename)
 				else if(name == "modulepath")
 				{
 					_modulePath = value;
-					if(_modulePath.empty()) _modulePath = "/usr/share/homegear/modules/";
+					if(_modulePath.empty()) _modulePath = "/var/lib/homegear/modules/";
 					if(_modulePath.back() != '/') _modulePath.push_back('/');
 					_bl->out.printDebug("Debug: libraryPath set to " + _modulePath);
 				}
