@@ -240,8 +240,8 @@ public:
 	DeviceType(BaseLib::Obj* baseLib, xml_node<>* typeNode);
 	virtual ~DeviceType() {}
 
-	virtual bool matches(Systems::DeviceFamilies family, std::shared_ptr<Systems::Packet> packet);
-	virtual bool matches(Systems::DeviceFamilies family, std::string typeID);
+	virtual bool matches(int32_t family, std::shared_ptr<Systems::Packet> packet);
+	virtual bool matches(int32_t family, std::string typeID);
 	virtual bool matches(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion);
 	virtual bool checkFirmwareVersion(int32_t version);
 protected:
@@ -440,7 +440,7 @@ public:
 
 	bool loaded() { return _loaded; }
 	bool hasBattery = false;
-	Systems::DeviceFamilies family = Systems::DeviceFamilies::HomeMaticBidCoS;
+	int32_t family = 0;
 	uint32_t version = 0;
 	uint32_t cyclicTimeout = 0;
 	int32_t eepSize = 1024;
@@ -463,8 +463,8 @@ public:
 	bool needsTime = false;
 	std::shared_ptr<Device> team;
 
-	Device(BaseLib::Obj* baseLib, Systems::DeviceFamilies family);
-	Device(BaseLib::Obj* baseLib, Systems::DeviceFamilies family, std::string xmlFilename);
+	Device(BaseLib::Obj* baseLib, int32_t family);
+	Device(BaseLib::Obj* baseLib, int32_t family, std::string xmlFilename);
 	virtual ~Device();
 	virtual std::shared_ptr<DeviceType> getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion);
 	virtual int32_t getCountFromSysinfo() { return _countFromSysinfo; }

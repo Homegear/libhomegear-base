@@ -1,16 +1,13 @@
 Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  /usr/include/stdc-predef.h Systems/LogicalDevice.h \
  Systems/../HelperFunctions/HelperFunctions.h \
- Systems/../HelperFunctions/../Systems/DeviceFamilies.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
  /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/c++/4.8/bits/stl_pair.h /usr/include/c++/4.8/bits/move.h \
@@ -77,7 +74,9 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  /usr/include/c++/4.8/bits/stringfwd.h \
  /usr/include/c++/4.8/bits/char_traits.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/4.8/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
  /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
  /usr/include/c++/4.8/ext/new_allocator.h \
@@ -197,12 +196,12 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  /usr/include/c++/4.8/forward_list \
  /usr/include/c++/4.8/bits/forward_list.h \
  /usr/include/c++/4.8/bits/forward_list.tcc \
- Systems/PhysicalInterfaceSettings.h Systems/../Systems/DeviceFamilies.h \
+ Systems/PhysicalInterfaceSettings.h \
  Systems/../Managers/FileDescriptorManager.h /usr/include/gnutls/gnutls.h \
  /usr/include/gnutls/compat.h /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
  /usr/include/c++/4.8/thread /usr/include/c++/4.8/condition_variable \
- Systems/DeviceFamilies.h Systems/Packet.h Systems/../Variable.h \
+ Systems/Packet.h Systems/../Variable.h \
  Systems/../Encoding/RapidXml/rapidxml.hpp /usr/include/c++/4.8/cassert \
  /usr/include/assert.h Systems/../DeviceDescription/Logical.h \
  Systems/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
@@ -221,9 +220,7 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  Systems/../DeviceDescription/Logical.h \
  Systems/../DeviceDescription/Physical.h \
  Systems/../DeviceDescription/SupportedDevice.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/../Systems/DeviceTypes.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/RunProgram.h \
  Systems/../DeviceDescription/Function.h \
  Systems/../DeviceDescription/ParameterGroup.h \
@@ -291,8 +288,7 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  Systems/../Systems/../DeviceDescription/HomegearDevice.h \
  Systems/../Systems/LogicalDevice.h \
  Systems/../Systems/PhysicalInterfaceSettings.h \
- Systems/../Systems/IPhysicalInterface.h \
- Systems/../Systems/DeviceFamilies.h Systems/../Systems/Peer.h \
+ Systems/../Systems/IPhysicalInterface.h Systems/../Systems/Peer.h \
  Systems/../Systems/SystemFactory.h Systems/../Systems/DeviceFamily.h \
  Systems/../Systems/UpdateInfo.h Systems/../Threads/Threads.h \
  Systems/../Threads/../Exception.h Systems/../Threads/../Output/Output.h \
@@ -305,11 +301,13 @@ Systems/LogicalDevice.h:
 
 Systems/../HelperFunctions/HelperFunctions.h:
 
-Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
+/usr/include/c++/4.8/algorithm:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+/usr/include/c++/4.8/utility:
 
-/usr/include/stdint.h:
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/features.h:
 
@@ -320,16 +318,6 @@ Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/c++/4.8/algorithm:
-
-/usr/include/c++/4.8/utility:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h:
 
@@ -495,9 +483,15 @@ Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/cwchar:
 
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/4.8/cstdint:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+
+/usr/include/stdint.h:
 
 /usr/include/c++/4.8/bits/allocator.h:
 
@@ -811,8 +805,6 @@ Systems/../Output/../Exception.h:
 
 Systems/PhysicalInterfaceSettings.h:
 
-Systems/../Systems/DeviceFamilies.h:
-
 Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/gnutls/gnutls.h:
@@ -828,8 +820,6 @@ Systems/../Managers/FileDescriptorManager.h:
 /usr/include/c++/4.8/thread:
 
 /usr/include/c++/4.8/condition_variable:
-
-Systems/DeviceFamilies.h:
 
 Systems/Packet.h:
 
@@ -879,11 +869,7 @@ Systems/../DeviceDescription/Physical.h:
 
 Systems/../DeviceDescription/SupportedDevice.h:
 
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Systems/../DeviceDescription/../Systems/DeviceTypes.h:
-
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Systems/../DeviceDescription/RunProgram.h:
 
@@ -1078,8 +1064,6 @@ Systems/../Systems/LogicalDevice.h:
 Systems/../Systems/PhysicalInterfaceSettings.h:
 
 Systems/../Systems/IPhysicalInterface.h:
-
-Systems/../Systems/DeviceFamilies.h:
 
 Systems/../Systems/Peer.h:
 

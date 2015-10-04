@@ -37,9 +37,6 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  /usr/include/c++/4.8/bits/exception_defines.h \
  /usr/include/c++/4.8/bits/nested_exception.h \
  DeviceDescription/HomeMatic/../../HelperFunctions/HelperFunctions.h \
- DeviceDescription/HomeMatic/../../HelperFunctions/../Systems/DeviceFamilies.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
  /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/c++/4.8/bits/stl_pair.h /usr/include/c++/4.8/bits/move.h \
@@ -82,7 +79,9 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  /usr/include/c++/4.8/bits/stringfwd.h \
  /usr/include/c++/4.8/bits/char_traits.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/4.8/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
  /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
  /usr/include/c++/4.8/ext/new_allocator.h \
@@ -266,7 +265,6 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/Devices.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/DevicePacket.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/JsonPayload.h \
@@ -279,7 +277,6 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/Logical.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/Physical.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/SupportedDevice.h \
- DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/RunProgram.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/Function.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/ParameterGroup.h \
@@ -313,10 +310,8 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../Systems/IPhysicalInterface.h \
  DeviceDescription/HomeMatic/../../Systems/../IEvents.h \
  DeviceDescription/HomeMatic/../../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/HomeMatic/../../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
- DeviceDescription/HomeMatic/../../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../Systems/Packet.h \
  DeviceDescription/HomeMatic/../../Systems/Peer.h \
  DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h \
@@ -424,14 +419,6 @@ DeviceDescription/HomeMatic/../../Encoding/RapidXml/rapidxml.hpp:
 
 DeviceDescription/HomeMatic/../../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/HomeMatic/../../HelperFunctions/../Systems/DeviceFamilies.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
-
-/usr/include/stdint.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/utility:
@@ -536,9 +523,15 @@ DeviceDescription/HomeMatic/../../HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/cwchar:
 
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/4.8/cstdint:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+
+/usr/include/stdint.h:
 
 /usr/include/c++/4.8/bits/allocator.h:
 
@@ -988,8 +981,6 @@ DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h:
-
 DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/DevicePacket.h:
@@ -1013,8 +1004,6 @@ DeviceDescription/HomeMatic/../../DeviceDescription/Logical.h:
 DeviceDescription/HomeMatic/../../DeviceDescription/Physical.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/SupportedDevice.h:
-
-DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/RunProgram.h:
 
@@ -1094,13 +1083,9 @@ DeviceDescription/HomeMatic/../../Systems/../IEvents.h:
 
 DeviceDescription/HomeMatic/../../Systems/PhysicalInterfaceSettings.h:
 
-DeviceDescription/HomeMatic/../../Systems/../Systems/DeviceFamilies.h:
-
 DeviceDescription/HomeMatic/../../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-DeviceDescription/HomeMatic/../../Systems/DeviceFamilies.h:
 
 DeviceDescription/HomeMatic/../../Systems/Packet.h:
 

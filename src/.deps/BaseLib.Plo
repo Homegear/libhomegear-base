@@ -203,7 +203,6 @@ BaseLib.lo: BaseLib.cpp /usr/include/stdc-predef.h BaseLib.h \
  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Managers/FileDescriptorManager.h HelperFunctions/HelperFunctions.h \
- HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -234,7 +233,6 @@ BaseLib.lo: BaseLib.cpp /usr/include/stdc-predef.h BaseLib.h \
  HelperFunctions/../Exception.h HelperFunctions/Io.h Output/Output.h \
  DeviceDescription/Devices.h DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/HomegearDevice.h DeviceDescription/DevicePacket.h \
  DeviceDescription/JsonPayload.h \
  DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
@@ -242,7 +240,6 @@ BaseLib.lo: BaseLib.cpp /usr/include/stdc-predef.h BaseLib.h \
  DeviceDescription/Parameter.h DeviceDescription/ParameterCast.h \
  DeviceDescription/../Variable.h DeviceDescription/Logical.h \
  DeviceDescription/Physical.h DeviceDescription/SupportedDevice.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/RunProgram.h DeviceDescription/Function.h \
  DeviceDescription/ParameterGroup.h DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
@@ -263,15 +260,14 @@ BaseLib.lo: BaseLib.cpp /usr/include/stdc-predef.h BaseLib.h \
  Systems/../DeviceDescription/HomegearDevice.h Systems/LogicalDevice.h \
  Systems/../HelperFunctions/HelperFunctions.h \
  Systems/IPhysicalInterface.h Systems/../IEvents.h \
- Systems/PhysicalInterfaceSettings.h Systems/../Systems/DeviceFamilies.h \
+ Systems/PhysicalInterfaceSettings.h \
  Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable Systems/DeviceFamilies.h \
- Systems/Packet.h Systems/Peer.h Systems/ServiceMessages.h \
- Systems/../Encoding/BinaryEncoder.h Systems/../Encoding/BinaryDecoder.h \
- Systems/Peer.h Systems/SystemFactory.h Systems/DeviceFamily.h \
- Systems/UpdateInfo.h Threads/Threads.h Threads/../Exception.h \
- Threads/../Output/Output.h SSDP/SSDP.h SSDP/../Encoding/HTTP.h \
- SSDP/../Variable.h IQueue.h
+ /usr/include/c++/4.8/condition_variable Systems/Packet.h Systems/Peer.h \
+ Systems/ServiceMessages.h Systems/../Encoding/BinaryEncoder.h \
+ Systems/../Encoding/BinaryDecoder.h Systems/Peer.h \
+ Systems/SystemFactory.h Systems/DeviceFamily.h Systems/UpdateInfo.h \
+ Threads/Threads.h Threads/../Exception.h Threads/../Output/Output.h \
+ SSDP/SSDP.h SSDP/../Encoding/HTTP.h SSDP/../Variable.h IQueue.h
 
 /usr/include/stdc-predef.h:
 
@@ -829,8 +825,6 @@ Managers/FileDescriptorManager.h:
 
 HelperFunctions/HelperFunctions.h:
 
-HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -921,8 +915,6 @@ DeviceDescription/../Systems/Packet.h:
 
 DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/../Systems/DeviceFamilies.h:
-
 DeviceDescription/HomegearDevice.h:
 
 DeviceDescription/DevicePacket.h:
@@ -946,8 +938,6 @@ DeviceDescription/Logical.h:
 DeviceDescription/Physical.h:
 
 DeviceDescription/SupportedDevice.h:
-
-DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/RunProgram.h:
 
@@ -1027,13 +1017,9 @@ Systems/../IEvents.h:
 
 Systems/PhysicalInterfaceSettings.h:
 
-Systems/../Systems/DeviceFamilies.h:
-
 Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Systems/DeviceFamilies.h:
 
 Systems/Packet.h:
 

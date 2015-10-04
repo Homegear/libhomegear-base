@@ -144,9 +144,7 @@ Systems/Peer.lo: Systems/Peer.cpp /usr/include/stdc-predef.h \
  Systems/../DeviceDescription/Logical.h \
  Systems/../DeviceDescription/Physical.h \
  Systems/../DeviceDescription/SupportedDevice.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/../Systems/DeviceTypes.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/RunProgram.h \
  Systems/../DeviceDescription/Function.h \
  Systems/../DeviceDescription/ParameterGroup.h \
@@ -233,7 +231,6 @@ Systems/Peer.lo: Systems/Peer.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Systems/../Managers/FileDescriptorManager.h \
  Systems/../HelperFunctions/HelperFunctions.h \
- Systems/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -287,10 +284,8 @@ Systems/Peer.lo: Systems/Peer.cpp /usr/include/stdc-predef.h \
  Systems/../Systems/../HelperFunctions/HelperFunctions.h \
  Systems/../Systems/IPhysicalInterface.h Systems/../Systems/../IEvents.h \
  Systems/../Systems/PhysicalInterfaceSettings.h \
- Systems/../Systems/../Systems/DeviceFamilies.h \
  Systems/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Systems/../Systems/DeviceFamilies.h Systems/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Systems/../Systems/Packet.h \
  Systems/../Systems/Peer.h Systems/../Systems/Peer.h \
  Systems/../Systems/SystemFactory.h Systems/../Systems/DeviceFamily.h \
  Systems/../Systems/UpdateInfo.h Systems/../Threads/Threads.h \
@@ -672,11 +667,7 @@ Systems/../DeviceDescription/Physical.h:
 
 Systems/../DeviceDescription/SupportedDevice.h:
 
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Systems/../DeviceDescription/../Systems/DeviceTypes.h:
-
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Systems/../DeviceDescription/RunProgram.h:
 
@@ -912,8 +903,6 @@ Systems/../Managers/FileDescriptorManager.h:
 
 Systems/../HelperFunctions/HelperFunctions.h:
 
-Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -1066,13 +1055,9 @@ Systems/../Systems/../IEvents.h:
 
 Systems/../Systems/PhysicalInterfaceSettings.h:
 
-Systems/../Systems/../Systems/DeviceFamilies.h:
-
 Systems/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Systems/../Systems/DeviceFamilies.h:
 
 Systems/../Systems/Packet.h:
 

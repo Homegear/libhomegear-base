@@ -35,14 +35,14 @@ namespace BaseLib
 namespace Systems
 {
 
-LogicalDevice::LogicalDevice(DeviceFamilies deviceFamily, BaseLib::Obj* baseLib, IDeviceEventSink* eventHandler)
+LogicalDevice::LogicalDevice(int32_t deviceFamily, BaseLib::Obj* baseLib, IDeviceEventSink* eventHandler)
 {
 	_bl = baseLib;
 	_deviceFamily = deviceFamily;
 	setEventHandler(eventHandler);
 }
 
-LogicalDevice::LogicalDevice(DeviceFamilies deviceFamily, BaseLib::Obj* baseLib, uint32_t deviceID, std::string serialNumber, int32_t address, IDeviceEventSink* eventHandler) : LogicalDevice(deviceFamily, baseLib, eventHandler)
+LogicalDevice::LogicalDevice(int32_t deviceFamily, BaseLib::Obj* baseLib, uint32_t deviceID, std::string serialNumber, int32_t address, IDeviceEventSink* eventHandler) : LogicalDevice(deviceFamily, baseLib, eventHandler)
 {
 	_deviceID = deviceID;
 	_serialNumber = serialNumber;
@@ -551,7 +551,7 @@ void LogicalDevice::setPeerID(uint64_t oldPeerID, uint64_t newPeerID)
     _peersMutex.unlock();
 }
 
-DeviceFamilies LogicalDevice::deviceFamily()
+int32_t LogicalDevice::deviceFamily()
 {
 	return _deviceFamily;
 }

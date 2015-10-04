@@ -35,7 +35,6 @@
 #include "LogicalDevice.h"
 #include "PhysicalInterfaceSettings.h"
 #include "IPhysicalInterface.h"
-#include "DeviceFamilies.h"
 #include "../Variable.h"
 
 #include <iostream>
@@ -110,7 +109,7 @@ public:
 	virtual bool init() = 0;
 	virtual void dispose();
 
-	virtual DeviceFamilies getFamily() { return _family; }
+	virtual int32_t getFamily() { return _family; }
 	virtual std::shared_ptr<Variable> listBidcosInterfaces() { return std::shared_ptr<Variable>(new Variable(VariableType::tVoid)); }
 	virtual std::shared_ptr<Systems::IPhysicalInterface> createPhysicalDevice(std::shared_ptr<Systems::PhysicalInterfaceSettings> settings) { return std::shared_ptr<Systems::IPhysicalInterface>(); }
 	virtual void load() = 0;
@@ -142,7 +141,7 @@ public:
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	IFamilyEventSink* _eventHandler;
-	DeviceFamilies _family = DeviceFamilies::none;
+	int32_t _family = -1;
 	std::timed_mutex _devicesMutex;
 	std::mutex _removeThreadMutex;
 	std::thread _removeThread;

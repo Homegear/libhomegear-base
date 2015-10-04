@@ -32,7 +32,6 @@
 
 #include "../HelperFunctions/HelperFunctions.h"
 #include "IPhysicalInterface.h"
-#include "DeviceFamilies.h"
 #include "Packet.h"
 #include "../Variable.h"
 #include "../IEvents.h"
@@ -106,12 +105,12 @@ public:
 	};
 	//End event handling
 
-	LogicalDevice(DeviceFamilies deviceFamily, BaseLib::Obj* baseLib, IDeviceEventSink* eventHandler);
-	LogicalDevice(DeviceFamilies deviceFamily, BaseLib::Obj* baseLib, uint32_t deviceID, std::string serialNumber, int32_t address, IDeviceEventSink* eventHandler);
+	LogicalDevice(int32_t deviceFamily, BaseLib::Obj* baseLib, IDeviceEventSink* eventHandler);
+	LogicalDevice(int32_t deviceFamily, BaseLib::Obj* baseLib, uint32_t deviceID, std::string serialNumber, int32_t address, IDeviceEventSink* eventHandler);
 	virtual ~LogicalDevice();
 	virtual void dispose(bool wait = true);
 
-	virtual DeviceFamilies deviceFamily();
+	virtual int32_t deviceFamily();
 
 	virtual int32_t getAddress() { return _address; }
 	virtual uint64_t getID() { return _deviceID; }
@@ -151,7 +150,7 @@ public:
     virtual void homegearShuttingDown();
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	DeviceFamilies _deviceFamily = DeviceFamilies::none;
+	int32_t _deviceFamily = -1;
 	uint64_t _deviceID = 0;
 	int32_t _address = 0;
     std::string _serialNumber;

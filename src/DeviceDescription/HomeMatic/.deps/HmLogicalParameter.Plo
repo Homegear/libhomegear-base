@@ -227,7 +227,6 @@ DeviceDescription/HomeMatic/HmLogicalParameter.lo: \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  DeviceDescription/HomeMatic/../../Managers/FileDescriptorManager.h \
  DeviceDescription/HomeMatic/../../HelperFunctions/HelperFunctions.h \
- DeviceDescription/HomeMatic/../../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -262,7 +261,6 @@ DeviceDescription/HomeMatic/HmLogicalParameter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/Devices.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/DevicePacket.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/JsonPayload.h \
@@ -274,7 +272,6 @@ DeviceDescription/HomeMatic/HmLogicalParameter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/Logical.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/Physical.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/SupportedDevice.h \
- DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/RunProgram.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/Function.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/ParameterGroup.h \
@@ -308,10 +305,8 @@ DeviceDescription/HomeMatic/HmLogicalParameter.lo: \
  DeviceDescription/HomeMatic/../../Systems/IPhysicalInterface.h \
  DeviceDescription/HomeMatic/../../Systems/../IEvents.h \
  DeviceDescription/HomeMatic/../../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/HomeMatic/../../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
- DeviceDescription/HomeMatic/../../Systems/DeviceFamilies.h \
  DeviceDescription/HomeMatic/../../Systems/Packet.h \
  DeviceDescription/HomeMatic/../../Systems/Peer.h \
  DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h \
@@ -899,8 +894,6 @@ DeviceDescription/HomeMatic/../../Managers/FileDescriptorManager.h:
 
 DeviceDescription/HomeMatic/../../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/HomeMatic/../../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -983,8 +976,6 @@ DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h:
-
 DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/DevicePacket.h:
@@ -1006,8 +997,6 @@ DeviceDescription/HomeMatic/../../DeviceDescription/Logical.h:
 DeviceDescription/HomeMatic/../../DeviceDescription/Physical.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/SupportedDevice.h:
-
-DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/RunProgram.h:
 
@@ -1087,13 +1076,9 @@ DeviceDescription/HomeMatic/../../Systems/../IEvents.h:
 
 DeviceDescription/HomeMatic/../../Systems/PhysicalInterfaceSettings.h:
 
-DeviceDescription/HomeMatic/../../Systems/../Systems/DeviceFamilies.h:
-
 DeviceDescription/HomeMatic/../../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-DeviceDescription/HomeMatic/../../Systems/DeviceFamilies.h:
 
 DeviceDescription/HomeMatic/../../Systems/Packet.h:
 

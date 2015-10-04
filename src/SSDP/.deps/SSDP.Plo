@@ -209,9 +209,8 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  SSDP/../Managers/FileDescriptorManager.h \
- SSDP/../HelperFunctions/HelperFunctions.h \
- SSDP/../HelperFunctions/../Systems/DeviceFamilies.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
+ SSDP/../HelperFunctions/HelperFunctions.h /usr/include/c++/4.8/algorithm \
+ /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
  /usr/include/c++/4.8/bits/random.h \
@@ -243,7 +242,6 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  SSDP/../DeviceDescription/Devices.h \
  SSDP/../DeviceDescription/../Systems/Packet.h \
  SSDP/../DeviceDescription/../Systems/DeviceTypes.h \
- SSDP/../DeviceDescription/../Systems/DeviceFamilies.h \
  SSDP/../DeviceDescription/HomegearDevice.h \
  SSDP/../DeviceDescription/DevicePacket.h \
  SSDP/../DeviceDescription/JsonPayload.h \
@@ -254,7 +252,6 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  SSDP/../DeviceDescription/../Variable.h \
  SSDP/../DeviceDescription/Logical.h SSDP/../DeviceDescription/Physical.h \
  SSDP/../DeviceDescription/SupportedDevice.h \
- SSDP/../DeviceDescription/../Systems/DeviceFamilies.h \
  SSDP/../DeviceDescription/RunProgram.h \
  SSDP/../DeviceDescription/Function.h \
  SSDP/../DeviceDescription/ParameterGroup.h \
@@ -278,11 +275,9 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  SSDP/../Systems/../HelperFunctions/HelperFunctions.h \
  SSDP/../Systems/IPhysicalInterface.h SSDP/../Systems/../IEvents.h \
  SSDP/../Systems/PhysicalInterfaceSettings.h \
- SSDP/../Systems/../Systems/DeviceFamilies.h \
  SSDP/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable SSDP/../Systems/DeviceFamilies.h \
- SSDP/../Systems/Packet.h SSDP/../Systems/Peer.h \
- SSDP/../Systems/ServiceMessages.h \
+ /usr/include/c++/4.8/condition_variable SSDP/../Systems/Packet.h \
+ SSDP/../Systems/Peer.h SSDP/../Systems/ServiceMessages.h \
  SSDP/../Systems/../Encoding/BinaryEncoder.h \
  SSDP/../Systems/../Encoding/BinaryDecoder.h SSDP/../Systems/Peer.h \
  SSDP/../Systems/SystemFactory.h SSDP/../Systems/DeviceFamily.h \
@@ -859,8 +854,6 @@ SSDP/../Managers/FileDescriptorManager.h:
 
 SSDP/../HelperFunctions/HelperFunctions.h:
 
-SSDP/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -951,8 +944,6 @@ SSDP/../DeviceDescription/../Systems/Packet.h:
 
 SSDP/../DeviceDescription/../Systems/DeviceTypes.h:
 
-SSDP/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 SSDP/../DeviceDescription/HomegearDevice.h:
 
 SSDP/../DeviceDescription/DevicePacket.h:
@@ -974,8 +965,6 @@ SSDP/../DeviceDescription/Logical.h:
 SSDP/../DeviceDescription/Physical.h:
 
 SSDP/../DeviceDescription/SupportedDevice.h:
-
-SSDP/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 SSDP/../DeviceDescription/RunProgram.h:
 
@@ -1049,13 +1038,9 @@ SSDP/../Systems/../IEvents.h:
 
 SSDP/../Systems/PhysicalInterfaceSettings.h:
 
-SSDP/../Systems/../Systems/DeviceFamilies.h:
-
 SSDP/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-SSDP/../Systems/DeviceFamilies.h:
 
 SSDP/../Systems/Packet.h:
 

@@ -1310,7 +1310,7 @@ bool DeviceType::matches(Systems::LogicalDeviceType deviceType, uint32_t firmwar
     return false;
 }
 
-bool DeviceType::matches(Systems::DeviceFamilies family, std::string typeID)
+bool DeviceType::matches(int32_t family, std::string typeID)
 {
 	try
 	{
@@ -1332,7 +1332,7 @@ bool DeviceType::matches(Systems::DeviceFamilies family, std::string typeID)
     return false;
 }
 
-bool DeviceType::matches(Systems::DeviceFamilies family, std::shared_ptr<Systems::Packet> packet)
+bool DeviceType::matches(int32_t family, std::shared_ptr<Systems::Packet> packet)
 {
 	try
 	{
@@ -2085,14 +2085,14 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 	}
 }
 
-Device::Device(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily)
+Device::Device(BaseLib::Obj* baseLib, int32_t deviceFamily)
 {
 	_bl = baseLib;
 	family = deviceFamily;
 	parameterSet.reset(new ParameterSet(baseLib));
 }
 
-Device::Device(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily, std::string xmlFilename) : Device(baseLib, deviceFamily)
+Device::Device(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename) : Device(baseLib, deviceFamily)
 {
 	try
 	{

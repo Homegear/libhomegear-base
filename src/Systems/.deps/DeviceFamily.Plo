@@ -148,9 +148,7 @@ Systems/DeviceFamily.lo: Systems/DeviceFamily.cpp \
  Systems/../DeviceDescription/Logical.h \
  Systems/../DeviceDescription/Physical.h \
  Systems/../DeviceDescription/SupportedDevice.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/../Systems/DeviceTypes.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/RunProgram.h \
  Systems/../DeviceDescription/Function.h \
  Systems/../DeviceDescription/ParameterGroup.h \
@@ -158,7 +156,6 @@ Systems/DeviceFamily.lo: Systems/DeviceFamily.cpp \
  /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h Systems/LogicalDevice.h \
  Systems/../HelperFunctions/HelperFunctions.h \
- Systems/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -228,15 +225,14 @@ Systems/DeviceFamily.lo: Systems/DeviceFamily.cpp \
  /usr/include/c++/4.8/forward_list \
  /usr/include/c++/4.8/bits/forward_list.h \
  /usr/include/c++/4.8/bits/forward_list.tcc \
- Systems/PhysicalInterfaceSettings.h Systems/../Systems/DeviceFamilies.h \
+ Systems/PhysicalInterfaceSettings.h \
  Systems/../Managers/FileDescriptorManager.h /usr/include/gnutls/gnutls.h \
  /usr/include/gnutls/compat.h /usr/include/c++/4.8/thread \
- /usr/include/c++/4.8/condition_variable Systems/DeviceFamilies.h \
- Systems/Packet.h Systems/Peer.h Systems/ServiceMessages.h \
- Systems/../Encoding/BinaryEncoder.h /usr/include/c++/4.8/cstring \
- Systems/../Encoding/BinaryDecoder.h Systems/../BaseLib.h \
- Systems/../Database/DatabaseTypes.h Systems/../Encoding/XMLRPCDecoder.h \
- Systems/../Encoding/../Variable.h \
+ /usr/include/c++/4.8/condition_variable Systems/Packet.h Systems/Peer.h \
+ Systems/ServiceMessages.h Systems/../Encoding/BinaryEncoder.h \
+ /usr/include/c++/4.8/cstring Systems/../Encoding/BinaryDecoder.h \
+ Systems/../BaseLib.h Systems/../Database/DatabaseTypes.h \
+ Systems/../Encoding/XMLRPCDecoder.h Systems/../Encoding/../Variable.h \
  Systems/../Encoding/RapidXml/rapidxml.hpp \
  Systems/../Encoding/XMLRPCEncoder.h Systems/../Encoding/../Exception.h \
  Systems/../Encoding/../Output/Output.h \
@@ -677,11 +673,7 @@ Systems/../DeviceDescription/Physical.h:
 
 Systems/../DeviceDescription/SupportedDevice.h:
 
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Systems/../DeviceDescription/../Systems/DeviceTypes.h:
-
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Systems/../DeviceDescription/RunProgram.h:
 
@@ -700,8 +692,6 @@ Systems/../DeviceDescription/Scenario.h:
 Systems/LogicalDevice.h:
 
 Systems/../HelperFunctions/HelperFunctions.h:
-
-Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/algorithm:
 
@@ -887,8 +877,6 @@ Systems/../Output/../Exception.h:
 
 Systems/PhysicalInterfaceSettings.h:
 
-Systems/../Systems/DeviceFamilies.h:
-
 Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/gnutls/gnutls.h:
@@ -898,8 +886,6 @@ Systems/../Managers/FileDescriptorManager.h:
 /usr/include/c++/4.8/thread:
 
 /usr/include/c++/4.8/condition_variable:
-
-Systems/DeviceFamilies.h:
 
 Systems/Packet.h:
 

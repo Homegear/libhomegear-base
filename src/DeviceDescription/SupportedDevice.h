@@ -30,7 +30,6 @@
 #ifndef SUPPORTEDDEVICE_H_
 #define SUPPORTEDDEVICE_H_
 
-#include "../Systems/DeviceFamilies.h"
 #include "../Systems/DeviceTypes.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
@@ -66,7 +65,7 @@ public:
 	uint32_t minFirmwareVersion = 0;
 	uint32_t maxFirmwareVersion = 0;
 
-	bool matches(Systems::DeviceFamilies family, std::string typeId);
+	bool matches(int32_t family, std::string typeId);
 	bool matches(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion);
 
 	/**

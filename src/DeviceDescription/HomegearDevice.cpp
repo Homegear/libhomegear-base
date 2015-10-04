@@ -93,19 +93,19 @@ void HomegearDevice::setDynamicChannelCount(int32_t value)
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily)
 {
 	_bl = baseLib;
 	family = deviceFamily;
 	runProgram.reset(new RunProgram(baseLib));
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily, xml_node<>* node) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, xml_node<>* node) : HomegearDevice(baseLib, deviceFamily)
 {
 	if(node) parseXML(node);
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib, deviceFamily)
 {
 	try
 	{
@@ -2143,7 +2143,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					else if(propertyName == "hasBattery") { if(propertyValue == "true") hasBattery = true; }
 					else _bl->out.printWarning("Warning: Unknown device property: " + propertyName);
 				}
-				if(!(receiveModes & ReceiveModes::Enum::always)) hasBattery = true;
+				if(receiveModes == ReceiveModes::Enum::none) receiveModes = ReceiveModes::Enum::always;
 			}
 			else if(nodeName == "functions")
 			{

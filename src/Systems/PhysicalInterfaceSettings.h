@@ -30,8 +30,6 @@
 #ifndef PHYSICALINTERFACESETTINGS_H_
 #define PHYSICALINTERFACESETTINGS_H_
 
-#include "../Systems/DeviceFamilies.h"
-
 #include <iostream>
 #include <string>
 #include <map>
@@ -58,7 +56,7 @@ public:
 	virtual ~PhysicalInterfaceSettings() {}
 	std::string id;
 	bool isDefault = false;
-	DeviceFamilies family = DeviceFamilies::none;
+	int32_t family = -1;
 	std::string device;
 	std::string type;
 	uint32_t responseDelay = 95;

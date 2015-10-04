@@ -213,7 +213,6 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Threads/../Managers/FileDescriptorManager.h \
  Threads/../HelperFunctions/HelperFunctions.h \
- Threads/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -247,7 +246,6 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../DeviceDescription/Devices.h \
  Threads/../DeviceDescription/../Systems/Packet.h \
  Threads/../DeviceDescription/../Systems/DeviceTypes.h \
- Threads/../DeviceDescription/../Systems/DeviceFamilies.h \
  Threads/../DeviceDescription/HomegearDevice.h \
  Threads/../DeviceDescription/DevicePacket.h \
  Threads/../DeviceDescription/JsonPayload.h \
@@ -260,7 +258,6 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../DeviceDescription/Logical.h \
  Threads/../DeviceDescription/Physical.h \
  Threads/../DeviceDescription/SupportedDevice.h \
- Threads/../DeviceDescription/../Systems/DeviceFamilies.h \
  Threads/../DeviceDescription/RunProgram.h \
  Threads/../DeviceDescription/Function.h \
  Threads/../DeviceDescription/ParameterGroup.h \
@@ -287,10 +284,8 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../Systems/../HelperFunctions/HelperFunctions.h \
  Threads/../Systems/IPhysicalInterface.h Threads/../Systems/../IEvents.h \
  Threads/../Systems/PhysicalInterfaceSettings.h \
- Threads/../Systems/../Systems/DeviceFamilies.h \
  Threads/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Threads/../Systems/DeviceFamilies.h Threads/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Threads/../Systems/Packet.h \
  Threads/../Systems/Peer.h Threads/../Systems/ServiceMessages.h \
  Threads/../Systems/../Encoding/BinaryEncoder.h \
  Threads/../Systems/../Encoding/BinaryDecoder.h Threads/../Systems/Peer.h \
@@ -861,8 +856,6 @@ Threads/../Managers/FileDescriptorManager.h:
 
 Threads/../HelperFunctions/HelperFunctions.h:
 
-Threads/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -953,8 +946,6 @@ Threads/../DeviceDescription/../Systems/Packet.h:
 
 Threads/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Threads/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Threads/../DeviceDescription/HomegearDevice.h:
 
 Threads/../DeviceDescription/DevicePacket.h:
@@ -978,8 +969,6 @@ Threads/../DeviceDescription/Logical.h:
 Threads/../DeviceDescription/Physical.h:
 
 Threads/../DeviceDescription/SupportedDevice.h:
-
-Threads/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Threads/../DeviceDescription/RunProgram.h:
 
@@ -1059,13 +1048,9 @@ Threads/../Systems/../IEvents.h:
 
 Threads/../Systems/PhysicalInterfaceSettings.h:
 
-Threads/../Systems/../Systems/DeviceFamilies.h:
-
 Threads/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Threads/../Systems/DeviceFamilies.h:
 
 Threads/../Systems/Packet.h:
 

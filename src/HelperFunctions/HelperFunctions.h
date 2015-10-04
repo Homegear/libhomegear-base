@@ -30,8 +30,6 @@
 #ifndef HELPERFUNCTIONS_H_
 #define HELPERFUNCTIONS_H_
 
-#include "../Systems/DeviceFamilies.h"
-
 #include <algorithm>
 #include <ctime>
 #include <map>

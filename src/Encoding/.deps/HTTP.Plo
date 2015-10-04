@@ -134,7 +134,6 @@ Encoding/HTTP.lo: Encoding/HTTP.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
  /usr/include/c++/4.8/bits/vector.tcc \
  Encoding/../HelperFunctions/HelperFunctions.h \
- Encoding/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -546,8 +545,6 @@ Encoding/../HelperFunctions/Math.h:
 /usr/include/c++/4.8/bits/vector.tcc:
 
 Encoding/../HelperFunctions/HelperFunctions.h:
-
-Encoding/../HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/algorithm:
 

@@ -1,18 +1,13 @@
 DeviceDescription/SupportedDevice.lo: \
  DeviceDescription/SupportedDevice.cpp /usr/include/stdc-predef.h \
  DeviceDescription/SupportedDevice.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ DeviceDescription/../Systems/DeviceTypes.h /usr/include/c++/4.8/iostream \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
- /usr/include/c++/4.8/iostream \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
  /usr/include/c++/4.8/ostream /usr/include/c++/4.8/ios \
  /usr/include/c++/4.8/iosfwd /usr/include/c++/4.8/bits/stringfwd.h \
@@ -20,6 +15,7 @@ DeviceDescription/SupportedDevice.lo: \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
  /usr/include/wchar.h /usr/include/stdio.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h \
  /usr/include/xlocale.h /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/4.8/exception \
@@ -40,6 +36,7 @@ DeviceDescription/SupportedDevice.lo: \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
  /usr/include/c++/4.8/debug/debug.h \
  /usr/include/c++/4.8/bits/stl_iterator.h /usr/include/c++/4.8/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
  /usr/include/c++/4.8/clocale /usr/include/locale.h \
@@ -226,7 +223,6 @@ DeviceDescription/SupportedDevice.lo: \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  DeviceDescription/../Managers/FileDescriptorManager.h \
  DeviceDescription/../HelperFunctions/HelperFunctions.h \
- DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -308,7 +304,6 @@ DeviceDescription/SupportedDevice.lo: \
  DeviceDescription/../Systems/IPhysicalInterface.h \
  DeviceDescription/../Systems/../IEvents.h \
  DeviceDescription/../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
  DeviceDescription/../Systems/Packet.h \
@@ -331,11 +326,13 @@ DeviceDescription/SupportedDevice.lo: \
 
 DeviceDescription/SupportedDevice.h:
 
-DeviceDescription/../Systems/DeviceFamilies.h:
+DeviceDescription/../Systems/DeviceTypes.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+/usr/include/c++/4.8/iostream:
 
-/usr/include/stdint.h:
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/features.h:
 
@@ -346,18 +343,6 @@ DeviceDescription/../Systems/DeviceFamilies.h:
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-DeviceDescription/../Systems/DeviceTypes.h:
-
-DeviceDescription/../Systems/DeviceFamilies.h:
-
-/usr/include/c++/4.8/iostream:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h:
 
@@ -380,6 +365,8 @@ DeviceDescription/../Systems/DeviceFamilies.h:
 /usr/include/stdio.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h:
 
@@ -426,6 +413,10 @@ DeviceDescription/../Systems/DeviceFamilies.h:
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
 /usr/include/c++/4.8/cstdint:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+
+/usr/include/stdint.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
 
@@ -893,8 +884,6 @@ DeviceDescription/../Managers/FileDescriptorManager.h:
 
 DeviceDescription/../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -1086,8 +1075,6 @@ DeviceDescription/../Systems/IPhysicalInterface.h:
 DeviceDescription/../Systems/../IEvents.h:
 
 DeviceDescription/../Systems/PhysicalInterfaceSettings.h:
-
-DeviceDescription/../Systems/../Systems/DeviceFamilies.h:
 
 DeviceDescription/../Systems/../Managers/FileDescriptorManager.h:
 

@@ -48,7 +48,7 @@ namespace DeviceDescription
 class Devices
 {
 public:
-	Devices(BaseLib::Systems::DeviceFamilies family);
+	Devices(int32_t family);
 	virtual ~Devices() {}
 	bool empty() { return _devices.empty(); }
 	void clear();
@@ -59,7 +59,7 @@ public:
 	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	BaseLib::Systems::DeviceFamilies _family;
+	int32_t _family;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 };
 

@@ -248,13 +248,13 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/missing aclocal-1.14
+ACLOCAL = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/missing aclocal-1.14
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 AR = ar
-AUTOCONF = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/missing autoconf
-AUTOHEADER = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/missing autoheader
-AUTOMAKE = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/missing automake-1.14
+AUTOCONF = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/missing autoconf
+AUTOHEADER = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/missing autoheader
+AUTOMAKE = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/missing automake-1.14
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -291,7 +291,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/missing makeinfo
+MAKEINFO = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/missing makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
@@ -314,10 +314,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.6.0
-abs_builddir = /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/src
-abs_srcdir = /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/src
-abs_top_builddir = /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base
-abs_top_srcdir = /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base
+abs_builddir = /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/src
+abs_srcdir = /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/src
+abs_top_builddir = /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base
+abs_top_srcdir = /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -345,24 +345,24 @@ host_cpu = x86_64
 host_os = linux-gnu
 host_vendor = unknown
 htmldir = ${docdir}
-includedir = ${prefix}/include
+includedir = /usr/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/Homegear/libhomegear-base/cfg/install-sh
+install_sh = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
-localstatedir = ${prefix}/var
+localstatedir = /var
 mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /usr/local
+prefix = /usr
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
-sysconfdir = ${prefix}/etc
+sysconfdir = /etc
 target_alias = 
 top_build_prefix = ../
 top_builddir = ..
@@ -436,13 +436,13 @@ libhomegear_base_la_SOURCES = BaseLib.cpp BaseLib.h Exception.h \
 	Sockets/SerialReaderWriter.h Sockets/ServerInfo.cpp \
 	Sockets/ServerInfo.h Sockets/SocketOperations.cpp \
 	Sockets/SocketOperations.h SSDP/SSDP.cpp SSDP/SSDP.h \
-	Systems/Central.cpp Systems/Central.h Systems/DeviceFamilies.h \
-	Systems/DeviceFamily.cpp Systems/DeviceFamily.h \
-	Systems/DeviceTypes.cpp Systems/DeviceTypes.h \
-	Systems/IPhysicalInterface.cpp Systems/IPhysicalInterface.h \
-	Systems/LogicalDevice.cpp Systems/LogicalDevice.h \
-	Systems/Packet.cpp Systems/Packet.h Systems/Peer.cpp \
-	Systems/Peer.h Systems/PhysicalInterfaceSettings.h \
+	Systems/Central.cpp Systems/Central.h Systems/DeviceFamily.cpp \
+	Systems/DeviceFamily.h Systems/DeviceTypes.cpp \
+	Systems/DeviceTypes.h Systems/IPhysicalInterface.cpp \
+	Systems/IPhysicalInterface.h Systems/LogicalDevice.cpp \
+	Systems/LogicalDevice.h Systems/Packet.cpp Systems/Packet.h \
+	Systems/Peer.cpp Systems/Peer.h \
+	Systems/PhysicalInterfaceSettings.h \
 	Systems/ServiceMessages.cpp Systems/ServiceMessages.h \
 	Systems/SystemFactory.h Systems/UpdateInfo.cpp \
 	Systems/UpdateInfo.h Threads/Threads.cpp Threads/Threads.h
@@ -481,8 +481,7 @@ nobase_otherinclude_HEADERS = BaseLib.h Exception.h IEvents.h IQueue.h \
 	Settings/Settings.h Sockets/HTTPClient.h \
 	Sockets/IWebserverEventSink.h Sockets/SerialReaderWriter.h \
 	Sockets/ServerInfo.h Sockets/SocketOperations.h SSDP/SSDP.h \
-	Systems/Central.h Systems/DeviceFamilies.h \
-	Systems/DeviceFamily.h Systems/DeviceTypes.h \
+	Systems/Central.h Systems/DeviceFamily.h Systems/DeviceTypes.h \
 	Systems/IPhysicalInterface.h Systems/LogicalDevice.h \
 	Systems/Packet.h Systems/Peer.h \
 	Systems/PhysicalInterfaceSettings.h Systems/ServiceMessages.h \
@@ -500,9 +499,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/Makefile
+	  $(AUTOMAKE) --gnu src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

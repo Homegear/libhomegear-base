@@ -123,9 +123,8 @@ HelperFunctions/Color.lo: HelperFunctions/Color.cpp \
  /usr/include/x86_64-linux-gnu/bits/mathdef.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
- HelperFunctions/HelperFunctions.h \
- HelperFunctions/../Systems/DeviceFamilies.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
+ HelperFunctions/HelperFunctions.h /usr/include/c++/4.8/algorithm \
+ /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h \
  /usr/include/c++/4.8/bits/stl_tempbuf.h \
@@ -504,8 +503,6 @@ HelperFunctions/Math.h:
 /usr/include/x86_64-linux-gnu/bits/mathinline.h:
 
 HelperFunctions/HelperFunctions.h:
-
-HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/algorithm:
 

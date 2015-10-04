@@ -36,7 +36,7 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Devices::Devices(BaseLib::Systems::DeviceFamilies family)
+Devices::Devices(int32_t family)
 {
 	_family = family;
 }
