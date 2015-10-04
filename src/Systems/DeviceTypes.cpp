@@ -34,7 +34,7 @@ namespace BaseLib
 namespace Systems
 {
 
-LogicalDeviceType::LogicalDeviceType(DeviceFamilies family, uint32_t type)
+LogicalDeviceType::LogicalDeviceType(int32_t family, uint32_t type)
 {
 	_family = family;
 	_type = type;

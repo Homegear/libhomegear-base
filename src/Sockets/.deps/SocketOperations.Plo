@@ -222,7 +222,6 @@ Sockets/SocketOperations.lo: Sockets/SocketOperations.cpp \
  /usr/include/x86_64-linux-gnu/sys/ttydefaults.h \
  Sockets/../Managers/FileDescriptorManager.h \
  Sockets/../HelperFunctions/HelperFunctions.h \
- Sockets/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -256,7 +255,6 @@ Sockets/SocketOperations.lo: Sockets/SocketOperations.cpp \
  Sockets/../DeviceDescription/Devices.h \
  Sockets/../DeviceDescription/../Systems/Packet.h \
  Sockets/../DeviceDescription/../Systems/DeviceTypes.h \
- Sockets/../DeviceDescription/../Systems/DeviceFamilies.h \
  Sockets/../DeviceDescription/HomegearDevice.h \
  Sockets/../DeviceDescription/DevicePacket.h \
  Sockets/../DeviceDescription/JsonPayload.h \
@@ -269,7 +267,6 @@ Sockets/SocketOperations.lo: Sockets/SocketOperations.cpp \
  Sockets/../DeviceDescription/Logical.h \
  Sockets/../DeviceDescription/Physical.h \
  Sockets/../DeviceDescription/SupportedDevice.h \
- Sockets/../DeviceDescription/../Systems/DeviceFamilies.h \
  Sockets/../DeviceDescription/RunProgram.h \
  Sockets/../DeviceDescription/Function.h \
  Sockets/../DeviceDescription/ParameterGroup.h \
@@ -290,10 +287,8 @@ Sockets/SocketOperations.lo: Sockets/SocketOperations.cpp \
  Sockets/../Systems/../HelperFunctions/HelperFunctions.h \
  Sockets/../Systems/IPhysicalInterface.h Sockets/../Systems/../IEvents.h \
  Sockets/../Systems/PhysicalInterfaceSettings.h \
- Sockets/../Systems/../Systems/DeviceFamilies.h \
  Sockets/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Sockets/../Systems/DeviceFamilies.h Sockets/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Sockets/../Systems/Packet.h \
  Sockets/../Systems/Peer.h Sockets/../Systems/ServiceMessages.h \
  Sockets/../Systems/../Encoding/BinaryEncoder.h \
  Sockets/../Systems/../Encoding/BinaryDecoder.h Sockets/../Systems/Peer.h \
@@ -889,8 +884,6 @@ Sockets/../Managers/FileDescriptorManager.h:
 
 Sockets/../HelperFunctions/HelperFunctions.h:
 
-Sockets/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -981,8 +974,6 @@ Sockets/../DeviceDescription/../Systems/Packet.h:
 
 Sockets/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Sockets/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Sockets/../DeviceDescription/HomegearDevice.h:
 
 Sockets/../DeviceDescription/DevicePacket.h:
@@ -1006,8 +997,6 @@ Sockets/../DeviceDescription/Logical.h:
 Sockets/../DeviceDescription/Physical.h:
 
 Sockets/../DeviceDescription/SupportedDevice.h:
-
-Sockets/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Sockets/../DeviceDescription/RunProgram.h:
 
@@ -1063,13 +1052,9 @@ Sockets/../Systems/../IEvents.h:
 
 Sockets/../Systems/PhysicalInterfaceSettings.h:
 
-Sockets/../Systems/../Systems/DeviceFamilies.h:
-
 Sockets/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Sockets/../Systems/DeviceFamilies.h:
 
 Sockets/../Systems/Packet.h:
 

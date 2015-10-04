@@ -212,7 +212,6 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Systems/../Managers/FileDescriptorManager.h \
  Systems/../HelperFunctions/HelperFunctions.h \
- Systems/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -245,7 +244,6 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  Systems/../HelperFunctions/Io.h Systems/../DeviceDescription/Devices.h \
  Systems/../DeviceDescription/../Systems/Packet.h \
  Systems/../DeviceDescription/../Systems/DeviceTypes.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/HomegearDevice.h \
  Systems/../DeviceDescription/DevicePacket.h \
  Systems/../DeviceDescription/JsonPayload.h \
@@ -257,7 +255,6 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  Systems/../DeviceDescription/Logical.h \
  Systems/../DeviceDescription/Physical.h \
  Systems/../DeviceDescription/SupportedDevice.h \
- Systems/../DeviceDescription/../Systems/DeviceFamilies.h \
  Systems/../DeviceDescription/RunProgram.h \
  Systems/../DeviceDescription/Function.h \
  Systems/../DeviceDescription/ParameterGroup.h \
@@ -284,10 +281,8 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  Systems/../Systems/../HelperFunctions/HelperFunctions.h \
  Systems/../Systems/IPhysicalInterface.h Systems/../Systems/../IEvents.h \
  Systems/../Systems/PhysicalInterfaceSettings.h \
- Systems/../Systems/../Systems/DeviceFamilies.h \
  Systems/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Systems/../Systems/DeviceFamilies.h Systems/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Systems/../Systems/Packet.h \
  Systems/../Systems/Peer.h Systems/../Systems/ServiceMessages.h \
  Systems/../Systems/Peer.h Systems/../Systems/SystemFactory.h \
  Systems/../Systems/DeviceFamily.h Systems/../Systems/UpdateInfo.h \
@@ -864,8 +859,6 @@ Systems/../Managers/FileDescriptorManager.h:
 
 Systems/../HelperFunctions/HelperFunctions.h:
 
-Systems/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -954,8 +947,6 @@ Systems/../DeviceDescription/../Systems/Packet.h:
 
 Systems/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Systems/../DeviceDescription/HomegearDevice.h:
 
 Systems/../DeviceDescription/DevicePacket.h:
@@ -977,8 +968,6 @@ Systems/../DeviceDescription/Logical.h:
 Systems/../DeviceDescription/Physical.h:
 
 Systems/../DeviceDescription/SupportedDevice.h:
-
-Systems/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Systems/../DeviceDescription/RunProgram.h:
 
@@ -1058,13 +1047,9 @@ Systems/../Systems/../IEvents.h:
 
 Systems/../Systems/PhysicalInterfaceSettings.h:
 
-Systems/../Systems/../Systems/DeviceFamilies.h:
-
 Systems/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Systems/../Systems/DeviceFamilies.h:
 
 Systems/../Systems/Packet.h:
 

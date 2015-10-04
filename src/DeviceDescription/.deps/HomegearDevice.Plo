@@ -140,9 +140,7 @@ DeviceDescription/HomegearDevice.lo: DeviceDescription/HomegearDevice.cpp \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
  DeviceDescription/Logical.h DeviceDescription/Physical.h \
  DeviceDescription/SupportedDevice.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/RunProgram.h DeviceDescription/Function.h \
  DeviceDescription/ParameterGroup.h DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
@@ -234,7 +232,6 @@ DeviceDescription/HomegearDevice.lo: DeviceDescription/HomegearDevice.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  DeviceDescription/../Managers/FileDescriptorManager.h \
  DeviceDescription/../HelperFunctions/HelperFunctions.h \
- DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -299,7 +296,6 @@ DeviceDescription/HomegearDevice.lo: DeviceDescription/HomegearDevice.cpp \
  DeviceDescription/../Systems/IPhysicalInterface.h \
  DeviceDescription/../Systems/../IEvents.h \
  DeviceDescription/../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
  DeviceDescription/../Systems/Packet.h \
@@ -691,11 +687,7 @@ DeviceDescription/Physical.h:
 
 DeviceDescription/SupportedDevice.h:
 
-DeviceDescription/../Systems/DeviceFamilies.h:
-
 DeviceDescription/../Systems/DeviceTypes.h:
-
-DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/RunProgram.h:
 
@@ -919,8 +911,6 @@ DeviceDescription/../Managers/FileDescriptorManager.h:
 
 DeviceDescription/../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -1076,8 +1066,6 @@ DeviceDescription/../Systems/IPhysicalInterface.h:
 DeviceDescription/../Systems/../IEvents.h:
 
 DeviceDescription/../Systems/PhysicalInterfaceSettings.h:
-
-DeviceDescription/../Systems/../Systems/DeviceFamilies.h:
 
 DeviceDescription/../Systems/../Managers/FileDescriptorManager.h:
 

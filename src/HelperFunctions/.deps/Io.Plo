@@ -221,7 +221,6 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  HelperFunctions/../Managers/FileDescriptorManager.h \
  HelperFunctions/../HelperFunctions/HelperFunctions.h \
- HelperFunctions/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -259,7 +258,6 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../DeviceDescription/Devices.h \
  HelperFunctions/../DeviceDescription/../Systems/Packet.h \
  HelperFunctions/../DeviceDescription/../Systems/DeviceTypes.h \
- HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h \
  HelperFunctions/../DeviceDescription/HomegearDevice.h \
  HelperFunctions/../DeviceDescription/DevicePacket.h \
  HelperFunctions/../DeviceDescription/JsonPayload.h \
@@ -272,7 +270,6 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../DeviceDescription/Logical.h \
  HelperFunctions/../DeviceDescription/Physical.h \
  HelperFunctions/../DeviceDescription/SupportedDevice.h \
- HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h \
  HelperFunctions/../DeviceDescription/RunProgram.h \
  HelperFunctions/../DeviceDescription/Function.h \
  HelperFunctions/../DeviceDescription/ParameterGroup.h \
@@ -305,10 +302,8 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../Systems/IPhysicalInterface.h \
  HelperFunctions/../Systems/../IEvents.h \
  HelperFunctions/../Systems/PhysicalInterfaceSettings.h \
- HelperFunctions/../Systems/../Systems/DeviceFamilies.h \
  HelperFunctions/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
- HelperFunctions/../Systems/DeviceFamilies.h \
  HelperFunctions/../Systems/Packet.h HelperFunctions/../Systems/Peer.h \
  HelperFunctions/../Systems/ServiceMessages.h \
  HelperFunctions/../Systems/../Encoding/BinaryEncoder.h \
@@ -883,8 +878,6 @@ HelperFunctions/../Managers/FileDescriptorManager.h:
 
 HelperFunctions/../HelperFunctions/HelperFunctions.h:
 
-HelperFunctions/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -975,8 +968,6 @@ HelperFunctions/../DeviceDescription/../Systems/Packet.h:
 
 HelperFunctions/../DeviceDescription/../Systems/DeviceTypes.h:
 
-HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 HelperFunctions/../DeviceDescription/HomegearDevice.h:
 
 HelperFunctions/../DeviceDescription/DevicePacket.h:
@@ -1000,8 +991,6 @@ HelperFunctions/../DeviceDescription/Logical.h:
 HelperFunctions/../DeviceDescription/Physical.h:
 
 HelperFunctions/../DeviceDescription/SupportedDevice.h:
-
-HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 HelperFunctions/../DeviceDescription/RunProgram.h:
 
@@ -1081,13 +1070,9 @@ HelperFunctions/../Systems/../IEvents.h:
 
 HelperFunctions/../Systems/PhysicalInterfaceSettings.h:
 
-HelperFunctions/../Systems/../Systems/DeviceFamilies.h:
-
 HelperFunctions/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-HelperFunctions/../Systems/DeviceFamilies.h:
 
 HelperFunctions/../Systems/Packet.h:
 

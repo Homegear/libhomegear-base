@@ -436,13 +436,13 @@ libhomegear_base_la_SOURCES = BaseLib.cpp BaseLib.h Exception.h \
 	Sockets/SerialReaderWriter.h Sockets/ServerInfo.cpp \
 	Sockets/ServerInfo.h Sockets/SocketOperations.cpp \
 	Sockets/SocketOperations.h SSDP/SSDP.cpp SSDP/SSDP.h \
-	Systems/Central.cpp Systems/Central.h Systems/DeviceFamilies.h \
-	Systems/DeviceFamily.cpp Systems/DeviceFamily.h \
-	Systems/DeviceTypes.cpp Systems/DeviceTypes.h \
-	Systems/IPhysicalInterface.cpp Systems/IPhysicalInterface.h \
-	Systems/LogicalDevice.cpp Systems/LogicalDevice.h \
-	Systems/Packet.cpp Systems/Packet.h Systems/Peer.cpp \
-	Systems/Peer.h Systems/PhysicalInterfaceSettings.h \
+	Systems/Central.cpp Systems/Central.h Systems/DeviceFamily.cpp \
+	Systems/DeviceFamily.h Systems/DeviceTypes.cpp \
+	Systems/DeviceTypes.h Systems/IPhysicalInterface.cpp \
+	Systems/IPhysicalInterface.h Systems/LogicalDevice.cpp \
+	Systems/LogicalDevice.h Systems/Packet.cpp Systems/Packet.h \
+	Systems/Peer.cpp Systems/Peer.h \
+	Systems/PhysicalInterfaceSettings.h \
 	Systems/ServiceMessages.cpp Systems/ServiceMessages.h \
 	Systems/SystemFactory.h Systems/UpdateInfo.cpp \
 	Systems/UpdateInfo.h Threads/Threads.cpp Threads/Threads.h
@@ -481,8 +481,7 @@ nobase_otherinclude_HEADERS = BaseLib.h Exception.h IEvents.h IQueue.h \
 	Settings/Settings.h Sockets/HTTPClient.h \
 	Sockets/IWebserverEventSink.h Sockets/SerialReaderWriter.h \
 	Sockets/ServerInfo.h Sockets/SocketOperations.h SSDP/SSDP.h \
-	Systems/Central.h Systems/DeviceFamilies.h \
-	Systems/DeviceFamily.h Systems/DeviceTypes.h \
+	Systems/Central.h Systems/DeviceFamily.h Systems/DeviceTypes.h \
 	Systems/IPhysicalInterface.h Systems/LogicalDevice.h \
 	Systems/Packet.h Systems/Peer.h \
 	Systems/PhysicalInterfaceSettings.h Systems/ServiceMessages.h \
@@ -500,9 +499,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/Makefile
+	  $(AUTOMAKE) --gnu src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

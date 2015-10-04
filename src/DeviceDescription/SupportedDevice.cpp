@@ -92,7 +92,7 @@ bool SupportedDevice::matches(Systems::LogicalDeviceType deviceType, uint32_t fi
     return false;
 }
 
-bool SupportedDevice::matches(Systems::DeviceFamilies family, std::string typeId)
+bool SupportedDevice::matches(int32_t family, std::string typeId)
 {
 	try
 	{

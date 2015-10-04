@@ -227,7 +227,6 @@ DeviceDescription/DevicePacket.lo: DeviceDescription/DevicePacket.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  DeviceDescription/../Managers/FileDescriptorManager.h \
  DeviceDescription/../HelperFunctions/HelperFunctions.h \
- DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -265,11 +264,9 @@ DeviceDescription/DevicePacket.lo: DeviceDescription/DevicePacket.cpp \
  DeviceDescription/../DeviceDescription/Devices.h \
  DeviceDescription/../DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/../DeviceDescription/HomegearDevice.h \
  DeviceDescription/../DeviceDescription/DevicePacket.h \
  DeviceDescription/../DeviceDescription/SupportedDevice.h \
- DeviceDescription/../DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/../DeviceDescription/RunProgram.h \
  DeviceDescription/../DeviceDescription/JsonPayload.h \
  DeviceDescription/../DeviceDescription/BinaryPayload.h \
@@ -305,10 +302,8 @@ DeviceDescription/DevicePacket.lo: DeviceDescription/DevicePacket.cpp \
  DeviceDescription/../Systems/IPhysicalInterface.h \
  DeviceDescription/../Systems/../IEvents.h \
  DeviceDescription/../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../Systems/Peer.h \
  DeviceDescription/../Systems/ServiceMessages.h \
@@ -901,8 +896,6 @@ DeviceDescription/../Managers/FileDescriptorManager.h:
 
 DeviceDescription/../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -993,15 +986,11 @@ DeviceDescription/../DeviceDescription/../Systems/Packet.h:
 
 DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 DeviceDescription/../DeviceDescription/HomegearDevice.h:
 
 DeviceDescription/../DeviceDescription/DevicePacket.h:
 
 DeviceDescription/../DeviceDescription/SupportedDevice.h:
-
-DeviceDescription/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/../DeviceDescription/RunProgram.h:
 
@@ -1087,13 +1076,9 @@ DeviceDescription/../Systems/../IEvents.h:
 
 DeviceDescription/../Systems/PhysicalInterfaceSettings.h:
 
-DeviceDescription/../Systems/../Systems/DeviceFamilies.h:
-
 DeviceDescription/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/../Systems/Packet.h:
 

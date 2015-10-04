@@ -214,7 +214,6 @@ Encoding/JsonEncoder.lo: Encoding/JsonEncoder.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Encoding/../Managers/FileDescriptorManager.h \
  Encoding/../HelperFunctions/HelperFunctions.h \
- Encoding/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -248,7 +247,6 @@ Encoding/JsonEncoder.lo: Encoding/JsonEncoder.cpp \
  Encoding/../DeviceDescription/Devices.h \
  Encoding/../DeviceDescription/../Systems/Packet.h \
  Encoding/../DeviceDescription/../Systems/DeviceTypes.h \
- Encoding/../DeviceDescription/../Systems/DeviceFamilies.h \
  Encoding/../DeviceDescription/HomegearDevice.h \
  Encoding/../DeviceDescription/DevicePacket.h \
  Encoding/../DeviceDescription/JsonPayload.h \
@@ -260,7 +258,6 @@ Encoding/JsonEncoder.lo: Encoding/JsonEncoder.cpp \
  Encoding/../DeviceDescription/Logical.h \
  Encoding/../DeviceDescription/Physical.h \
  Encoding/../DeviceDescription/SupportedDevice.h \
- Encoding/../DeviceDescription/../Systems/DeviceFamilies.h \
  Encoding/../DeviceDescription/RunProgram.h \
  Encoding/../DeviceDescription/Function.h \
  Encoding/../DeviceDescription/ParameterGroup.h \
@@ -289,10 +286,8 @@ Encoding/JsonEncoder.lo: Encoding/JsonEncoder.cpp \
  Encoding/../Systems/IPhysicalInterface.h \
  Encoding/../Systems/../IEvents.h \
  Encoding/../Systems/PhysicalInterfaceSettings.h \
- Encoding/../Systems/../Systems/DeviceFamilies.h \
  Encoding/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Encoding/../Systems/DeviceFamilies.h Encoding/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Encoding/../Systems/Packet.h \
  Encoding/../Systems/Peer.h Encoding/../Systems/ServiceMessages.h \
  Encoding/../Systems/../Encoding/BinaryEncoder.h \
  Encoding/../Systems/../Encoding/BinaryDecoder.h \
@@ -865,8 +860,6 @@ Encoding/../Managers/FileDescriptorManager.h:
 
 Encoding/../HelperFunctions/HelperFunctions.h:
 
-Encoding/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -957,8 +950,6 @@ Encoding/../DeviceDescription/../Systems/Packet.h:
 
 Encoding/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Encoding/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Encoding/../DeviceDescription/HomegearDevice.h:
 
 Encoding/../DeviceDescription/DevicePacket.h:
@@ -980,8 +971,6 @@ Encoding/../DeviceDescription/Logical.h:
 Encoding/../DeviceDescription/Physical.h:
 
 Encoding/../DeviceDescription/SupportedDevice.h:
-
-Encoding/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Encoding/../DeviceDescription/RunProgram.h:
 
@@ -1061,13 +1050,9 @@ Encoding/../Systems/../IEvents.h:
 
 Encoding/../Systems/PhysicalInterfaceSettings.h:
 
-Encoding/../Systems/../Systems/DeviceFamilies.h:
-
 Encoding/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Encoding/../Systems/DeviceFamilies.h:
 
 Encoding/../Systems/Packet.h:
 

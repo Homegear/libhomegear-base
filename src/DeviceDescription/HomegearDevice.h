@@ -54,11 +54,11 @@ public:
 		enum Enum { none = 0, always = 1, wakeOnRadio = 2, config = 4, wakeUp = 8, lazyConfig = 16, wakeUp2 = 32 };
 	};
 
-	Systems::DeviceFamilies family = Systems::DeviceFamilies::none;
+	int32_t family = -1;
 
-	HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies family);
-	HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies deviceFamily, xml_node<>* node);
-	HomegearDevice(BaseLib::Obj* baseLib, Systems::DeviceFamilies family, std::string xmlFilename, bool& oldFormat);
+	HomegearDevice(BaseLib::Obj* baseLib, int32_t family);
+	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, xml_node<>* node);
+	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, std::string xmlFilename, bool& oldFormat);
 	virtual ~HomegearDevice();
 
 	bool loaded() { return _loaded; }
@@ -73,7 +73,7 @@ public:
 	// }}}
 
 	// {{{ Properties
-	ReceiveModes::Enum receiveModes = ReceiveModes::always;
+	ReceiveModes::Enum receiveModes = ReceiveModes::none;
 	bool encryption = false;
 	uint32_t timeout = 0;
 	uint32_t memorySize = 1024;

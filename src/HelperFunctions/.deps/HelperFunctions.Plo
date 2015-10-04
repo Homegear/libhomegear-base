@@ -1,15 +1,12 @@
 HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  /usr/include/stdc-predef.h HelperFunctions/HelperFunctions.h \
- HelperFunctions/../Systems/DeviceFamilies.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
  /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/c++/4.8/bits/stl_pair.h /usr/include/c++/4.8/bits/move.h \
@@ -76,7 +73,9 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  /usr/include/c++/4.8/bits/stringfwd.h \
  /usr/include/c++/4.8/bits/char_traits.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/4.8/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
  /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
  /usr/include/c++/4.8/ext/new_allocator.h \
@@ -258,7 +257,6 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  HelperFunctions/../DeviceDescription/Devices.h \
  HelperFunctions/../DeviceDescription/../Systems/Packet.h \
  HelperFunctions/../DeviceDescription/../Systems/DeviceTypes.h \
- HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h \
  HelperFunctions/../DeviceDescription/HomegearDevice.h \
  HelperFunctions/../DeviceDescription/DevicePacket.h \
  HelperFunctions/../DeviceDescription/JsonPayload.h \
@@ -271,7 +269,6 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  HelperFunctions/../DeviceDescription/Logical.h \
  HelperFunctions/../DeviceDescription/Physical.h \
  HelperFunctions/../DeviceDescription/SupportedDevice.h \
- HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h \
  HelperFunctions/../DeviceDescription/RunProgram.h \
  HelperFunctions/../DeviceDescription/Function.h \
  HelperFunctions/../DeviceDescription/ParameterGroup.h \
@@ -304,10 +301,8 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  HelperFunctions/../Systems/IPhysicalInterface.h \
  HelperFunctions/../Systems/../IEvents.h \
  HelperFunctions/../Systems/PhysicalInterfaceSettings.h \
- HelperFunctions/../Systems/../Systems/DeviceFamilies.h \
  HelperFunctions/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
- HelperFunctions/../Systems/DeviceFamilies.h \
  HelperFunctions/../Systems/Packet.h HelperFunctions/../Systems/Peer.h \
  HelperFunctions/../Systems/ServiceMessages.h \
  HelperFunctions/../Systems/../Encoding/BinaryEncoder.h \
@@ -329,11 +324,13 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
 
 HelperFunctions/HelperFunctions.h:
 
-HelperFunctions/../Systems/DeviceFamilies.h:
+/usr/include/c++/4.8/algorithm:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+/usr/include/c++/4.8/utility:
 
-/usr/include/stdint.h:
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/features.h:
 
@@ -344,16 +341,6 @@ HelperFunctions/../Systems/DeviceFamilies.h:
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/c++/4.8/algorithm:
-
-/usr/include/c++/4.8/utility:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h:
 
@@ -519,9 +506,15 @@ HelperFunctions/../Systems/DeviceFamilies.h:
 
 /usr/include/c++/4.8/cwchar:
 
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/4.8/cstdint:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+
+/usr/include/stdint.h:
 
 /usr/include/c++/4.8/bits/allocator.h:
 
@@ -975,8 +968,6 @@ HelperFunctions/../DeviceDescription/../Systems/Packet.h:
 
 HelperFunctions/../DeviceDescription/../Systems/DeviceTypes.h:
 
-HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 HelperFunctions/../DeviceDescription/HomegearDevice.h:
 
 HelperFunctions/../DeviceDescription/DevicePacket.h:
@@ -1000,8 +991,6 @@ HelperFunctions/../DeviceDescription/Logical.h:
 HelperFunctions/../DeviceDescription/Physical.h:
 
 HelperFunctions/../DeviceDescription/SupportedDevice.h:
-
-HelperFunctions/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 HelperFunctions/../DeviceDescription/RunProgram.h:
 
@@ -1081,13 +1070,9 @@ HelperFunctions/../Systems/../IEvents.h:
 
 HelperFunctions/../Systems/PhysicalInterfaceSettings.h:
 
-HelperFunctions/../Systems/../Systems/DeviceFamilies.h:
-
 HelperFunctions/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-HelperFunctions/../Systems/DeviceFamilies.h:
 
 HelperFunctions/../Systems/Packet.h:
 

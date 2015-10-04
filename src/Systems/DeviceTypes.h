@@ -30,8 +30,6 @@
 #ifndef HMDEVICETYPES_H_
 #define HMDEVICETYPES_H_
 
-#include "DeviceFamilies.h"
-
 #include <iostream>
 #include <string>
 #include <map>
@@ -45,16 +43,16 @@ class LogicalDeviceType
 {
 public:
 	LogicalDeviceType() {}
-	LogicalDeviceType(DeviceFamilies family, uint32_t type);
+	LogicalDeviceType(int32_t family, uint32_t type);
 	virtual ~LogicalDeviceType() {}
 
-	DeviceFamilies family() { return _family; }
+	int32_t family() { return _family; }
 	uint32_t type() { return _type; }
 
 	bool operator==(LogicalDeviceType& other);
 	bool operator!=(LogicalDeviceType& other);
 private:
-	DeviceFamilies _family = DeviceFamilies::none;
+	int32_t _family = -1;
 	uint32_t _type = 0xFFFFFFFF;
 };
 

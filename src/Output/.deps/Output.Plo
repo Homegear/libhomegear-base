@@ -212,7 +212,6 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  Output/../Managers/FileDescriptorManager.h \
  Output/../HelperFunctions/HelperFunctions.h \
- Output/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -245,7 +244,6 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../Output/Output.h Output/../DeviceDescription/Devices.h \
  Output/../DeviceDescription/../Systems/Packet.h \
  Output/../DeviceDescription/../Systems/DeviceTypes.h \
- Output/../DeviceDescription/../Systems/DeviceFamilies.h \
  Output/../DeviceDescription/HomegearDevice.h \
  Output/../DeviceDescription/DevicePacket.h \
  Output/../DeviceDescription/JsonPayload.h \
@@ -258,7 +256,6 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../DeviceDescription/Logical.h \
  Output/../DeviceDescription/Physical.h \
  Output/../DeviceDescription/SupportedDevice.h \
- Output/../DeviceDescription/../Systems/DeviceFamilies.h \
  Output/../DeviceDescription/RunProgram.h \
  Output/../DeviceDescription/Function.h \
  Output/../DeviceDescription/ParameterGroup.h \
@@ -285,10 +282,8 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../Systems/../HelperFunctions/HelperFunctions.h \
  Output/../Systems/IPhysicalInterface.h Output/../Systems/../IEvents.h \
  Output/../Systems/PhysicalInterfaceSettings.h \
- Output/../Systems/../Systems/DeviceFamilies.h \
  Output/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- Output/../Systems/DeviceFamilies.h Output/../Systems/Packet.h \
+ /usr/include/c++/4.8/condition_variable Output/../Systems/Packet.h \
  Output/../Systems/Peer.h Output/../Systems/ServiceMessages.h \
  Output/../Systems/../Encoding/BinaryEncoder.h \
  Output/../Systems/../Encoding/BinaryDecoder.h Output/../Systems/Peer.h \
@@ -856,8 +851,6 @@ Output/../Managers/FileDescriptorManager.h:
 
 Output/../HelperFunctions/HelperFunctions.h:
 
-Output/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -948,8 +941,6 @@ Output/../DeviceDescription/../Systems/Packet.h:
 
 Output/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Output/../DeviceDescription/../Systems/DeviceFamilies.h:
-
 Output/../DeviceDescription/HomegearDevice.h:
 
 Output/../DeviceDescription/DevicePacket.h:
@@ -973,8 +964,6 @@ Output/../DeviceDescription/Logical.h:
 Output/../DeviceDescription/Physical.h:
 
 Output/../DeviceDescription/SupportedDevice.h:
-
-Output/../DeviceDescription/../Systems/DeviceFamilies.h:
 
 Output/../DeviceDescription/RunProgram.h:
 
@@ -1054,13 +1043,9 @@ Output/../Systems/../IEvents.h:
 
 Output/../Systems/PhysicalInterfaceSettings.h:
 
-Output/../Systems/../Systems/DeviceFamilies.h:
-
 Output/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
-
-Output/../Systems/DeviceFamilies.h:
 
 Output/../Systems/Packet.h:
 

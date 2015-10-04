@@ -109,10 +109,9 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  /usr/include/c++/4.8/bits/shared_ptr_base.h \
  /usr/include/c++/4.8/backward/auto_ptr.h \
  DeviceDescription/../Systems/Packet.h \
- DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
- /usr/include/c++/4.8/iostream /usr/include/c++/4.8/ostream \
- /usr/include/c++/4.8/ios /usr/include/c++/4.8/bits/ios_base.h \
+ DeviceDescription/../Systems/DeviceTypes.h /usr/include/c++/4.8/iostream \
+ /usr/include/c++/4.8/ostream /usr/include/c++/4.8/ios \
+ /usr/include/c++/4.8/bits/ios_base.h \
  /usr/include/c++/4.8/bits/locale_classes.h \
  /usr/include/c++/4.8/bits/locale_classes.tcc \
  /usr/include/c++/4.8/streambuf /usr/include/c++/4.8/bits/streambuf.tcc \
@@ -145,7 +144,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  /usr/include/c++/4.8/list /usr/include/c++/4.8/bits/stl_list.h \
  /usr/include/c++/4.8/bits/list.tcc DeviceDescription/Logical.h \
  DeviceDescription/Physical.h DeviceDescription/SupportedDevice.h \
- DeviceDescription/../Systems/DeviceFamilies.h \
  DeviceDescription/RunProgram.h DeviceDescription/Function.h \
  DeviceDescription/ParameterGroup.h DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
@@ -237,7 +235,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  DeviceDescription/../Managers/FileDescriptorManager.h \
  DeviceDescription/../HelperFunctions/HelperFunctions.h \
- DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -299,7 +296,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/../Systems/IPhysicalInterface.h \
  DeviceDescription/../Systems/../IEvents.h \
  DeviceDescription/../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/../Systems/../Systems/DeviceFamilies.h \
  DeviceDescription/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable \
  DeviceDescription/../Systems/Packet.h \
@@ -610,8 +606,6 @@ DeviceDescription/../Systems/Packet.h:
 
 DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/iostream:
 
 /usr/include/c++/4.8/ostream:
@@ -709,8 +703,6 @@ DeviceDescription/Logical.h:
 DeviceDescription/Physical.h:
 
 DeviceDescription/SupportedDevice.h:
-
-DeviceDescription/../Systems/DeviceFamilies.h:
 
 DeviceDescription/RunProgram.h:
 
@@ -934,8 +926,6 @@ DeviceDescription/../Managers/FileDescriptorManager.h:
 
 DeviceDescription/../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/../HelperFunctions/../Systems/DeviceFamilies.h:
-
 /usr/include/c++/4.8/algorithm:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
@@ -1085,8 +1075,6 @@ DeviceDescription/../Systems/IPhysicalInterface.h:
 DeviceDescription/../Systems/../IEvents.h:
 
 DeviceDescription/../Systems/PhysicalInterfaceSettings.h:
-
-DeviceDescription/../Systems/../Systems/DeviceFamilies.h:
 
 DeviceDescription/../Systems/../Managers/FileDescriptorManager.h:
 
