@@ -535,6 +535,10 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				convertedValue = reversedData;
 			}
 		}
+		else if(convertedValue.empty() && !variable->stringValue.empty())
+		{
+			convertedValue.insert(convertedValue.end(), variable->stringValue.begin(), variable->stringValue.end());
+		}
 	}
 	catch(const std::exception& ex)
     {
