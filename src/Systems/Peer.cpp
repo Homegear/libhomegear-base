@@ -2283,10 +2283,19 @@ std::shared_ptr<Variable> Peer::setId(int32_t clientID, uint64_t newPeerId)
 	try
 	{
 		if(newPeerId == 0 || newPeerId >= 0x40000000) return Variable::createError(-100, "New peer ID is invalid.");
-		if(!raiseSetPeerID(newPeerId)) return Variable::createError(-101, "New peer ID is already in use.");
-		_peerID = newPeerId;
-		if(serviceMessages) serviceMessages->setPeerID(newPeerId);
-		return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
+		if(newPeerId == _peerID) return Variable::createError(-100, "New peer ID is the same as the old one.");
+
+		std::shared_ptr<Central> central(getCentral());
+		if(central)
+		{
+			std::shared_ptr<Peer> peer = central->logicalDevice()->getPeer(newPeerId);
+			if(peer) return Variable::createError(-101, "New peer ID is already in use.");
+			if(!raiseSetPeerID(newPeerId)) return Variable::createError(-32500, "Error setting id. See log for more details.");
+			_peerID = newPeerId;
+			if(serviceMessages) serviceMessages->setPeerID(newPeerId);
+			return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
+		}
+		else return Variable::createError(-32500, "Application error. Central could not be found.");
 	}
 	catch(const std::exception& ex)
     {
