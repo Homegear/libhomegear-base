@@ -106,21 +106,17 @@ std::shared_ptr<HomegearDevice> Devices::load(std::string& filepath)
 	{
 		if(!Io::fileExists(filepath))
 		{
-			_bl->out.printError("Error: Could not load device description file: File does not exist.");
+			_bl->out.printError("Error: Could not load device description file \"" + filepath + "\": File does not exist.");
 			return std::shared_ptr<HomegearDevice>();
 		}
 		if(filepath.size() < 5)
 		{
-			_bl->out.printError("Error: Could not load device description file: File does not end with \".xml\".");
+			_bl->out.printError("Error: Could not load device description file \"" + filepath + "\": File does not end with \".xml\".");
 			return std::shared_ptr<HomegearDevice>();
 		}
 		std::string extension = filepath.substr(filepath.size() - 4, 4);
 		HelperFunctions::toLower(extension);
-		if(extension != ".xml")
-		{
-			_bl->out.printError("Error: Could not load device description file: File does not end with \".xml\".");
-			return std::shared_ptr<HomegearDevice>();
-		}
+		if(extension != ".xml") return std::shared_ptr<HomegearDevice>();
 		_bl->out.printDebug("Loading XML RPC device " + filepath);
 		bool oldFormat = false;
 		std::shared_ptr<HomegearDevice> device(new HomegearDevice(_bl, _family, filepath, oldFormat));

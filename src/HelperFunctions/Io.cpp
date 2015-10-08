@@ -52,7 +52,7 @@ Io::~Io()
 bool Io::fileExists(std::string filename)
 {
 	std::ifstream in(filename.c_str());
-	return in;
+	return in.rdstate() != std::ios_base::failbit;
 }
 
 int32_t Io::isDirectory(std::string path, bool& result)
