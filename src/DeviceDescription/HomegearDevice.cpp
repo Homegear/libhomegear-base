@@ -2299,6 +2299,30 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
     }
 }
 
+PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType)
+{
+	try
+	{
+		for(SupportedDevices::iterator j = supportedDevices.begin(); j != supportedDevices.end(); ++j)
+		{
+			if((*j)->matches(deviceType, -1)) return *j;
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+	return PSupportedDevice();
+}
+
 PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion)
 {
 	try
