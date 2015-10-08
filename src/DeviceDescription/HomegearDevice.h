@@ -99,6 +99,7 @@ public:
 	// {{{ Helpers
 	int32_t getDynamicChannelCount();
 	void setDynamicChannelCount(int32_t value);
+	PSupportedDevice getType(Systems::LogicalDeviceType deviceType);
 	PSupportedDevice getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion);
 	void save(std::string& filename);
 	// }}}
