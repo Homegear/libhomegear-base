@@ -87,6 +87,7 @@ void Settings::reset()
 	_scriptPath = "/var/lib/homegear/scripts/";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
+	_phpIniPath = "/etc/homegear/php.ini";
 	_tunnelClients.clear();
 	_clientAddressesToReplace.clear();
 	_gpioPath = "/sys/class/gpio/";
@@ -408,6 +409,12 @@ void Settings::load(std::string filename)
 					if(_tempPath.empty()) _tempPath = "/var/lib/homegear/tmp/";
 					if(_tempPath.back() != '/') _tempPath.push_back('/');
 					_bl->out.printDebug("Debug: tempPath set to " + _tempPath);
+				}
+				else if(name == "phpinipath")
+				{
+					_phpIniPath = value;
+					if(_phpIniPath.empty()) _phpIniPath = "/etc/homegear/php.ini";
+					_bl->out.printDebug("Debug: phpIniPath set to " + _phpIniPath);
 				}
 				else if(name == "redirecttosshtunnel")
 				{
