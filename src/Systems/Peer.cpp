@@ -2119,6 +2119,8 @@ std::shared_ptr<Variable> Peer::getParamsetId(int32_t clientID, uint32_t channel
 		if(type == ParameterGroup::Type::Enum::config) id = rpcFunction->configParameters->id;
 		else if(type == ParameterGroup::Type::Enum::variables) id = rpcFunction->variables->id;
 		else if(type == ParameterGroup::Type::Enum::link) id = rpcFunction->linkParameters->id;
+		int32_t pos = id.find_last_of("--");
+		if(pos > 0) id = id.substr(0, pos - 1);
 		return std::shared_ptr<Variable>(new Variable(id));
 	}
 	catch(const std::exception& ex)
