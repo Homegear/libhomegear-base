@@ -174,7 +174,9 @@ void XMLRPCEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::s
 		}
 		else if(variable->type == VariableType::tFloat)
 		{
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "double", doc->allocate_string(std::to_string(variable->floatValue).c_str()));
+			std::stringstream stringStream;
+			stringStream << variable->floatValue;
+			xml_node<> *valueNode2 = doc->allocate_node(node_element, "double", doc->allocate_string(stringStream.str().c_str()));
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tBoolean)
