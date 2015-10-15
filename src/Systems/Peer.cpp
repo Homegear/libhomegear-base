@@ -217,6 +217,11 @@ void Peer::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vec
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
 }
 
+void Peer::raiseRunScript(std::string& script, const std::string& args)
+{
+	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(script, _peerID, args);
+}
+
 int32_t Peer::raiseIsAddonClient(int32_t clientID)
 {
 	if(_eventHandler) return ((IPeerEventSink*)_eventHandler)->onIsAddonClient(clientID);

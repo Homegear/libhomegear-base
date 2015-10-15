@@ -102,6 +102,7 @@ public:
 		virtual void onRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions) = 0;
 		virtual void onRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo) = 0;
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values) = 0;
+		virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args) = 0;
 		virtual int32_t onIsAddonClient(int32_t clientID) = 0;
 	};
 	//End event handling
@@ -213,6 +214,7 @@ protected:
 	virtual void raiseRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions);
 	virtual void raiseRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
 	virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
+	virtual void raiseRunScript(std::string& script, uint64_t peerId, const std::string& args);
 	virtual int32_t raiseIsAddonClient(int32_t clientID);
 	//End event handling
 
@@ -254,6 +256,7 @@ protected:
 	virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
 	virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 	virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
+	virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args);
 	virtual int32_t onIsAddonClient(int32_t clientID);
 	//End Peer event handling
 };

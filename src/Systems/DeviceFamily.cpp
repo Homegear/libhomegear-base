@@ -211,6 +211,11 @@ void DeviceFamily::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
 }
 
+void DeviceFamily::raiseRunScript(std::string& script, uint64_t peerId, const std::string& args)
+{
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(script, peerId, args);
+}
+
 int32_t DeviceFamily::raiseIsAddonClient(int32_t clientID)
 {
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onIsAddonClient(clientID);
@@ -357,6 +362,11 @@ void DeviceFamily::onRPCDeleteDevices(PVariable deviceAddresses, PVariable devic
 void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
 {
 	raiseEvent(peerID, channel, variables, values);
+}
+
+void DeviceFamily::onRunScript(std::string& script, uint64_t peerId, const std::string& args)
+{
+	raiseRunScript(script, peerId, args);
 }
 
 int32_t DeviceFamily::onIsAddonClient(int32_t clientID)
