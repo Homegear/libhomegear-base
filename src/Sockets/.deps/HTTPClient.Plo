@@ -247,7 +247,7 @@ Sockets/HTTPClient.lo: Sockets/HTTPClient.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
  Sockets/../HelperFunctions/Color.h Sockets/../HelperFunctions/Math.h \
  Sockets/../HelperFunctions/Math.h Sockets/../HelperFunctions/Crypt.h \
  Sockets/../HelperFunctions/Base64.h Sockets/../HelperFunctions/Net.h \
@@ -950,6 +950,8 @@ Sockets/../HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 Sockets/../HelperFunctions/Color.h:
 

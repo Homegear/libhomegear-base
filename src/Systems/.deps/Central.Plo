@@ -253,7 +253,7 @@ Systems/Central.lo: Systems/Central.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
  Systems/../HelperFunctions/Color.h Systems/../HelperFunctions/Math.h \
  Systems/../HelperFunctions/Math.h Systems/../HelperFunctions/Crypt.h \
  Systems/../HelperFunctions/Base64.h Systems/../HelperFunctions/Net.h \
@@ -957,6 +957,8 @@ Systems/../HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 Systems/../HelperFunctions/Color.h:
 

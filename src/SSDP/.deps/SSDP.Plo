@@ -234,12 +234,12 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h SSDP/../HelperFunctions/Color.h \
- SSDP/../HelperFunctions/Math.h SSDP/../HelperFunctions/Math.h \
- SSDP/../HelperFunctions/Crypt.h SSDP/../HelperFunctions/Base64.h \
- SSDP/../HelperFunctions/Net.h SSDP/../HelperFunctions/../Exception.h \
- SSDP/../HelperFunctions/Io.h SSDP/../Output/Output.h \
- SSDP/../DeviceDescription/Devices.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
+ SSDP/../HelperFunctions/Color.h SSDP/../HelperFunctions/Math.h \
+ SSDP/../HelperFunctions/Math.h SSDP/../HelperFunctions/Crypt.h \
+ SSDP/../HelperFunctions/Base64.h SSDP/../HelperFunctions/Net.h \
+ SSDP/../HelperFunctions/../Exception.h SSDP/../HelperFunctions/Io.h \
+ SSDP/../Output/Output.h SSDP/../DeviceDescription/Devices.h \
  SSDP/../DeviceDescription/../Systems/Packet.h \
  SSDP/../DeviceDescription/../Systems/DeviceTypes.h \
  SSDP/../DeviceDescription/HomegearDevice.h \
@@ -919,6 +919,8 @@ SSDP/../HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 SSDP/../HelperFunctions/Color.h:
 

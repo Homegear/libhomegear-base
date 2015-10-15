@@ -227,9 +227,9 @@ BaseLib.lo: BaseLib.cpp /usr/include/stdc-predef.h BaseLib.h \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h HelperFunctions/Color.h \
- HelperFunctions/Math.h HelperFunctions/Math.h HelperFunctions/Crypt.h \
- HelperFunctions/Base64.h HelperFunctions/Net.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
+ HelperFunctions/Color.h HelperFunctions/Math.h HelperFunctions/Math.h \
+ HelperFunctions/Crypt.h HelperFunctions/Base64.h HelperFunctions/Net.h \
  HelperFunctions/../Exception.h HelperFunctions/Io.h Output/Output.h \
  DeviceDescription/Devices.h DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../Systems/DeviceTypes.h \
@@ -890,6 +890,8 @@ HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 HelperFunctions/Color.h:
 

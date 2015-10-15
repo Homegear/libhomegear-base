@@ -236,7 +236,7 @@ Managers/SerialDeviceManager.lo: Managers/SerialDeviceManager.cpp \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
  Managers/../HelperFunctions/Color.h Managers/../HelperFunctions/Math.h \
  Managers/../HelperFunctions/Math.h Managers/../HelperFunctions/Crypt.h \
  Managers/../HelperFunctions/Base64.h Managers/../HelperFunctions/Net.h \
@@ -919,6 +919,8 @@ Managers/../HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 Managers/../HelperFunctions/Color.h:
 

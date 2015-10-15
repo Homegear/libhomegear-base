@@ -177,9 +177,9 @@ HelperFunctions/HelperFunctions.lo: HelperFunctions/HelperFunctions.cpp \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
- /usr/include/x86_64-linux-gnu/sys/time.h HelperFunctions/../BaseLib.h \
- HelperFunctions/../Database/DatabaseTypes.h /usr/include/c++/4.8/deque \
- /usr/include/c++/4.8/bits/stl_deque.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
+ HelperFunctions/../BaseLib.h HelperFunctions/../Database/DatabaseTypes.h \
+ /usr/include/c++/4.8/deque /usr/include/c++/4.8/bits/stl_deque.h \
  /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/memory \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/4.8/ext/concurrence.h \
@@ -781,6 +781,8 @@ HelperFunctions/HelperFunctions.h:
 /usr/include/x86_64-linux-gnu/bits/socket2.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/gcrypt-module.h:
 
 HelperFunctions/../BaseLib.h:
 
