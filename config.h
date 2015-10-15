@@ -32,10 +32,10 @@
 #define HAVE_GCRYPT_H 1
 
 /* Define to 1 if you have the <gnutls/gnutls.h> header file. */
-#define HAVE_GNUTLS_GNUTLS_H 1
+/* #undef HAVE_GNUTLS_GNUTLS_H */
 
 /* Define to 1 if you have the <gnutls/x509.h> header file. */
-#define HAVE_GNUTLS_X509_H 1
+/* #undef HAVE_GNUTLS_X509_H */
 
 /* Define to 1 if you have the <grp.h> header file. */
 #define HAVE_GRP_H 1
