@@ -56,6 +56,13 @@ bool Io::fileExists(std::string filename)
 	return in.rdstate() != std::ios_base::failbit;
 }
 
+bool Io::directoryExists(std::string path)
+{
+	struct stat s;
+	if(stat(path.c_str(), &s) == 0 && (s.st_mode & S_IFDIR)) return true;
+	return false;
+}
+
 int32_t Io::isDirectory(std::string path, bool& result)
 {
 	struct stat s;
@@ -66,6 +73,11 @@ int32_t Io::isDirectory(std::string path, bool& result)
 		return 0;
 	}
 	return -1;
+}
+
+bool Io::createDirectory(std::string path, mode_t mode)
+{
+	return mkdir(path.c_str(), mode) == 0;
 }
 
 int32_t Io::getFileLastModifiedTime(const std::string& filename)
