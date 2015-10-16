@@ -339,10 +339,13 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
 		if(_rpcDevice)
 		{
 			_rxModes = _rpcDevice->receiveModes;
-			if(configCentral.find(0) != configCentral.end())
+			std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configIterator = configCentral.find(0);
+			if(configIterator != configCentral.end())
 			{
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configCentral.at(0).find("WAKE_ON_RADIO");
-				if(parameterIterator != configCentral.at(0).end())
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configIterator->second.find("WAKE_ON_RADIO");
+				if(parameterIterator == configIterator->second.end())parameterIterator = configIterator->second.find("BURST_RX");
+				if(parameterIterator == configIterator->second.end())parameterIterator = configIterator->second.find("LIVE_MODE_RX");
+				if(parameterIterator != configIterator->second.end())
 				{
 					if(!parameterIterator->second.rpcParameter) return _rxModes;
 					if(parameterIterator->second.rpcParameter->convertFromPacket(parameterIterator->second.data)->booleanValue)
