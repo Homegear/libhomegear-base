@@ -64,12 +64,12 @@ public:
 	void init(Obj* baseLib);
 
 	/**
-	 * Checks if a file exists.
+	 * Checks if a directory exists.
 	 *
-	 * @param filename The path to the file.
-	 * @return Returns true when the file exists, or false if the file couldn't be accessed.
+	 * @param path The path to the directory.
+	 * @return Returns true when the directory exists, or false if the directory couldn't be accessed.
 	 */
-	static bool fileExists(std::string filename);
+	static bool directoryExists(std::string path);
 
 	/**
 	 * Checks if a path is a directory.
@@ -79,6 +79,15 @@ public:
 	 * @return Returns 0 on success or -1 on error.
 	 */
 	static int32_t isDirectory(std::string path, bool& result);
+
+	/**
+	 * Creates a new directory. Make sure, the directory doesn't exist.
+	 *
+	 * @param path The directory to create.
+	 * @param mode The creation mode.
+	 * @return Returns 0 on success or -1 on error.
+	 */
+	static bool createDirectory(std::string path, mode_t mode);
 
 	/**
 	 * Reads a file and returns the content as a string.
@@ -103,6 +112,14 @@ public:
 	 * @return Returns the content of the file as an unsigned char array.
 	 */
 	static std::vector<uint8_t> getUBinaryFileContent(std::string filename);
+
+	/**
+	 * Checks if a file exists.
+	 *
+	 * @param filename The path to the file.
+	 * @return Returns true when the file exists, or false if the file couldn't be accessed.
+	 */
+	static bool fileExists(std::string filename);
 
 	/**
 	 * Writes a string to a file. If the file already exists it will be overwritten.
