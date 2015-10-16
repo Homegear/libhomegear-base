@@ -317,7 +317,6 @@ void HmConverter::convertChannel(std::shared_ptr<DeviceChannel> homematicChannel
 			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->configParameters.get()));
 			convertParameter(*i, parameter);
 			if(parameter->id.empty()) continue;
-			if(parameter->id == "BURST_RX" || parameter->id == "LIVE_MODE_RX") parameter->id = "WAKE_ON_RADIO";
 			if(parameter->parameterGroupSelector)
 			{
 				homegearFunction->configParametersId += "-t" + std::to_string(homegearFunction->channel);
