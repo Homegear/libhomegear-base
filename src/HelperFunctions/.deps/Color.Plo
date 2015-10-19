@@ -186,8 +186,7 @@ HelperFunctions/Color.lo: HelperFunctions/Color.cpp \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
- /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
- /usr/include/c++/4.8/iostream
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/c++/4.8/iostream
 
 /usr/include/stdc-predef.h:
 
@@ -668,7 +667,5 @@ HelperFunctions/HelperFunctions.h:
 /usr/include/x86_64-linux-gnu/bits/socket2.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
-
-/usr/include/gcrypt-module.h:
 
 /usr/include/c++/4.8/iostream:

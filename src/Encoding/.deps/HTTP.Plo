@@ -190,7 +190,7 @@ Encoding/HTTP.lo: Encoding/HTTP.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
- /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h
+ /usr/include/x86_64-linux-gnu/sys/time.h
 
 /usr/include/stdc-predef.h:
 
@@ -691,5 +691,3 @@ Encoding/../HelperFunctions/HelperFunctions.h:
 /usr/include/x86_64-linux-gnu/bits/socket2.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
-
-/usr/include/gcrypt-module.h:

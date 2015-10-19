@@ -237,7 +237,7 @@ Settings/Settings.lo: Settings/Settings.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
- /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/gcrypt-module.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h \
  Settings/../HelperFunctions/Color.h Settings/../HelperFunctions/Math.h \
  Settings/../HelperFunctions/Math.h Settings/../HelperFunctions/Crypt.h \
  Settings/../HelperFunctions/Base64.h Settings/../HelperFunctions/Net.h \
@@ -921,8 +921,6 @@ Settings/../HelperFunctions/HelperFunctions.h:
 /usr/include/gpg-error.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
-
-/usr/include/gcrypt-module.h:
 
 Settings/../HelperFunctions/Color.h:
 
