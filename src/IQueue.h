@@ -49,24 +49,27 @@ public:
 class IQueue
 {
 public:
-	IQueue(Obj* baseLib, int32_t threadPriority, int32_t threadPolicy);
+	IQueue(Obj* baseLib);
 	virtual ~IQueue();
-	bool enqueue(std::shared_ptr<IQueueEntry>& entry);
-	virtual void processQueueEntry(std::shared_ptr<IQueueEntry>& entry) = 0;
+	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
+	void stopQueue(int32_t index);
+	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry);
+	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
 private:
 	Obj* _bl = nullptr;
+	static const int32_t _queueCount = 2;
 	static const int32_t _bufferSize = 1000;
-	std::mutex _bufferMutex;
-	int32_t _bufferHead = 0;
-	int32_t _bufferTail = 0;
-	std::shared_ptr<IQueueEntry> _buffer[_bufferSize];
-	std::mutex _processingThreadMutex;
-	std::thread _processingThread;
-	bool _processingEntryAvailable = false;
-	std::condition_variable _processingConditionVariable;
-	bool _stopProcessingThread = false;
+	std::mutex _bufferMutex[2];
+	int32_t _bufferHead[_queueCount];
+	int32_t _bufferTail[_queueCount];
+	std::shared_ptr<IQueueEntry> _buffer[_queueCount][_bufferSize];
+	std::mutex _processingThreadMutex[_queueCount];
+	std::thread _processingThread[_queueCount];
+	bool _processingEntryAvailable[_queueCount];
+	std::condition_variable _processingConditionVariable[_queueCount];
+	bool _stopProcessingThread[_queueCount];
 
-	void process();
+	void process(int32_t index);
 };
 
 }
