@@ -1980,6 +1980,8 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
 				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
 				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(true))));
+				description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(false))));
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("BOOL")))));
@@ -1993,6 +1995,8 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
 				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
 				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(std::string("")))));
+				description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(std::string("")))));
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRING")))));
@@ -2003,6 +2007,8 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
 				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
 				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(true))));
+				description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(false))));
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
