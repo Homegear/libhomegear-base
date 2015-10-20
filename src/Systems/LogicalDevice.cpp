@@ -217,9 +217,9 @@ void LogicalDevice::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr
 	if(_eventHandler) ((IDeviceEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
 }
 
-void LogicalDevice::raiseRunScript(std::string& script, uint64_t peerId, const std::string& args)
+void LogicalDevice::raiseRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
 {
-	if(_eventHandler) ((IDeviceEventSink*)_eventHandler)->onRunScript(script, peerId, args);
+	if(_eventHandler) ((IDeviceEventSink*)_eventHandler)->onRunScript(script, peerId, args, keepAlive, interval);
 }
 
 int32_t LogicalDevice::raiseIsAddonClient(int32_t clientID)
@@ -335,9 +335,9 @@ void LogicalDevice::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<st
 	raiseEvent(peerID, channel, variables, values);
 }
 
-void LogicalDevice::onRunScript(std::string& script, uint64_t peerId, const std::string& args)
+void LogicalDevice::onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
 {
-	raiseRunScript(script, peerId, args);
+	raiseRunScript(script, peerId, args, keepAlive, interval);
 }
 
 int32_t LogicalDevice::onIsAddonClient(int32_t clientID)
