@@ -1157,6 +1157,9 @@ void Peer::loadConfig()
 				if(!parameter->rpcParameter)
 				{
 					_bl->out.printError("Error: Deleting parameter " + *parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string(channel) + " Parameter set type: " + std::to_string((uint32_t)parameterGroupType));
+					if(parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[channel].erase(*parameterName);
+					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[channel].erase(*parameterName);
+					else if(parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[channel][remoteAddress][remoteChannel].erase(*parameterName);
 					Database::DataRow data;
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)parameterGroupType)));
