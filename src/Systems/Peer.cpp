@@ -1131,12 +1131,9 @@ void Peer::loadConfig()
 					continue;
 				}
 
-				RPCConfigurationParameter* parameter = nullptr;
-				if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter = &configCentral[channel][*parameterName];
-				else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter = &valuesCentral[channel][*parameterName];
-				else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter = &linksCentral[channel][remoteAddress][remoteChannel][*parameterName];
-				parameter->databaseID = databaseID;
-				parameter->data.insert(parameter->data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				RPCConfigurationParameter parameter;
+				parameter.databaseID = databaseID;
+				parameter.data.insert(parameter.data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
 				if(!_rpcDevice)
 				{
 					_bl->out.printError("Critical: No xml rpc device found for peer " + std::to_string(_peerID) + ".");
@@ -1144,22 +1141,19 @@ void Peer::loadConfig()
 				}
 				if(_rpcDevice->functions.find(channel) != _rpcDevice->functions.end() && _rpcDevice->functions[channel])
 				{
-					if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter->rpcParameter = _rpcDevice->functions[channel]->configParameters->parameters[*parameterName];
-					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter->rpcParameter = _rpcDevice->functions[channel]->variables->parameters[*parameterName];
-					else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter->rpcParameter = _rpcDevice->functions[channel]->linkParameters->parameters[*parameterName];
-					if(!parameter->rpcParameter && _rpcDevice->functions[channel]->alternativeFunction)
+					if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter.rpcParameter = _rpcDevice->functions[channel]->configParameters->parameters[*parameterName];
+					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter.rpcParameter = _rpcDevice->functions[channel]->variables->parameters[*parameterName];
+					else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter.rpcParameter = _rpcDevice->functions[channel]->linkParameters->parameters[*parameterName];
+					if(!parameter.rpcParameter && _rpcDevice->functions[channel]->alternativeFunction)
 					{
-						if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter->rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->configParameters->parameters[*parameterName];
-						else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter->rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->variables->parameters[*parameterName];
-						else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter->rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->linkParameters->parameters[*parameterName];
+						if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->configParameters->parameters[*parameterName];
+						else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->variables->parameters[*parameterName];
+						else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->linkParameters->parameters[*parameterName];
 					}
 				}
-				if(!parameter->rpcParameter)
+				if(!parameter.rpcParameter)
 				{
 					_bl->out.printError("Error: Deleting parameter " + *parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string(channel) + " Parameter set type: " + std::to_string((uint32_t)parameterGroupType));
-					if(parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[channel].erase(*parameterName);
-					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[channel].erase(*parameterName);
-					else if(parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[channel][remoteAddress][remoteChannel].erase(*parameterName);
 					Database::DataRow data;
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)parameterGroupType)));
@@ -1180,6 +1174,12 @@ void Peer::loadConfig()
 						data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(remoteChannel)));
 					}
 					raiseDeletePeerParameter(data);
+				}
+				else
+				{
+					if(parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[channel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
+					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[channel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
+					else if(parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[channel][remoteAddress][remoteChannel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
 				}
 			}
 		}
