@@ -92,6 +92,7 @@ void Settings::reset()
 	_tunnelClients.clear();
 	_clientAddressesToReplace.clear();
 	_gpioPath = "/sys/class/gpio/";
+	_exportGpios.clear();
 }
 
 bool Settings::changed()
@@ -436,6 +437,16 @@ void Settings::load(std::string filename)
 					if(_gpioPath.empty()) _gpioPath = "/sys/class/gpio/";
 					if(_gpioPath.back() != '/') _gpioPath.push_back('/');
 					_bl->out.printDebug("Debug: gpioPath set to " + _gpioPath);
+				}
+				else if(name == "exportgpios")
+				{
+					std::vector<std::string> stringValues = BaseLib::HelperFunctions::splitAll(value, ',');
+					for(std::vector<std::string>::iterator i = stringValues.begin(); i != stringValues.end(); ++i)
+					{
+						uint32_t gpio = BaseLib::Math::getNumber(*i);
+						_exportGpios.push_back(gpio);
+						_bl->out.printDebug("Debug: Added " + std::to_string(gpio) + " to exportGpios.");
+					}
 				}
 				else
 				{

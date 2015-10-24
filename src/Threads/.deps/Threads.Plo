@@ -242,8 +242,8 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../HelperFunctions/Math.h Threads/../HelperFunctions/Crypt.h \
  Threads/../HelperFunctions/Base64.h Threads/../HelperFunctions/Net.h \
  Threads/../HelperFunctions/../Exception.h \
- Threads/../HelperFunctions/Io.h Threads/../Output/Output.h \
- Threads/../DeviceDescription/Devices.h \
+ Threads/../HelperFunctions/Io.h Threads/../LowLevel/Gpio.h \
+ Threads/../Output/Output.h Threads/../DeviceDescription/Devices.h \
  Threads/../DeviceDescription/../Systems/Packet.h \
  Threads/../DeviceDescription/../Systems/DeviceTypes.h \
  Threads/../DeviceDescription/HomegearDevice.h \
@@ -937,6 +937,8 @@ Threads/../HelperFunctions/Net.h:
 Threads/../HelperFunctions/../Exception.h:
 
 Threads/../HelperFunctions/Io.h:
+
+Threads/../LowLevel/Gpio.h:
 
 Threads/../Output/Output.h:
 

@@ -256,6 +256,7 @@ DeviceDescription/ParameterCast.lo: DeviceDescription/ParameterCast.cpp \
  DeviceDescription/../HelperFunctions/Net.h \
  DeviceDescription/../HelperFunctions/../Exception.h \
  DeviceDescription/../HelperFunctions/Io.h \
+ DeviceDescription/../LowLevel/Gpio.h \
  DeviceDescription/../Output/Output.h \
  DeviceDescription/../DeviceDescription/Devices.h \
  DeviceDescription/../DeviceDescription/../Systems/Packet.h \
@@ -963,6 +964,8 @@ DeviceDescription/../HelperFunctions/Net.h:
 DeviceDescription/../HelperFunctions/../Exception.h:
 
 DeviceDescription/../HelperFunctions/Io.h:
+
+DeviceDescription/../LowLevel/Gpio.h:
 
 DeviceDescription/../Output/Output.h:
 

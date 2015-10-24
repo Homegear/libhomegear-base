@@ -252,8 +252,8 @@ Sockets/HTTPClient.lo: Sockets/HTTPClient.cpp /usr/include/stdc-predef.h \
  Sockets/../HelperFunctions/Math.h Sockets/../HelperFunctions/Crypt.h \
  Sockets/../HelperFunctions/Base64.h Sockets/../HelperFunctions/Net.h \
  Sockets/../HelperFunctions/../Exception.h \
- Sockets/../HelperFunctions/Io.h Sockets/../Output/Output.h \
- Sockets/../DeviceDescription/Devices.h \
+ Sockets/../HelperFunctions/Io.h Sockets/../LowLevel/Gpio.h \
+ Sockets/../Output/Output.h Sockets/../DeviceDescription/Devices.h \
  Sockets/../DeviceDescription/../Systems/Packet.h \
  Sockets/../DeviceDescription/../Systems/DeviceTypes.h \
  Sockets/../DeviceDescription/HomegearDevice.h \
@@ -966,6 +966,8 @@ Sockets/../HelperFunctions/Net.h:
 Sockets/../HelperFunctions/../Exception.h:
 
 Sockets/../HelperFunctions/Io.h:
+
+Sockets/../LowLevel/Gpio.h:
 
 Sockets/../Output/Output.h:
 

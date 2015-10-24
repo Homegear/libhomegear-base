@@ -261,6 +261,7 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../HelperFunctions/Net.h \
  DeviceDescription/HomeMatic/../../HelperFunctions/../Exception.h \
  DeviceDescription/HomeMatic/../../HelperFunctions/Io.h \
+ DeviceDescription/HomeMatic/../../LowLevel/Gpio.h \
  DeviceDescription/HomeMatic/../../Output/Output.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/Devices.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h \
@@ -972,6 +973,8 @@ DeviceDescription/HomeMatic/../../HelperFunctions/Net.h:
 DeviceDescription/HomeMatic/../../HelperFunctions/../Exception.h:
 
 DeviceDescription/HomeMatic/../../HelperFunctions/Io.h:
+
+DeviceDescription/HomeMatic/../../LowLevel/Gpio.h:
 
 DeviceDescription/HomeMatic/../../Output/Output.h:
 

@@ -245,7 +245,8 @@ Systems/IPhysicalInterface.lo: Systems/IPhysicalInterface.cpp \
  Systems/../HelperFunctions/Math.h Systems/../HelperFunctions/Crypt.h \
  Systems/../HelperFunctions/Base64.h Systems/../HelperFunctions/Net.h \
  Systems/../HelperFunctions/../Exception.h \
- Systems/../HelperFunctions/Io.h Systems/../DeviceDescription/Devices.h \
+ Systems/../HelperFunctions/Io.h Systems/../LowLevel/Gpio.h \
+ Systems/../DeviceDescription/Devices.h \
  Systems/../DeviceDescription/../Systems/Packet.h \
  Systems/../DeviceDescription/../Systems/DeviceTypes.h \
  Systems/../DeviceDescription/HomegearDevice.h \
@@ -944,6 +945,8 @@ Systems/../HelperFunctions/Net.h:
 Systems/../HelperFunctions/../Exception.h:
 
 Systems/../HelperFunctions/Io.h:
+
+Systems/../LowLevel/Gpio.h:
 
 Systems/../DeviceDescription/Devices.h:
 

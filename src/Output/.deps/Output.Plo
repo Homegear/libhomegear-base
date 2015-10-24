@@ -241,7 +241,8 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../HelperFunctions/Math.h Output/../HelperFunctions/Crypt.h \
  Output/../HelperFunctions/Base64.h Output/../HelperFunctions/Net.h \
  Output/../HelperFunctions/../Exception.h Output/../HelperFunctions/Io.h \
- Output/../Output/Output.h Output/../DeviceDescription/Devices.h \
+ Output/../LowLevel/Gpio.h Output/../Output/Output.h \
+ Output/../DeviceDescription/Devices.h \
  Output/../DeviceDescription/../Systems/Packet.h \
  Output/../DeviceDescription/../Systems/DeviceTypes.h \
  Output/../DeviceDescription/HomegearDevice.h \
@@ -932,6 +933,8 @@ Output/../HelperFunctions/Net.h:
 Output/../HelperFunctions/../Exception.h:
 
 Output/../HelperFunctions/Io.h:
+
+Output/../LowLevel/Gpio.h:
 
 Output/../Output/Output.h:
 
