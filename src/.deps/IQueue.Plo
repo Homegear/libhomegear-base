@@ -229,8 +229,9 @@ IQueue.lo: IQueue.cpp /usr/include/stdc-predef.h IQueue.h \
  /usr/include/x86_64-linux-gnu/sys/time.h HelperFunctions/Color.h \
  HelperFunctions/Math.h HelperFunctions/Math.h HelperFunctions/Crypt.h \
  HelperFunctions/Base64.h HelperFunctions/Net.h \
- HelperFunctions/../Exception.h HelperFunctions/Io.h Output/Output.h \
- DeviceDescription/Devices.h DeviceDescription/../Systems/Packet.h \
+ HelperFunctions/../Exception.h HelperFunctions/Io.h LowLevel/Gpio.h \
+ Output/Output.h DeviceDescription/Devices.h \
+ DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../Systems/DeviceTypes.h \
  DeviceDescription/HomegearDevice.h DeviceDescription/DevicePacket.h \
  DeviceDescription/JsonPayload.h \
@@ -909,6 +910,8 @@ HelperFunctions/Net.h:
 HelperFunctions/../Exception.h:
 
 HelperFunctions/Io.h:
+
+LowLevel/Gpio.h:
 
 Output/Output.h:
 

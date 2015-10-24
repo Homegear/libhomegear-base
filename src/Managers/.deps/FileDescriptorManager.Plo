@@ -240,8 +240,8 @@ Managers/FileDescriptorManager.lo: Managers/FileDescriptorManager.cpp \
  Managers/../HelperFunctions/Math.h Managers/../HelperFunctions/Crypt.h \
  Managers/../HelperFunctions/Base64.h Managers/../HelperFunctions/Net.h \
  Managers/../HelperFunctions/../Exception.h \
- Managers/../HelperFunctions/Io.h Managers/../Output/Output.h \
- Managers/../DeviceDescription/Devices.h \
+ Managers/../HelperFunctions/Io.h Managers/../LowLevel/Gpio.h \
+ Managers/../Output/Output.h Managers/../DeviceDescription/Devices.h \
  Managers/../DeviceDescription/../Systems/Packet.h \
  Managers/../DeviceDescription/../Systems/DeviceTypes.h \
  Managers/../DeviceDescription/HomegearDevice.h \
@@ -935,6 +935,8 @@ Managers/../HelperFunctions/Net.h:
 Managers/../HelperFunctions/../Exception.h:
 
 Managers/../HelperFunctions/Io.h:
+
+Managers/../LowLevel/Gpio.h:
 
 Managers/../Output/Output.h:
 

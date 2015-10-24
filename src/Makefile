@@ -150,7 +150,7 @@ am_libhomegear_base_la_OBJECTS = BaseLib.lo IEvents.lo IQueue.lo \
 	HelperFunctions/Color.lo HelperFunctions/Crypt.lo \
 	HelperFunctions/HelperFunctions.lo HelperFunctions/Io.lo \
 	HelperFunctions/Math.lo HelperFunctions/Net.lo \
-	Managers/FileDescriptorManager.lo \
+	LowLevel/Gpio.lo Managers/FileDescriptorManager.lo \
 	Managers/SerialDeviceManager.lo Output/Output.lo \
 	Settings/Settings.lo Sockets/HTTPClient.lo \
 	Sockets/SerialReaderWriter.lo Sockets/ServerInfo.lo \
@@ -348,7 +348,7 @@ htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
 install_sh = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/libhomegear-base/cfg/install-sh
-libdir = ${exec_prefix}/lib
+libdir = /usr/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = /var
@@ -426,7 +426,8 @@ libhomegear_base_la_SOURCES = BaseLib.cpp BaseLib.h Exception.h \
 	HelperFunctions/HelperFunctions.h HelperFunctions/Io.cpp \
 	HelperFunctions/Io.h HelperFunctions/Math.cpp \
 	HelperFunctions/Math.h HelperFunctions/Net.cpp \
-	HelperFunctions/Net.h Managers/FileDescriptorManager.cpp \
+	HelperFunctions/Net.h LowLevel/Gpio.cpp LowLevel/Gpio.h \
+	Managers/FileDescriptorManager.cpp \
 	Managers/FileDescriptorManager.h \
 	Managers/SerialDeviceManager.cpp \
 	Managers/SerialDeviceManager.h Output/Output.cpp \
@@ -475,7 +476,7 @@ nobase_otherinclude_HEADERS = BaseLib.h Exception.h IEvents.h IQueue.h \
 	Encoding/RapidXml/rapidxml_print.hpp HelperFunctions/Base64.h \
 	HelperFunctions/Color.h HelperFunctions/Crypt.h \
 	HelperFunctions/HelperFunctions.h HelperFunctions/Io.h \
-	HelperFunctions/Math.h HelperFunctions/Net.h \
+	HelperFunctions/Math.h HelperFunctions/Net.h LowLevel/Gpio.h \
 	Managers/FileDescriptorManager.h \
 	Managers/SerialDeviceManager.h Output/Output.h \
 	Settings/Settings.h Sockets/HTTPClient.h \
@@ -662,6 +663,14 @@ HelperFunctions/Math.lo: HelperFunctions/$(am__dirstamp) \
 	HelperFunctions/$(DEPDIR)/$(am__dirstamp)
 HelperFunctions/Net.lo: HelperFunctions/$(am__dirstamp) \
 	HelperFunctions/$(DEPDIR)/$(am__dirstamp)
+LowLevel/$(am__dirstamp):
+	@$(MKDIR_P) LowLevel
+	@: > LowLevel/$(am__dirstamp)
+LowLevel/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) LowLevel/$(DEPDIR)
+	@: > LowLevel/$(DEPDIR)/$(am__dirstamp)
+LowLevel/Gpio.lo: LowLevel/$(am__dirstamp) \
+	LowLevel/$(DEPDIR)/$(am__dirstamp)
 Managers/$(am__dirstamp):
 	@$(MKDIR_P) Managers
 	@: > Managers/$(am__dirstamp)
@@ -755,6 +764,8 @@ mostlyclean-compile:
 	-rm -f Encoding/*.lo
 	-rm -f HelperFunctions/*.$(OBJEXT)
 	-rm -f HelperFunctions/*.lo
+	-rm -f LowLevel/*.$(OBJEXT)
+	-rm -f LowLevel/*.lo
 	-rm -f Managers/*.$(OBJEXT)
 	-rm -f Managers/*.lo
 	-rm -f Output/*.$(OBJEXT)
@@ -815,6 +826,7 @@ include HelperFunctions/$(DEPDIR)/HelperFunctions.Plo
 include HelperFunctions/$(DEPDIR)/Io.Plo
 include HelperFunctions/$(DEPDIR)/Math.Plo
 include HelperFunctions/$(DEPDIR)/Net.Plo
+include LowLevel/$(DEPDIR)/Gpio.Plo
 include Managers/$(DEPDIR)/FileDescriptorManager.Plo
 include Managers/$(DEPDIR)/SerialDeviceManager.Plo
 include Output/$(DEPDIR)/Output.Plo
@@ -868,6 +880,7 @@ clean-libtool:
 	-rm -rf DeviceDescription/HomeMatic/.libs DeviceDescription/HomeMatic/_libs
 	-rm -rf Encoding/.libs Encoding/_libs
 	-rm -rf HelperFunctions/.libs HelperFunctions/_libs
+	-rm -rf LowLevel/.libs LowLevel/_libs
 	-rm -rf Managers/.libs Managers/_libs
 	-rm -rf Output/.libs Output/_libs
 	-rm -rf SSDP/.libs SSDP/_libs
@@ -1023,6 +1036,8 @@ distclean-generic:
 	-rm -f Encoding/$(am__dirstamp)
 	-rm -f HelperFunctions/$(DEPDIR)/$(am__dirstamp)
 	-rm -f HelperFunctions/$(am__dirstamp)
+	-rm -f LowLevel/$(DEPDIR)/$(am__dirstamp)
+	-rm -f LowLevel/$(am__dirstamp)
 	-rm -f Managers/$(DEPDIR)/$(am__dirstamp)
 	-rm -f Managers/$(am__dirstamp)
 	-rm -f Output/$(DEPDIR)/$(am__dirstamp)
@@ -1047,7 +1062,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1093,7 +1108,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -20,6 +20,7 @@
 #include "HelperFunctions/Base64.h"
 #include "HelperFunctions/Net.h"
 #include "HelperFunctions/Io.h"
+#include "LowLevel/Gpio.h"
 #include "Output/Output.h"
 #include "DeviceDescription/Devices.h"
 #include "Settings/Settings.h"

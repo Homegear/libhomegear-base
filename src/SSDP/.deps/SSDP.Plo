@@ -238,8 +238,8 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  SSDP/../HelperFunctions/Math.h SSDP/../HelperFunctions/Math.h \
  SSDP/../HelperFunctions/Crypt.h SSDP/../HelperFunctions/Base64.h \
  SSDP/../HelperFunctions/Net.h SSDP/../HelperFunctions/../Exception.h \
- SSDP/../HelperFunctions/Io.h SSDP/../Output/Output.h \
- SSDP/../DeviceDescription/Devices.h \
+ SSDP/../HelperFunctions/Io.h SSDP/../LowLevel/Gpio.h \
+ SSDP/../Output/Output.h SSDP/../DeviceDescription/Devices.h \
  SSDP/../DeviceDescription/../Systems/Packet.h \
  SSDP/../DeviceDescription/../Systems/DeviceTypes.h \
  SSDP/../DeviceDescription/HomegearDevice.h \
@@ -935,6 +935,8 @@ SSDP/../HelperFunctions/Net.h:
 SSDP/../HelperFunctions/../Exception.h:
 
 SSDP/../HelperFunctions/Io.h:
+
+SSDP/../LowLevel/Gpio.h:
 
 SSDP/../Output/Output.h:
 

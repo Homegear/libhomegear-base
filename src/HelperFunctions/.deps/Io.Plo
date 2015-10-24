@@ -254,7 +254,7 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../HelperFunctions/Net.h \
  HelperFunctions/../HelperFunctions/../Exception.h \
  HelperFunctions/../HelperFunctions/Io.h \
- HelperFunctions/../Output/Output.h \
+ HelperFunctions/../LowLevel/Gpio.h HelperFunctions/../Output/Output.h \
  HelperFunctions/../DeviceDescription/Devices.h \
  HelperFunctions/../DeviceDescription/../Systems/Packet.h \
  HelperFunctions/../DeviceDescription/../Systems/DeviceTypes.h \
@@ -959,6 +959,8 @@ HelperFunctions/../HelperFunctions/Net.h:
 HelperFunctions/../HelperFunctions/../Exception.h:
 
 HelperFunctions/../HelperFunctions/Io.h:
+
+HelperFunctions/../LowLevel/Gpio.h:
 
 HelperFunctions/../Output/Output.h:
 

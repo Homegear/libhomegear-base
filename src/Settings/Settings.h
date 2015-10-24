@@ -34,6 +34,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 namespace BaseLib
 {
@@ -97,6 +98,7 @@ public:
 	std::map<std::string, bool>& tunnelClients() { return _tunnelClients; }
 	std::map<std::string, std::string>& clientAddressesToReplace() { return _clientAddressesToReplace; }
 	std::string gpioPath() { return _gpioPath; }
+	std::vector<uint32_t> exportGpios() { return _exportGpios; }
 private:
 	BaseLib::Obj* _bl = nullptr;
 	std::string _path;
@@ -153,6 +155,7 @@ private:
 	std::map<std::string, bool> _tunnelClients;
 	std::map<std::string, std::string> _clientAddressesToReplace;
 	std::string _gpioPath;
+	std::vector<uint32_t> _exportGpios;
 
 	void reset();
 };

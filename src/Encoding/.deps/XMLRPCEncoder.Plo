@@ -239,8 +239,8 @@ Encoding/XMLRPCEncoder.lo: Encoding/XMLRPCEncoder.cpp \
  Encoding/../HelperFunctions/Math.h Encoding/../HelperFunctions/Crypt.h \
  Encoding/../HelperFunctions/Base64.h Encoding/../HelperFunctions/Net.h \
  Encoding/../HelperFunctions/../Exception.h \
- Encoding/../HelperFunctions/Io.h Encoding/../Output/Output.h \
- Encoding/../DeviceDescription/Devices.h \
+ Encoding/../HelperFunctions/Io.h Encoding/../LowLevel/Gpio.h \
+ Encoding/../Output/Output.h Encoding/../DeviceDescription/Devices.h \
  Encoding/../DeviceDescription/../Systems/Packet.h \
  Encoding/../DeviceDescription/../Systems/DeviceTypes.h \
  Encoding/../DeviceDescription/HomegearDevice.h \
@@ -937,6 +937,8 @@ Encoding/../HelperFunctions/Net.h:
 Encoding/../HelperFunctions/../Exception.h:
 
 Encoding/../HelperFunctions/Io.h:
+
+Encoding/../LowLevel/Gpio.h:
 
 Encoding/../Output/Output.h:
 

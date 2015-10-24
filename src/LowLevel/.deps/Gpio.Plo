@@ -1,6 +1,7 @@
-Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
- /usr/include/stdc-predef.h Encoding/RPCEncoder.h Encoding/RPCHeader.h \
- /usr/include/c++/4.8/string \
+LowLevel/Gpio.lo: LowLevel/Gpio.cpp /usr/include/stdc-predef.h \
+ LowLevel/Gpio.h /usr/include/c++/4.8/map \
+ /usr/include/c++/4.8/bits/stl_tree.h \
+ /usr/include/c++/4.8/bits/stl_algobase.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -8,10 +9,6 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
- /usr/include/c++/4.8/bits/stringfwd.h \
- /usr/include/c++/4.8/bits/memoryfwd.h \
- /usr/include/c++/4.8/bits/char_traits.h \
- /usr/include/c++/4.8/bits/stl_algobase.h \
  /usr/include/c++/4.8/bits/functexcept.h \
  /usr/include/c++/4.8/bits/exception_defines.h \
  /usr/include/c++/4.8/bits/cpp_type_traits.h \
@@ -24,6 +21,24 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
  /usr/include/c++/4.8/debug/debug.h \
  /usr/include/c++/4.8/bits/stl_iterator.h \
+ /usr/include/c++/4.8/bits/allocator.h \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
+ /usr/include/c++/4.8/ext/new_allocator.h /usr/include/c++/4.8/new \
+ /usr/include/c++/4.8/exception \
+ /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/4.8/bits/exception_ptr.h \
+ /usr/include/c++/4.8/bits/nested_exception.h \
+ /usr/include/c++/4.8/bits/memoryfwd.h \
+ /usr/include/c++/4.8/bits/stl_function.h \
+ /usr/include/c++/4.8/backward/binders.h \
+ /usr/include/c++/4.8/bits/alloc_traits.h \
+ /usr/include/c++/4.8/bits/ptr_traits.h \
+ /usr/include/c++/4.8/bits/stl_map.h \
+ /usr/include/c++/4.8/initializer_list /usr/include/c++/4.8/tuple \
+ /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
+ /usr/include/c++/4.8/array /usr/include/c++/4.8/stdexcept \
+ /usr/include/c++/4.8/string /usr/include/c++/4.8/bits/stringfwd.h \
+ /usr/include/c++/4.8/bits/char_traits.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
  /usr/include/wchar.h /usr/include/stdio.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h \
@@ -32,13 +47,6 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/xlocale.h /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/4.8/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
- /usr/include/c++/4.8/bits/allocator.h \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
- /usr/include/c++/4.8/ext/new_allocator.h /usr/include/c++/4.8/new \
- /usr/include/c++/4.8/exception \
- /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
- /usr/include/c++/4.8/bits/exception_ptr.h \
- /usr/include/c++/4.8/bits/nested_exception.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
  /usr/include/c++/4.8/clocale /usr/include/locale.h \
@@ -51,8 +59,6 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/x86_64-linux-gnu/bits/byteswap-16.h \
  /usr/include/c++/4.8/bits/ostream_insert.h \
  /usr/include/c++/4.8/bits/cxxabi_forced.h \
- /usr/include/c++/4.8/bits/stl_function.h \
- /usr/include/c++/4.8/backward/binders.h \
  /usr/include/c++/4.8/bits/range_access.h \
  /usr/include/c++/4.8/bits/basic_string.h \
  /usr/include/c++/4.8/ext/atomicity.h \
@@ -65,7 +71,6 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/atomic_word.h \
- /usr/include/c++/4.8/initializer_list \
  /usr/include/c++/4.8/ext/string_conversions.h \
  /usr/include/c++/4.8/cstdlib /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
@@ -89,35 +94,41 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/c++/4.8/bits/functional_hash.h \
  /usr/include/c++/4.8/bits/hash_bytes.h \
- /usr/include/c++/4.8/bits/basic_string.tcc Encoding/../Variable.h \
- Encoding/../Encoding/RapidXml/rapidxml.hpp /usr/include/c++/4.8/cassert \
- /usr/include/assert.h Encoding/../DeviceDescription/Logical.h \
- Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
+ /usr/include/c++/4.8/bits/basic_string.tcc \
+ /usr/include/c++/4.8/bits/uses_allocator.h \
+ /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/mutex \
+ /usr/include/c++/4.8/chrono /usr/include/c++/4.8/ratio \
+ /usr/include/c++/4.8/limits /usr/include/c++/4.8/ctime \
+ /usr/include/c++/4.8/functional /usr/include/c++/4.8/typeinfo \
+ /usr/include/c++/4.8/system_error \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h \
  /usr/include/c++/4.8/memory /usr/include/c++/4.8/bits/stl_construct.h \
  /usr/include/c++/4.8/ext/alloc_traits.h \
- /usr/include/c++/4.8/bits/alloc_traits.h \
- /usr/include/c++/4.8/bits/ptr_traits.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
  /usr/include/c++/4.8/bits/stl_tempbuf.h \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
- /usr/include/c++/4.8/typeinfo /usr/include/c++/4.8/ext/concurrence.h \
- /usr/include/c++/4.8/bits/uses_allocator.h \
- /usr/include/c++/4.8/functional /usr/include/c++/4.8/tuple \
- /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
- /usr/include/c++/4.8/array /usr/include/c++/4.8/stdexcept \
+ /usr/include/c++/4.8/ext/concurrence.h \
  /usr/include/c++/4.8/bits/unique_ptr.h \
  /usr/include/c++/4.8/bits/shared_ptr.h \
  /usr/include/c++/4.8/bits/shared_ptr_base.h \
- /usr/include/c++/4.8/backward/auto_ptr.h \
- /usr/include/c++/4.8/unordered_map /usr/include/c++/4.8/bits/hashtable.h \
- /usr/include/c++/4.8/bits/hashtable_policy.h \
- /usr/include/c++/4.8/bits/unordered_map.h /usr/include/c++/4.8/vector \
+ /usr/include/c++/4.8/backward/auto_ptr.h LowLevel/../BaseLib.h \
+ LowLevel/../Database/DatabaseTypes.h /usr/include/c++/4.8/vector \
  /usr/include/c++/4.8/bits/stl_vector.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc \
- Encoding/../DeviceDescription/Physical.h /usr/include/c++/4.8/iostream \
- /usr/include/c++/4.8/ostream /usr/include/c++/4.8/ios \
- /usr/include/c++/4.8/bits/ios_base.h \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/deque \
+ /usr/include/c++/4.8/bits/stl_deque.h \
+ /usr/include/c++/4.8/bits/deque.tcc LowLevel/../Encoding/XMLRPCDecoder.h \
+ LowLevel/../Encoding/../Variable.h \
+ LowLevel/../Encoding/../Encoding/RapidXml/rapidxml.hpp \
+ /usr/include/c++/4.8/cassert /usr/include/assert.h \
+ LowLevel/../Encoding/../DeviceDescription/Logical.h \
+ LowLevel/../Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
+ /usr/include/c++/4.8/unordered_map /usr/include/c++/4.8/bits/hashtable.h \
+ /usr/include/c++/4.8/bits/hashtable_policy.h \
+ /usr/include/c++/4.8/bits/unordered_map.h \
+ LowLevel/../Encoding/../DeviceDescription/Physical.h \
+ /usr/include/c++/4.8/iostream /usr/include/c++/4.8/ostream \
+ /usr/include/c++/4.8/ios /usr/include/c++/4.8/bits/ios_base.h \
  /usr/include/c++/4.8/bits/locale_classes.h \
  /usr/include/c++/4.8/bits/locale_classes.tcc \
  /usr/include/c++/4.8/streambuf /usr/include/c++/4.8/bits/streambuf.tcc \
@@ -130,35 +141,26 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/c++/4.8/bits/locale_facets.tcc \
  /usr/include/c++/4.8/bits/basic_ios.tcc \
  /usr/include/c++/4.8/bits/ostream.tcc /usr/include/c++/4.8/istream \
- /usr/include/c++/4.8/bits/istream.tcc /usr/include/c++/4.8/map \
- /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
- /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/list \
+ /usr/include/c++/4.8/bits/istream.tcc /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
- Encoding/BinaryEncoder.h /usr/include/c++/4.8/cstring \
- /usr/include/string.h /usr/include/x86_64-linux-gnu/bits/string3.h \
- Encoding/../BaseLib.h Encoding/../Database/DatabaseTypes.h \
- /usr/include/c++/4.8/deque /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc Encoding/../Encoding/XMLRPCDecoder.h \
- Encoding/../Encoding/../Variable.h \
- Encoding/../Encoding/RapidXml/rapidxml.hpp \
- Encoding/../Encoding/XMLRPCEncoder.h Encoding/../Encoding/../Exception.h \
- Encoding/../Encoding/../Output/Output.h \
- Encoding/../Encoding/../Output/../Exception.h \
+ LowLevel/../Encoding/RapidXml/rapidxml.hpp \
+ LowLevel/../Encoding/XMLRPCEncoder.h LowLevel/../Encoding/../Exception.h \
+ LowLevel/../Encoding/../Output/Output.h \
+ LowLevel/../Encoding/../Output/../Exception.h \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/locale \
  /usr/include/c++/4.8/bits/locale_facets_nonio.h \
- /usr/include/c++/4.8/ctime \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/messages_members.h \
  /usr/include/libintl.h /usr/include/c++/4.8/bits/codecvt.h \
  /usr/include/c++/4.8/bits/locale_facets_nonio.tcc \
  /usr/include/c++/4.8/sstream /usr/include/c++/4.8/bits/sstream.tcc \
- /usr/include/c++/4.8/chrono /usr/include/c++/4.8/ratio \
- /usr/include/c++/4.8/limits \
- Encoding/../Encoding/RapidXml/rapidxml_print.hpp \
- Encoding/../Encoding/RapidXml/rapidxml.hpp /usr/include/c++/4.8/iterator \
+ LowLevel/../Encoding/RapidXml/rapidxml_print.hpp \
+ LowLevel/../Encoding/RapidXml/rapidxml.hpp /usr/include/c++/4.8/iterator \
  /usr/include/c++/4.8/bits/stream_iterator.h \
- Encoding/../Encoding/RPCDecoder.h /usr/include/c++/4.8/cmath \
- /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/huge_val.h \
+ LowLevel/../Encoding/RPCDecoder.h /usr/include/c++/4.8/cstring \
+ /usr/include/string.h /usr/include/x86_64-linux-gnu/bits/string3.h \
+ /usr/include/c++/4.8/cmath /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_val.h \
  /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
  /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
  /usr/include/x86_64-linux-gnu/bits/inf.h \
@@ -166,17 +168,16 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/x86_64-linux-gnu/bits/mathdef.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
- Encoding/../Encoding/BinaryDecoder.h Encoding/../Encoding/RPCHeader.h \
- Encoding/../Encoding/RPCEncoder.h Encoding/../Encoding/JsonDecoder.h \
- Encoding/../Encoding/JsonEncoder.h Encoding/../Encoding/HTTP.h \
- Encoding/../Encoding/../HelperFunctions/Math.h \
- Encoding/../Encoding/Html.h Encoding/../Encoding/WebSocket.h \
- Encoding/../Managers/SerialDeviceManager.h \
- Encoding/../Managers/../Sockets/SerialReaderWriter.h \
- Encoding/../Managers/../Sockets/../Exception.h \
- Encoding/../Managers/../Sockets/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/mutex /usr/include/c++/4.8/system_error \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h \
+ LowLevel/../Encoding/BinaryDecoder.h LowLevel/../Encoding/RPCHeader.h \
+ LowLevel/../Encoding/RPCEncoder.h LowLevel/../Encoding/BinaryEncoder.h \
+ LowLevel/../Encoding/JsonDecoder.h LowLevel/../Encoding/JsonEncoder.h \
+ LowLevel/../Encoding/HTTP.h \
+ LowLevel/../Encoding/../HelperFunctions/Math.h \
+ LowLevel/../Encoding/Html.h LowLevel/../Encoding/WebSocket.h \
+ LowLevel/../Managers/SerialDeviceManager.h \
+ LowLevel/../Managers/../Sockets/SerialReaderWriter.h \
+ LowLevel/../Managers/../Sockets/../Exception.h \
+ LowLevel/../Managers/../Sockets/../Managers/FileDescriptorManager.h \
  /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
@@ -193,8 +194,8 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
  /usr/include/gnutls/gnutls.h /usr/include/gnutls/compat.h \
- Encoding/../Managers/../Sockets/../IEvents.h \
- Encoding/../Managers/../Sockets/../Output/Output.h \
+ LowLevel/../Managers/../Sockets/../IEvents.h \
+ LowLevel/../Managers/../Sockets/../Output/Output.h \
  /usr/include/c++/4.8/forward_list \
  /usr/include/c++/4.8/bits/forward_list.h \
  /usr/include/c++/4.8/bits/forward_list.tcc /usr/include/c++/4.8/thread \
@@ -211,8 +212,8 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigstack.h \
  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
- Encoding/../Managers/FileDescriptorManager.h \
- Encoding/../HelperFunctions/HelperFunctions.h \
+ LowLevel/../Managers/FileDescriptorManager.h \
+ LowLevel/../HelperFunctions/HelperFunctions.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -238,72 +239,75 @@ Encoding/RPCEncoder.lo: Encoding/RPCEncoder.cpp \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
  /usr/include/x86_64-linux-gnu/sys/time.h \
- Encoding/../HelperFunctions/Color.h Encoding/../HelperFunctions/Math.h \
- Encoding/../HelperFunctions/Math.h Encoding/../HelperFunctions/Crypt.h \
- Encoding/../HelperFunctions/Base64.h Encoding/../HelperFunctions/Net.h \
- Encoding/../HelperFunctions/../Exception.h \
- Encoding/../HelperFunctions/Io.h Encoding/../LowLevel/Gpio.h \
- Encoding/../Output/Output.h Encoding/../DeviceDescription/Devices.h \
- Encoding/../DeviceDescription/../Systems/Packet.h \
- Encoding/../DeviceDescription/../Systems/DeviceTypes.h \
- Encoding/../DeviceDescription/HomegearDevice.h \
- Encoding/../DeviceDescription/DevicePacket.h \
- Encoding/../DeviceDescription/JsonPayload.h \
- Encoding/../DeviceDescription/BinaryPayload.h \
- Encoding/../DeviceDescription/HttpPayload.h \
- Encoding/../DeviceDescription/Parameter.h \
- Encoding/../DeviceDescription/ParameterCast.h \
- Encoding/../DeviceDescription/../Variable.h \
- Encoding/../DeviceDescription/Logical.h \
- Encoding/../DeviceDescription/Physical.h \
- Encoding/../DeviceDescription/SupportedDevice.h \
- Encoding/../DeviceDescription/RunProgram.h \
- Encoding/../DeviceDescription/Function.h \
- Encoding/../DeviceDescription/ParameterGroup.h \
- Encoding/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
+ LowLevel/../HelperFunctions/Color.h LowLevel/../HelperFunctions/Math.h \
+ LowLevel/../HelperFunctions/Math.h LowLevel/../HelperFunctions/Crypt.h \
+ LowLevel/../HelperFunctions/Base64.h LowLevel/../HelperFunctions/Net.h \
+ LowLevel/../HelperFunctions/../Exception.h \
+ LowLevel/../HelperFunctions/Io.h LowLevel/../LowLevel/Gpio.h \
+ LowLevel/../Output/Output.h LowLevel/../DeviceDescription/Devices.h \
+ LowLevel/../DeviceDescription/../Systems/Packet.h \
+ LowLevel/../DeviceDescription/../Systems/DeviceTypes.h \
+ LowLevel/../DeviceDescription/HomegearDevice.h \
+ LowLevel/../DeviceDescription/DevicePacket.h \
+ LowLevel/../DeviceDescription/JsonPayload.h \
+ LowLevel/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
+ LowLevel/../DeviceDescription/BinaryPayload.h \
+ LowLevel/../DeviceDescription/HttpPayload.h \
+ LowLevel/../DeviceDescription/Parameter.h \
+ LowLevel/../DeviceDescription/ParameterCast.h \
+ LowLevel/../DeviceDescription/../Variable.h \
+ LowLevel/../DeviceDescription/Logical.h \
+ LowLevel/../DeviceDescription/Physical.h \
+ LowLevel/../DeviceDescription/SupportedDevice.h \
+ LowLevel/../DeviceDescription/RunProgram.h \
+ LowLevel/../DeviceDescription/Function.h \
+ LowLevel/../DeviceDescription/ParameterGroup.h \
+ LowLevel/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Encoding/../Settings/Settings.h \
- Encoding/../Sockets/HTTPClient.h Encoding/../Sockets/../Exception.h \
- Encoding/../Sockets/../Managers/FileDescriptorManager.h \
- Encoding/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h LowLevel/../Settings/Settings.h \
+ LowLevel/../Sockets/HTTPClient.h LowLevel/../Sockets/../Exception.h \
+ LowLevel/../Sockets/../Managers/FileDescriptorManager.h \
+ LowLevel/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
  /usr/include/netinet/tcp.h /usr/include/netdb.h /usr/include/rpc/netdb.h \
  /usr/include/x86_64-linux-gnu/bits/netdb.h /usr/include/poll.h \
  /usr/include/x86_64-linux-gnu/sys/poll.h \
  /usr/include/x86_64-linux-gnu/bits/poll.h \
  /usr/include/x86_64-linux-gnu/bits/poll2.h /usr/include/gnutls/x509.h \
- Encoding/../Sockets/../Encoding/HTTP.h \
- Encoding/../Sockets/SocketOperations.h \
- Encoding/../Sockets/IWebserverEventSink.h \
- Encoding/../Sockets/ServerInfo.h Encoding/../Sockets/ServerInfo.h \
- Encoding/../Systems/DeviceFamily.h \
- Encoding/../Systems/../Database/DatabaseTypes.h \
- Encoding/../Systems/Central.h Encoding/../Systems/../Variable.h \
- Encoding/../Systems/../DeviceDescription/HomegearDevice.h \
- Encoding/../Systems/LogicalDevice.h \
- Encoding/../Systems/../HelperFunctions/HelperFunctions.h \
- Encoding/../Systems/IPhysicalInterface.h \
- Encoding/../Systems/../IEvents.h \
- Encoding/../Systems/PhysicalInterfaceSettings.h \
- Encoding/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable Encoding/../Systems/Packet.h \
- Encoding/../Systems/Peer.h Encoding/../Systems/ServiceMessages.h \
- Encoding/../Systems/../Encoding/BinaryEncoder.h \
- Encoding/../Systems/../Encoding/BinaryDecoder.h \
- Encoding/../Systems/Peer.h Encoding/../Systems/SystemFactory.h \
- Encoding/../Systems/DeviceFamily.h Encoding/../Systems/UpdateInfo.h \
- Encoding/../Threads/Threads.h Encoding/../Threads/../Exception.h \
- Encoding/../Threads/../Output/Output.h Encoding/../SSDP/SSDP.h \
- Encoding/../SSDP/../Encoding/HTTP.h Encoding/../SSDP/../Variable.h \
- Encoding/../IQueue.h
+ LowLevel/../Sockets/../Encoding/HTTP.h \
+ LowLevel/../Sockets/SocketOperations.h \
+ LowLevel/../Sockets/IWebserverEventSink.h \
+ LowLevel/../Sockets/ServerInfo.h LowLevel/../Sockets/ServerInfo.h \
+ LowLevel/../Systems/DeviceFamily.h \
+ LowLevel/../Systems/../Database/DatabaseTypes.h \
+ LowLevel/../Systems/Central.h LowLevel/../Systems/../Variable.h \
+ LowLevel/../Systems/../DeviceDescription/HomegearDevice.h \
+ LowLevel/../Systems/LogicalDevice.h \
+ LowLevel/../Systems/../HelperFunctions/HelperFunctions.h \
+ LowLevel/../Systems/IPhysicalInterface.h \
+ LowLevel/../Systems/../IEvents.h \
+ LowLevel/../Systems/PhysicalInterfaceSettings.h \
+ LowLevel/../Systems/../Managers/FileDescriptorManager.h \
+ /usr/include/c++/4.8/condition_variable LowLevel/../Systems/Packet.h \
+ LowLevel/../Systems/Peer.h LowLevel/../Systems/ServiceMessages.h \
+ LowLevel/../Systems/../Encoding/BinaryEncoder.h \
+ LowLevel/../Systems/../Encoding/BinaryDecoder.h \
+ LowLevel/../Systems/Peer.h LowLevel/../Systems/SystemFactory.h \
+ LowLevel/../Systems/DeviceFamily.h LowLevel/../Systems/UpdateInfo.h \
+ LowLevel/../Threads/Threads.h LowLevel/../Threads/../Exception.h \
+ LowLevel/../Threads/../Output/Output.h LowLevel/../SSDP/SSDP.h \
+ LowLevel/../SSDP/../Encoding/HTTP.h LowLevel/../SSDP/../Variable.h \
+ LowLevel/../IQueue.h /usr/include/x86_64-linux-gnu/sys/stat.h
 
 /usr/include/stdc-predef.h:
 
-Encoding/RPCEncoder.h:
+LowLevel/Gpio.h:
 
-Encoding/RPCHeader.h:
+/usr/include/c++/4.8/map:
 
-/usr/include/c++/4.8/string:
+/usr/include/c++/4.8/bits/stl_tree.h:
+
+/usr/include/c++/4.8/bits/stl_algobase.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
 
@@ -320,14 +324,6 @@ Encoding/RPCHeader.h:
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h:
-
-/usr/include/c++/4.8/bits/stringfwd.h:
-
-/usr/include/c++/4.8/bits/memoryfwd.h:
-
-/usr/include/c++/4.8/bits/char_traits.h:
-
-/usr/include/c++/4.8/bits/stl_algobase.h:
 
 /usr/include/c++/4.8/bits/functexcept.h:
 
@@ -355,6 +351,52 @@ Encoding/RPCHeader.h:
 
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
+/usr/include/c++/4.8/bits/allocator.h:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h:
+
+/usr/include/c++/4.8/ext/new_allocator.h:
+
+/usr/include/c++/4.8/new:
+
+/usr/include/c++/4.8/exception:
+
+/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
+
+/usr/include/c++/4.8/bits/exception_ptr.h:
+
+/usr/include/c++/4.8/bits/nested_exception.h:
+
+/usr/include/c++/4.8/bits/memoryfwd.h:
+
+/usr/include/c++/4.8/bits/stl_function.h:
+
+/usr/include/c++/4.8/backward/binders.h:
+
+/usr/include/c++/4.8/bits/alloc_traits.h:
+
+/usr/include/c++/4.8/bits/ptr_traits.h:
+
+/usr/include/c++/4.8/bits/stl_map.h:
+
+/usr/include/c++/4.8/initializer_list:
+
+/usr/include/c++/4.8/tuple:
+
+/usr/include/c++/4.8/utility:
+
+/usr/include/c++/4.8/bits/stl_relops.h:
+
+/usr/include/c++/4.8/array:
+
+/usr/include/c++/4.8/stdexcept:
+
+/usr/include/c++/4.8/string:
+
+/usr/include/c++/4.8/bits/stringfwd.h:
+
+/usr/include/c++/4.8/bits/char_traits.h:
+
 /usr/include/c++/4.8/bits/postypes.h:
 
 /usr/include/c++/4.8/cwchar:
@@ -378,22 +420,6 @@ Encoding/RPCHeader.h:
 /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
 
 /usr/include/stdint.h:
-
-/usr/include/c++/4.8/bits/allocator.h:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h:
-
-/usr/include/c++/4.8/ext/new_allocator.h:
-
-/usr/include/c++/4.8/new:
-
-/usr/include/c++/4.8/exception:
-
-/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
-
-/usr/include/c++/4.8/bits/exception_ptr.h:
-
-/usr/include/c++/4.8/bits/nested_exception.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
 
@@ -427,10 +453,6 @@ Encoding/RPCHeader.h:
 
 /usr/include/c++/4.8/bits/cxxabi_forced.h:
 
-/usr/include/c++/4.8/bits/stl_function.h:
-
-/usr/include/c++/4.8/backward/binders.h:
-
 /usr/include/c++/4.8/bits/range_access.h:
 
 /usr/include/c++/4.8/bits/basic_string.h:
@@ -458,8 +480,6 @@ Encoding/RPCHeader.h:
 /usr/include/x86_64-linux-gnu/bits/setjmp.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/atomic_word.h:
-
-/usr/include/c++/4.8/initializer_list:
 
 /usr/include/c++/4.8/ext/string_conversions.h:
 
@@ -525,17 +545,27 @@ Encoding/RPCHeader.h:
 
 /usr/include/c++/4.8/bits/basic_string.tcc:
 
-Encoding/../Variable.h:
+/usr/include/c++/4.8/bits/uses_allocator.h:
 
-Encoding/../Encoding/RapidXml/rapidxml.hpp:
+/usr/include/c++/4.8/bits/stl_multimap.h:
 
-/usr/include/c++/4.8/cassert:
+/usr/include/c++/4.8/mutex:
 
-/usr/include/assert.h:
+/usr/include/c++/4.8/chrono:
 
-Encoding/../DeviceDescription/Logical.h:
+/usr/include/c++/4.8/ratio:
 
-Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+/usr/include/c++/4.8/limits:
+
+/usr/include/c++/4.8/ctime:
+
+/usr/include/c++/4.8/functional:
+
+/usr/include/c++/4.8/typeinfo:
+
+/usr/include/c++/4.8/system_error:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h:
 
 /usr/include/c++/4.8/memory:
 
@@ -543,33 +573,13 @@ Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/ext/alloc_traits.h:
 
-/usr/include/c++/4.8/bits/alloc_traits.h:
-
-/usr/include/c++/4.8/bits/ptr_traits.h:
-
 /usr/include/c++/4.8/bits/stl_uninitialized.h:
 
 /usr/include/c++/4.8/bits/stl_tempbuf.h:
 
 /usr/include/c++/4.8/bits/stl_raw_storage_iter.h:
 
-/usr/include/c++/4.8/typeinfo:
-
 /usr/include/c++/4.8/ext/concurrence.h:
-
-/usr/include/c++/4.8/bits/uses_allocator.h:
-
-/usr/include/c++/4.8/functional:
-
-/usr/include/c++/4.8/tuple:
-
-/usr/include/c++/4.8/utility:
-
-/usr/include/c++/4.8/bits/stl_relops.h:
-
-/usr/include/c++/4.8/array:
-
-/usr/include/c++/4.8/stdexcept:
 
 /usr/include/c++/4.8/bits/unique_ptr.h:
 
@@ -579,13 +589,9 @@ Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/backward/auto_ptr.h:
 
-/usr/include/c++/4.8/unordered_map:
+LowLevel/../BaseLib.h:
 
-/usr/include/c++/4.8/bits/hashtable.h:
-
-/usr/include/c++/4.8/bits/hashtable_policy.h:
-
-/usr/include/c++/4.8/bits/unordered_map.h:
+LowLevel/../Database/DatabaseTypes.h:
 
 /usr/include/c++/4.8/vector:
 
@@ -595,7 +601,35 @@ Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/bits/vector.tcc:
 
-Encoding/../DeviceDescription/Physical.h:
+/usr/include/c++/4.8/deque:
+
+/usr/include/c++/4.8/bits/stl_deque.h:
+
+/usr/include/c++/4.8/bits/deque.tcc:
+
+LowLevel/../Encoding/XMLRPCDecoder.h:
+
+LowLevel/../Encoding/../Variable.h:
+
+LowLevel/../Encoding/../Encoding/RapidXml/rapidxml.hpp:
+
+/usr/include/c++/4.8/cassert:
+
+/usr/include/assert.h:
+
+LowLevel/../Encoding/../DeviceDescription/Logical.h:
+
+LowLevel/../Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+
+/usr/include/c++/4.8/unordered_map:
+
+/usr/include/c++/4.8/bits/hashtable.h:
+
+/usr/include/c++/4.8/bits/hashtable_policy.h:
+
+/usr/include/c++/4.8/bits/unordered_map.h:
+
+LowLevel/../Encoding/../DeviceDescription/Physical.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -637,59 +671,27 @@ Encoding/../DeviceDescription/Physical.h:
 
 /usr/include/c++/4.8/bits/istream.tcc:
 
-/usr/include/c++/4.8/map:
-
-/usr/include/c++/4.8/bits/stl_tree.h:
-
-/usr/include/c++/4.8/bits/stl_map.h:
-
-/usr/include/c++/4.8/bits/stl_multimap.h:
-
 /usr/include/c++/4.8/list:
 
 /usr/include/c++/4.8/bits/stl_list.h:
 
 /usr/include/c++/4.8/bits/list.tcc:
 
-Encoding/BinaryEncoder.h:
+LowLevel/../Encoding/RapidXml/rapidxml.hpp:
 
-/usr/include/c++/4.8/cstring:
+LowLevel/../Encoding/XMLRPCEncoder.h:
 
-/usr/include/string.h:
+LowLevel/../Encoding/../Exception.h:
 
-/usr/include/x86_64-linux-gnu/bits/string3.h:
+LowLevel/../Encoding/../Output/Output.h:
 
-Encoding/../BaseLib.h:
-
-Encoding/../Database/DatabaseTypes.h:
-
-/usr/include/c++/4.8/deque:
-
-/usr/include/c++/4.8/bits/stl_deque.h:
-
-/usr/include/c++/4.8/bits/deque.tcc:
-
-Encoding/../Encoding/XMLRPCDecoder.h:
-
-Encoding/../Encoding/../Variable.h:
-
-Encoding/../Encoding/RapidXml/rapidxml.hpp:
-
-Encoding/../Encoding/XMLRPCEncoder.h:
-
-Encoding/../Encoding/../Exception.h:
-
-Encoding/../Encoding/../Output/Output.h:
-
-Encoding/../Encoding/../Output/../Exception.h:
+LowLevel/../Encoding/../Output/../Exception.h:
 
 /usr/include/c++/4.8/iomanip:
 
 /usr/include/c++/4.8/locale:
 
 /usr/include/c++/4.8/bits/locale_facets_nonio.h:
-
-/usr/include/c++/4.8/ctime:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h:
 
@@ -705,21 +707,21 @@ Encoding/../Encoding/../Output/../Exception.h:
 
 /usr/include/c++/4.8/bits/sstream.tcc:
 
-/usr/include/c++/4.8/chrono:
+LowLevel/../Encoding/RapidXml/rapidxml_print.hpp:
 
-/usr/include/c++/4.8/ratio:
-
-/usr/include/c++/4.8/limits:
-
-Encoding/../Encoding/RapidXml/rapidxml_print.hpp:
-
-Encoding/../Encoding/RapidXml/rapidxml.hpp:
+LowLevel/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/iterator:
 
 /usr/include/c++/4.8/bits/stream_iterator.h:
 
-Encoding/../Encoding/RPCDecoder.h:
+LowLevel/../Encoding/RPCDecoder.h:
+
+/usr/include/c++/4.8/cstring:
+
+/usr/include/string.h:
+
+/usr/include/x86_64-linux-gnu/bits/string3.h:
 
 /usr/include/c++/4.8/cmath:
 
@@ -741,37 +743,33 @@ Encoding/../Encoding/RPCDecoder.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathinline.h:
 
-Encoding/../Encoding/BinaryDecoder.h:
+LowLevel/../Encoding/BinaryDecoder.h:
 
-Encoding/../Encoding/RPCHeader.h:
+LowLevel/../Encoding/RPCHeader.h:
 
-Encoding/../Encoding/RPCEncoder.h:
+LowLevel/../Encoding/RPCEncoder.h:
 
-Encoding/../Encoding/JsonDecoder.h:
+LowLevel/../Encoding/BinaryEncoder.h:
 
-Encoding/../Encoding/JsonEncoder.h:
+LowLevel/../Encoding/JsonDecoder.h:
 
-Encoding/../Encoding/HTTP.h:
+LowLevel/../Encoding/JsonEncoder.h:
 
-Encoding/../Encoding/../HelperFunctions/Math.h:
+LowLevel/../Encoding/HTTP.h:
 
-Encoding/../Encoding/Html.h:
+LowLevel/../Encoding/../HelperFunctions/Math.h:
 
-Encoding/../Encoding/WebSocket.h:
+LowLevel/../Encoding/Html.h:
 
-Encoding/../Managers/SerialDeviceManager.h:
+LowLevel/../Encoding/WebSocket.h:
 
-Encoding/../Managers/../Sockets/SerialReaderWriter.h:
+LowLevel/../Managers/SerialDeviceManager.h:
 
-Encoding/../Managers/../Sockets/../Exception.h:
+LowLevel/../Managers/../Sockets/SerialReaderWriter.h:
 
-Encoding/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
+LowLevel/../Managers/../Sockets/../Exception.h:
 
-/usr/include/c++/4.8/mutex:
-
-/usr/include/c++/4.8/system_error:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h:
+LowLevel/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 
 /usr/include/unistd.h:
 
@@ -811,9 +809,9 @@ Encoding/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 
 /usr/include/gnutls/compat.h:
 
-Encoding/../Managers/../Sockets/../IEvents.h:
+LowLevel/../Managers/../Sockets/../IEvents.h:
 
-Encoding/../Managers/../Sockets/../Output/Output.h:
+LowLevel/../Managers/../Sockets/../Output/Output.h:
 
 /usr/include/c++/4.8/forward_list:
 
@@ -855,9 +853,9 @@ Encoding/../Managers/../Sockets/../Output/Output.h:
 
 /usr/include/x86_64-linux-gnu/bits/sigthread.h:
 
-Encoding/../Managers/FileDescriptorManager.h:
+LowLevel/../Managers/FileDescriptorManager.h:
 
-Encoding/../HelperFunctions/HelperFunctions.h:
+LowLevel/../HelperFunctions/HelperFunctions.h:
 
 /usr/include/c++/4.8/algorithm:
 
@@ -925,61 +923,63 @@ Encoding/../HelperFunctions/HelperFunctions.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
 
-Encoding/../HelperFunctions/Color.h:
+LowLevel/../HelperFunctions/Color.h:
 
-Encoding/../HelperFunctions/Math.h:
+LowLevel/../HelperFunctions/Math.h:
 
-Encoding/../HelperFunctions/Math.h:
+LowLevel/../HelperFunctions/Math.h:
 
-Encoding/../HelperFunctions/Crypt.h:
+LowLevel/../HelperFunctions/Crypt.h:
 
-Encoding/../HelperFunctions/Base64.h:
+LowLevel/../HelperFunctions/Base64.h:
 
-Encoding/../HelperFunctions/Net.h:
+LowLevel/../HelperFunctions/Net.h:
 
-Encoding/../HelperFunctions/../Exception.h:
+LowLevel/../HelperFunctions/../Exception.h:
 
-Encoding/../HelperFunctions/Io.h:
+LowLevel/../HelperFunctions/Io.h:
 
-Encoding/../LowLevel/Gpio.h:
+LowLevel/../LowLevel/Gpio.h:
 
-Encoding/../Output/Output.h:
+LowLevel/../Output/Output.h:
 
-Encoding/../DeviceDescription/Devices.h:
+LowLevel/../DeviceDescription/Devices.h:
 
-Encoding/../DeviceDescription/../Systems/Packet.h:
+LowLevel/../DeviceDescription/../Systems/Packet.h:
 
-Encoding/../DeviceDescription/../Systems/DeviceTypes.h:
+LowLevel/../DeviceDescription/../Systems/DeviceTypes.h:
 
-Encoding/../DeviceDescription/HomegearDevice.h:
+LowLevel/../DeviceDescription/HomegearDevice.h:
 
-Encoding/../DeviceDescription/DevicePacket.h:
+LowLevel/../DeviceDescription/DevicePacket.h:
 
-Encoding/../DeviceDescription/JsonPayload.h:
+LowLevel/../DeviceDescription/JsonPayload.h:
 
-Encoding/../DeviceDescription/BinaryPayload.h:
+LowLevel/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
-Encoding/../DeviceDescription/HttpPayload.h:
+LowLevel/../DeviceDescription/BinaryPayload.h:
 
-Encoding/../DeviceDescription/Parameter.h:
+LowLevel/../DeviceDescription/HttpPayload.h:
 
-Encoding/../DeviceDescription/ParameterCast.h:
+LowLevel/../DeviceDescription/Parameter.h:
 
-Encoding/../DeviceDescription/../Variable.h:
+LowLevel/../DeviceDescription/ParameterCast.h:
 
-Encoding/../DeviceDescription/Logical.h:
+LowLevel/../DeviceDescription/../Variable.h:
 
-Encoding/../DeviceDescription/Physical.h:
+LowLevel/../DeviceDescription/Logical.h:
 
-Encoding/../DeviceDescription/SupportedDevice.h:
+LowLevel/../DeviceDescription/Physical.h:
 
-Encoding/../DeviceDescription/RunProgram.h:
+LowLevel/../DeviceDescription/SupportedDevice.h:
 
-Encoding/../DeviceDescription/Function.h:
+LowLevel/../DeviceDescription/RunProgram.h:
 
-Encoding/../DeviceDescription/ParameterGroup.h:
+LowLevel/../DeviceDescription/Function.h:
 
-Encoding/../DeviceDescription/Scenario.h:
+LowLevel/../DeviceDescription/ParameterGroup.h:
+
+LowLevel/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/set:
 
@@ -987,15 +987,15 @@ Encoding/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
-Encoding/../Settings/Settings.h:
+LowLevel/../Settings/Settings.h:
 
-Encoding/../Sockets/HTTPClient.h:
+LowLevel/../Sockets/HTTPClient.h:
 
-Encoding/../Sockets/../Exception.h:
+LowLevel/../Sockets/../Exception.h:
 
-Encoding/../Sockets/../Managers/FileDescriptorManager.h:
+LowLevel/../Sockets/../Managers/FileDescriptorManager.h:
 
-Encoding/../Sockets/SocketOperations.h:
+LowLevel/../Sockets/SocketOperations.h:
 
 /usr/include/arpa/inet.h:
 
@@ -1021,68 +1021,70 @@ Encoding/../Sockets/SocketOperations.h:
 
 /usr/include/gnutls/x509.h:
 
-Encoding/../Sockets/../Encoding/HTTP.h:
+LowLevel/../Sockets/../Encoding/HTTP.h:
 
-Encoding/../Sockets/SocketOperations.h:
+LowLevel/../Sockets/SocketOperations.h:
 
-Encoding/../Sockets/IWebserverEventSink.h:
+LowLevel/../Sockets/IWebserverEventSink.h:
 
-Encoding/../Sockets/ServerInfo.h:
+LowLevel/../Sockets/ServerInfo.h:
 
-Encoding/../Sockets/ServerInfo.h:
+LowLevel/../Sockets/ServerInfo.h:
 
-Encoding/../Systems/DeviceFamily.h:
+LowLevel/../Systems/DeviceFamily.h:
 
-Encoding/../Systems/../Database/DatabaseTypes.h:
+LowLevel/../Systems/../Database/DatabaseTypes.h:
 
-Encoding/../Systems/Central.h:
+LowLevel/../Systems/Central.h:
 
-Encoding/../Systems/../Variable.h:
+LowLevel/../Systems/../Variable.h:
 
-Encoding/../Systems/../DeviceDescription/HomegearDevice.h:
+LowLevel/../Systems/../DeviceDescription/HomegearDevice.h:
 
-Encoding/../Systems/LogicalDevice.h:
+LowLevel/../Systems/LogicalDevice.h:
 
-Encoding/../Systems/../HelperFunctions/HelperFunctions.h:
+LowLevel/../Systems/../HelperFunctions/HelperFunctions.h:
 
-Encoding/../Systems/IPhysicalInterface.h:
+LowLevel/../Systems/IPhysicalInterface.h:
 
-Encoding/../Systems/../IEvents.h:
+LowLevel/../Systems/../IEvents.h:
 
-Encoding/../Systems/PhysicalInterfaceSettings.h:
+LowLevel/../Systems/PhysicalInterfaceSettings.h:
 
-Encoding/../Systems/../Managers/FileDescriptorManager.h:
+LowLevel/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
 
-Encoding/../Systems/Packet.h:
+LowLevel/../Systems/Packet.h:
 
-Encoding/../Systems/Peer.h:
+LowLevel/../Systems/Peer.h:
 
-Encoding/../Systems/ServiceMessages.h:
+LowLevel/../Systems/ServiceMessages.h:
 
-Encoding/../Systems/../Encoding/BinaryEncoder.h:
+LowLevel/../Systems/../Encoding/BinaryEncoder.h:
 
-Encoding/../Systems/../Encoding/BinaryDecoder.h:
+LowLevel/../Systems/../Encoding/BinaryDecoder.h:
 
-Encoding/../Systems/Peer.h:
+LowLevel/../Systems/Peer.h:
 
-Encoding/../Systems/SystemFactory.h:
+LowLevel/../Systems/SystemFactory.h:
 
-Encoding/../Systems/DeviceFamily.h:
+LowLevel/../Systems/DeviceFamily.h:
 
-Encoding/../Systems/UpdateInfo.h:
+LowLevel/../Systems/UpdateInfo.h:
 
-Encoding/../Threads/Threads.h:
+LowLevel/../Threads/Threads.h:
 
-Encoding/../Threads/../Exception.h:
+LowLevel/../Threads/../Exception.h:
 
-Encoding/../Threads/../Output/Output.h:
+LowLevel/../Threads/../Output/Output.h:
 
-Encoding/../SSDP/SSDP.h:
+LowLevel/../SSDP/SSDP.h:
 
-Encoding/../SSDP/../Encoding/HTTP.h:
+LowLevel/../SSDP/../Encoding/HTTP.h:
 
-Encoding/../SSDP/../Variable.h:
+LowLevel/../SSDP/../Variable.h:
 
-Encoding/../IQueue.h:
+LowLevel/../IQueue.h:
+
+/usr/include/x86_64-linux-gnu/sys/stat.h:

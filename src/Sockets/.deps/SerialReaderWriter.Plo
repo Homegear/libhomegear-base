@@ -240,7 +240,8 @@ Sockets/SerialReaderWriter.lo: Sockets/SerialReaderWriter.cpp \
  Sockets/../HelperFunctions/Math.h Sockets/../HelperFunctions/Crypt.h \
  Sockets/../HelperFunctions/Base64.h Sockets/../HelperFunctions/Net.h \
  Sockets/../HelperFunctions/../Exception.h \
- Sockets/../HelperFunctions/Io.h Sockets/../DeviceDescription/Devices.h \
+ Sockets/../HelperFunctions/Io.h Sockets/../LowLevel/Gpio.h \
+ Sockets/../DeviceDescription/Devices.h \
  Sockets/../DeviceDescription/../Systems/Packet.h \
  Sockets/../DeviceDescription/../Systems/DeviceTypes.h \
  Sockets/../DeviceDescription/HomegearDevice.h \
@@ -931,6 +932,8 @@ Sockets/../HelperFunctions/Net.h:
 Sockets/../HelperFunctions/../Exception.h:
 
 Sockets/../HelperFunctions/Io.h:
+
+Sockets/../LowLevel/Gpio.h:
 
 Sockets/../DeviceDescription/Devices.h:
 
