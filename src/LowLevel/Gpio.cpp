@@ -334,11 +334,6 @@ void Gpio::exportGpio(uint32_t index)
 			getPath(index);
 			_gpioMutex.lock();
 		}
-		if(_gpioInfo[index].path.empty())
-		{
-			_gpioInfo.erase(index);
-			throw(Exception("Error: Failed to get path for GPIO with index " + std::to_string(index) + "."));
-		}
 		std::string path;
 		std::shared_ptr<FileDescriptor> fileDescriptor;
 		std::string temp(std::to_string(index));
@@ -385,7 +380,8 @@ void Gpio::setup(int32_t userId, int32_t groupId)
 {
 	try
 	{
-		for(std::vector<uint32_t>::iterator i = _bl->settings.exportGpios().begin(); i != _bl->settings.exportGpios().end(); ++i)
+		std::vector<uint32_t> exportGpios = _bl->settings.exportGpios();
+		for(std::vector<uint32_t>::iterator i = exportGpios.begin(); i != exportGpios.end(); ++i)
 		{
 			exportGpio(*i);
 			setPermission(*i, userId, groupId, false);
