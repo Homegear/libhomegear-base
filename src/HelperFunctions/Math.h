@@ -240,6 +240,14 @@ public:
 	static double getDouble(const std::string& s);
 
 	/**
+	 * Converts a double to string removing any trailing zeros.
+	 *
+	 * @param number The number to convert
+	 * @return Returns the number.
+	 */
+	static std::string toString(double number);
+
+	/**
 	 * Converts a double to string.
 	 *
 	 * @param number The number to convert
