@@ -51,7 +51,7 @@ SerialReaderWriter::~SerialReaderWriter()
 	closeDevice();
 }
 
-void SerialReaderWriter::openDevice()
+void SerialReaderWriter::openDevice(bool events)
 {
 	_handles++;
 	if(_fileDescriptor->descriptor > -1) return;
@@ -113,6 +113,45 @@ void SerialReaderWriter::openDevice()
 	case 115200:
 		baudrate = B115200;
 		break;
+	case 230400:
+		baudrate = B230400;
+		break;
+	case 460800:
+		baudrate = B460800;
+		break;
+	case 500000:
+		baudrate = B500000;
+		break;
+	case 576000:
+		baudrate = B576000;
+		break;
+	case 921600:
+		baudrate = B921600;
+		break;
+	case 1000000:
+		baudrate = B1000000;
+		break;
+	case 1152000:
+		baudrate = B1152000;
+		break;
+	case 1500000:
+		baudrate = B1500000;
+		break;
+	case 2000000:
+		baudrate = B2000000;
+		break;
+	case 2500000:
+		baudrate = B2500000;
+		break;
+	case 3000000:
+		baudrate = B3000000;
+		break;
+	case 3500000:
+		baudrate = B3500000;
+		break;
+	case 4000000:
+		baudrate = B4000000;
+		break;
 	default:
 		throw SerialReaderWriterException("Couldn't setup device \"" + _device + "\": Unsupported baudrate.");
 	}
@@ -134,13 +173,16 @@ void SerialReaderWriter::openDevice()
 		if(fcntl(_fileDescriptor->descriptor, F_SETFL, flags | O_NONBLOCK) == -1) throw SerialReaderWriterException("Couldn't set device to non blocking mode: " + _device);
 	}
 
-	_readThreadMutex.lock();
-	if(_readThread.joinable()) _readThread.join();
-	_stopped = false;
-	_stopReadThread = false;
-	_readThread = std::thread(&SerialReaderWriter::readThread, this);
-	if(_readThreadPriority > -1) Threads::setThreadPriority(_bl, _readThread.native_handle(), _readThreadPriority, SCHED_FIFO);
-	_readThreadMutex.unlock();
+	if(events)
+	{
+		_readThreadMutex.lock();
+		if(_readThread.joinable()) _readThread.join();
+		_stopped = false;
+		_stopReadThread = false;
+		_readThread = std::thread(&SerialReaderWriter::readThread, this);
+		if(_readThreadPriority > -1) Threads::setThreadPriority(_bl, _readThread.native_handle(), _readThreadPriority, SCHED_FIFO);
+		_readThreadMutex.unlock();
+	}
 }
 
 void SerialReaderWriter::closeDevice()
@@ -152,6 +194,9 @@ void SerialReaderWriter::closeDevice()
 	_stopReadThread = true;
 	if(_readThread.joinable()) _readThread.join();
 	_readThreadMutex.unlock();
+	_openDeviceThreadMutex.lock();
+	if(_openDeviceThread.joinable()) _openDeviceThread.join();
+	_openDeviceThreadMutex.unlock();
 	_bl->fileDescriptorManager.close(_fileDescriptor);
 	unlink(_lockfile.c_str());
 }
@@ -184,6 +229,54 @@ void SerialReaderWriter::createLockFile()
 	}
 	dprintf(lockfileDescriptor->descriptor, "%10i", getpid());
 	_bl->fileDescriptorManager.close(lockfileDescriptor);
+}
+
+int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
+{
+	data.clear();
+	int32_t i;
+	char localBuffer[1];
+	fd_set readFileDescriptor;
+	while(!_stopReadThread)
+	{
+		if(_fileDescriptor->descriptor == -1)
+		{
+			_bl->out.printError("Error: File descriptor is invalid.");
+			return -1;
+		}
+		FD_ZERO(&readFileDescriptor);
+		FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
+		//Timeout needs to be set every time, so don't put it outside of the while loop
+		timeval timeval;
+		timeval.tv_sec = timeout / 1000000;
+		timeval.tv_usec = timeout % 1000000;
+		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);
+		switch(i)
+		{
+			case 0: //Timeout
+				return 1;
+			case 1:
+				break;
+			default:
+				//Error
+				_bl->fileDescriptorManager.close(_fileDescriptor);
+				return -1;
+		}
+		i = read(_fileDescriptor->descriptor, localBuffer, 1);
+		if(i == -1)
+		{
+			if(errno == EAGAIN) continue;
+			_bl->fileDescriptorManager.close(_fileDescriptor);
+			continue;
+		}
+		data.push_back(localBuffer[0]);
+		if(data.size() > 1024)
+		{
+			//Something is wrong
+			_bl->fileDescriptorManager.close(_fileDescriptor);
+		}
+		if(localBuffer[0] == '\n') return 0;
+	}
 }
 
 void SerialReaderWriter::writeLine(std::string& data)
@@ -225,52 +318,19 @@ void SerialReaderWriter::writeLine(std::string& data)
 void SerialReaderWriter::readThread()
 {
 	std::string data;
-	int32_t i;
-	char localBuffer[1];
-	fd_set readFileDescriptor;
 	while(!_stopReadThread)
 	{
 		if(_fileDescriptor->descriptor == -1)
 		{
 			closeDevice();
 			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-			std::thread t(&SerialReaderWriter::openDevice, this);
-			t.detach();
+			_openDeviceThreadMutex.lock();
+			if(_openDeviceThread.joinable()) _openDeviceThread.join();
+			_openDeviceThread = std::thread(&SerialReaderWriter::openDevice, this, true);
+			_openDeviceThreadMutex.unlock();
 			return;
 		}
-		FD_ZERO(&readFileDescriptor);
-		FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
-		//Timeout needs to be set every time, so don't put it outside of the while loop
-		timeval timeout;
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 500000;
-		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeout);
-		switch(i)
-		{
-			case 0: //Timeout
-				if(!_stopReadThread) continue;
-				else return;
-			case 1:
-				break;
-			default:
-				//Error
-				_bl->fileDescriptorManager.close(_fileDescriptor);
-				continue;
-		}
-		i = read(_fileDescriptor->descriptor, localBuffer, 1);
-		if(i == -1)
-		{
-			if(errno == EAGAIN) continue;
-			_bl->fileDescriptorManager.close(_fileDescriptor);
-			continue;
-		}
-		data.push_back(localBuffer[0]);
-		if(data.size() > 1024)
-		{
-			//Something is wrong
-			_bl->fileDescriptorManager.close(_fileDescriptor);
-		}
-		if(localBuffer[0] == '\n')
+		if(readLine(data) == 0)
 		{
 			EventHandlers eventHandlers = getEventHandlers();
 			_eventHandlerMutex.lock();
@@ -281,7 +341,6 @@ void SerialReaderWriter::readThread()
 				i->second->unlock();
 			}
 			_eventHandlerMutex.unlock();
-			data.clear();
 		}
 	}
 }

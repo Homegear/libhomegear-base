@@ -266,6 +266,26 @@ double Math::getDouble(const std::string& s)
 	return number;
 }
 
+std::string Math::toString(double number)
+{
+	std::stringstream out;
+    out << number;
+    std::string string = out.str();
+    std::string::size_type pos = string.find('.');
+    if(pos == std::string::npos) return string;
+    int32_t decimalPlaces = string.size() - pos - 1;
+    if(decimalPlaces > 3 && string[string.size() - 2] == string.back() && string[string.size() - 3] == string.back())
+    {
+    	double factor = std::pow(10, decimalPlaces - 1);
+		//Round to 9 digits
+		number = std::floor(number * factor + 0.5) / factor;
+		out.str(std::string());
+		out.clear();
+		out << number;
+    }
+    return out.str();
+}
+
 std::string Math::toString(double number, int32_t precision)
 {
 	std::ostringstream out;

@@ -386,9 +386,7 @@ void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::os
 
 void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
 {
-	std::ostringstream os;
-	os << std::fixed << std::setprecision(15) << variable->floatValue;
-	std::string value(os.str());
+	std::string value(Math::toString(variable->floatValue));
 	s.insert(s.end(), value.begin(), value.end());
 }
 
