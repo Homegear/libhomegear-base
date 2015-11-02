@@ -41,6 +41,7 @@ SerialReaderWriter::SerialReaderWriter(BaseLib::Obj* baseLib, std::string device
 	_device = device;
 	_baudrate = baudrate;
 	_flags = flags;
+	if(_flags == 0) _flags = O_RDWR | O_NOCTTY | O_NDELAY;
 	_createLockFile = createLockFile;
 	_readThreadPriority = readThreadPriority;
 }
@@ -56,7 +57,7 @@ void SerialReaderWriter::openDevice(bool events)
 	_handles++;
 	if(_fileDescriptor->descriptor > -1) return;
 	if(_createLockFile) createLockFile();
-	_fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), O_RDWR | O_NOCTTY | O_NDELAY));
+	_fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags));
 	if(_fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't open device \"" + _device + "\": " + strerror(errno));
 
 	tcflag_t baudrate;
@@ -277,14 +278,14 @@ int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
 		}
 		if(localBuffer[0] == '\n') return 0;
 	}
+	return 0;
 }
 
 void SerialReaderWriter::writeLine(std::string& data)
 {
     try
     {
-    	if(_stopped) return;
-        if(_fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
+        if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
         int32_t bytesWritten = 0;
         int32_t i;
         _sendMutex.lock();

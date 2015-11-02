@@ -65,6 +65,7 @@ public:
 	virtual ~SerialReaderWriter();
 
 	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor > -1; }
+	std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
 	void openDevice(bool events = true);
 	void closeDevice();
 
