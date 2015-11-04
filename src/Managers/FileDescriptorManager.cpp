@@ -141,8 +141,8 @@ void FileDescriptorManager::close(PFileDescriptor descriptor)
 			if(descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
 			::close(descriptor->descriptor);
 			if(descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-			descriptor->descriptor = -1;
 			descriptor->tlsSession = nullptr;
+			descriptor->descriptor = -1;
 		}
 	}
 	catch(const std::exception& ex)
@@ -175,8 +175,8 @@ void FileDescriptorManager::shutdown(PFileDescriptor descriptor)
 			if(!descriptor->tlsSession) ::shutdown(descriptor->descriptor, 0);
 			::close(descriptor->descriptor);
 			if(descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-			descriptor->descriptor = -1;
 			descriptor->tlsSession = nullptr;
+			descriptor->descriptor = -1;
 		}
 	}
 	catch(const std::exception& ex)

@@ -67,6 +67,14 @@ SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, 
 	if(_useSSL) initSSL();
 }
 
+SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : SocketOperations(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
+{
+	_clientCertFile = clientCertFile;
+	_clientKeyFile = clientKeyFile;
+
+	if(_useSSL) initSSL();
+}
+
 SocketOperations::~SocketOperations()
 {
 	_bl->fileDescriptorManager.close(_socketDescriptor);
@@ -83,7 +91,7 @@ void SocketOperations::initSSL()
 		_x509Cred = nullptr;
 		throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
 	}
-	if(_caFile.length() == 0)
+	if(_caFile.empty())
 	{
 		if(_verifyCertificate) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" is not specified for the host \"" + _hostname + "\" in rpcclients.conf.");
 		else _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" in rpcclients.conf and certificate verification is disabled. It is highly recommended to enable certificate verification.");
@@ -99,6 +107,15 @@ void SocketOperations::initSSL()
 		gnutls_certificate_free_credentials(_x509Cred);
 		_x509Cred = nullptr;
 		throw SocketSSLException("No certificates found in \"" + _caFile + "\".");
+	}
+	if(!_clientCertFile.empty() && !_clientKeyFile.empty())
+	{
+		if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _clientCertFile.c_str(), _clientKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+		{
+			gnutls_certificate_free_credentials(_x509Cred);
+			_x509Cred = nullptr;
+			throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+		}
 	}
 }
 
@@ -125,7 +142,9 @@ void SocketOperations::autoConnect()
 
 void SocketOperations::close()
 {
+	_connectMutex.lock();
 	_bl->fileDescriptorManager.close(_socketDescriptor);
+	_connectMutex.unlock();
 }
 
 int32_t SocketOperations::proofread(char* buffer, int32_t bufferSize)
@@ -314,13 +333,33 @@ bool SocketOperations::connected()
 
 void SocketOperations::getSocketDescriptor()
 {
+	_connectMutex.lock();
 	_bl->out.printDebug("Debug: Calling getFileDescriptor...");
 	_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 
-	getConnection();
-	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) throw SocketOperationException("Could not connect to server.");
+	try
+	{
+		getConnection();
+		if(!_socketDescriptor || _socketDescriptor->descriptor < 0)
+		{
+			_connectMutex.unlock();
+			throw SocketOperationException("Could not connect to server.");
+		}
 
-	if(_useSSL) getSSL();
+		if(_useSSL) getSSL();
+		_connectMutex.unlock();
+	}
+	catch(const std::exception& ex)
+    {
+    	_connectMutex.unlock();
+		throw(ex);
+    }
+	catch(Exception& ex)
+	{
+		_connectMutex.unlock();
+		throw(ex);
+	}
+
 }
 
 void SocketOperations::getSSL()
@@ -375,25 +414,25 @@ void SocketOperations::getSSL()
 	const gnutls_datum_t* const serverCertChain = gnutls_certificate_get_peers(_socketDescriptor->tlsSession, &serverCertChainLength);
 	if(!serverCertChain || serverCertChainLength == 0)
 	{
-		close();
+		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSSLException("Could not get server certificate.");
 	}
 	uint32_t status = (uint32_t)-1;
 	if((result = gnutls_certificate_verify_peers2(_socketDescriptor->tlsSession, &status)) != GNUTLS_E_SUCCESS)
 	{
-		close();
+		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSSLException("Could not verify server certificate: " + std::string(gnutls_strerror(result)));
 	}
 	if(status > 0)
 	{
 		if(_verifyCertificate)
 		{
-			close();
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Error verifying server certificate (Code: " + std::to_string(status) + "): " + HelperFunctions::getGNUTLSCertVerificationError(status));
 		}
 		else if((status & GNUTLS_CERT_REVOKED) || (status & GNUTLS_CERT_INSECURE_ALGORITHM) || (status & GNUTLS_CERT_NOT_ACTIVATED) || (status & GNUTLS_CERT_EXPIRED))
 		{
-			close();
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Error verifying server certificate (Code: " + std::to_string(status) + "): " + HelperFunctions::getGNUTLSCertVerificationError(status));
 		}
 		else _bl->out.printWarning("Warning: Certificate verification failed (Code: " + std::to_string(status) + "): " + HelperFunctions::getGNUTLSCertVerificationError(status));
@@ -403,24 +442,25 @@ void SocketOperations::getSSL()
 		gnutls_x509_crt_t serverCert;
 		if((result = gnutls_x509_crt_init(&serverCert)) != GNUTLS_E_SUCCESS)
 		{
-			close();
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Could not initialize server certificate structure: " + std::string(gnutls_strerror(result)));
 		}
 		//The peer certificate is the first certificate in the list
 		if((result = gnutls_x509_crt_import(serverCert, serverCertChain, GNUTLS_X509_FMT_DER)) != GNUTLS_E_SUCCESS)
 		{
 			gnutls_x509_crt_deinit(serverCert);
-			close();
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Could not import server certificate: " + std::string(gnutls_strerror(result)));
 		}
 		if((result = gnutls_x509_crt_check_hostname(serverCert, _hostname.c_str())) == 0)
 		{
 			gnutls_x509_crt_deinit(serverCert);
-			close();
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Server's hostname does not match the server certificate.");
 		}
 		gnutls_x509_crt_deinit(serverCert);
 	}
+	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
 }
 
 bool SocketOperations::waitForSocket()
@@ -451,7 +491,7 @@ void SocketOperations::getConnection()
 	if(_hostname.empty()) throw SocketInvalidParametersException("Hostname is empty");
 	if(_port.empty()) throw SocketInvalidParametersException("Port is empty");
 
-	_bl->out.printInfo("Info: Connecting to host " + _hostname + " on port " + _port + "...");
+	_bl->out.printInfo("Info: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
 
 	//Retry for two minutes
 	for(uint32_t i = 0; i < 6; ++i)
