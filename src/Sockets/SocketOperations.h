@@ -118,6 +118,7 @@ public:
 	SocketOperations(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
 	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port);
 	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
+	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
 	virtual ~SocketOperations();
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
@@ -143,6 +144,9 @@ protected:
 	std::string _hostname;
 	std::string _port;
 	std::string _caFile;
+	std::string _clientCertFile;
+	std::string _clientKeyFile;
+	std::mutex _connectMutex;
 	bool _verifyCertificate = true;
 
 	std::shared_ptr<FileDescriptor> _socketDescriptor;
