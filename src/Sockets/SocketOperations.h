@@ -146,7 +146,8 @@ protected:
 	std::string _caFile;
 	std::string _clientCertFile;
 	std::string _clientKeyFile;
-	std::mutex _connectMutex;
+	std::mutex _readMutex;
+	std::mutex _writeMutex;
 	bool _verifyCertificate = true;
 
 	std::shared_ptr<FileDescriptor> _socketDescriptor;
@@ -158,7 +159,7 @@ protected:
 	void getSSL();
 	void initSSL();
 	void autoConnect();
-	bool waitForSocket();
+	//bool waitForSocket();
 };
 
 }
