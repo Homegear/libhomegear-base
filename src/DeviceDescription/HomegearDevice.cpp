@@ -745,7 +745,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if(!(*j)->constValueStringSet)
+					if((*j)->constValueStringSet)
 					{
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", (*j)->constValueString.c_str());
 						payloadNode->append_node(payloadElementNode);
@@ -793,7 +793,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if(!(*j)->constValueStringSet)
+					if((*j)->constValueStringSet)
 					{
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", (*j)->constValueString.c_str());
 						payloadNode->append_node(payloadElementNode);
