@@ -119,6 +119,12 @@ public:
 	 * Destructor.
 	 */
 	virtual ~Obj();
+
+	/**
+	 * Returns the Homegear version.
+	 * @return The Homegear version string.
+	 */
+	static std::string version();
 private:
 	Obj(const Obj&);
 	Obj& operator=(const Obj&);

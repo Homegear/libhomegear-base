@@ -29,6 +29,7 @@
 */
 
 #include "BaseLib.h"
+#include "../config.h"
 
 namespace BaseLib
 {
@@ -46,6 +47,11 @@ Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCa
 
 Obj::~Obj()
 {
+}
+
+std::string Obj::version()
+{
+	return VERSION;
 }
 
 }
