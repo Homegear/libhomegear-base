@@ -12,4 +12,5 @@ while [ $revision -eq 0 ] && [ $wgetCount -le 5 ]; do
 	done
 	wgetCount=$(($wgetCount + 1))
 done
+rm -f contributors*
 echo 0.6.0-$revision

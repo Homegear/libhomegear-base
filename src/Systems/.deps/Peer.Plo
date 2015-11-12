@@ -291,6 +291,7 @@ Systems/Peer.lo: Systems/Peer.cpp /usr/include/stdc-predef.h \
  Systems/../Systems/SystemFactory.h Systems/../Systems/DeviceFamily.h \
  Systems/../Systems/UpdateInfo.h Systems/../Threads/Threads.h \
  Systems/../Threads/../Exception.h Systems/../Threads/../Output/Output.h \
+ Systems/../Licensing/LicensingFactory.h Systems/../Licensing/Licensing.h \
  Systems/../SSDP/SSDP.h Systems/../SSDP/../Encoding/HTTP.h \
  Systems/../SSDP/../Variable.h Systems/../IQueue.h
 
@@ -1079,6 +1080,10 @@ Systems/../Threads/Threads.h:
 Systems/../Threads/../Exception.h:
 
 Systems/../Threads/../Output/Output.h:
+
+Systems/../Licensing/LicensingFactory.h:
+
+Systems/../Licensing/Licensing.h:
 
 Systems/../SSDP/SSDP.h:
 

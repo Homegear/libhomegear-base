@@ -291,6 +291,7 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../Systems/../Encoding/BinaryDecoder.h Threads/../Systems/Peer.h \
  Threads/../Systems/SystemFactory.h Threads/../Systems/DeviceFamily.h \
  Threads/../Systems/UpdateInfo.h Threads/../Threads/Threads.h \
+ Threads/../Licensing/LicensingFactory.h Threads/../Licensing/Licensing.h \
  Threads/../SSDP/SSDP.h Threads/../SSDP/../Encoding/HTTP.h \
  Threads/../SSDP/../Variable.h Threads/../IQueue.h
 
@@ -1073,6 +1074,10 @@ Threads/../Systems/DeviceFamily.h:
 Threads/../Systems/UpdateInfo.h:
 
 Threads/../Threads/Threads.h:
+
+Threads/../Licensing/LicensingFactory.h:
+
+Threads/../Licensing/Licensing.h:
 
 Threads/../SSDP/SSDP.h:
 

@@ -362,6 +362,24 @@ public:
 	/**
 	 * Converts a byte array to a hex string.
 	 *
+	 * @param buffer The byte array to convert.
+	 * @param size The size of the buffer.
+	 * @return Returns the hex string of the byte array.
+	 */
+	static std::string getHexString(const uint8_t* buffer, uint32_t size);
+
+	/**
+	 * Converts a byte array to a hex string.
+	 *
+	 * @param buffer The byte array to convert.
+	 * @param size The size of the buffer.
+	 * @return Returns the hex string of the byte array.
+	 */
+	static std::string getHexString(const char* buffer, uint32_t size);
+
+	/**
+	 * Converts a byte array to a hex string.
+	 *
 	 * @param data The byte array to convert.
 	 * @return Returns the hex string of the byte array.
 	 */
@@ -451,7 +469,7 @@ public:
 	 * @param username The name of the user to get the UID for.
 	 * @return Returns the user ID or "-1" on error.
 	 */
-	int32_t userID(std::string username);
+	uid_t userId(std::string username);
 
 	/**
 	 * Gets the GID of a group.
@@ -459,7 +477,7 @@ public:
 	 * @param groupname The name of the group to get the GID for.
 	 * @return Returns the group ID or "-1" on error.
 	 */
-	int32_t groupID(std::string groupname);
+	gid_t groupId(std::string groupname);
 
 	/**
 	 * Starts a program and returns the process id.

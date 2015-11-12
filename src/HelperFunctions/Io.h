@@ -151,7 +151,7 @@ public:
 	 *
 	 * @param source The path to the file.
 	 * @param target The destination path to copy the file to.
-	 * @return Returns true on success
+	 * @return Returns true on success.
 	 */
 	bool copyFile(std::string source, std::string dest);
 
@@ -160,7 +160,7 @@ public:
 	 *
 	 * @param source The path to the file.
 	 * @param target The destination path to move the file to.
-	 * @return Returns true on success
+	 * @return Returns true on success.
 	 */
 	static bool moveFile(std::string source, std::string dest);
 
@@ -168,10 +168,17 @@ public:
 	 * Deletes a file.
 	 *
 	 * @param file The file to delete.
-	 * @return Returns true on success
+	 * @return Returns true on success.
 	 */
 	static bool deleteFile(std::string file);
 
+	/**
+	 * Calculates the SHA-2 SHA-512 of a given file.
+	 *
+	 * @param file The file to calculate the SHA-512 for.
+	 * @return Returns the SHA-512 or an empty string on errors.
+	 */
+	std::string sha512(std::string file);
 private:
 	/**
 	 * Pointer to the common base library object.

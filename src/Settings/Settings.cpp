@@ -45,6 +45,8 @@ void Settings::init(BaseLib::Obj* baseLib)
 
 void Settings::reset()
 {
+	_runAsUser = "";
+	_runAsGroup = "";
 	_certPath = "/etc/homegear/homegear.crt";
 	_keyPath = "/etc/homegear/homegear.key";
 	_dhParamPath = "/etc/homegear/dh2048.pem";
@@ -148,7 +150,17 @@ void Settings::load(std::string filename)
 				HelperFunctions::trim(name);
 				std::string value(&input[ptr]);
 				HelperFunctions::trim(value);
-				if(name == "certpath")
+				if(name == "runAsUser")
+				{
+					_runAsUser = value;
+					_bl->out.printDebug("Debug: runAsUser set to " + _runAsUser);
+				}
+				else if(name == "runAsGroup")
+				{
+					_runAsGroup = value;
+					_bl->out.printDebug("Debug: runAsGroup set to " + _keyPath);
+				}
+				else if(name == "certpath")
 				{
 					_certPath = value;
 					if(_certPath.empty()) _certPath = "/etc/homegear/homegear.crt";
