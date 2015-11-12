@@ -147,7 +147,24 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/RunProgram.h DeviceDescription/Function.h \
  DeviceDescription/ParameterGroup.h DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h DeviceDescription/../BaseLib.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h DeviceDescription/../IEvents.h \
+ DeviceDescription/../Output/Output.h \
+ DeviceDescription/../Output/../Exception.h /usr/include/c++/4.8/iomanip \
+ /usr/include/c++/4.8/locale \
+ /usr/include/c++/4.8/bits/locale_facets_nonio.h \
+ /usr/include/c++/4.8/ctime \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/4.8/bits/codecvt.h \
+ /usr/include/c++/4.8/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/4.8/sstream /usr/include/c++/4.8/bits/sstream.tcc \
+ /usr/include/c++/4.8/chrono /usr/include/c++/4.8/ratio \
+ /usr/include/c++/4.8/limits /usr/include/c++/4.8/forward_list \
+ /usr/include/c++/4.8/bits/forward_list.h \
+ /usr/include/c++/4.8/bits/forward_list.tcc /usr/include/c++/4.8/mutex \
+ /usr/include/c++/4.8/system_error \
+ /usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h \
+ DeviceDescription/../BaseLib.h \
  DeviceDescription/../Database/DatabaseTypes.h /usr/include/c++/4.8/deque \
  /usr/include/c++/4.8/bits/stl_deque.h \
  /usr/include/c++/4.8/bits/deque.tcc \
@@ -157,17 +174,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/../Encoding/XMLRPCEncoder.h \
  DeviceDescription/../Encoding/../Exception.h \
  DeviceDescription/../Encoding/../Output/Output.h \
- DeviceDescription/../Encoding/../Output/../Exception.h \
- /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/locale \
- /usr/include/c++/4.8/bits/locale_facets_nonio.h \
- /usr/include/c++/4.8/ctime \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/messages_members.h \
- /usr/include/libintl.h /usr/include/c++/4.8/bits/codecvt.h \
- /usr/include/c++/4.8/bits/locale_facets_nonio.tcc \
- /usr/include/c++/4.8/sstream /usr/include/c++/4.8/bits/sstream.tcc \
- /usr/include/c++/4.8/chrono /usr/include/c++/4.8/ratio \
- /usr/include/c++/4.8/limits \
  DeviceDescription/../Encoding/RapidXml/rapidxml_print.hpp \
  DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
  /usr/include/c++/4.8/iterator \
@@ -197,8 +203,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/../Managers/../Sockets/SerialReaderWriter.h \
  DeviceDescription/../Managers/../Sockets/../Exception.h \
  DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/mutex /usr/include/c++/4.8/system_error \
- /usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h \
  /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
@@ -216,11 +220,8 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
  /usr/include/gnutls/gnutls.h /usr/include/gnutls/compat.h \
  DeviceDescription/../Managers/../Sockets/../IEvents.h \
- DeviceDescription/../Managers/../Sockets/../Output/Output.h \
- /usr/include/c++/4.8/forward_list \
- /usr/include/c++/4.8/bits/forward_list.h \
- /usr/include/c++/4.8/bits/forward_list.tcc /usr/include/c++/4.8/thread \
- /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
+ /usr/include/c++/4.8/thread /usr/include/fcntl.h \
+ /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/stat.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl2.h /usr/include/termios.h \
@@ -269,7 +270,6 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/../HelperFunctions/../Exception.h \
  DeviceDescription/../HelperFunctions/Io.h \
  DeviceDescription/../LowLevel/Gpio.h \
- DeviceDescription/../Output/Output.h \
  DeviceDescription/../DeviceDescription/Devices.h \
  DeviceDescription/../Settings/Settings.h \
  DeviceDescription/../Sockets/HTTPClient.h \
@@ -304,6 +304,7 @@ DeviceDescription/Devices.lo: DeviceDescription/Devices.cpp \
  DeviceDescription/../Systems/ServiceMessages.h \
  DeviceDescription/../Systems/../Encoding/BinaryEncoder.h \
  DeviceDescription/../Systems/../Encoding/BinaryDecoder.h \
+ DeviceDescription/../Systems/../DeviceDescription/Devices.h \
  DeviceDescription/../Systems/Peer.h \
  DeviceDescription/../Systems/SystemFactory.h \
  DeviceDescription/../Systems/DeviceFamily.h \
@@ -721,29 +722,11 @@ DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
-DeviceDescription/../BaseLib.h:
+DeviceDescription/../IEvents.h:
 
-DeviceDescription/../Database/DatabaseTypes.h:
+DeviceDescription/../Output/Output.h:
 
-/usr/include/c++/4.8/deque:
-
-/usr/include/c++/4.8/bits/stl_deque.h:
-
-/usr/include/c++/4.8/bits/deque.tcc:
-
-DeviceDescription/../Encoding/XMLRPCDecoder.h:
-
-DeviceDescription/../Encoding/../Variable.h:
-
-DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
-
-DeviceDescription/../Encoding/XMLRPCEncoder.h:
-
-DeviceDescription/../Encoding/../Exception.h:
-
-DeviceDescription/../Encoding/../Output/Output.h:
-
-DeviceDescription/../Encoding/../Output/../Exception.h:
+DeviceDescription/../Output/../Exception.h:
 
 /usr/include/c++/4.8/iomanip:
 
@@ -772,6 +755,40 @@ DeviceDescription/../Encoding/../Output/../Exception.h:
 /usr/include/c++/4.8/ratio:
 
 /usr/include/c++/4.8/limits:
+
+/usr/include/c++/4.8/forward_list:
+
+/usr/include/c++/4.8/bits/forward_list.h:
+
+/usr/include/c++/4.8/bits/forward_list.tcc:
+
+/usr/include/c++/4.8/mutex:
+
+/usr/include/c++/4.8/system_error:
+
+/usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h:
+
+DeviceDescription/../BaseLib.h:
+
+DeviceDescription/../Database/DatabaseTypes.h:
+
+/usr/include/c++/4.8/deque:
+
+/usr/include/c++/4.8/bits/stl_deque.h:
+
+/usr/include/c++/4.8/bits/deque.tcc:
+
+DeviceDescription/../Encoding/XMLRPCDecoder.h:
+
+DeviceDescription/../Encoding/../Variable.h:
+
+DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+
+DeviceDescription/../Encoding/XMLRPCEncoder.h:
+
+DeviceDescription/../Encoding/../Exception.h:
+
+DeviceDescription/../Encoding/../Output/Output.h:
 
 DeviceDescription/../Encoding/RapidXml/rapidxml_print.hpp:
 
@@ -837,12 +854,6 @@ DeviceDescription/../Managers/../Sockets/../Exception.h:
 
 DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 
-/usr/include/c++/4.8/mutex:
-
-/usr/include/c++/4.8/system_error:
-
-/usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h:
-
 /usr/include/unistd.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
@@ -882,14 +893,6 @@ DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 /usr/include/gnutls/compat.h:
 
 DeviceDescription/../Managers/../Sockets/../IEvents.h:
-
-DeviceDescription/../Managers/../Sockets/../Output/Output.h:
-
-/usr/include/c++/4.8/forward_list:
-
-/usr/include/c++/4.8/bits/forward_list.h:
-
-/usr/include/c++/4.8/bits/forward_list.tcc:
 
 /usr/include/c++/4.8/thread:
 
@@ -1013,8 +1016,6 @@ DeviceDescription/../HelperFunctions/Io.h:
 
 DeviceDescription/../LowLevel/Gpio.h:
 
-DeviceDescription/../Output/Output.h:
-
 DeviceDescription/../DeviceDescription/Devices.h:
 
 DeviceDescription/../Settings/Settings.h:
@@ -1094,6 +1095,8 @@ DeviceDescription/../Systems/ServiceMessages.h:
 DeviceDescription/../Systems/../Encoding/BinaryEncoder.h:
 
 DeviceDescription/../Systems/../Encoding/BinaryDecoder.h:
+
+DeviceDescription/../Systems/../DeviceDescription/Devices.h:
 
 DeviceDescription/../Systems/Peer.h:
 

@@ -255,7 +255,8 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  SSDP/../DeviceDescription/RunProgram.h \
  SSDP/../DeviceDescription/Function.h \
  SSDP/../DeviceDescription/ParameterGroup.h \
- SSDP/../DeviceDescription/Scenario.h SSDP/../Settings/Settings.h \
+ SSDP/../DeviceDescription/Scenario.h \
+ SSDP/../DeviceDescription/../IEvents.h SSDP/../Settings/Settings.h \
  SSDP/../Sockets/HTTPClient.h SSDP/../Sockets/../Exception.h \
  SSDP/../Sockets/../Managers/FileDescriptorManager.h \
  SSDP/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
@@ -279,7 +280,8 @@ SSDP/SSDP.lo: SSDP/SSDP.cpp /usr/include/stdc-predef.h SSDP/SSDP.h \
  /usr/include/c++/4.8/condition_variable SSDP/../Systems/Packet.h \
  SSDP/../Systems/Peer.h SSDP/../Systems/ServiceMessages.h \
  SSDP/../Systems/../Encoding/BinaryEncoder.h \
- SSDP/../Systems/../Encoding/BinaryDecoder.h SSDP/../Systems/Peer.h \
+ SSDP/../Systems/../Encoding/BinaryDecoder.h \
+ SSDP/../Systems/../DeviceDescription/Devices.h SSDP/../Systems/Peer.h \
  SSDP/../Systems/SystemFactory.h SSDP/../Systems/DeviceFamily.h \
  SSDP/../Systems/UpdateInfo.h SSDP/../Threads/Threads.h \
  SSDP/../Threads/../Exception.h SSDP/../Threads/../Output/Output.h \
@@ -977,6 +979,8 @@ SSDP/../DeviceDescription/ParameterGroup.h:
 
 SSDP/../DeviceDescription/Scenario.h:
 
+SSDP/../DeviceDescription/../IEvents.h:
+
 SSDP/../Settings/Settings.h:
 
 SSDP/../Sockets/HTTPClient.h:
@@ -1054,6 +1058,8 @@ SSDP/../Systems/ServiceMessages.h:
 SSDP/../Systems/../Encoding/BinaryEncoder.h:
 
 SSDP/../Systems/../Encoding/BinaryDecoder.h:
+
+SSDP/../Systems/../DeviceDescription/Devices.h:
 
 SSDP/../Systems/Peer.h:
 

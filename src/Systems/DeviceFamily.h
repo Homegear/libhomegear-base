@@ -37,6 +37,7 @@
 #include "PhysicalInterfaceSettings.h"
 #include "IPhysicalInterface.h"
 #include "../Variable.h"
+#include "../DeviceDescription/Devices.h"
 
 #include <iostream>
 #include <string>
@@ -49,7 +50,7 @@ class Obj;
 
 namespace Systems
 {
-class DeviceFamily : public LogicalDevice::IDeviceEventSink, public IEvents
+class DeviceFamily : public LogicalDevice::IDeviceEventSink, public DeviceDescription::Devices::IDevicesEventSink, public IEvents
 {
 public:
 	//Event handling
@@ -102,6 +103,9 @@ public:
 		virtual void onRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo) = 0;
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval) = 0;
+
+		//Device description
+		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output) = 0;
 	};
 	//End event handling
 
@@ -153,101 +157,109 @@ protected:
 
 	void removeThread(uint64_t id);
 
-	//Event handling
-	//Database
-		//General
-		virtual void raiseCreateSavepointSynchronous(std::string name);
-		virtual void raiseReleaseSavepointSynchronous(std::string name);
-		virtual void raiseCreateSavepointAsynchronous(std::string name);
-		virtual void raiseReleaseSavepointAsynchronous(std::string name);
+	// {{{ Event handling
+		// {{{
+			//General
+			virtual void raiseCreateSavepointSynchronous(std::string name);
+			virtual void raiseReleaseSavepointSynchronous(std::string name);
+			virtual void raiseCreateSavepointAsynchronous(std::string name);
+			virtual void raiseReleaseSavepointAsynchronous(std::string name);
 
-		//Metadata
-		virtual void raiseDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "");
+			//Metadata
+			virtual void raiseDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "");
 
-		//Device
-		virtual std::shared_ptr<Database::DataTable> raiseGetDevices();
-		virtual void raiseDeleteDevice(uint64_t id);
-		virtual uint64_t raiseSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family);
-		virtual void raiseSaveDeviceVariable(Database::DataRow& data);
-		virtual void raiseDeletePeers(int32_t deviceID);
-		virtual std::shared_ptr<Database::DataTable> raiseGetPeers(uint64_t deviceID);
-		virtual std::shared_ptr<Database::DataTable> raiseGetDeviceVariables(uint64_t deviceID);
+			//Device
+			virtual std::shared_ptr<Database::DataTable> raiseGetDevices();
+			virtual void raiseDeleteDevice(uint64_t id);
+			virtual uint64_t raiseSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family);
+			virtual void raiseSaveDeviceVariable(Database::DataRow& data);
+			virtual void raiseDeletePeers(int32_t deviceID);
+			virtual std::shared_ptr<Database::DataTable> raiseGetPeers(uint64_t deviceID);
+			virtual std::shared_ptr<Database::DataTable> raiseGetDeviceVariables(uint64_t deviceID);
 
-		//Peer
-		virtual void raiseDeletePeer(uint64_t id);
-		virtual uint64_t raiseSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber);
-		virtual void raiseSavePeerParameter(uint64_t peerID, Database::DataRow& data);
-		virtual void raiseSavePeerVariable(uint64_t peerID, Database::DataRow& data);
-		virtual std::shared_ptr<Database::DataTable> raiseGetPeerParameters(uint64_t peerID);
-		virtual std::shared_ptr<Database::DataTable> raiseGetPeerVariables(uint64_t peerID);
-		virtual void raiseDeletePeerParameter(uint64_t peerID, Database::DataRow& data);
-		virtual bool raiseSetPeerID(uint64_t oldPeerID, uint64_t newPeerID);
+			//Peer
+			virtual void raiseDeletePeer(uint64_t id);
+			virtual uint64_t raiseSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber);
+			virtual void raiseSavePeerParameter(uint64_t peerID, Database::DataRow& data);
+			virtual void raiseSavePeerVariable(uint64_t peerID, Database::DataRow& data);
+			virtual std::shared_ptr<Database::DataTable> raiseGetPeerParameters(uint64_t peerID);
+			virtual std::shared_ptr<Database::DataTable> raiseGetPeerVariables(uint64_t peerID);
+			virtual void raiseDeletePeerParameter(uint64_t peerID, Database::DataRow& data);
+			virtual bool raiseSetPeerID(uint64_t oldPeerID, uint64_t newPeerID);
 
-		//Service messages
-		virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages(uint64_t peerID);
-		virtual void raiseSaveServiceMessage(uint64_t peerID, Database::DataRow& data);
-		virtual void raiseDeleteServiceMessage(uint64_t id);
+			//Service messages
+			virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages(uint64_t peerID);
+			virtual void raiseSaveServiceMessage(uint64_t peerID, Database::DataRow& data);
+			virtual void raiseDeleteServiceMessage(uint64_t id);
 
-		//Hooks
-		virtual void raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
-		virtual void raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
-	//End database
+			//Hooks
+			virtual void raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
+			virtual void raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
+		// }}}
 
-	virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
-	virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-	virtual void raiseRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions);
-	virtual void raiseRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-	virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
-	virtual void raiseRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval);
-	virtual int32_t raiseIsAddonClient(int32_t clientID);
-	//End event handling
+		virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
+		virtual void raiseRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions);
+		virtual void raiseRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
+		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void raiseRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval);
+		virtual int32_t raiseIsAddonClient(int32_t clientID);
 
-	//Device event handling
-	//Database
-		//General
-		virtual void onCreateSavepointSynchronous(std::string name);
-		virtual void onReleaseSavepointSynchronous(std::string name);
-		virtual void onCreateSavepointAsynchronous(std::string name);
-		virtual void onReleaseSavepointAsynchronous(std::string name);
+		// {{{ Device description event handling
+			virtual void raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
+		// }}}
+	// }}}
 
-		//Metadata
-		virtual void onDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "");
+	// {{{ Device event handling
+		// {{{
+			//General
+			virtual void onCreateSavepointSynchronous(std::string name);
+			virtual void onReleaseSavepointSynchronous(std::string name);
+			virtual void onCreateSavepointAsynchronous(std::string name);
+			virtual void onReleaseSavepointAsynchronous(std::string name);
 
-		//Device
-		virtual uint64_t onSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family);
-		virtual void onSaveDeviceVariable(Database::DataRow& data);
-		virtual void onDeletePeers(int32_t deviceID);
-		virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeers(uint64_t deviceID);
-		virtual std::shared_ptr<BaseLib::Database::DataTable> onGetDeviceVariables(uint64_t deviceID);
+			//Metadata
+			virtual void onDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "");
 
-		//Peer
-		virtual void onDeletePeer(uint64_t id);
-		virtual uint64_t onSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber);
-		virtual void onSavePeerParameter(uint64_t peerID, Database::DataRow& data);
-		virtual void onSavePeerVariable(uint64_t peerID, Database::DataRow& data);
-		virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeerParameters(uint64_t peerID);
-		virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeerVariables(uint64_t peerID);
-		virtual void onDeletePeerParameter(uint64_t peerID, Database::DataRow& data);
-		virtual bool onSetPeerID(uint64_t oldPeerID, uint64_t newPeerID);
+			//Device
+			virtual uint64_t onSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family);
+			virtual void onSaveDeviceVariable(Database::DataRow& data);
+			virtual void onDeletePeers(int32_t deviceID);
+			virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeers(uint64_t deviceID);
+			virtual std::shared_ptr<BaseLib::Database::DataTable> onGetDeviceVariables(uint64_t deviceID);
 
-		//Service messages
-		virtual std::shared_ptr<BaseLib::Database::DataTable> onGetServiceMessages(uint64_t peerID);
-		virtual void onSaveServiceMessage(uint64_t peerID, Database::DataRow& data);
-		virtual void onDeleteServiceMessage(uint64_t databaseID);
+			//Peer
+			virtual void onDeletePeer(uint64_t id);
+			virtual uint64_t onSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber);
+			virtual void onSavePeerParameter(uint64_t peerID, Database::DataRow& data);
+			virtual void onSavePeerVariable(uint64_t peerID, Database::DataRow& data);
+			virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeerParameters(uint64_t peerID);
+			virtual std::shared_ptr<BaseLib::Database::DataTable> onGetPeerVariables(uint64_t peerID);
+			virtual void onDeletePeerParameter(uint64_t peerID, Database::DataRow& data);
+			virtual bool onSetPeerID(uint64_t oldPeerID, uint64_t newPeerID);
 
-		//Hooks
-		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
-		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
-	//End database
+			//Service messages
+			virtual std::shared_ptr<BaseLib::Database::DataTable> onGetServiceMessages(uint64_t peerID);
+			virtual void onSaveServiceMessage(uint64_t peerID, Database::DataRow& data);
+			virtual void onDeleteServiceMessage(uint64_t databaseID);
 
-	virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
-	virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-	virtual void onRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions);
-	virtual void onRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-	virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
-	virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval);
-	virtual int32_t onIsAddonClient(int32_t clientID);
-	//End Device event handling
+			//Hooks
+			virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
+			virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
+		// }}}
+
+		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
+		virtual void onRPCNewDevices(std::shared_ptr<Variable> deviceDescriptions);
+		virtual void onRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
+		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval);
+		virtual int32_t onIsAddonClient(int32_t clientID);
+	// }}}
+
+	// {{{ Device description event handling
+		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
+	// }}}
 private:
 	DeviceFamily(const DeviceFamily&);
 	DeviceFamily& operator=(const DeviceFamily&);

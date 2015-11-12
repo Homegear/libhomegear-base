@@ -42,9 +42,10 @@ Devices::Devices(int32_t family)
 	_family = family;
 }
 
-void Devices::init(BaseLib::Obj* baseLib)
+void Devices::init(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler)
 {
 	_bl = baseLib;
+	setEventHandler(eventHandler);
 }
 
 void Devices::clear()
@@ -110,17 +111,39 @@ std::shared_ptr<HomegearDevice> Devices::load(std::string& filepath)
 			_bl->out.printError("Error: Could not load device description file \"" + filepath + "\": File does not exist.");
 			return std::shared_ptr<HomegearDevice>();
 		}
-		if(filepath.size() < 5)
-		{
-			_bl->out.printError("Error: Could not load device description file \"" + filepath + "\": File does not end with \".xml\".");
-			return std::shared_ptr<HomegearDevice>();
-		}
+		if(filepath.size() < 5) return std::shared_ptr<HomegearDevice>();
 		std::string extension = filepath.substr(filepath.size() - 4, 4);
 		HelperFunctions::toLower(extension);
-		if(extension != ".xml") return std::shared_ptr<HomegearDevice>();
+		if(extension != ".xml" && extension != ".hgd") return std::shared_ptr<HomegearDevice>();
 		_bl->out.printDebug("Loading XML RPC device " + filepath);
 		bool oldFormat = false;
-		std::shared_ptr<HomegearDevice> device(new HomegearDevice(_bl, _family, filepath, oldFormat));
+		std::shared_ptr<HomegearDevice> device;
+		if(extension == ".hgd")
+		{
+			std::vector<char> data = Io::getBinaryFileContent(filepath);
+			int32_t pos = -1;
+			for(uint32_t i = 0; i < 11 && i < data.size(); i++)
+			{
+				if(data[i] == ' ')
+				{
+					pos = (int32_t)i;
+					break;
+				}
+			}
+			if(pos == -1)
+			{
+				_bl->out.printError("Error: License module id is missing in encrypted device description file \"" + filepath + "\"");
+				return device;
+			}
+			std::string moduleIdString(&data.at(0), pos);
+			int32_t moduleId = BaseLib::Math::getNumber(moduleIdString);
+			std::vector<char> input(&data.at(pos + 1), &data.at(data.size() - 1));
+			std::vector<char> xml;
+			if(data.empty()) return device;
+			if(_eventHandler) ((IDevicesEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, data, xml);
+			if(!xml.empty()) device.reset(new HomegearDevice(_bl, _family, xml));
+		}
+		else device.reset(new HomegearDevice(_bl, _family, filepath, oldFormat));
 		if(oldFormat) return loadHomeMatic(filepath);
 		else if(device && device->loaded()) return device;
 	}

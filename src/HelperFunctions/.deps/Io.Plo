@@ -276,6 +276,7 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h \
+ HelperFunctions/../DeviceDescription/../IEvents.h \
  HelperFunctions/../Settings/Settings.h \
  HelperFunctions/../Sockets/HTTPClient.h \
  HelperFunctions/../Sockets/../Exception.h \
@@ -308,6 +309,7 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../Systems/ServiceMessages.h \
  HelperFunctions/../Systems/../Encoding/BinaryEncoder.h \
  HelperFunctions/../Systems/../Encoding/BinaryDecoder.h \
+ HelperFunctions/../Systems/../DeviceDescription/Devices.h \
  HelperFunctions/../Systems/Peer.h \
  HelperFunctions/../Systems/SystemFactory.h \
  HelperFunctions/../Systems/DeviceFamily.h \
@@ -1009,6 +1011,8 @@ HelperFunctions/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+HelperFunctions/../DeviceDescription/../IEvents.h:
+
 HelperFunctions/../Settings/Settings.h:
 
 HelperFunctions/../Sockets/HTTPClient.h:
@@ -1086,6 +1090,8 @@ HelperFunctions/../Systems/ServiceMessages.h:
 HelperFunctions/../Systems/../Encoding/BinaryEncoder.h:
 
 HelperFunctions/../Systems/../Encoding/BinaryDecoder.h:
+
+HelperFunctions/../Systems/../DeviceDescription/Devices.h:
 
 HelperFunctions/../Systems/Peer.h:
 

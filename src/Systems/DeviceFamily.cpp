@@ -221,6 +221,11 @@ int32_t DeviceFamily::raiseIsAddonClient(int32_t clientID)
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onIsAddonClient(clientID);
 	return -1;
 }
+
+void DeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
+{
+	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, output);
+}
 //End event handling
 
 //Device event handling
@@ -372,6 +377,11 @@ void DeviceFamily::onRunScript(std::string& script, uint64_t peerId, const std::
 int32_t DeviceFamily::onIsAddonClient(int32_t clientID)
 {
 	return raiseIsAddonClient(clientID);
+}
+
+void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
+{
+	raiseDecryptDeviceDescription(moduleId, input, output);
 }
 //End Device event handling
 

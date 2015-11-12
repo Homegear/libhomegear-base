@@ -263,8 +263,10 @@ Settings/Settings.lo: Settings/Settings.cpp /usr/include/stdc-predef.h \
  Settings/../DeviceDescription/ParameterGroup.h \
  Settings/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Settings/../Settings/Settings.h \
- Settings/../Sockets/HTTPClient.h Settings/../Sockets/../Exception.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Settings/../DeviceDescription/../IEvents.h \
+ Settings/../Settings/Settings.h Settings/../Sockets/HTTPClient.h \
+ Settings/../Sockets/../Exception.h \
  Settings/../Sockets/../Managers/FileDescriptorManager.h \
  Settings/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -291,6 +293,7 @@ Settings/Settings.lo: Settings/Settings.cpp /usr/include/stdc-predef.h \
  Settings/../Systems/Peer.h Settings/../Systems/ServiceMessages.h \
  Settings/../Systems/../Encoding/BinaryEncoder.h \
  Settings/../Systems/../Encoding/BinaryDecoder.h \
+ Settings/../Systems/../DeviceDescription/Devices.h \
  Settings/../Systems/Peer.h Settings/../Systems/SystemFactory.h \
  Settings/../Systems/DeviceFamily.h Settings/../Systems/UpdateInfo.h \
  Settings/../Threads/Threads.h Settings/../Threads/../Exception.h \
@@ -988,6 +991,8 @@ Settings/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Settings/../DeviceDescription/../IEvents.h:
+
 Settings/../Settings/Settings.h:
 
 Settings/../Sockets/HTTPClient.h:
@@ -1065,6 +1070,8 @@ Settings/../Systems/ServiceMessages.h:
 Settings/../Systems/../Encoding/BinaryEncoder.h:
 
 Settings/../Systems/../Encoding/BinaryDecoder.h:
+
+Settings/../Systems/../DeviceDescription/Devices.h:
 
 Settings/../Systems/Peer.h:
 

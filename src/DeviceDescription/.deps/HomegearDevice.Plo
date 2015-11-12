@@ -271,6 +271,7 @@ DeviceDescription/HomegearDevice.lo: DeviceDescription/HomegearDevice.cpp \
  DeviceDescription/../DeviceDescription/../Systems/Packet.h \
  DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h \
  DeviceDescription/../DeviceDescription/HomegearDevice.h \
+ DeviceDescription/../DeviceDescription/../IEvents.h \
  DeviceDescription/../Settings/Settings.h \
  DeviceDescription/../Sockets/HTTPClient.h \
  DeviceDescription/../Sockets/../Exception.h \
@@ -304,6 +305,7 @@ DeviceDescription/HomegearDevice.lo: DeviceDescription/HomegearDevice.cpp \
  DeviceDescription/../Systems/ServiceMessages.h \
  DeviceDescription/../Systems/../Encoding/BinaryEncoder.h \
  DeviceDescription/../Systems/../Encoding/BinaryDecoder.h \
+ DeviceDescription/../Systems/../DeviceDescription/Devices.h \
  DeviceDescription/../Systems/Peer.h \
  DeviceDescription/../Systems/SystemFactory.h \
  DeviceDescription/../Systems/DeviceFamily.h \
@@ -1008,6 +1010,8 @@ DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h:
 
 DeviceDescription/../DeviceDescription/HomegearDevice.h:
 
+DeviceDescription/../DeviceDescription/../IEvents.h:
+
 DeviceDescription/../Settings/Settings.h:
 
 DeviceDescription/../Sockets/HTTPClient.h:
@@ -1085,6 +1089,8 @@ DeviceDescription/../Systems/ServiceMessages.h:
 DeviceDescription/../Systems/../Encoding/BinaryEncoder.h:
 
 DeviceDescription/../Systems/../Encoding/BinaryDecoder.h:
+
+DeviceDescription/../Systems/../DeviceDescription/Devices.h:
 
 DeviceDescription/../Systems/Peer.h:
 

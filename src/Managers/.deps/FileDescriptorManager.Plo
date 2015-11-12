@@ -261,8 +261,10 @@ Managers/FileDescriptorManager.lo: Managers/FileDescriptorManager.cpp \
  Managers/../DeviceDescription/ParameterGroup.h \
  Managers/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Managers/../Settings/Settings.h \
- Managers/../Sockets/HTTPClient.h Managers/../Sockets/../Exception.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Managers/../DeviceDescription/../IEvents.h \
+ Managers/../Settings/Settings.h Managers/../Sockets/HTTPClient.h \
+ Managers/../Sockets/../Exception.h \
  Managers/../Sockets/../Managers/FileDescriptorManager.h \
  Managers/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -289,6 +291,7 @@ Managers/FileDescriptorManager.lo: Managers/FileDescriptorManager.cpp \
  Managers/../Systems/Peer.h Managers/../Systems/ServiceMessages.h \
  Managers/../Systems/../Encoding/BinaryEncoder.h \
  Managers/../Systems/../Encoding/BinaryDecoder.h \
+ Managers/../Systems/../DeviceDescription/Devices.h \
  Managers/../Systems/Peer.h Managers/../Systems/SystemFactory.h \
  Managers/../Systems/DeviceFamily.h Managers/../Systems/UpdateInfo.h \
  Managers/../Threads/Threads.h Managers/../Threads/../Exception.h \
@@ -986,6 +989,8 @@ Managers/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Managers/../DeviceDescription/../IEvents.h:
+
 Managers/../Settings/Settings.h:
 
 Managers/../Sockets/HTTPClient.h:
@@ -1063,6 +1068,8 @@ Managers/../Systems/ServiceMessages.h:
 Managers/../Systems/../Encoding/BinaryEncoder.h:
 
 Managers/../Systems/../Encoding/BinaryDecoder.h:
+
+Managers/../Systems/../DeviceDescription/Devices.h:
 
 Managers/../Systems/Peer.h:
 

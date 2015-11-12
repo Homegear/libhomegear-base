@@ -289,6 +289,7 @@ DeviceDescription/HomeMatic/HmConverter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/Packet.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h \
  DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h \
+ DeviceDescription/HomeMatic/../../DeviceDescription/../IEvents.h \
  DeviceDescription/HomeMatic/../../Settings/Settings.h \
  DeviceDescription/HomeMatic/../../Sockets/HTTPClient.h \
  DeviceDescription/HomeMatic/../../Sockets/../Exception.h \
@@ -323,6 +324,7 @@ DeviceDescription/HomeMatic/HmConverter.lo: \
  DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h \
  DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryEncoder.h \
  DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryDecoder.h \
+ DeviceDescription/HomeMatic/../../Systems/../DeviceDescription/Devices.h \
  DeviceDescription/HomeMatic/../../Systems/Peer.h \
  DeviceDescription/HomeMatic/../../Systems/SystemFactory.h \
  DeviceDescription/HomeMatic/../../Systems/DeviceFamily.h \
@@ -1049,6 +1051,8 @@ DeviceDescription/HomeMatic/../../DeviceDescription/../Systems/DeviceTypes.h:
 
 DeviceDescription/HomeMatic/../../DeviceDescription/HomegearDevice.h:
 
+DeviceDescription/HomeMatic/../../DeviceDescription/../IEvents.h:
+
 DeviceDescription/HomeMatic/../../Settings/Settings.h:
 
 DeviceDescription/HomeMatic/../../Sockets/HTTPClient.h:
@@ -1126,6 +1130,8 @@ DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h:
 DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryEncoder.h:
 
 DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryDecoder.h:
+
+DeviceDescription/HomeMatic/../../Systems/../DeviceDescription/Devices.h:
 
 DeviceDescription/HomeMatic/../../Systems/Peer.h:
 
