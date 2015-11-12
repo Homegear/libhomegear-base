@@ -279,6 +279,7 @@ DeviceDescription/SupportedDevice.lo: \
  DeviceDescription/../DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h \
+ DeviceDescription/../DeviceDescription/../IEvents.h \
  DeviceDescription/../Settings/Settings.h \
  DeviceDescription/../Sockets/HTTPClient.h \
  DeviceDescription/../Sockets/../Exception.h \
@@ -312,6 +313,7 @@ DeviceDescription/SupportedDevice.lo: \
  DeviceDescription/../Systems/ServiceMessages.h \
  DeviceDescription/../Systems/../Encoding/BinaryEncoder.h \
  DeviceDescription/../Systems/../Encoding/BinaryDecoder.h \
+ DeviceDescription/../Systems/../DeviceDescription/Devices.h \
  DeviceDescription/../Systems/Peer.h \
  DeviceDescription/../Systems/SystemFactory.h \
  DeviceDescription/../Systems/DeviceFamily.h \
@@ -1017,6 +1019,8 @@ DeviceDescription/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+DeviceDescription/../DeviceDescription/../IEvents.h:
+
 DeviceDescription/../Settings/Settings.h:
 
 DeviceDescription/../Sockets/HTTPClient.h:
@@ -1094,6 +1098,8 @@ DeviceDescription/../Systems/ServiceMessages.h:
 DeviceDescription/../Systems/../Encoding/BinaryEncoder.h:
 
 DeviceDescription/../Systems/../Encoding/BinaryDecoder.h:
+
+DeviceDescription/../Systems/../DeviceDescription/Devices.h:
 
 DeviceDescription/../Systems/Peer.h:
 

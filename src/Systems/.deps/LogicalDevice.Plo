@@ -270,8 +270,8 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  Systems/../DeviceDescription/Devices.h \
  Systems/../DeviceDescription/../Systems/Packet.h \
  Systems/../DeviceDescription/HomegearDevice.h \
- Systems/../Settings/Settings.h Systems/../Sockets/HTTPClient.h \
- Systems/../Sockets/../Exception.h \
+ Systems/../DeviceDescription/../IEvents.h Systems/../Settings/Settings.h \
+ Systems/../Sockets/HTTPClient.h Systems/../Sockets/../Exception.h \
  Systems/../Sockets/../Managers/FileDescriptorManager.h \
  Systems/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -289,10 +289,12 @@ Systems/LogicalDevice.lo: Systems/LogicalDevice.cpp \
  Systems/../Systems/../DeviceDescription/HomegearDevice.h \
  Systems/../Systems/LogicalDevice.h \
  Systems/../Systems/PhysicalInterfaceSettings.h \
- Systems/../Systems/IPhysicalInterface.h Systems/../Systems/Peer.h \
- Systems/../Systems/SystemFactory.h Systems/../Systems/DeviceFamily.h \
- Systems/../Systems/UpdateInfo.h Systems/../Threads/Threads.h \
- Systems/../Threads/../Exception.h Systems/../Threads/../Output/Output.h \
+ Systems/../Systems/IPhysicalInterface.h \
+ Systems/../Systems/../DeviceDescription/Devices.h \
+ Systems/../Systems/Peer.h Systems/../Systems/SystemFactory.h \
+ Systems/../Systems/DeviceFamily.h Systems/../Systems/UpdateInfo.h \
+ Systems/../Threads/Threads.h Systems/../Threads/../Exception.h \
+ Systems/../Threads/../Output/Output.h \
  Systems/../Licensing/LicensingFactory.h Systems/../Licensing/Licensing.h \
  Systems/../SSDP/SSDP.h Systems/../SSDP/../Encoding/HTTP.h \
  Systems/../SSDP/../Variable.h Systems/../IQueue.h
@@ -1009,6 +1011,8 @@ Systems/../DeviceDescription/../Systems/Packet.h:
 
 Systems/../DeviceDescription/HomegearDevice.h:
 
+Systems/../DeviceDescription/../IEvents.h:
+
 Systems/../Settings/Settings.h:
 
 Systems/../Sockets/HTTPClient.h:
@@ -1068,6 +1072,8 @@ Systems/../Systems/LogicalDevice.h:
 Systems/../Systems/PhysicalInterfaceSettings.h:
 
 Systems/../Systems/IPhysicalInterface.h:
+
+Systems/../Systems/../DeviceDescription/Devices.h:
 
 Systems/../Systems/Peer.h:
 

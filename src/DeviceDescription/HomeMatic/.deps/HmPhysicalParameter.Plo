@@ -284,6 +284,7 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h \
+ DeviceDescription/HomeMatic/../../DeviceDescription/../IEvents.h \
  DeviceDescription/HomeMatic/../../Settings/Settings.h \
  DeviceDescription/HomeMatic/../../Sockets/HTTPClient.h \
  DeviceDescription/HomeMatic/../../Sockets/../Exception.h \
@@ -318,6 +319,7 @@ DeviceDescription/HomeMatic/HmPhysicalParameter.lo: \
  DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h \
  DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryEncoder.h \
  DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryDecoder.h \
+ DeviceDescription/HomeMatic/../../Systems/../DeviceDescription/Devices.h \
  DeviceDescription/HomeMatic/../../Systems/Peer.h \
  DeviceDescription/HomeMatic/../../Systems/SystemFactory.h \
  DeviceDescription/HomeMatic/../../Systems/DeviceFamily.h \
@@ -1024,6 +1026,8 @@ DeviceDescription/HomeMatic/../../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+DeviceDescription/HomeMatic/../../DeviceDescription/../IEvents.h:
+
 DeviceDescription/HomeMatic/../../Settings/Settings.h:
 
 DeviceDescription/HomeMatic/../../Sockets/HTTPClient.h:
@@ -1101,6 +1105,8 @@ DeviceDescription/HomeMatic/../../Systems/ServiceMessages.h:
 DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryEncoder.h:
 
 DeviceDescription/HomeMatic/../../Systems/../Encoding/BinaryDecoder.h:
+
+DeviceDescription/HomeMatic/../../Systems/../DeviceDescription/Devices.h:
 
 DeviceDescription/HomeMatic/../../Systems/Peer.h:
 

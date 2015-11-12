@@ -111,8 +111,26 @@ HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std:
 	try
 	{
 		load(xmlFilename, oldFormat);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
 
-		if(!_loaded) return;
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::vector<char> xml) : HomegearDevice(baseLib, deviceFamily)
+{
+	try
+	{
+		load(xml);
 	}
 	catch(const std::exception& ex)
     {
@@ -132,6 +150,44 @@ HomegearDevice::~HomegearDevice() {
 
 }
 
+void HomegearDevice::load(std::vector<char> xml)
+{
+	if(xml.empty()) return;
+	if(xml.at(xml.size() - 1) != '\0')
+	{
+		_bl->out.printError("Error: Passed XML does not end with null character.");
+		return;
+	}
+	xml_document<> doc;
+	try
+	{
+		doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml[0]);
+		if(!doc.first_node("homegearDevice"))
+		{
+			_bl->out.printError("Error: Device XML does not start with \"homegearDevice\".");
+			doc.clear();
+			return;
+		}
+		parseXML(doc.first_node("homegearDevice"));
+
+		postLoad();
+		_loaded = true;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    doc.clear();
+}
+
 void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 {
 	xml_document<> doc;
@@ -144,11 +200,11 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 			fileStream.seekg(0, std::ios::end);
 			length = fileStream.tellg();
 			fileStream.seekg(0, std::ios::beg);
-			char buffer[length + 1];
+			std::vector<char> buffer(length + 1);
 			fileStream.read(&buffer[0], length);
 			fileStream.close();
 			buffer[length] = '\0';
-			doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(buffer);
+			doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&buffer[0]);
 			if(doc.first_node("device"))
 			{
 				oldFormat = true;
@@ -164,8 +220,29 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 			parseXML(doc.first_node("homegearDevice"));
 		}
 		else _bl->out.printError("Error reading file " + xmlFilename + ": " + strerror(errno));
-		_loaded = true;
 
+		postLoad();
+		_loaded = true;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    doc.clear();
+}
+
+void HomegearDevice::postLoad()
+{
+	try
+	{
 		PParameter parameter(new Parameter(_bl, nullptr));
 		parameter->id = "PAIRED_TO_CENTRAL";
 		parameter->visible = false;
@@ -254,7 +331,6 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    doc.clear();
 }
 
 void HomegearDevice::save(std::string& filename)

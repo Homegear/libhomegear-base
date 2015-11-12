@@ -263,7 +263,8 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  Threads/../DeviceDescription/ParameterGroup.h \
  Threads/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Threads/../Settings/Settings.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Threads/../DeviceDescription/../IEvents.h Threads/../Settings/Settings.h \
  Threads/../Sockets/HTTPClient.h Threads/../Sockets/../Exception.h \
  Threads/../Sockets/../Managers/FileDescriptorManager.h \
  Threads/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
@@ -288,12 +289,14 @@ Threads/Threads.lo: Threads/Threads.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/condition_variable Threads/../Systems/Packet.h \
  Threads/../Systems/Peer.h Threads/../Systems/ServiceMessages.h \
  Threads/../Systems/../Encoding/BinaryEncoder.h \
- Threads/../Systems/../Encoding/BinaryDecoder.h Threads/../Systems/Peer.h \
- Threads/../Systems/SystemFactory.h Threads/../Systems/DeviceFamily.h \
- Threads/../Systems/UpdateInfo.h Threads/../Threads/Threads.h \
- Threads/../Licensing/LicensingFactory.h Threads/../Licensing/Licensing.h \
- Threads/../SSDP/SSDP.h Threads/../SSDP/../Encoding/HTTP.h \
- Threads/../SSDP/../Variable.h Threads/../IQueue.h
+ Threads/../Systems/../Encoding/BinaryDecoder.h \
+ Threads/../Systems/../DeviceDescription/Devices.h \
+ Threads/../Systems/Peer.h Threads/../Systems/SystemFactory.h \
+ Threads/../Systems/DeviceFamily.h Threads/../Systems/UpdateInfo.h \
+ Threads/../Threads/Threads.h Threads/../Licensing/LicensingFactory.h \
+ Threads/../Licensing/Licensing.h Threads/../SSDP/SSDP.h \
+ Threads/../SSDP/../Encoding/HTTP.h Threads/../SSDP/../Variable.h \
+ Threads/../IQueue.h
 
 /usr/include/stdc-predef.h:
 
@@ -987,6 +990,8 @@ Threads/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Threads/../DeviceDescription/../IEvents.h:
+
 Threads/../Settings/Settings.h:
 
 Threads/../Sockets/HTTPClient.h:
@@ -1064,6 +1069,8 @@ Threads/../Systems/ServiceMessages.h:
 Threads/../Systems/../Encoding/BinaryEncoder.h:
 
 Threads/../Systems/../Encoding/BinaryDecoder.h:
+
+Threads/../Systems/../DeviceDescription/Devices.h:
 
 Threads/../Systems/Peer.h:
 

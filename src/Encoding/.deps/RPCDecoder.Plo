@@ -260,8 +260,10 @@ Encoding/RPCDecoder.lo: Encoding/RPCDecoder.cpp \
  Encoding/../DeviceDescription/ParameterGroup.h \
  Encoding/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Encoding/../Settings/Settings.h \
- Encoding/../Sockets/HTTPClient.h Encoding/../Sockets/../Exception.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Encoding/../DeviceDescription/../IEvents.h \
+ Encoding/../Settings/Settings.h Encoding/../Sockets/HTTPClient.h \
+ Encoding/../Sockets/../Exception.h \
  Encoding/../Sockets/../Managers/FileDescriptorManager.h \
  Encoding/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -288,6 +290,7 @@ Encoding/RPCDecoder.lo: Encoding/RPCDecoder.cpp \
  Encoding/../Systems/Peer.h Encoding/../Systems/ServiceMessages.h \
  Encoding/../Systems/../Encoding/BinaryEncoder.h \
  Encoding/../Systems/../Encoding/BinaryDecoder.h \
+ Encoding/../Systems/../DeviceDescription/Devices.h \
  Encoding/../Systems/Peer.h Encoding/../Systems/SystemFactory.h \
  Encoding/../Systems/DeviceFamily.h Encoding/../Systems/UpdateInfo.h \
  Encoding/../Threads/Threads.h Encoding/../Threads/../Exception.h \
@@ -987,6 +990,8 @@ Encoding/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Encoding/../DeviceDescription/../IEvents.h:
+
 Encoding/../Settings/Settings.h:
 
 Encoding/../Sockets/HTTPClient.h:
@@ -1064,6 +1069,8 @@ Encoding/../Systems/ServiceMessages.h:
 Encoding/../Systems/../Encoding/BinaryEncoder.h:
 
 Encoding/../Systems/../Encoding/BinaryDecoder.h:
+
+Encoding/../Systems/../DeviceDescription/Devices.h:
 
 Encoding/../Systems/Peer.h:
 

@@ -231,8 +231,12 @@ Systems/DeviceFamily.lo: Systems/DeviceFamily.cpp \
  /usr/include/c++/4.8/condition_variable Systems/Packet.h Systems/Peer.h \
  Systems/ServiceMessages.h Systems/../Encoding/BinaryEncoder.h \
  /usr/include/c++/4.8/cstring Systems/../Encoding/BinaryDecoder.h \
- Systems/../BaseLib.h Systems/../Database/DatabaseTypes.h \
- Systems/../Encoding/XMLRPCDecoder.h Systems/../Encoding/../Variable.h \
+ Systems/../DeviceDescription/Devices.h \
+ Systems/../DeviceDescription/../Systems/Packet.h \
+ Systems/../DeviceDescription/HomegearDevice.h \
+ Systems/../DeviceDescription/../IEvents.h Systems/../BaseLib.h \
+ Systems/../Database/DatabaseTypes.h Systems/../Encoding/XMLRPCDecoder.h \
+ Systems/../Encoding/../Variable.h \
  Systems/../Encoding/RapidXml/rapidxml.hpp \
  Systems/../Encoding/XMLRPCEncoder.h Systems/../Encoding/../Exception.h \
  Systems/../Encoding/../Output/Output.h \
@@ -266,11 +270,8 @@ Systems/DeviceFamily.lo: Systems/DeviceFamily.cpp \
  Systems/../HelperFunctions/Base64.h Systems/../HelperFunctions/Net.h \
  Systems/../HelperFunctions/../Exception.h \
  Systems/../HelperFunctions/Io.h Systems/../LowLevel/Gpio.h \
- Systems/../DeviceDescription/Devices.h \
- Systems/../DeviceDescription/../Systems/Packet.h \
- Systems/../DeviceDescription/HomegearDevice.h \
- Systems/../Settings/Settings.h Systems/../Sockets/HTTPClient.h \
- Systems/../Sockets/../Exception.h \
+ Systems/../DeviceDescription/Devices.h Systems/../Settings/Settings.h \
+ Systems/../Sockets/HTTPClient.h Systems/../Sockets/../Exception.h \
  Systems/../Sockets/../Managers/FileDescriptorManager.h \
  Systems/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -901,6 +902,14 @@ Systems/../Encoding/BinaryEncoder.h:
 
 Systems/../Encoding/BinaryDecoder.h:
 
+Systems/../DeviceDescription/Devices.h:
+
+Systems/../DeviceDescription/../Systems/Packet.h:
+
+Systems/../DeviceDescription/HomegearDevice.h:
+
+Systems/../DeviceDescription/../IEvents.h:
+
 Systems/../BaseLib.h:
 
 Systems/../Database/DatabaseTypes.h:
@@ -1002,10 +1011,6 @@ Systems/../HelperFunctions/Io.h:
 Systems/../LowLevel/Gpio.h:
 
 Systems/../DeviceDescription/Devices.h:
-
-Systems/../DeviceDescription/../Systems/Packet.h:
-
-Systems/../DeviceDescription/HomegearDevice.h:
 
 Systems/../Settings/Settings.h:
 

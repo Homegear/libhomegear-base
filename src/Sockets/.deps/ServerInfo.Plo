@@ -261,7 +261,8 @@ Sockets/ServerInfo.lo: Sockets/ServerInfo.cpp /usr/include/stdc-predef.h \
  Sockets/../DeviceDescription/ParameterGroup.h \
  Sockets/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Sockets/../Settings/Settings.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Sockets/../DeviceDescription/../IEvents.h Sockets/../Settings/Settings.h \
  Sockets/../Sockets/HTTPClient.h Sockets/../Sockets/../Exception.h \
  Sockets/../Sockets/../Managers/FileDescriptorManager.h \
  Sockets/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
@@ -286,10 +287,12 @@ Sockets/ServerInfo.lo: Sockets/ServerInfo.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/condition_variable Sockets/../Systems/Packet.h \
  Sockets/../Systems/Peer.h Sockets/../Systems/ServiceMessages.h \
  Sockets/../Systems/../Encoding/BinaryEncoder.h \
- Sockets/../Systems/../Encoding/BinaryDecoder.h Sockets/../Systems/Peer.h \
- Sockets/../Systems/SystemFactory.h Sockets/../Systems/DeviceFamily.h \
- Sockets/../Systems/UpdateInfo.h Sockets/../Threads/Threads.h \
- Sockets/../Threads/../Exception.h Sockets/../Threads/../Output/Output.h \
+ Sockets/../Systems/../Encoding/BinaryDecoder.h \
+ Sockets/../Systems/../DeviceDescription/Devices.h \
+ Sockets/../Systems/Peer.h Sockets/../Systems/SystemFactory.h \
+ Sockets/../Systems/DeviceFamily.h Sockets/../Systems/UpdateInfo.h \
+ Sockets/../Threads/Threads.h Sockets/../Threads/../Exception.h \
+ Sockets/../Threads/../Output/Output.h \
  Sockets/../Licensing/LicensingFactory.h Sockets/../Licensing/Licensing.h \
  Sockets/../SSDP/SSDP.h Sockets/../SSDP/../Encoding/HTTP.h \
  Sockets/../SSDP/../Variable.h Sockets/../IQueue.h
@@ -982,6 +985,8 @@ Sockets/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Sockets/../DeviceDescription/../IEvents.h:
+
 Sockets/../Settings/Settings.h:
 
 Sockets/../Sockets/HTTPClient.h:
@@ -1059,6 +1064,8 @@ Sockets/../Systems/ServiceMessages.h:
 Sockets/../Systems/../Encoding/BinaryEncoder.h:
 
 Sockets/../Systems/../Encoding/BinaryDecoder.h:
+
+Sockets/../Systems/../DeviceDescription/Devices.h:
 
 Sockets/../Systems/Peer.h:
 

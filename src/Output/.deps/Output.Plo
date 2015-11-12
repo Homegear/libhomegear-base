@@ -262,7 +262,8 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../DeviceDescription/ParameterGroup.h \
  Output/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Output/../Settings/Settings.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Output/../DeviceDescription/../IEvents.h Output/../Settings/Settings.h \
  Output/../Sockets/HTTPClient.h Output/../Sockets/../Exception.h \
  Output/../Sockets/../Managers/FileDescriptorManager.h \
  Output/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
@@ -287,10 +288,12 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/condition_variable Output/../Systems/Packet.h \
  Output/../Systems/Peer.h Output/../Systems/ServiceMessages.h \
  Output/../Systems/../Encoding/BinaryEncoder.h \
- Output/../Systems/../Encoding/BinaryDecoder.h Output/../Systems/Peer.h \
- Output/../Systems/SystemFactory.h Output/../Systems/DeviceFamily.h \
- Output/../Systems/UpdateInfo.h Output/../Threads/Threads.h \
- Output/../Threads/../Exception.h Output/../Threads/../Output/Output.h \
+ Output/../Systems/../Encoding/BinaryDecoder.h \
+ Output/../Systems/../DeviceDescription/Devices.h \
+ Output/../Systems/Peer.h Output/../Systems/SystemFactory.h \
+ Output/../Systems/DeviceFamily.h Output/../Systems/UpdateInfo.h \
+ Output/../Threads/Threads.h Output/../Threads/../Exception.h \
+ Output/../Threads/../Output/Output.h \
  Output/../Licensing/LicensingFactory.h Output/../Licensing/Licensing.h \
  Output/../SSDP/SSDP.h Output/../SSDP/../Encoding/HTTP.h \
  Output/../SSDP/../Variable.h Output/../IQueue.h
@@ -983,6 +986,8 @@ Output/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Output/../DeviceDescription/../IEvents.h:
+
 Output/../Settings/Settings.h:
 
 Output/../Sockets/HTTPClient.h:
@@ -1060,6 +1065,8 @@ Output/../Systems/ServiceMessages.h:
 Output/../Systems/../Encoding/BinaryEncoder.h:
 
 Output/../Systems/../Encoding/BinaryDecoder.h:
+
+Output/../Systems/../DeviceDescription/Devices.h:
 
 Output/../Systems/Peer.h:
 

@@ -264,8 +264,10 @@ LowLevel/Gpio.lo: LowLevel/Gpio.cpp /usr/include/stdc-predef.h \
  LowLevel/../DeviceDescription/ParameterGroup.h \
  LowLevel/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h LowLevel/../Settings/Settings.h \
- LowLevel/../Sockets/HTTPClient.h LowLevel/../Sockets/../Exception.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ LowLevel/../DeviceDescription/../IEvents.h \
+ LowLevel/../Settings/Settings.h LowLevel/../Sockets/HTTPClient.h \
+ LowLevel/../Sockets/../Exception.h \
  LowLevel/../Sockets/../Managers/FileDescriptorManager.h \
  LowLevel/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
@@ -292,6 +294,7 @@ LowLevel/Gpio.lo: LowLevel/Gpio.cpp /usr/include/stdc-predef.h \
  LowLevel/../Systems/Peer.h LowLevel/../Systems/ServiceMessages.h \
  LowLevel/../Systems/../Encoding/BinaryEncoder.h \
  LowLevel/../Systems/../Encoding/BinaryDecoder.h \
+ LowLevel/../Systems/../DeviceDescription/Devices.h \
  LowLevel/../Systems/Peer.h LowLevel/../Systems/SystemFactory.h \
  LowLevel/../Systems/DeviceFamily.h LowLevel/../Systems/UpdateInfo.h \
  LowLevel/../Threads/Threads.h LowLevel/../Threads/../Exception.h \
@@ -989,6 +992,8 @@ LowLevel/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+LowLevel/../DeviceDescription/../IEvents.h:
+
 LowLevel/../Settings/Settings.h:
 
 LowLevel/../Sockets/HTTPClient.h:
@@ -1066,6 +1071,8 @@ LowLevel/../Systems/ServiceMessages.h:
 LowLevel/../Systems/../Encoding/BinaryEncoder.h:
 
 LowLevel/../Systems/../Encoding/BinaryDecoder.h:
+
+LowLevel/../Systems/../DeviceDescription/Devices.h:
 
 LowLevel/../Systems/Peer.h:
 

@@ -261,7 +261,8 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  Systems/../DeviceDescription/ParameterGroup.h \
  Systems/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Systems/../Settings/Settings.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h \
+ Systems/../DeviceDescription/../IEvents.h Systems/../Settings/Settings.h \
  Systems/../Sockets/HTTPClient.h Systems/../Sockets/../Exception.h \
  Systems/../Sockets/../Managers/FileDescriptorManager.h \
  Systems/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
@@ -285,6 +286,7 @@ Systems/ServiceMessages.lo: Systems/ServiceMessages.cpp \
  Systems/../Systems/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/condition_variable Systems/../Systems/Packet.h \
  Systems/../Systems/Peer.h Systems/../Systems/ServiceMessages.h \
+ Systems/../Systems/../DeviceDescription/Devices.h \
  Systems/../Systems/Peer.h Systems/../Systems/SystemFactory.h \
  Systems/../Systems/DeviceFamily.h Systems/../Systems/UpdateInfo.h \
  Systems/../Threads/Threads.h Systems/../Threads/../Exception.h \
@@ -987,6 +989,8 @@ Systems/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Systems/../DeviceDescription/../IEvents.h:
+
 Systems/../Settings/Settings.h:
 
 Systems/../Sockets/HTTPClient.h:
@@ -1060,6 +1064,8 @@ Systems/../Systems/Packet.h:
 Systems/../Systems/Peer.h:
 
 Systems/../Systems/ServiceMessages.h:
+
+Systems/../Systems/../DeviceDescription/Devices.h:
 
 Systems/../Systems/Peer.h:
 

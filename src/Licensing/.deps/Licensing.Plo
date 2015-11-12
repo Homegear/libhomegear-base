@@ -268,6 +268,7 @@ Licensing/Licensing.lo: Licensing/Licensing.cpp \
  Licensing/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h \
+ Licensing/../DeviceDescription/../IEvents.h \
  Licensing/../Settings/Settings.h Licensing/../Sockets/HTTPClient.h \
  Licensing/../Sockets/../Exception.h \
  Licensing/../Sockets/../Managers/FileDescriptorManager.h \
@@ -296,6 +297,7 @@ Licensing/Licensing.lo: Licensing/Licensing.cpp \
  Licensing/../Systems/Peer.h Licensing/../Systems/ServiceMessages.h \
  Licensing/../Systems/../Encoding/BinaryEncoder.h \
  Licensing/../Systems/../Encoding/BinaryDecoder.h \
+ Licensing/../Systems/../DeviceDescription/Devices.h \
  Licensing/../Systems/Peer.h Licensing/../Systems/SystemFactory.h \
  Licensing/../Systems/DeviceFamily.h Licensing/../Systems/UpdateInfo.h \
  Licensing/../Threads/Threads.h Licensing/../Threads/../Exception.h \
@@ -993,6 +995,8 @@ Licensing/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+Licensing/../DeviceDescription/../IEvents.h:
+
 Licensing/../Settings/Settings.h:
 
 Licensing/../Sockets/HTTPClient.h:
@@ -1070,6 +1074,8 @@ Licensing/../Systems/ServiceMessages.h:
 Licensing/../Systems/../Encoding/BinaryEncoder.h:
 
 Licensing/../Systems/../Encoding/BinaryDecoder.h:
+
+Licensing/../Systems/../DeviceDescription/Devices.h:
 
 Licensing/../Systems/Peer.h:
 

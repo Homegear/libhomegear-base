@@ -37,6 +37,7 @@
 #include "../Systems/Packet.h"
 #include "../Systems/DeviceTypes.h"
 #include "HomegearDevice.h"
+#include "../IEvents.h"
 
 namespace BaseLib
 {
@@ -46,14 +47,22 @@ class Obj;
 namespace DeviceDescription
 {
 
-class Devices
+class Devices : public IEvents
 {
 public:
+	// {{{ Event handling
+		class IDevicesEventSink : public IEventSinkBase
+		{
+		public:
+			virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output) = 0;
+		};
+	// }}}
+
 	Devices(int32_t family);
 	virtual ~Devices() {}
 	bool empty() { return _devices.empty(); }
 	void clear();
-	void init(BaseLib::Obj* baseLib);
+	void init(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler);
 	void load();
 	std::shared_ptr<HomegearDevice> load(std::string& filepath);
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);

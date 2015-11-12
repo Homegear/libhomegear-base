@@ -243,8 +243,8 @@ IQueue.lo: IQueue.cpp /usr/include/stdc-predef.h IQueue.h \
  DeviceDescription/RunProgram.h DeviceDescription/Function.h \
  DeviceDescription/ParameterGroup.h DeviceDescription/Scenario.h \
  /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h Settings/Settings.h \
- Sockets/HTTPClient.h Sockets/../Exception.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h DeviceDescription/../IEvents.h \
+ Settings/Settings.h Sockets/HTTPClient.h Sockets/../Exception.h \
  Sockets/../Managers/FileDescriptorManager.h Sockets/SocketOperations.h \
  /usr/include/arpa/inet.h /usr/include/netinet/in.h \
  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/netinet/tcp.h \
@@ -264,11 +264,11 @@ IQueue.lo: IQueue.cpp /usr/include/stdc-predef.h IQueue.h \
  Systems/../Managers/FileDescriptorManager.h Systems/Packet.h \
  Systems/Peer.h Systems/ServiceMessages.h \
  Systems/../Encoding/BinaryEncoder.h Systems/../Encoding/BinaryDecoder.h \
- Systems/Peer.h Systems/SystemFactory.h Systems/DeviceFamily.h \
- Systems/UpdateInfo.h Threads/Threads.h Threads/../Exception.h \
- Threads/../Output/Output.h Licensing/LicensingFactory.h \
- Licensing/Licensing.h SSDP/SSDP.h SSDP/../Encoding/HTTP.h \
- SSDP/../Variable.h
+ Systems/../DeviceDescription/Devices.h Systems/Peer.h \
+ Systems/SystemFactory.h Systems/DeviceFamily.h Systems/UpdateInfo.h \
+ Threads/Threads.h Threads/../Exception.h Threads/../Output/Output.h \
+ Licensing/LicensingFactory.h Licensing/Licensing.h SSDP/SSDP.h \
+ SSDP/../Encoding/HTTP.h SSDP/../Variable.h
 
 /usr/include/stdc-predef.h:
 
@@ -960,6 +960,8 @@ DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+DeviceDescription/../IEvents.h:
+
 Settings/Settings.h:
 
 Sockets/HTTPClient.h:
@@ -1035,6 +1037,8 @@ Systems/ServiceMessages.h:
 Systems/../Encoding/BinaryEncoder.h:
 
 Systems/../Encoding/BinaryDecoder.h:
+
+Systems/../DeviceDescription/Devices.h:
 
 Systems/Peer.h:
 
