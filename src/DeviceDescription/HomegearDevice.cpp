@@ -226,7 +226,7 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 	}
 	catch(const std::exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    	_bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
     }
     catch(const Exception& ex)
     {
