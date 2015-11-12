@@ -98,7 +98,7 @@ std::string Io::getFileContent(std::string filename)
 		in.seekg(0, std::ios::beg);
 		in.read(&contents[0], contents.size());
 		in.close();
-		return(contents);
+		return contents;
 	}
 	throw Exception(strerror(errno));
 }
@@ -251,6 +251,52 @@ bool Io::deleteFile(std::string file)
 {
 	if(remove(file.c_str()) == 0) return true;
 	return false;
+}
+
+std::string Io::sha512(std::string file)
+{
+	try
+	{
+		gcry_error_t result;
+		gcry_md_hd_t stribogHandle = nullptr;
+		if((result = gcry_md_open(&stribogHandle, GCRY_MD_SHA512, 0)) != GPG_ERR_NO_ERROR)
+		{
+			_bl->out.printError("Error: Could not initialize SHA512 handle: " + _bl->hf.getGCRYPTError(result));
+			return "";
+		}
+
+		std::string data = getFileContent(file);
+		if(data.empty())
+		{
+			_bl->out.printError("Error: " + file + " is empty.");
+			return "";
+		}
+		gcry_md_write(stribogHandle, &data.at(0), data.size());
+		gcry_md_final(stribogHandle);
+		uint8_t* digest = gcry_md_read(stribogHandle, GCRY_MD_SHA512);
+		if(!digest)
+		{
+			_bl->out.printError("Error Could not generate SHA-512 of file: " + _bl->hf.getGCRYPTError(result));
+			gcry_md_close(stribogHandle);
+			return "";
+		}
+		std::string sha512 =_bl->hf.getHexString(digest, gcry_md_get_algo_dlen(GCRY_MD_SHA512));
+		gcry_md_close(stribogHandle);
+		return sha512;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return "";
 }
 
 }

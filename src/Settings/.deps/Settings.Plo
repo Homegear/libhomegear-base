@@ -294,7 +294,9 @@ Settings/Settings.lo: Settings/Settings.cpp /usr/include/stdc-predef.h \
  Settings/../Systems/Peer.h Settings/../Systems/SystemFactory.h \
  Settings/../Systems/DeviceFamily.h Settings/../Systems/UpdateInfo.h \
  Settings/../Threads/Threads.h Settings/../Threads/../Exception.h \
- Settings/../Threads/../Output/Output.h Settings/../SSDP/SSDP.h \
+ Settings/../Threads/../Output/Output.h \
+ Settings/../Licensing/LicensingFactory.h \
+ Settings/../Licensing/Licensing.h Settings/../SSDP/SSDP.h \
  Settings/../SSDP/../Encoding/HTTP.h Settings/../SSDP/../Variable.h \
  Settings/../IQueue.h
 
@@ -1077,6 +1079,10 @@ Settings/../Threads/Threads.h:
 Settings/../Threads/../Exception.h:
 
 Settings/../Threads/../Output/Output.h:
+
+Settings/../Licensing/LicensingFactory.h:
+
+Settings/../Licensing/Licensing.h:
 
 Settings/../SSDP/SSDP.h:
 

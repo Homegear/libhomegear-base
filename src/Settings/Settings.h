@@ -49,6 +49,8 @@ public:
 	void load(std::string filename);
 	bool changed();
 
+	std::string runAsUser() { return _runAsUser; }
+	std::string runAsGroup() { return _runAsGroup; }
 	std::string certPath() { return _certPath; }
 	std::string keyPath() { return _keyPath;  }
 	bool loadDHParamsFromFile() { return _loadDHParamsFromFile; }
@@ -107,6 +109,8 @@ private:
 	int32_t _serverSettingsLastModified = -1;
 	int32_t _mqttSettingsLastModified = -1;
 
+	std::string _runAsUser;
+	std::string _runAsGroup;
 	std::string _certPath;
 	std::string _keyPath;
 	bool _loadDHParamsFromFile = true;

@@ -310,6 +310,32 @@ char HelperFunctions::getHexChar(int32_t nibble)
     return 0;
 }
 
+std::string HelperFunctions::getHexString(const uint8_t* buffer, uint32_t size)
+{
+	if(!buffer) return "";
+	std::ostringstream stringstream;
+	stringstream << std::hex << std::setfill('0') << std::uppercase;
+	for(const uint8_t* i = buffer; i < buffer + size; ++i)
+	{
+		stringstream << std::setw(2) << (int32_t)(*i);
+	}
+	stringstream << std::dec;
+	return stringstream.str();
+}
+
+std::string HelperFunctions::getHexString(const char* buffer, uint32_t size)
+{
+	if(!buffer) return "";
+	std::ostringstream stringstream;
+	stringstream << std::hex << std::setfill('0') << std::uppercase;
+	for(const char* i = buffer; i < buffer + size; ++i)
+	{
+		stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+	}
+	stringstream << std::dec;
+	return stringstream.str();
+}
+
 std::string HelperFunctions::getHexString(const std::vector<uint8_t>& data)
 {
 	std::ostringstream stringstream;
@@ -430,7 +456,7 @@ std::vector<uint8_t> HelperFunctions::getUBinary(std::vector<uint8_t>& hexData)
     return binary;
 }
 
-int32_t HelperFunctions::userID(std::string username)
+uid_t HelperFunctions::userId(std::string username)
 {
 	struct passwd pwd;
 	struct passwd* pwdResult;
@@ -447,7 +473,7 @@ int32_t HelperFunctions::userID(std::string username)
 	return pwd.pw_uid;
 }
 
-int32_t HelperFunctions::groupID(std::string groupname)
+gid_t HelperFunctions::groupId(std::string groupname)
 {
 	struct group grp;
 	struct group* grpResult;

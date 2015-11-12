@@ -1,9 +1,6 @@
-DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
- /usr/include/stdc-predef.h DeviceDescription/ParameterGroup.h \
- DeviceDescription/Parameter.h DeviceDescription/ParameterCast.h \
- DeviceDescription/../Variable.h \
- DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
- /usr/include/c++/4.8/cstdlib \
+Licensing/Licensing.lo: Licensing/Licensing.cpp \
+ /usr/include/stdc-predef.h Licensing/Licensing.h \
+ /usr/include/c++/4.8/cstdint \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -11,38 +8,15 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
- /usr/include/stdlib.h /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h \
- /usr/include/x86_64-linux-gnu/bits/waitflags.h \
- /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/endian.h \
- /usr/include/x86_64-linux-gnu/bits/endian.h \
- /usr/include/x86_64-linux-gnu/bits/byteswap.h \
- /usr/include/x86_64-linux-gnu/bits/types.h \
- /usr/include/x86_64-linux-gnu/bits/typesizes.h \
- /usr/include/x86_64-linux-gnu/bits/byteswap-16.h /usr/include/xlocale.h \
- /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/time.h \
- /usr/include/x86_64-linux-gnu/sys/select.h \
- /usr/include/x86_64-linux-gnu/bits/select.h \
- /usr/include/x86_64-linux-gnu/bits/sigset.h \
- /usr/include/x86_64-linux-gnu/bits/time.h \
- /usr/include/x86_64-linux-gnu/bits/select2.h \
- /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
- /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/c++/4.8/cassert \
- /usr/include/assert.h /usr/include/c++/4.8/new \
- /usr/include/c++/4.8/exception \
- /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
- /usr/include/c++/4.8/bits/exception_ptr.h \
- /usr/include/c++/4.8/bits/exception_defines.h \
- /usr/include/c++/4.8/bits/nested_exception.h \
- DeviceDescription/../DeviceDescription/Logical.h \
- DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
- /usr/include/c++/4.8/string /usr/include/c++/4.8/bits/stringfwd.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h Licensing/../BaseLib.h \
+ Licensing/../Database/DatabaseTypes.h /usr/include/c++/4.8/string \
+ /usr/include/c++/4.8/bits/stringfwd.h \
  /usr/include/c++/4.8/bits/memoryfwd.h \
  /usr/include/c++/4.8/bits/char_traits.h \
  /usr/include/c++/4.8/bits/stl_algobase.h \
  /usr/include/c++/4.8/bits/functexcept.h \
+ /usr/include/c++/4.8/bits/exception_defines.h \
  /usr/include/c++/4.8/bits/cpp_type_traits.h \
  /usr/include/c++/4.8/ext/type_traits.h \
  /usr/include/c++/4.8/ext/numeric_traits.h \
@@ -56,17 +30,25 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
  /usr/include/wchar.h /usr/include/stdio.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/4.8/cstdint \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h \
+ /usr/include/xlocale.h /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
- /usr/include/c++/4.8/ext/new_allocator.h \
+ /usr/include/c++/4.8/ext/new_allocator.h /usr/include/c++/4.8/new \
+ /usr/include/c++/4.8/exception \
+ /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/4.8/bits/exception_ptr.h \
+ /usr/include/c++/4.8/bits/nested_exception.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
  /usr/include/c++/4.8/clocale /usr/include/locale.h \
  /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/4.8/iosfwd \
  /usr/include/c++/4.8/cctype /usr/include/ctype.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap-16.h \
  /usr/include/c++/4.8/bits/ostream_insert.h \
  /usr/include/c++/4.8/bits/cxxabi_forced.h \
  /usr/include/c++/4.8/bits/stl_function.h \
@@ -76,15 +58,29 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/c++/4.8/ext/atomicity.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/gthr.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/gthr-default.h \
- /usr/include/pthread.h /usr/include/sched.h \
+ /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
  /usr/include/x86_64-linux-gnu/bits/sched.h \
+ /usr/include/x86_64-linux-gnu/bits/time.h \
  /usr/include/x86_64-linux-gnu/bits/timex.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/atomic_word.h \
  /usr/include/c++/4.8/initializer_list \
  /usr/include/c++/4.8/ext/string_conversions.h \
- /usr/include/c++/4.8/cstdio /usr/include/libio.h \
- /usr/include/_G_config.h /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/c++/4.8/cstdlib /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/sigset.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h \
+ /usr/include/x86_64-linux-gnu/sys/sysmacros.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/c++/4.8/cstdio \
+ /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
  /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
  /usr/include/x86_64-linux-gnu/bits/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/stdio2.h /usr/include/c++/4.8/cerrno \
@@ -93,30 +89,40 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/c++/4.8/bits/functional_hash.h \
  /usr/include/c++/4.8/bits/hash_bytes.h \
- /usr/include/c++/4.8/bits/basic_string.tcc /usr/include/c++/4.8/memory \
+ /usr/include/c++/4.8/bits/basic_string.tcc /usr/include/c++/4.8/vector \
  /usr/include/c++/4.8/bits/stl_construct.h \
  /usr/include/c++/4.8/ext/alloc_traits.h \
  /usr/include/c++/4.8/bits/alloc_traits.h \
  /usr/include/c++/4.8/bits/ptr_traits.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
+ /usr/include/c++/4.8/bits/stl_vector.h \
+ /usr/include/c++/4.8/bits/stl_bvector.h \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/deque \
+ /usr/include/c++/4.8/bits/stl_deque.h \
+ /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/map \
+ /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
+ /usr/include/c++/4.8/tuple /usr/include/c++/4.8/utility \
+ /usr/include/c++/4.8/bits/stl_relops.h /usr/include/c++/4.8/array \
+ /usr/include/c++/4.8/stdexcept \
+ /usr/include/c++/4.8/bits/uses_allocator.h \
+ /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/memory \
  /usr/include/c++/4.8/bits/stl_tempbuf.h \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/4.8/typeinfo /usr/include/c++/4.8/ext/concurrence.h \
- /usr/include/c++/4.8/bits/uses_allocator.h \
- /usr/include/c++/4.8/functional /usr/include/c++/4.8/tuple \
- /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
- /usr/include/c++/4.8/array /usr/include/c++/4.8/stdexcept \
- /usr/include/c++/4.8/bits/unique_ptr.h \
+ /usr/include/c++/4.8/functional /usr/include/c++/4.8/bits/unique_ptr.h \
  /usr/include/c++/4.8/bits/shared_ptr.h \
  /usr/include/c++/4.8/bits/shared_ptr_base.h \
  /usr/include/c++/4.8/backward/auto_ptr.h \
+ Licensing/../Encoding/XMLRPCDecoder.h \
+ Licensing/../Encoding/../Variable.h \
+ Licensing/../Encoding/../Encoding/RapidXml/rapidxml.hpp \
+ /usr/include/c++/4.8/cassert /usr/include/assert.h \
+ Licensing/../Encoding/../DeviceDescription/Logical.h \
+ Licensing/../Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
  /usr/include/c++/4.8/unordered_map /usr/include/c++/4.8/bits/hashtable.h \
  /usr/include/c++/4.8/bits/hashtable_policy.h \
- /usr/include/c++/4.8/bits/unordered_map.h /usr/include/c++/4.8/vector \
- /usr/include/c++/4.8/bits/stl_vector.h \
- /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc \
- DeviceDescription/../DeviceDescription/Physical.h \
+ /usr/include/c++/4.8/bits/unordered_map.h \
+ Licensing/../Encoding/../DeviceDescription/Physical.h \
  /usr/include/c++/4.8/iostream /usr/include/c++/4.8/ostream \
  /usr/include/c++/4.8/ios /usr/include/c++/4.8/bits/ios_base.h \
  /usr/include/c++/4.8/bits/locale_classes.h \
@@ -131,23 +137,13 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/c++/4.8/bits/locale_facets.tcc \
  /usr/include/c++/4.8/bits/basic_ios.tcc \
  /usr/include/c++/4.8/bits/ostream.tcc /usr/include/c++/4.8/istream \
- /usr/include/c++/4.8/bits/istream.tcc /usr/include/c++/4.8/map \
- /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
- /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/list \
+ /usr/include/c++/4.8/bits/istream.tcc /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
- DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
- DeviceDescription/Logical.h DeviceDescription/Physical.h \
- DeviceDescription/Scenario.h DeviceDescription/../BaseLib.h \
- DeviceDescription/../Database/DatabaseTypes.h /usr/include/c++/4.8/deque \
- /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc \
- DeviceDescription/../Encoding/XMLRPCDecoder.h \
- DeviceDescription/../Encoding/../Variable.h \
- DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
- DeviceDescription/../Encoding/XMLRPCEncoder.h \
- DeviceDescription/../Encoding/../Exception.h \
- DeviceDescription/../Encoding/../Output/Output.h \
- DeviceDescription/../Encoding/../Output/../Exception.h \
+ Licensing/../Encoding/RapidXml/rapidxml.hpp \
+ Licensing/../Encoding/XMLRPCEncoder.h \
+ Licensing/../Encoding/../Exception.h \
+ Licensing/../Encoding/../Output/Output.h \
+ Licensing/../Encoding/../Output/../Exception.h \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/locale \
  /usr/include/c++/4.8/bits/locale_facets_nonio.h \
  /usr/include/c++/4.8/ctime \
@@ -158,11 +154,11 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/c++/4.8/sstream /usr/include/c++/4.8/bits/sstream.tcc \
  /usr/include/c++/4.8/chrono /usr/include/c++/4.8/ratio \
  /usr/include/c++/4.8/limits \
- DeviceDescription/../Encoding/RapidXml/rapidxml_print.hpp \
- DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
+ Licensing/../Encoding/RapidXml/rapidxml_print.hpp \
+ Licensing/../Encoding/RapidXml/rapidxml.hpp \
  /usr/include/c++/4.8/iterator \
  /usr/include/c++/4.8/bits/stream_iterator.h \
- DeviceDescription/../Encoding/RPCDecoder.h /usr/include/c++/4.8/cstring \
+ Licensing/../Encoding/RPCDecoder.h /usr/include/c++/4.8/cstring \
  /usr/include/string.h /usr/include/x86_64-linux-gnu/bits/string3.h \
  /usr/include/c++/4.8/cmath /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/huge_val.h \
@@ -173,20 +169,16 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/x86_64-linux-gnu/bits/mathdef.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
- DeviceDescription/../Encoding/BinaryDecoder.h \
- DeviceDescription/../Encoding/RPCHeader.h \
- DeviceDescription/../Encoding/RPCEncoder.h \
- DeviceDescription/../Encoding/BinaryEncoder.h \
- DeviceDescription/../Encoding/JsonDecoder.h \
- DeviceDescription/../Encoding/JsonEncoder.h \
- DeviceDescription/../Encoding/HTTP.h \
- DeviceDescription/../Encoding/../HelperFunctions/Math.h \
- DeviceDescription/../Encoding/Html.h \
- DeviceDescription/../Encoding/WebSocket.h \
- DeviceDescription/../Managers/SerialDeviceManager.h \
- DeviceDescription/../Managers/../Sockets/SerialReaderWriter.h \
- DeviceDescription/../Managers/../Sockets/../Exception.h \
- DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h \
+ Licensing/../Encoding/BinaryDecoder.h Licensing/../Encoding/RPCHeader.h \
+ Licensing/../Encoding/RPCEncoder.h Licensing/../Encoding/BinaryEncoder.h \
+ Licensing/../Encoding/JsonDecoder.h Licensing/../Encoding/JsonEncoder.h \
+ Licensing/../Encoding/HTTP.h \
+ Licensing/../Encoding/../HelperFunctions/Math.h \
+ Licensing/../Encoding/Html.h Licensing/../Encoding/WebSocket.h \
+ Licensing/../Managers/SerialDeviceManager.h \
+ Licensing/../Managers/../Sockets/SerialReaderWriter.h \
+ Licensing/../Managers/../Sockets/../Exception.h \
+ Licensing/../Managers/../Sockets/../Managers/FileDescriptorManager.h \
  /usr/include/c++/4.8/mutex /usr/include/c++/4.8/system_error \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/error_constants.h \
  /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
@@ -205,8 +197,8 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/asm-generic/sockios.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h \
  /usr/include/gnutls/gnutls.h /usr/include/gnutls/compat.h \
- DeviceDescription/../Managers/../Sockets/../IEvents.h \
- DeviceDescription/../Managers/../Sockets/../Output/Output.h \
+ Licensing/../Managers/../Sockets/../IEvents.h \
+ Licensing/../Managers/../Sockets/../Output/Output.h \
  /usr/include/c++/4.8/forward_list \
  /usr/include/c++/4.8/bits/forward_list.h \
  /usr/include/c++/4.8/bits/forward_list.tcc /usr/include/c++/4.8/thread \
@@ -223,8 +215,8 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/x86_64-linux-gnu/bits/sigstack.h \
  /usr/include/x86_64-linux-gnu/sys/ucontext.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
- DeviceDescription/../Managers/FileDescriptorManager.h \
- DeviceDescription/../HelperFunctions/HelperFunctions.h \
+ Licensing/../Managers/FileDescriptorManager.h \
+ Licensing/../HelperFunctions/HelperFunctions.h \
  /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h /usr/include/c++/4.8/random \
@@ -250,90 +242,74 @@ DeviceDescription/ParameterGroup.lo: DeviceDescription/ParameterGroup.cpp \
  /usr/include/linux/limits.h /usr/include/pwd.h /usr/include/grp.h \
  /usr/include/gcrypt.h /usr/include/gpg-error.h \
  /usr/include/x86_64-linux-gnu/sys/time.h \
- DeviceDescription/../HelperFunctions/Color.h \
- DeviceDescription/../HelperFunctions/Math.h \
- DeviceDescription/../HelperFunctions/Math.h \
- DeviceDescription/../HelperFunctions/Crypt.h \
- DeviceDescription/../HelperFunctions/Base64.h \
- DeviceDescription/../HelperFunctions/Net.h \
- DeviceDescription/../HelperFunctions/../Exception.h \
- DeviceDescription/../HelperFunctions/Io.h \
- DeviceDescription/../LowLevel/Gpio.h \
- DeviceDescription/../Output/Output.h \
- DeviceDescription/../DeviceDescription/Devices.h \
- DeviceDescription/../DeviceDescription/../Systems/Packet.h \
- DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h \
- DeviceDescription/../DeviceDescription/HomegearDevice.h \
- DeviceDescription/../DeviceDescription/DevicePacket.h \
- DeviceDescription/../DeviceDescription/JsonPayload.h \
- DeviceDescription/../DeviceDescription/BinaryPayload.h \
- DeviceDescription/../DeviceDescription/HttpPayload.h \
- DeviceDescription/../DeviceDescription/Parameter.h \
- DeviceDescription/../DeviceDescription/SupportedDevice.h \
- DeviceDescription/../DeviceDescription/RunProgram.h \
- DeviceDescription/../DeviceDescription/Function.h \
- DeviceDescription/../DeviceDescription/ParameterGroup.h \
- /usr/include/c++/4.8/set /usr/include/c++/4.8/bits/stl_set.h \
+ Licensing/../HelperFunctions/Color.h Licensing/../HelperFunctions/Math.h \
+ Licensing/../HelperFunctions/Math.h Licensing/../HelperFunctions/Crypt.h \
+ Licensing/../HelperFunctions/Base64.h Licensing/../HelperFunctions/Net.h \
+ Licensing/../HelperFunctions/../Exception.h \
+ Licensing/../HelperFunctions/Io.h Licensing/../LowLevel/Gpio.h \
+ Licensing/../Output/Output.h Licensing/../DeviceDescription/Devices.h \
+ Licensing/../DeviceDescription/../Systems/Packet.h \
+ Licensing/../DeviceDescription/../Systems/DeviceTypes.h \
+ Licensing/../DeviceDescription/HomegearDevice.h \
+ Licensing/../DeviceDescription/DevicePacket.h \
+ Licensing/../DeviceDescription/JsonPayload.h \
+ Licensing/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp \
+ Licensing/../DeviceDescription/BinaryPayload.h \
+ Licensing/../DeviceDescription/HttpPayload.h \
+ Licensing/../DeviceDescription/Parameter.h \
+ Licensing/../DeviceDescription/ParameterCast.h \
+ Licensing/../DeviceDescription/../Variable.h \
+ Licensing/../DeviceDescription/Logical.h \
+ Licensing/../DeviceDescription/Physical.h \
+ Licensing/../DeviceDescription/SupportedDevice.h \
+ Licensing/../DeviceDescription/RunProgram.h \
+ Licensing/../DeviceDescription/Function.h \
+ Licensing/../DeviceDescription/ParameterGroup.h \
+ Licensing/../DeviceDescription/Scenario.h /usr/include/c++/4.8/set \
+ /usr/include/c++/4.8/bits/stl_set.h \
  /usr/include/c++/4.8/bits/stl_multiset.h \
- DeviceDescription/../Settings/Settings.h \
- DeviceDescription/../Sockets/HTTPClient.h \
- DeviceDescription/../Sockets/../Exception.h \
- DeviceDescription/../Sockets/../Managers/FileDescriptorManager.h \
- DeviceDescription/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
+ Licensing/../Settings/Settings.h Licensing/../Sockets/HTTPClient.h \
+ Licensing/../Sockets/../Exception.h \
+ Licensing/../Sockets/../Managers/FileDescriptorManager.h \
+ Licensing/../Sockets/SocketOperations.h /usr/include/arpa/inet.h \
  /usr/include/netinet/in.h /usr/include/x86_64-linux-gnu/bits/in.h \
  /usr/include/netinet/tcp.h /usr/include/netdb.h /usr/include/rpc/netdb.h \
  /usr/include/x86_64-linux-gnu/bits/netdb.h /usr/include/poll.h \
  /usr/include/x86_64-linux-gnu/sys/poll.h \
  /usr/include/x86_64-linux-gnu/bits/poll.h \
  /usr/include/x86_64-linux-gnu/bits/poll2.h /usr/include/gnutls/x509.h \
- DeviceDescription/../Sockets/../Encoding/HTTP.h \
- DeviceDescription/../Sockets/SocketOperations.h \
- DeviceDescription/../Sockets/IWebserverEventSink.h \
- DeviceDescription/../Sockets/ServerInfo.h \
- DeviceDescription/../Sockets/ServerInfo.h \
- DeviceDescription/../Systems/DeviceFamily.h \
- DeviceDescription/../Systems/../Database/DatabaseTypes.h \
- DeviceDescription/../Systems/Central.h \
- DeviceDescription/../Systems/../Variable.h \
- DeviceDescription/../Systems/../DeviceDescription/HomegearDevice.h \
- DeviceDescription/../Systems/LogicalDevice.h \
- DeviceDescription/../Systems/../HelperFunctions/HelperFunctions.h \
- DeviceDescription/../Systems/IPhysicalInterface.h \
- DeviceDescription/../Systems/../IEvents.h \
- DeviceDescription/../Systems/PhysicalInterfaceSettings.h \
- DeviceDescription/../Systems/../Managers/FileDescriptorManager.h \
- /usr/include/c++/4.8/condition_variable \
- DeviceDescription/../Systems/Packet.h \
- DeviceDescription/../Systems/Peer.h \
- DeviceDescription/../Systems/ServiceMessages.h \
- DeviceDescription/../Systems/../Encoding/BinaryEncoder.h \
- DeviceDescription/../Systems/../Encoding/BinaryDecoder.h \
- DeviceDescription/../Systems/Peer.h \
- DeviceDescription/../Systems/SystemFactory.h \
- DeviceDescription/../Systems/DeviceFamily.h \
- DeviceDescription/../Systems/UpdateInfo.h \
- DeviceDescription/../Threads/Threads.h \
- DeviceDescription/../Threads/../Exception.h \
- DeviceDescription/../Threads/../Output/Output.h \
- DeviceDescription/../Licensing/LicensingFactory.h \
- DeviceDescription/../Licensing/Licensing.h \
- DeviceDescription/../SSDP/SSDP.h \
- DeviceDescription/../SSDP/../Encoding/HTTP.h \
- DeviceDescription/../SSDP/../Variable.h DeviceDescription/../IQueue.h
+ Licensing/../Sockets/../Encoding/HTTP.h \
+ Licensing/../Sockets/SocketOperations.h \
+ Licensing/../Sockets/IWebserverEventSink.h \
+ Licensing/../Sockets/ServerInfo.h Licensing/../Sockets/ServerInfo.h \
+ Licensing/../Systems/DeviceFamily.h \
+ Licensing/../Systems/../Database/DatabaseTypes.h \
+ Licensing/../Systems/Central.h Licensing/../Systems/../Variable.h \
+ Licensing/../Systems/../DeviceDescription/HomegearDevice.h \
+ Licensing/../Systems/LogicalDevice.h \
+ Licensing/../Systems/../HelperFunctions/HelperFunctions.h \
+ Licensing/../Systems/IPhysicalInterface.h \
+ Licensing/../Systems/../IEvents.h \
+ Licensing/../Systems/PhysicalInterfaceSettings.h \
+ Licensing/../Systems/../Managers/FileDescriptorManager.h \
+ /usr/include/c++/4.8/condition_variable Licensing/../Systems/Packet.h \
+ Licensing/../Systems/Peer.h Licensing/../Systems/ServiceMessages.h \
+ Licensing/../Systems/../Encoding/BinaryEncoder.h \
+ Licensing/../Systems/../Encoding/BinaryDecoder.h \
+ Licensing/../Systems/Peer.h Licensing/../Systems/SystemFactory.h \
+ Licensing/../Systems/DeviceFamily.h Licensing/../Systems/UpdateInfo.h \
+ Licensing/../Threads/Threads.h Licensing/../Threads/../Exception.h \
+ Licensing/../Threads/../Output/Output.h \
+ Licensing/../Licensing/LicensingFactory.h \
+ Licensing/../Licensing/Licensing.h Licensing/../SSDP/SSDP.h \
+ Licensing/../SSDP/../Encoding/HTTP.h Licensing/../SSDP/../Variable.h \
+ Licensing/../IQueue.h
 
 /usr/include/stdc-predef.h:
 
-DeviceDescription/ParameterGroup.h:
+Licensing/Licensing.h:
 
-DeviceDescription/Parameter.h:
-
-DeviceDescription/ParameterCast.h:
-
-DeviceDescription/../Variable.h:
-
-DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
-
-/usr/include/c++/4.8/cstdlib:
+/usr/include/c++/4.8/cstdint:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h:
 
@@ -351,73 +327,15 @@ DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h:
 
-/usr/include/stdlib.h:
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h:
+/usr/include/stdint.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+Licensing/../BaseLib.h:
 
-/usr/include/endian.h:
-
-/usr/include/x86_64-linux-gnu/bits/endian.h:
-
-/usr/include/x86_64-linux-gnu/bits/byteswap.h:
-
-/usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
-
-/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
-
-/usr/include/xlocale.h:
-
-/usr/include/x86_64-linux-gnu/sys/types.h:
-
-/usr/include/time.h:
-
-/usr/include/x86_64-linux-gnu/sys/select.h:
-
-/usr/include/x86_64-linux-gnu/bits/select.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigset.h:
-
-/usr/include/x86_64-linux-gnu/bits/time.h:
-
-/usr/include/x86_64-linux-gnu/bits/select2.h:
-
-/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
-
-/usr/include/alloca.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib.h:
-
-/usr/include/c++/4.8/cassert:
-
-/usr/include/assert.h:
-
-/usr/include/c++/4.8/new:
-
-/usr/include/c++/4.8/exception:
-
-/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
-
-/usr/include/c++/4.8/bits/exception_ptr.h:
-
-/usr/include/c++/4.8/bits/exception_defines.h:
-
-/usr/include/c++/4.8/bits/nested_exception.h:
-
-DeviceDescription/../DeviceDescription/Logical.h:
-
-DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+Licensing/../Database/DatabaseTypes.h:
 
 /usr/include/c++/4.8/string:
 
@@ -430,6 +348,8 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 /usr/include/c++/4.8/bits/stl_algobase.h:
 
 /usr/include/c++/4.8/bits/functexcept.h:
+
+/usr/include/c++/4.8/bits/exception_defines.h:
 
 /usr/include/c++/4.8/bits/cpp_type_traits.h:
 
@@ -463,21 +383,27 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h:
 
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h:
+
+/usr/include/xlocale.h:
 
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
-
-/usr/include/c++/4.8/cstdint:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
-
-/usr/include/stdint.h:
 
 /usr/include/c++/4.8/bits/allocator.h:
 
 /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h:
 
 /usr/include/c++/4.8/ext/new_allocator.h:
+
+/usr/include/c++/4.8/new:
+
+/usr/include/c++/4.8/exception:
+
+/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
+
+/usr/include/c++/4.8/bits/exception_ptr.h:
+
+/usr/include/c++/4.8/bits/nested_exception.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
 
@@ -494,6 +420,18 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 /usr/include/c++/4.8/cctype:
 
 /usr/include/ctype.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
 
 /usr/include/c++/4.8/bits/ostream_insert.h:
 
@@ -517,9 +455,15 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/sched.h:
 
+/usr/include/time.h:
+
 /usr/include/x86_64-linux-gnu/bits/sched.h:
 
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
 /usr/include/x86_64-linux-gnu/bits/timex.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
 /usr/include/x86_64-linux-gnu/bits/setjmp.h:
 
@@ -528,6 +472,34 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 /usr/include/c++/4.8/initializer_list:
 
 /usr/include/c++/4.8/ext/string_conversions.h:
+
+/usr/include/c++/4.8/cstdlib:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigset.h:
+
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
+/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/c++/4.8/cstdio:
 
@@ -563,7 +535,7 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/bits/basic_string.tcc:
 
-/usr/include/c++/4.8/memory:
+/usr/include/c++/4.8/vector:
 
 /usr/include/c++/4.8/bits/stl_construct.h:
 
@@ -575,17 +547,23 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/bits/stl_uninitialized.h:
 
-/usr/include/c++/4.8/bits/stl_tempbuf.h:
+/usr/include/c++/4.8/bits/stl_vector.h:
 
-/usr/include/c++/4.8/bits/stl_raw_storage_iter.h:
+/usr/include/c++/4.8/bits/stl_bvector.h:
 
-/usr/include/c++/4.8/typeinfo:
+/usr/include/c++/4.8/bits/vector.tcc:
 
-/usr/include/c++/4.8/ext/concurrence.h:
+/usr/include/c++/4.8/deque:
 
-/usr/include/c++/4.8/bits/uses_allocator.h:
+/usr/include/c++/4.8/bits/stl_deque.h:
 
-/usr/include/c++/4.8/functional:
+/usr/include/c++/4.8/bits/deque.tcc:
+
+/usr/include/c++/4.8/map:
+
+/usr/include/c++/4.8/bits/stl_tree.h:
+
+/usr/include/c++/4.8/bits/stl_map.h:
 
 /usr/include/c++/4.8/tuple:
 
@@ -597,6 +575,22 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/stdexcept:
 
+/usr/include/c++/4.8/bits/uses_allocator.h:
+
+/usr/include/c++/4.8/bits/stl_multimap.h:
+
+/usr/include/c++/4.8/memory:
+
+/usr/include/c++/4.8/bits/stl_tempbuf.h:
+
+/usr/include/c++/4.8/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/4.8/typeinfo:
+
+/usr/include/c++/4.8/ext/concurrence.h:
+
+/usr/include/c++/4.8/functional:
+
 /usr/include/c++/4.8/bits/unique_ptr.h:
 
 /usr/include/c++/4.8/bits/shared_ptr.h:
@@ -604,6 +598,20 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 /usr/include/c++/4.8/bits/shared_ptr_base.h:
 
 /usr/include/c++/4.8/backward/auto_ptr.h:
+
+Licensing/../Encoding/XMLRPCDecoder.h:
+
+Licensing/../Encoding/../Variable.h:
+
+Licensing/../Encoding/../Encoding/RapidXml/rapidxml.hpp:
+
+/usr/include/c++/4.8/cassert:
+
+/usr/include/assert.h:
+
+Licensing/../Encoding/../DeviceDescription/Logical.h:
+
+Licensing/../Encoding/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/unordered_map:
 
@@ -613,15 +621,7 @@ DeviceDescription/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/bits/unordered_map.h:
 
-/usr/include/c++/4.8/vector:
-
-/usr/include/c++/4.8/bits/stl_vector.h:
-
-/usr/include/c++/4.8/bits/stl_bvector.h:
-
-/usr/include/c++/4.8/bits/vector.tcc:
-
-DeviceDescription/../DeviceDescription/Physical.h:
+Licensing/../Encoding/../DeviceDescription/Physical.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -663,51 +663,21 @@ DeviceDescription/../DeviceDescription/Physical.h:
 
 /usr/include/c++/4.8/bits/istream.tcc:
 
-/usr/include/c++/4.8/map:
-
-/usr/include/c++/4.8/bits/stl_tree.h:
-
-/usr/include/c++/4.8/bits/stl_map.h:
-
-/usr/include/c++/4.8/bits/stl_multimap.h:
-
 /usr/include/c++/4.8/list:
 
 /usr/include/c++/4.8/bits/stl_list.h:
 
 /usr/include/c++/4.8/bits/list.tcc:
 
-DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+Licensing/../Encoding/RapidXml/rapidxml.hpp:
 
-DeviceDescription/Logical.h:
+Licensing/../Encoding/XMLRPCEncoder.h:
 
-DeviceDescription/Physical.h:
+Licensing/../Encoding/../Exception.h:
 
-DeviceDescription/Scenario.h:
+Licensing/../Encoding/../Output/Output.h:
 
-DeviceDescription/../BaseLib.h:
-
-DeviceDescription/../Database/DatabaseTypes.h:
-
-/usr/include/c++/4.8/deque:
-
-/usr/include/c++/4.8/bits/stl_deque.h:
-
-/usr/include/c++/4.8/bits/deque.tcc:
-
-DeviceDescription/../Encoding/XMLRPCDecoder.h:
-
-DeviceDescription/../Encoding/../Variable.h:
-
-DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
-
-DeviceDescription/../Encoding/XMLRPCEncoder.h:
-
-DeviceDescription/../Encoding/../Exception.h:
-
-DeviceDescription/../Encoding/../Output/Output.h:
-
-DeviceDescription/../Encoding/../Output/../Exception.h:
+Licensing/../Encoding/../Output/../Exception.h:
 
 /usr/include/c++/4.8/iomanip:
 
@@ -737,15 +707,15 @@ DeviceDescription/../Encoding/../Output/../Exception.h:
 
 /usr/include/c++/4.8/limits:
 
-DeviceDescription/../Encoding/RapidXml/rapidxml_print.hpp:
+Licensing/../Encoding/RapidXml/rapidxml_print.hpp:
 
-DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
+Licensing/../Encoding/RapidXml/rapidxml.hpp:
 
 /usr/include/c++/4.8/iterator:
 
 /usr/include/c++/4.8/bits/stream_iterator.h:
 
-DeviceDescription/../Encoding/RPCDecoder.h:
+Licensing/../Encoding/RPCDecoder.h:
 
 /usr/include/c++/4.8/cstring:
 
@@ -773,33 +743,33 @@ DeviceDescription/../Encoding/RPCDecoder.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathinline.h:
 
-DeviceDescription/../Encoding/BinaryDecoder.h:
+Licensing/../Encoding/BinaryDecoder.h:
 
-DeviceDescription/../Encoding/RPCHeader.h:
+Licensing/../Encoding/RPCHeader.h:
 
-DeviceDescription/../Encoding/RPCEncoder.h:
+Licensing/../Encoding/RPCEncoder.h:
 
-DeviceDescription/../Encoding/BinaryEncoder.h:
+Licensing/../Encoding/BinaryEncoder.h:
 
-DeviceDescription/../Encoding/JsonDecoder.h:
+Licensing/../Encoding/JsonDecoder.h:
 
-DeviceDescription/../Encoding/JsonEncoder.h:
+Licensing/../Encoding/JsonEncoder.h:
 
-DeviceDescription/../Encoding/HTTP.h:
+Licensing/../Encoding/HTTP.h:
 
-DeviceDescription/../Encoding/../HelperFunctions/Math.h:
+Licensing/../Encoding/../HelperFunctions/Math.h:
 
-DeviceDescription/../Encoding/Html.h:
+Licensing/../Encoding/Html.h:
 
-DeviceDescription/../Encoding/WebSocket.h:
+Licensing/../Encoding/WebSocket.h:
 
-DeviceDescription/../Managers/SerialDeviceManager.h:
+Licensing/../Managers/SerialDeviceManager.h:
 
-DeviceDescription/../Managers/../Sockets/SerialReaderWriter.h:
+Licensing/../Managers/../Sockets/SerialReaderWriter.h:
 
-DeviceDescription/../Managers/../Sockets/../Exception.h:
+Licensing/../Managers/../Sockets/../Exception.h:
 
-DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
+Licensing/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/mutex:
 
@@ -845,9 +815,9 @@ DeviceDescription/../Managers/../Sockets/../Managers/FileDescriptorManager.h:
 
 /usr/include/gnutls/compat.h:
 
-DeviceDescription/../Managers/../Sockets/../IEvents.h:
+Licensing/../Managers/../Sockets/../IEvents.h:
 
-DeviceDescription/../Managers/../Sockets/../Output/Output.h:
+Licensing/../Managers/../Sockets/../Output/Output.h:
 
 /usr/include/c++/4.8/forward_list:
 
@@ -889,9 +859,9 @@ DeviceDescription/../Managers/../Sockets/../Output/Output.h:
 
 /usr/include/x86_64-linux-gnu/bits/sigthread.h:
 
-DeviceDescription/../Managers/FileDescriptorManager.h:
+Licensing/../Managers/FileDescriptorManager.h:
 
-DeviceDescription/../HelperFunctions/HelperFunctions.h:
+Licensing/../HelperFunctions/HelperFunctions.h:
 
 /usr/include/c++/4.8/algorithm:
 
@@ -959,51 +929,63 @@ DeviceDescription/../HelperFunctions/HelperFunctions.h:
 
 /usr/include/x86_64-linux-gnu/sys/time.h:
 
-DeviceDescription/../HelperFunctions/Color.h:
+Licensing/../HelperFunctions/Color.h:
 
-DeviceDescription/../HelperFunctions/Math.h:
+Licensing/../HelperFunctions/Math.h:
 
-DeviceDescription/../HelperFunctions/Math.h:
+Licensing/../HelperFunctions/Math.h:
 
-DeviceDescription/../HelperFunctions/Crypt.h:
+Licensing/../HelperFunctions/Crypt.h:
 
-DeviceDescription/../HelperFunctions/Base64.h:
+Licensing/../HelperFunctions/Base64.h:
 
-DeviceDescription/../HelperFunctions/Net.h:
+Licensing/../HelperFunctions/Net.h:
 
-DeviceDescription/../HelperFunctions/../Exception.h:
+Licensing/../HelperFunctions/../Exception.h:
 
-DeviceDescription/../HelperFunctions/Io.h:
+Licensing/../HelperFunctions/Io.h:
 
-DeviceDescription/../LowLevel/Gpio.h:
+Licensing/../LowLevel/Gpio.h:
 
-DeviceDescription/../Output/Output.h:
+Licensing/../Output/Output.h:
 
-DeviceDescription/../DeviceDescription/Devices.h:
+Licensing/../DeviceDescription/Devices.h:
 
-DeviceDescription/../DeviceDescription/../Systems/Packet.h:
+Licensing/../DeviceDescription/../Systems/Packet.h:
 
-DeviceDescription/../DeviceDescription/../Systems/DeviceTypes.h:
+Licensing/../DeviceDescription/../Systems/DeviceTypes.h:
 
-DeviceDescription/../DeviceDescription/HomegearDevice.h:
+Licensing/../DeviceDescription/HomegearDevice.h:
 
-DeviceDescription/../DeviceDescription/DevicePacket.h:
+Licensing/../DeviceDescription/DevicePacket.h:
 
-DeviceDescription/../DeviceDescription/JsonPayload.h:
+Licensing/../DeviceDescription/JsonPayload.h:
 
-DeviceDescription/../DeviceDescription/BinaryPayload.h:
+Licensing/../DeviceDescription/../Encoding/RapidXml/rapidxml.hpp:
 
-DeviceDescription/../DeviceDescription/HttpPayload.h:
+Licensing/../DeviceDescription/BinaryPayload.h:
 
-DeviceDescription/../DeviceDescription/Parameter.h:
+Licensing/../DeviceDescription/HttpPayload.h:
 
-DeviceDescription/../DeviceDescription/SupportedDevice.h:
+Licensing/../DeviceDescription/Parameter.h:
 
-DeviceDescription/../DeviceDescription/RunProgram.h:
+Licensing/../DeviceDescription/ParameterCast.h:
 
-DeviceDescription/../DeviceDescription/Function.h:
+Licensing/../DeviceDescription/../Variable.h:
 
-DeviceDescription/../DeviceDescription/ParameterGroup.h:
+Licensing/../DeviceDescription/Logical.h:
+
+Licensing/../DeviceDescription/Physical.h:
+
+Licensing/../DeviceDescription/SupportedDevice.h:
+
+Licensing/../DeviceDescription/RunProgram.h:
+
+Licensing/../DeviceDescription/Function.h:
+
+Licensing/../DeviceDescription/ParameterGroup.h:
+
+Licensing/../DeviceDescription/Scenario.h:
 
 /usr/include/c++/4.8/set:
 
@@ -1011,15 +993,15 @@ DeviceDescription/../DeviceDescription/ParameterGroup.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
-DeviceDescription/../Settings/Settings.h:
+Licensing/../Settings/Settings.h:
 
-DeviceDescription/../Sockets/HTTPClient.h:
+Licensing/../Sockets/HTTPClient.h:
 
-DeviceDescription/../Sockets/../Exception.h:
+Licensing/../Sockets/../Exception.h:
 
-DeviceDescription/../Sockets/../Managers/FileDescriptorManager.h:
+Licensing/../Sockets/../Managers/FileDescriptorManager.h:
 
-DeviceDescription/../Sockets/SocketOperations.h:
+Licensing/../Sockets/SocketOperations.h:
 
 /usr/include/arpa/inet.h:
 
@@ -1045,72 +1027,72 @@ DeviceDescription/../Sockets/SocketOperations.h:
 
 /usr/include/gnutls/x509.h:
 
-DeviceDescription/../Sockets/../Encoding/HTTP.h:
+Licensing/../Sockets/../Encoding/HTTP.h:
 
-DeviceDescription/../Sockets/SocketOperations.h:
+Licensing/../Sockets/SocketOperations.h:
 
-DeviceDescription/../Sockets/IWebserverEventSink.h:
+Licensing/../Sockets/IWebserverEventSink.h:
 
-DeviceDescription/../Sockets/ServerInfo.h:
+Licensing/../Sockets/ServerInfo.h:
 
-DeviceDescription/../Sockets/ServerInfo.h:
+Licensing/../Sockets/ServerInfo.h:
 
-DeviceDescription/../Systems/DeviceFamily.h:
+Licensing/../Systems/DeviceFamily.h:
 
-DeviceDescription/../Systems/../Database/DatabaseTypes.h:
+Licensing/../Systems/../Database/DatabaseTypes.h:
 
-DeviceDescription/../Systems/Central.h:
+Licensing/../Systems/Central.h:
 
-DeviceDescription/../Systems/../Variable.h:
+Licensing/../Systems/../Variable.h:
 
-DeviceDescription/../Systems/../DeviceDescription/HomegearDevice.h:
+Licensing/../Systems/../DeviceDescription/HomegearDevice.h:
 
-DeviceDescription/../Systems/LogicalDevice.h:
+Licensing/../Systems/LogicalDevice.h:
 
-DeviceDescription/../Systems/../HelperFunctions/HelperFunctions.h:
+Licensing/../Systems/../HelperFunctions/HelperFunctions.h:
 
-DeviceDescription/../Systems/IPhysicalInterface.h:
+Licensing/../Systems/IPhysicalInterface.h:
 
-DeviceDescription/../Systems/../IEvents.h:
+Licensing/../Systems/../IEvents.h:
 
-DeviceDescription/../Systems/PhysicalInterfaceSettings.h:
+Licensing/../Systems/PhysicalInterfaceSettings.h:
 
-DeviceDescription/../Systems/../Managers/FileDescriptorManager.h:
+Licensing/../Systems/../Managers/FileDescriptorManager.h:
 
 /usr/include/c++/4.8/condition_variable:
 
-DeviceDescription/../Systems/Packet.h:
+Licensing/../Systems/Packet.h:
 
-DeviceDescription/../Systems/Peer.h:
+Licensing/../Systems/Peer.h:
 
-DeviceDescription/../Systems/ServiceMessages.h:
+Licensing/../Systems/ServiceMessages.h:
 
-DeviceDescription/../Systems/../Encoding/BinaryEncoder.h:
+Licensing/../Systems/../Encoding/BinaryEncoder.h:
 
-DeviceDescription/../Systems/../Encoding/BinaryDecoder.h:
+Licensing/../Systems/../Encoding/BinaryDecoder.h:
 
-DeviceDescription/../Systems/Peer.h:
+Licensing/../Systems/Peer.h:
 
-DeviceDescription/../Systems/SystemFactory.h:
+Licensing/../Systems/SystemFactory.h:
 
-DeviceDescription/../Systems/DeviceFamily.h:
+Licensing/../Systems/DeviceFamily.h:
 
-DeviceDescription/../Systems/UpdateInfo.h:
+Licensing/../Systems/UpdateInfo.h:
 
-DeviceDescription/../Threads/Threads.h:
+Licensing/../Threads/Threads.h:
 
-DeviceDescription/../Threads/../Exception.h:
+Licensing/../Threads/../Exception.h:
 
-DeviceDescription/../Threads/../Output/Output.h:
+Licensing/../Threads/../Output/Output.h:
 
-DeviceDescription/../Licensing/LicensingFactory.h:
+Licensing/../Licensing/LicensingFactory.h:
 
-DeviceDescription/../Licensing/Licensing.h:
+Licensing/../Licensing/Licensing.h:
 
-DeviceDescription/../SSDP/SSDP.h:
+Licensing/../SSDP/SSDP.h:
 
-DeviceDescription/../SSDP/../Encoding/HTTP.h:
+Licensing/../SSDP/../Encoding/HTTP.h:
 
-DeviceDescription/../SSDP/../Variable.h:
+Licensing/../SSDP/../Variable.h:
 
-DeviceDescription/../IQueue.h:
+Licensing/../IQueue.h:

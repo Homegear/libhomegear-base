@@ -150,7 +150,8 @@ am_libhomegear_base_la_OBJECTS = BaseLib.lo IEvents.lo IQueue.lo \
 	HelperFunctions/Color.lo HelperFunctions/Crypt.lo \
 	HelperFunctions/HelperFunctions.lo HelperFunctions/Io.lo \
 	HelperFunctions/Math.lo HelperFunctions/Net.lo \
-	LowLevel/Gpio.lo Managers/FileDescriptorManager.lo \
+	Licensing/Licensing.lo LowLevel/Gpio.lo \
+	Managers/FileDescriptorManager.lo \
 	Managers/SerialDeviceManager.lo Output/Output.lo \
 	Settings/Settings.lo Sockets/HTTPClient.lo \
 	Sockets/SerialReaderWriter.lo Sockets/ServerInfo.lo \
@@ -369,7 +370,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
 AM_CPPFLAGS = -Wall -std=c++11 -DFORTIFY_SOURCE=2 -DGCRYPT_NO_DEPRECATED
-AM_LDFLAGS = -Wl,-rpath=/lib/homegear -Wl,-rpath=/usr/lib/homegear
+AM_LDFLAGS = -Wl,-rpath=/lib/homegear -Wl,-rpath=/usr/lib/homegear -Wl,-rpath=/usr/local/lib/homegear
 lib_LTLIBRARIES = libhomegear-base.la
 libhomegear_base_la_SOURCES = BaseLib.cpp BaseLib.h Exception.h \
 	IEvents.cpp IEvents.h IQueue.cpp IQueue.h Variable.cpp \
@@ -426,7 +427,9 @@ libhomegear_base_la_SOURCES = BaseLib.cpp BaseLib.h Exception.h \
 	HelperFunctions/HelperFunctions.h HelperFunctions/Io.cpp \
 	HelperFunctions/Io.h HelperFunctions/Math.cpp \
 	HelperFunctions/Math.h HelperFunctions/Net.cpp \
-	HelperFunctions/Net.h LowLevel/Gpio.cpp LowLevel/Gpio.h \
+	HelperFunctions/Net.h Licensing/Licensing.cpp \
+	Licensing/Licensing.h Licensing/LicensingFactory.h \
+	LowLevel/Gpio.cpp LowLevel/Gpio.h \
 	Managers/FileDescriptorManager.cpp \
 	Managers/FileDescriptorManager.h \
 	Managers/SerialDeviceManager.cpp \
@@ -476,8 +479,9 @@ nobase_otherinclude_HEADERS = BaseLib.h Exception.h IEvents.h IQueue.h \
 	Encoding/RapidXml/rapidxml_print.hpp HelperFunctions/Base64.h \
 	HelperFunctions/Color.h HelperFunctions/Crypt.h \
 	HelperFunctions/HelperFunctions.h HelperFunctions/Io.h \
-	HelperFunctions/Math.h HelperFunctions/Net.h LowLevel/Gpio.h \
-	Managers/FileDescriptorManager.h \
+	HelperFunctions/Math.h HelperFunctions/Net.h \
+	Licensing/Licensing.h Licensing/LicensingFactory.h \
+	LowLevel/Gpio.h Managers/FileDescriptorManager.h \
 	Managers/SerialDeviceManager.h Output/Output.h \
 	Settings/Settings.h Sockets/HTTPClient.h \
 	Sockets/IWebserverEventSink.h Sockets/SerialReaderWriter.h \
@@ -663,6 +667,14 @@ HelperFunctions/Math.lo: HelperFunctions/$(am__dirstamp) \
 	HelperFunctions/$(DEPDIR)/$(am__dirstamp)
 HelperFunctions/Net.lo: HelperFunctions/$(am__dirstamp) \
 	HelperFunctions/$(DEPDIR)/$(am__dirstamp)
+Licensing/$(am__dirstamp):
+	@$(MKDIR_P) Licensing
+	@: > Licensing/$(am__dirstamp)
+Licensing/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) Licensing/$(DEPDIR)
+	@: > Licensing/$(DEPDIR)/$(am__dirstamp)
+Licensing/Licensing.lo: Licensing/$(am__dirstamp) \
+	Licensing/$(DEPDIR)/$(am__dirstamp)
 LowLevel/$(am__dirstamp):
 	@$(MKDIR_P) LowLevel
 	@: > LowLevel/$(am__dirstamp)
@@ -764,6 +776,8 @@ mostlyclean-compile:
 	-rm -f Encoding/*.lo
 	-rm -f HelperFunctions/*.$(OBJEXT)
 	-rm -f HelperFunctions/*.lo
+	-rm -f Licensing/*.$(OBJEXT)
+	-rm -f Licensing/*.lo
 	-rm -f LowLevel/*.$(OBJEXT)
 	-rm -f LowLevel/*.lo
 	-rm -f Managers/*.$(OBJEXT)
@@ -826,6 +840,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@HelperFunctions/$(DEPDIR)/Io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@HelperFunctions/$(DEPDIR)/Math.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@HelperFunctions/$(DEPDIR)/Net.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@Licensing/$(DEPDIR)/Licensing.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@LowLevel/$(DEPDIR)/Gpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Managers/$(DEPDIR)/FileDescriptorManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Managers/$(DEPDIR)/SerialDeviceManager.Plo@am__quote@
@@ -880,6 +895,7 @@ clean-libtool:
 	-rm -rf DeviceDescription/HomeMatic/.libs DeviceDescription/HomeMatic/_libs
 	-rm -rf Encoding/.libs Encoding/_libs
 	-rm -rf HelperFunctions/.libs HelperFunctions/_libs
+	-rm -rf Licensing/.libs Licensing/_libs
 	-rm -rf LowLevel/.libs LowLevel/_libs
 	-rm -rf Managers/.libs Managers/_libs
 	-rm -rf Output/.libs Output/_libs
@@ -1036,6 +1052,8 @@ distclean-generic:
 	-rm -f Encoding/$(am__dirstamp)
 	-rm -f HelperFunctions/$(DEPDIR)/$(am__dirstamp)
 	-rm -f HelperFunctions/$(am__dirstamp)
+	-rm -f Licensing/$(DEPDIR)/$(am__dirstamp)
+	-rm -f Licensing/$(am__dirstamp)
 	-rm -f LowLevel/$(DEPDIR)/$(am__dirstamp)
 	-rm -f LowLevel/$(am__dirstamp)
 	-rm -f Managers/$(DEPDIR)/$(am__dirstamp)
@@ -1062,7 +1080,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) Licensing/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1108,7 +1126,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) DeviceDescription/$(DEPDIR) DeviceDescription/HomeMatic/$(DEPDIR) Encoding/$(DEPDIR) HelperFunctions/$(DEPDIR) Licensing/$(DEPDIR) LowLevel/$(DEPDIR) Managers/$(DEPDIR) Output/$(DEPDIR) SSDP/$(DEPDIR) Settings/$(DEPDIR) Sockets/$(DEPDIR) Systems/$(DEPDIR) Threads/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

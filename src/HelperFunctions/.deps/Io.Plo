@@ -315,7 +315,8 @@ HelperFunctions/Io.lo: HelperFunctions/Io.cpp /usr/include/stdc-predef.h \
  HelperFunctions/../Threads/Threads.h \
  HelperFunctions/../Threads/../Exception.h \
  HelperFunctions/../Threads/../Output/Output.h \
- HelperFunctions/../SSDP/SSDP.h \
+ HelperFunctions/../Licensing/LicensingFactory.h \
+ HelperFunctions/../Licensing/Licensing.h HelperFunctions/../SSDP/SSDP.h \
  HelperFunctions/../SSDP/../Encoding/HTTP.h \
  HelperFunctions/../SSDP/../Variable.h HelperFunctions/../IQueue.h \
  /usr/include/x86_64-linux-gnu/sys/stat.h
@@ -1099,6 +1100,10 @@ HelperFunctions/../Threads/Threads.h:
 HelperFunctions/../Threads/../Exception.h:
 
 HelperFunctions/../Threads/../Output/Output.h:
+
+HelperFunctions/../Licensing/LicensingFactory.h:
+
+HelperFunctions/../Licensing/Licensing.h:
 
 HelperFunctions/../SSDP/SSDP.h:
 

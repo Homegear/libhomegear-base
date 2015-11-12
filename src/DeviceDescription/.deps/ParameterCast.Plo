@@ -317,6 +317,8 @@ DeviceDescription/ParameterCast.lo: DeviceDescription/ParameterCast.cpp \
  DeviceDescription/../Threads/Threads.h \
  DeviceDescription/../Threads/../Exception.h \
  DeviceDescription/../Threads/../Output/Output.h \
+ DeviceDescription/../Licensing/LicensingFactory.h \
+ DeviceDescription/../Licensing/Licensing.h \
  DeviceDescription/../SSDP/SSDP.h \
  DeviceDescription/../SSDP/../Encoding/HTTP.h \
  DeviceDescription/../SSDP/../Variable.h DeviceDescription/../IQueue.h
@@ -1100,6 +1102,10 @@ DeviceDescription/../Threads/Threads.h:
 DeviceDescription/../Threads/../Exception.h:
 
 DeviceDescription/../Threads/../Output/Output.h:
+
+DeviceDescription/../Licensing/LicensingFactory.h:
+
+DeviceDescription/../Licensing/Licensing.h:
 
 DeviceDescription/../SSDP/SSDP.h:
 

@@ -295,7 +295,9 @@ LowLevel/Gpio.lo: LowLevel/Gpio.cpp /usr/include/stdc-predef.h \
  LowLevel/../Systems/Peer.h LowLevel/../Systems/SystemFactory.h \
  LowLevel/../Systems/DeviceFamily.h LowLevel/../Systems/UpdateInfo.h \
  LowLevel/../Threads/Threads.h LowLevel/../Threads/../Exception.h \
- LowLevel/../Threads/../Output/Output.h LowLevel/../SSDP/SSDP.h \
+ LowLevel/../Threads/../Output/Output.h \
+ LowLevel/../Licensing/LicensingFactory.h \
+ LowLevel/../Licensing/Licensing.h LowLevel/../SSDP/SSDP.h \
  LowLevel/../SSDP/../Encoding/HTTP.h LowLevel/../SSDP/../Variable.h \
  LowLevel/../IQueue.h /usr/include/x86_64-linux-gnu/sys/stat.h
 
@@ -1078,6 +1080,10 @@ LowLevel/../Threads/Threads.h:
 LowLevel/../Threads/../Exception.h:
 
 LowLevel/../Threads/../Output/Output.h:
+
+LowLevel/../Licensing/LicensingFactory.h:
+
+LowLevel/../Licensing/Licensing.h:
 
 LowLevel/../SSDP/SSDP.h:
 

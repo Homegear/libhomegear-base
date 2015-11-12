@@ -330,6 +330,8 @@ DeviceDescription/HomeMatic/HmConverter.lo: \
  DeviceDescription/HomeMatic/../../Threads/Threads.h \
  DeviceDescription/HomeMatic/../../Threads/../Exception.h \
  DeviceDescription/HomeMatic/../../Threads/../Output/Output.h \
+ DeviceDescription/HomeMatic/../../Licensing/LicensingFactory.h \
+ DeviceDescription/HomeMatic/../../Licensing/Licensing.h \
  DeviceDescription/HomeMatic/../../SSDP/SSDP.h \
  DeviceDescription/HomeMatic/../../SSDP/../Encoding/HTTP.h \
  DeviceDescription/HomeMatic/../../SSDP/../Variable.h \
@@ -1138,6 +1140,10 @@ DeviceDescription/HomeMatic/../../Threads/Threads.h:
 DeviceDescription/HomeMatic/../../Threads/../Exception.h:
 
 DeviceDescription/HomeMatic/../../Threads/../Output/Output.h:
+
+DeviceDescription/HomeMatic/../../Licensing/LicensingFactory.h:
+
+DeviceDescription/HomeMatic/../../Licensing/Licensing.h:
 
 DeviceDescription/HomeMatic/../../SSDP/SSDP.h:
 

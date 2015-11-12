@@ -291,6 +291,7 @@ Output/Output.lo: Output/Output.cpp /usr/include/stdc-predef.h \
  Output/../Systems/SystemFactory.h Output/../Systems/DeviceFamily.h \
  Output/../Systems/UpdateInfo.h Output/../Threads/Threads.h \
  Output/../Threads/../Exception.h Output/../Threads/../Output/Output.h \
+ Output/../Licensing/LicensingFactory.h Output/../Licensing/Licensing.h \
  Output/../SSDP/SSDP.h Output/../SSDP/../Encoding/HTTP.h \
  Output/../SSDP/../Variable.h Output/../IQueue.h
 
@@ -1073,6 +1074,10 @@ Output/../Threads/Threads.h:
 Output/../Threads/../Exception.h:
 
 Output/../Threads/../Output/Output.h:
+
+Output/../Licensing/LicensingFactory.h:
+
+Output/../Licensing/Licensing.h:
 
 Output/../SSDP/SSDP.h:
 

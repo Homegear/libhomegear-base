@@ -295,7 +295,9 @@ Encoding/JsonDecoder.lo: Encoding/JsonDecoder.cpp \
  Encoding/../Systems/Peer.h Encoding/../Systems/SystemFactory.h \
  Encoding/../Systems/DeviceFamily.h Encoding/../Systems/UpdateInfo.h \
  Encoding/../Threads/Threads.h Encoding/../Threads/../Exception.h \
- Encoding/../Threads/../Output/Output.h Encoding/../SSDP/SSDP.h \
+ Encoding/../Threads/../Output/Output.h \
+ Encoding/../Licensing/LicensingFactory.h \
+ Encoding/../Licensing/Licensing.h Encoding/../SSDP/SSDP.h \
  Encoding/../SSDP/../Encoding/HTTP.h Encoding/../SSDP/../Variable.h \
  Encoding/../IQueue.h
 
@@ -1082,6 +1084,10 @@ Encoding/../Threads/Threads.h:
 Encoding/../Threads/../Exception.h:
 
 Encoding/../Threads/../Output/Output.h:
+
+Encoding/../Licensing/LicensingFactory.h:
+
+Encoding/../Licensing/Licensing.h:
 
 Encoding/../SSDP/SSDP.h:
 

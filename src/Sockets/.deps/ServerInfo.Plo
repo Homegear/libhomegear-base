@@ -290,6 +290,7 @@ Sockets/ServerInfo.lo: Sockets/ServerInfo.cpp /usr/include/stdc-predef.h \
  Sockets/../Systems/SystemFactory.h Sockets/../Systems/DeviceFamily.h \
  Sockets/../Systems/UpdateInfo.h Sockets/../Threads/Threads.h \
  Sockets/../Threads/../Exception.h Sockets/../Threads/../Output/Output.h \
+ Sockets/../Licensing/LicensingFactory.h Sockets/../Licensing/Licensing.h \
  Sockets/../SSDP/SSDP.h Sockets/../SSDP/../Encoding/HTTP.h \
  Sockets/../SSDP/../Variable.h Sockets/../IQueue.h
 
@@ -1072,6 +1073,10 @@ Sockets/../Threads/Threads.h:
 Sockets/../Threads/../Exception.h:
 
 Sockets/../Threads/../Output/Output.h:
+
+Sockets/../Licensing/LicensingFactory.h:
+
+Sockets/../Licensing/Licensing.h:
 
 Sockets/../SSDP/SSDP.h:
 
