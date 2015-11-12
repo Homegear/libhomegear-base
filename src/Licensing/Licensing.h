@@ -32,6 +32,7 @@
 #define LICENSING_H_
 
 #include <cstdint>
+#include <vector>
 
 namespace BaseLib
 {
@@ -52,7 +53,7 @@ public:
 
 	virtual int32_t getModuleId() { return _moduleId; }
 
-
+	virtual void decryptDeviceDescription(const std::vector<char>& input, std::vector<char>& output) = 0;
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	bool _disposed = false;

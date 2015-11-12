@@ -137,10 +137,10 @@ std::shared_ptr<HomegearDevice> Devices::load(std::string& filepath)
 			}
 			std::string moduleIdString(&data.at(0), pos);
 			int32_t moduleId = BaseLib::Math::getNumber(moduleIdString);
-			std::vector<char> input(&data.at(pos + 1), &data.at(data.size() - 1));
+			std::vector<char> input(&data.at(pos + 1), &data.at(data.size() - 1) + 1);
 			std::vector<char> xml;
 			if(data.empty()) return device;
-			if(_eventHandler) ((IDevicesEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, data, xml);
+			if(_eventHandler) ((IDevicesEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, xml);
 			if(!xml.empty()) device.reset(new HomegearDevice(_bl, _family, xml));
 		}
 		else device.reset(new HomegearDevice(_bl, _family, filepath, oldFormat));
