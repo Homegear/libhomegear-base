@@ -48,94 +48,6 @@ DeviceFamily::~DeviceFamily()
 }
 
 //Event handling
-void DeviceFamily::raiseCreateSavepointSynchronous(std::string name)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onCreateSavepointSynchronous(name);
-}
-
-void DeviceFamily::raiseReleaseSavepointSynchronous(std::string name)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onReleaseSavepointSynchronous(name);
-}
-
-void DeviceFamily::raiseCreateSavepointAsynchronous(std::string name)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onCreateSavepointAsynchronous(name);
-}
-
-void DeviceFamily::raiseReleaseSavepointAsynchronous(std::string name)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onReleaseSavepointAsynchronous(name);
-}
-
-void DeviceFamily::raiseDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onDeleteMetadata(peerID, serialNumber, dataID);
-}
-
-void DeviceFamily::raiseDeletePeer(uint64_t id)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onDeletePeer(id);
-}
-
-uint64_t DeviceFamily::raiseSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber)
-{
-	if(!_eventHandler) return 0;
-	return ((IFamilyEventSink*)_eventHandler)->onSavePeer(id, parentID, address, serialNumber);
-}
-
-void DeviceFamily::raiseSavePeerParameter(uint64_t peerID, Database::DataRow& data)
-{
-	if(!_eventHandler) return;
-	((IFamilyEventSink*)_eventHandler)->onSavePeerParameter(peerID, data);
-}
-
-void DeviceFamily::raiseSavePeerVariable(uint64_t peerID, Database::DataRow& data)
-{
-	if(!_eventHandler) return;
-	((IFamilyEventSink*)_eventHandler)->onSavePeerVariable(peerID, data);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetPeerParameters(uint64_t peerID)
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetPeerParameters(peerID);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetPeerVariables(uint64_t peerID)
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetPeerVariables(peerID);
-}
-
-void DeviceFamily::raiseDeletePeerParameter(uint64_t peerID, Database::DataRow& data)
-{
-	return ((IFamilyEventSink*)_eventHandler)->onDeletePeerParameter(peerID, data);
-}
-
-bool DeviceFamily::raiseSetPeerID(uint64_t oldPeerID, uint64_t newPeerID)
-{
-	if(!_eventHandler) return false;
-	return ((IFamilyEventSink*)_eventHandler)->onSetPeerID(oldPeerID, newPeerID);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetServiceMessages(uint64_t peerID)
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetServiceMessages(peerID);
-}
-
-void DeviceFamily::raiseSaveServiceMessage(uint64_t peerID, Database::DataRow& data)
-{
-	if(!_eventHandler) return;
-	((IFamilyEventSink*)_eventHandler)->onSaveServiceMessage(peerID, data);
-}
-
-void DeviceFamily::raiseDeleteServiceMessage(uint64_t databaseID)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onDeleteServiceMessage(databaseID);
-}
-
 void DeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
 {
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onAddWebserverEventHandler(eventHandler, eventHandlers);
@@ -144,46 +56,6 @@ void DeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSi
 void DeviceFamily::raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers)
 {
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRemoveWebserverEventHandler(eventHandlers);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetDevices()
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetDevices((uint32_t)_family);
-}
-
-void DeviceFamily::raiseDeleteDevice(uint64_t deviceID)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onDeleteDevice(deviceID);
-}
-
-uint64_t DeviceFamily::raiseSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family)
-{
-	if(!_eventHandler) return 0;
-	return ((IFamilyEventSink*)_eventHandler)->onSaveDevice(id, address, serialNumber, type, family);
-}
-
-void DeviceFamily::raiseSaveDeviceVariable(Database::DataRow& data)
-{
-	if(!_eventHandler) return;
-	((IFamilyEventSink*)_eventHandler)->onSaveDeviceVariable(data);
-}
-
-void DeviceFamily::raiseDeletePeers(int32_t deviceID)
-{
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onDeletePeers(deviceID);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetPeers(uint64_t deviceID)
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetPeers(deviceID);
-}
-
-std::shared_ptr<Database::DataTable> DeviceFamily::raiseGetDeviceVariables(uint64_t deviceID)
-{
-	if(!_eventHandler) return std::shared_ptr<Database::DataTable>();
-	return ((IFamilyEventSink*)_eventHandler)->onGetDeviceVariables(deviceID);
 }
 
 void DeviceFamily::raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
@@ -222,6 +94,12 @@ int32_t DeviceFamily::raiseIsAddonClient(int32_t clientID)
 	return -1;
 }
 
+int32_t DeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey)
+{
+	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onCheckLicense(moduleId, familyId, deviceId, licenseKey);
+	return -1;
+}
+
 void DeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
 {
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, output);
@@ -229,86 +107,6 @@ void DeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::ve
 //End event handling
 
 //Device event handling
-void DeviceFamily::onCreateSavepointSynchronous(std::string name)
-{
-	raiseCreateSavepointSynchronous(name);
-}
-
-void DeviceFamily::onReleaseSavepointSynchronous(std::string name)
-{
-	raiseReleaseSavepointSynchronous(name);
-}
-
-void DeviceFamily::onCreateSavepointAsynchronous(std::string name)
-{
-	raiseCreateSavepointAsynchronous(name);
-}
-
-void DeviceFamily::onReleaseSavepointAsynchronous(std::string name)
-{
-	raiseReleaseSavepointAsynchronous(name);
-}
-
-void DeviceFamily::onDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID)
-{
-	raiseDeleteMetadata(peerID, serialNumber, dataID);
-}
-
-void DeviceFamily::onDeletePeer(uint64_t id)
-{
-	raiseDeletePeer(id);
-}
-
-uint64_t DeviceFamily::onSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber)
-{
-	return raiseSavePeer(id, parentID, address, serialNumber);
-}
-
-void DeviceFamily::onSavePeerParameter(uint64_t peerID, Database::DataRow& data)
-{
-	raiseSavePeerParameter(peerID, data);
-}
-
-void DeviceFamily::onSavePeerVariable(uint64_t peerID, Database::DataRow& data)
-{
-	raiseSavePeerVariable(peerID, data);
-}
-
-std::shared_ptr<BaseLib::Database::DataTable> DeviceFamily::onGetPeerParameters(uint64_t peerID)
-{
-	return raiseGetPeerParameters(peerID);
-}
-
-std::shared_ptr<BaseLib::Database::DataTable> DeviceFamily::onGetPeerVariables(uint64_t peerID)
-{
-	return raiseGetPeerVariables(peerID);
-}
-
-void DeviceFamily::onDeletePeerParameter(uint64_t peerID, Database::DataRow& data)
-{
-	raiseDeletePeerParameter(peerID, data);
-}
-
-bool DeviceFamily::onSetPeerID(uint64_t oldPeerID, uint64_t newPeerID)
-{
-	return raiseSetPeerID(oldPeerID, newPeerID);
-}
-
-std::shared_ptr<BaseLib::Database::DataTable> DeviceFamily::onGetServiceMessages(uint64_t peerID)
-{
-	return raiseGetServiceMessages(peerID);
-}
-
-void DeviceFamily::onSaveServiceMessage(uint64_t peerID, Database::DataRow& data)
-{
-	raiseSaveServiceMessage(peerID, data);
-}
-
-void DeviceFamily::onDeleteServiceMessage(uint64_t databaseID)
-{
-	raiseDeleteServiceMessage(databaseID);
-}
-
 void DeviceFamily::onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
 {
 	raiseAddWebserverEventHandler(eventHandler, eventHandlers);
@@ -317,31 +115,6 @@ void DeviceFamily::onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink*
 void DeviceFamily::onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers)
 {
 	raiseRemoveWebserverEventHandler(eventHandlers);
-}
-
-uint64_t DeviceFamily::onSaveDevice(uint64_t id, int32_t address, std::string serialNumber, uint32_t type, uint32_t family)
-{
-	return raiseSaveDevice(id, address, serialNumber, type, family);
-}
-
-void DeviceFamily::onSaveDeviceVariable(Database::DataRow& data)
-{
-	raiseSaveDeviceVariable(data);
-}
-
-void DeviceFamily::onDeletePeers(int32_t deviceID)
-{
-	raiseDeletePeers(deviceID);
-}
-
-std::shared_ptr<BaseLib::Database::DataTable> DeviceFamily::onGetPeers(uint64_t deviceID)
-{
-	return raiseGetPeers(deviceID);
-}
-
-std::shared_ptr<BaseLib::Database::DataTable> DeviceFamily::onGetDeviceVariables(uint64_t deviceID)
-{
-	return raiseGetDeviceVariables(deviceID);
 }
 
 void DeviceFamily::onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
@@ -605,7 +378,7 @@ void DeviceFamily::removeThread(uint64_t id)
 				_bl->out.printDebug("Deleting peers from database...");
 				device->deletePeersFromDatabase();
 				_bl->out.printDebug("Deleting database entry...");
-				raiseDeleteDevice(id);
+				_bl->db->deleteDevice(id);
 				return;
 			}
 		}

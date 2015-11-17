@@ -1,7 +1,7 @@
 #ifndef BASELIB_H_
 #define BASELIB_H_
 
-#include "Database/DatabaseTypes.h"
+#include "Database/IDatabaseController.h"
 #include "Encoding/XMLRPCDecoder.h"
 #include "Encoding/XMLRPCEncoder.h"
 #include "Encoding/RPCDecoder.h"
@@ -82,6 +82,11 @@ public:
 	 * The main.conf settings.
 	 */
 	Settings settings;
+
+	/**
+	 * Provides database access.
+	 */
+	std::shared_ptr<Database::IDatabaseController> db;
 
 	/**
 	 * Port, the non-ssl RPC server listens on.

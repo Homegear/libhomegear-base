@@ -103,14 +103,16 @@ std::string Io::getFileContent(std::string filename)
 	throw Exception(strerror(errno));
 }
 
-std::vector<char> Io::getBinaryFileContent(std::string filename)
+std::vector<char> Io::getBinaryFileContent(std::string filename, uint32_t maxBytes)
 {
 	std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
 	if(in)
 	{
 		std::vector<char> contents;
 		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
+		uint32_t size = in.tellg();
+		if(maxBytes > size || maxBytes == 0) maxBytes = size;
+		contents.resize(maxBytes);
 		in.seekg(0, std::ios::beg);
 		in.read(&contents[0], contents.size());
 		in.close();
