@@ -101,9 +101,10 @@ public:
 	 * Reads a file and returns the content as a signed binary array.
 	 *
 	 * @param filename The path to the file to read.
+	 * @param maxBytes Maximum number of bytes to read.
 	 * @return Returns the content of the file as a char array.
 	 */
-	static std::vector<char> getBinaryFileContent(std::string filename);
+	static std::vector<char> getBinaryFileContent(std::string filename, uint32_t maxBytes = 0);
 
 	/**
 	 * Reads a file and returns the content as an unsigned binary array.

@@ -66,5 +66,235 @@ void Licensing::dispose()
     }
 }
 
+void Licensing::load()
+{
+	loadVariables();
+}
+
+void Licensing::loadVariables()
+{
+	try
+	{
+		if(!_bl->db) return;
+		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getLicenseVariables(_moduleId);
+		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
+		{
+			_variableDatabaseIds[row->second.at(2)->intValue] = row->second.at(0)->intValue;
+			uint64_t index = row->second.at(2)->intValue;
+			std::shared_ptr<std::vector<char>> data = row->second.at(5)->binaryValue;
+			if(!data || data->empty()) continue;
+			std::string stringData(&data->at(0), data->size());
+			std::pair<std::string, std::string> parsedData = BaseLib::HelperFunctions::split(stringData, ',');
+			_licenseData[index].licenseKey = parsedData.first;
+			_licenseData[index].activationKey = parsedData.second;
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Licensing::saveVariable(uint64_t index, int32_t intValue)
+{
+	try
+	{
+		if(!_bl->db) return;
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		Database::DataRow data;
+		if(databaseIdIterator != _variableDatabaseIds.end())
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+		else
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_moduleId)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Licensing::saveVariable(uint64_t index, int64_t intValue)
+{
+	try
+	{
+		if(!_bl->db) return;
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		Database::DataRow data;
+		if(databaseIdIterator != _variableDatabaseIds.end())
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+		else
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_moduleId)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Licensing::saveVariable(uint64_t index, std::string& stringValue)
+{
+	try
+	{
+		if(!_bl->db) return;
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		Database::DataRow data;
+		if(databaseIdIterator != _variableDatabaseIds.end())
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(stringValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+		else
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_moduleId)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(stringValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Licensing::saveVariable(uint64_t index, std::vector<uint8_t>& binaryValue)
+{
+	try
+	{
+		if(!_bl->db) return;
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		Database::DataRow data;
+		if(databaseIdIterator != _variableDatabaseIds.end())
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+		else
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_moduleId)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Licensing::saveVariable(uint64_t index, LicenseData& licenseData)
+{
+	try
+	{
+		if(!_bl->db) return;
+		if(licenseData.licenseKey.empty() || licenseData.activationKey.empty()) return;
+		std::vector<uint8_t> blob;
+		blob.reserve(licenseData.licenseKey.size() + 1 + licenseData.activationKey.size());
+		blob.insert(blob.end(), licenseData.licenseKey.begin(), licenseData.licenseKey.end());
+		blob.push_back(',');
+		blob.insert(blob.end(), licenseData.activationKey.begin(), licenseData.activationKey.end());
+
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		Database::DataRow data;
+		if(_licenseData.find(index) == _licenseData.end()) _licenseData[index] = licenseData;
+		if(databaseIdIterator != _variableDatabaseIds.end())
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(blob)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+		else
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_moduleId)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(blob)));
+			_bl->db->saveLicenseVariable(_moduleId, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 }
 }

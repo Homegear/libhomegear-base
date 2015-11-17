@@ -105,35 +105,9 @@ public:
 	class IPeerEventSink : public IEventSinkBase
 	{
 	public:
-		//Database
-			//General
-			virtual void onCreateSavepointSynchronous(std::string name) = 0;
-			virtual void onReleaseSavepointSynchronous(std::string name) = 0;
-			virtual void onCreateSavepointAsynchronous(std::string name) = 0;
-			virtual void onReleaseSavepointAsynchronous(std::string name) = 0;
-
-			//Metadata
-			virtual void onDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "") = 0;
-
-			//Peer
-			virtual void onDeletePeer(uint64_t id) = 0;
-			virtual uint64_t onSavePeer(uint64_t id, uint32_t parentID, int32_t address, std::string serialNumber) = 0;
-			virtual void onSavePeerParameter(uint64_t peerID, Database::DataRow& data) = 0;
-			virtual void onSavePeerVariable(uint64_t peerID, Database::DataRow& data) = 0;
-			virtual std::shared_ptr<Database::DataTable> onGetPeerParameters(uint64_t peerID) = 0;
-			virtual std::shared_ptr<Database::DataTable> onGetPeerVariables(uint64_t peerID) = 0;
-			virtual void onDeletePeerParameter(uint64_t peerID, Database::DataRow& data) = 0;
-			virtual bool onSetPeerID(uint64_t oldPeerID, uint64_t newPeerID) = 0;
-
-			//Service messages
-			virtual std::shared_ptr<Database::DataTable> onGetServiceMessages(uint64_t peerID) = 0;
-			virtual void onSaveServiceMessage(uint64_t peerID, Database::DataRow& data) = 0;
-			virtual void onDeleteServiceMessage(uint64_t databaseID) = 0;
-
-			//Hooks
-			virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers) = 0;
-			virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers) = 0;
-		//End database
+		//Hooks
+		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers) = 0;
+		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers) = 0;
 
 		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
@@ -316,44 +290,18 @@ protected:
 	uint32_t _lastPacketReceived = 0;
 	std::mutex _databaseMutex;
 
-	//Event handling
-	//Database
-		//General
-		virtual void raiseCreateSavepointSynchronous(std::string name);
-		virtual void raiseReleaseSavepointSynchronous(std::string name);
-		virtual void raiseCreateSavepointAsynchronous(std::string name);
-		virtual void raiseReleaseSavepointAsynchronous(std::string name);
-
-		//Metadata
-		virtual void raiseDeleteMetadata(uint64_t peerID, std::string serialNumber, std::string dataID = "");
-
-		//Peer
-		virtual void raiseDeletePeer();
-		virtual uint64_t raiseSavePeer();
-		virtual void raiseSavePeerParameter(Database::DataRow& data);
-		virtual void raiseSavePeerVariable(Database::DataRow& data);
-		virtual std::shared_ptr<Database::DataTable> raiseGetPeerParameters();
-		virtual std::shared_ptr<Database::DataTable> raiseGetPeerVariables();
-		virtual void raiseDeletePeerParameter(Database::DataRow& data);
-		virtual bool raiseSetPeerID(uint64_t newPeerID);
-
-		//Service messages
-		virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages();
-		virtual void raiseSaveServiceMessage(Database::DataRow& data);
-		virtual void raiseDeleteServiceMessage(uint64_t id);
-
+	// {{{ Event handling
 		//Hooks
 		std::map<int32_t, PEventHandler> _webserverEventHandlers;
 		virtual void raiseAddWebserverEventHandler(Rpc::IWebserverEventSink* eventHandler);
 		virtual void raiseRemoveWebserverEventHandler();
-	//End database
 
-	virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
-	virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-	virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
-	virtual void raiseRunScript(std::string& script, const std::string& args, bool keepAlive, int32_t interval);
-	virtual int32_t raiseIsAddonClient(int32_t clientID);
-	//End event handling
+		virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
+		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
+		virtual void raiseRunScript(std::string& script, const std::string& args, bool keepAlive, int32_t interval);
+		virtual int32_t raiseIsAddonClient(int32_t clientID);
+	// }}}
 
 	//ServiceMessages event handling
 	virtual void onConfigPending(bool configPending);

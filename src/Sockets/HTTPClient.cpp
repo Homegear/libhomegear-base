@@ -213,6 +213,8 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 				_socketMutex.unlock();
 				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 10 MiB received.");
 			}
+
+			if(http.isFinished()) break;
 		}
 		if(!_keepAlive) _socket->close();
 		_socketMutex.unlock();
