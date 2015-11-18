@@ -87,11 +87,11 @@ public:
 	int32_t eventTriggerThreadPriority() { return _eventTriggerThreadPriority; }
 	int32_t eventTriggerThreadPolicy() { return _eventTriggerThreadPolicy; }
 	uint32_t scriptThreadMax() { return _scriptThreadMax; }
+	std::string familyConfigPath() { return _familyConfigPath; }
 	std::string deviceDescriptionPath() { return _deviceDescriptionPath; }
 	std::string clientSettingsPath() { return _clientSettingsPath; }
 	std::string serverSettingsPath() { return _serverSettingsPath; }
 	std::string mqttSettingsPath() { return _mqttSettingsPath; }
-	std::string physicalInterfaceSettingsPath() { return _physicalInterfaceSettingsPath; }
 	std::string modulePath() { return _modulePath; }
 	std::string scriptPath() { return _scriptPath; }
 	std::string firmwarePath() { return _firmwarePath; }
@@ -146,11 +146,11 @@ private:
 	int32_t _eventTriggerThreadPriority = 0;
 	int32_t _eventTriggerThreadPolicy = SCHED_OTHER;
 	uint32_t _scriptThreadMax = 10;
+	std::string _familyConfigPath;
 	std::string _deviceDescriptionPath;
 	std::string _clientSettingsPath;
 	std::string _serverSettingsPath;
 	std::string _mqttSettingsPath;
-	std::string _physicalInterfaceSettingsPath;
 	std::string _modulePath;
 	std::string _scriptPath;
 	std::string _firmwarePath;

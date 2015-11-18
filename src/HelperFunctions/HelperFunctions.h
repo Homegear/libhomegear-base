@@ -276,6 +276,7 @@ public:
 	 * Checks if a character is not alphanumeric ('_' and '-' are also regarded alphanumeric).
 	 *
 	 * @see isAlphaNumeric()
+	 * @see stripNonAlphaNumeric
 	 * @param c The character to check.
 	 * @return Returns false if the character is alphanumeric, '_' or '-', otherwise true.
 	 */
@@ -288,6 +289,7 @@ public:
 	 * Checks if a string is alphanumeric ('_' and '-' are also regarded alphanumeric).
 	 *
 	 * @see isNotAlphaNumeric()
+	 * @see stripNonAlphaNumeric
 	 * @param s The string to check.
 	 * @return Returns true if the string is alphanumeric, or contains '_' or '-', otherwise false.
 	 */
@@ -300,6 +302,16 @@ public:
 			[](const char c){ return !(isalpha(c) || isdigit(c) || (c == '_') || (c == '-')); }
 		) == s.end();
 	}
+
+	/**
+	 * Strips all non alphanumeric characters from a string ('_' and '-' are also regarded alphanumeric).
+	 *
+	 * @see isNotAlphaNumeric()
+	 * @see isAlphaNumeric()
+	 * @param s The string to strip.
+	 * @return Returns the stripped string.
+	 */
+	static std::string stripNonAlphaNumeric(const std::string& s);
 
 	/**
 	 * Returns the endianess of the system.

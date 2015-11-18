@@ -31,6 +31,7 @@
 #ifndef DEVICEFAMILY_H_
 #define DEVICEFAMILY_H_
 
+#include "FamilySettings.h"
 #include "../Database/DatabaseTypes.h"
 #include "Central.h"
 #include "LogicalDevice.h"
@@ -42,6 +43,8 @@
 #include <iostream>
 #include <string>
 #include <memory>
+
+#include "PhysicalInterfaces.h"
 
 namespace BaseLib
 {
@@ -75,14 +78,13 @@ public:
 	};
 	//End event handling
 
-	DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler);
+	DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
 	virtual ~DeviceFamily();
 
 	virtual bool init() = 0;
 	virtual void dispose();
 
 	virtual int32_t getFamily() { return _family; }
-	virtual std::shared_ptr<Systems::IPhysicalInterface> createPhysicalDevice(std::shared_ptr<Systems::PhysicalInterfaceSettings> settings) { return std::shared_ptr<Systems::IPhysicalInterface>(); }
 	virtual void load() = 0;
 	virtual void save(bool full);
 	virtual void add(std::shared_ptr<LogicalDevice> device);
@@ -92,13 +94,14 @@ public:
 	virtual std::shared_ptr<LogicalDevice> get(std::string serialNumber);
 	virtual std::vector<std::shared_ptr<LogicalDevice>> getDevices();
 	virtual std::shared_ptr<Central> getCentral() = 0;
-	virtual std::string getName() = 0;
+	virtual std::string getName() { return _name; }
 	virtual std::shared_ptr<Variable> getPairingMethods() = 0;
 	virtual std::string handleCLICommand(std::string& command) = 0;
 	virtual bool peerSelected() { if(!_currentDevice) return false; return _currentDevice->peerSelected(); }
 	virtual bool deviceSelected() { return (bool)_currentDevice; }
 	virtual bool skipFamilyCLI() { return false; }
 	virtual bool hasPhysicalInterface() { return true; }
+	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces() { return _physicalInterfaces; }
 
 	/*
      * Executed when Homegear is fully started.
@@ -111,13 +114,13 @@ public:
     virtual void homegearShuttingDown();
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	IFamilyEventSink* _eventHandler;
-	int32_t _family = -1;
 	std::timed_mutex _devicesMutex;
 	std::mutex _removeThreadMutex;
 	std::thread _removeThread;
 	std::vector<std::shared_ptr<LogicalDevice>> _devices;
 	std::shared_ptr<BaseLib::Systems::LogicalDevice> _currentDevice;
+	std::shared_ptr<FamilySettings> _settings;
+	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
 	bool _disposed = false;
 
 	void removeThread(uint64_t id);
@@ -161,6 +164,10 @@ protected:
 private:
 	DeviceFamily(const DeviceFamily&);
 	DeviceFamily& operator=(const DeviceFamily&);
+
+	IFamilyEventSink* _eventHandler;
+	int32_t _family = -1;
+	std::string _name;
 };
 
 }

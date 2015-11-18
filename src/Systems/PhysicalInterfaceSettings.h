@@ -57,7 +57,6 @@ public:
 	virtual ~PhysicalInterfaceSettings() {}
 	std::string id;
 	bool isDefault = false;
-	int32_t family = -1;
 	std::string device;
 	std::string type;
 	uint32_t responseDelay = 95;

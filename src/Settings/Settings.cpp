@@ -81,11 +81,11 @@ void Settings::reset()
 	_eventTriggerThreadPriority = 0;
 	_eventTriggerThreadPolicy = SCHED_OTHER;
 	_scriptThreadMax = 10;
+	_familyConfigPath = "/etc/homegear/families/";
 	_deviceDescriptionPath = "/etc/homegear/devices/";
 	_clientSettingsPath = "/etc/homegear/rpcclients.conf";
 	_serverSettingsPath = "/etc/homegear/rpcservers.conf";
 	_mqttSettingsPath = "/etc/homegear/mqtt.conf";
-	_physicalInterfaceSettingsPath = "/etc/homegear/physicalinterfaces.conf";
 	_modulePath = "/var/lib/homegear/modules/";
 	_scriptPath = "/var/lib/homegear/scripts/";
 	_firmwarePath = "/usr/share/homegear/firmware/";
@@ -365,6 +365,13 @@ void Settings::load(std::string filename)
 					_scriptThreadMax = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptMaxThreads set to " + std::to_string(_scriptThreadMax));
 				}
+				else if(name == "familyconfigpath")
+				{
+					_familyConfigPath = value;
+					if(_familyConfigPath.empty()) _familyConfigPath = "/etc/homegear/families";
+					if(_familyConfigPath.back() != '/') _familyConfigPath.push_back('/');
+					_bl->out.printDebug("Debug: familyConfigPath set to " + _familyConfigPath);
+				}
 				else if(name == "devicedescriptionpath")
 				{
 					_deviceDescriptionPath = value;
@@ -389,12 +396,6 @@ void Settings::load(std::string filename)
 					_mqttSettingsPath = value;
 					if(_mqttSettingsPath.empty()) _mqttSettingsPath = "/etc/homegear/mqtt.conf";
 					_bl->out.printDebug("Debug: mqttSettingsPath set to " + _mqttSettingsPath);
-				}
-				else if(name == "physicalinterfacesettingspath")
-				{
-					_physicalInterfaceSettingsPath = value;
-					if(_physicalInterfaceSettingsPath.empty()) _physicalInterfaceSettingsPath = "/etc/homegear/physicalinterfaces.conf";
-					_bl->out.printDebug("Debug: physicalDeviceSettingsPath set to " + _physicalInterfaceSettingsPath);
 				}
 				else if(name == "modulepath")
 				{
