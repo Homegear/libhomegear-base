@@ -148,6 +148,17 @@ std::string HelperFunctions::getTimeString(std::string format, int64_t time)
 	return timeStream.str();
 }
 
+std::string HelperFunctions::stripNonAlphaNumeric(const std::string& s)
+{
+	std::string strippedString;
+	strippedString.reserve(s.size());
+	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+	{
+		if(isalpha(*i) || isdigit(*i) || (*i == '_') || (*i == '-')) strippedString.push_back(*i);
+	}
+	return strippedString;
+}
+
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 {
 	std::random_device rd;

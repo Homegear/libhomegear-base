@@ -35,11 +35,20 @@ namespace BaseLib
 {
 namespace Systems
 {
-DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler)
+DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name)
 {
 	_bl = bl;
 	_eventHandler = eventHandler;
+	_family = id;
+	_name = name;
+	_physicalInterfaces.reset(new PhysicalInterfaces(bl, id, std::vector<std::shared_ptr<PhysicalInterfaceSettings>>()));
 	if(_eventHandler) setEventHandler(_eventHandler);
+	std::string filename = getName();
+	HelperFunctions::toLower(filename);
+	filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
+	_settings.reset(new FamilySettings(bl));
+	_bl->out.printInfo(filename);
+	_settings->load(filename);
 }
 
 DeviceFamily::~DeviceFamily()
@@ -404,6 +413,9 @@ void DeviceFamily::dispose()
 	{
 		if(_disposed) return;
 		_disposed = true;
+
+		_physicalInterfaces->dispose();
+
 		if(!_devices.empty())
 		{
 			std::vector<std::shared_ptr<LogicalDevice>> devices;
@@ -422,6 +434,10 @@ void DeviceFamily::dispose()
 		_removeThreadMutex.lock();
 		if(_removeThread.joinable()) _removeThread.join();
 		_removeThreadMutex.unlock();
+
+		_physicalInterfaces.reset();
+		_settings->dispose();
+		_settings.reset();
 	}
 	catch(const std::exception& ex)
     {
