@@ -464,16 +464,40 @@ void IPhysicalInterface::setGPIOPermission(uint32_t index, int32_t userID, int32
     	}
 		if(_settings->gpio[index].path.empty()) getGPIOPath(index);
 		if(_settings->gpio[index].path.empty()) throw(Exception("Error: Failed to get path for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\"."));
-		std::string path = _settings->gpio[index].path + "value";
-    	int32_t result = chown(path.c_str(), userID, groupID);
+		std::string valuePath = _settings->gpio[index].path + "value";
+    	int32_t result = chown(valuePath.c_str(), userID, groupID);
     	if(result == -1)
     	{
-    		_bl->out.printError("Error: Could not set owner for GPIO value file " + path + ": " + std::string(strerror(errno)));
+    		_bl->out.printError("Error: Could not set owner for GPIO value file " + valuePath + ": " + std::string(strerror(errno)));
     	}
-    	result = chmod(path.c_str(), readOnly ? (S_IRUSR | S_IRGRP) : (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP));
+    	result = chmod(valuePath.c_str(), readOnly ? (S_IRUSR | S_IRGRP) : (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP));
     	if(result == -1)
     	{
-    		_bl->out.printError("Error: Could not set permissions for GPIO value file " + path + ": " + std::string(strerror(errno)));
+    		_bl->out.printError("Error: Could not set permissions for GPIO value file " + valuePath + ": " + std::string(strerror(errno)));
+    	}
+
+    	std::string edgePath = _settings->gpio[index].path + "edge";
+    	int32_t result = chown(edgePath.c_str(), userID, groupID);
+    	if(result == -1)
+    	{
+    		_bl->out.printError("Error: Could not set owner for GPIO value file " + edgePath + ": " + std::string(strerror(errno)));
+    	}
+    	result = chmod(edgePath.c_str(), readOnly ? (S_IRUSR | S_IRGRP) : (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP));
+    	if(result == -1)
+    	{
+    		_bl->out.printError("Error: Could not set permissions for GPIO value file " + edgePath + ": " + std::string(strerror(errno)));
+    	}
+
+		std::string directionPath = _settings->gpio[index].path + "direction";
+		int32_t result = chown(directionPath.c_str(), userID, groupID);
+    	if(result == -1)
+    	{
+    		_bl->out.printError("Error: Could not set owner for GPIO value file " + directionPath + ": " + std::string(strerror(errno)));
+    	}
+    	result = chmod(directionPath.c_str(), readOnly ? (S_IRUSR | S_IRGRP) : (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP));
+    	if(result == -1)
+    	{
+    		_bl->out.printError("Error: Could not set permissions for GPIO value file " + directionPath + ": " + std::string(strerror(errno)));
     	}
 	}
 	catch(const std::exception& ex)
