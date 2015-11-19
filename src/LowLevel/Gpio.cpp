@@ -282,7 +282,7 @@ void Gpio::setPermission(uint32_t index, int32_t userID, int32_t groupID, bool r
     	}
 
     	std::string edgePath = _gpioInfo[index].path + "edge";
-    	int32_t result = chown(edgePath.c_str(), userID, groupID);
+    	result = chown(edgePath.c_str(), userID, groupID);
     	if(result == -1)
     	{
     		_bl->out.printError("Error: Could not set owner for GPIO value file " + edgePath + ": " + std::string(strerror(errno)));
@@ -294,7 +294,7 @@ void Gpio::setPermission(uint32_t index, int32_t userID, int32_t groupID, bool r
     	}
 
 		std::string directionPath = _gpioInfo[index].path + "direction";
-		int32_t result = chown(directionPath.c_str(), userID, groupID);
+		result = chown(directionPath.c_str(), userID, groupID);
     	if(result == -1)
     	{
     		_bl->out.printError("Error: Could not set owner for GPIO value file " + directionPath + ": " + std::string(strerror(errno)));
