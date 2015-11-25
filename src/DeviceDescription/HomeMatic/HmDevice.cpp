@@ -105,7 +105,7 @@ DeviceFrame::DeviceFrame(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceFrame(
 		else if(attributeName == "subtype") subtype = Math::getNumber(attributeValue);
 		else if(attributeName == "subtype_index")
 		{
-			std::pair<std::string, std::string> splitString = HelperFunctions::split(attributeValue, ':');
+			std::pair<std::string, std::string> splitString = HelperFunctions::splitLast(attributeValue, ':');
 			subtypeIndex = Math::getNumber(splitString.first);
 			if(!splitString.second.empty()) subtypeFieldSize = Math::getDouble(splitString.second);
 		}
@@ -115,14 +115,14 @@ DeviceFrame::DeviceFrame(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceFrame(
 		{
 			if(channelField == -1) //Might already be set by receiver_channel_field. We don't need both
 			{
-				std::pair<std::string, std::string> splitString = HelperFunctions::split(attributeValue, ':');
+				std::pair<std::string, std::string> splitString = HelperFunctions::splitLast(attributeValue, ':');
 				channelField = Math::getNumber(splitString.first);
 				if(!splitString.second.empty()) channelFieldSize = Math::getDouble(splitString.second);
 			}
 		}
 		else if(attributeName == "receiver_channel_field")
 		{
-			std::pair<std::string, std::string> splitString = HelperFunctions::split(attributeValue, ':');
+			std::pair<std::string, std::string> splitString = HelperFunctions::splitLast(attributeValue, ':');
 			channelField = Math::getNumber(splitString.first);
 			if(!splitString.second.empty()) channelFieldSize = Math::getDouble(splitString.second);
 		}
@@ -2003,7 +2003,7 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 		}
 		else if(attributeName == "count_from_sysinfo")
 		{
-			std::pair<std::string, std::string> splitValue = HelperFunctions::split(attributeValue, ':');
+			std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(attributeValue, ':');
 			if(!splitValue.first.empty())
 			{
 				countFromSysinfo = Math::getDouble(splitValue.first);

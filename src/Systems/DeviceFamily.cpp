@@ -172,15 +172,11 @@ void DeviceFamily::save(bool full)
 	try
 	{
 		_bl->out.printMessage("(Shutdown) => Saving devices");
-		if(!_devicesMutex.try_lock_for(std::chrono::milliseconds(5000)))
+		if(_central)
 		{
-			_bl->out.printError("Error: Could not get device mutex. Saving devices anyway.");
-		}
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			_bl->out.printMessage("(Shutdown) => Saving " + getName() + " device " + std::to_string((*i)->getID()));
-			(*i)->save(full);
-			(*i)->savePeers(full);
+			_bl->out.printMessage("(Shutdown) => Saving " + getName() + " central...");
+			_central->save(full);
+			_central->savePeers(full);
 		}
 	}
 	catch(const std::exception& ex)
@@ -195,216 +191,6 @@ void DeviceFamily::save(bool full)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _devicesMutex.unlock();
-}
-
-void DeviceFamily::add(std::shared_ptr<LogicalDevice> device)
-{
-	try
-	{
-		if(!device) return;
-		_devicesMutex.lock();
-		device->save(true);
-		_devices.push_back(device);
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
-}
-
-std::vector<std::shared_ptr<LogicalDevice>> DeviceFamily::getDevices()
-{
-	try
-	{
-		_devicesMutex.lock();
-		std::vector<std::shared_ptr<LogicalDevice>> devices;
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			devices.push_back(*i);
-		}
-		_devicesMutex.unlock();
-		return devices;
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
-	return std::vector<std::shared_ptr<LogicalDevice>>();
-}
-
-std::shared_ptr<LogicalDevice> DeviceFamily::get(int32_t address)
-{
-	try
-	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			if((*i)->getAddress() == address)
-			{
-				_devicesMutex.unlock();
-				return (*i);
-			}
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
-	return std::shared_ptr<LogicalDevice>();
-}
-
-std::shared_ptr<LogicalDevice> DeviceFamily::get(uint64_t id)
-{
-	try
-	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			if((*i)->getID() == id)
-			{
-				_devicesMutex.unlock();
-				return (*i);
-			}
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
-	return std::shared_ptr<LogicalDevice>();
-}
-
-std::shared_ptr<LogicalDevice> DeviceFamily::get(std::string serialNumber)
-{
-	try
-	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			if((*i)->getSerialNumber() == serialNumber)
-			{
-				_devicesMutex.unlock();
-				return (*i);
-			}
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
-	return std::shared_ptr<LogicalDevice>();
-}
-
-void DeviceFamily::remove(uint64_t id)
-{
-	try
-	{
-		_removeThreadMutex.lock();
-		if(_disposed)
-		{
-			_removeThreadMutex.unlock();
-			return;
-		}
-		if(_removeThread.joinable()) _removeThread.join();
-		_removeThread = std::thread(&DeviceFamily::removeThread, this, id);
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _removeThreadMutex.unlock();
-}
-
-void DeviceFamily::removeThread(uint64_t id)
-{
-	try
-	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			if((*i)->getID() == id)
-			{
-				_bl->out.printDebug("Removing device pointer from device array...");
-				std::shared_ptr<LogicalDevice> device = *i;
-				_devices.erase(i);
-				_devicesMutex.unlock();
-				_bl->out.printDebug("Disposing device...");
-				device->dispose(true);
-				_bl->out.printDebug("Deleting peers from database...");
-				device->deletePeersFromDatabase();
-				_bl->out.printDebug("Deleting database entry...");
-				_bl->db->deleteDevice(id);
-				return;
-			}
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    _devicesMutex.unlock();
 }
 
 void DeviceFamily::dispose()
@@ -416,24 +202,8 @@ void DeviceFamily::dispose()
 
 		_physicalInterfaces->dispose();
 
-		if(!_devices.empty())
-		{
-			std::vector<std::shared_ptr<LogicalDevice>> devices;
-			_devicesMutex.lock();
-			for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-			{
-				devices.push_back(*i);
-			}
-			_devicesMutex.unlock();
-			for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = devices.begin(); i != devices.end(); ++i)
-			{
-				_bl->out.printDebug("Debug: Disposing device " + std::to_string((*i)->getID()));
-				(*i)->dispose(false);
-			}
-		}
-		_removeThreadMutex.lock();
-		if(_removeThread.joinable()) _removeThread.join();
-		_removeThreadMutex.unlock();
+		_bl->out.printDebug("Debug: Disposing central...");
+		if(_central) _central->dispose(false);
 
 		_physicalInterfaces.reset();
 		_settings->dispose();
@@ -441,17 +211,14 @@ void DeviceFamily::dispose()
 	}
 	catch(const std::exception& ex)
     {
-		_devicesMutex.unlock();
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_devicesMutex.unlock();
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_devicesMutex.unlock();
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
@@ -460,11 +227,7 @@ void DeviceFamily::homegearStarted()
 {
 	try
 	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			(*i)->homegearStarted();
-		}
+		if(_central) _central->homegearStarted();
 	}
 	catch(const std::exception& ex)
     {
@@ -478,18 +241,13 @@ void DeviceFamily::homegearStarted()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _devicesMutex.unlock();
 }
 
 void DeviceFamily::homegearShuttingDown()
 {
 	try
 	{
-		_devicesMutex.lock();
-		for(std::vector<std::shared_ptr<LogicalDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			(*i)->homegearShuttingDown();
-		}
+		if(_central) _central->homegearShuttingDown();
 	}
 	catch(const std::exception& ex)
     {
@@ -503,7 +261,6 @@ void DeviceFamily::homegearShuttingDown()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _devicesMutex.unlock();
 }
 
 }

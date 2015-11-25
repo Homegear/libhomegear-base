@@ -253,14 +253,26 @@ public:
 	}
 
 	/**
-	 * Splits a string at the last occurrence of a delimiter.
+	 * Splits a string at the first occurrence of a delimiter.
 	 *
 	 * @see splitAll()
+	 * @see splitLast
 	 * @param string The string to split.
 	 * @param delimiter The delimiter to split the string at.
 	 * @return Returns a pair with the two parts.
 	 */
-	static std::pair<std::string, std::string> split(std::string string, char delimiter);
+	static std::pair<std::string, std::string> splitFirst(std::string string, char delimiter);
+
+	/**
+	 * Splits a string at the last occurrence of a delimiter.
+	 *
+	 * @see splitAll()
+	 * @see splitFirst()
+	 * @param string The string to split.
+	 * @param delimiter The delimiter to split the string at.
+	 * @return Returns a pair with the two parts.
+	 */
+	static std::pair<std::string, std::string> splitLast(std::string string, char delimiter);
 
 	/**
 	 * Splits a string at all occurrences of a delimiter.

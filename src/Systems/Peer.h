@@ -52,8 +52,8 @@ namespace Rpc
 
 namespace Systems
 {
-class LogicalDevice;
-class Central;
+class ICentral;
+class Peer;
 
 class RPCConfigurationParameter
 {
@@ -81,19 +81,19 @@ class BasicPeer
 {
 public:
 	BasicPeer() {}
-	BasicPeer(int32_t addr, std::string serial, bool hid) { address = addr; serialNumber = serial; hidden = hid; }
+	BasicPeer(int32_t address, std::string serial, bool isVirtual) { this->address = address; serialNumber = serial; this->isVirtual = isVirtual; }
 	virtual ~BasicPeer() {}
 
+	std::shared_ptr<Peer> peer;
 	bool isSender = false;
 	uint64_t id = 0;
 	int32_t address = 0;
 	std::string serialNumber;
 	int32_t channel = 0;
 	int32_t physicalIndexOffset = 0;
-	bool hidden = false;
+	bool isVirtual = false;
 	std::string linkName;
 	std::string linkDescription;
-	std::shared_ptr<LogicalDevice> device;
 	std::vector<uint8_t> data;
 	int32_t configEEPROMAddress = -1;
 };
@@ -166,7 +166,7 @@ public:
 
 	virtual std::string getRpcTypeString() { return _rpcTypeString; }
 
-	virtual std::string handleCLICommand(std::string command) = 0;
+	virtual std::string handleCliCommand(std::string command) = 0;
 	virtual HomegearDevice::ReceiveModes::Enum getRXModes();
 	virtual bool isTeam() { return false; }
 	virtual void setLastPacketReceived();
@@ -178,14 +178,14 @@ public:
 	virtual std::string getFirmwareVersionString(int32_t firmwareVersion) = 0;
     virtual bool firmwareUpdateAvailable() = 0;
 
-	virtual bool load(LogicalDevice* device) { return false; }
+	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
 	virtual void loadConfig();
     virtual void saveConfig();
 	virtual void saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, std::string parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
 	virtual void saveParameter(uint32_t parameterID, uint32_t address, std::vector<uint8_t>& value);
 	virtual void saveParameter(uint32_t parameterID, std::vector<uint8_t>& value);
-	virtual void loadVariables(LogicalDevice* device = nullptr, std::shared_ptr<BaseLib::Database::DataTable> rows = std::shared_ptr<BaseLib::Database::DataTable>());
+	virtual void loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows);
 	virtual void saveVariables();
 	virtual void saveVariable(uint32_t index, int32_t intValue);
     virtual void saveVariable(uint32_t index, int64_t intValue);
@@ -216,8 +216,7 @@ public:
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, uint64_t id, int32_t remoteChannel = -1);
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel = -1);
 
-    virtual std::shared_ptr<Central> getCentral() = 0;
-	virtual std::shared_ptr<LogicalDevice> getDevice(int32_t address) = 0;
+    virtual std::shared_ptr<ICentral> getCentral() = 0;
 
     //RPC methods
 	virtual std::shared_ptr<Variable> activateLinkParamset(int32_t clientID, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
@@ -253,7 +252,7 @@ protected:
     BaseLib::Obj* _bl = nullptr;
     std::shared_ptr<HomegearDevice> _rpcDevice;
     std::map<uint32_t, uint32_t> _variableDatabaseIDs;
-    std::shared_ptr<Central> _central;
+    std::shared_ptr<ICentral> _central;
 
 	//In table peers:
 	uint64_t _peerID = 0;
@@ -266,6 +265,7 @@ protected:
 	int32_t _firmwareVersion = 0;
 	std::string _firmwareVersionString;
 	LogicalDeviceType _deviceType;
+	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
 	std::string _name;
 	std::string _ip;

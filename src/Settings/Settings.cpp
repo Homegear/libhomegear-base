@@ -439,7 +439,7 @@ void Settings::load(std::string filename)
 				{
 					if(!value.empty())
 					{
-						std::pair<std::string, std::string> addresses = _bl->hf.split(HelperFunctions::toLower(value), ' ');
+						std::pair<std::string, std::string> addresses = _bl->hf.splitLast(HelperFunctions::toLower(value), ' ');
 						if(!value.empty()) _clientAddressesToReplace[addresses.first] = addresses.second;
 						_bl->out.printDebug("Debug: Added replaceClientServerAddress " + addresses.first + " " + addresses.second);
 					}

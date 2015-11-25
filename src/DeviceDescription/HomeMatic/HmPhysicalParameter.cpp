@@ -135,7 +135,7 @@ PhysicalParameter::PhysicalParameter(BaseLib::Obj* baseLib, xml_node<>* node) : 
 			else if(attributeName == "list") list = Math::getNumber(attributeValue);
 			else if(attributeName == "index")
 			{
-				std::pair<std::string, std::string> splitValue = baseLib->hf.split(attributeValue, '.');
+				std::pair<std::string, std::string> splitValue = baseLib->hf.splitLast(attributeValue, '.');
 				index = 0;
 				if(!splitValue.second.empty())
 				{
@@ -146,7 +146,7 @@ PhysicalParameter::PhysicalParameter(BaseLib::Obj* baseLib, xml_node<>* node) : 
 			}
 			else if(attributeName == "size")
 			{
-				std::pair<std::string, std::string> splitValue = baseLib->hf.split(attributeValue, '.');
+				std::pair<std::string, std::string> splitValue = baseLib->hf.splitLast(attributeValue, '.');
 				size = 0;
 				if(!splitValue.second.empty())
 				{
@@ -237,7 +237,7 @@ PhysicalParameter::PhysicalParameter(BaseLib::Obj* baseLib, xml_node<>* node) : 
 							address.operation = PhysicalParameterAddress::Operation::substraction;
 							attributeValue.erase(0, 1);
 						}
-						std::pair<std::string, std::string> splitValue = baseLib->hf.split(attributeValue, '.');
+						std::pair<std::string, std::string> splitValue = baseLib->hf.splitLast(attributeValue, '.');
 						address.index = 0;
 						if(!splitValue.second.empty())
 						{

@@ -68,7 +68,7 @@ Packet::Packet(BaseLib::Obj* baseLib, xml_node<>* node) : Packet(baseLib)
 		else if(nodeName == "subtype") subtype = Math::getNumber(value);
 		else if(nodeName == "subtypeIndex")
 		{
-			std::pair<std::string, std::string> splitValue = HelperFunctions::split(value, ':');
+			std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(value, ':');
 			if(!splitValue.first.empty()) subtypeIndex = Math::getUnsignedNumber(splitValue.first);
 			if(!splitValue.second.empty()) subtypeSize = Math::getDouble(splitValue.second);
 		}
@@ -81,7 +81,7 @@ Packet::Packet(BaseLib::Obj* baseLib, xml_node<>* node) : Packet(baseLib)
 		else if(nodeName == "channel") channel = Math::getNumber(value);
 		else if(nodeName == "channelIndex")
 		{
-			std::pair<std::string, std::string> splitValue = HelperFunctions::split(value, ':');
+			std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(value, ':');
 			if(!splitValue.first.empty()) channelIndex = Math::getUnsignedNumber(splitValue.first);
 			if(!splitValue.second.empty()) channelSize = Math::getDouble(splitValue.second);
 		}
