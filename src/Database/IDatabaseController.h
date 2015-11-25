@@ -57,7 +57,7 @@ public:
 	virtual void hotBackup() = 0;
 	virtual bool isOpen() = 0;
 	virtual void initializeDatabase() = 0;
-	virtual void convertDatabase() = 0;
+	virtual bool convertDatabase() = 0;
 	virtual void createSavepointSynchronous(std::string& name) = 0;
 	virtual void releaseSavepointSynchronous(std::string& name) = 0;
 	virtual void createSavepointAsynchronous(std::string& name) = 0;
@@ -111,7 +111,7 @@ public:
 
 	//Peer
 	virtual void deletePeer(uint64_t id) = 0;
-	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber) = 0;
+	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
 	virtual void savePeerParameterAsynchronous(uint64_t peerID, DataRow& data) = 0;
 	virtual void savePeerVariableAsynchronous(uint64_t peerID, DataRow& data) = 0;
 	virtual std::shared_ptr<DataTable> getPeerParameters(uint64_t peerID) = 0;

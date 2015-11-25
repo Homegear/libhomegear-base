@@ -84,7 +84,7 @@ void Licensing::loadVariables()
 			std::shared_ptr<std::vector<char>> data = row->second.at(5)->binaryValue;
 			if(!data || data->empty()) continue;
 			std::string stringData(&data->at(0), data->size());
-			std::pair<std::string, std::string> parsedData = BaseLib::HelperFunctions::split(stringData, ',');
+			std::pair<std::string, std::string> parsedData = BaseLib::HelperFunctions::splitLast(stringData, ',');
 			_licenseData[index].licenseKey = parsedData.first;
 			_licenseData[index].activationKey = parsedData.second;
 		}

@@ -99,7 +99,9 @@ void Peer::dispose()
 {
 	_disposing = true;
 	_central.reset();
+	_peersMutex.lock();
 	_peers.clear();
+	_peersMutex.unlock();
 }
 
 
@@ -295,22 +297,32 @@ void Peer::setLastPacketReceived()
 
 std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel)
 {
+	_peersMutex.lock();
 	try
 	{
-		if(_peers.find(channel) == _peers.end()) return std::shared_ptr<BasicPeer>();
+		if(_peers.find(channel) == _peers.end())
+		{
+			_peersMutex.unlock();
+			return std::shared_ptr<BasicPeer>();
+		}
 
 		for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = _peers[channel].begin(); i != _peers[channel].end(); ++i)
 		{
 			if((*i)->serialNumber.empty())
 			{
-				std::shared_ptr<Central> central(getCentral());
+				std::shared_ptr<ICentral> central(getCentral());
 				if(central)
 				{
-					std::shared_ptr<Peer> peer(central->logicalDevice()->getPeer((*i)->address));
+					std::shared_ptr<Peer> peer(central->getPeer((*i)->address));
 					if(peer) (*i)->serialNumber = peer->getSerialNumber();
 				}
 			}
-			if((*i)->serialNumber == serialNumber && (remoteChannel < 0 || remoteChannel == (*i)->channel)) return *i;
+			if((*i)->serialNumber == serialNumber && (remoteChannel < 0 || remoteChannel == (*i)->channel))
+			{
+				std::shared_ptr<BasicPeer> peer = *i;
+				_peersMutex.unlock();
+				return peer;
+			}
 		}
 	}
 	catch(const std::exception& ex)
@@ -325,18 +337,29 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumb
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    _peersMutex.unlock();
 	return std::shared_ptr<BasicPeer>();
 }
 
 std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, int32_t address, int32_t remoteChannel)
 {
+	_peersMutex.lock();
 	try
 	{
-		if(_peers.find(channel) == _peers.end()) return std::shared_ptr<BasicPeer>();
+		if(_peers.find(channel) == _peers.end())
+		{
+			_peersMutex.unlock();
+			return std::shared_ptr<BasicPeer>();
+		}
 
 		for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = _peers[channel].begin(); i != _peers[channel].end(); ++i)
 		{
-			if((*i)->address == address && (remoteChannel < 0 || remoteChannel == (*i)->channel)) return *i;
+			if((*i)->address == address && (remoteChannel < 0 || remoteChannel == (*i)->channel))
+			{
+				std::shared_ptr<BasicPeer> peer = *i;
+				_peersMutex.unlock();
+				return peer;
+			}
 		}
 	}
 	catch(const std::exception& ex)
@@ -351,28 +374,39 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, int32_t address, int32
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    _peersMutex.unlock();
 	return std::shared_ptr<BasicPeer>();
 }
 
 std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, uint64_t id, int32_t remoteChannel)
 {
+	_peersMutex.lock();
 	try
 	{
-		if(_peers.find(channel) == _peers.end()) return std::shared_ptr<BasicPeer>();
+		if(_peers.find(channel) == _peers.end())
+		{
+			_peersMutex.unlock();
+			return std::shared_ptr<BasicPeer>();
+		}
 
 		for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = _peers[channel].begin(); i != _peers[channel].end(); ++i)
 		{
 			//TODO: Remove a few versions after ID is saved
 			if((*i)->id == 0)
 			{
-				std::shared_ptr<Peer> peer = getCentral()->logicalDevice()->getPeer((*i)->serialNumber);
+				std::shared_ptr<Peer> peer = getCentral()->getPeer((*i)->serialNumber);
 				if(peer) (*i)->id = peer->getID();
-				else if((*i)->hidden && (*i)->address == getCentral()->logicalDevice()->getAddress())
+				else if((*i)->isVirtual && (*i)->address == getCentral()->getAddress())
 				{
 					(*i)->id = 0xFFFFFFFFFFFFFFFF;
 				}
 			}
-			if((*i)->id == id && (remoteChannel < 0 || remoteChannel == (*i)->channel)) return *i;
+			if((*i)->id == id && (remoteChannel < 0 || remoteChannel == (*i)->channel))
+			{
+				std::shared_ptr<BasicPeer> peer = *i;
+				_peersMutex.unlock();
+				return peer;
+			}
 		}
 	}
 	catch(const std::exception& ex)
@@ -387,6 +421,7 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, uint64_t id, int32_t r
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    _peersMutex.unlock();
 	return std::shared_ptr<BasicPeer>();
 }
 
@@ -547,7 +582,7 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
 		if(savePeer)
 		{
 			_databaseMutex.lock();
-			uint64_t result = _bl->db->savePeer(_peerID, _parentID, _address, _serialNumber);
+			uint64_t result = _bl->db->savePeer(_peerID, _parentID, _address, _serialNumber, _deviceType.type());
 			if(_peerID == 0 && result > 0) setID(result);
 			_databaseMutex.unlock();
 		}
@@ -677,7 +712,7 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
     _databaseMutex.unlock();
 }
 
-void Peer::loadVariables(BaseLib::Systems::LogicalDevice* device, std::shared_ptr<BaseLib::Database::DataTable> rows)
+void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows)
 {
 	try
 	{
@@ -695,7 +730,7 @@ void Peer::loadVariables(BaseLib::Systems::LogicalDevice* device, std::shared_pt
 				_firmwareVersion = row->second.at(3)->intValue;
 				break;
 			case 1002:
-				_deviceType = BaseLib::Systems::LogicalDeviceType(device->deviceFamily(), row->second.at(3)->intValue);
+				_deviceType = BaseLib::Systems::LogicalDeviceType(central->deviceFamily(), row->second.at(3)->intValue);
 				if(_deviceType.type() == (uint32_t)0xFFFFFFFF)
 				{
 					_bl->out.printError("Error loading peer " + std::to_string(_peerID) + ": Device type unknown: 0x" + BaseLib::HelperFunctions::getHexString(row->second.at(3)->intValue) + " Firmware version: " + std::to_string(_firmwareVersion));
@@ -1333,7 +1368,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(int32_t clientID, int32_t c
 				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
 			}
 
-			if(fields.empty() || fields.find("INTERFACE") != fields.end()) description->structValue->insert(StructElement("INTERFACE", std::shared_ptr<Variable>(new Variable(getCentral()->logicalDevice()->getSerialNumber()))));
+			if(fields.empty() || fields.find("INTERFACE") != fields.end()) description->structValue->insert(StructElement("INTERFACE", std::shared_ptr<Variable>(new Variable(getCentral()->getSerialNumber()))));
 
 			if(fields.empty() || fields.find("PARAMSETS") != fields.end())
 			{
@@ -1556,25 +1591,33 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		std::shared_ptr<Variable> array(new Variable(VariableType::tArray));
+		std::shared_ptr<ICentral> central = getCentral();
+		if(!central) return array; //central actually should always be set at this point
 		std::shared_ptr<Variable> element;
 		bool groupFlag = false;
 		if(flags & 0x01) groupFlag = true;
 		if(channel > -1 && !groupFlag) //Get link of single channel
 		{
 			if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
-			//Return if no peers are paired to the channel
-			if(_peers.find(channel) == _peers.end() || _peers.at(channel).empty()) return array;
 			bool isSender = false;
 			//Return if there are no link roles defined
 			PFunction rpcFunction = _rpcDevice->functions.at(channel);
 			if(!rpcFunction->linkSenderFunctionTypes.empty()) isSender = true;
 			else if(rpcFunction->linkReceiverFunctionTypes.empty()) return array;
-			std::shared_ptr<Central> central = getCentral();
-			if(!central) return array; //central actually should always be set at this point
-			for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = _peers.at(channel).begin(); i != _peers.at(channel).end(); ++i)
+			//Return if no peers are paired to the channel
+			_peersMutex.lock();
+			std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
+			if(peersIterator == _peers.end() || peersIterator->second.empty())
 			{
-				if((*i)->hidden) continue;
-				std::shared_ptr<Peer> remotePeer(central->logicalDevice()->getPeer((*i)->address));
+				_peersMutex.unlock();
+				return array;
+			}
+			std::vector<std::shared_ptr<BasicPeer>> peers = peersIterator->second;
+			_peersMutex.unlock();
+			for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+			{
+				if((*i)->isVirtual) continue;
+				std::shared_ptr<Peer> remotePeer(central->getPeer((*i)->address));
 				if(!remotePeer)
 				{
 					_bl->out.printDebug("Debug: Can't return link description for peer with address 0x" + BaseLib::HelperFunctions::getHexString((*i)->address, 6) + ". The peer is not paired to Homegear.");
@@ -1763,9 +1806,8 @@ std::shared_ptr<Variable> Peer::getLinkInfo(int32_t clientID, int32_t senderChan
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(_peers.find(senderChannel) == _peers.end()) return Variable::createError(-2, "No peer found for sender channel.");
 		std::shared_ptr<BasicPeer> remotePeer = getPeer(senderChannel, receiverID, receiverChannel);
-		if(!remotePeer) return Variable::createError(-2, "Peer not found.");
+		if(!remotePeer) return Variable::createError(-2, "No peer found for sender channel.");
 		std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
 		response->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(remotePeer->linkDescription))));
 		response->structValue->insert(StructElement("NAME", std::shared_ptr<Variable>(new Variable(remotePeer->linkName))));
@@ -1795,17 +1837,25 @@ std::shared_ptr<Variable> Peer::getLinkPeers(int32_t clientID, int32_t channel, 
 		if(channel > -1)
 		{
 			if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
-			//Return if no peers are paired to the channel
-			if(_peers.find(channel) == _peers.end() || _peers.at(channel).empty()) return array;
 			PFunction rpcFunction = _rpcDevice->functions.at(channel);
 			//Return if there are no link roles defined
 			if(rpcFunction->linkSenderFunctionTypes.empty() || rpcFunction->linkReceiverFunctionTypes.empty()) return array;
-			std::shared_ptr<Central> central(getCentral());
+			std::shared_ptr<ICentral> central(getCentral());
 			if(!central) return array; //central actually should always be set at this point
-			for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = _peers.at(channel).begin(); i != _peers.at(channel).end(); ++i)
+			_peersMutex.lock();
+			std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
+			if(peersIterator == _peers.end() || peersIterator->second.empty())
 			{
-				if((*i)->hidden) continue;
-				std::shared_ptr<Peer> peer(central->logicalDevice()->getPeer((*i)->address));
+				//Return if no peers are paired to the channel
+				_peersMutex.unlock();
+				return array;
+			}
+			std::vector<std::shared_ptr<BasicPeer>> peers = peersIterator->second;
+			_peersMutex.unlock();
+			for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+			{
+				if((*i)->isVirtual) continue;
+				std::shared_ptr<Peer> peer(central->getPeer((*i)->address));
 				if(returnID && !peer) continue;
 				bool peerKnowsMe = false;
 				if(peer && peer->getPeer(channel, _peerID)) peerKnowsMe = true;
@@ -2164,9 +2214,9 @@ std::shared_ptr<Variable> Peer::rssiInfo(int32_t clientID)
 		if(element->integerValue == 0) element->integerValue = 65536;
 		rpcArray->arrayValue->push_back(element);
 
-		std::shared_ptr<Central> central = getCentral();
+		std::shared_ptr<ICentral> central = getCentral();
 		if(!central) return Variable::createError(-32500, "Central is nullptr.");
-		response->structValue->insert(StructElement(central->logicalDevice()->getSerialNumber(), rpcArray));
+		response->structValue->insert(StructElement(central->getSerialNumber(), rpcArray));
 		return response;
 	}
 	catch(const std::exception& ex)
@@ -2188,9 +2238,8 @@ std::shared_ptr<Variable> Peer::setLinkInfo(int32_t clientID, int32_t senderChan
 {
 	try
 	{
-		if(_peers.find(senderChannel) == _peers.end()) return Variable::createError(-2, "No peer found for sender channel.");
 		std::shared_ptr<BasicPeer> remotePeer = getPeer(senderChannel, receiverID, receiverChannel);
-		if(!remotePeer)	return Variable::createError(-2, "Peer not found.");
+		if(!remotePeer)	return Variable::createError(-2, "No peer found for sender channel..");
 		remotePeer->linkDescription = description;
 		remotePeer->linkName = name;
 		savePeers();
@@ -2218,10 +2267,10 @@ std::shared_ptr<Variable> Peer::setId(int32_t clientID, uint64_t newPeerId)
 		if(newPeerId == 0 || newPeerId >= 0x40000000) return Variable::createError(-100, "New peer ID is invalid.");
 		if(newPeerId == _peerID) return Variable::createError(-100, "New peer ID is the same as the old one.");
 
-		std::shared_ptr<Central> central(getCentral());
+		std::shared_ptr<ICentral> central(getCentral());
 		if(central)
 		{
-			std::shared_ptr<Peer> peer = central->logicalDevice()->getPeer(newPeerId);
+			std::shared_ptr<Peer> peer = central->getPeer(newPeerId);
 			if(peer) return Variable::createError(-101, "New peer ID is already in use.");
 			if(!_bl->db->setPeerID(_peerID, newPeerId)) return Variable::createError(-32500, "Error setting id. See log for more details.");
 			_peerID = newPeerId;

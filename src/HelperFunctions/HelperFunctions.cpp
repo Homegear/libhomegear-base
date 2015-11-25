@@ -268,7 +268,15 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& f
     }
 }
 
-std::pair<std::string, std::string> HelperFunctions::split(std::string string, char delimiter)
+std::pair<std::string, std::string> HelperFunctions::splitFirst(std::string string, char delimiter)
+{
+	int32_t pos = string.find_first_of(delimiter);
+	if(pos == -1) return std::pair<std::string, std::string>(string, "");
+	if((unsigned)pos + 1 >= string.size()) return std::pair<std::string, std::string>(string.substr(0, pos), "");
+	return std::pair<std::string, std::string>(string.substr(0, pos), string.substr(pos + 1));
+}
+
+std::pair<std::string, std::string> HelperFunctions::splitLast(std::string string, char delimiter)
 {
 	int32_t pos = string.find_last_of(delimiter);
 	if(pos == -1) return std::pair<std::string, std::string>(string, "");
