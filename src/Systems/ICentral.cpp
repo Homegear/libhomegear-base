@@ -429,6 +429,7 @@ void ICentral::load()
 	try
 	{
 		loadVariables();
+		loadPeers();
 	}
     catch(const std::exception& ex)
     {
@@ -454,6 +455,7 @@ void ICentral::save(bool saveDevice)
 			if(_deviceId == 0) _deviceId = result;
 		}
 		saveVariables();
+		savePeers();
 	}
     catch(const std::exception& ex)
     {

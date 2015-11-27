@@ -35,6 +35,13 @@ namespace BaseLib
 {
 namespace Systems
 {
+int32_t DeviceFamily::getFamily(){ return _family; }
+std::shared_ptr<ICentral> DeviceFamily::getCentral() { return _central; }
+std::string DeviceFamily::getName() { return _name; }
+bool DeviceFamily::peerSelected() { if(!_central) return false; return _central->peerSelected(); }
+bool DeviceFamily::hasPhysicalInterface() { return true; }
+std::shared_ptr<PhysicalInterfaces> DeviceFamily::physicalInterfaces() { return _physicalInterfaces; }
+
 DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name)
 {
 	_bl = bl;
@@ -167,6 +174,41 @@ void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vecto
 }
 //End Device event handling
 
+void DeviceFamily::load()
+{
+	try
+	{
+		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getDevices((uint32_t)getFamily());
+		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
+		{
+			uint32_t deviceId = row->second.at(0)->intValue;
+			_bl->out.printMessage("Loading device " + std::to_string(deviceId));
+			int32_t address = row->second.at(1)->intValue;
+			std::string serialNumber = row->second.at(2)->textValue;
+			uint32_t deviceType = row->second.at(3)->intValue;
+
+			if(deviceType == 0xFFFFFFFD)
+			{
+				_central = initializeCentral(deviceId, address, serialNumber);
+				_central->load();
+			}
+		}
+		if(!_central) createCentral();
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 void DeviceFamily::save(bool full)
 {
 	try
@@ -176,7 +218,6 @@ void DeviceFamily::save(bool full)
 		{
 			_bl->out.printMessage("(Shutdown) => Saving " + getName() + " central...");
 			_central->save(full);
-			_central->savePeers(full);
 		}
 	}
 	catch(const std::exception& ex)
@@ -208,6 +249,8 @@ void DeviceFamily::dispose()
 		_physicalInterfaces.reset();
 		_settings->dispose();
 		_settings.reset();
+
+		_central.reset();
 	}
 	catch(const std::exception& ex)
     {
@@ -221,6 +264,21 @@ void DeviceFamily::dispose()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+}
+
+void DeviceFamily::lock()
+{
+	_locked = true;
+}
+
+void DeviceFamily::unlock()
+{
+	_locked = false;
+}
+
+bool DeviceFamily::locked()
+{
+	return _locked;
 }
 
 void DeviceFamily::homegearStarted()
@@ -261,6 +319,29 @@ void DeviceFamily::homegearShuttingDown()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+}
+
+std::string DeviceFamily::handleCliCommand(std::string& command)
+{
+	try
+	{
+		std::ostringstream stringStream;
+		if(!_central) return "Error: No central exists.\n";
+		return _central->handleCliCommand(command);
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return "Error executing command. See log file for more details.\n";
 }
 
 }

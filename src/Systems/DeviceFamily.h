@@ -83,16 +83,20 @@ public:
 	virtual bool init() = 0;
 	virtual void dispose();
 
-	virtual int32_t getFamily() { return _family; }
-	virtual void load() = 0;
-	virtual void save(bool full);
-	virtual std::shared_ptr<ICentral> getCentral() = 0;
-	virtual std::string getName() { return _name; }
+	virtual void lock();
+	virtual void unlock();
+	virtual bool locked();
+
 	virtual std::shared_ptr<Variable> getPairingMethods() = 0;
-	virtual std::string handleCliCommand(std::string& command) = 0;
-	virtual bool peerSelected() { if(!_central) return false; return _central->peerSelected(); }
-	virtual bool hasPhysicalInterface() { return true; }
-	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces() { return _physicalInterfaces; }
+	virtual int32_t getFamily();
+	virtual void load();
+	virtual void save(bool full);
+	virtual std::shared_ptr<ICentral> getCentral();
+	virtual std::string getName();
+	virtual std::string handleCliCommand(std::string& command);
+	virtual bool peerSelected();
+	virtual bool hasPhysicalInterface();
+	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces();
 
 	/*
      * Executed when Homegear is fully started.
@@ -108,6 +112,7 @@ protected:
 	std::shared_ptr<ICentral> _central;
 	std::shared_ptr<FamilySettings> _settings;
 	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
+	bool _locked = false;
 	bool _disposed = false;
 
 	// {{{ Event handling
@@ -146,6 +151,9 @@ protected:
 	// {{{ Device description event handling
 		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
 	// }}}
+protected:
+	virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
+	virtual void createCentral() = 0;
 private:
 	DeviceFamily(const DeviceFamily&);
 	DeviceFamily& operator=(const DeviceFamily&);
