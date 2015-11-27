@@ -73,6 +73,9 @@ public:
 	virtual ~ICentral();
 	virtual void dispose(bool wait = true);
 
+	virtual void load();
+	virtual void save(bool saveDevice);
+
 	/*
      * Executed when Homegear is fully started.
      */
@@ -94,17 +97,6 @@ public:
     std::shared_ptr<Peer> getPeer(uint64_t id);
     std::shared_ptr<Peer> getPeer(std::string serialNumber);
 	virtual bool peerSelected();
-	virtual void setPeerId(uint64_t oldPeerId, uint64_t newPeerId);
-	virtual void deletePeersFromDatabase();
-	virtual void load();
-	virtual void loadVariables() = 0;
-	virtual void loadPeers() {}
-	virtual void save(bool saveDevice);
-	virtual void saveVariables() = 0;
-	virtual void saveVariable(uint32_t index, int64_t intValue);
-	virtual void saveVariable(uint32_t index, std::string& stringValue);
-	virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
-	virtual void savePeers(bool full) = 0;
 
 	virtual bool peerExists(int32_t address);
 	virtual bool peerExists(std::string serialNumber);
@@ -181,7 +173,6 @@ protected:
     std::map<uint32_t, uint32_t> _variableDatabaseIds;
     bool _initialized = false;
     bool _disposing = false;
-	bool _disposed = false;
 
 	std::shared_ptr<Peer> _currentPeer;
     std::unordered_map<int32_t, std::shared_ptr<Peer>> _peers;
@@ -223,6 +214,17 @@ protected:
 		virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval);
 		virtual int32_t onIsAddonClient(int32_t clientID);
 	// }}}
+
+	virtual void setPeerId(uint64_t oldPeerId, uint64_t newPeerId);
+	virtual void deletePeersFromDatabase();
+	virtual void loadVariables() = 0;
+	virtual void loadPeers() {}
+	virtual void savePeers() {}
+	virtual void saveVariables() = 0;
+	virtual void saveVariable(uint32_t index, int64_t intValue);
+	virtual void saveVariable(uint32_t index, std::string& stringValue);
+	virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
+	virtual void savePeers(bool full) = 0;
 };
 
 }

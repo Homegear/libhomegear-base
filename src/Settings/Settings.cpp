@@ -150,12 +150,12 @@ void Settings::load(std::string filename)
 				HelperFunctions::trim(name);
 				std::string value(&input[ptr]);
 				HelperFunctions::trim(value);
-				if(name == "runAsUser")
+				if(name == "runasuser")
 				{
 					_runAsUser = value;
 					_bl->out.printDebug("Debug: runAsUser set to " + _runAsUser);
 				}
-				else if(name == "runAsGroup")
+				else if(name == "runasgroup")
 				{
 					_runAsGroup = value;
 					_bl->out.printDebug("Debug: runAsGroup set to " + _keyPath);
