@@ -75,7 +75,7 @@ Function::Function(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& channelInd
 				else if(propertyName == "deletable") { if(propertyValue == "true") deletable = true; }
 				else if(propertyName == "dynamicChannelCount")
 				{
-					std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(propertyValue, ':');
+					std::pair<std::string, std::string> splitValue = HelperFunctions::splitFirst(propertyValue, ':');
 					if(!splitValue.first.empty()) dynamicChannelCountIndex = Math::getUnsignedNumber(splitValue.first);
 					if(!splitValue.second.empty()) dynamicChannelCountSize = Math::getDouble(splitValue.second);
 				}
