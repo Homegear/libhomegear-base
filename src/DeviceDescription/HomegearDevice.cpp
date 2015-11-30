@@ -1987,9 +1987,12 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
 		attr = doc->allocate_attribute("type", function->type.c_str());
 		parentNode->append_attribute(attr);
 
-		tempStrings.push_back(std::to_string(function->channelCount));
-		attr = doc->allocate_attribute("channelCount", tempStrings.back().c_str());
-		parentNode->append_attribute(attr);
+		if(function->channelCount > 1)
+		{
+			tempStrings.push_back(std::to_string(function->channelCount));
+			attr = doc->allocate_attribute("channelCount", tempStrings.back().c_str());
+			parentNode->append_attribute(attr);
+		}
 
 		// {{{ Properties
 		{
