@@ -574,7 +574,7 @@ void OptionString::fromPacket(PVariable value)
 	}
 	if(value->integerValue < 0)
 	{
-		_bl->out.printWarning("Warning: Cannot convert JSON string to enum, because no matching element could be found.");
+		_bl->out.printWarning("Warning: Cannot convert JSON string to enum, because no matching element could be found for \"" + value->stringValue + "\".");
 		value->integerValue = 0;
 	}
 	value->stringValue = "";
