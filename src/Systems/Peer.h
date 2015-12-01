@@ -362,6 +362,18 @@ protected:
 	 * @see _typeString
 	 */
 	virtual void initializeTypeString();
+
+	// {{{ Hooks
+		/*
+		 * This hook is executed for each parameter in getAllValues after the initial checks if the parameter exists etc. It can be used for example to set the value of the parameter.
+		 *
+		 * @param parameter The current parameter.
+		 * @param channel The channel of the parameter.
+		 * @param parameters The parameters struct which will be returned by getAllValues.
+		 * @return "true" means the function handled the parameter completely and there is nothing to do anymore in getAllValues.
+		 */
+		virtual bool getAllValuesHook2(PParameter parameter, uint32_t channel, PVariable parameters) { return false; }
+	// }}}
 };
 
 }

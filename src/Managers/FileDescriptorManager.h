@@ -83,6 +83,7 @@ private:
 	uint32_t _currentID = 0;
 	std::mutex _descriptorsMutex;
 	FileDescriptors _descriptors;
+
 };
 }
 #endif

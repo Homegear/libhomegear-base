@@ -1199,7 +1199,7 @@ std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteO
 			channel->structValue->insert(StructElement("INDEX", std::shared_ptr<Variable>(new Variable(i->first))));
 			channel->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(i->second->type))));
 
-			std::shared_ptr<Variable> parameters(new Variable(VariableType::tStruct));
+			PVariable parameters(new Variable(VariableType::tStruct));
 			channel->structValue->insert(StructElement("PARAMSET", parameters));
 			channels->arrayValue->push_back(channel);
 
@@ -1215,14 +1215,18 @@ std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteO
 					continue;
 				}
 				if(!j->second->readable && !returnWriteOnly) continue;
-				if(valuesCentral.find(i->first) == valuesCentral.end()) continue;
-				if(valuesCentral[i->first].find(j->second->id) == valuesCentral[i->first].end()) continue;
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
+				if(valuesCentralIterator == valuesCentral.end()) continue;
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
+				if(parameterIterator == valuesCentralIterator->second.end()) continue;
+
+				if(getAllValuesHook2(j->second, i->first, parameters)) continue;
 
 				std::shared_ptr<Variable> element(new Variable(VariableType::tStruct));
 				std::shared_ptr<Variable> value;
 				if(j->second->readable)
 				{
-					value = (j->second->convertFromPacket(valuesCentral[i->first][j->second->id].data));
+					value = (j->second->convertFromPacket(parameterIterator->second.data));
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
 				}

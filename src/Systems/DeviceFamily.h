@@ -83,6 +83,7 @@ public:
 	virtual bool init() = 0;
 	virtual void dispose();
 
+	virtual bool lifetick();
 	virtual void lock();
 	virtual void unlock();
 	virtual bool locked();

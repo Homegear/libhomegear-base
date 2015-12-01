@@ -335,6 +335,17 @@ public:
 	void toPacket(PVariable value);
 };
 
+class TimeStringSeconds : public ICast
+{
+public:
+	TimeStringSeconds(BaseLib::Obj* baseLib);
+	TimeStringSeconds(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	virtual ~TimeStringSeconds() {}
+
+	void fromPacket(PVariable value);
+	void toPacket(PVariable value);
+};
+
 typedef std::shared_ptr<ICast> PICast;
 typedef std::vector<PICast> Casts;
 typedef std::shared_ptr<BlindTest> PBlindTest;
@@ -355,6 +366,7 @@ typedef std::shared_ptr<StringUnsignedInteger> PStringUnsignedInteger;
 typedef std::shared_ptr<Toggle> PToggle;
 typedef std::shared_ptr<StringReplace> PStringReplace;
 typedef std::shared_ptr<HexStringByteArray> PHexStringByteArray;
+typedef std::shared_ptr<TimeStringSeconds> PTimeStringSeconds;
 
 }
 }

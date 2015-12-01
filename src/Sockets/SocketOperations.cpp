@@ -81,6 +81,52 @@ SocketOperations::~SocketOperations()
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
 }
 
+std::shared_ptr<FileDescriptor> SocketOperations::bindSocket(std::string address, std::string port)
+{
+	std::shared_ptr<FileDescriptor> socketDescriptor;
+	addrinfo hostInfo;
+	addrinfo *serverInfo = nullptr;
+
+	int32_t yes = 1;
+
+	memset(&hostInfo, 0, sizeof(hostInfo));
+
+	hostInfo.ai_family = AF_UNSPEC;
+	hostInfo.ai_socktype = SOCK_STREAM;
+	hostInfo.ai_flags = AI_PASSIVE;
+	char buffer[100];
+	int32_t result;
+	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
+	{
+		_bl->out.printCritical("Error: Could not get address information: " + std::string(gai_strerror(result)));
+		return socketDescriptor;
+	}
+
+	bool bound = false;
+	int32_t error = 0;
+	for(struct addrinfo *info = serverInfo; info != 0; info = info->ai_next)
+	{
+		socketDescriptor = _bl->fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype, info->ai_protocol));
+		if(socketDescriptor->descriptor == -1) continue;
+		if(!(fcntl(socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK))
+		{
+			if(fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw BaseLib::Exception("Error: Could not set socket options.");
+		}
+		if(setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw BaseLib::Exception("Error: Could not set socket options.");
+		if(bind(socketDescriptor->descriptor, info->ai_addr, info->ai_addrlen) == -1)
+		{
+			socketDescriptor.reset();
+			error = errno;
+			continue;
+		}
+		bound = true;
+		break;
+	}
+	freeaddrinfo(serverInfo);
+	if(!bound) _bl->out.printError("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
+	return socketDescriptor;
+}
+
 void SocketOperations::initSSL()
 {
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);

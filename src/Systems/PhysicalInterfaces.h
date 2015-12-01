@@ -61,6 +61,7 @@ public:
 	void clear();
 	void stopListening();
 	void startListening();
+	bool lifetick();
 	bool isOpen();
 	void setup(int32_t userID, int32_t groupID);
 	PVariable listInterfaces(int32_t centralAddress);

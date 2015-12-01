@@ -61,6 +61,34 @@ IPhysicalInterface::~IPhysicalInterface()
 	if(_packetProcessingThread.joinable()) _packetProcessingThread.join();
 }
 
+bool IPhysicalInterface::lifetick()
+{
+	try
+	{
+		_lifetick1Mutex.lock();
+		if(!_lifetick1.second && BaseLib::HelperFunctions::getTime() - _lifetick1.first > 60000)
+		{
+			_bl->out.printCritical("Critical: Physical interface's (" + _settings->id + ") lifetick was not updated for more than 60 seconds.");
+			return false;
+		}
+		_lifetick1Mutex.unlock();
+		return true;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
 void IPhysicalInterface::startListening()
 {
 	try
@@ -147,6 +175,11 @@ void IPhysicalInterface::processPackets()
 
 			while(_packetBufferHead != _packetBufferTail)
 			{
+				_lifetick1Mutex.lock();
+				_lifetick1.second = false;
+				_lifetick1.first = BaseLib::HelperFunctions::getTime();
+				_lifetick1Mutex.unlock();
+
 				int64_t processingTime = HelperFunctions::getTime();
 				_lastPacketReceived = processingTime;
 
@@ -170,6 +203,10 @@ void IPhysicalInterface::processPackets()
 				processingTime = HelperFunctions::getTime() - processingTime;
 				if(_bl->settings.devLog() || _bl->debugLevel >= 5) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took " + std::to_string(processingTime) + " ms.");
 				if(processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second.");
+
+				_lifetick1Mutex.lock();
+				_lifetick1.second = true;
+				_lifetick1Mutex.unlock();
 			}
 		}
 		catch(const std::exception& ex)

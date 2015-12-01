@@ -93,6 +93,7 @@ public:
 	virtual void enableUpdateMode();
 	virtual void disableUpdateMode();
 	virtual void sendPacket(std::shared_ptr<Packet> packet) = 0;
+	virtual bool lifetick();
 	virtual bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor > -1; }
 	virtual uint32_t responseDelay() { return _settings->responseDelay; }
 	virtual int64_t lastPacketSent() { return _lastPacketSent; }
@@ -127,6 +128,8 @@ protected:
 	int64_t _lastPacketReceived = -1;
 	int64_t _maxPacketProcessingTime = 1000;
 	bool _updateMode = false;
+	std::mutex _lifetick1Mutex;
+	std::pair<int64_t, bool> _lifetick1;
 
 	//Event handling
 	virtual void raisePacketReceived(std::shared_ptr<Packet> packet);
