@@ -46,6 +46,9 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib)
 	_gpioDescriptors[1] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_gpioDescriptors[2] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_gpioDescriptors[3] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
+
+	_lifetick1.first = 0;
+	_lifetick1.second = true;
 }
 
 IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib)

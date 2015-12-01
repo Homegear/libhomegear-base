@@ -201,7 +201,7 @@ public:
 	}
 
 	/**
-	 * Returns a UTF-8 substring. This method is needed, because std::string::substr() counts bytes and not characters.
+	 * Returns an UTF-8 substring. This method is needed, because std::string::substr() counts bytes and not characters.
 	 *
 	 * @param s The string to get the substring from.
 	 * @param start The start position of the substring.
