@@ -71,6 +71,38 @@ void PhysicalInterfaces::dispose()
 	_physicalInterfacesMutex.unlock();
 }
 
+bool PhysicalInterfaces::lifetick()
+{
+	try
+	{
+		_physicalInterfacesMutex.lock();
+		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
+		{
+			if(!j->second->lifetick())
+			{
+				_physicalInterfacesMutex.unlock();
+				return false;
+			}
+		}
+		_physicalInterfacesMutex.unlock();
+		return true;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _physicalInterfacesMutex.unlock();
+    return false;
+}
+
 uint32_t PhysicalInterfaces::count()
 {
 	uint32_t size = 0;

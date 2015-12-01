@@ -121,6 +121,8 @@ public:
 	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
 	virtual ~SocketOperations();
 
+	std::shared_ptr<FileDescriptor> bindSocket(std::string address, std::string port);
+
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
 	void setHostname(std::string hostname) { close(); _hostname = hostname; }
@@ -138,6 +140,7 @@ public:
 	void open();
 	void close();
 protected:
+
 	BaseLib::Obj* _bl = nullptr;
 	int64_t _readTimeout = 15000000;
 	bool _autoConnect = true;

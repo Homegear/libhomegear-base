@@ -935,6 +935,48 @@ void HexStringByteArray::toPacket(PVariable value)
 	value->stringValue = _bl->hf.getBinaryString(value->stringValue);
 }
 
+TimeStringSeconds::TimeStringSeconds(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+TimeStringSeconds::TimeStringSeconds(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"timestringDuration\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		_bl->out.printWarning("Warning: Unknown node in \"timestringDuration\": " + std::string(subNode->name()));
+	}
+}
+
+void TimeStringSeconds::fromPacket(PVariable value)
+{
+	if(!value) return;
+	std::vector<std::string> parts = BaseLib::HelperFunctions::splitAll(value->stringValue, ':');
+	value->integerValue = 0;
+	value->type = VariableType::tInteger;
+	int32_t j = 0;
+	for(std::vector<std::string>::reverse_iterator i = parts.rbegin(); i != parts.rend(); i++, j++)
+	{
+		if(j == 0) value->integerValue += Math::getNumber(*i);
+		else if(j == 1) value->integerValue += Math::getNumber(*i) * 60;
+		else if(j == 2) value->integerValue += Math::getNumber(*i) * 3600;
+	}
+	value->stringValue.clear();
+}
+
+void TimeStringSeconds::toPacket(PVariable value)
+{
+	if(!value) return;
+	value->type = VariableType::tString;
+	std::ostringstream timeStream;
+	timeStream << (value->integerValue / 3600) << ':' << std::setw(2) << std::setfill('0') << ((value->integerValue % 3600) / 60) << ':' << std::setw(2) << (value->integerValue % 60);
+	value->stringValue = timeStream.str();
+	value->integerValue = 0;
+}
+
 }
 }
 }

@@ -63,6 +63,12 @@ DeviceFamily::~DeviceFamily()
 	dispose();
 }
 
+bool DeviceFamily::lifetick()
+{
+	if(_physicalInterfaces) return _physicalInterfaces->lifetick();
+	return true;
+}
+
 //Event handling
 void DeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
 {
