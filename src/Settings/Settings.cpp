@@ -55,6 +55,7 @@ void Settings::reset()
 	_uPnPIpAddress = "";
 	_ssdpIpAddress = "";
 	_ssdpPort = 1900;
+	_enableMonitoring = true;
 	_devLog = false;
 	_databasePath = _bl->executablePath + "db.sql";
 	_databaseSynchronous = true;
@@ -211,6 +212,11 @@ void Settings::load(std::string filename)
 					_ssdpPort = Math::getNumber(value);
 					if(_ssdpPort < 1 || _ssdpPort > 65535) _ssdpPort = 1900;
 					_bl->out.printDebug("Debug: ssdpPort set to " + std::to_string(_ssdpPort));
+				}
+				else if(name == "enablemonitoring")
+				{
+					if(HelperFunctions::toLower(value) == "false") _enableMonitoring = false;
+					_bl->out.printDebug("Debug: enableMonitoring set to " + std::to_string(_enableMonitoring));
 				}
 				else if(name == "devlog")
 				{

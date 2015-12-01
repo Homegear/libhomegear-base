@@ -94,7 +94,6 @@ std::shared_ptr<FileDescriptor> SocketOperations::bindSocket(std::string address
 	hostInfo.ai_family = AF_UNSPEC;
 	hostInfo.ai_socktype = SOCK_STREAM;
 	hostInfo.ai_flags = AI_PASSIVE;
-	char buffer[100];
 	int32_t result;
 	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
 	{

@@ -60,6 +60,7 @@ public:
 	std::string uPnPIpAddress() { return _uPnPIpAddress; }
 	std::string ssdpIpAddress() { return _ssdpIpAddress; }
 	int32_t ssdpPort() { return _ssdpPort; }
+	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
 	std::string databasePath() { return _databasePath; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
@@ -120,6 +121,7 @@ private:
 	std::string _uPnPIpAddress = "";
 	std::string _ssdpIpAddress = "";
 	int32_t _ssdpPort = 1900;
+	bool _enableMonitoring = true;
 	bool _devLog = false;
 	std::string _databasePath;
 	bool _databaseSynchronous = true;

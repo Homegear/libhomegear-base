@@ -69,6 +69,7 @@ bool IPhysicalInterface::lifetick()
 		if(!_lifetick1.second && BaseLib::HelperFunctions::getTime() - _lifetick1.first > 60000)
 		{
 			_bl->out.printCritical("Critical: Physical interface's (" + _settings->id + ") lifetick was not updated for more than 60 seconds.");
+			_lifetick1Mutex.unlock();
 			return false;
 		}
 		_lifetick1Mutex.unlock();
@@ -86,6 +87,7 @@ bool IPhysicalInterface::lifetick()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    _lifetick1Mutex.unlock();
     return false;
 }
 
