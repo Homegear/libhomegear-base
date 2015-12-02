@@ -59,9 +59,9 @@ public:
 	 * Checks if a license key is valid.
 	 *
 	 * @param familyId The family id the license key is for.
-     * @param deviceId The device id the license key is for or -1 if not applicable.
-     * @param licenseKey The license key to check. If empty the mothod reads the license key for this device from the database.
-     * @return Returns -1 on application errors, -2 if the licensing module could not be found, -3 on communication errors, -4 if the activation server returned invalid data, -5 if the license key is invalid, -6 if the license key is valid but blocked, -7 if the activation key validation failed, -8 if no license key was passed and no license key was found in the database, -9 if no license key was passed and the activation key verification failed 0 if the license key is valid and already known and 1 if the license key is valid and on new activation.
+	 * @param deviceId The device id the license key is for or -1 if not applicable.
+	 * @param licenseKey The license key to check. If empty the mothod reads the license key for this device from the database.
+	 * @return Returns -1 on application errors, -2 if the licensing module could not be found, -3 on communication errors, -4 if the activation server returned invalid data, -5 if the license key is invalid, -6 if the license key is valid but blocked, -7 if the activation key validation failed, -8 if no license key was passed and no license key was found in the database, -9 if no license key was passed and the activation key verification failed 0 if the license key is valid and already known and 1 if the license key is valid and on new activation.
 	 */
 	virtual int32_t checkLicense(int32_t familyId, int32_t deviceId, const std::string& licenseKey = "") = 0;
 	virtual void decryptScript(const std::vector<char>& input, std::string& output) = 0;
