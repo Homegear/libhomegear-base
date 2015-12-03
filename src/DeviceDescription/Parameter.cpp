@@ -84,7 +84,9 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 			{
 				std::string propertyName(propertyNode->name());
 				std::string propertyValue(propertyNode->value());
-				if(propertyName == "readable") { if(propertyValue == "false") readable = false; }
+				if(propertyName == "label") label = propertyValue;
+				else if(propertyName == "description") description = propertyValue;
+				else if(propertyName == "readable") { if(propertyValue == "false") readable = false; }
 				else if(propertyName == "writeable") { if(propertyValue == "false") writeable = false; }
 				else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }
 				else if(propertyName == "visible") { if(propertyValue == "false") visible = false; }
@@ -96,6 +98,8 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 				else if(propertyName == "signed") { if(propertyValue == "true") isSigned = true; }
 				else if(propertyName == "control") control = propertyValue;
 				else if(propertyName == "unit") unit = propertyValue;
+				else if(propertyName == "formFieldType") formFieldType = propertyValue;
+				else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
 				else if(propertyName == "casts")
 				{
 					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())

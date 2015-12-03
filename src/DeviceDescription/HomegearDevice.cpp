@@ -398,6 +398,18 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* deviceNode = doc->allocate_node(node_element, "description", (*i)->description.c_str());
 			subnode->append_node(deviceNode);
 
+			if(!(*i)->longDescription.empty())
+			{
+				deviceNode = doc->allocate_node(node_element, "longDescription", (*i)->longDescription.c_str());
+				subnode->append_node(deviceNode);
+			}
+
+			if(!(*i)->serialPrefix.empty())
+			{
+				deviceNode = doc->allocate_node(node_element, "serialPrefix", (*i)->serialPrefix.c_str());
+				subnode->append_node(deviceNode);
+			}
+
 			if((*i)->typeNumber != (uint32_t)-1)
 			{
 				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString((*i)->typeNumber));
@@ -1056,6 +1068,18 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			xml_node<>* propertiesNode = doc->allocate_node(node_element, "properties");
 			parentNode->append_node(propertiesNode);
 
+			if(!parameter->label.empty())
+			{
+				xml_node<>* node = doc->allocate_node(node_element, "label", parameter->label.c_str());
+				propertiesNode->append_node(node);
+			}
+
+			if(!parameter->description.empty())
+			{
+				xml_node<>* node = doc->allocate_node(node_element, "description", parameter->description.c_str());
+				propertiesNode->append_node(node);
+			}
+
 			if(!parameter->readable)
 			{
 				tempStrings.push_back("false");
@@ -1135,6 +1159,19 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			if(!parameter->unit.empty())
 			{
 				xml_node<>* node = doc->allocate_node(node_element, "unit", parameter->unit.c_str());
+				propertiesNode->append_node(node);
+			}
+
+			if(!parameter->formFieldType.empty())
+			{
+				xml_node<>* node = doc->allocate_node(node_element, "formFieldType", parameter->formFieldType.c_str());
+				propertiesNode->append_node(node);
+			}
+
+			if(parameter->formPosition != -1)
+			{
+				tempStrings.push_back(std::to_string(parameter->formPosition));
+				xml_node<>* node = doc->allocate_node(node_element, "formPosition", tempStrings.back().c_str());
 				propertiesNode->append_node(node);
 			}
 
