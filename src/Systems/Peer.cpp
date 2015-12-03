@@ -1330,9 +1330,13 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(int32_t clientID, int32_t c
 
 		if(channel == -1) //Base device
 		{
+			BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
+
 			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
+			if(supportedDevice && !supportedDevice->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(supportedDevice->longDescription))));
+			if(supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", std::shared_ptr<Variable>(new Variable(supportedDevice->serialPrefix))));
 
 			std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
 			std::shared_ptr<Variable> variable2 = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
@@ -1352,7 +1356,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(int32_t clientID, int32_t c
 
 			if(fields.empty() || fields.find("FIRMWARE") != fields.end())
 			{
-				if(_firmwareVersion != 0) description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(getFirmwareVersionString(_firmwareVersion)))));
+				if(_firmwareVersion != -1) description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(getFirmwareVersionString(_firmwareVersion)))));
 				else if(!_firmwareVersionString.empty()) description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(_firmwareVersionString))));
 				else description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(std::string("?")))));
 			}
@@ -1955,7 +1959,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("BOOL")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			}
 			else if(i->second->logical->type == ILogical::Type::tString)
 			{
@@ -1970,7 +1973,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRING")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			}
 			else if(i->second->logical->type == ILogical::Type::tAction)
 			{
@@ -1982,7 +1984,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			}
 			else if(i->second->logical->type == ILogical::Type::tInteger)
 			{
@@ -2011,7 +2012,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			}
 			else if(i->second->logical->type == ILogical::Type::tEnum)
 			{
@@ -2026,7 +2026,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ENUM")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 
 				std::shared_ptr<Variable> valueList(new Variable(VariableType::tArray));
 				for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
@@ -2062,8 +2061,13 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("FLOAT")))));
-				description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			}
+
+			description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
+			if(!i->second->label.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(i->second->label))));
+			if(!i->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(i->second->description))));
+			if(!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::shared_ptr<Variable>(new Variable(i->second->formFieldType))));
+			if(i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::shared_ptr<Variable>(new Variable(i->second->formPosition))));
 
 			index++;
 			descriptions->structValue->insert(StructElement(i->second->id, description));

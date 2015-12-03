@@ -62,6 +62,8 @@ public:
 
 	std::string id;
 	std::string description;
+	std::string longDescription;
+	std::string serialPrefix;
 	uint32_t typeNumber = 0;
 	uint32_t minFirmwareVersion = 0;
 	uint32_t maxFirmwareVersion = 0;

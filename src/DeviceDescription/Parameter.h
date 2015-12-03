@@ -88,6 +88,8 @@ public:
 	std::string id;
 
 	//Properties
+	std::string label;
+	std::string description;
 	bool readable = true;
 	bool writeable = true;
 	bool addonWriteable = true;
@@ -100,6 +102,8 @@ public:
 	bool isSigned = false;
 	std::string control;
 	std::string unit;
+	std::string formFieldType;
+	int32_t formPosition = -1;
 	Casts casts;
 
 	//Elements
