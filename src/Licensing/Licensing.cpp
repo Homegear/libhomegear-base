@@ -296,5 +296,121 @@ void Licensing::saveVariable(uint64_t index, LicenseData& licenseData)
     }
 }
 
+Licensing::DeviceStates Licensing::getDeviceStates()
+{
+	DeviceStates devices;
+	_devicesMutex.lock();
+	try
+	{
+		devices = _devices;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _devicesMutex.unlock();
+    return devices;
+}
+
+bool Licensing::getDeviceState(int32_t familyId, int32_t deviceId)
+{
+	_devicesMutex.lock();
+	try
+	{
+		DeviceStates::iterator stateIterator1 = _devices.find(familyId);
+		if(stateIterator1 == _devices.end())
+		{
+			_devicesMutex.unlock();
+			return false;
+		}
+		std::map<int32_t, std::shared_ptr<DeviceInfo>>::iterator stateIterator2 = stateIterator1->second.find(deviceId);
+		if(stateIterator2 == stateIterator1->second.end())
+		{
+			_devicesMutex.unlock();
+			return false;
+		}
+		bool state = stateIterator2->second->state;
+		_devicesMutex.unlock();
+		return state;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _devicesMutex.unlock();
+    return false;
+}
+
+void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state)
+{
+	_devicesMutex.lock();
+	try
+	{
+		PDeviceInfo info(new DeviceInfo());
+		info->moduleId = _moduleId;
+		info->familyId = familyId;
+		info->deviceId = deviceId;
+		info->state = state;
+		_devices[familyId][deviceId] = info;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _devicesMutex.unlock();
+}
+
+void Licensing::updateDevice(int32_t familyId, int32_t deviceId, bool state)
+{
+	addDevice(familyId, deviceId, state);
+}
+
+void Licensing::removeDevice(int32_t familyId, int32_t deviceId, bool state)
+{
+	_devicesMutex.lock();
+	try
+	{
+		_devices[familyId].erase(deviceId);
+		_devices.erase(familyId);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _devicesMutex.unlock();
+}
+
 }
 }
