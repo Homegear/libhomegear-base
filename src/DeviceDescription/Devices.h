@@ -68,6 +68,7 @@ public:
 	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 
 	// {{{ RPC
+	PVariable listKnownDeviceType(int32_t clientId, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::map<std::string, bool>& fields);
 	PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields);
 	// }}}
 protected:
