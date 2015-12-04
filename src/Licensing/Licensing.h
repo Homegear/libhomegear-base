@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
+#include <mutex>
 
 namespace BaseLib
 {
@@ -46,6 +48,16 @@ namespace Licensing
 class Licensing
 {
 public:
+	struct DeviceInfo
+	{
+		int32_t moduleId = -1;
+		int32_t familyId = -1;
+		int32_t deviceId = -1;
+		bool state = false;
+	};
+	typedef std::shared_ptr<DeviceInfo> PDeviceInfo;
+	typedef std::map<int32_t, std::map<int32_t, PDeviceInfo>> DeviceStates;
+
 	Licensing(BaseLib::Obj* bl);
 	virtual ~Licensing();
 
@@ -54,6 +66,20 @@ public:
 	virtual void load();
 
 	virtual int32_t getModuleId() { return _moduleId; }
+
+	/**
+	 * Returns a map with all unlicensed devices.
+	 * @return Returns a map with all unlicensed devices. The first pair element is the family id the second the device id. When the device id is "-1" the whole device family is not activated.
+	 */
+	virtual DeviceStates getDeviceStates();
+
+	/**
+	 * Returns the activation status of a device or family.
+	 * @param familyId The family id.
+	 * @param deviceId The device id or -1.
+	 * @return Returns true when the device or family is activated otherwise false. When the device is unknown, false is returned.
+	 */
+	virtual bool getDeviceState(int32_t familyId, int32_t deviceId);
 
 	/**
 	 * Checks if a license key is valid.
@@ -78,7 +104,12 @@ protected:
 	int32_t _moduleId = -1;
 	std::map<uint32_t, uint32_t> _variableDatabaseIds;
 	std::map<uint64_t, LicenseData> _licenseData;
+	std::mutex _devicesMutex;
+	DeviceStates _devices;
 
+	virtual void addDevice(int32_t familyId, int32_t deviceId, bool state);
+	virtual void removeDevice(int32_t familyId, int32_t deviceId, bool state);
+	virtual void updateDevice(int32_t familyId, int32_t deviceId, bool state);
 	virtual void loadVariables();
 	virtual void saveVariable(uint64_t index, int32_t intValue);
     virtual void saveVariable(uint64_t index, int64_t intValue);
