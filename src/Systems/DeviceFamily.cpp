@@ -358,7 +358,7 @@ PVariable DeviceFamily::listKnownDeviceTypes(int32_t clientId, bool channels, st
 	{
 		PVariable array(new Variable(VariableType::tArray));
 
-		return _devices
+
 
 		return array;
 	}
