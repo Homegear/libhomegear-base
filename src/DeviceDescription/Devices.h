@@ -67,6 +67,10 @@ public:
 	std::shared_ptr<HomegearDevice> load(std::string& filepath);
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);
 	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
+
+	// {{{ RPC
+	PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields);
+	// }}}
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	int32_t _family;
