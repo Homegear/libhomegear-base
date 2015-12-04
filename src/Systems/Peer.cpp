@@ -1524,15 +1524,16 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> Peer::getDeviceDescripti
 	try
 	{
 		std::shared_ptr<std::vector<std::shared_ptr<Variable>>> descriptions(new std::vector<std::shared_ptr<Variable>>());
-		descriptions->push_back(getDeviceDescription(clientID, -1, fields));
+		std::shared_ptr<Variable> description = getDeviceDescription(clientID, -1, fields);
+		if(!description->errorStruct && !description->structValue->empty()) descriptions->push_back(description);
 
 		if(channels)
 		{
 			for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 			{
 				if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
-				std::shared_ptr<Variable> description = getDeviceDescription(clientID, (int32_t)i->first, fields);
-				if(!description->structValue->empty()) descriptions->push_back(description);
+				description = getDeviceDescription(clientID, (int32_t)i->first, fields);
+				if(!description->errorStruct && !description->structValue->empty()) descriptions->push_back(description);
 			}
 		}
 
