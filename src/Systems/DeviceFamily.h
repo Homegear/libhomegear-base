@@ -80,7 +80,7 @@ public:
 	DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
 	virtual ~DeviceFamily();
 
-	virtual bool init() = 0;
+	virtual bool init();
 	virtual void dispose();
 
 	virtual bool lifetick();
@@ -89,6 +89,7 @@ public:
 	virtual bool locked();
 
 	virtual int32_t getFamily();
+	virtual std::shared_ptr<DeviceDescription::Devices> getRpcDevices();
 	virtual void load();
 	virtual void save(bool full);
 	virtual std::shared_ptr<ICentral> getCentral();
@@ -110,7 +111,7 @@ public:
 
     // {{{ RPC
     virtual std::shared_ptr<Variable> getPairingMethods() = 0;
-    PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields);
+    PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields);
     // }}}
 protected:
 	BaseLib::Obj* _bl = nullptr;
@@ -166,6 +167,7 @@ private:
 	IFamilyEventSink* _eventHandler;
 	int32_t _family = -1;
 	std::string _name;
+	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
 };
 
 }

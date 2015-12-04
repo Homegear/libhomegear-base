@@ -36,6 +36,7 @@ namespace BaseLib
 namespace Systems
 {
 int32_t DeviceFamily::getFamily(){ return _family; }
+std::shared_ptr<DeviceDescription::Devices> DeviceFamily::getRpcDevices() { return _rpcDevices; }
 std::shared_ptr<ICentral> DeviceFamily::getCentral() { return _central; }
 std::string DeviceFamily::getName() { return _name; }
 bool DeviceFamily::peerSelected() { if(!_central) return false; return _central->peerSelected(); }
@@ -56,11 +57,20 @@ DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int
 	_settings.reset(new FamilySettings(bl));
 	_bl->out.printInfo(filename);
 	_settings->load(filename);
+	_rpcDevices.reset(new DeviceDescription::Devices(bl, this, id));
 }
 
 DeviceFamily::~DeviceFamily()
 {
 	dispose();
+}
+
+bool DeviceFamily::init()
+{
+	_bl->out.printInfo("Loading XML RPC devices...");
+	_rpcDevices->load();
+	if(_rpcDevices->empty()) return false;
+	return true;
 }
 
 bool DeviceFamily::lifetick()
@@ -258,6 +268,7 @@ void DeviceFamily::dispose()
 		_settings.reset();
 
 		_central.reset();
+		_rpcDevices.reset();
 	}
 	catch(const std::exception& ex)
     {
@@ -352,15 +363,11 @@ std::string DeviceFamily::handleCliCommand(std::string& command)
 }
 
 // {{{ RPC
-PVariable DeviceFamily::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields)
+PVariable DeviceFamily::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields)
 {
 	try
 	{
-		PVariable array(new Variable(VariableType::tArray));
-
-
-
-		return array;
+		if(_rpcDevices) return _rpcDevices->listKnownDeviceTypes(clientId, channels, fields);
 	}
 	catch(const std::exception& ex)
     {
