@@ -37,15 +37,11 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Devices::Devices(int32_t family)
-{
-	_family = family;
-}
-
-void Devices::init(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler)
+Devices::Devices(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler, int32_t family)
 {
 	_bl = baseLib;
 	setEventHandler(eventHandler);
+	_family = family;
 }
 
 void Devices::clear()
@@ -1128,28 +1124,32 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
 {
 	try
 	{
-		std::shared_ptr<HomegearDevice> partialMatch;
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
 			{
 				if((*j)->matches(deviceType, firmwareVersion))
 				{
-					if(countFromSysinfo > -1 && (*i)->dynamicChannelCountIndex > -1 && (*i)->getDynamicChannelCount() != countFromSysinfo)
+					if(countFromSysinfo > -1 && (*i)->dynamicChannelCountIndex > -1)
 					{
-						if((*i)->getDynamicChannelCount() == -1) partialMatch = *i;
+						//Device has dynamic channel count
+						for(std::vector<std::shared_ptr<HomegearDevice>>::iterator k = _dynamicDevices.begin(); k != _dynamicDevices.end(); ++k)
+						{
+							for(SupportedDevices::iterator l = (*k)->supportedDevices.begin(); l != (*k)->supportedDevices.end(); ++l)
+							{
+								if((*l)->matches(deviceType, firmwareVersion) && (*k)->getDynamicChannelCount() == countFromSysinfo) return *k;
+							}
+						}
+						//No matching device was found
+						std::shared_ptr<HomegearDevice> newDevice(new HomegearDevice(_bl, _family));
+						*newDevice = **i;
+						newDevice->setDynamicChannelCount(countFromSysinfo);
+						_dynamicDevices.push_back(newDevice);
+						return newDevice;
 					}
 					else return *i;
 				}
 			}
-		}
-		if(partialMatch)
-		{
-			std::shared_ptr<HomegearDevice> newDevice(new HomegearDevice(_bl, _family));
-			*newDevice = *partialMatch;
-			newDevice->setDynamicChannelCount(countFromSysinfo);
-			_devices.push_back(newDevice);
-			return newDevice;
 		}
 	}
 	catch(const std::exception& ex)
@@ -1168,7 +1168,7 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
 }
 
 // {{{ RPC
-PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields)
+PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields)
 {
 	try
 	{
@@ -1176,10 +1176,9 @@ PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::ma
 
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
-			/*_devices hat zu viele Geräte => alle Geräte mit dynamischen Kanälen in separates Array auslagern
 			std::shared_ptr<Variable> description(new Variable(VariableType::tStruct));
 
-			if(channel == -1) //Base device
+			/*if(channel == -1) //Base device
 			{
 				BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
 
@@ -1352,8 +1351,8 @@ PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::ma
 				if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(rpcFunction->type))));
 
 				if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", std::shared_ptr<Variable>(new Variable(_rpcDevice->version))));
-			}
-			descriptions add description*/
+			}*/
+			descriptions->arrayValue->push_back(description);
 		}
 		return descriptions;
 	}

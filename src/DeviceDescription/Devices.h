@@ -58,23 +58,23 @@ public:
 		};
 	// }}}
 
-	Devices(int32_t family);
+	Devices(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler, int32_t family);
 	virtual ~Devices() {}
 	bool empty() { return _devices.empty(); }
 	void clear();
-	void init(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler);
 	void load();
 	std::shared_ptr<HomegearDevice> load(std::string& filepath);
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);
 	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 
 	// {{{ RPC
-	PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields);
+	PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields);
 	// }}}
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	int32_t _family;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
+	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
 };
 
 }
