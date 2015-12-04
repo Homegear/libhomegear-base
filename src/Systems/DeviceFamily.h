@@ -88,7 +88,6 @@ public:
 	virtual void unlock();
 	virtual bool locked();
 
-	virtual std::shared_ptr<Variable> getPairingMethods() = 0;
 	virtual int32_t getFamily();
 	virtual void load();
 	virtual void save(bool full);
@@ -108,6 +107,11 @@ public:
      * Executed before Homegear starts shutting down.
      */
     virtual void homegearShuttingDown();
+
+    // {{{ RPC
+    virtual std::shared_ptr<Variable> getPairingMethods() = 0;
+    PVariable listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields);
+    // }}}
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	std::shared_ptr<ICentral> _central;

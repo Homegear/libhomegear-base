@@ -136,6 +136,7 @@ public:
 	virtual std::shared_ptr<Variable> getValue(int32_t clientId, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual std::shared_ptr<Variable> getValue(int32_t clientId, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual std::shared_ptr<Variable> listDevices(int32_t clientId, bool channels, std::map<std::string, bool> fields);
+	virtual std::shared_ptr<Variable> listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields);
 	virtual std::shared_ptr<Variable> listDevices(int32_t clientId, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices);
 	virtual std::shared_ptr<Variable> listTeams(int32_t clientId) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> putParamset(int32_t clientId, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, std::shared_ptr<Variable> paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }

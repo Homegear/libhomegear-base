@@ -351,5 +351,32 @@ std::string DeviceFamily::handleCliCommand(std::string& command)
     return "Error executing command. See log file for more details.\n";
 }
 
+// {{{ RPC
+PVariable DeviceFamily::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields)
+{
+	try
+	{
+		PVariable array(new Variable(VariableType::tArray));
+
+		return _devices
+
+		return array;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+// }}}
+
 }
 }

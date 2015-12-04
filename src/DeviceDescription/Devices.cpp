@@ -1167,5 +1167,211 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
     return nullptr;
 }
 
+// {{{ RPC
+PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool> fields)
+{
+	try
+	{
+		std::shared_ptr<Variable> descriptions(new Variable(VariableType::tStruct));
+
+		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
+		{
+			/*_devices hat zu viele Geräte => alle Geräte mit dynamischen Kanälen in separates Array auslagern
+			std::shared_ptr<Variable> description(new Variable(VariableType::tStruct));
+
+			if(channel == -1) //Base device
+			{
+				BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
+
+				if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+				if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
+				if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
+				if(supportedDevice && !supportedDevice->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(supportedDevice->longDescription))));
+				if(supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", std::shared_ptr<Variable>(new Variable(supportedDevice->serialPrefix))));
+
+				std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
+				std::shared_ptr<Variable> variable2 = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
+				if(fields.empty() || fields.find("CHILDREN") != fields.end()) description->structValue->insert(StructElement("CHILDREN", variable));
+				if(fields.empty() || fields.find("CHANNELS") != fields.end()) description->structValue->insert(StructElement("CHANNELS", variable2));
+
+				if(fields.empty() || fields.find("CHILDREN") != fields.end() || fields.find("CHANNELS") != fields.end())
+				{
+					for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
+					{
+						if(!i->second->visible) continue;
+						if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+						if(fields.empty() || fields.find("CHILDREN") != fields.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(_serialNumber + ":" + std::to_string(i->first))));
+						if(fields.empty() || fields.find("CHANNELS") != fields.end()) variable2->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(i->first)));
+					}
+				}
+
+				if(fields.empty() || fields.find("FIRMWARE") != fields.end())
+				{
+					if(_firmwareVersion != -1) description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(getFirmwareVersionString(_firmwareVersion)))));
+					else if(!_firmwareVersionString.empty()) description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(_firmwareVersionString))));
+					else description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(std::string("?")))));
+				}
+
+				if(fields.empty() || fields.find("AVAILABLE_FIRMWARE") != fields.end())
+				{
+					int32_t newFirmwareVersion = getNewFirmwareVersion();
+					if(newFirmwareVersion > _firmwareVersion) description->structValue->insert(StructElement("AVAILABLE_FIRMWARE", std::shared_ptr<Variable>(new Variable(getFirmwareVersionString(newFirmwareVersion)))));
+				}
+
+				if(fields.empty() || fields.find("FLAGS") != fields.end())
+				{
+					int32_t uiFlags = 0;
+					if(_rpcDevice->visible) uiFlags += 1;
+					if(_rpcDevice->internal) uiFlags += 2;
+					if(!_rpcDevice->deletable || isTeam()) uiFlags += 8;
+					description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
+				}
+
+				if(fields.empty() || fields.find("INTERFACE") != fields.end()) description->structValue->insert(StructElement("INTERFACE", std::shared_ptr<Variable>(new Variable(getCentral()->getSerialNumber()))));
+
+				if(fields.empty() || fields.find("PARAMSETS") != fields.end())
+				{
+					variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
+					description->structValue->insert(StructElement("PARAMSETS", variable));
+					variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(std::string("MASTER")))); //Always MASTER
+				}
+
+				if(fields.empty() || fields.find("PARENT") != fields.end()) description->structValue->insert(StructElement("PARENT", std::shared_ptr<Variable>(new Variable(std::string("")))));
+
+				if(!_ip.empty() && (fields.empty() || fields.find("IP_ADDRESS") != fields.end())) description->structValue->insert(StructElement("IP_ADDRESS", std::shared_ptr<Variable>(new Variable(_ip))));
+
+				if(fields.empty() || fields.find("PHYSICAL_ADDRESS") != fields.end()) description->structValue->insert(StructElement("PHYSICAL_ADDRESS", std::shared_ptr<Variable>(new Variable(_address))));
+
+				//Compatibility
+				if(fields.empty() || fields.find("RF_ADDRESS") != fields.end()) description->structValue->insert(StructElement("RF_ADDRESS", std::shared_ptr<Variable>(new Variable(_address))));
+				//Compatibility
+				if(fields.empty() || fields.find("ROAMING") != fields.end()) description->structValue->insert(StructElement("ROAMING", std::shared_ptr<Variable>(new Variable((int32_t)0))));
+
+				if(fields.empty() || fields.find("RX_MODE") != fields.end()) description->structValue->insert(StructElement("RX_MODE", std::shared_ptr<Variable>(new Variable((int32_t)_rpcDevice->receiveModes))));
+
+				if(!_rpcTypeString.empty() && (fields.empty() || fields.find("TYPE") != fields.end())) description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
+
+				if(fields.empty() || fields.find("TYPE_ID") != fields.end()) description->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType.type()))));
+
+				if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", std::shared_ptr<Variable>(new Variable(_rpcDevice->version))));
+
+				if(fields.find("WIRELESS") != fields.end()) description->structValue->insert(StructElement("WIRELESS", std::shared_ptr<Variable>(new Variable(wireless()))));
+			}
+			else
+			{
+				if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
+				PFunction rpcFunction = _rpcDevice->functions.at(channel);
+				if(!rpcFunction->countFromVariable.empty() && configCentral[0].find(rpcFunction->countFromVariable) != configCentral[0].end() && configCentral[0][rpcFunction->countFromVariable].data.size() > 0 && channel >= (int32_t)rpcFunction->channel + configCentral[0][rpcFunction->countFromVariable].data.at(configCentral[0][rpcFunction->countFromVariable].data.size() - 1)) return Variable::createError(-2, "Channel index larger than defined.");
+				if(!rpcFunction->visible) return description;
+
+				if(fields.empty() || fields.find("FAMILYID") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+				if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
+				if(fields.empty() || fields.find("CHANNEL") != fields.end()) description->structValue->insert(StructElement("CHANNEL", std::shared_ptr<Variable>(new Variable(channel))));
+				if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber + ":" + std::to_string(channel)))));
+
+				if(fields.empty() || fields.find("AES_ACTIVE") != fields.end())
+				{
+					int32_t aesActive = 0;
+					if(configCentral.find(channel) != configCentral.end() && configCentral.at(channel).find("AES_ACTIVE") != configCentral.at(channel).end() && !configCentral.at(channel).at("AES_ACTIVE").data.empty() && configCentral.at(channel).at("AES_ACTIVE").data.at(0) != 0)
+					{
+						aesActive = 1;
+					}
+					//Integer for compatability
+					description->structValue->insert(StructElement("AES_ACTIVE", std::shared_ptr<Variable>(new Variable(aesActive))));
+				}
+
+				if(fields.empty() || fields.find("DIRECTION") != fields.end() || fields.find("LINK_SOURCE_ROLES") != fields.end() || fields.find("LINK_TARGET_ROLES") != fields.end())
+				{
+					int32_t direction = 0;
+					std::ostringstream linkSourceRoles;
+					std::ostringstream linkTargetRoles;
+					for(LinkFunctionTypes::iterator k = rpcFunction->linkSenderFunctionTypes.begin(); k != rpcFunction->linkSenderFunctionTypes.end(); ++k)
+					{
+						//Probably only one direction is supported, but just in case I use the "or"
+						if(!k->empty())
+						{
+							if(direction & 1) linkSourceRoles << " ";
+							linkSourceRoles << *k;
+							direction |= 1;
+						}
+					}
+					for(LinkFunctionTypes::iterator k = rpcFunction->linkReceiverFunctionTypes.begin(); k != rpcFunction->linkReceiverFunctionTypes.end(); ++k)
+					{
+						//Probably only one direction is supported, but just in case I use the "or"
+						if(!k->empty())
+						{
+							if(direction & 2) linkTargetRoles << " ";
+							linkTargetRoles << *k;
+							direction |= 2;
+						}
+					}
+
+					//Overwrite direction when manually set
+					if(rpcFunction->direction != Function::Direction::Enum::none) direction = (int32_t)rpcFunction->direction;
+					if(fields.empty() || fields.find("DIRECTION") != fields.end()) description->structValue->insert(StructElement("DIRECTION", std::shared_ptr<Variable>(new Variable(direction))));
+					if(fields.empty() || fields.find("LINK_SOURCE_ROLES") != fields.end()) description->structValue->insert(StructElement("LINK_SOURCE_ROLES", std::shared_ptr<Variable>(new Variable(linkSourceRoles.str()))));
+					if(fields.empty() || fields.find("LINK_TARGET_ROLES") != fields.end()) description->structValue->insert(StructElement("LINK_TARGET_ROLES", std::shared_ptr<Variable>(new Variable(linkTargetRoles.str()))));
+				}
+
+				if(fields.empty() || fields.find("FLAGS") != fields.end())
+				{
+					int32_t uiFlags = 0;
+					if(rpcFunction->visible) uiFlags += 1;
+					if(rpcFunction->internal) uiFlags += 2;
+					if(rpcFunction->deletable || isTeam()) uiFlags += 8;
+					description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
+				}
+
+				if(fields.empty() || fields.find("GROUP") != fields.end())
+				{
+					int32_t groupedWith = getChannelGroupedWith(channel);
+					if(groupedWith > -1)
+					{
+						description->structValue->insert(StructElement("GROUP", std::shared_ptr<Variable>(new Variable(_serialNumber + ":" + std::to_string(groupedWith)))));
+					}
+				}
+
+				if(fields.empty() || fields.find("INDEX") != fields.end()) description->structValue->insert(StructElement("INDEX", std::shared_ptr<Variable>(new Variable(channel))));
+
+				if(fields.empty() || fields.find("PARAMSETS") != fields.end())
+				{
+					std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
+					description->structValue->insert(StructElement("PARAMSETS", variable));
+					if(!rpcFunction->configParameters->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("MASTER"))));
+					if(!rpcFunction->variables->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("VALUES"))));
+					if(!rpcFunction->linkParameters->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("LINK"))));
+				}
+				//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::link) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::link)->typeString())));
+				//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::master) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::master)->typeString())));
+				//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::values) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::values)->typeString())));
+
+				if(fields.empty() || fields.find("PARENT") != fields.end()) description->structValue->insert(StructElement("PARENT", std::shared_ptr<Variable>(new Variable(_serialNumber))));
+
+				if(!_rpcTypeString.empty() && (fields.empty() || fields.find("PARENT_TYPE") != fields.end())) description->structValue->insert(StructElement("PARENT_TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
+
+				if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(rpcFunction->type))));
+
+				if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", std::shared_ptr<Variable>(new Variable(_rpcDevice->version))));
+			}
+			descriptions add description*/
+		}
+		return descriptions;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+// }}}
+
 }
 }
