@@ -57,6 +57,7 @@ void Settings::reset()
 	_ssdpPort = 1900;
 	_enableMonitoring = true;
 	_devLog = false;
+	_enableCoreDumps = true;
 	_databasePath = _bl->executablePath + "db.sql";
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
@@ -222,6 +223,11 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "true") _devLog = true;
 					_bl->out.printDebug("Debug: devLog set to " + std::to_string(_devLog));
+				}
+				else if(name == "enablecoredumps")
+				{
+					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
+					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
 				}
 				else if(name == "databasepath")
 				{
