@@ -62,6 +62,7 @@ public:
 	int32_t ssdpPort() { return _ssdpPort; }
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
+	bool enableCoreDumps() { return _enableCoreDumps; };
 	std::string databasePath() { return _databasePath; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
@@ -123,6 +124,7 @@ private:
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
 	bool _devLog = false;
+	bool _enableCoreDumps = true;
 	std::string _databasePath;
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
