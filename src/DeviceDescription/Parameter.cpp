@@ -142,6 +142,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 		else if(nodeName == "logicalString") logical.reset(new LogicalString(_bl, subNode));
 		else if(nodeName == "logicalStruct") logical.reset(new LogicalStruct(_bl, subNode));
 		else if(nodeName == "logicalEnumeration") logical.reset(new LogicalEnumeration(_bl, subNode));
+		else if(nodeName == "physicalNone") physical.reset(new PhysicalNone(_bl, subNode));
 		else if(nodeName == "physicalInteger") physical.reset(new PhysicalInteger(_bl, subNode));
 		else if(nodeName == "physicalBoolean") physical.reset(new PhysicalBoolean(_bl, subNode));
 		else if(nodeName == "physicalString") physical.reset(new PhysicalString(_bl, subNode));

@@ -112,6 +112,16 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
     }
 }
 
+PhysicalNone::PhysicalNone(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::none)
+{
+
+}
+
+PhysicalNone::PhysicalNone(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
+{
+
+}
+
 PhysicalInteger::PhysicalInteger(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::tInteger)
 {
 
