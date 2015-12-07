@@ -54,6 +54,7 @@ public:
 		int32_t familyId = -1;
 		int32_t deviceId = -1;
 		bool state = false;
+		std::string licenseKey;
 	};
 	typedef std::shared_ptr<DeviceInfo> PDeviceInfo;
 	typedef std::map<int32_t, std::map<int32_t, PDeviceInfo>> DeviceStates;
@@ -90,6 +91,16 @@ public:
 	 * @return Returns -1 on application errors, -2 if the licensing module could not be found, -3 on communication errors, -4 if the activation server returned invalid data, -5 if the license key is invalid, -6 if the license key is valid but blocked, -7 if the activation key validation failed, -8 if no license key was passed and no license key was found in the database, -9 if no license key was passed and the activation key verification failed 0 if the license key is valid and already known and 1 if the license key is valid and on new activation.
 	 */
 	virtual int32_t checkLicense(int32_t familyId, int32_t deviceId, const std::string& licenseKey = "") = 0;
+
+	/**
+	 * Returns the license key stored in the database.
+	 *
+	 * @param familyId The family id the license key is for.
+	 * @param deviceId The device id the license key is for or -1 if not applicable.
+	 * @return Returns the license key or an empty string if no license key was found.
+	 */
+	virtual std::string getLicenseKey(int32_t familyId, int32_t deviceId);
+
 	virtual void decryptScript(const std::vector<char>& input, std::string& output) = 0;
 	virtual void decryptDeviceDescription(const std::vector<char>& input, std::vector<char>& output) = 0;
 protected:
@@ -107,9 +118,9 @@ protected:
 	std::mutex _devicesMutex;
 	DeviceStates _devices;
 
-	virtual void addDevice(int32_t familyId, int32_t deviceId, bool state);
-	virtual void removeDevice(int32_t familyId, int32_t deviceId, bool state);
-	virtual void updateDevice(int32_t familyId, int32_t deviceId, bool state);
+	virtual void addDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey);
+	virtual void removeDevice(int32_t familyId, int32_t deviceId);
+	virtual void updateDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey);
 	virtual void loadVariables();
 	virtual void saveVariable(uint64_t index, int32_t intValue);
     virtual void saveVariable(uint64_t index, int64_t intValue);

@@ -34,6 +34,7 @@
 #include "../Variable.h"
 #include "../IEvents.h"
 #include "../DeviceDescription/HomegearDevice.h"
+#include "../Sockets/RpcClientInfo.h"
 #include "IPhysicalInterface.h"
 #include "Peer.h"
 
@@ -103,48 +104,48 @@ public:
 	virtual bool peerExists(uint64_t id);
 	virtual uint64_t getPeerIdFromSerial(std::string serialNumber) { return 0; }
 
-	virtual std::shared_ptr<Variable> activateLinkParamset(int32_t clientId, std::string serialNumber, int32_t channel, std::string remoteSerialNumber, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> activateLinkParamset(int32_t clientId, uint64_t peerId, int32_t channel, uint64_t remoteId, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> addDevice(int32_t clientId, std::string serialNumber) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> addLink(int32_t clientId, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> addLink(int32_t clientId, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> createDevice(int32_t clientId, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> deleteDevice(int32_t clientId, std::string serialNumber, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> deleteDevice(int32_t clientId, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> getAllValues(int32_t clientId, uint64_t peerId, bool returnWriteOnly);
-	virtual std::shared_ptr<Variable> getDeviceDescription(int32_t clientId, std::string serialNumber, int32_t channel);
-	virtual std::shared_ptr<Variable> getDeviceDescription(int32_t clientId, uint64_t id, int32_t channel);
-	virtual std::shared_ptr<Variable> getDeviceInfo(int32_t clientId, uint64_t id, std::map<std::string, bool> fields) = 0;
-	virtual std::shared_ptr<Variable> getPeerId(int32_t clientId, int32_t filterType, std::string filterValue);
-	virtual std::shared_ptr<Variable> getPeerId(int32_t clientId, int32_t address);
-	virtual std::shared_ptr<Variable> getPeerId(int32_t clientId, std::string serialNumber);
-	virtual std::shared_ptr<Variable> getInstallMode(int32_t clientId) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> getLinkInfo(int32_t clientId, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel);
-	virtual std::shared_ptr<Variable> getLinkInfo(int32_t clientId, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel);
-	virtual std::shared_ptr<Variable> getLinkPeers(int32_t clientId, std::string serialNumber, int32_t channel);
-	virtual std::shared_ptr<Variable> getLinkPeers(int32_t clientId, uint64_t peerId, int32_t channel);
-	virtual std::shared_ptr<Variable> getLinks(int32_t clientId, std::string serialNumber, int32_t channel, int32_t flags);
-	virtual std::shared_ptr<Variable> getLinks(int32_t clientId, uint64_t peerId, int32_t channel, int32_t flags);
-	virtual std::shared_ptr<Variable> getName(int32_t clientId, uint64_t id);
-	virtual std::shared_ptr<Variable> getParamsetDescription(int32_t clientId, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getParamsetDescription(int32_t clientId, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getParamsetId(int32_t clientId, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getParamsetId(int32_t clientId, uint64_t peerId, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getParamset(int32_t clientId, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getParamset(int32_t clientId, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
-	virtual std::shared_ptr<Variable> getServiceMessages(int32_t clientId, bool returnId);
-	virtual std::shared_ptr<Variable> getValue(int32_t clientId, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-	virtual std::shared_ptr<Variable> getValue(int32_t clientId, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-	virtual std::shared_ptr<Variable> listDevices(int32_t clientId, bool channels, std::map<std::string, bool> fields);
-	virtual std::shared_ptr<Variable> listDevices(int32_t clientId, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices);
-	virtual std::shared_ptr<Variable> listTeams(int32_t clientId) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> putParamset(int32_t clientId, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, std::shared_ptr<Variable> paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> putParamset(int32_t clientId, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, std::shared_ptr<Variable> paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> reportValueUsage(int32_t clientId, std::string serialNumber);
-	virtual std::shared_ptr<Variable> removeLink(int32_t clientId, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> removeLink(int32_t clientId, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> rssiInfo(int32_t clientId);
-	virtual std::shared_ptr<Variable> searchDevices(int32_t clientId) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> activateLinkParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string remoteSerialNumber, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> activateLinkParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t remoteId, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> addDevice(PRpcClientInfo clientInfo, std::string serialNumber) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> addLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> addLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> createDevice(PRpcClientInfo clientInfo, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly);
+	virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel);
+	virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel);
+	virtual std::shared_ptr<Variable> getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields) = 0;
+	virtual std::shared_ptr<Variable> getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std::string filterValue);
+	virtual std::shared_ptr<Variable> getPeerId(PRpcClientInfo clientInfo, int32_t address);
+	virtual std::shared_ptr<Variable> getPeerId(PRpcClientInfo clientInfo, std::string serialNumber);
+	virtual std::shared_ptr<Variable> getInstallMode(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> getLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel);
+	virtual std::shared_ptr<Variable> getLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel);
+	virtual std::shared_ptr<Variable> getLinkPeers(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel);
+	virtual std::shared_ptr<Variable> getLinkPeers(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel);
+	virtual std::shared_ptr<Variable> getLinks(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, int32_t flags);
+	virtual std::shared_ptr<Variable> getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, int32_t flags);
+	virtual std::shared_ptr<Variable> getName(PRpcClientInfo clientInfo, uint64_t id);
+	virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getParamsetId(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getParamsetId(PRpcClientInfo clientInfo, uint64_t peerId, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
+	virtual std::shared_ptr<Variable> getServiceMessages(PRpcClientInfo clientInfo, bool returnId);
+	virtual std::shared_ptr<Variable> getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
+	virtual std::shared_ptr<Variable> getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
+	virtual std::shared_ptr<Variable> listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
+	virtual std::shared_ptr<Variable> listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices);
+	virtual std::shared_ptr<Variable> listTeams(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, std::shared_ptr<Variable> paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, std::shared_ptr<Variable> paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber);
+	virtual std::shared_ptr<Variable> removeLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> removeLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> rssiInfo(PRpcClientInfo clientInfo);
+	virtual std::shared_ptr<Variable> searchDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
 
 	/**
      * RPC function to change the Id of the peer.
@@ -153,17 +154,17 @@ public:
      * @param newPeerId The new ID of the peer.
      * @return Returns "RPC void" on success or RPC error "-100" when the new peer ID is invalid and error "-101" when the new peer ID is already in use.
      */
-    virtual std::shared_ptr<BaseLib::Variable> setId(int32_t clientId, uint64_t oldPeerId, uint64_t newPeerId);
-	virtual std::shared_ptr<Variable> setInstallMode(int32_t clientId, bool on, uint32_t duration = 60, bool debugOutput = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> setInterface(int32_t clientId, uint64_t peerId, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> setLinkInfo(int32_t clientId, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description);
-	virtual std::shared_ptr<Variable> setLinkInfo(int32_t clientId, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description);
-	virtual std::shared_ptr<Variable> setName(int32_t clientId, uint64_t id, std::string name);
-	virtual std::shared_ptr<Variable> setTeam(int32_t clientId, std::string serialNumber, int32_t channel, std::string teamSerialNumber, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> setTeam(int32_t clientId, uint64_t peerId, int32_t channel, uint64_t teamId, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> setValue(int32_t clientId, std::string serialNumber, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
-	virtual std::shared_ptr<Variable> setValue(int32_t clientId, uint64_t id, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
-	virtual std::shared_ptr<Variable> updateFirmware(int32_t clientId, std::vector<uint64_t> ids, bool manual) { return Variable::createError(-32601, "Method not implemented for this central."); }
+    virtual std::shared_ptr<BaseLib::Variable> setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_t newPeerId);
+	virtual std::shared_ptr<Variable> setInstallMode(PRpcClientInfo clientInfo, bool on, uint32_t duration = 60, bool debugOutput = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> setInterface(PRpcClientInfo clientInfo, uint64_t peerId, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> setLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description);
+	virtual std::shared_ptr<Variable> setLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description);
+	virtual std::shared_ptr<Variable> setName(PRpcClientInfo clientInfo, uint64_t id, std::string name);
+	virtual std::shared_ptr<Variable> setTeam(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string teamSerialNumber, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> setTeam(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t teamId, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
+	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
+	virtual std::shared_ptr<Variable> updateFirmware(PRpcClientInfo clientInfo, std::vector<uint64_t> ids, bool manual) { return Variable::createError(-32601, "Method not implemented for this central."); }
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	int32_t _deviceFamily = -1;

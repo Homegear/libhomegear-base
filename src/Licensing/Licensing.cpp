@@ -103,6 +103,31 @@ void Licensing::loadVariables()
     }
 }
 
+std::string Licensing::getLicenseKey(int32_t familyId, int32_t deviceId)
+{
+	try
+	{
+		DeviceStates::iterator familyIterator = _devices.find(familyId);
+		if(familyIterator == _devices.end()) return "";
+		std::map<int32_t, PDeviceInfo>::iterator deviceIterator = familyIterator->second.find(deviceId);
+		if(deviceIterator == familyIterator->second.end() || !deviceIterator->second) return "";
+		return deviceIterator->second->licenseKey;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return "";
+}
+
 void Licensing::saveVariable(uint64_t index, int32_t intValue)
 {
 	try
@@ -357,7 +382,7 @@ bool Licensing::getDeviceState(int32_t familyId, int32_t deviceId)
     return false;
 }
 
-void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state)
+void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey)
 {
 	_devicesMutex.lock();
 	try
@@ -367,6 +392,7 @@ void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state)
 		info->familyId = familyId;
 		info->deviceId = deviceId;
 		info->state = state;
+		info->licenseKey = licenseKey;
 		_devices[familyId][deviceId] = info;
 	}
 	catch(const std::exception& ex)
@@ -384,12 +410,12 @@ void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state)
     _devicesMutex.unlock();
 }
 
-void Licensing::updateDevice(int32_t familyId, int32_t deviceId, bool state)
+void Licensing::updateDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey)
 {
-	addDevice(familyId, deviceId, state);
+	addDevice(familyId, deviceId, state, licenseKey);
 }
 
-void Licensing::removeDevice(int32_t familyId, int32_t deviceId, bool state)
+void Licensing::removeDevice(int32_t familyId, int32_t deviceId)
 {
 	_devicesMutex.lock();
 	try

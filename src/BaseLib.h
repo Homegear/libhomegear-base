@@ -28,6 +28,7 @@
 #include "Sockets/SocketOperations.h"
 #include "Sockets/IWebserverEventSink.h"
 #include "Sockets/ServerInfo.h"
+#include "Sockets/RpcClientInfo.h"
 #include "Systems/DeviceFamily.h"
 #include "Systems/Peer.h"
 #include "Systems/SystemFactory.h"

@@ -362,7 +362,7 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel)
     }
 }
 
-PVariable ServiceMessages::get(int32_t clientID, bool returnID)
+PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
 {
 	try
 	{

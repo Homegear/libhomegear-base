@@ -120,9 +120,9 @@ void DeviceFamily::raiseRunScript(std::string& script, uint64_t peerId, const st
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(script, peerId, args, keepAlive, interval);
 }
 
-int32_t DeviceFamily::raiseIsAddonClient(int32_t clientID)
+int32_t DeviceFamily::raiseIsAddonClient(int32_t clientId)
 {
-	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onIsAddonClient(clientID);
+	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onIsAddonClient(clientId);
 	return -1;
 }
 
@@ -179,9 +179,9 @@ void DeviceFamily::onRunScript(std::string& script, uint64_t peerId, const std::
 	raiseRunScript(script, peerId, args, keepAlive, interval);
 }
 
-int32_t DeviceFamily::onIsAddonClient(int32_t clientID)
+int32_t DeviceFamily::onIsAddonClient(int32_t clientId)
 {
-	return raiseIsAddonClient(clientID);
+	return raiseIsAddonClient(clientId);
 }
 
 void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
@@ -363,11 +363,11 @@ std::string DeviceFamily::handleCliCommand(std::string& command)
 }
 
 // {{{ RPC
-PVariable DeviceFamily::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields)
+PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields)
 {
 	try
 	{
-		if(_rpcDevices) return _rpcDevices->listKnownDeviceTypes(clientId, channels, fields);
+		if(_rpcDevices) return _rpcDevices->listKnownDeviceTypes(clientInfo, channels, fields);
 	}
 	catch(const std::exception& ex)
     {
