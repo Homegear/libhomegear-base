@@ -36,6 +36,7 @@
 #include "../Encoding/BinaryDecoder.h"
 #include "../IEvents.h"
 #include "../Database/DatabaseTypes.h"
+#include "../Sockets/RpcClientInfo.h"
 
 #include <string>
 #include <iomanip>
@@ -81,7 +82,7 @@ public:
 	virtual void save(int32_t channel, std::string id, uint8_t value);
 	virtual bool set(std::string id, bool value);
 	virtual void set(std::string id, uint8_t value, uint32_t channel);
-	virtual std::shared_ptr<Variable> get(int32_t clientID, bool returnID);
+	virtual std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, bool returnID);
 
 	virtual void setConfigPending(bool value);
 	virtual bool getConfigPending() { return _configPending; }

@@ -33,6 +33,7 @@
 
 #include "../DeviceDescription/HomegearDevice.h"
 #include "../Database/DatabaseTypes.h"
+#include "../Sockets/RpcClientInfo.h"
 #include "ServiceMessages.h"
 
 #include <string>
@@ -219,24 +220,24 @@ public:
     virtual std::shared_ptr<ICentral> getCentral() = 0;
 
     //RPC methods
-	virtual std::shared_ptr<Variable> activateLinkParamset(int32_t clientID, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
-	virtual std::shared_ptr<Variable> getAllValues(int32_t clientID, bool returnWriteOnly);
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> getDeviceDescriptions(int32_t clientID, bool channels, std::map<std::string, bool> fields);
-    virtual std::shared_ptr<Variable> getDeviceDescription(int32_t clientID, int32_t channel, std::map<std::string, bool> fields);
-    virtual std::shared_ptr<Variable> getDeviceInfo(int32_t clientID, std::map<std::string, bool> fields);
-    virtual std::shared_ptr<Variable> getLink(int32_t clientID, int32_t channel, int32_t flags, bool avoidDuplicates);
-    virtual std::shared_ptr<Variable> getLinkInfo(int32_t clientID, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
-	virtual std::shared_ptr<Variable> setLinkInfo(int32_t clientID, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description);
-	virtual std::shared_ptr<Variable> getLinkPeers(int32_t clientID, int32_t channel, bool returnID);
-    virtual std::shared_ptr<Variable> getParamset(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
-    virtual std::shared_ptr<Variable> getParamsetDescription(int32_t clientID, std::shared_ptr<ParameterGroup> parameterSet);
-    virtual std::shared_ptr<Variable> getParamsetDescription(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
-    virtual std::shared_ptr<Variable> getParamsetId(int32_t clientID, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
-    virtual std::shared_ptr<Variable> getServiceMessages(int32_t clientID, bool returnID);
-    virtual std::shared_ptr<Variable> getValue(int32_t clientID, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-    virtual std::shared_ptr<Variable> putParamset(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, std::shared_ptr<BaseLib::Variable> variables, bool onlyPushing = false) = 0;
-    virtual std::shared_ptr<Variable> reportValueUsage(int32_t clientID);
-    virtual std::shared_ptr<Variable> rssiInfo(int32_t clientID);
+	virtual std::shared_ptr<Variable> activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
+	virtual std::shared_ptr<Variable> getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly);
+	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> getDeviceDescriptions(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
+    virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel, std::map<std::string, bool> fields);
+    virtual std::shared_ptr<Variable> getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, bool> fields);
+    virtual std::shared_ptr<Variable> getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flags, bool avoidDuplicates);
+    virtual std::shared_ptr<Variable> getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
+	virtual std::shared_ptr<Variable> setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description);
+	virtual std::shared_ptr<Variable> getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool returnID);
+    virtual std::shared_ptr<Variable> getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
+    virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, std::shared_ptr<ParameterGroup> parameterSet);
+    virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
+    virtual std::shared_ptr<Variable> getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+    virtual std::shared_ptr<Variable> getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
+    virtual std::shared_ptr<Variable> getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
+    virtual std::shared_ptr<Variable> putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, std::shared_ptr<BaseLib::Variable> variables, bool onlyPushing = false) = 0;
+    virtual std::shared_ptr<Variable> reportValueUsage(PRpcClientInfo clientInfo);
+    virtual std::shared_ptr<Variable> rssiInfo(PRpcClientInfo clientInfo);
 
     /**
      * RPC function to change the ID of the peer.
@@ -244,9 +245,9 @@ public:
      * @param newPeerID The new ID of the peer.
      * @return Returns "RPC void" on success or RPC error "-100" when the new peer ID is invalid and error "-101" when the new peer ID is already in use.
      */
-    virtual std::shared_ptr<BaseLib::Variable> setId(int32_t clientID, uint64_t newPeerID);
-    virtual std::shared_ptr<Variable> setInterface(int32_t clientID, std::string interfaceID) { return Variable::createError(-32601, "Method not implemented for this Peer."); }
-	virtual std::shared_ptr<BaseLib::Variable> setValue(int32_t clientID, uint32_t channel, std::string valueKey, std::shared_ptr<BaseLib::Variable> value);
+    virtual std::shared_ptr<BaseLib::Variable> setId(PRpcClientInfo clientInfo, uint64_t newPeerID);
+    virtual std::shared_ptr<Variable> setInterface(PRpcClientInfo clientInfo, std::string interfaceID) { return Variable::createError(-32601, "Method not implemented for this Peer."); }
+	virtual std::shared_ptr<BaseLib::Variable> setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<BaseLib::Variable> value);
     //End RPC methods
 protected:
     BaseLib::Obj* _bl = nullptr;
@@ -372,7 +373,7 @@ protected:
 		 * @param parameters The parameters struct which will be returned by getAllValues.
 		 * @return "true" means the function handled the parameter completely and there is nothing to do anymore in getAllValues.
 		 */
-		virtual bool getAllValuesHook2(PParameter parameter, uint32_t channel, PVariable parameters) { return false; }
+		virtual bool getAllValuesHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters) { return false; }
 	// }}}
 };
 

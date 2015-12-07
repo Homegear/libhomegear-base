@@ -1168,7 +1168,7 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
 }
 
 // {{{ RPC
-PVariable Devices::listKnownDeviceType(int32_t clientId, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::map<std::string, bool>& fields)
+PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::map<std::string, bool>& fields)
 {
 	try
 	{
@@ -1306,7 +1306,7 @@ PVariable Devices::listKnownDeviceType(int32_t clientId, std::shared_ptr<Homegea
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::map<std::string, bool>& fields)
+PVariable Devices::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields)
 {
 	try
 	{
@@ -1316,14 +1316,14 @@ PVariable Devices::listKnownDeviceTypes(int32_t clientId, bool channels, std::ma
 		{
 			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
 			{
-				std::shared_ptr<Variable> description = listKnownDeviceType(clientId, *i, *k, -1, fields);
+				std::shared_ptr<Variable> description = listKnownDeviceType(clientInfo, *i, *k, -1, fields);
 				if(!description->errorStruct && !description->structValue->empty()) descriptions->arrayValue->push_back(description);
 
 				if(channels)
 				{
 					for(Functions::iterator j = (*i)->functions.begin(); j != (*i)->functions.end(); ++j)
 					{
-						description = listKnownDeviceType(clientId, *i, *k, (int32_t)j->first, fields);
+						description = listKnownDeviceType(clientInfo, *i, *k, (int32_t)j->first, fields);
 						if(!description->errorStruct && !description->structValue->empty()) descriptions->arrayValue->push_back(description);
 					}
 				}

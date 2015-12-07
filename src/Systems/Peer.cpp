@@ -1177,11 +1177,12 @@ void Peer::initializeTypeString()
 }
 
 //RPC methods
-std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteOnly)
+std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 {
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 		std::shared_ptr<Variable> values(new Variable(VariableType::tStruct));
 
 		values->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
@@ -1220,7 +1221,7 @@ std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteO
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
 				if(parameterIterator == valuesCentralIterator->second.end()) continue;
 
-				if(getAllValuesHook2(j->second, i->first, parameters)) continue;
+				if(getAllValuesHook2(clientInfo, j->second, i->first, parameters)) continue;
 
 				std::shared_ptr<Variable> element(new Variable(VariableType::tStruct));
 				std::shared_ptr<Variable> value;
@@ -1299,6 +1300,16 @@ std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteO
 						element->structValue->insert(StructElement("SPECIAL", specialValues));
 					}
 				}
+				else if(j->second->logical->type == ILogical::Type::tArray)
+				{
+					if(!clientInfo->initNewFormat) continue;
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ARRAY")))));
+				}
+				else if(j->second->logical->type == ILogical::Type::tStruct)
+				{
+					if(!clientInfo->initNewFormat) continue;
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRUCT")))));
+				}
 				parameters->structValue->insert(StructElement(j->second->id, element));
 			}
 		}
@@ -1321,7 +1332,7 @@ std::shared_ptr<Variable> Peer::getAllValues(int32_t clientID, bool returnWriteO
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getDeviceDescription(int32_t clientID, int32_t channel, std::map<std::string, bool> fields)
+std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel, std::map<std::string, bool> fields)
 {
 	try
 	{
@@ -1519,12 +1530,12 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(int32_t clientID, int32_t c
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Variable>>> Peer::getDeviceDescriptions(int32_t clientID, bool channels, std::map<std::string, bool> fields)
+std::shared_ptr<std::vector<std::shared_ptr<Variable>>> Peer::getDeviceDescriptions(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields)
 {
 	try
 	{
 		std::shared_ptr<std::vector<std::shared_ptr<Variable>>> descriptions(new std::vector<std::shared_ptr<Variable>>());
-		std::shared_ptr<Variable> description = getDeviceDescription(clientID, -1, fields);
+		std::shared_ptr<Variable> description = getDeviceDescription(clientInfo, -1, fields);
 		if(!description->errorStruct && !description->structValue->empty()) descriptions->push_back(description);
 
 		if(channels)
@@ -1532,7 +1543,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> Peer::getDeviceDescripti
 			for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 			{
 				if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
-				description = getDeviceDescription(clientID, (int32_t)i->first, fields);
+				description = getDeviceDescription(clientInfo, (int32_t)i->first, fields);
 				if(!description->errorStruct && !description->structValue->empty()) descriptions->push_back(description);
 			}
 		}
@@ -1554,7 +1565,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> Peer::getDeviceDescripti
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
-std::shared_ptr<Variable> Peer::getDeviceInfo(int32_t clientID, std::map<std::string, bool> fields)
+std::shared_ptr<Variable> Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, bool> fields)
 {
 	try
 	{
@@ -1593,7 +1604,7 @@ std::shared_ptr<Variable> Peer::getDeviceInfo(int32_t clientID, std::map<std::st
     return std::shared_ptr<Variable>();
 }
 
-std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32_t flags, bool avoidDuplicates)
+std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flags, bool avoidDuplicates)
 {
 	try
 	{
@@ -1682,7 +1693,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 4)
 					{
 						std::shared_ptr<Variable> paramset;
-						if(!(brokenFlags & 2) && remotePeer) paramset = remotePeer->getParamset(clientID, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
+						if(!(brokenFlags & 2) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_PARAMSET", paramset));
@@ -1690,7 +1701,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 16)
 					{
 						std::shared_ptr<Variable> description;
-						if(!(brokenFlags & 2) && remotePeer) description = remotePeer->getDeviceDescription(clientID, (*i)->channel, std::map<std::string, bool>());
+						if(!(brokenFlags & 2) && remotePeer) description = remotePeer->getDeviceDescription(clientInfo, (*i)->channel, std::map<std::string, bool>());
 						else description.reset(new Variable(VariableType::tStruct));
 						if(description->errorStruct) description.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_DESCRIPTION", description));
@@ -1701,7 +1712,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 2)
 					{
 						std::shared_ptr<Variable> paramset;
-						if(!(brokenFlags & 1)) paramset = getParamset(clientID, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
+						if(!(brokenFlags & 1)) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_PARAMSET", paramset));
@@ -1709,7 +1720,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 8)
 					{
 						std::shared_ptr<Variable> description;
-						if(!(brokenFlags & 1)) description = getDeviceDescription(clientID, channel, std::map<std::string, bool>());
+						if(!(brokenFlags & 1)) description = getDeviceDescription(clientInfo, channel, std::map<std::string, bool>());
 						else description.reset(new Variable(VariableType::tStruct));
 						if(description->errorStruct) description.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_DESCRIPTION", description));
@@ -1723,7 +1734,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 4)
 					{
 						std::shared_ptr<Variable> paramset;
-						if(!(brokenFlags & 2) && remotePeer) paramset = getParamset(clientID, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
+						if(!(brokenFlags & 2) && remotePeer) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_PARAMSET", paramset));
@@ -1731,7 +1742,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 16)
 					{
 						std::shared_ptr<Variable> description;
-						if(!(brokenFlags & 2)) description = getDeviceDescription(clientID, channel, std::map<std::string, bool>());
+						if(!(brokenFlags & 2)) description = getDeviceDescription(clientInfo, channel, std::map<std::string, bool>());
 						else description.reset(new Variable(VariableType::tStruct));
 						if(description->errorStruct) description.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_DESCRIPTION", description));
@@ -1742,7 +1753,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 2)
 					{
 						std::shared_ptr<Variable> paramset;
-						if(!(brokenFlags & 1) && remotePeer) paramset = remotePeer->getParamset(clientID, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
+						if(!(brokenFlags & 1) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_PARAMSET", paramset));
@@ -1750,7 +1761,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 					if(flags & 8)
 					{
 						std::shared_ptr<Variable> description;
-						if(!(brokenFlags & 1) && remotePeer) description = remotePeer->getDeviceDescription(clientID, (*i)->channel, std::map<std::string, bool>());
+						if(!(brokenFlags & 1) && remotePeer) description = remotePeer->getDeviceDescription(clientInfo, (*i)->channel, std::map<std::string, bool>());
 						else description.reset(new Variable(VariableType::tStruct));
 						if(description->errorStruct) description.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_DESCRIPTION", description));
@@ -1767,19 +1778,19 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 				PFunction rpcFunction = _rpcDevice->functions.at(channel);
 				if(rpcFunction->grouped)
 				{
-					element = getLink(clientID, channel, flags & 0xFFFFFFFE, avoidDuplicates);
+					element = getLink(clientInfo, channel, flags & 0xFFFFFFFE, avoidDuplicates);
 					array->arrayValue->insert(array->arrayValue->end(), element->arrayValue->begin(), element->arrayValue->end());
 
 					int32_t groupedWith = getChannelGroupedWith(channel);
 					if(groupedWith > -1)
 					{
-						element = getLink(clientID, groupedWith, flags & 0xFFFFFFFE, avoidDuplicates);
+						element = getLink(clientInfo, groupedWith, flags & 0xFFFFFFFE, avoidDuplicates);
 						array->arrayValue->insert(array->arrayValue->end(), element->arrayValue->begin(), element->arrayValue->end());
 					}
 				}
 				else
 				{
-					element = getLink(clientID, channel, flags & 0xFFFFFFFE, avoidDuplicates);
+					element = getLink(clientInfo, channel, flags & 0xFFFFFFFE, avoidDuplicates);
 					array->arrayValue->insert(array->arrayValue->end(), element->arrayValue->begin(), element->arrayValue->end());
 				}
 			}
@@ -1788,7 +1799,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
 				for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 				{
 					element.reset(new Variable(VariableType::tArray));
-					element = getLink(clientID, i->first, flags, avoidDuplicates);
+					element = getLink(clientInfo, i->first, flags, avoidDuplicates);
 					array->arrayValue->insert(array->arrayValue->end(), element->arrayValue->begin(), element->arrayValue->end());
 				}
 			}
@@ -1810,7 +1821,7 @@ std::shared_ptr<Variable> Peer::getLink(int32_t clientID, int32_t channel, int32
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getLinkInfo(int32_t clientID, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel)
+std::shared_ptr<Variable> Peer::getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel)
 {
 	try
 	{
@@ -1837,7 +1848,7 @@ std::shared_ptr<Variable> Peer::getLinkInfo(int32_t clientID, int32_t senderChan
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getLinkPeers(int32_t clientID, int32_t channel, bool returnID)
+std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool returnID)
 {
 	try
 	{
@@ -1900,7 +1911,7 @@ std::shared_ptr<Variable> Peer::getLinkPeers(int32_t clientID, int32_t channel, 
 		{
 			for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 			{
-				std::shared_ptr<Variable> linkPeers = getLinkPeers(clientID, i->first, returnID);
+				std::shared_ptr<Variable> linkPeers = getLinkPeers(clientInfo, i->first, returnID);
 				array->arrayValue->insert(array->arrayValue->end(), linkPeers->arrayValue->begin(), linkPeers->arrayValue->end());
 			}
 		}
@@ -1921,14 +1932,15 @@ std::shared_ptr<Variable> Peer::getLinkPeers(int32_t clientID, int32_t channel, 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParameterGroup parameterGroup)
+std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGroup parameterGroup)
 {
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 
 		std::shared_ptr<Variable> descriptions(new Variable(VariableType::tStruct));
-		std::shared_ptr<Variable> description(new Variable(VariableType::tStruct));
+		std::shared_ptr<Variable> description;
 		uint32_t index = 0;
 		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
 		{
@@ -1938,6 +1950,8 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
 				continue;
 			}
+			description.reset(new Variable(VariableType::tStruct));
+
 			int32_t operations = 0;
 			if(i->second->readable) operations += 5;
 			if(i->second->writeable) operations += 2;
@@ -2063,6 +2077,26 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("FLOAT")))));
 			}
+			else if(i->second->logical->type == ILogical::Type::tArray)
+			{
+				if(!clientInfo->initNewFormat) continue;
+				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
+				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
+				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
+				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ARRAY")))));
+			}
+			else if(i->second->logical->type == ILogical::Type::tStruct)
+			{
+				if(!clientInfo->initNewFormat) continue;
+				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
+				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
+				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
+				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRUCT")))));
+			}
 
 			description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
 			if(!i->second->label.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(i->second->label))));
@@ -2072,7 +2106,6 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
 
 			index++;
 			descriptions->structValue->insert(StructElement(i->second->id, description));
-			description.reset(new Variable(VariableType::tStruct));
 		}
 		return descriptions;
 	}
@@ -2091,7 +2124,7 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(int32_t clientID, PParame
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getParamsetId(int32_t clientID, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
+std::shared_ptr<Variable> Peer::getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
 {
 	try
 	{
@@ -2128,14 +2161,14 @@ std::shared_ptr<Variable> Peer::getParamsetId(int32_t clientID, uint32_t channel
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::getServiceMessages(int32_t clientID, bool returnID)
+std::shared_ptr<Variable> Peer::getServiceMessages(PRpcClientInfo clientInfo, bool returnID)
 {
 	if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 	if(!serviceMessages) return Variable::createError(-32500, "Service messages are not initialized.");
-	return serviceMessages->get(clientID, returnID);
+	return serviceMessages->get(clientInfo, returnID);
 }
 
-std::shared_ptr<Variable> Peer::getValue(int32_t clientID, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous)
+std::shared_ptr<Variable> Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous)
 {
 	try
 	{
@@ -2171,7 +2204,7 @@ std::shared_ptr<Variable> Peer::getValue(int32_t clientID, uint32_t channel, std
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::reportValueUsage(int32_t clientID)
+std::shared_ptr<Variable> Peer::reportValueUsage(PRpcClientInfo clientInfo)
 {
 	try
 	{
@@ -2193,7 +2226,7 @@ std::shared_ptr<Variable> Peer::reportValueUsage(int32_t clientID)
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::rssiInfo(int32_t clientID)
+std::shared_ptr<Variable> Peer::rssiInfo(PRpcClientInfo clientInfo)
 {
 	try
 	{
@@ -2243,7 +2276,7 @@ std::shared_ptr<Variable> Peer::rssiInfo(int32_t clientID)
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::setLinkInfo(int32_t clientID, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description)
+std::shared_ptr<Variable> Peer::setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description)
 {
 	try
 	{
@@ -2269,7 +2302,7 @@ std::shared_ptr<Variable> Peer::setLinkInfo(int32_t clientID, int32_t senderChan
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-std::shared_ptr<Variable> Peer::setId(int32_t clientID, uint64_t newPeerId)
+std::shared_ptr<Variable> Peer::setId(PRpcClientInfo clientInfo, uint64_t newPeerId)
 {
 	try
 	{
@@ -2303,7 +2336,7 @@ std::shared_ptr<Variable> Peer::setId(int32_t clientID, uint64_t newPeerId)
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
 
-std::shared_ptr<Variable> Peer::setValue(int32_t clientID, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value)
+std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value)
 {
 	try
 	{
