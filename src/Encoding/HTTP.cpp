@@ -530,7 +530,7 @@ void HTTP::readChunkSize(char** buffer, int32_t& bufferLength)
 		if(!newlinePos || newlinePos >= *buffer + bufferLength) throw BaseLib::Exception("Could not parse chunk size.");
 		std::string chunkSize = _partialChunkSize + std::string(*buffer, newlinePos - *buffer);
 		HelperFunctions::trim(_partialChunkSize);
-		if(!Math::isNumber(chunkSize)) throw BaseLib::Exception("Chunk size is no number.");
+		if(!Math::isNumber(chunkSize, true)) throw BaseLib::Exception("Chunk size is no number.");
 		_chunkSize = Math::getNumber(chunkSize, true);
 		_partialChunkSize = "";
 		bufferLength -= (newlinePos + 1) - *buffer;
