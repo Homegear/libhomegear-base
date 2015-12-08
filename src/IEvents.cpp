@@ -163,13 +163,15 @@ void IEventsEx::removeEventHandler(PEventHandler eventHandler)
 	if(!eventHandler) return;
 
 	_eventHandlerMutex.lock();
+	while(eventHandler->useCount() > 0)
+	{
+		_eventHandlerMutex.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		_eventHandlerMutex.lock();
+	}
 	EventHandlers::iterator handlerIterator = _eventHandlers.find(eventHandler->handler());
 	if(handlerIterator != _eventHandlers.end())
 	{
-		while(eventHandler->useCount() > 0)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
 		_eventHandlers.erase(eventHandler->handler());
 		eventHandler->invalidate();
 	}

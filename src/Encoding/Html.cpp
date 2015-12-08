@@ -316,7 +316,7 @@ void Html::unescapeHtmlEntities(std::string& in, std::string& out)
 	char* pos = &in.at(0);
 	char* end = &in.at(0) + in.size();
 
-	while(pos <= end)
+	while(pos <= end && *pos)
 	{
 		if(found)
 		{
