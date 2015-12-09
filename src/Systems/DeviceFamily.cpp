@@ -363,6 +363,27 @@ std::string DeviceFamily::handleCliCommand(std::string& command)
 }
 
 // {{{ RPC
+std::shared_ptr<Variable> DeviceFamily::getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type)
+{
+	try
+	{
+		if(_rpcDevices) return _rpcDevices->getParamsetDescription(clientInfo, deviceId, firmwareVersion, channel, type);
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields)
 {
 	try
