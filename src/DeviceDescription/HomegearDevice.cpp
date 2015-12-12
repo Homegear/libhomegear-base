@@ -1101,6 +1101,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 			}
 
+			if(parameter->password)
+			{
+				tempStrings.push_back("true");
+				xml_node<>* node = doc->allocate_node(node_element, "password", tempStrings.back().c_str());
+				propertiesNode->append_node(node);
+			}
+
 			if(!parameter->visible)
 			{
 				tempStrings.push_back("false");

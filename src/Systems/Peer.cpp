@@ -1228,6 +1228,7 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				if(j->second->readable)
 				{
 					value = (j->second->convertFromPacket(parameterIterator->second.data));
+					if(j->second->password) value.reset(new Variable(value->type));
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
 				}
@@ -2182,12 +2183,16 @@ std::shared_ptr<Variable> Peer::getValue(PRpcClientInfo clientInfo, uint32_t cha
 		PParameter parameter = parameterGroup->parameters.at(valueKey);
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
 		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+		std::shared_ptr<Variable> variable;
 		if(requestFromDevice)
 		{
-			std::shared_ptr<Variable> variable = getValueFromDevice(parameter, channel, asynchronous);
+			variable = getValueFromDevice(parameter, channel, asynchronous);
+			if(parameter->password) variable.reset(new Variable(variable->type));
 			if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
 		}
-		return parameter->convertFromPacket(valuesCentral[channel][valueKey].data);
+		variable = parameter->convertFromPacket(valuesCentral[channel][valueKey].data);
+		if(parameter->password) variable.reset(new Variable(variable->type));
+		return variable;
 	}
 	catch(const std::exception& ex)
     {
