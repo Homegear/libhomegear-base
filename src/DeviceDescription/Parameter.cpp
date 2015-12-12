@@ -89,6 +89,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 				else if(propertyName == "readable") { if(propertyValue == "false") readable = false; }
 				else if(propertyName == "writeable") { if(propertyValue == "false") writeable = false; }
 				else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }
+				else if(propertyName == "password") { if(propertyValue == "true") password = true; }
 				else if(propertyName == "visible") { if(propertyValue == "false") visible = false; }
 				else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
 				else if(propertyName == "parameterGroupSelector") { if(propertyValue == "true") parameterGroupSelector = true; }

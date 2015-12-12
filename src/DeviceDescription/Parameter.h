@@ -93,6 +93,7 @@ public:
 	bool readable = true;
 	bool writeable = true;
 	bool addonWriteable = true;
+	bool password = false;
 	bool visible = true;
 	bool internal = false;
 	bool parameterGroupSelector = false;

@@ -122,20 +122,17 @@ PEventHandler IEventsEx::addEventHandler(IEventSinkBase* eventHandler)
 {
 	PEventHandler handler;
 	if(!eventHandler) return handler;
-	_eventHandlerMutex.lock();
-
+	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
 	for(EventHandlers::iterator i = _eventHandlers.begin(); i != _eventHandlers.end(); ++i)
 	{
 		if(i->first == eventHandler)
 		{
 			handler = i->second;
-			_eventHandlerMutex.unlock();
 			return handler;
 		}
 	}
 	handler.reset(new EventHandler(_currentId++, eventHandler));
 	_eventHandlers[eventHandler] = handler;
-    _eventHandlerMutex.unlock();
     return handler;
 }
 
@@ -143,7 +140,7 @@ std::vector<PEventHandler> IEventsEx::addEventHandlers(EventHandlers eventHandle
 {
 	std::vector<PEventHandler> newHandlers;
 	if(eventHandlers.empty()) return newHandlers;
-	_eventHandlerMutex.lock();
+	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
 	for(EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
 	{
 		EventHandlers::iterator handlerIterator = _eventHandlers.find(i->first);
@@ -154,7 +151,6 @@ std::vector<PEventHandler> IEventsEx::addEventHandlers(EventHandlers eventHandle
 		}
 		else newHandlers.push_back(handlerIterator->second);
 	}
-    _eventHandlerMutex.unlock();
     return newHandlers;
 }
 
@@ -162,12 +158,12 @@ void IEventsEx::removeEventHandler(PEventHandler eventHandler)
 {
 	if(!eventHandler) return;
 
-	_eventHandlerMutex.lock();
+	std::unique_ptr<std::lock_guard<std::mutex>> eventHandlerGuard(new std::lock_guard<std::mutex>(_eventHandlerMutex));
 	while(eventHandler->useCount() > 0)
 	{
-		_eventHandlerMutex.unlock();
+		eventHandlerGuard.reset();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		_eventHandlerMutex.lock();
+		eventHandlerGuard.reset(new std::lock_guard<std::mutex>(_eventHandlerMutex));
 	}
 	EventHandlers::iterator handlerIterator = _eventHandlers.find(eventHandler->handler());
 	if(handlerIterator != _eventHandlers.end())
@@ -175,15 +171,13 @@ void IEventsEx::removeEventHandler(PEventHandler eventHandler)
 		_eventHandlers.erase(eventHandler->handler());
 		eventHandler->invalidate();
 	}
-    _eventHandlerMutex.unlock();
 }
 
 EventHandlers IEventsEx::getEventHandlers()
 {
 	EventHandlers eventHandlers;
-	_eventHandlerMutex.lock();
+	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
 	eventHandlers = _eventHandlers;
-    _eventHandlerMutex.unlock();
     return eventHandlers;
 }
 
