@@ -93,6 +93,14 @@ public:
 	virtual int32_t checkLicense(int32_t familyId, int32_t deviceId, const std::string& licenseKey = "") = 0;
 
 	/**
+	 * Removes a license.
+	 *
+	 * @param familyId The family id the license key is for.
+	 * @param deviceId The device id the license key is for or -1 if not applicable.
+	 */
+	virtual void removeLicense(int32_t familyId, int32_t deviceId);
+
+	/**
 	 * Returns the license key stored in the database.
 	 *
 	 * @param familyId The family id the license key is for.
@@ -118,6 +126,7 @@ protected:
 	std::mutex _devicesMutex;
 	DeviceStates _devices;
 
+	uint64_t getMapKey(int32_t familyId, int32_t deviceId);
 	virtual void addDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey);
 	virtual void removeDevice(int32_t familyId, int32_t deviceId);
 	virtual void updateDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey);
