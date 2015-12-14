@@ -137,6 +137,7 @@ public:
 	// {{{ License modules
 	virtual std::shared_ptr<DataTable> getLicenseVariables(int32_t moduleId) = 0;
 	virtual void saveLicenseVariable(int32_t moduleId, DataRow& data) = 0;
+	virtual void deleteLicenseVariable(int32_t moduleId, uint64_t mapKey) = 0;
 	// }}}
 };
 

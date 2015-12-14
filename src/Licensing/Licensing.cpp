@@ -107,6 +107,7 @@ std::string Licensing::getLicenseKey(int32_t familyId, int32_t deviceId)
 {
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		DeviceStates::iterator familyIterator = _devices.find(familyId);
 		if(familyIterator == _devices.end()) return "";
 		std::map<int32_t, PDeviceInfo>::iterator deviceIterator = familyIterator->second.find(deviceId);
@@ -126,6 +127,32 @@ std::string Licensing::getLicenseKey(int32_t familyId, int32_t deviceId)
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return "";
+}
+
+void Licensing::removeLicense(int32_t familyId, int32_t deviceId)
+{
+	try
+	{
+		removeDevice(familyId, deviceId);
+		uint64_t mapKey = getMapKey(familyId, deviceId);
+		_licenseData[mapKey].licenseKey = "";
+		_licenseData[mapKey].activationKey = "";
+		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(mapKey);
+		if(databaseIdIterator != _variableDatabaseIds.end()) databaseIdIterator->second = 0;
+		_bl->db->deleteLicenseVariable(_moduleId, mapKey);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
 }
 
 void Licensing::saveVariable(uint64_t index, int32_t intValue)
@@ -290,8 +317,8 @@ void Licensing::saveVariable(uint64_t index, LicenseData& licenseData)
 
 		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
-		if(_licenseData.find(index) == _licenseData.end()) _licenseData[index] = licenseData;
-		if(databaseIdIterator != _variableDatabaseIds.end())
+		if(_licenseData[index].activationKey.empty() || _licenseData[index].licenseKey.empty()) _licenseData[index] = licenseData;
+		if(databaseIdIterator != _variableDatabaseIds.end() && databaseIdIterator->second > 0)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(blob)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(databaseIdIterator->second)));
@@ -380,6 +407,11 @@ bool Licensing::getDeviceState(int32_t familyId, int32_t deviceId)
     }
     _devicesMutex.unlock();
     return false;
+}
+
+uint64_t Licensing::getMapKey(int32_t familyId, int32_t deviceId)
+{
+	return (((uint64_t)familyId) << 32) + (uint32_t)deviceId;
 }
 
 void Licensing::addDevice(int32_t familyId, int32_t deviceId, bool state, std::string licenseKey)
