@@ -104,6 +104,19 @@ void Peer::dispose()
 	_peersMutex.unlock();
 }
 
+void Peer::homegearStarted()
+{
+	std::shared_ptr<ICentral> central = getCentral();
+	if(!central) return;
+	raiseEvent(_peerID, -1, std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"INITIALIZED"}), PArray(new Array{PVariable(new Variable(true))}));
+}
+
+void Peer::homegearShuttingDown()
+{
+	std::shared_ptr<ICentral> central = getCentral();
+	if(!central) return;
+	raiseEvent(_peerID, -1, std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"DISPOSING"}), PArray(new Array{PVariable(new Variable(true))}));
+}
 
 //Event handling
 void Peer::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler)
@@ -2175,6 +2188,8 @@ std::shared_ptr<Variable> Peer::getValue(PRpcClientInfo clientInfo, uint32_t cha
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+		if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
+		else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
 		if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
