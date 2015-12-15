@@ -106,15 +106,11 @@ void Peer::dispose()
 
 void Peer::homegearStarted()
 {
-	std::shared_ptr<ICentral> central = getCentral();
-	if(!central) return;
 	raiseEvent(_peerID, -1, std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"INITIALIZED"}), PArray(new Array{PVariable(new Variable(true))}));
 }
 
 void Peer::homegearShuttingDown()
 {
-	std::shared_ptr<ICentral> central = getCentral();
-	if(!central) return;
 	raiseEvent(_peerID, -1, std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"DISPOSING"}), PArray(new Array{PVariable(new Variable(true))}));
 }
 
