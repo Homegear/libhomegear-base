@@ -66,12 +66,16 @@ IEventSinkBase* EventHandler::handler()
 
 void EventHandler::lock()
 {
+	_useCountMutex.lock();
 	_useCount++;
+	_useCountMutex.unlock();
 }
 
 void EventHandler::unlock()
 {
+	_useCountMutex.lock();
 	_useCount--;
+	_useCountMutex.unlock();
 }
 
 void EventHandler::invalidate()
@@ -159,7 +163,7 @@ void IEventsEx::removeEventHandler(PEventHandler eventHandler)
 	if(!eventHandler) return;
 
 	std::unique_ptr<std::lock_guard<std::mutex>> eventHandlerGuard(new std::lock_guard<std::mutex>(_eventHandlerMutex));
-	while(eventHandler->useCount() > 0)
+	while(eventHandler->useCount() != 0)
 	{
 		eventHandlerGuard.reset();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));

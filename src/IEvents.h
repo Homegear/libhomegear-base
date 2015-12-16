@@ -56,6 +56,7 @@ public:
 	void invalidate();
 private:
 	int32_t _id;
+	std::mutex _useCountMutex;
 	int32_t _useCount = 0;
 	IEventSinkBase* _handler = nullptr;
 };
