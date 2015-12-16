@@ -221,7 +221,9 @@ public:
 
     //RPC methods
 	virtual std::shared_ptr<Variable> activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
+	virtual std::shared_ptr<Variable> getAllConfig(PRpcClientInfo clientInfo);
 	virtual std::shared_ptr<Variable> getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly);
+	virtual std::shared_ptr<Variable> getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name);
 	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> getDeviceDescriptions(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
     virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel, std::map<std::string, bool> fields);
     virtual std::shared_ptr<Variable> getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, bool> fields);

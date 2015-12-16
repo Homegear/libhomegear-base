@@ -1186,6 +1186,157 @@ void Peer::initializeTypeString()
 }
 
 //RPC methods
+std::shared_ptr<Variable> Peer::getAllConfig(PRpcClientInfo clientInfo)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
+		std::shared_ptr<Variable> config(new Variable(VariableType::tStruct));
+
+		config->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+		config->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
+		config->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
+		config->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
+		config->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType.type()))));
+		config->structValue->insert(StructElement("NAME", std::shared_ptr<Variable>(new Variable(_name))));
+		std::shared_ptr<Variable> channels(new Variable(VariableType::tArray));
+		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
+		{
+			if(!i->second) continue;
+			if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+			std::shared_ptr<Variable> channel(new Variable(VariableType::tStruct));
+			channel->structValue->insert(StructElement("INDEX", std::shared_ptr<Variable>(new Variable(i->first))));
+			channel->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(i->second->type))));
+
+			PVariable parameters(new Variable(VariableType::tStruct));
+			channel->structValue->insert(StructElement("PARAMSET", parameters));
+			channels->arrayValue->push_back(channel);
+
+			PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::config);
+			if(!parameterGroup) continue;
+
+			for(Parameters::iterator j = parameterGroup->parameters.begin(); j != parameterGroup->parameters.end(); ++j)
+			{
+				if(!j->second || j->second->id.empty() || !j->second->visible) continue;
+				if(!j->second->visible && !j->second->service && !j->second->internal  && !j->second->transform)
+				{
+					_bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
+					continue;
+				}
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configCentralIterator = configCentral.find(i->first);
+				if(configCentralIterator == configCentral.end()) continue;
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configCentralIterator->second.find(j->second->id);
+				if(parameterIterator == configCentralIterator->second.end()) continue;
+
+				std::shared_ptr<Variable> element(new Variable(VariableType::tStruct));
+				std::shared_ptr<Variable> value;
+				if(j->second->readable)
+				{
+					value = (j->second->convertFromPacket(parameterIterator->second.data));
+					if(j->second->password) value.reset(new Variable(value->type));
+					if(!value) continue;
+					element->structValue->insert(StructElement("VALUE", value));
+				}
+
+				if(j->second->logical->type == ILogical::Type::tBoolean)
+				{
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("BOOL")))));
+				}
+				else if(j->second->logical->type == ILogical::Type::tString)
+				{
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRING")))));
+				}
+				else if(j->second->logical->type == ILogical::Type::tAction)
+				{
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
+				}
+				else if(j->second->logical->type == ILogical::Type::tInteger)
+				{
+					LogicalInteger* parameter = (LogicalInteger*)j->second->logical.get();
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER")))));
+					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
+					element->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
+
+					if(!parameter->specialValuesStringMap.empty())
+					{
+						std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
+						for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+						{
+							std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
+							specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
+							specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+							specialValues->arrayValue->push_back(specialElement);
+						}
+						element->structValue->insert(StructElement("SPECIAL", specialValues));
+					}
+				}
+				else if(j->second->logical->type == ILogical::Type::tEnum)
+				{
+					LogicalEnumeration* parameter = (LogicalEnumeration*)j->second->logical.get();
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ENUM")))));
+					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
+					element->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
+
+					std::shared_ptr<Variable> valueList(new Variable(VariableType::tArray));
+					for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
+					{
+						valueList->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(j->id)));
+					}
+					element->structValue->insert(StructElement("VALUE_LIST", valueList));
+				}
+				else if(j->second->logical->type == ILogical::Type::tFloat)
+				{
+					LogicalDecimal* parameter = (LogicalDecimal*)j->second->logical.get();
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("FLOAT")))));
+					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
+					element->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
+
+					if(!parameter->specialValuesStringMap.empty())
+					{
+						std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
+						for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+						{
+							std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
+							specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
+							specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+							specialValues->arrayValue->push_back(specialElement);
+						}
+						element->structValue->insert(StructElement("SPECIAL", specialValues));
+					}
+				}
+				else if(j->second->logical->type == ILogical::Type::tArray)
+				{
+					if(!clientInfo->initNewFormat) continue;
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ARRAY")))));
+				}
+				else if(j->second->logical->type == ILogical::Type::tStruct)
+				{
+					if(!clientInfo->initNewFormat) continue;
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRUCT")))));
+				}
+				parameters->structValue->insert(StructElement(j->second->id, element));
+			}
+		}
+		config->structValue->insert(StructElement("CHANNELS", channels));
+
+		return config;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 {
 	try
@@ -1326,6 +1477,45 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 		values->structValue->insert(StructElement("CHANNELS", channels));
 
 		return values;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+std::shared_ptr<Variable> Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+		if(channelIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
+		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(name);
+		if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+
+		//Check if channel still exists in device description
+		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
+		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel (2).");
+
+		PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::config);
+		PParameter parameter = parameterGroup->parameters.at(name);
+		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
+		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+		std::shared_ptr<Variable> variable;
+		variable = parameter->convertFromPacket(parameterIterator->second.data);
+		if(parameter->password) variable.reset(new Variable(variable->type));
+		return variable;
 	}
 	catch(const std::exception& ex)
     {
@@ -2186,10 +2376,15 @@ std::shared_ptr<Variable> Peer::getValue(PRpcClientInfo clientInfo, uint32_t cha
 		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
 		if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
 		else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
-		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
-		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
-		if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
-		PFunction rpcFunction = _rpcDevice->functions.at(channel);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
+		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(valueKey);
+		if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+
+		//Check if channel still exists in device description
+		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
+		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel (2).");
+
 		PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::variables);
 		PParameter parameter = parameterGroup->parameters.at(valueKey);
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");

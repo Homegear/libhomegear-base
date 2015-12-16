@@ -317,7 +317,8 @@ void Licensing::saveVariable(uint64_t index, LicenseData& licenseData)
 
 		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
-		if(_licenseData[index].activationKey.empty() || _licenseData[index].licenseKey.empty()) _licenseData[index] = licenseData;
+		_licenseData[index].licenseKey = licenseData.licenseKey;
+		_licenseData[index].activationKey = licenseData.activationKey;
 		if(databaseIdIterator != _variableDatabaseIds.end() && databaseIdIterator->second > 0)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(blob)));

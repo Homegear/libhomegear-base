@@ -112,7 +112,10 @@ public:
 	virtual std::shared_ptr<Variable> createDevice(PRpcClientInfo clientInfo, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId);
 	virtual std::shared_ptr<Variable> getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly);
+	virtual std::shared_ptr<Variable> getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name);
+	virtual std::shared_ptr<Variable> getConfigParameter(PRpcClientInfo clientInfo, uint64_t peerId, uint32_t channel, std::string name);
 	virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel);
 	virtual std::shared_ptr<Variable> getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel);
 	virtual std::shared_ptr<Variable> getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields) = 0;
