@@ -603,6 +603,54 @@ void ICentral::deletePeersFromDatabase()
 }
 
 //RPC methods
+PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId)
+{
+	try
+	{
+		PVariable array(new Variable(VariableType::tArray));
+
+		if(peerId > 0)
+		{
+			std::shared_ptr<Peer> peer = getPeer(peerId);
+			if(!peer) return Variable::createError(-2, "Unknown device.");
+			PVariable config = peer->getAllConfig(clientInfo);
+			if(!config) return Variable::createError(-32500, "Unknown application error. Config is nullptr.");
+			if(config->errorStruct) return config;
+			array->arrayValue->push_back(config);
+		}
+		else
+		{
+			std::vector<std::shared_ptr<Peer>> peers;
+			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
+			getPeers(peers);
+
+			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+			{
+				//getAllValues really needs a lot of resources, so wait a little bit after each device
+				std::this_thread::sleep_for(std::chrono::milliseconds(3));
+				PVariable config = (*i)->getAllConfig(clientInfo);
+				if(!config || config->errorStruct) continue;
+				array->arrayValue->push_back(config);
+			}
+		}
+
+		return array;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly)
 {
 	try
@@ -635,6 +683,52 @@ PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, boo
 		}
 
 		return array;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer(getPeer(serialNumber));
+		if(peer) return peer->getConfigParameter(clientInfo, channel, name);
+		return Variable::createError(-2, "Unknown device.");
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string name)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer(getPeer(id));
+		if(peer) return peer->getConfigParameter(clientInfo, channel, name);
+		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
     {
