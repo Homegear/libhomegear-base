@@ -2382,18 +2382,27 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
 						if(packetIterator != packetsById.end())
 						{
 							packetIterator->second->associatedVariables.push_back(j->second);
+							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
 							valueRequestPackets[function->channel][(*k)->id] = packetIterator->second;
 						}
 					}
 					for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator k = j->second->setPackets.begin(); k != j->second->setPackets.end(); ++k)
 					{
 						PacketsById::iterator packetIterator = packetsById.find((*k)->id);
-						if(packetIterator != packetsById.end()) packetIterator->second->associatedVariables.push_back(j->second);
+						if(packetIterator != packetsById.end())
+						{
+							packetIterator->second->associatedVariables.push_back(j->second);
+							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
+						}
 					}
 					for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator k = j->second->eventPackets.begin(); k != j->second->eventPackets.end(); ++k)
 					{
 						PacketsById::iterator packetIterator = packetsById.find((*k)->id);
-						if(packetIterator != packetsById.end()) packetIterator->second->associatedVariables.push_back(j->second);
+						if(packetIterator != packetsById.end())
+						{
+							packetIterator->second->associatedVariables.push_back(j->second);
+							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
+						}
 					}
 				}
 			}

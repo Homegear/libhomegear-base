@@ -1572,7 +1572,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 				else description->structValue->insert(StructElement("FIRMWARE", std::shared_ptr<Variable>(new Variable(std::string("?")))));
 			}
 
-			if(fields.empty() || fields.find("AVAILABLE_FIRMWARE") != fields.end())
+			if((fields.empty() || fields.find("AVAILABLE_FIRMWARE") != fields.end()) && (_firmwareVersion != -1 || !_firmwareVersionString.empty()))
 			{
 				int32_t newFirmwareVersion = getNewFirmwareVersion();
 				if(newFirmwareVersion > _firmwareVersion) description->structValue->insert(StructElement("AVAILABLE_FIRMWARE", std::shared_ptr<Variable>(new Variable(getFirmwareVersionString(newFirmwareVersion)))));
