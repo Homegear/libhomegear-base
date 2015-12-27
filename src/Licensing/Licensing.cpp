@@ -135,8 +135,8 @@ void Licensing::removeLicense(int32_t familyId, int32_t deviceId)
 	{
 		removeDevice(familyId, deviceId);
 		uint64_t mapKey = getMapKey(familyId, deviceId);
-		_licenseData[mapKey].licenseKey = "";
-		_licenseData[mapKey].activationKey = "";
+		_licenseData[mapKey].licenseKey.clear();
+		_licenseData[mapKey].activationKey.clear();
 		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(mapKey);
 		if(databaseIdIterator != _variableDatabaseIds.end()) databaseIdIterator->second = 0;
 		_bl->db->deleteLicenseVariable(_moduleId, mapKey);
