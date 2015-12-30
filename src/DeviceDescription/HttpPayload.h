@@ -61,7 +61,7 @@ public:
 	std::string key;
 	std::string parameterId;
 	bool constValueBooleanSet = false;
-	int32_t constValueBoolean = false;
+	bool constValueBoolean = false;
 	bool constValueIntegerSet = false;
 	int32_t constValueInteger = -1;
 	bool constValueDecimalSet = false;
