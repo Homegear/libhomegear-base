@@ -477,7 +477,7 @@ protected:
 	int32_t _countFromSysinfo = -1;
 
 	virtual void load(std::string xmlFilename);
-	virtual void parseXML(xml_node<>* node);
+	virtual void parseXML(xml_node<>* node, std::string& xmlFilename);
 };
 }
 }

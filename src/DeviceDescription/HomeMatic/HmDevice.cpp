@@ -2215,7 +2215,7 @@ void Device::load(std::string xmlFilename)
 				_bl->out.printError("Error: Device XML file \"" + xmlFilename + "\" does not start with \"device\".");
 				return;
 			}
-			parseXML(doc.first_node("device"));
+			parseXML(doc.first_node("device"), xmlFilename);
 		}
 		else _bl->out.printError("Error reading file " + xmlFilename + ": " + strerror(errno));
 		_loaded = true;
@@ -2235,7 +2235,7 @@ void Device::load(std::string xmlFilename)
     doc.clear();
 }
 
-void Device::parseXML(xml_node<>* node)
+void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 {
 	try
 	{
@@ -2371,6 +2371,13 @@ void Device::parseXML(xml_node<>* node)
 					framesByMessageType.insert(std::pair<uint32_t, std::shared_ptr<DeviceFrame>>(frame->type, frame));
 					if(!frame->function1.empty()) framesByFunction1.insert(std::pair<std::string, std::shared_ptr<DeviceFrame>>(frame->function1, frame));
 					if(!frame->function2.empty()) framesByFunction2.insert(std::pair<std::string, std::shared_ptr<DeviceFrame>>(frame->function2, frame));
+					if(xmlFilename == "rf_wds30_ot2.xml")
+					{
+						if(frame->id == "MEASURE_EVENT" && frame->channelField == 10) frame->id = "MEASURE_EVENT1";
+						if(frame->id == "MEASURE_EVENT" && frame->channelField == 13) frame->id = "MEASURE_EVENT2";
+						if(frame->id == "MEASURE_EVENT" && frame->channelField == 16) frame->id = "MEASURE_EVENT3";
+						if(frame->id == "MEASURE_EVENT" && frame->channelField == 19) frame->id = "MEASURE_EVENT4";
+					}
 					framesByID[frame->id] = frame;
 				}
 				for(xml_node<>* frameNode = node->first_node("packet"); frameNode; frameNode = frameNode->next_sibling("packet"))
@@ -2389,7 +2396,7 @@ void Device::parseXML(xml_node<>* node)
 			else if(nodeName == "team")
 			{
 				team.reset(new Device(_bl, family));
-				team->parseXML(node);
+				team->parseXML(node, xmlFilename);
 			}
 			else _bl->out.printWarning("Warning: Unknown node name for \"device\": " + nodeName);
 		}

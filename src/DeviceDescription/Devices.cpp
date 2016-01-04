@@ -521,7 +521,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			std::map<std::string, std::shared_ptr<HmDeviceDescription::DeviceFrame>>::iterator frameIterator = homeMaticDevice->framesByID.find("WEATHER_EVENT");
 			if(frameIterator != homeMaticDevice->framesByID.end()) frameIterator->second->id = "WEATHER_EVENT5";
 
-			frameIterator = homeMaticDevice->framesByID.find("MEASURE_EVENT");
+			/*frameIterator = homeMaticDevice->framesByID.find("MEASURE_EVENT");
 			while(frameIterator != homeMaticDevice->framesByID.end())
 			{
 				if(frameIterator->second->channelField == 10)
@@ -549,7 +549,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 					homeMaticDevice->framesByID.erase(frameIterator);
 				}
 				frameIterator = homeMaticDevice->framesByID.find("MEASURE_EVENT");
-			}
+			}*/
 
 			std::map<uint32_t, std::shared_ptr<HmDeviceDescription::DeviceChannel>>::iterator channelIterator = homeMaticDevice->channels.find(1);
 			if(channelIterator != homeMaticDevice->channels.end())
@@ -569,6 +569,8 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 								if(i == 1 && (*j)->frame == "MEASURE_EVENT")
 								{
 									(*j)->frame = "MEASURE_EVENT1";
+									frameExists = true;
+									break;
 								}
 								else if((*j)->frame == "MEASURE_EVENT" + std::to_string(i))
 								{

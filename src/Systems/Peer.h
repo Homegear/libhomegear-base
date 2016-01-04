@@ -309,7 +309,8 @@ protected:
 	//ServiceMessages event handling
 	virtual void onConfigPending(bool configPending);
 
-	virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+	virtual void onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+	virtual void onRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
 	virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t>& data);
 	virtual std::shared_ptr<Database::DataTable> onGetServiceMessages();
 	virtual void onSaveServiceMessage(Database::DataRow& data);
