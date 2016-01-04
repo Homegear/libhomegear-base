@@ -243,7 +243,7 @@ int32_t SocketOperations::proofread(char* buffer, int32_t bufferSize)
 		do
 		{
 			bytesRead = read(_socketDescriptor->descriptor, buffer, bufferSize);
-		} while(bytesRead < 0 && errno == EAGAIN);
+		} while(bytesRead < 0 && (errno == EAGAIN || errno == EINTR));
 	}
 	if(bytesRead <= 0)
 	{
@@ -321,6 +321,7 @@ int32_t SocketOperations::proofwrite(const std::vector<char>& data)
 		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), data.size() - totalBytesWritten) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, MSG_NOSIGNAL);
 		if(bytesWritten <= 0)
 		{
+			if(bytesWritten == -1 && errno == EINTR) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
@@ -395,6 +396,7 @@ int32_t SocketOperations::proofwrite(const char* buffer, int32_t bytesToWrite)
 		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten) : send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, MSG_NOSIGNAL);
 		if(bytesWritten <= 0)
 		{
+			if(bytesWritten == -1 && errno == EINTR) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
@@ -436,8 +438,8 @@ int32_t SocketOperations::proofwrite(const std::string& data)
 		throw SocketDataLimitException("Data size is larger than 10 MiB.");
 	}
 
-	int32_t bytesSentSoFar = 0;
-	while (bytesSentSoFar < (signed)data.size())
+	int32_t totalBytesWritten = 0;
+	while (totalBytesWritten < (signed)data.size())
 	{
 		timeval timeout;
 		timeout.tv_sec = 5;
@@ -466,17 +468,18 @@ int32_t SocketOperations::proofwrite(const std::string& data)
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
 		}
 
-		int32_t bytesToSend = data.size() - bytesSentSoFar;
-		int32_t bytesSentInStep = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(bytesSentSoFar), bytesToSend) : send(_socketDescriptor->descriptor, &data.at(bytesSentSoFar), bytesToSend, MSG_NOSIGNAL);
-		if(bytesSentInStep <= 0)
+		int32_t bytesToSend = data.size() - totalBytesWritten;
+		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+		if(bytesWritten <= 0)
 		{
+			if(bytesWritten == -1 && errno == EINTR) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
 			if(_socketDescriptor->tlsSession)
 			{
 				_writeMutex.unlock();
-				throw SocketOperationException(gnutls_strerror(bytesSentInStep));
+				throw SocketOperationException(gnutls_strerror(bytesWritten));
 			}
 			else
 			{
@@ -484,10 +487,10 @@ int32_t SocketOperations::proofwrite(const std::string& data)
 				throw SocketOperationException(strerror(errno));
 			}
 		}
-		bytesSentSoFar += bytesSentInStep;
+		totalBytesWritten += bytesWritten;
 	}
 	_writeMutex.unlock();
-	return bytesSentSoFar;
+	return totalBytesWritten;
 }
 
 bool SocketOperations::connected()

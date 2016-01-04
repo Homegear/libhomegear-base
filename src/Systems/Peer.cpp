@@ -125,9 +125,10 @@ void Peer::raiseRemoveWebserverEventHandler()
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRemoveWebserverEventHandler(_webserverEventHandlers);
 }
 
-void Peer::raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
+void Peer::raiseRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
 {
-	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRPCEvent(id, channel, deviceAddress, valueKeys, values);
+	if(_peerID == 0) return;
+	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRPCEvent(peerId, channel, deviceAddress, valueKeys, values);
 }
 
 void Peer::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
@@ -135,9 +136,10 @@ void Peer::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string addres
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
 }
 
-void Peer::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
+void Peer::raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
 {
-	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
+	if(_peerID == 0) return;
+	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onEvent(peerId, channel, variables, values);
 }
 
 void Peer::raiseRunScript(std::string& script, const std::string& args, bool keepAlive, int32_t interval)
@@ -156,6 +158,11 @@ int32_t Peer::raiseIsAddonClient(int32_t clientID)
 void Peer::onConfigPending(bool configPending)
 {
 
+}
+
+void Peer::onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
+{
+	raiseEvent(peerId, channel, variables, values);
 }
 
 void Peer::onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
