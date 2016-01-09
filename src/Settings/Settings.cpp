@@ -51,6 +51,7 @@ void Settings::reset()
 	_keyPath = "/etc/homegear/homegear.key";
 	_dhParamPath = "/etc/homegear/dh2048.pem";
 	_debugLevel = 3;
+	_memoryDebugging = false;
 	_enableUPnP = true;
 	_uPnPIpAddress = "";
 	_ssdpIpAddress = "";
@@ -192,6 +193,11 @@ void Settings::load(std::string filename)
 					if(_debugLevel < 0) _debugLevel = 3;
 					_bl->debugLevel = _debugLevel;
 					_bl->out.printDebug("Debug: debugLevel set to " + std::to_string(_debugLevel));
+				}
+				else if(name == "memorydebugging")
+				{
+					if(HelperFunctions::toLower(value) == "true") _memoryDebugging = true;
+					_bl->out.printDebug("Debug: memoryDebugging set to " + std::to_string(_memoryDebugging));
 				}
 				else if(name == "enableupnp")
 				{
