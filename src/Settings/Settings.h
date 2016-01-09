@@ -56,6 +56,7 @@ public:
 	bool loadDHParamsFromFile() { return _loadDHParamsFromFile; }
 	std::string dhParamPath() { return _dhParamPath;  }
 	int32_t debugLevel() { return _debugLevel; }
+	bool memoryDebugging() { return _memoryDebugging; }
 	bool enableUPnP() { return _enableUPnP; }
 	std::string uPnPIpAddress() { return _uPnPIpAddress; }
 	std::string ssdpIpAddress() { return _ssdpIpAddress; }
@@ -118,6 +119,7 @@ private:
 	bool _loadDHParamsFromFile = true;
 	std::string _dhParamPath;
 	int32_t _debugLevel = 3;
+	bool _memoryDebugging = false;
 	bool _enableUPnP = true;
 	std::string _uPnPIpAddress = "";
 	std::string _ssdpIpAddress = "";
