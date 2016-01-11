@@ -37,6 +37,7 @@
 #include "Licensing/LicensingFactory.h"
 #include "SSDP/SSDP.h"
 #include "IQueue.h"
+#include "ITimedQueue.h"
 
 namespace BaseLib
 {
@@ -113,6 +114,11 @@ public:
 	 * The main output object to print text to the standard and error output.
 	 */
 	Output out;
+
+	/**
+	 * The thread manager.
+	 */
+	Threads threads;
 
 	/**
 	 * Main constructor.

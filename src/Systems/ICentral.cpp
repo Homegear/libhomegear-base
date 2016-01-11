@@ -445,17 +445,17 @@ void ICentral::load()
     }
 }
 
-void ICentral::save(bool saveDevice)
+void ICentral::save(bool full)
 {
 	try
 	{
-		if(saveDevice)
+		if(full)
 		{
 			uint64_t result = _bl->db->saveDevice(_deviceId, _address, _serialNumber, 0xFFFFFFFD, (uint32_t)_deviceFamily);
 			if(_deviceId == 0) _deviceId = result;
 		}
 		saveVariables();
-		savePeers();
+		savePeers(full);
 	}
     catch(const std::exception& ex)
     {

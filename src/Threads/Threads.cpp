@@ -34,8 +34,38 @@
 namespace BaseLib
 {
 
-Threads::~Threads() {
+Threads::Threads()
+{
 
+}
+
+Threads::~Threads()
+{
+
+}
+
+void* threadCountTest(void*)
+{
+    while(true)
+    {
+    	std::this_thread::sleep_for(std::chrono::seconds(60));
+    }
+    return 0;
+}
+
+uint32_t Threads::getMaxThreadCount()
+{
+	uint32_t maxThreadCount = 0;
+	pthread_t thread;
+	while(true)
+	{
+		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
+		{
+			return maxThreadCount;
+		}
+		maxThreadCount++;
+	}
+	return 0;
 }
 
 int32_t Threads::getThreadPolicyFromString(std::string policy)
@@ -111,6 +141,18 @@ void Threads::setThreadPriority(BaseLib::Obj* baseLib, pthread_t thread, int32_t
     {
     	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+}
+
+void Threads::registerThread()
+{
+	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
+	_currentThreadCount++;
+}
+
+void Threads::unregisterThread()
+{
+	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
+	_currentThreadCount--;
 }
 
 }
