@@ -75,7 +75,7 @@ public:
 	virtual void dispose(bool wait = true);
 
 	virtual void load();
-	virtual void save(bool saveDevice);
+	virtual void save(bool full);
 
 	/*
      * Executed when Homegear is fully started.
@@ -223,12 +223,11 @@ protected:
 	virtual void deletePeersFromDatabase();
 	virtual void loadVariables() = 0;
 	virtual void loadPeers() {}
-	virtual void savePeers() {}
+	virtual void savePeers(bool full) {}
 	virtual void saveVariables() = 0;
 	virtual void saveVariable(uint32_t index, int64_t intValue);
 	virtual void saveVariable(uint32_t index, std::string& stringValue);
 	virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
-	virtual void savePeers(bool full) = 0;
 };
 
 }

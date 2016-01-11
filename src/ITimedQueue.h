@@ -28,37 +28,52 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef THREADS_H_
-#define THREADS_H_
+#ifndef ITIMEDQUEUE_H_
+#define ITIMEDQUEUE_H_
 
-#include "../Exception.h"
-#include "../Output/Output.h"
-#include <mutex>
+#include <memory>
+#include <condition_variable>
+#include <thread>
+#include <map>
 
 namespace BaseLib
 {
-
 class Obj;
 
-class Threads
+class ITimedQueueEntry
 {
 public:
-	Threads();
-	virtual ~Threads();
+	ITimedQueueEntry() {}
+	ITimedQueueEntry(int64_t time) { _time = time; };
+	virtual ~ITimedQueueEntry() {};
 
-	static int32_t getThreadPolicyFromString(std::string policy);
-	static int32_t parseThreadPriority(int32_t priority, int32_t policy);
-	static void setThreadPriority(BaseLib::Obj* baseLib, pthread_t thread, int32_t priority, int32_t policy = SCHED_FIFO);
-
-	void registerThread();
-	void unregisterThread();
-	uint32_t getMaxThreadCount();
-protected:
-    std::mutex _threadCountMutex;
-    volatile int32_t _currentThreadCount = 0;
+	int64_t getTime() { return _time; }
+	void setTime(int64_t value) { _time = value; }
 private:
-	Threads(const Threads&) = delete;
-    Threads& operator=(const Threads&) = delete;
+	int64_t _time = 0;
+};
+
+class ITimedQueue
+{
+public:
+	ITimedQueue(Obj* baseLib);
+	virtual ~ITimedQueue();
+	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
+	void stopQueue(int32_t index);
+	bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry);
+	virtual void processQueueEntry(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
+private:
+	Obj* _bl = nullptr;
+	static const int32_t _queueCount = 2;
+	static const int32_t _bufferSize = 1000;
+	std::mutex _bufferMutex[2];
+	std::map<int64_t, std::shared_ptr<ITimedQueueEntry>> _buffer[_queueCount];
+	std::mutex _processingThreadMutex[_queueCount];
+	std::thread _processingThread[_queueCount];
+	std::condition_variable _processingConditionVariable[_queueCount];
+	bool _stopProcessingThread[_queueCount];
+
+	void process(int32_t index);
 };
 
 }
