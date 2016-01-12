@@ -58,6 +58,7 @@ public:
 	void load(std::string filename);
 	bool changed();
 	std::string get(std::string name);
+	int32_t getNumber(std::string name);
 	std::vector<std::shared_ptr<PhysicalInterfaceSettings>> getPhysicalInterfaceSettings();
 private:
 	BaseLib::Obj* _bl = nullptr;;

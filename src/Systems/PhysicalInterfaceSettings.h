@@ -68,10 +68,7 @@ public:
 	std::string host;
 	std::string port;
 	std::string portKeepAlive;
-	std::string oldRFKey;
-	std::string rfKey;
 	std::string lanKey;
-	uint32_t currentRFKeyIndex = 0;
 	bool ssl = false;
 	std::string caFile;
 	bool verifyCertificate = true;
