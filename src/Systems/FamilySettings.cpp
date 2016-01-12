@@ -82,6 +82,35 @@ std::string FamilySettings::get(std::string name)
     return "";
 }
 
+int32_t FamilySettings::getNumber(std::string name)
+{
+	_settingsMutex.lock();
+	try
+	{
+		std::map<std::string, std::string>::iterator settingIterator = _settings.find(name);
+		if(settingIterator != _settings.end())
+		{
+			std::string setting = settingIterator->second;
+			_settingsMutex.unlock();
+			return Math::getNumber(setting);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _settingsMutex.unlock();
+    return 0;
+}
+
 std::vector<std::shared_ptr<PhysicalInterfaceSettings>> FamilySettings::getPhysicalInterfaceSettings()
 {
 	return _physicalInterfaceSettings;
@@ -311,18 +340,18 @@ void FamilySettings::load(std::string filename)
 				}
 				else if(name == "oldrfkey")
 				{
-					settings->oldRFKey = value;
-					_bl->out.printDebug("Debug: OldRFKey set to " + settings->oldRFKey);
+					_bl->out.printError("Error: OldRFKey now needs to be set in section [General] of homematicbidcos.conf.");
+					if(_settings.find("oldrfkey") == _settings.end()) _settings["oldrfkey"] = value;
 				}
 				else if(name == "rfkey")
 				{
-					settings->rfKey = value;
-					_bl->out.printDebug("Debug: RFKey set to " + settings->rfKey);
+					_bl->out.printError("Error: RFKey now needs to be set in section [General] of homematicbidcos.conf.");
+					if(_settings.find("rfkey") == _settings.end()) _settings["rfkey"] = value;
 				}
 				else if(name == "currentrfkeyindex")
 				{
-					settings->currentRFKeyIndex = BaseLib::Math::getNumber(value);
-					_bl->out.printDebug("Debug: CurrentRFKeyIndex set to " + std::to_string(settings->currentRFKeyIndex));
+					_bl->out.printError("Error: CurrentRFKeyIndex now needs to be set in section [General] of homematicbidcos.conf.");
+					if(_settings.find("currentrfkeyindex") == _settings.end()) _settings["currentrfkeyindex"] = value;
 				}
 				else if(name == "lankey")
 				{
