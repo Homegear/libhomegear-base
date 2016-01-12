@@ -68,7 +68,7 @@ void ITimedQueue::stopQueue(int32_t index)
 	if(_processingThread[index].joinable()) _processingThread[index].join();
 }
 
-bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry)
+bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry, int64_t& id)
 {
 	try
 	{
@@ -77,7 +77,10 @@ bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entr
 			std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]);
 			if(_buffer[index].size() >= _bufferSize) return false;
 
-			_buffer[index].insert(std::pair<int64_t, std::shared_ptr<ITimedQueueEntry>>(entry->getTime(), entry));
+			id = entry->getTime();
+			while(_buffer[index].find(id) != _buffer[index].end()) id++;
+
+			_buffer[index].insert(std::pair<int64_t, std::shared_ptr<ITimedQueueEntry>>(id, entry));
 		}
 
 		_processingConditionVariable[index].notify_one();
@@ -98,6 +101,27 @@ bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entr
 	return false;
 }
 
+void ITimedQueue::removeQueueEntry(int32_t index, int64_t id)
+{
+	try
+	{
+		std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]);
+		_buffer[index].erase(id);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
 void ITimedQueue::process(int32_t index)
 {
 	if(index < 0 || index >= _queueCount) return;
@@ -114,7 +138,7 @@ void ITimedQueue::process(int32_t index)
 			{
 				next = _buffer[index].empty() ? 0 : _buffer[index].begin()->first;
 				_bufferMutex[index].unlock();
-				if(next > 0) _processingConditionVariable[index].wait_until(lock, std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(next)), [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return (!_buffer[index].empty() && _buffer[index].begin()->first <= _bl->hf.getTime()) || _stopProcessingThread[index]; });
+				if(next > 0) _processingConditionVariable[index].wait_until(lock, std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(next)), [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return _buffer[index].empty() || _buffer[index].begin()->first <= _bl->hf.getTime() || _stopProcessingThread[index]; });
 				else _processingConditionVariable[index].wait(lock, [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return !_buffer[index].empty() || _stopProcessingThread[index]; });
 			}
 			else _bufferMutex[index].unlock();
@@ -126,14 +150,16 @@ void ITimedQueue::process(int32_t index)
 
 			now = _bl->hf.getTime();
 
+			int64_t id = 0;
 			std::shared_ptr<ITimedQueueEntry> entry;
 			{
 				std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]);
-				if(_buffer[index].begin()->first > now) continue;
+				if(_buffer[index].empty() || _buffer[index].begin()->first > now) continue;
+				id = _buffer[index].begin()->first;
 				entry = _buffer[index].begin()->second;
 				_buffer[index].erase(_buffer[index].begin());
 			}
-			if(entry) processQueueEntry(index, entry);
+			if(entry) processQueueEntry(index, id, entry);
 		}
 		catch(const std::exception& ex)
 		{

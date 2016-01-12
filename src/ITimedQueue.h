@@ -60,8 +60,9 @@ public:
 	virtual ~ITimedQueue();
 	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
-	bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry);
-	virtual void processQueueEntry(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
+	bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry, int64_t& id);
+	void removeQueueEntry(int32_t index, int64_t id);
+	virtual void processQueueEntry(int32_t index, int64_t id, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
 private:
 	Obj* _bl = nullptr;
 	static const int32_t _queueCount = 2;
