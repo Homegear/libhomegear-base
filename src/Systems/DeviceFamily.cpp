@@ -209,8 +209,11 @@ void DeviceFamily::load()
 				_central->load();
 			}
 		}
-		if(!_central) createCentral();
-		_central->save(true);
+		if(!_central)
+		{
+			createCentral();
+			_central->save(true);
+		}
 	}
 	catch(const std::exception& ex)
     {
