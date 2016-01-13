@@ -334,14 +334,12 @@ void SerialReaderWriter::readThread()
 		if(readLine(data) == 0)
 		{
 			EventHandlers eventHandlers = getEventHandlers();
-			_eventHandlerMutex.lock();
 			for(EventHandlers::const_iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
 			{
 				i->second->lock();
 				if(i->second->handler()) ((ISerialReaderWriterEventSink*)i->second->handler())->lineReceived(data);
 				i->second->unlock();
 			}
-			_eventHandlerMutex.unlock();
 		}
 	}
 }
