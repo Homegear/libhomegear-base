@@ -265,7 +265,7 @@ protected:
 	//End
 
 	//In table variables:
-	int32_t _firmwareVersion = -1;
+	int32_t _firmwareVersion = 0;
 	std::string _firmwareVersionString;
 	LogicalDeviceType _deviceType;
 	std::mutex _peersMutex;
