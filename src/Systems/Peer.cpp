@@ -2203,7 +2203,7 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
 				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(true))));
 				description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(false))));
-				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations & 0xFE)))); //Remove read
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
 			}
