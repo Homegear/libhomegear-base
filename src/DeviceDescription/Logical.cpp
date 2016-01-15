@@ -418,12 +418,12 @@ LogicalAction::LogicalAction(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalA
 			if(nodeName == "defaultValue")
 			{
 				defaultValueExists = true;
-				defaultValue = nodeValue;
+				defaultValue = (nodeValue == "true");
 			}
 			else if(nodeName == "setToValueOnPairing")
 			{
 				setToValueOnPairingExists = true;
-				setToValueOnPairing = nodeValue;
+				setToValueOnPairing = (nodeValue == "true");
 			}
 			else _bl->out.printWarning("Warning: Unknown node in \"logicalAction\": " + nodeName);
 		}
