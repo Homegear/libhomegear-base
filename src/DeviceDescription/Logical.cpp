@@ -432,12 +432,12 @@ LogicalAction::LogicalAction(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalA
 
 std::shared_ptr<Variable> LogicalAction::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
 }
 
 std::shared_ptr<Variable> LogicalAction::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
 LogicalArray::LogicalArray(BaseLib::Obj* baseLib) : ILogical(baseLib)

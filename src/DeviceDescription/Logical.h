@@ -178,6 +178,9 @@ public:
 class LogicalAction : public ILogical
 {
 public:
+	bool defaultValue = false;
+	bool setToValueOnPairing = false;
+
 	LogicalAction(BaseLib::Obj* baseLib);
 	LogicalAction(BaseLib::Obj* baseLib, xml_node<>* node);
 	virtual ~LogicalAction() {}

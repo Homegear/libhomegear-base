@@ -2198,7 +2198,10 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 			}
 			else if(i->second->logical->type == ILogical::Type::tAction)
 			{
+				LogicalAction* parameter = (LogicalAction*)i->second->logical.get();
+
 				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
+				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
 				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
 				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
 				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(true))));
