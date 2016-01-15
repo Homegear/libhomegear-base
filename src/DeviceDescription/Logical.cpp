@@ -411,9 +411,21 @@ LogicalAction::LogicalAction(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalA
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalAction\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* logicalNode = node->first_node(); logicalNode; logicalNode = logicalNode->next_sibling())
+		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
-			_bl->out.printWarning("Warning: Unknown node in \"logicalAction\": " + std::string(logicalNode->name()));
+			std::string nodeName(subNode->name());
+			std::string nodeValue(subNode->value());
+			if(nodeName == "defaultValue")
+			{
+				defaultValueExists = true;
+				defaultValue = nodeValue;
+			}
+			else if(nodeName == "setToValueOnPairing")
+			{
+				setToValueOnPairingExists = true;
+				setToValueOnPairing = nodeValue;
+			}
+			else _bl->out.printWarning("Warning: Unknown node in \"logicalAction\": " + nodeName);
 		}
 	}
     catch(const std::exception& ex)
