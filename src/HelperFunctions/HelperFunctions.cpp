@@ -527,7 +527,7 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
     		_bl->out.printError("Error: Couldn't read rlimits.");
     		_exit(1);
     	}
-        // Close all other descriptors for the safety sake.
+        // Close all non standard descriptors - safety
         for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
 
         setsid();
