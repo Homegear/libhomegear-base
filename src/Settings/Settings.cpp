@@ -67,6 +67,7 @@ void Settings::reset()
 	_logfilePath = "/var/log/homegear/";
 	_prioritizeThreads = true;
 	_workerThreadWindow = 3000;
+	_scriptEngineServerMaxConnections = 10;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
@@ -80,9 +81,9 @@ void Settings::reset()
 	_packetQueueThreadPolicy = SCHED_FIFO;
 	_packetReceivedThreadPriority = 0;
 	_packetReceivedThreadPolicy = SCHED_OTHER;
-	_eventThreadMax = 20;
-	_eventTriggerThreadPriority = 0;
-	_eventTriggerThreadPolicy = SCHED_OTHER;
+	_eventThreadCount = 5;
+	_eventThreadPriority = 0;
+	_eventThreadPolicy = SCHED_OTHER;
 	_scriptThreadMax = 10;
 	_familyConfigPath = "/etc/homegear/families/";
 	_deviceDescriptionPath = "/etc/homegear/devices/";
@@ -280,6 +281,11 @@ void Settings::load(std::string filename)
 					if(_workerThreadWindow > 3600000) _workerThreadWindow = 3600000;
 					_bl->out.printDebug("Debug: workerThreadWindow set to " + std::to_string(_workerThreadWindow));
 				}
+				else if(name == "scriptengineservermaxconnections")
+				{
+					_scriptEngineServerMaxConnections = Math::getNumber(value);
+					_bl->out.printDebug("Debug: scriptEngineServerMaxConnections set to " + std::to_string(_scriptEngineServerMaxConnections));
+				}
 				else if(name == "cliservermaxconnections")
 				{
 					_cliServerMaxConnections = Math::getNumber(value);
@@ -299,8 +305,8 @@ void Settings::load(std::string filename)
 				}
 				else if(name == "rpcserverthreadpolicy")
 				{
-					_rpcServerThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_rpcServerThreadPriority = Threads::parseThreadPriority(_rpcServerThreadPriority, _rpcServerThreadPolicy);
+					_rpcServerThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_rpcServerThreadPriority = ThreadManager::parseThreadPriority(_rpcServerThreadPriority, _rpcServerThreadPolicy);
 					_bl->out.printDebug("Debug: rpcServerThreadPolicy set to " + std::to_string(_rpcServerThreadPolicy));
 				}
 				else if(name == "rpcclientmaxservers")
@@ -317,8 +323,8 @@ void Settings::load(std::string filename)
 				}
 				else if(name == "rpcclientthreadpolicy")
 				{
-					_rpcClientThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_rpcClientThreadPriority = Threads::parseThreadPriority(_rpcClientThreadPriority, _rpcClientThreadPolicy);
+					_rpcClientThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_rpcClientThreadPriority = ThreadManager::parseThreadPriority(_rpcClientThreadPriority, _rpcClientThreadPolicy);
 					_bl->out.printDebug("Debug: rpcClientThreadPolicy set to " + std::to_string(_rpcClientThreadPolicy));
 				}
 				else if(name == "workerthreadpriority")
@@ -330,8 +336,8 @@ void Settings::load(std::string filename)
 				}
 				else if(name == "workerthreadpolicy")
 				{
-					_workerThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_workerThreadPriority = Threads::parseThreadPriority(_workerThreadPriority, _workerThreadPolicy);
+					_workerThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_workerThreadPriority = ThreadManager::parseThreadPriority(_workerThreadPriority, _workerThreadPolicy);
 					_bl->out.printDebug("Debug: workerThreadPolicy set to " + std::to_string(_workerThreadPolicy));
 				}
 				else if(name == "packetqueuethreadpriority")
@@ -343,8 +349,8 @@ void Settings::load(std::string filename)
 				}
 				else if(name == "packetqueuethreadpolicy")
 				{
-					_packetQueueThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_packetQueueThreadPriority = Threads::parseThreadPriority(_packetQueueThreadPriority, _packetQueueThreadPolicy);
+					_packetQueueThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_packetQueueThreadPriority = ThreadManager::parseThreadPriority(_packetQueueThreadPriority, _packetQueueThreadPolicy);
 					_bl->out.printDebug("Debug: physicalInterfaceThreadPolicy set to " + std::to_string(_packetQueueThreadPolicy));
 				}
 				else if(name == "packetreceivedthreadpriority")
@@ -356,27 +362,27 @@ void Settings::load(std::string filename)
 				}
 				else if(name == "packetreceivedthreadpolicy")
 				{
-					_packetReceivedThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_packetReceivedThreadPriority = Threads::parseThreadPriority(_packetReceivedThreadPriority, _packetReceivedThreadPolicy);
+					_packetReceivedThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_packetReceivedThreadPriority = ThreadManager::parseThreadPriority(_packetReceivedThreadPriority, _packetReceivedThreadPolicy);
 					_bl->out.printDebug("Debug: packetReceivedThreadPolicy set to " + std::to_string(_packetReceivedThreadPolicy));
 				}
-				else if(name == "eventmaxthreads")
+				else if(name == "eventthreadcount")
 				{
-					_eventThreadMax = Math::getNumber(value);
-					_bl->out.printDebug("Debug: eventMaxThreads set to " + std::to_string(_eventThreadMax));
+					_eventThreadCount = Math::getNumber(value);
+					_bl->out.printDebug("Debug: eventThreadCount set to " + std::to_string(_eventThreadCount));
 				}
-				else if(name == "eventtriggerthreadpriority")
+				else if(name == "eventthreadpriority")
 				{
-					_eventTriggerThreadPriority = Math::getNumber(value);
-					if(_eventTriggerThreadPriority > 99) _eventTriggerThreadPriority = 99;
-					if(_eventTriggerThreadPriority < 0) _eventTriggerThreadPriority = 0;
-					_bl->out.printDebug("Debug: eventTriggerThreadPriority set to " + std::to_string(_eventTriggerThreadPriority));
+					_eventThreadPriority = Math::getNumber(value);
+					if(_eventThreadPriority > 99) _eventThreadPriority = 99;
+					if(_eventThreadPriority < 0) _eventThreadPriority = 0;
+					_bl->out.printDebug("Debug: eventThreadPriority set to " + std::to_string(_eventThreadPriority));
 				}
-				else if(name == "eventtriggerthreadpolicy")
+				else if(name == "eventthreadpolicy")
 				{
-					_eventTriggerThreadPolicy = Threads::getThreadPolicyFromString(value);
-					_eventTriggerThreadPriority = Threads::parseThreadPriority(_eventTriggerThreadPriority, _eventTriggerThreadPolicy);
-					_bl->out.printDebug("Debug: eventTriggerThreadPolicy set to " + std::to_string(_eventTriggerThreadPolicy));
+					_eventThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					_eventThreadPriority = ThreadManager::parseThreadPriority(_eventThreadPriority, _eventThreadPolicy);
+					_bl->out.printDebug("Debug: eventThreadPolicy set to " + std::to_string(_eventThreadPolicy));
 				}
 				else if(name == "scriptmaxthreads")
 				{

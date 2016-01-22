@@ -1,19 +1,19 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,37 +28,29 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef THREADS_H_
-#define THREADS_H_
-
-#include "../Exception.h"
-#include "../Output/Output.h"
-#include <mutex>
+#ifndef STATEGUARD_H_
+#define STATEGUARD_H_
 
 namespace BaseLib
 {
 
-class Obj;
-
-class Threads
+class StateGuard
 {
 public:
-	Threads();
-	virtual ~Threads();
+	explicit StateGuard(bool& state) : _state(state)
+	{
+		_state = true;
+	}
 
-	static int32_t getThreadPolicyFromString(std::string policy);
-	static int32_t parseThreadPriority(int32_t priority, int32_t policy);
-	static void setThreadPriority(BaseLib::Obj* baseLib, pthread_t thread, int32_t priority, int32_t policy = SCHED_FIFO);
+	~StateGuard()
+	{
+		_state = false;
+	}
 
-	void registerThread();
-	void unregisterThread();
-	uint32_t getMaxThreadCount();
-protected:
-    std::mutex _threadCountMutex;
-    volatile int32_t _currentThreadCount = 0;
+	StateGuard(const StateGuard&) = delete;
+	StateGuard& operator=(const StateGuard&) = delete;
 private:
-	Threads(const Threads&) = delete;
-    Threads& operator=(const Threads&) = delete;
+	bool& _state;
 };
 
 }

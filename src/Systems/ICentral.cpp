@@ -1656,12 +1656,12 @@ PVariable ICentral::setName(PRpcClientInfo clientInfo, uint64_t id, std::string 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, PVariable value)
+PVariable ICentral::setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, PVariable value, bool wait)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(serialNumber));
-		if(peer) return peer->setValue(clientInfo, channel, valueKey, value);
+		if(peer) return peer->setValue(clientInfo, channel, valueKey, value, wait);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
@@ -1679,12 +1679,12 @@ PVariable ICentral::setValue(PRpcClientInfo clientInfo, std::string serialNumber
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, PVariable value)
+PVariable ICentral::setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, PVariable value, bool wait)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
-		if(peer) return peer->setValue(clientInfo, channel, valueKey, value);
+		if(peer) return peer->setValue(clientInfo, channel, valueKey, value, wait);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)

@@ -249,7 +249,7 @@ public:
      */
     virtual std::shared_ptr<BaseLib::Variable> setId(PRpcClientInfo clientInfo, uint64_t newPeerID);
     virtual std::shared_ptr<Variable> setInterface(PRpcClientInfo clientInfo, std::string interfaceID) { return Variable::createError(-32601, "Method not implemented for this Peer."); }
-	virtual std::shared_ptr<BaseLib::Variable> setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<BaseLib::Variable> value);
+	virtual std::shared_ptr<BaseLib::Variable> setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<BaseLib::Variable> value, bool wait);
     //End RPC methods
 protected:
     BaseLib::Obj* _bl = nullptr;

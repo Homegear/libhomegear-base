@@ -67,7 +67,8 @@ private:
 	Obj* _bl = nullptr;
 	static const int32_t _queueCount = 2;
 	static const int32_t _bufferSize = 1000;
-	std::mutex _bufferMutex[2];
+	bool _firstPositionChanged[_queueCount];
+	std::mutex _bufferMutex[_queueCount];
 	std::map<int64_t, std::shared_ptr<ITimedQueueEntry>> _buffer[_queueCount];
 	std::mutex _processingThreadMutex[_queueCount];
 	std::thread _processingThread[_queueCount];

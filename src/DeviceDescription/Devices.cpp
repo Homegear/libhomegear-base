@@ -196,7 +196,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 					}
 				}
 
-				paramsetIterator = channelIterator->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::values);
+				paramsetIterator = channelIterator->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::master);
 				if(paramsetIterator != channelIterator->second->parameterSets.end() && paramsetIterator->second)
 				{
 					if((homeMaticDevice->rxModes & HmDeviceDescription::Device::RXModes::Enum::always) || (homeMaticDevice->rxModes & HmDeviceDescription::Device::RXModes::Enum::burst))
@@ -233,7 +233,11 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 							paramsetIterator->second->parameters.push_back(parameter);
 						}
 					}
+				}
 
+				paramsetIterator = channelIterator->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::values);
+				if(paramsetIterator != channelIterator->second->parameterSets.end() && paramsetIterator->second)
+				{
 					if(!paramsetIterator->second->getParameter("CENTRAL_ADDRESS_SPOOFED"))
 					{
 						std::shared_ptr<HmDeviceDescription::HomeMaticParameter> parameter(new HmDeviceDescription::HomeMaticParameter(_bl));
@@ -300,7 +304,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 				}
 			}
 		}
-		else if(filename == "rf_sec_sd.xml" || filename == "rf_sec_sd_schueco.xml")
+		else if(filename == "rf_sec_sd.xml" || filename == "rf_sec_sd_2.xml" || filename == "rf_sec_sd_schueco.xml")
 		{
 			_bl->out.printInfo("Info: Please ignore the warning that \"typeID\" is \"-1\".");
 
@@ -617,6 +621,19 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 						i->constValue = 2;
 						break;
 					}
+				}
+			}
+		}
+		else if(filename == "rf_cc_vd.xml")
+		{
+			std::map<uint32_t, std::shared_ptr<HmDeviceDescription::DeviceChannel>>::iterator channelIterator = homeMaticDevice->channels.find(1);
+			if(channelIterator != homeMaticDevice->channels.end() && channelIterator->second)
+			{
+				std::map<HmDeviceDescription::ParameterSet::Type::Enum, std::shared_ptr<HmDeviceDescription::ParameterSet>>::iterator paramsetIterator = channelIterator->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::values);
+				if(paramsetIterator != channelIterator->second->parameterSets.end() && paramsetIterator->second)
+				{
+					std::shared_ptr<HmDeviceDescription::HomeMaticParameter> parameter = paramsetIterator->second->getParameter("VALVE_STATE");
+					if(parameter) parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write | HmDeviceDescription::HomeMaticParameter::Operations::Enum::event);
 				}
 			}
 		}

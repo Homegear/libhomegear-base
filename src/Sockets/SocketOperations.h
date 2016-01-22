@@ -140,7 +140,6 @@ public:
 	void open();
 	void close();
 protected:
-
 	BaseLib::Obj* _bl = nullptr;
 	int64_t _readTimeout = 15000000;
 	bool _autoConnect = true;
@@ -162,7 +161,6 @@ protected:
 	void getSSL();
 	void initSSL();
 	void autoConnect();
-	//bool waitForSocket();
 };
 
 }

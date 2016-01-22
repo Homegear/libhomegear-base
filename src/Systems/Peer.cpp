@@ -2557,7 +2557,7 @@ std::shared_ptr<Variable> Peer::setId(PRpcClientInfo clientInfo, uint64_t newPee
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
 
-std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value)
+std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value, bool wait)
 {
 	try
 	{
