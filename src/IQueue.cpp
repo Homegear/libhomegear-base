@@ -34,14 +34,16 @@
 namespace BaseLib
 {
 
-IQueue::IQueue(Obj* baseLib)
+IQueue::IQueue(Obj* baseLib, int32_t bufferSize)
 {
 	_bl = baseLib;
+	if(bufferSize > 0) _bufferSize = bufferSize;
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
+		_buffer[i] = nullptr;
 		_bufferHead[i] = 0;
 		_bufferTail[i] = 0;
-		_processingEntryAvailable[i] = false;
+		_bufferCount[i] = 0;
 		_stopProcessingThread[i] = true;
 	}
 }
@@ -51,18 +53,24 @@ IQueue::~IQueue()
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
 		stopQueue(i);
+		if(_buffer[i]) delete[] _buffer[i];
 	}
 }
 
-void IQueue::startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy)
+void IQueue::startQueue(int32_t index, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy)
 {
 	if(index < 0 || index >= _queueCount) return;
 	_stopProcessingThread[index] = false;
-	_processingEntryAvailable[index] = false;
 	_bufferHead[index] = 0;
 	_bufferTail[index] = 0;
-	_processingThread[index] = std::thread(&IQueue::process, this, index);
-	Threads::setThreadPriority(_bl, _processingThread[index].native_handle(), threadPriority, threadPolicy);
+	_bufferCount[index] = 0;
+	for(uint32_t i = 0; i < processingThreadCount; i++)
+	{
+		std::shared_ptr<std::thread> thread(new std::thread());
+		_bl->threadManager.start(*thread, true, threadPriority, threadPolicy, &IQueue::process, this, index);
+		_processingThread[index].push_back(thread);
+	}
+	if(!_buffer[index]) _buffer[index] = new std::shared_ptr<IQueueEntry>[_bufferSize];
 }
 
 void IQueue::stopQueue(int32_t index)
@@ -70,33 +78,29 @@ void IQueue::stopQueue(int32_t index)
 	if(index < 0 || index >= _queueCount) return;
 	if(_stopProcessingThread[index]) return;
 	_stopProcessingThread[index] = true;
-	_processingEntryAvailable[index] = true;
-	_processingConditionVariable[index].notify_one();
-	if(_processingThread[index].joinable()) _processingThread[index].join();
+	_processingConditionVariable[index].notify_all();
+	_produceConditionVariable[index].notify_all();
+	for(uint32_t i = 0; i < _processingThread[index].size(); i++)
+	{
+		_bl->threadManager.join(*(_processingThread[index][i]));
+	}
+	_processingThread[index].clear();
+	delete[] _buffer[index];
+	_buffer[index] = nullptr;
 }
 
 bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry)
 {
 	try
 	{
-		if(index < 0 || index >= _queueCount || !entry) return false;
-		{
-			std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]);
-			int32_t tempHead = _bufferHead[index] + 1;
-			if(tempHead >= _bufferSize) tempHead = 0;
-			if(tempHead == _bufferTail[index])
-			{
-				return false;
-			}
+		if(index < 0 || index >= _queueCount || !entry || !_buffer[index] || _stopProcessingThread[index]) return false;
+		std::unique_lock<std::mutex> lock(_queueMutex[index]);
+		_produceConditionVariable[index].wait(lock, [&]{ return _bufferCount[index] < _bufferSize || _stopProcessingThread[index]; });
+		if(_stopProcessingThread[index]) return true;
 
-			_buffer[index][_bufferHead[index]] = entry;
-			_bufferHead[index]++;
-			if(_bufferHead[index] >= _bufferSize)
-			{
-				_bufferHead[index] = 0;
-			}
-			_processingEntryAvailable[index] = true;
-		}
+        _buffer[index][_bufferTail[index]] = entry;
+        _bufferTail[index] = (_bufferTail[index] + 1) % _bufferSize;
+        ++(_bufferCount[index]);
 
 		_processingConditionVariable[index].notify_one();
 		return true;
@@ -121,33 +125,24 @@ void IQueue::process(int32_t index)
 	if(index < 0 || index >= _queueCount) return;
 	while(!_stopProcessingThread[index])
 	{
-		std::unique_lock<std::mutex> lock(_processingThreadMutex[index]);
 		try
 		{
-			_bufferMutex[index].lock();
-			if(_bufferHead[index] == _bufferTail[index]) //Only lock, when there is really no packet to process. This check is necessary, because the check of the while loop condition is outside of the mutex
+			std::shared_ptr<IQueueEntry> entry;
+
 			{
-				_bufferMutex[index].unlock();
-				_processingConditionVariable[index].wait(lock, [&]{ return _processingEntryAvailable[index]; });
-			}
-			else _bufferMutex[index].unlock();
-			if(_stopProcessingThread[index])
-			{
-				lock.unlock();
-				return;
+				std::unique_lock<std::mutex> lock(_queueMutex[index]);
+
+				_processingConditionVariable[index].wait(lock, [&]{ return _bufferCount[index] > 0 || _stopProcessingThread[index]; });
+				if(_stopProcessingThread[index]) return;
+
+				entry = _buffer[index][_bufferHead[index]];
+				_bufferHead[index] = (_bufferHead[index] + 1) % _bufferSize;
+				--(_bufferCount[index]);
+
+				_produceConditionVariable[index].notify_one();
 			}
 
-			while(_bufferHead[index] != _bufferTail[index])
-			{
-				_bufferMutex[index].lock();
-				std::shared_ptr<IQueueEntry> entry = _buffer[index][_bufferTail[index]];
-				_buffer[index][_bufferTail[index]].reset();
-				_bufferTail[index]++;
-				if(_bufferTail[index] >= _bufferSize) _bufferTail[index] = 0;
-				if(_bufferHead[index] == _bufferTail[index]) _processingEntryAvailable[index] = false; //Set here, because otherwise it might be set to "true" in publish and then set to false again after the while loop
-				_bufferMutex[index].unlock();
-				if(entry) processQueueEntry(index, entry);
-			}
+			if(entry) processQueueEntry(index, entry);
 		}
 		catch(const std::exception& ex)
 		{
@@ -161,7 +156,6 @@ void IQueue::process(int32_t index)
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 		}
-		lock.unlock();
 	}
 }
 

@@ -40,6 +40,7 @@ ITimedQueue::ITimedQueue(Obj* baseLib)
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
 		_stopProcessingThread[i] = true;
+		_firstPositionChanged[i] = false;
 	}
 }
 
@@ -55,8 +56,7 @@ void ITimedQueue::startQueue(int32_t index, int32_t threadPriority, int32_t thre
 {
 	if(index < 0 || index >= _queueCount) return;
 	_stopProcessingThread[index] = false;
-	_processingThread[index] = std::thread(&ITimedQueue::process, this, index);
-	Threads::setThreadPriority(_bl, _processingThread[index].native_handle(), threadPriority, threadPolicy);
+	_bl->threadManager.start(_processingThread[index], true, threadPriority, threadPolicy, &ITimedQueue::process, this, index);
 }
 
 void ITimedQueue::stopQueue(int32_t index)
@@ -65,7 +65,7 @@ void ITimedQueue::stopQueue(int32_t index)
 	if(_stopProcessingThread[index]) return;
 	_stopProcessingThread[index] = true;
 	_processingConditionVariable[index].notify_one();
-	if(_processingThread[index].joinable()) _processingThread[index].join();
+	_bl->threadManager.join(_processingThread[index]);
 }
 
 bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry, int64_t& id)
@@ -80,6 +80,7 @@ bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entr
 			id = entry->getTime();
 			while(_buffer[index].find(id) != _buffer[index].end()) id++;
 
+			if(!_buffer[index].empty() && _buffer[index].begin()->first > id) _firstPositionChanged[index] = true;
 			_buffer[index].insert(std::pair<int64_t, std::shared_ptr<ITimedQueueEntry>>(id, entry));
 		}
 
@@ -138,8 +139,9 @@ void ITimedQueue::process(int32_t index)
 			{
 				next = _buffer[index].empty() ? 0 : _buffer[index].begin()->first;
 				_bufferMutex[index].unlock();
-				if(next > 0) _processingConditionVariable[index].wait_until(lock, std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(next)), [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return _buffer[index].empty() || _buffer[index].begin()->first <= _bl->hf.getTime() || _stopProcessingThread[index]; });
+				if(next > 0) _processingConditionVariable[index].wait_until(lock, std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(next)), [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return _buffer[index].empty() || _buffer[index].begin()->first <= _bl->hf.getTime() || _firstPositionChanged[index] || _stopProcessingThread[index]; });
 				else _processingConditionVariable[index].wait(lock, [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return !_buffer[index].empty() || _stopProcessingThread[index]; });
+				if(_firstPositionChanged[index]) _firstPositionChanged[index] = false;
 			}
 			else _bufferMutex[index].unlock();
 			if(_stopProcessingThread[index])

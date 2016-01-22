@@ -61,7 +61,7 @@ IPhysicalInterface::~IPhysicalInterface()
 	_stopPacketProcessingThread = true;
 	_packetProcessingPacketAvailable = true;
 	_packetProcessingConditionVariable.notify_one();
-	if(_packetProcessingThread.joinable()) _packetProcessingThread.join();
+	_bl->threadManager.join(_packetProcessingThread);
 }
 
 bool IPhysicalInterface::lifetick()
@@ -101,13 +101,12 @@ void IPhysicalInterface::startListening()
 		_stopPacketProcessingThread = true;
 		_packetProcessingPacketAvailable = true;
 		_packetProcessingConditionVariable.notify_one();
-		if(_packetProcessingThread.joinable()) _packetProcessingThread.join();
+		_bl->threadManager.join(_packetProcessingThread);
 		_stopPacketProcessingThread = false;
 		_packetProcessingPacketAvailable = false;
 		_packetBufferHead = 0;
 		_packetBufferTail = 0;
-		_packetProcessingThread = std::thread(&IPhysicalInterface::processPackets, this);
-		BaseLib::Threads::setThreadPriority(_bl, _packetProcessingThread.native_handle(), 45, SCHED_FIFO);
+		_bl->threadManager.start(_packetProcessingThread, true, 45, SCHED_FIFO, &IPhysicalInterface::processPackets, this);
 	}
     catch(const std::exception& ex)
     {
@@ -130,7 +129,7 @@ void IPhysicalInterface::stopListening()
 		_stopPacketProcessingThread = true;
 		_packetProcessingPacketAvailable = true;
 		_packetProcessingConditionVariable.notify_one();
-		if(_packetProcessingThread.joinable()) _packetProcessingThread.join();
+		_bl->threadManager.join(_packetProcessingThread);
 	}
     catch(const std::exception& ex)
     {
@@ -200,7 +199,9 @@ void IPhysicalInterface::processPackets()
 					for(EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
 					{
 						i->second->lock();
+						if(_bl->settings.devLog()) _bl->out.printMessage("Devlog: Packet " + packet->hexString() + " is now passed to the EventHandler.");
 						if(i->second->handler()) ((IPhysicalInterfaceEventSink*)i->second->handler())->onPacketReceived(_settings->id, packet);
+						if(_bl->settings.devLog()) _bl->out.printMessage("Devlog: Packet " + packet->hexString() + " is now processed.");
 						i->second->unlock();
 					}
 				}
@@ -234,6 +235,7 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet)
 {
 	try
 	{
+		if(_bl->settings.devLog()) _bl->out.printMessage("Devlog: Packet " + packet->hexString() + " enters raisePacketReceived.");
 		_packetBufferMutex.lock();
 		int32_t tempHead = _packetBufferHead + 1;
 		if(tempHead >= _packetBufferSize) tempHead = 0;

@@ -165,8 +165,8 @@ public:
 	virtual std::shared_ptr<Variable> setName(PRpcClientInfo clientInfo, uint64_t id, std::string name);
 	virtual std::shared_ptr<Variable> setTeam(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string teamSerialNumber, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> setTeam(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t teamId, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
-	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value);
+	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value, bool wait);
+	virtual std::shared_ptr<Variable> setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, std::shared_ptr<Variable> value, bool wait);
 	virtual std::shared_ptr<Variable> updateFirmware(PRpcClientInfo clientInfo, std::vector<uint64_t> ids, bool manual) { return Variable::createError(-32601, "Method not implemented for this central."); }
 protected:
 	BaseLib::Obj* _bl = nullptr;

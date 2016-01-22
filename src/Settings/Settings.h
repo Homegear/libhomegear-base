@@ -73,6 +73,7 @@ public:
 	bool prioritizeThreads() { return _prioritizeThreads; }
 	void setPrioritizeThreads(bool value) { _prioritizeThreads = value; }
 	uint32_t workerThreadWindow() { return _workerThreadWindow; }
+	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
 	uint32_t rpcServerMaxConnections() { return _rpcServerMaxConnections; }
 	int32_t rpcServerThreadPriority() { return _rpcServerThreadPriority; }
@@ -86,9 +87,9 @@ public:
 	int32_t packetQueueThreadPolicy() { return _packetQueueThreadPolicy; }
 	int32_t packetReceivedThreadPriority() { return _packetReceivedThreadPriority; }
 	int32_t packetReceivedThreadPolicy() { return _packetReceivedThreadPolicy; }
-	uint32_t eventThreadMax() { return _eventThreadMax; }
-	int32_t eventTriggerThreadPriority() { return _eventTriggerThreadPriority; }
-	int32_t eventTriggerThreadPolicy() { return _eventTriggerThreadPolicy; }
+	uint32_t eventThreadCount() { return _eventThreadCount; }
+	int32_t eventThreadPriority() { return _eventThreadPriority; }
+	int32_t eventThreadPolicy() { return _eventThreadPolicy; }
 	uint32_t scriptThreadMax() { return _scriptThreadMax; }
 	std::string familyConfigPath() { return _familyConfigPath; }
 	std::string deviceDescriptionPath() { return _deviceDescriptionPath; }
@@ -135,6 +136,7 @@ private:
 	std::string _logfilePath;
 	bool _prioritizeThreads = true;
 	uint32_t _workerThreadWindow = 3000;
+	uint32_t _scriptEngineServerMaxConnections = 10;
 	uint32_t _cliServerMaxConnections = 50;
 	uint32_t _rpcServerMaxConnections = 50;
 	int32_t _rpcServerThreadPriority = 0;
@@ -148,9 +150,9 @@ private:
 	int32_t _packetQueueThreadPolicy = SCHED_FIFO;
 	int32_t _packetReceivedThreadPriority = 0;
 	int32_t _packetReceivedThreadPolicy = SCHED_OTHER;
-	uint32_t _eventThreadMax = 20;
-	int32_t _eventTriggerThreadPriority = 0;
-	int32_t _eventTriggerThreadPolicy = SCHED_OTHER;
+	uint32_t _eventThreadCount = 5;
+	int32_t _eventThreadPriority = 0;
+	int32_t _eventThreadPolicy = SCHED_OTHER;
 	uint32_t _scriptThreadMax = 10;
 	std::string _familyConfigPath;
 	std::string _deviceDescriptionPath;

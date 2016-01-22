@@ -177,11 +177,11 @@ void SerialReaderWriter::openDevice(bool events)
 	if(events)
 	{
 		_readThreadMutex.lock();
-		if(_readThread.joinable()) _readThread.join();
+		_bl->threadManager.join(_readThread);
 		_stopped = false;
 		_stopReadThread = false;
-		_readThread = std::thread(&SerialReaderWriter::readThread, this);
-		if(_readThreadPriority > -1) Threads::setThreadPriority(_bl, _readThread.native_handle(), _readThreadPriority, SCHED_FIFO);
+		if(_readThreadPriority > -1) _bl->threadManager.start(_readThread, true, _readThreadPriority, SCHED_FIFO, &SerialReaderWriter::readThread, this);
+		else _bl->threadManager.start(_readThread, true, &SerialReaderWriter::readThread, this);
 		_readThreadMutex.unlock();
 	}
 }
@@ -193,10 +193,10 @@ void SerialReaderWriter::closeDevice()
 	_readThreadMutex.lock();
 	_stopped = true;
 	_stopReadThread = true;
-	if(_readThread.joinable()) _readThread.join();
+	_bl->threadManager.join(_readThread);
 	_readThreadMutex.unlock();
 	_openDeviceThreadMutex.lock();
-	if(_openDeviceThread.joinable()) _openDeviceThread.join();
+	_bl->threadManager.join(_openDeviceThread);
 	_openDeviceThreadMutex.unlock();
 	_bl->fileDescriptorManager.close(_fileDescriptor);
 	unlink(_lockfile.c_str());
@@ -326,8 +326,8 @@ void SerialReaderWriter::readThread()
 			closeDevice();
 			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 			_openDeviceThreadMutex.lock();
-			if(_openDeviceThread.joinable()) _openDeviceThread.join();
-			_openDeviceThread = std::thread(&SerialReaderWriter::openDevice, this, true);
+			_bl->threadManager.join(_openDeviceThread);
+			_bl->threadManager.start(_openDeviceThread, true, &SerialReaderWriter::openDevice, this, true);
 			_openDeviceThreadMutex.unlock();
 			return;
 		}

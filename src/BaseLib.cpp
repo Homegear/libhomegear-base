@@ -34,8 +34,9 @@
 namespace BaseLib
 {
 
-Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback)
+Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount)
 {
+	threadManager.init(this, testMaxThreadCount);
 	fileDescriptorManager.init(this);
 	serialDeviceManager.init(this);
 	hf.init(this);

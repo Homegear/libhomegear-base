@@ -384,8 +384,8 @@ void FamilySettings::load(std::string filename)
 				}
 				else if(name == "listenthreadpolicy")
 				{
-					settings->listenThreadPolicy = BaseLib::Threads::getThreadPolicyFromString(value);
-					settings->listenThreadPriority = BaseLib::Threads::parseThreadPriority(settings->listenThreadPriority, settings->listenThreadPolicy);
+					settings->listenThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
+					settings->listenThreadPriority = ThreadManager::parseThreadPriority(settings->listenThreadPriority, settings->listenThreadPolicy);
 					_bl->out.printDebug("Debug: ListenThreadPolicy set to " + std::to_string(settings->listenThreadPolicy));
 				}
 				else if(name == "ttsprogram")

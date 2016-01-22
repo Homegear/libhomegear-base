@@ -28,47 +28,83 @@
  * files in the program, then also delete it here.
 */
 
-#include "Threads.h"
 #include "../BaseLib.h"
+#include "ThreadManager.h"
 
 namespace BaseLib
 {
 
-Threads::Threads()
-{
-
-}
-
-Threads::~Threads()
-{
-
-}
+bool _stopThreadCountTest = false;
 
 void* threadCountTest(void*)
 {
-    while(true)
+    while(!_stopThreadCountTest)
     {
-    	std::this_thread::sleep_for(std::chrono::seconds(60));
+    	std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return 0;
 }
 
-uint32_t Threads::getMaxThreadCount()
+ThreadManager::ThreadManager()
 {
-	uint32_t maxThreadCount = 0;
-	pthread_t thread;
-	while(true)
-	{
-		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
-		{
-			return maxThreadCount;
-		}
-		maxThreadCount++;
-	}
-	return 0;
 }
 
-int32_t Threads::getThreadPolicyFromString(std::string policy)
+ThreadManager::~ThreadManager()
+{
+}
+
+void ThreadManager::init(BaseLib::Obj* baseLib, bool testMaxThreadCount)
+{
+	_bl = baseLib;
+	if(testMaxThreadCount) this->testMaxThreadCount();
+}
+
+void ThreadManager::testMaxThreadCount()
+{
+	std::vector<pthread_t> threads;
+	threads.reserve(1000);
+	while(true)
+	{
+		pthread_t thread;
+		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
+		{
+			_stopThreadCountTest = true;
+			for(std::vector<pthread_t>::iterator i = threads.begin(); i != threads.end(); ++i)
+			{
+				pthread_join(*i, nullptr);
+			}
+			_maxThreadCount = _maxThreadCount * 90 / 100;
+			return;
+		}
+		threads.push_back(thread);
+		if(threads.size() > threads.capacity() - 10) threads.reserve(threads.size() + 1000);
+		_maxThreadCount++;
+	}
+}
+
+uint32_t ThreadManager::getMaxThreadCount()
+{
+	return _maxThreadCount;
+}
+
+int32_t ThreadManager::getCurrentThreadCount()
+{
+	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
+	int32_t count = _currentThreadCount;
+	return count;
+}
+
+bool ThreadManager::checkThreadCount(bool highPriority)
+{
+	if(_maxThreadCount == 0) return true;
+	if(highPriority && _currentThreadCount < (signed)_maxThreadCount) return true;
+	else if(_currentThreadCount < (signed)_maxThreadCount * 90 / 100) return true;
+	if(highPriority) _bl->out.printCritical("Critical: Can't start more threads. Thread limit reached.");
+	else _bl->out.printCritical("Critical: Can't start more low priority threads. 90% of thread limit reached.");
+	return false;
+}
+
+int32_t ThreadManager::getThreadPolicyFromString(std::string policy)
 {
 	HelperFunctions::toLower(policy);
 	if(policy == "sched_other") return SCHED_OTHER;
@@ -83,7 +119,7 @@ int32_t Threads::getThreadPolicyFromString(std::string policy)
     return 0;
 }
 
-int32_t Threads::parseThreadPriority(int32_t priority, int32_t policy)
+int32_t ThreadManager::parseThreadPriority(int32_t priority, int32_t policy)
 {
 	if(policy == SCHED_FIFO || policy == SCHED_OTHER)
 	{
@@ -94,14 +130,14 @@ int32_t Threads::parseThreadPriority(int32_t priority, int32_t policy)
 	else return 0;
 }
 
-void Threads::setThreadPriority(BaseLib::Obj* baseLib, pthread_t thread, int32_t priority, int32_t policy)
+void ThreadManager::setThreadPriority(pthread_t thread, int32_t priority, int32_t policy)
 {
 	try
 	{
-		if(!baseLib->settings.prioritizeThreads()) return;
+		if(!_bl->settings.prioritizeThreads()) return;
 		if(priority == -1)
 		{
-			baseLib->out.printWarning("Warning: Priority of -1 was passed to setThreadPriority.");
+			_bl->out.printWarning("Warning: Priority of -1 was passed to setThreadPriority.");
 			priority = 0;
 			policy = SCHED_OTHER;
 		}
@@ -120,36 +156,45 @@ void Threads::setThreadPriority(BaseLib::Obj* baseLib, pthread_t thread, int32_t
 		{
 			if(error == EPERM)
 			{
-				baseLib->out.printError("Could not set thread priority. The executing user does not have enough privileges. Please run \"ulimit -r 100\" before executing Homegear.");
+				_bl->out.printError("Could not set thread priority. The executing user does not have enough privileges. Please run \"ulimit -r 100\" before executing Homegear.");
 			}
-			else if(error == ESRCH) baseLib->out.printError("Could not set thread priority. Thread could not be found.");
-			else if(error == EINVAL) baseLib->out.printError("Could not set thread priority: policy is not a recognized policy, or param does not make sense for the policy.");
-			else baseLib->out.printError("Error: Could not set thread priority to " + std::to_string(priority) + " Error: " + std::to_string(error));
-			baseLib->settings.setPrioritizeThreads(false);
+			else if(error == ESRCH) _bl->out.printError("Could not set thread priority. Thread could not be found.");
+			else if(error == EINVAL) _bl->out.printError("Could not set thread priority: policy is not a recognized policy, or param does not make sense for the policy.");
+			else _bl->out.printError("Error: Could not set thread priority to " + std::to_string(priority) + " Error: " + std::to_string(error));
+			_bl->settings.setPrioritizeThreads(false);
 		}
-		else baseLib->out.printDebug("Debug: Thread priority successfully set to: " + std::to_string(priority), 7);
+		else _bl->out.printDebug("Debug: Thread priority successfully set to: " + std::to_string(priority), 7);
 	}
 	catch(const std::exception& ex)
     {
-		baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
-void Threads::registerThread()
+void ThreadManager::join(std::thread& thread)
+{
+	if(thread.joinable())
+	{
+		thread.join();
+		unregisterThread();
+	}
+}
+
+void ThreadManager::registerThread()
 {
 	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
 	_currentThreadCount++;
 }
 
-void Threads::unregisterThread()
+void ThreadManager::unregisterThread()
 {
 	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
 	_currentThreadCount--;
