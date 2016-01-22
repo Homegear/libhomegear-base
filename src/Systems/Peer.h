@@ -129,8 +129,8 @@ public:
 	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>> linksCentral;
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
-	Peer(BaseLib::Obj* baseLib, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler);
-	Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler);
+	Peer(BaseLib::Obj* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
+	Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
 	virtual ~Peer();
 	virtual void dispose();
 
@@ -289,7 +289,6 @@ protected:
 	HomegearDevice::ReceiveModes::Enum _rxModes = HomegearDevice::ReceiveModes::Enum::none;
 
 	bool _disposing = false;
-	bool _centralFeatures = false;
 	uint32_t _lastPacketReceived = 0;
 	std::mutex _databaseMutex;
 

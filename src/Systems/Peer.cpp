@@ -37,14 +37,13 @@ namespace BaseLib
 namespace Systems
 {
 
-Peer::Peer(BaseLib::Obj* baseLib, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler)
+Peer::Peer(BaseLib::Obj* baseLib, uint32_t parentID, IPeerEventSink* eventHandler)
 {
 	try
 	{
 		_bl = baseLib;
 		_parentID = parentID;
-		_centralFeatures = centralFeatures;
-		if(centralFeatures) serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
+		serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
 		_lastPacketReceived = HelperFunctions::getTimeSeconds();
 		_rpcDevice.reset();
 		setEventHandler(eventHandler);
@@ -63,7 +62,7 @@ Peer::Peer(BaseLib::Obj* baseLib, uint32_t parentID, bool centralFeatures, IPeer
     }
 }
 
-Peer::Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler) : Peer(baseLib, parentID, centralFeatures, eventHandler)
+Peer::Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler) : Peer(baseLib, parentID, eventHandler)
 {
 	try
 	{
@@ -1816,7 +1815,6 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		std::shared_ptr<Variable> array(new Variable(VariableType::tArray));
 		std::shared_ptr<ICentral> central = getCentral();
 		if(!central) return array; //central actually should always be set at this point
@@ -2565,7 +2563,6 @@ std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t cha
 		if(value->stringValue.size() < 3) return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
 
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
 		if(channel == 0 && serviceMessages->set(valueKey, value->booleanValue)) return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
