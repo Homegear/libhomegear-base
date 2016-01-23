@@ -76,10 +76,12 @@ public:
 	void unregisterThread();
 	uint32_t getMaxThreadCount();
 	int32_t getCurrentThreadCount();
+	uint32_t getMaxRegisteredThreadCount();
 	void testMaxThreadCount();
 protected:
 	Obj* _bl = nullptr;
     std::mutex _threadCountMutex;
+    uint32_t _maxRegisteredThreadCount = 0;
     uint32_t _maxThreadCount = 0;
     volatile int32_t _currentThreadCount = 0;
 

@@ -42,7 +42,6 @@
 #include <map>
 #include <chrono>
 #include <ctime>
-#include <functional>
 
 namespace BaseLib
 {

@@ -82,6 +82,11 @@ void ThreadManager::testMaxThreadCount()
 	}
 }
 
+uint32_t ThreadManager::getMaxRegisteredThreadCount()
+{
+	return _maxRegisteredThreadCount;
+}
+
 uint32_t ThreadManager::getMaxThreadCount()
 {
 	return _maxThreadCount;
@@ -192,6 +197,7 @@ void ThreadManager::registerThread()
 {
 	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
 	_currentThreadCount++;
+	if(_currentThreadCount > _maxRegisteredThreadCount) _maxRegisteredThreadCount = _currentThreadCount;
 }
 
 void ThreadManager::unregisterThread()
