@@ -74,6 +74,7 @@ public:
 
 	void registerThread();
 	void unregisterThread();
+	void setMaxThreadCount(uint32_t value);
 	uint32_t getMaxThreadCount();
 	int32_t getCurrentThreadCount();
 	uint32_t getMaxRegisteredThreadCount();

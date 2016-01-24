@@ -87,6 +87,11 @@ uint32_t ThreadManager::getMaxRegisteredThreadCount()
 	return _maxRegisteredThreadCount;
 }
 
+void ThreadManager::setMaxThreadCount(uint32_t value)
+{
+	_maxThreadCount = value;
+}
+
 uint32_t ThreadManager::getMaxThreadCount()
 {
 	return _maxThreadCount;

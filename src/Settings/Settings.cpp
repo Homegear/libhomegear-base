@@ -67,7 +67,8 @@ void Settings::reset()
 	_logfilePath = "/var/log/homegear/";
 	_prioritizeThreads = true;
 	_workerThreadWindow = 3000;
-	_scriptEngineServerMaxConnections = 10;
+	_scriptEngineThreadCount = 10;
+	_scriptEngineServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
@@ -84,7 +85,6 @@ void Settings::reset()
 	_eventThreadCount = 5;
 	_eventThreadPriority = 0;
 	_eventThreadPolicy = SCHED_OTHER;
-	_scriptThreadMax = 10;
 	_familyConfigPath = "/etc/homegear/families/";
 	_deviceDescriptionPath = "/etc/homegear/devices/";
 	_clientSettingsPath = "/etc/homegear/rpcclients.conf";
@@ -281,6 +281,11 @@ void Settings::load(std::string filename)
 					if(_workerThreadWindow > 3600000) _workerThreadWindow = 3600000;
 					_bl->out.printDebug("Debug: workerThreadWindow set to " + std::to_string(_workerThreadWindow));
 				}
+				else if(name == "scriptenginethreadcount")
+				{
+					_scriptEngineThreadCount = Math::getNumber(value);
+					_bl->out.printDebug("Debug: scriptEngineThreadCount set to " + std::to_string(_scriptEngineThreadCount));
+				}
 				else if(name == "scriptengineservermaxconnections")
 				{
 					_scriptEngineServerMaxConnections = Math::getNumber(value);
@@ -383,11 +388,6 @@ void Settings::load(std::string filename)
 					_eventThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
 					_eventThreadPriority = ThreadManager::parseThreadPriority(_eventThreadPriority, _eventThreadPolicy);
 					_bl->out.printDebug("Debug: eventThreadPolicy set to " + std::to_string(_eventThreadPolicy));
-				}
-				else if(name == "scriptmaxthreads")
-				{
-					_scriptThreadMax = Math::getNumber(value);
-					_bl->out.printDebug("Debug: scriptMaxThreads set to " + std::to_string(_scriptThreadMax));
 				}
 				else if(name == "familyconfigpath")
 				{
