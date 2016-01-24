@@ -202,7 +202,7 @@ void ThreadManager::registerThread()
 {
 	std::lock_guard<std::mutex> threadCountGuard(_threadCountMutex);
 	_currentThreadCount++;
-	if(_currentThreadCount > _maxRegisteredThreadCount) _maxRegisteredThreadCount = _currentThreadCount;
+	if(_currentThreadCount > (signed)_maxRegisteredThreadCount) _maxRegisteredThreadCount = _currentThreadCount;
 }
 
 void ThreadManager::unregisterThread()
