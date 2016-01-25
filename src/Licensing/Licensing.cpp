@@ -137,7 +137,7 @@ void Licensing::removeLicense(int32_t familyId, int32_t deviceId)
 		uint64_t mapKey = getMapKey(familyId, deviceId);
 		_licenseData[mapKey].licenseKey.clear();
 		_licenseData[mapKey].activationKey.clear();
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(mapKey);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(mapKey);
 		if(databaseIdIterator != _variableDatabaseIds.end()) databaseIdIterator->second = 0;
 		_bl->db->deleteLicenseVariable(_moduleId, mapKey);
 	}
@@ -160,7 +160,7 @@ void Licensing::saveVariable(uint64_t index, int32_t intValue)
 	try
 	{
 		if(!_bl->db) return;
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
 		if(databaseIdIterator != _variableDatabaseIds.end())
 		{
@@ -197,7 +197,7 @@ void Licensing::saveVariable(uint64_t index, int64_t intValue)
 	try
 	{
 		if(!_bl->db) return;
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
 		if(databaseIdIterator != _variableDatabaseIds.end())
 		{
@@ -234,7 +234,7 @@ void Licensing::saveVariable(uint64_t index, std::string& stringValue)
 	try
 	{
 		if(!_bl->db) return;
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
 		if(databaseIdIterator != _variableDatabaseIds.end())
 		{
@@ -271,7 +271,7 @@ void Licensing::saveVariable(uint64_t index, std::vector<uint8_t>& binaryValue)
 	try
 	{
 		if(!_bl->db) return;
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
 		if(databaseIdIterator != _variableDatabaseIds.end())
 		{
@@ -315,7 +315,7 @@ void Licensing::saveVariable(uint64_t index, LicenseData& licenseData)
 		blob.push_back(',');
 		blob.insert(blob.end(), licenseData.activationKey.begin(), licenseData.activationKey.end());
 
-		std::map<uint32_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
+		std::map<uint64_t, uint32_t>::iterator databaseIdIterator = _variableDatabaseIds.find(index);
 		Database::DataRow data;
 		_licenseData[index].licenseKey = licenseData.licenseKey;
 		_licenseData[index].activationKey = licenseData.activationKey;

@@ -121,7 +121,7 @@ protected:
 	BaseLib::Obj* _bl = nullptr;
 	bool _disposed = false;
 	int32_t _moduleId = -1;
-	std::map<uint32_t, uint32_t> _variableDatabaseIds;
+	std::map<uint64_t, uint32_t> _variableDatabaseIds;
 	std::map<uint64_t, LicenseData> _licenseData;
 	std::mutex _devicesMutex;
 	DeviceStates _devices;
