@@ -94,7 +94,7 @@ public:
 	virtual void disableUpdateMode();
 	virtual void sendPacket(std::shared_ptr<Packet> packet) = 0;
 	virtual bool lifetick();
-	virtual bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor > -1; }
+	virtual bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
 	virtual uint32_t responseDelay() { return _settings->responseDelay; }
 	virtual int64_t lastPacketSent() { return _lastPacketSent; }
 	virtual int64_t lastPacketReceived() { return _lastPacketReceived; }

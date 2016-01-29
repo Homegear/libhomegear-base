@@ -1703,9 +1703,9 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 			{
 				std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
 				description->structValue->insert(StructElement("PARAMSETS", variable));
-				if(!rpcFunction->configParameters->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("MASTER"))));
-				if(!rpcFunction->variables->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("VALUES"))));
-				if(!rpcFunction->linkParameters->parameters.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("LINK"))));
+				if(!rpcFunction->configParameters->parameters.empty() || !rpcFunction->configParameters->id.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("MASTER"))));
+				if(!rpcFunction->variables->parameters.empty() || !rpcFunction->variables->id.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("VALUES"))));
+				if(!rpcFunction->linkParameters->parameters.empty() || !rpcFunction->linkParameters->id.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("LINK"))));
 			}
 			//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::link) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::link)->typeString())));
 			//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::master) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::master)->typeString())));
