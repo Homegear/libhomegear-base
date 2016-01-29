@@ -199,16 +199,15 @@ void IPhysicalInterface::processPackets()
 					for(EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
 					{
 						i->second->lock();
-						if(_bl->settings.devLog()) _bl->out.printMessage("Devlog (" + _settings->id + "): Packet " + packet->hexString() + " is now passed to the EventHandler.");
+						if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug (" + _settings->id + "): Packet " + packet->hexString() + " is now passed to the EventHandler.");
 						if(i->second->handler()) ((IPhysicalInterfaceEventSink*)i->second->handler())->onPacketReceived(_settings->id, packet);
-						if(_bl->settings.devLog()) _bl->out.printMessage("Devlog (" + _settings->id + "): Packet " + packet->hexString() + " is now processed.");
 						i->second->unlock();
 					}
 				}
 				else _bl->out.printWarning("Warning (" + _settings->id + "): Packet was nullptr.");
 				processingTime = HelperFunctions::getTime() - processingTime;
-				if(_bl->settings.devLog() || _bl->debugLevel >= 5) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing of packet " + packet->hexString() + " took " + std::to_string(processingTime) + " ms.");
-				if(processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second.");
+				if(_bl->settings.devLog() || _bl->debugLevel >= 5) _bl->out.printDebug("Debug (" + _settings->id + "): Packet processing of packet " + packet->hexString() + " took " + std::to_string(processingTime) + " ms.");
+				if(processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");
 
 				_lifetick1Mutex.lock();
 				_lifetick1.second = true;
@@ -235,7 +234,7 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet)
 {
 	try
 	{
-		if(_bl->settings.devLog()) _bl->out.printMessage("Devlog (" + _settings->id + "): Packet " + packet->hexString() + " enters raisePacketReceived.");
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug (" + _settings->id + "): Packet " + packet->hexString() + " enters raisePacketReceived.");
 		_packetBufferMutex.lock();
 		int32_t tempHead = _packetBufferHead + 1;
 		if(tempHead >= _packetBufferSize) tempHead = 0;
