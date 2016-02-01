@@ -69,6 +69,8 @@ void Settings::reset()
 	_workerThreadWindow = 3000;
 	_scriptEngineThreadCount = 10;
 	_scriptEngineServerMaxConnections = 20;
+	_scriptEngineMaxThreadsPerScript = 4;
+	_scriptEngineMaxScriptsPerProcess = -1;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
@@ -290,6 +292,16 @@ void Settings::load(std::string filename)
 				{
 					_scriptEngineServerMaxConnections = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptEngineServerMaxConnections set to " + std::to_string(_scriptEngineServerMaxConnections));
+				}
+				else if(name == "scriptenginemaxthreadsperscript")
+				{
+					_scriptEngineMaxThreadsPerScript = Math::getNumber(value);
+					_bl->out.printDebug("Debug: scriptEngineMaxThreadsPerScript set to " + std::to_string(_scriptEngineMaxThreadsPerScript));
+				}
+				else if(name == "scriptenginemaxscriptsperprocess")
+				{
+					_scriptEngineMaxScriptsPerProcess = Math::getNumber(value);
+					_bl->out.printDebug("Debug: scriptEngineMaxScriptsPerProcess set to " + std::to_string(_scriptEngineMaxScriptsPerProcess));
 				}
 				else if(name == "cliservermaxconnections")
 				{

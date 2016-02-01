@@ -75,6 +75,8 @@ public:
 	uint32_t workerThreadWindow() { return _workerThreadWindow; }
 	uint32_t scriptEngineThreadCount() { return _scriptEngineThreadCount; }
 	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
+	uint32_t scriptEngineMaxThreadsPerScript() { return _scriptEngineMaxThreadsPerScript; }
+	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
 	uint32_t rpcServerMaxConnections() { return _rpcServerMaxConnections; }
 	int32_t rpcServerThreadPriority() { return _rpcServerThreadPriority; }
@@ -138,6 +140,8 @@ private:
 	uint32_t _workerThreadWindow = 3000;
 	uint32_t _scriptEngineThreadCount = 10;
 	uint32_t _scriptEngineServerMaxConnections = 20;
+	uint32_t _scriptEngineMaxThreadsPerScript = 4;
+	int32_t _scriptEngineMaxScriptsPerProcess = -1;
 	uint32_t _cliServerMaxConnections = 50;
 	uint32_t _rpcServerMaxConnections = 50;
 	int32_t _rpcServerThreadPriority = 0;
