@@ -517,7 +517,7 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
 
     pid = fork();
 
-    if(pid < 0) return pid;
+    if(pid == -1) return pid;
     else if(pid == 0)
     {
     	//Child process
