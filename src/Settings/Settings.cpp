@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -59,6 +59,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
+	_socketPath = _bl->executablePath;
 	_databasePath = _bl->executablePath + "db.sql";
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
@@ -237,6 +238,13 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
 					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
+				}
+				else if(name == "socketpath")
+				{
+					_socketPath = value;
+					if(_socketPath.empty()) _socketPath = _bl->executablePath;
+					if(_socketPath.back() != '/') _socketPath.push_back('/');
+					_bl->out.printDebug("Debug: socketPath set to " + _socketPath);
 				}
 				else if(name == "databasepath")
 				{

@@ -28,55 +28,32 @@
  * files in the program, then also delete it here.
 */
 
-#include "JsonPayload.h"
-#include "../BaseLib.h"
+#ifndef ISCRIPTENGINEEVENTSINK_H_
+#define ISCRIPTENGINEEVENTSINK_H_
+
+#include "ScriptInfo.h"
 
 namespace BaseLib
 {
-namespace DeviceDescription
+namespace ScriptEngine
 {
-
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib)
+/**
+ * This class provides hooks into the script engine server so family modules can be notified about finished script executions.
+ */
+class IScriptEngineEventSink : public IEventSinkBase
 {
-	_bl = baseLib;
-}
+public:
+	virtual ~IScriptEngineEventSink() {}
 
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib, xml_node<>* node) : JsonPayload(baseLib)
-{
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-	{
-		_bl->out.printWarning("Warning: Unknown attribute for \"jsonPayload\": " + std::string(attr->name()));
-	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-	{
-		std::string nodeName(subNode->name());
-		std::string value(subNode->value());
-		if(nodeName == "key") key = value;
-		else if(nodeName == "subkey") subkey = value;
-		else if(nodeName == "parameterId") parameterId = value;
-		else if(nodeName == "constValueBoolean")
-		{
-			constValueBooleanSet = true;
-			if(value == "true") constValueBoolean = true;
-		}
-		else if(nodeName == "constValueInteger")
-		{
-			constValueIntegerSet = true;
-			constValueInteger = Math::getNumber(value);
-		}
-		else if(nodeName == "constValueDecimal")
-		{
-			constValueDecimalSet = true;
-			constValueDecimal = Math::getDouble(value);
-		}
-		else if(nodeName == "constValueString")
-		{
-			constValueStringSet = true;
-			constValueString = value;
-		}
-		else _bl->out.printWarning("Warning: Unknown node in \"jsonPayload\": " + nodeName);
-	}
+	/**
+	 * Called when script execution finished or when the script process is killed.
+	 * @param scriptInfo The ScriptInfo object previously passed to the script engine server.
+	 * @return Return true when the request was handled.
+	 */
+	virtual bool onExecutionFinished(PScriptInfo& scriptInfo, int32_t exitCode) { return false; }
+};
 }
+}
+#endif
 
-}
-}
+

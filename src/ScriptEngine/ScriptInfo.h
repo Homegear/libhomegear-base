@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,55 +28,31 @@
  * files in the program, then also delete it here.
 */
 
-#include "JsonPayload.h"
-#include "../BaseLib.h"
+#ifndef ISCRIPTINFO_H_
+#define ISCRIPTINFO_H_
+
+#include <string>
 
 namespace BaseLib
 {
-namespace DeviceDescription
+namespace ScriptEngine
 {
-
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib)
+/**
+ * This class provides hooks into the script engine server so family modules can be notified about finished script executions.
+ */
+class ScriptInfo
 {
-	_bl = baseLib;
-}
+public:
+	std::string path;
+	std::string arguments;
+	std::vector<char> output;
 
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib, xml_node<>* node) : JsonPayload(baseLib)
-{
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-	{
-		_bl->out.printWarning("Warning: Unknown attribute for \"jsonPayload\": " + std::string(attr->name()));
-	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-	{
-		std::string nodeName(subNode->name());
-		std::string value(subNode->value());
-		if(nodeName == "key") key = value;
-		else if(nodeName == "subkey") subkey = value;
-		else if(nodeName == "parameterId") parameterId = value;
-		else if(nodeName == "constValueBoolean")
-		{
-			constValueBooleanSet = true;
-			if(value == "true") constValueBoolean = true;
-		}
-		else if(nodeName == "constValueInteger")
-		{
-			constValueIntegerSet = true;
-			constValueInteger = Math::getNumber(value);
-		}
-		else if(nodeName == "constValueDecimal")
-		{
-			constValueDecimalSet = true;
-			constValueDecimal = Math::getDouble(value);
-		}
-		else if(nodeName == "constValueString")
-		{
-			constValueStringSet = true;
-			constValueString = value;
-		}
-		else _bl->out.printWarning("Warning: Unknown node in \"jsonPayload\": " + nodeName);
-	}
-}
+	virtual ~ScriptInfo() {}
+};
 
+typedef std::shared_ptr<ScriptInfo> PScriptInfo;
 }
 }
+#endif
+
+

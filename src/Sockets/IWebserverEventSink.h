@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -43,6 +43,8 @@ namespace Rpc
 class IWebserverEventSink : public IEventSinkBase
 {
 public:
+	virtual ~IWebserverEventSink() {}
+
 	/**
 	 * Called on every HTTP GET request processed by the web server.
 	 * @param httpRequest The http request received by the webserver.
