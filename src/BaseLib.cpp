@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -36,6 +36,7 @@ namespace BaseLib
 
 Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount)
 {
+	executablePath = exePath;
 	threadManager.init(this, testMaxThreadCount);
 	fileDescriptorManager.init(this);
 	serialDeviceManager.init(this);

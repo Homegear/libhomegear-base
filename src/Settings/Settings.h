@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -64,6 +64,7 @@ public:
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
+	std::string socketPath() { return _socketPath; }
 	std::string databasePath() { return _databasePath; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
@@ -130,6 +131,7 @@ private:
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
+	std::string _socketPath;
 	std::string _databasePath;
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;

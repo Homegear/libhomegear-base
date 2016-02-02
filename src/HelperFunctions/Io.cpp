@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -77,7 +77,9 @@ int32_t Io::isDirectory(std::string path, bool& result)
 
 bool Io::createDirectory(std::string path, mode_t mode)
 {
-	return mkdir(path.c_str(), mode) == 0;
+	int32_t result = mkdir(path.c_str(), mode);
+	if(result != 0) return result;
+	return chmod(path.c_str(), mode) == 0; //Passing mode to mkdir doesn't set the permissions on the directory itself, so we call chmod.
 }
 
 int32_t Io::getFileLastModifiedTime(const std::string& filename)
