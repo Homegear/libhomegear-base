@@ -37,6 +37,10 @@ namespace BaseLib
 {
 namespace ScriptEngine
 {
+
+class ScriptInfo;
+typedef std::shared_ptr<ScriptInfo> PScriptInfo;
+
 /**
  * This class provides hooks into the script engine server so family modules can be notified about finished script executions.
  */
@@ -46,11 +50,10 @@ public:
 	std::string path;
 	std::string arguments;
 	std::vector<char> output;
+	std::function<void(PScriptInfo& scriptInfo, int32_t exitCode)> scriptFinishedCallback;
 
 	virtual ~ScriptInfo() {}
 };
-
-typedef std::shared_ptr<ScriptInfo> PScriptInfo;
 }
 }
 #endif
