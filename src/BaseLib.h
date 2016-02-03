@@ -54,7 +54,7 @@
 #include "LowLevel/Gpio.h"
 #include "Output/Output.h"
 #include "DeviceDescription/Devices.h"
-#include "ScriptEngine/IScriptEngineEventSink.h"
+#include "ScriptEngine/ScriptInfo.h"
 #include "Settings/Settings.h"
 #include "Sockets/HTTPClient.h"
 #include "Sockets/SocketOperations.h"
