@@ -87,6 +87,7 @@ void IQueue::stopQueue(int32_t index)
 	_processingThread[index].clear();
 	delete[] _buffer[index];
 	_buffer[index] = nullptr;
+
 }
 
 bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry)
