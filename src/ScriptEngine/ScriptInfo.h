@@ -32,6 +32,8 @@
 #define ISCRIPTINFO_H_
 
 #include <string>
+#include <mutex>
+#include <condition_variable>
 
 namespace BaseLib
 {
@@ -47,10 +49,31 @@ typedef std::shared_ptr<ScriptInfo> PScriptInfo;
 class ScriptInfo
 {
 public:
-	std::string path;
-	std::string arguments;
+	enum class ScriptType
+	{
+		cli,
+		device,
+		web
+	};
+
+	int32_t id = 0;
+	int32_t customId = 0;
+
+	std::string path;			//cli, web
+	std::string arguments;		//cli
+	std::string script;			//device
+	int64_t peerId = 0;			//device
+	bool keepAlive = false;		//device
+	int32_t interval = -1;		//device
+
 	std::vector<char> output;
-	std::function<void(PScriptInfo& scriptInfo, int32_t exitCode)> scriptFinishedCallback;
+
+	// Option 1: Call scriptFinishedCallback
+	std::function<void(PScriptInfo& scriptInfo, int32_t exitCode, std::string& output)> scriptFinishedCallback;
+
+	// Option 2: Wait for script
+	std::mutex requestMutex;
+	std::condition_variable requestConditionVariable;
 
 	virtual ~ScriptInfo() {}
 };
