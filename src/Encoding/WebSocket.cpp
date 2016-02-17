@@ -36,7 +36,6 @@ namespace BaseLib
 {
 WebSocket::WebSocket()
 {
-	_content.reset(new std::vector<char>());
 }
 
 void WebSocket::setFinished()
@@ -47,7 +46,7 @@ void WebSocket::setFinished()
 void WebSocket::reset()
 {
 	_header = Header();
-	_content.reset(new std::vector<char>());
+	_content.clear();
 	_finished = false;
 	_dataProcessingStarted = false;
 	_oldContentSize = 0;
@@ -111,10 +110,10 @@ void WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 
 void WebSocket::processContent(char* buffer, int32_t bufferLength)
 {
-	uint32_t currentContentSize = _content->size() - _oldContentSize;
+	uint32_t currentContentSize = _content.size() - _oldContentSize;
 	if(currentContentSize + bufferLength > 10485760) throw WebSocketException("Data is larger than 10MiB.");
 	if(currentContentSize + bufferLength > _header.length) bufferLength -= (currentContentSize + bufferLength) - _header.length;
-	_content->insert(_content->end(), buffer, buffer + bufferLength);
+	_content.insert(_content.end(), buffer, buffer + bufferLength);
 	if(currentContentSize + bufferLength == _header.length)
 	{
 		if(_header.fin)
@@ -124,7 +123,7 @@ void WebSocket::processContent(char* buffer, int32_t bufferLength)
 		}
 		else
 		{
-			_oldContentSize = _content->size();
+			_oldContentSize = _content.size();
 			_header.parsed = false;
 		}
 	}
@@ -133,9 +132,9 @@ void WebSocket::processContent(char* buffer, int32_t bufferLength)
 void WebSocket::applyMask()
 {
 	if(!_header.hasMask) return;
-	for(uint32_t i = 0; i < _content->size(); i++)
+	for(uint32_t i = 0; i < _content.size(); i++)
 	{
-		_content->operator [](i) ^= _header.maskingKey[i % 4];
+		_content.operator [](i) ^= _header.maskingKey[i % 4];
 	}
 }
 

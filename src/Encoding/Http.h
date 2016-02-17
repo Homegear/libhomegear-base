@@ -31,6 +31,7 @@
 #ifndef HTTP_H_
 #define HTTP_H_
 
+#include "../Variable.h"
 #include "../Exception.h"
 #include "../HelperFunctions/Math.h"
 
@@ -44,13 +45,13 @@
 
 namespace BaseLib
 {
-class HTTPException : public BaseLib::Exception
+class HttpException : public BaseLib::Exception
 {
 public:
-	HTTPException(std::string message) : BaseLib::Exception(message) {}
+	HttpException(std::string message) : BaseLib::Exception(message) {}
 };
 
-class HTTP
+class Http
 {
 public:
 	struct Type
@@ -90,8 +91,8 @@ public:
 		std::map<std::string, std::string> fields;
 	};
 
-	HTTP();
-	virtual ~HTTP();
+	Http();
+	virtual ~Http();
 
 	Type::Enum getType() { return _type; }
 	bool headerIsFinished() { return _header.parsed; }
@@ -104,10 +105,10 @@ public:
 	 * @see _finished
 	 */
 	void setFinished();
-	std::shared_ptr<std::vector<char>> getRawHeader() { return _rawHeader; }
-	std::shared_ptr<std::vector<char>> getContent() { return _content; }
-	uint32_t getContentSize() { return _content->empty() ? 0 : (_finished ? _content->size() - 1 : _content->size()); }
-	Header* getHeader() { return &_header; }
+	std::vector<char>& getRawHeader() { return _rawHeader; }
+	std::vector<char>& getContent() { return _content; }
+	uint32_t getContentSize() { return _content.empty() ? 0 : (_finished ? _content.size() - 1 : _content.size()); }
+	Header& getHeader() { return _header; }
 	void reset();
 
 	/**
@@ -116,8 +117,9 @@ public:
 	 * @param buffer The buffer to parse
 	 * @param bufferLength The size of the buffer
 	 * @param checkForChunkedXML Optional. Only works for XML-like content (content needs to start with '<'). Needed when TransferEncoding is not set to chunked.
+	 * @return The number of processed bytes.
 	 */
-	void process(char* buffer, int32_t bufferLength, bool checkForChunkedXML = false);
+	int32_t process(char* buffer, int32_t bufferLength, bool checkForChunkedXML = false);
 	bool headerProcessingStarted() { return _headerProcessingStarted; }
 	bool dataProcessingStarted() { return _dataProcessingStarted; }
 	static std::string encodeURL(const std::string& url);
@@ -128,16 +130,18 @@ public:
 	std::string getMimeType(std::string extension);
 	std::string getStatusText(int32_t code);
 	static void constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header);
+	PVariable serialize();
+	void unserialize(PVariable data);
 private:
 	bool _contentLengthSet = false;
 	bool _headerProcessingStarted = false;
 	bool _dataProcessingStarted = false;
 	bool _crlf = true;
 	Header _header;
-	std::shared_ptr<std::vector<char>> _rawHeader;
+	std::vector<char> _rawHeader;
 	Type::Enum _type = Type::Enum::none;
-	std::shared_ptr<std::vector<char>> _content;
-	std::shared_ptr<std::vector<char>> _chunk;
+	std::vector<char> _content;
+	std::vector<char> _chunk;
 	bool _finished = false;
 	int32_t _chunkSize = -1;
 	int32_t _endChunkSizeBytes = -1;
@@ -147,10 +151,10 @@ private:
 	std::map <std::string, std::string> _extMimeTypeMap;
 	std::map <int32_t, std::string> _statusCodeMap;
 
-	void processHeader(char** buffer, int32_t& bufferLength);
+	int32_t processHeader(char** buffer, int32_t& bufferLength);
 	void processHeaderField(char* name, uint32_t nameSize, char* value, uint32_t valueSize);
-	void processContent(char* buffer, int32_t bufferLength);
-	void processChunkedContent(char* buffer, int32_t bufferLength);
+	int32_t processContent(char* buffer, int32_t bufferLength);
+	int32_t processChunkedContent(char* buffer, int32_t bufferLength);
 	void readChunkSize(char** buffer, int32_t& bufferLength);
 
 	int32_t strnaicmp(char const *a, char const *b, uint32_t size);

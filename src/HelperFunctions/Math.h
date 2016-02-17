@@ -209,6 +209,17 @@ public:
 	static int32_t getNumber(std::string& s, bool isHex = false);
 
 	/**
+	 * Converts a string (decimal or hexadecimal) to an 64-bit integer.
+	 *
+	 * @see getDouble()
+	 * @see getUnsignedNumber()
+	 * @param s The string to convert.
+	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
+	 * @return Returns the integer or "0" on error.
+	 */
+	static int64_t getNumber64(std::string& s, bool isHex = false);
+
+	/**
 	 * Converts a hexadecimal character to an integer.
 	 *
 	 * @see getDouble()

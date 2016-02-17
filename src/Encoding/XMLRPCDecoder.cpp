@@ -260,6 +260,10 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeParameter(xml_node<>* valueNode)
 		{
 			return std::shared_ptr<Variable>(new Variable(Math::getNumber(value)));
 		}
+		else if(type == "i8")
+		{
+			return std::shared_ptr<Variable>(new Variable(Math::getNumber64(value)));
+		}
 		else if(type == "double")
 		{
 			double number = 0;

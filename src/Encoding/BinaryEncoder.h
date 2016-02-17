@@ -50,10 +50,14 @@ public:
 
 	virtual void encodeInteger(std::vector<char>& encodedData, int32_t integer);
 	virtual void encodeInteger(std::vector<uint8_t>& encodedData, int32_t integer);
+	virtual void encodeInteger64(std::vector<char>& encodedData, int64_t integer);
+	virtual void encodeInteger64(std::vector<uint8_t>& encodedData, int64_t integer);
 	virtual void encodeByte(std::vector<char>& encodedData, uint8_t byte);
 	virtual void encodeByte(std::vector<uint8_t>& encodedData, uint8_t byte);
 	virtual void encodeString(std::vector<char>& packet, std::string& string);
 	virtual void encodeString(std::vector<uint8_t>& encodedData, std::string& string);
+	virtual void encodeBinary(std::vector<char>& packet, std::vector<uint8_t>& data);
+	virtual void encodeBinary(std::vector<uint8_t>& encodedData, std::vector<uint8_t>& data);
 	virtual void encodeBoolean(std::vector<char>& encodedData, bool boolean);
 	virtual void encodeBoolean(std::vector<uint8_t>& encodedData, bool boolean);
 	virtual void encodeFloat(std::vector<char>& encodedData, double floatValue);

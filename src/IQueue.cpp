@@ -57,6 +57,11 @@ IQueue::~IQueue()
 	}
 }
 
+bool IQueue::queueEmpty(int32_t index)
+{
+	return _bufferCount[index] > 0;
+}
+
 void IQueue::startQueue(int32_t index, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy)
 {
 	if(index < 0 || index >= _queueCount) return;

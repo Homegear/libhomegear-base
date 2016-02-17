@@ -163,5 +163,7 @@ protected:
 	void autoConnect();
 };
 
+typedef std::shared_ptr<BaseLib::SocketOperations> PSocketOperations;
+
 }
 #endif

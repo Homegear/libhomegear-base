@@ -34,6 +34,7 @@
 #include "../DeviceDescription/HomegearDevice.h"
 #include "../Database/DatabaseTypes.h"
 #include "../Sockets/RpcClientInfo.h"
+#include "../ScriptEngine/ScriptInfo.h"
 #include "ServiceMessages.h"
 
 #include <string>
@@ -113,7 +114,7 @@ public:
 		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
-		virtual void onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval) = 0;
+		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
 		virtual int32_t onIsAddonClient(int32_t clientID) = 0;
 	};
 	//End event handling
@@ -301,7 +302,7 @@ protected:
 		virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
 		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
-		virtual void raiseRunScript(std::string& script, const std::string& args, bool keepAlive, int32_t interval);
+		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 		virtual int32_t raiseIsAddonClient(int32_t clientID);
 	// }}}
 

@@ -28,24 +28,24 @@
  * files in the program, then also delete it here.
 */
 
-#include "HTTPClient.h"
 #include "../BaseLib.h"
-#include "../Encoding/HTTP.h"
+#include "../Encoding/Http.h"
+#include "HttpClient.h"
 
 namespace BaseLib
 {
 
-HTTPClient::HTTPClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
+HttpClient::HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
 {
 	_bl = baseLib;
 	_hostname = hostname;
-	if(_hostname.empty()) throw HTTPClientException("The provided hostname is empty.");
+	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
 	_socket = std::unique_ptr<BaseLib::SocketOperations>(new BaseLib::SocketOperations(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
 }
 
-HTTPClient::~HTTPClient()
+HttpClient::~HttpClient()
 {
 	_socketMutex.lock();
 	if(_socket)
@@ -56,7 +56,7 @@ HTTPClient::~HTTPClient()
 	_socketMutex.unlock();
 }
 
-void HTTPClient::get(const std::string& path, std::string& data)
+void HttpClient::get(const std::string& path, std::string& data)
 {
 	std::string fixedPath = path;
 	if(fixedPath.empty()) fixedPath = "/";
@@ -65,21 +65,21 @@ void HTTPClient::get(const std::string& path, std::string& data)
 	sendRequest(getRequest, data);
 }
 
-void HTTPClient::sendRequest(const std::string& request, std::string& response, bool responseIsHeaderOnly)
+void HttpClient::sendRequest(const std::string& request, std::string& response, bool responseIsHeaderOnly)
 {
 	response.clear();
-	HTTP http;
+	Http http;
 	sendRequest(request, http, responseIsHeaderOnly);
 	if(http.isFinished() && http.getContentSize() > 0)
 	{
-		std::shared_ptr<std::vector<char>> content = http.getContent();
-		response.insert(response.end(), content->begin(), content->begin() + http.getContentSize());
+		std::vector<char>& content = http.getContent();
+		response.insert(response.end(), content.begin(), content.begin() + http.getContentSize());
 	}
 }
 
-void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool responseIsHeaderOnly)
+void HttpClient::sendRequest(const std::string& request, Http& http, bool responseIsHeaderOnly)
 {
-	if(request.empty()) throw HTTPClientException("Request is empty.");
+	if(request.empty()) throw HttpClientException("Request is empty.");
 
 	_socketMutex.lock();
 	try
@@ -91,7 +91,7 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 		catch(const BaseLib::SocketOperationException& ex)
 		{
 			_socketMutex.unlock();
-			throw HTTPClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
+			throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
 		}
 
 		try
@@ -103,13 +103,13 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 		{
 			if(!_keepAlive) _socket->close();
 			_socketMutex.unlock();
-			throw HTTPClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
+			throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
 		}
 		catch(const BaseLib::SocketOperationException& ex)
 		{
 			if(!_keepAlive) _socket->close();
 			_socketMutex.unlock();
-			throw HTTPClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
+			throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
 		}
 
 		ssize_t receivedBytes;
@@ -127,7 +127,7 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 				if(http.getContentSize() == 0)
 				{
 					_socketMutex.unlock();
-					throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": Connection closed.");
+					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Connection closed.");
 				}
 				else
 				{
@@ -148,14 +148,14 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
 			}
 			catch(const BaseLib::SocketClosedException& ex)
 			{
 				if(http.getContentSize() == 0)
 				{
 					_socketMutex.unlock();
-					throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
 				}
 				else
 				{
@@ -167,7 +167,7 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
 			}
 			if(bufferPos + receivedBytes > bufferMax)
 			{
@@ -181,7 +181,7 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 			if(!http.headerIsFinished() && (!strncmp(buffer, "401", 3) || !strncmp(&buffer[9], "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
 			{
 				_socketMutex.unlock();
-				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.");
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.");
 			}
 			if(!http.headerIsFinished() && !strncmp(&buffer[9], "200", 3) && !strstr(buffer, "\r\n\r\n") && !strstr(buffer, "\n\n"))
 			{
@@ -201,17 +201,17 @@ void HTTPClient::sendRequest(const std::string& request, HTTP& http, bool respon
 					break;
 				}
 			}
-			catch(HTTPException& ex)
+			catch(HttpException& ex)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
 			}
-			if(http.getContentSize() > 10485760 || http.getHeader()->contentLength > 10485760)
+			if(http.getContentSize() > 10485760 || http.getHeader().contentLength > 10485760)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HTTPClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 10 MiB received.");
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 10 MiB received.");
 			}
 
 			if(http.isFinished()) break;

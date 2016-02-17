@@ -248,6 +248,12 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet,
 		else if(type == VariableType::tInteger)
 		{
 			variable->integerValue = _decoder->decodeInteger(packet, position);
+			variable->integerValue64 = variable->integerValue;
+		}
+		else if(type == VariableType::tInteger64)
+		{
+			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
+			variable->integerValue = variable->integerValue64;
 		}
 		else if(type == VariableType::tFloat)
 		{
@@ -256,6 +262,10 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet,
 		else if(type == VariableType::tBoolean)
 		{
 			variable->booleanValue = _decoder->decodeBoolean(packet, position);
+		}
+		else if(type == VariableType::tBinary)
+		{
+			variable->binaryValue = _decoder->decodeBinary(packet, position);
 		}
 		else if(type == VariableType::tArray)
 		{
@@ -296,6 +306,10 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& pack
 		{
 			variable->integerValue = _decoder->decodeInteger(packet, position);
 		}
+		else if(type == VariableType::tInteger64)
+		{
+			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
+		}
 		else if(type == VariableType::tFloat)
 		{
 			variable->floatValue = _decoder->decodeFloat(packet, position);
@@ -303,6 +317,10 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& pack
 		else if(type == VariableType::tBoolean)
 		{
 			variable->booleanValue = _decoder->decodeBoolean(packet, position);
+		}
+		else if(type == VariableType::tBinary)
+		{
+			variable->binaryValue = _decoder->decodeBinary(packet, position);
 		}
 		else if(type == VariableType::tArray)
 		{
@@ -342,6 +360,10 @@ void RPCDecoder::decodeParameter(PVariable& variable, uint32_t& position)
 		{
 			variable->integerValue = _decoder->decodeInteger(variable->binaryValue, position);
 		}
+		else if(variable->type == VariableType::tInteger64)
+		{
+			variable->integerValue64 = _decoder->decodeInteger64(variable->binaryValue, position);
+		}
 		else if(variable->type == VariableType::tFloat)
 		{
 			variable->floatValue = _decoder->decodeFloat(variable->binaryValue, position);
@@ -349,6 +371,10 @@ void RPCDecoder::decodeParameter(PVariable& variable, uint32_t& position)
 		else if(variable->type == VariableType::tBoolean)
 		{
 			variable->booleanValue = _decoder->decodeBoolean(variable->binaryValue, position);
+		}
+		else if(variable->type == VariableType::tBinary)
+		{
+			variable->binaryValue = _decoder->decodeBinary(variable->binaryValue, position);
 		}
 		else if(variable->type == VariableType::tArray)
 		{

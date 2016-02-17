@@ -58,13 +58,15 @@ enum class VariableType
 	tStruct = 0x101,
 	//rpcDate = 0x10,
 	tBase64 = 0x11,
+	tBinary = 0xD0,
+	tInteger64 = 0xD1,
 	tVariant = 0x1111,
-	tBinary = 0x1112
 };
 
 class Variable;
 
 typedef std::shared_ptr<Variable> PVariable;
+typedef std::shared_ptr<PVariable> PPVariable;
 typedef std::pair<std::string, PVariable> StructElement;
 typedef std::map<std::string, PVariable> Struct;
 typedef std::shared_ptr<std::map<std::string, PVariable>> PStruct;
@@ -80,6 +82,7 @@ public:
 	VariableType type;
 	std::string stringValue;
 	int32_t integerValue = 0;
+	int64_t integerValue64 = 0;
 	double floatValue = 0;
 	bool booleanValue = false;
 	PArray arrayValue;
@@ -89,15 +92,19 @@ public:
 	Variable() { type = VariableType::tVoid; arrayValue = PArray(new Array()); structValue = PStruct(new Struct()); }
 	Variable(VariableType variableType) : Variable() { type = variableType; if(type == VariableType::tVariant) type = VariableType::tVoid; }
 	Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; }
-	Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = integer; }
-	Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; }
+	Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = integer; integerValue64 = integer; }
+	Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = integer; }
+	Variable(int64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = integer; }
+	Variable(uint64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
 	Variable(std::string string) : Variable() { type = VariableType::tString; stringValue = string; }
 	Variable(const char* string) : Variable() { type = VariableType::tString; stringValue = std::string(string); }
 	Variable(bool boolean) : Variable() { type = VariableType::tBoolean; booleanValue = boolean; }
 	Variable(double floatVal) : Variable() { type = VariableType::tFloat; floatValue = floatVal; }
 	Variable(PArray arrayVal) : Variable() { type = VariableType::tArray; arrayValue = arrayVal; }
+	Variable(std::vector<std::string>& arrayVal) : Variable() { type = VariableType::tArray; arrayValue->reserve(arrayVal.size()); for(std::vector<std::string>::iterator i = arrayVal.begin(); i != arrayVal.end(); ++i) arrayValue->push_back(PVariable(new Variable(*i))); }
 	Variable(PStruct structVal) : Variable() { type = VariableType::tStruct; structValue = structVal; }
-	Variable(std::vector<uint8_t> binaryVal) : Variable() { type = VariableType::tBinary; binaryValue = binaryVal; }
+	Variable(std::vector<uint8_t>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue = binaryVal; }
+	Variable(std::vector<char>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue.clear(); binaryValue.insert(binaryValue.end(), binaryVal.begin(), binaryVal.end()); }
 	Variable(xml_node<>* node);
 	virtual ~Variable();
 	static PVariable createError(int32_t faultCode, std::string faultString);
