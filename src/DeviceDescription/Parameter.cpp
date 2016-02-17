@@ -427,13 +427,7 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 		if(!value) return;
 		PVariable variable(new Variable());
 		*variable = *value;
-		if(logical->type == ILogical::Type::Enum::tEnum && casts.empty())
-		{
-			LogicalEnumeration* parameter = (LogicalEnumeration*)logical.get();
-			if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
-			if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-		}
-		else if(logical->type == ILogical::Type::Enum::tAction && casts.empty())
+		if(logical->type == ILogical::Type::Enum::tAction && casts.empty())
 		{
 			variable->integerValue = (int32_t)variable->booleanValue;
 		}
@@ -447,7 +441,13 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 		}
 		else
 		{
-			if(logical->type == ILogical::Type::Enum::tFloat)
+			if(logical->type == ILogical::Type::Enum::tEnum)
+			{
+				LogicalEnumeration* parameter = (LogicalEnumeration*)logical.get();
+				if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
+				if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+			}
+			else if(logical->type == ILogical::Type::Enum::tFloat)
 			{
 				if(variable->floatValue == 0 && variable->integerValue != 0) variable->floatValue = variable->integerValue;
 				else if(variable->integerValue == 0 && !variable->stringValue.empty()) variable->floatValue = Math::getDouble(variable->stringValue);
