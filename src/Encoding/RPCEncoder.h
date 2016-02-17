@@ -57,6 +57,8 @@ public:
 	virtual void insertHeader(std::vector<uint8_t>& packet, const RPCHeader& header);
 	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
 	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
+	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<char>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
+	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
 	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
 	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData);
 private:
@@ -72,6 +74,8 @@ private:
 	void encodeVariable(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeInteger(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
 	void encodeInteger(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
+	void encodeInteger64(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
+	void encodeInteger64(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeFloat(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
 	void encodeFloat(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeBoolean(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
@@ -82,6 +86,8 @@ private:
 	void encodeString(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeBase64(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
 	void encodeBase64(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
+	void encodeBinary(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
+	void encodeBinary(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeVoid(std::vector<char>& packet);
 	void encodeVoid(std::vector<uint8_t>& packet);
 	void encodeStruct(std::vector<char>& packet, std::shared_ptr<Variable>& variable);

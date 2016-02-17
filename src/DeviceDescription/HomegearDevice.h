@@ -60,7 +60,7 @@ public:
 	HomegearDevice(BaseLib::Obj* baseLib, int32_t family);
 	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, xml_node<>* node);
 	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, std::string xmlFilename, bool& oldFormat);
-	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, std::vector<char> xml);
+	HomegearDevice(BaseLib::Obj* baseLib, int32_t family, std::string xmlFilename, std::vector<char>& xml);
 	virtual ~HomegearDevice();
 
 	bool loaded() { return _loaded; }
@@ -99,6 +99,8 @@ public:
 	// }}}
 
 	// {{{ Helpers
+	void setPath(std::string& value);
+	std::string getPath();
 	int32_t getDynamicChannelCount();
 	void setDynamicChannelCount(int32_t value);
 	PSupportedDevice getType(Systems::LogicalDeviceType deviceType);
@@ -110,11 +112,12 @@ protected:
 	bool _loaded = false;
 
 	// {{{ Helpers
+	std::string _path;
 	int32_t _dynamicChannelCount = -1;
 	// }}}
 
 	void load(std::string xmlFilename, bool& oldFormat);
-	void load(std::vector<char> xml);
+	void load(std::string xmlFilename, std::vector<char>& xml);
 	void postProcessFunction(PFunction& function, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters);
 	void parseXML(xml_node<>* node);
 	void postLoad();

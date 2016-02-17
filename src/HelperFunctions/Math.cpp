@@ -244,6 +244,15 @@ int32_t Math::getNumber(std::string& s, bool isHex)
 	return number;
 }
 
+int64_t Math::getNumber64(std::string& s, bool isHex)
+{
+	int32_t xpos = s.find('x');
+	int64_t number = 0;
+	if(xpos == -1 && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
+	else try { number = std::stoll(s, 0, 16); } catch(...) {}
+	return number;
+}
+
 int32_t Math::getNumber(char hexChar)
 {
 	if(_hexMap.find(hexChar) == _hexMap.end()) return 0;

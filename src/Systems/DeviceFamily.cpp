@@ -115,9 +115,9 @@ void DeviceFamily::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
 }
 
-void DeviceFamily::raiseRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
+void DeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(script, peerId, args, keepAlive, interval);
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
 
 int32_t DeviceFamily::raiseIsAddonClient(int32_t clientId)
@@ -174,9 +174,9 @@ void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std
 	raiseEvent(peerID, channel, variables, values);
 }
 
-void DeviceFamily::onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
+void DeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
-	raiseRunScript(script, peerId, args, keepAlive, interval);
+	raiseRunScript(scriptInfo, wait);
 }
 
 int32_t DeviceFamily::onIsAddonClient(int32_t clientId)

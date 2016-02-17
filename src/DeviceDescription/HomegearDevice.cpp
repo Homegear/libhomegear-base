@@ -37,6 +37,16 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
+void HomegearDevice::setPath(std::string& value)
+{
+	_path = value;
+}
+
+std::string HomegearDevice::getPath()
+{
+	return _path;
+}
+
 int32_t HomegearDevice::getDynamicChannelCount()
 {
 	return _dynamicChannelCount;
@@ -126,11 +136,11 @@ HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std:
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::vector<char> xml) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib, deviceFamily)
 {
 	try
 	{
-		load(xml);
+		load(xmlFilename, xml);
 	}
 	catch(const std::exception& ex)
     {
@@ -150,7 +160,7 @@ HomegearDevice::~HomegearDevice() {
 
 }
 
-void HomegearDevice::load(std::vector<char> xml)
+void HomegearDevice::load(std::string xmlFilename, std::vector<char>& xml)
 {
 	if(xml.empty()) return;
 	if(xml.at(xml.size() - 1) != '\0')
@@ -161,6 +171,7 @@ void HomegearDevice::load(std::vector<char> xml)
 	xml_document<> doc;
 	try
 	{
+		_path = xmlFilename;
 		doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml[0]);
 		if(!doc.first_node("homegearDevice"))
 		{
@@ -193,6 +204,7 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 	xml_document<> doc;
 	try
 	{
+		_path = xmlFilename;
 		std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
 		if(fileStream)
 		{

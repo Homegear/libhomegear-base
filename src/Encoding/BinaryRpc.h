@@ -28,60 +28,65 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef SSDP_H_
-#define SSDP_H_
+#ifndef BINARYRPC_H_
+#define BINARYRPC_H_
 
-#include "../Encoding/Http.h"
 #include "../Variable.h"
-
-#include <string>
-#include <vector>
-#include <memory>
-#include <set>
+#include "../Exception.h"
 
 namespace BaseLib
 {
 
 class Obj;
-class FileDescriptor;
 
-class SSDPInfo
+namespace Rpc
+{
+
+class BinaryRpcException : public BaseLib::Exception
 {
 public:
-	SSDPInfo(std::string ip, PVariable info);
-	virtual ~SSDPInfo();
-	std::string ip();
-	const PVariable info();
-private:
-	std::string _ip;
-	PVariable _info;
+	BinaryRpcException(std::string message) : BaseLib::Exception(message) {}
 };
 
-class SSDP
+class BinaryRpc
 {
 public:
-	SSDP(BaseLib::Obj* baseLib);
-	virtual ~SSDP();
+	enum class Type
+	{
+		unknown,
+		request,
+		response
+	};
+
+	BinaryRpc(BaseLib::Obj* bl);
+	virtual ~BinaryRpc();
+
+	Type getType() { return _type; }
+	bool hasHeader() { return _hasHeader; }
+	bool processingStarted() { return _processingStarted; }
+	bool isFinished() { return _finished; }
+	std::vector<char>& getData() { return _data; }
+
+	void reset();
 
 	/**
-	 * Searches for SSDP devices and returns the IPv4 addresses.
+	 * Parses binary RPC data from a buffer.
 	 *
-	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
-	 * @param[in] timeout The time to wait for responses
-	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
+	 * @param buffer The buffer to parse
+	 * @param bufferLength The maximum number of bytes to process.
+	 * @return The number of processed bytes.
 	 */
-	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SSDPInfo>& devices);
+	int32_t process(char* buffer, int32_t bufferLength);
 private:
-	BaseLib::Obj* _bl = nullptr;
-	std::string _address;
-	int32_t _port = 1900;
-
-	void getAddress();
-	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
-	void processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations);
-	void getDeviceInfo(std::set<std::string>& locations, std::vector<SSDPInfo>& devices);
-	std::shared_ptr<FileDescriptor> getSocketDescriptor();
+	Obj* _bl = nullptr;
+	bool _hasHeader = false;
+	bool _processingStarted = false;
+	bool _finished = false;
+	Type _type = Type::unknown;
+	uint32_t _headerSize = 0;
+	uint32_t _dataSize = 0;
+	std::vector<char> _data;
 };
-
+}
 }
 #endif

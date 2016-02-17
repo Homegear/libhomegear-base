@@ -136,6 +136,92 @@ void RPCEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list
     }
 }
 
+void RPCEncoder::encodeRequest(std::string methodName, PArray parameters, std::vector<char>& encodedData, std::shared_ptr<RPCHeader> header)
+{
+	//The "Bin", the type byte after that and the length itself are not part of the length
+	try
+	{
+		encodedData.clear();
+		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
+		uint32_t headerSize = 0;
+		if(header)
+		{
+			headerSize = encodeHeader(encodedData, *header) + 4;
+			if(headerSize > 0) encodedData.at(3) |= 0x40;
+		}
+		_encoder->encodeString(encodedData, methodName);
+		if(!parameters) _encoder->encodeInteger(encodedData, 0);
+		else _encoder->encodeInteger(encodedData, parameters->size());
+		if(parameters)
+		{
+			for(Array::iterator i = parameters->begin(); i != parameters->end(); ++i)
+			{
+				encodeVariable(encodedData, (*i));
+			}
+		}
+
+		uint32_t dataSize = encodedData.size() - 4 - headerSize;
+		char result[4];
+		_bl->hf.memcpyBigEndian(result, (char*)&dataSize, 4);
+		encodedData.insert(encodedData.begin() + 4 + headerSize, result, result + 4);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void RPCEncoder::encodeRequest(std::string methodName, PArray parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RPCHeader> header)
+{
+	//The "Bin", the type byte after that and the length itself are not part of the length
+	try
+	{
+		encodedData.clear();
+		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
+		uint32_t headerSize = 0;
+		if(header)
+		{
+			headerSize = encodeHeader(encodedData, *header) + 4;
+			if(headerSize > 0) encodedData.at(3) |= 0x40;
+		}
+		_encoder->encodeString(encodedData, methodName);
+		if(!parameters) _encoder->encodeInteger(encodedData, 0);
+		else _encoder->encodeInteger(encodedData, parameters->size());
+		if(parameters)
+		{
+			for(Array::iterator i = parameters->begin(); i != parameters->end(); ++i)
+			{
+				encodeVariable(encodedData, (*i));
+			}
+		}
+
+		uint32_t dataSize = encodedData.size() - 4 - headerSize;
+		char result[4];
+		_bl->hf.memcpyBigEndian(result, (char*)&dataSize, 4);
+		encodedData.insert(encodedData.begin() + 4 + headerSize, result, result + 4);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 void RPCEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData)
 {
 	//The "Bin", the type byte after that and the length itself are not part of the length
@@ -279,6 +365,10 @@ void RPCEncoder::encodeVariable(std::vector<char>& packet, std::shared_ptr<Varia
 		{
 			encodeInteger(packet, variable);
 		}
+		else if(variable->type == VariableType::tInteger64)
+		{
+			encodeInteger64(packet, variable);
+		}
 		else if(variable->type == VariableType::tFloat)
 		{
 			encodeFloat(packet, variable);
@@ -294,6 +384,10 @@ void RPCEncoder::encodeVariable(std::vector<char>& packet, std::shared_ptr<Varia
 		else if(variable->type == VariableType::tBase64)
 		{
 			encodeBase64(packet, variable);
+		}
+		else if(variable->type == VariableType::tBinary)
+		{
+			encodeBinary(packet, variable);
 		}
 		else if(variable->type == VariableType::tStruct)
 		{
@@ -331,6 +425,10 @@ void RPCEncoder::encodeVariable(std::vector<uint8_t>& packet, std::shared_ptr<Va
 		{
 			encodeInteger(packet, variable);
 		}
+		else if(variable->type == VariableType::tInteger64)
+		{
+			encodeInteger64(packet, variable);
+		}
 		else if(variable->type == VariableType::tFloat)
 		{
 			encodeFloat(packet, variable);
@@ -346,6 +444,10 @@ void RPCEncoder::encodeVariable(std::vector<uint8_t>& packet, std::shared_ptr<Va
 		else if(variable->type == VariableType::tBase64)
 		{
 			encodeBase64(packet, variable);
+		}
+		else if(variable->type == VariableType::tBinary)
+		{
+			encodeBinary(packet, variable);
 		}
 		else if(variable->type == VariableType::tStruct)
 		{
@@ -498,6 +600,18 @@ void RPCEncoder::encodeInteger(std::vector<uint8_t>& packet, std::shared_ptr<Var
 	_encoder->encodeInteger(packet, variable->integerValue);
 }
 
+void RPCEncoder::encodeInteger64(std::vector<char>& packet, std::shared_ptr<Variable>& variable)
+{
+	encodeType(packet, VariableType::tInteger64);
+	_encoder->encodeInteger64(packet, variable->integerValue64);
+}
+
+void RPCEncoder::encodeInteger64(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable)
+{
+	encodeType(packet, VariableType::tInteger64);
+	_encoder->encodeInteger64(packet, variable->integerValue64);
+}
+
 void RPCEncoder::encodeFloat(std::vector<char>& packet, std::shared_ptr<Variable>& variable)
 {
 	try
@@ -640,6 +754,56 @@ void RPCEncoder::encodeBase64(std::vector<uint8_t>& packet, std::shared_ptr<Vari
 		if(variable->stringValue.size() > 0)
 		{
 			packet.insert(packet.end(), variable->stringValue.begin(), variable->stringValue.end());
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void RPCEncoder::encodeBinary(std::vector<char>& packet, std::shared_ptr<Variable>& variable)
+{
+	try
+	{
+		encodeType(packet, VariableType::tBinary);
+		_encoder->encodeInteger(packet, variable->binaryValue.size());
+		if(variable->binaryValue.size() > 0)
+		{
+			packet.insert(packet.end(), variable->binaryValue.begin(), variable->binaryValue.end());
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void RPCEncoder::encodeBinary(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable)
+{
+	try
+	{
+		encodeType(packet, VariableType::tBinary);
+		_encoder->encodeInteger(packet, variable->binaryValue.size());
+		if(variable->binaryValue.size() > 0)
+		{
+			packet.insert(packet.end(), variable->binaryValue.begin(), variable->binaryValue.end());
 		}
 	}
 	catch(const std::exception& ex)

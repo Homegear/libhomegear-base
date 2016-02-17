@@ -78,6 +78,7 @@ Variable& Variable::operator=(const Variable& rhs)
 	type = rhs.type;
 	stringValue = rhs.stringValue;
 	integerValue = rhs.integerValue;
+	integerValue64 = rhs.integerValue64;
 	floatValue = rhs.floatValue;
 	booleanValue = rhs.booleanValue;
 	binaryValue = rhs.binaryValue;
@@ -101,6 +102,7 @@ bool Variable::operator==(const Variable& rhs)
 	if(type != rhs.type) return false;
 	if(type == VariableType::tBoolean) return booleanValue == rhs.booleanValue;
 	if(type == VariableType::tInteger) return integerValue == rhs.integerValue;
+	if(type == VariableType::tInteger64) return integerValue64 == rhs.integerValue64;
 	if(type == VariableType::tString) return stringValue == rhs.stringValue;
 	if(type == VariableType::tFloat) return floatValue == rhs.floatValue;
 	if(type == VariableType::tArray)
@@ -138,6 +140,8 @@ bool Variable::operator==(const Variable& rhs)
 bool Variable::operator<(const Variable& rhs)
 {
 	if(type == VariableType::tBoolean) return booleanValue < rhs.booleanValue;
+	if(type == VariableType::tInteger) return integerValue < rhs.integerValue;
+	if(type == VariableType::tInteger64) return integerValue64 < rhs.integerValue64;
 	if(type == VariableType::tString) return stringValue < rhs.stringValue;
 	if(type == VariableType::tFloat) return floatValue < rhs.floatValue;
 	if(type == VariableType::tArray)
@@ -155,6 +159,8 @@ bool Variable::operator<(const Variable& rhs)
 bool Variable::operator<=(const Variable& rhs)
 {
 	if(type == VariableType::tBoolean) return booleanValue <= rhs.booleanValue;
+	if(type == VariableType::tInteger) return integerValue <= rhs.integerValue;
+	if(type == VariableType::tInteger64) return integerValue64 <= rhs.integerValue64;
 	if(type == VariableType::tString) return stringValue <= rhs.stringValue;
 	if(type == VariableType::tFloat) return floatValue <= rhs.floatValue;
 	if(type == VariableType::tArray)
@@ -172,6 +178,8 @@ bool Variable::operator<=(const Variable& rhs)
 bool Variable::operator>(const Variable& rhs)
 {
 	if(type == VariableType::tBoolean) return booleanValue > rhs.booleanValue;
+	if(type == VariableType::tInteger) return integerValue > rhs.integerValue;
+	if(type == VariableType::tInteger64) return integerValue64 > rhs.integerValue64;
 	if(type == VariableType::tString) return stringValue > rhs.stringValue;
 	if(type == VariableType::tFloat) return floatValue > rhs.floatValue;
 	if(type == VariableType::tArray)
@@ -189,6 +197,8 @@ bool Variable::operator>(const Variable& rhs)
 bool Variable::operator>=(const Variable& rhs)
 {
 	if(type == VariableType::tBoolean) return booleanValue >= rhs.booleanValue;
+	if(type == VariableType::tInteger) return integerValue >= rhs.integerValue;
+	if(type == VariableType::tInteger64) return integerValue64 >= rhs.integerValue64;
 	if(type == VariableType::tString) return stringValue >= rhs.stringValue;
 	if(type == VariableType::tFloat) return floatValue >= rhs.floatValue;
 	if(type == VariableType::tArray)
@@ -221,6 +231,10 @@ void Variable::print()
 	else if(type == VariableType::tInteger)
 	{
 		std::cout << "(Integer) " << integerValue << std::endl;
+	}
+	else if(type == VariableType::tInteger64)
+	{
+		std::cout << "(Integer64) " << integerValue64 << std::endl;
 	}
 	else if(type == VariableType::tFloat)
 	{
@@ -265,6 +279,10 @@ void Variable::print(std::shared_ptr<Variable> variable, std::string indent)
 	{
 		std::cout << indent << "(Integer) " << variable->integerValue << std::endl;
 	}
+	else if(variable->type == VariableType::tInteger64)
+	{
+		std::cout << indent << "(Integer64) " << variable->integerValue64 << std::endl;
+	}
 	else if(variable->type == VariableType::tFloat)
 	{
 		std::cout << indent << "(Float) " << variable->floatValue << std::endl;
@@ -291,7 +309,7 @@ void Variable::print(std::shared_ptr<Variable> variable, std::string indent)
 	}
 	else if(variable->type == VariableType::tBinary)
 	{
-		std::cout << indent << "(Binary) " << HelperFunctions::getHexString(binaryValue) << std::endl;
+		std::cout << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << std::endl;
 	}
 	else
 	{
@@ -392,6 +410,7 @@ PVariable Variable::fromString(std::string& value, VariableType type)
 	}
 	else if(type == VariableType::tString) return std::shared_ptr<Variable>(new Variable(value));
 	else if(type == VariableType::tInteger) return std::shared_ptr<Variable>(new Variable(Math::getNumber(value)));
+	else if(type == VariableType::tInteger64) return std::shared_ptr<Variable>(new Variable(Math::getNumber64(value)));
 	else if(type == VariableType::tFloat) return std::shared_ptr<Variable>(new Variable(Math::getDouble(value)));
 	else if(type == VariableType::tBase64)
 	{
@@ -416,6 +435,8 @@ std::string Variable::toString()
 		return std::to_string(floatValue);
 	case VariableType::tInteger:
 		return std::to_string(integerValue);
+	case VariableType::tInteger64:
+		return std::to_string(integerValue64);
 	case VariableType::tString:
 		return stringValue;
 	case VariableType::tStruct:
@@ -446,6 +467,8 @@ std::string Variable::getTypeString(VariableType type)
 		return "double";
 	case VariableType::tInteger:
 		return "i4";
+	case VariableType::tInteger64:
+		return "i8";
 	case VariableType::tString:
 		return "string";
 	case VariableType::tStruct:

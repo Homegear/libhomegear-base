@@ -99,9 +99,9 @@ void ICentral::dispose(bool wait)
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onEvent(peerId, channel, variables, values);
 	}
 
-	void ICentral::raiseRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
+	void ICentral::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 	{
-		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(script, peerId, args, keepAlive, interval);
+		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 	}
 
 	int32_t ICentral::raiseIsAddonClient(int32_t clientId)
@@ -137,9 +137,9 @@ void ICentral::dispose(bool wait)
 		raiseEvent(peerId, channel, variables, values);
 	}
 
-	void ICentral::onRunScript(std::string& script, uint64_t peerId, const std::string& args, bool keepAlive, int32_t interval)
+	void ICentral::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 	{
-		raiseRunScript(script, peerId, args, keepAlive, interval);
+		raiseRunScript(scriptInfo, wait);
 	}
 
 	int32_t ICentral::onIsAddonClient(int32_t clientId)

@@ -35,6 +35,60 @@ namespace BaseLib
 {
 namespace Rpc
 {
+PVariable ServerInfo::Info::serialize()
+{
+	if(serializedInfo) return serializedInfo;
+
+	serializedInfo.reset(new Variable(VariableType::tArray));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(index)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(name)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(interface)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(port)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(ssl)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable((int32_t)authType)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(validUsers.size())));
+	for(std::vector<std::string>::iterator i = validUsers.begin(); i != validUsers.end(); ++i)
+	{
+		serializedInfo->arrayValue->push_back(PVariable(new Variable(*i)));
+	}
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(diffieHellmanKeySize)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(contentPath)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(webServer)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(webSocket)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable((int32_t)websocketAuthType)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(xmlrpcServer)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(jsonrpcServer)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(redirectTo)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(address)));
+	return serializedInfo;
+}
+
+void ServerInfo::Info::unserialize(PVariable data)
+{
+	if(!data) return;
+	int32_t pos = 0;
+	index = data->arrayValue->at(pos)->integerValue; pos++;
+	name = data->arrayValue->at(pos)->stringValue; pos++;
+	interface = data->arrayValue->at(pos)->stringValue; pos++;
+	port = data->arrayValue->at(pos)->integerValue; pos++;
+	ssl = data->arrayValue->at(pos)->booleanValue; pos++;
+	authType = (AuthType)data->arrayValue->at(pos)->integerValue; pos++;
+	int32_t validUsersSize = data->arrayValue->at(pos)->integerValue; pos++;
+	for(int32_t i = 0; i < validUsersSize; i++)
+	{
+		validUsers.push_back(data->arrayValue->at(pos)->stringValue); pos++;
+	}
+	diffieHellmanKeySize = data->arrayValue->at(pos)->integerValue; pos++;
+	contentPath = data->arrayValue->at(pos)->stringValue; pos++;
+	webServer = data->arrayValue->at(pos)->booleanValue; pos++;
+	webSocket = data->arrayValue->at(pos)->booleanValue; pos++;
+	websocketAuthType = (AuthType)data->arrayValue->at(pos)->integerValue; pos++;
+	xmlrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
+	jsonrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
+	redirectTo = data->arrayValue->at(pos)->stringValue; pos++;
+	address = data->arrayValue->at(pos)->stringValue;
+}
+
 ServerInfo::ServerInfo()
 {
 }
@@ -228,5 +282,6 @@ void ServerInfo::load(std::string filename)
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
+
 }
 }

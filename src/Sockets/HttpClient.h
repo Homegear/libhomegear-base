@@ -34,7 +34,7 @@
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "SocketOperations.h"
-#include "../Encoding/HTTP.h"
+#include "../Encoding/Http.h"
 
 namespace BaseLib
 {
@@ -43,10 +43,10 @@ namespace BaseLib
  *
  * @see HTTPClient
  */
-class HTTPClientException : public Exception
+class HttpClientException : public Exception
 {
 public:
-	HTTPClientException(std::string message) : Exception(message) {}
+	HttpClientException(std::string message) : Exception(message) {}
 };
 
 /**
@@ -54,7 +54,7 @@ public:
  *
  * @see HTTPClientException
  */
-class HTTPClient
+class HttpClient
 {
 public:
 	/**
@@ -68,12 +68,12 @@ public:
 	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
 	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
 	 */
-	HTTPClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true);
+	HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true);
 
 	/**
 	 * Destructor
 	 */
-	virtual ~HTTPClient();
+	virtual ~HttpClient();
 
 	/**
 	 * Returns "true" if the socket is connected, otherwise "false".
@@ -100,7 +100,7 @@ public:
 	 * @param[in] request The HTTP request including the full header.
 	 * @param[out] response The HTTP response.
 	 */
-	void sendRequest(const std::string& request, HTTP& response, bool responseIsHeaderOnly = false);
+	void sendRequest(const std::string& request, Http& response, bool responseIsHeaderOnly = false);
 
 	/*
 	 * Sends an HTTP GET request and returns the response. This method can be used to download files.

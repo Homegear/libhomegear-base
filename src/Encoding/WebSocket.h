@@ -78,9 +78,9 @@ public:
 	 */
 	void setFinished();
 
-	std::shared_ptr<std::vector<char>> getContent() { return _content; }
-	uint32_t getContentSize() { return _content->size(); }
-	Header* getHeader() { return &_header; }
+	std::vector<char>& getContent() { return _content; }
+	uint32_t getContentSize() { return _content.size(); }
+	Header& getHeader() { return _header; }
 	void reset();
 
 	/**
@@ -110,7 +110,7 @@ public:
 	static void encodeClose(std::vector<char>& output);
 private:
 	Header _header;
-	std::shared_ptr<std::vector<char>> _content;
+	std::vector<char> _content;
 	uint32_t _oldContentSize = 0;
 	bool _finished = false;
 	bool _dataProcessingStarted = false;

@@ -31,6 +31,8 @@
 #ifndef SERVERINFO_H_
 #define SERVERINFO_H_
 
+#include "../Variable.h"
+
 #include <memory>
 #include <iostream>
 #include <string>
@@ -78,6 +80,10 @@ public:
 
 		//Not settable
 		std::string address;
+		PVariable serializedInfo;
+
+		PVariable serialize();
+		void unserialize(PVariable data);
 	};
 
 	ServerInfo();

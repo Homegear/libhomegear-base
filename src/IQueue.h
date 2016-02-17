@@ -56,6 +56,7 @@ public:
 	void stopQueue(int32_t index);
 	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry);
 	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
+	bool queueEmpty(int32_t index);
 private:
 	Obj* _bl = nullptr;
 	static const int32_t _queueCount = 2;

@@ -103,6 +103,54 @@ int32_t BinaryDecoder::decodeInteger(std::vector<uint8_t>& encodedData, uint32_t
 	return integer;
 }
 
+int64_t BinaryDecoder::decodeInteger64(std::vector<char>& encodedData, uint32_t& position)
+{
+	int64_t integer = 0;
+	try
+	{
+		if(position + 8 > encodedData.size()) return 0;
+		_bl->hf.memcpyBigEndian((char*)&integer, &encodedData.at(position), 8);
+		position += 8;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+	return integer;
+}
+
+int64_t BinaryDecoder::decodeInteger64(std::vector<uint8_t>& encodedData, uint32_t& position)
+{
+	int64_t integer = 0;
+	try
+	{
+		if(position + 8 > encodedData.size()) return 0;
+		_bl->hf.memcpyBigEndian((char*)&integer, (char*)&encodedData.at(position), 8);
+		position += 8;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+	return integer;
+}
+
 uint8_t BinaryDecoder::decodeByte(std::vector<char>& encodedData, uint32_t& position)
 {
 	uint8_t byte = 0;
@@ -199,6 +247,58 @@ std::string BinaryDecoder::decodeString(std::vector<uint8_t>& encodedData, uint3
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return "";
+}
+
+std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<char>& encodedData, uint32_t& position)
+{
+	std::vector<uint8_t> data;
+	try
+	{
+		int32_t length = decodeInteger(encodedData, position);
+		if(position + length > encodedData.size() || length == 0) return data;
+		data.insert(data.end(), &encodedData.at(position), &encodedData.at(position) + length);
+		position += length;
+		return data;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return data;
+}
+
+std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<uint8_t>& encodedData, uint32_t& position)
+{
+	std::vector<uint8_t> data;
+	try
+	{
+		int32_t length = decodeInteger(encodedData, position);
+		if(position + length > encodedData.size() || length == 0) return data;
+		data.insert(data.end(), &encodedData.at(position), &encodedData.at(position) + length);
+		position += length;
+		return data;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return data;
 }
 
 double BinaryDecoder::decodeFloat(std::vector<char>& encodedData, uint32_t& position)

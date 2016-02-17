@@ -36,9 +36,10 @@
 #include "Encoding/XMLRPCEncoder.h"
 #include "Encoding/RPCDecoder.h"
 #include "Encoding/RPCEncoder.h"
+#include "Encoding/BinaryRpc.h"
 #include "Encoding/JsonDecoder.h"
 #include "Encoding/JsonEncoder.h"
-#include "Encoding/HTTP.h"
+#include "Encoding/Http.h"
 #include "Encoding/Html.h"
 #include "Encoding/WebSocket.h"
 #include "Managers/SerialDeviceManager.h"
@@ -56,7 +57,6 @@
 #include "DeviceDescription/Devices.h"
 #include "ScriptEngine/ScriptInfo.h"
 #include "Settings/Settings.h"
-#include "Sockets/HTTPClient.h"
 #include "Sockets/SocketOperations.h"
 #include "Sockets/IWebserverEventSink.h"
 #include "Sockets/ServerInfo.h"
@@ -69,6 +69,7 @@
 #include "SSDP/SSDP.h"
 #include "IQueue.h"
 #include "ITimedQueue.h"
+#include "Sockets/HttpClient.h"
 #include "StateGuard.h"
 
 namespace BaseLib

@@ -889,8 +889,8 @@ StringReplace::StringReplace(BaseLib::Obj* baseLib, xml_node<>* node, Parameter*
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
-		if(name == "search") search = HTTP::decodeURL(value);
-		else if(name == "replace") replace = HTTP::decodeURL(value);
+		if(name == "search") search = Http::decodeURL(value);
+		else if(name == "replace") replace = Http::decodeURL(value);
 		else _bl->out.printWarning("Warning: Unknown node in \"stringReplace\": " + name);
 	}
 }

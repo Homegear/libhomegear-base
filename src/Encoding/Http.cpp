@@ -28,26 +28,26 @@
  * files in the program, then also delete it here.
 */
 
-#include "HTTP.h"
+#include "Http.h"
 #include "../HelperFunctions/Math.h"
 #include "../HelperFunctions/HelperFunctions.h"
 
 namespace BaseLib
 {
 
-std::string HTTP::getMimeType(std::string extension)
+std::string Http::getMimeType(std::string extension)
 {
 	if(_extMimeTypeMap.find(extension) != _extMimeTypeMap.end()) return _extMimeTypeMap[extension];
 	return "";
 }
 
-std::string HTTP::getStatusText(int32_t code)
+std::string Http::getStatusText(int32_t code)
 {
 	if(_statusCodeMap.find(code) != _statusCodeMap.end()) return _statusCodeMap[code];
 	return "";
 }
 
-void HTTP::constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header)
+void Http::constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header)
 {
 	std::string additionalHeader;
 	additionalHeader.reserve(1024);
@@ -70,12 +70,8 @@ void HTTP::constructHeader(uint32_t contentLength, std::string contentType, int3
 	header.append("Content-Length: ").append(std::to_string(contentLength)).append("\r\n\r\n");
 }
 
-HTTP::HTTP()
+Http::Http()
 {
-	_content.reset(new std::vector<char>());
-	_chunk.reset(new std::vector<char>());
-	_rawHeader.reset(new std::vector<char>());
-
 	_extMimeTypeMap = {
 		{"html", "text/html"},
 		{"htm", "text/html"},
@@ -189,23 +185,55 @@ HTTP::HTTP()
 	};
 }
 
-HTTP::~HTTP()
+Http::~Http()
 {
 	_extMimeTypeMap.clear();
 	_statusCodeMap.clear();
 }
 
-void HTTP::process(char* buffer, int32_t bufferLength, bool checkForChunkedXML)
+PVariable Http::serialize()
 {
-	if(bufferLength <= 0 || _finished) return;
+	PVariable data(new Variable(VariableType::tArray));
+	data->arrayValue->push_back(PVariable(new Variable((int32_t)_type)));						// 0
+	data->arrayValue->push_back(PVariable(new Variable(_finished)));							// 1
+	data->arrayValue->push_back(PVariable(new Variable(_headerProcessingStarted)));				// 2
+	data->arrayValue->push_back(PVariable(new Variable(_dataProcessingStarted)));				// 3
+	data->arrayValue->push_back(PVariable(new Variable(_content)));								// 4
+	data->arrayValue->push_back(PVariable(new Variable(_rawHeader)));							// 5
+	data->arrayValue->push_back(PVariable(new Variable(_header.remoteAddress)));				// 6
+	data->arrayValue->push_back(PVariable(new Variable(_header.remotePort)));					// 7
+	return data;
+}
+
+void Http::unserialize(PVariable data)
+{
+	if(!data) return;
+	_type = (Type::Enum)data->arrayValue->at(0)->integerValue;
+	_finished = data->arrayValue->at(1)->booleanValue;
+	_headerProcessingStarted = data->arrayValue->at(2)->booleanValue;
+	_dataProcessingStarted = data->arrayValue->at(3)->booleanValue;
+	_content.insert(_content.end(), data->arrayValue->at(4)->binaryValue.begin(), data->arrayValue->at(4)->binaryValue.end());
+	_rawHeader.insert(_rawHeader.end(), data->arrayValue->at(5)->binaryValue.begin(), data->arrayValue->at(5)->binaryValue.end());
+	_header.remoteAddress = data->arrayValue->at(6)->stringValue;
+	_header.remotePort = data->arrayValue->at(7)->integerValue;
+
+	int32_t headerSize = _rawHeader.size();
+	char* pHeader = &(_rawHeader.at(0));
+	processHeader(&pHeader, headerSize);
+}
+
+int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXML)
+{
+	if(bufferLength <= 0 || _finished) return 0;
 	_headerProcessingStarted = true;
-	if(!_header.parsed) processHeader(&buffer, bufferLength);
-	if(!_header.parsed) return;
+	int32_t processedBytes = 0;
+	if(!_header.parsed) processedBytes = processHeader(&buffer, bufferLength);
+	if(!_header.parsed) return processedBytes;
 	if(_header.method == "GET" || _header.method == "M-SEARCH" || (_header.method == "NOTIFY" && _header.contentLength == 0) || (_contentLengthSet && _header.contentLength == 0))
 	{
 		_dataProcessingStarted = true;
 		setFinished();
-		return;
+		return processedBytes;
 	}
 	if(!_dataProcessingStarted)
 	{
@@ -214,23 +242,24 @@ void HTTP::process(char* buffer, int32_t bufferLength, bool checkForChunkedXML)
 			if(bufferLength + _partialChunkSize.length() < 8) //Not enough data.
 			{
 				_partialChunkSize.append(buffer, bufferLength);
-				return;
+				return processedBytes + bufferLength;
 			}
 			std::string chunk = _partialChunkSize + std::string(buffer, bufferLength);
 			int32_t pos = chunk.find('<');
 			if(pos != (signed)std::string::npos && pos != 0)
 			{
-				if(BaseLib::Math::isNumber(BaseLib::HelperFunctions::trim(chunk), true)) _header.transferEncoding = BaseLib::HTTP::TransferEncoding::chunked;
+				if(BaseLib::Math::isNumber(BaseLib::HelperFunctions::trim(chunk), true)) _header.transferEncoding = BaseLib::Http::TransferEncoding::chunked;
 			}
 		}
-		if(_header.contentLength > 10485760) throw HTTPException("Data is larger than 10MiB.");
-		_content->reserve(_header.contentLength);
+		if(_header.contentLength > 10485760) throw HttpException("Data is larger than 10MiB.");
+		_content.reserve(_header.contentLength);
 	}
 	_dataProcessingStarted = true;
-	if(_header.transferEncoding & TransferEncoding::Enum::chunked) processChunkedContent(buffer, bufferLength); else processContent(buffer, bufferLength);
+	if(_header.transferEncoding & TransferEncoding::Enum::chunked) processedBytes += processChunkedContent(buffer, bufferLength); else processedBytes += processContent(buffer, bufferLength);
+	return processedBytes;
 }
 
-void HTTP::processHeader(char** buffer, int32_t& bufferLength)
+int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 {
 	char* end = strstr(*buffer, "\r\n\r\n");
 	uint32_t headerSize = 0;
@@ -240,11 +269,11 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 		end = strstr(*buffer, "\n\n");
 		if(!end || ((end + 1) - *buffer) + 1 > bufferLength)
 		{
-			if(_rawHeader->size() > 2 && (
-					(_rawHeader->back() == '\n' && **buffer == '\n') ||
-					(_rawHeader->back() == '\r' && **buffer == '\n' && *(*buffer + 1) == '\r') ||
-					(_rawHeader->at(_rawHeader->size() - 2) == '\r' && _rawHeader->back() == '\n' && **buffer == '\r') ||
-					(_rawHeader->at(_rawHeader->size() - 2) == '\n' && _rawHeader->back() == '\r' && **buffer == '\n')
+			if(_rawHeader.size() > 2 && (
+					(_rawHeader.back() == '\n' && **buffer == '\n') ||
+					(_rawHeader.back() == '\r' && **buffer == '\n' && *(*buffer + 1) == '\r') ||
+					(_rawHeader.at(_rawHeader.size() - 2) == '\r' && _rawHeader.back() == '\n' && **buffer == '\r') ||
+					(_rawHeader.at(_rawHeader.size() - 2) == '\n' && _rawHeader.back() == '\r' && **buffer == '\n')
 			))
 			{
 				//Special case: The two new lines are split between _rawHeader and buffer
@@ -258,7 +287,7 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 				if(**buffer == '\n' && *(*buffer + 1) != '\r') //rawHeader = ...\r\n\r, buffer = \n... or rawHeader = ...\n, buffer = \n...
 				{
 					headerSize = 1;
-					if(_rawHeader->back() == '\r') crlfOffset = 2;
+					if(_rawHeader.back() == '\r') crlfOffset = 2;
 					else crlfOffset = 1;
 				}
 				else if(**buffer == '\n' && *(*buffer + 1) == '\r' && *(*buffer + 2) == '\n') //rawHeader = ...\r, buffer = \n\r\n...
@@ -274,8 +303,8 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 			}
 			else
 			{
-				_rawHeader->insert(_rawHeader->end(), *buffer, *buffer + bufferLength);
-				return;
+				_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bufferLength);
+				return bufferLength;
 			}
 		}
 		else
@@ -287,23 +316,23 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 	}
 	else headerSize = ((end + 3) - *buffer) + 1;
 
-	_rawHeader->insert(_rawHeader->end(), *buffer, *buffer + headerSize);
+	_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + headerSize);
 
-	char* headerBuffer = &_rawHeader->at(0);
-	end = &_rawHeader->at(0) + _rawHeader->size();
-	bufferLength -= headerSize;
+	char* headerBuffer = &_rawHeader.at(0);
+	end = &_rawHeader.at(0) + _rawHeader.size();
 	*buffer += headerSize;
+	bufferLength -= headerSize;
 
 	if(!strncmp(headerBuffer, "HTTP/1.", 7))
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
-		if(_header.responseCode != 200) throw HTTPException("Response code was: " + std::to_string(_header.responseCode));
+		if(_header.responseCode != 200) throw HttpException("Response code was: " + std::to_string(_header.responseCode));
 	}
 	else
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
-		if(!endPos) throw HTTPException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
 		_type = Type::Enum::request;
 		_header.method = std::string(headerBuffer, endPos);
 	}
@@ -314,10 +343,10 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 	{
 		int32_t startPos = _header.method.size() + 1;
 		newlinePos = (crlfOffset == 2) ? (char*)memchr(headerBuffer, '\r', end - headerBuffer) : (char*)memchr(headerBuffer, '\n', end - headerBuffer);
-		if(!newlinePos || newlinePos > end) throw HTTPException("Could not parse HTTP header.");
+		if(!newlinePos || newlinePos > end) throw HttpException("Could not parse HTTP header.");
 
 		char* endPos = (char*)HelperFunctions::memrchr(headerBuffer + startPos, ' ', newlinePos - (headerBuffer + startPos));
-		if(!endPos) throw HTTPException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
 
 		_header.path = std::string(headerBuffer + startPos, (int32_t)(endPos - headerBuffer - startPos));
 		int32_t pos = _header.path.find('?');
@@ -339,14 +368,14 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 		_header.path = decodeURL(_header.path);
 		HelperFunctions::stringReplace(_header.path, "../", "");
 
-		if(!strncmp(endPos + 1, "HTTP/1.1", 8)) _header.protocol = HTTP::Protocol::http11;
-		else if(!strncmp(endPos + 1, "HTTP/1.0", 8)) _header.protocol = HTTP::Protocol::http10;
-		else throw HTTPException("Your client is using a HTTP protocol version that this server cannot understand.");
+		if(!strncmp(endPos + 1, "HTTP/1.1", 8)) _header.protocol = Http::Protocol::http11;
+		else if(!strncmp(endPos + 1, "HTTP/1.0", 8)) _header.protocol = Http::Protocol::http10;
+		else throw HttpException("Your client is using a HTTP protocol version that this server cannot understand.");
 	}
 
 	char* colonPos = nullptr;
-	newlinePos = (char*)memchr(headerBuffer, '\n', _rawHeader->size());
-	if(!newlinePos || newlinePos > end) throw HTTPException("Could not parse HTTP header.");
+	newlinePos = (char*)memchr(headerBuffer, '\n', _rawHeader.size());
+	if(!newlinePos || newlinePos > end) throw HttpException("Could not parse HTTP header.");
 	headerBuffer = newlinePos + 1;
 
 	while(headerBuffer < end)
@@ -364,9 +393,10 @@ void HTTP::processHeader(char** buffer, int32_t& bufferLength)
 		headerBuffer = newlinePos + crlfOffset;
 	}
 	_header.parsed = true;
+	return headerSize;
 }
 
-void HTTP::processHeaderField(char* name, uint32_t nameSize, char* value, uint32_t valueSize)
+void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32_t valueSize)
 {
 	if(nameSize == 0 || valueSize == 0 || !name || !value) return;
 	while(*value == ' ' && valueSize > 0)
@@ -411,7 +441,7 @@ void HTTP::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			else if(te == "deflate") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::deflate | TransferEncoding::Enum::chunked);
 			else if(te == "gzip") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::gzip | TransferEncoding::Enum::chunked);
 			else if(te == "identity") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::identity);
-			else throw HTTPException("Unknown value for HTTP header \"Transfer-Encoding\": " + std::string(value, valueSize));
+			else throw HttpException("Unknown value for HTTP header \"Transfer-Encoding\": " + std::string(value, valueSize));
 		    if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
@@ -428,7 +458,7 @@ void HTTP::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			else if(c == "close") _header.connection = (Connection::Enum)(_header.connection | Connection::Enum::close);
 			else if(c == "upgrade") _header.connection = (Connection::Enum)(_header.connection | Connection::Enum::upgrade);
 			else if(c == "te") {} //ignore
-			else throw HTTPException("Unknown value for HTTP header \"Connection\": " + std::string(value, valueSize));
+			else throw HttpException("Unknown value for HTTP header \"Connection\": " + std::string(value, valueSize));
 			if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
@@ -439,7 +469,7 @@ void HTTP::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 	_header.fields[lowercaseName] = std::string(value, valueSize);
 }
 
-int32_t HTTP::strnaicmp(char const *a, char const *b, uint32_t size)
+int32_t Http::strnaicmp(char const *a, char const *b, uint32_t size)
 {
 	if(size == 0) return 0;
 	for (uint32_t pos = 0;; a++, b++, pos++)
@@ -450,42 +480,44 @@ int32_t HTTP::strnaicmp(char const *a, char const *b, uint32_t size)
 	return 0;
 }
 
-void HTTP::reset()
+void Http::reset()
 {
 	_header = Header();
-	_content.reset(new std::vector<char>());
-	_rawHeader.reset(new std::vector<char>());
-	_chunk.reset(new std::vector<char>());
+	_content.clear();
+	_rawHeader.clear();
+	_chunk.clear();
 	_type = Type::Enum::none;
 	_finished = false;
 	_dataProcessingStarted = false;
 	_headerProcessingStarted = false;
 }
 
-void HTTP::setFinished()
+void Http::setFinished()
 {
 	if(_finished) return;
 	_finished = true;
-	_content->push_back('\0');
+	_content.push_back('\0');
 }
 
-void HTTP::processContent(char* buffer, int32_t bufferLength)
+int32_t Http::processContent(char* buffer, int32_t bufferLength)
 {
-	if(_content->size() + bufferLength > 10485760) throw HTTPException("Data is larger than 10MiB.");
-	if(_header.contentLength == 0) _content->insert(_content->end(), buffer, buffer + bufferLength);
+	if(_content.size() + bufferLength > 10485760) throw HttpException("Data is larger than 10MiB.");
+	if(_header.contentLength == 0) _content.insert(_content.end(), buffer, buffer + bufferLength);
 	else
 	{
-		if(_content->size() + bufferLength > _header.contentLength) bufferLength -= (_content->size() + bufferLength) - _header.contentLength;
-		_content->insert(_content->end(), buffer, buffer + bufferLength);
-		if(_content->size() == _header.contentLength) setFinished();
+		if(_content.size() + bufferLength > _header.contentLength) bufferLength -= (_content.size() + bufferLength) - _header.contentLength;
+		_content.insert(_content.end(), buffer, buffer + bufferLength);
+		if(_content.size() == _header.contentLength) setFinished();
 	}
+	return bufferLength;
 }
 
-void HTTP::processChunkedContent(char* buffer, int32_t bufferLength)
+int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
 {
+	int32_t initialBufferLength = bufferLength;
 	while(true)
 	{
-		if(_content->size() + bufferLength > 10485760) throw HTTPException("Data is larger than 10MiB.");
+		if(_content.size() + bufferLength > 10485760) throw HttpException("Data is larger than 10MiB.");
 		if(_chunkSize == -1)
 		{
 			readChunkSize(&buffer, bufferLength);
@@ -500,12 +532,12 @@ void HTTP::processChunkedContent(char* buffer, int32_t bufferLength)
 			}
 			if(bufferLength <= 0) break;
 			int32_t sizeToInsert = bufferLength;
-			if((signed)_chunk->size() + sizeToInsert > _chunkSize) sizeToInsert -= (_chunk->size() + sizeToInsert) - _chunkSize;
-			_chunk->insert(_chunk->end(), buffer, buffer + sizeToInsert);
-			if((signed)_chunk->size() == _chunkSize)
+			if((signed)_chunk.size() + sizeToInsert > _chunkSize) sizeToInsert -= (_chunk.size() + sizeToInsert) - _chunkSize;
+			_chunk.insert(_chunk.end(), buffer, buffer + sizeToInsert);
+			if((signed)_chunk.size() == _chunkSize)
 			{
-				_content->insert(_content->end(), _chunk->begin(), _chunk->end());
-				_chunk.reset(new std::vector<char>());
+				_content.insert(_content.end(), _chunk.begin(), _chunk.end());
+				_chunk.clear();
 				_chunkSize = -1;
 			}
 			bufferLength -= _crlf ? sizeToInsert + 2 : sizeToInsert + 1;
@@ -517,9 +549,16 @@ void HTTP::processChunkedContent(char* buffer, int32_t bufferLength)
 			buffer = _crlf ? buffer + sizeToInsert + 2 : buffer + sizeToInsert + 1;
 		}
 	}
+	if(bufferLength < 0) bufferLength = 0;
+	while(bufferLength > 0 && (*buffer == '\r' || *buffer == '\n' || *buffer == '\0'))
+	{
+		buffer++;
+		bufferLength--;
+	}
+	return initialBufferLength - bufferLength;
 }
 
-void HTTP::readChunkSize(char** buffer, int32_t& bufferLength)
+void Http::readChunkSize(char** buffer, int32_t& bufferLength)
 {
 	char* newlinePos;
 	if(_chunkSize == -1 && _endChunkSizeBytes == 0)
@@ -548,18 +587,18 @@ void HTTP::readChunkSize(char** buffer, int32_t& bufferLength)
 		if(!semicolonPos || semicolonPos >= *buffer + bufferLength)
 		{
 			_partialChunkSize = std::string(*buffer, bufferLength);
-			if(_partialChunkSize.size() > 8) throw HTTPException("Could not parse chunk size.");
+			if(_partialChunkSize.size() > 8) throw HttpException("Could not parse chunk size.");
 		}
 		else
 		{
 			_chunkSize = strtol(*buffer, NULL, 16);
-			if(_chunkSize < 0) throw HTTPException("Could not parse chunk size. Chunk size is negative.");
+			if(_chunkSize < 0) throw HttpException("Could not parse chunk size. Chunk size is negative.");
 		}
 	}
 	else
 	{
 		_chunkSize = strtol(*buffer, NULL, 16);
-		if(_chunkSize < 0) throw HTTPException("Could not parse chunk size. Chunk size is negative.");
+		if(_chunkSize < 0) throw HttpException("Could not parse chunk size. Chunk size is negative.");
 		bufferLength -= (newlinePos + 1) - *buffer;
 		if(bufferLength == -1)
 		{
@@ -570,7 +609,7 @@ void HTTP::readChunkSize(char** buffer, int32_t& bufferLength)
 	}
 }
 
-std::string HTTP::encodeURL(const std::string& url)
+std::string Http::encodeURL(const std::string& url)
 {
 	std::ostringstream encoded;
 	encoded.fill('0');
@@ -588,7 +627,7 @@ std::string HTTP::encodeURL(const std::string& url)
 	return encoded.str();
 }
 
-std::string HTTP::decodeURL(const std::string& url)
+std::string Http::decodeURL(const std::string& url)
 {
 	Math math;
 	std::ostringstream decoded;
@@ -610,25 +649,25 @@ std::string HTTP::decodeURL(const std::string& url)
 	return decoded.str();
 }
 
-size_t HTTP::readStream(char* buffer, size_t requestLength)
+size_t Http::readStream(char* buffer, size_t requestLength)
 {
 	size_t bytesRead = 0;
-	if(_streamPos < _rawHeader->size())
+	if(_streamPos < _rawHeader.size())
 	{
 		size_t length = requestLength;
-		if(_streamPos + length > _rawHeader->size()) length = _rawHeader->size() - _streamPos;
-		memcpy(buffer, &_rawHeader->at(_streamPos), length);
+		if(_streamPos + length > _rawHeader.size()) length = _rawHeader.size() - _streamPos;
+		memcpy(buffer, &_rawHeader.at(_streamPos), length);
 		_streamPos += length;
 		bytesRead += length;
 		requestLength -= length;
 	}
-	if(_content->size() == 0) return bytesRead;
-	size_t contentSize = _content->size() - 1; //Ignore trailing "0"
-	if(requestLength > 0 && (_streamPos - _rawHeader->size()) < contentSize)
+	if(_content.size() == 0) return bytesRead;
+	size_t contentSize = _content.size() - 1; //Ignore trailing "0"
+	if(requestLength > 0 && (_streamPos - _rawHeader.size()) < contentSize)
 	{
 		size_t length = requestLength;
-		if((_streamPos - _rawHeader->size()) + length > contentSize) length = _content->size() - (_streamPos - _rawHeader->size());
-		memcpy(buffer + bytesRead, &_content->at(_streamPos - _rawHeader->size()), length);
+		if((_streamPos - _rawHeader.size()) + length > contentSize) length = _content.size() - (_streamPos - _rawHeader.size());
+		memcpy(buffer + bytesRead, &_content.at(_streamPos - _rawHeader.size()), length);
 		_streamPos += length;
 		bytesRead += length;
 		requestLength -= length;
@@ -636,15 +675,15 @@ size_t HTTP::readStream(char* buffer, size_t requestLength)
 	return bytesRead;
 }
 
-size_t HTTP::readContentStream(char* buffer, size_t requestLength)
+size_t Http::readContentStream(char* buffer, size_t requestLength)
 {
 	size_t bytesRead = 0;
-	size_t contentSize = _content->size() - 1; //Ignore trailing "0"
+	size_t contentSize = _content.size() - 1; //Ignore trailing "0"
 	if(_contentStreamPos < contentSize)
 	{
 		size_t length = requestLength;
 		if(_contentStreamPos + length > contentSize) length = contentSize - _contentStreamPos;
-		memcpy(buffer, &_content->at(_contentStreamPos), length);
+		memcpy(buffer, &_content.at(_contentStreamPos), length);
 		_contentStreamPos += length;
 		bytesRead += length;
 		requestLength -= length;
@@ -652,21 +691,21 @@ size_t HTTP::readContentStream(char* buffer, size_t requestLength)
 	return bytesRead;
 }
 
-size_t HTTP::readFirstContentLine(char* buffer, size_t requestLength)
+size_t Http::readFirstContentLine(char* buffer, size_t requestLength)
 {
-	if(_content->size() == 0) return 0;
-	if(_contentStreamPos >= _content->size() - 1) return 0;
+	if(_content.size() == 0) return 0;
+	if(_contentStreamPos >= _content.size() - 1) return 0;
 	size_t bytesRead = 0;
-	char* posTemp = (char*)memchr(&_content->at(_contentStreamPos), '\n', _content->size() - 1 - _contentStreamPos);
+	char* posTemp = (char*)memchr(&_content.at(_contentStreamPos), '\n', _content.size() - 1 - _contentStreamPos);
 	int32_t newlinePos = 0;
-	if(posTemp > 0) newlinePos = posTemp - &_content->at(0);
-	if(newlinePos > 0 && _content->at(newlinePos - 1) == '\r') newlinePos--;
-	else if(newlinePos <= 0) newlinePos = _content->size() - 1;
+	if(posTemp > 0) newlinePos = posTemp - &_content.at(0);
+	if(newlinePos > 0 && _content.at(newlinePos - 1) == '\r') newlinePos--;
+	else if(newlinePos <= 0) newlinePos = _content.size() - 1;
 	if(_contentStreamPos < (unsigned)newlinePos)
 	{
 		size_t length = requestLength;
 		if(_contentStreamPos + length > (unsigned)newlinePos) length = newlinePos - _contentStreamPos;
-		memcpy(buffer, &_content->at(_contentStreamPos), length);
+		memcpy(buffer, &_content.at(_contentStreamPos), length);
 		_contentStreamPos += length;
 		bytesRead += length;
 		requestLength -= length;

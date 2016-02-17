@@ -83,6 +83,50 @@ void BinaryEncoder::encodeInteger(std::vector<uint8_t>& encodedData, int32_t int
     }
 }
 
+void BinaryEncoder::encodeInteger64(std::vector<char>& encodedData, int64_t integer)
+{
+	try
+	{
+		char result[8];
+		_bl->hf.memcpyBigEndian(result, (char*)&integer, 8);
+		encodedData.insert(encodedData.end(), result, result + 8);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void BinaryEncoder::encodeInteger64(std::vector<uint8_t>& encodedData, int64_t integer)
+{
+	try
+	{
+		char result[8];
+		_bl->hf.memcpyBigEndian(result, (char*)&integer, 8);
+		encodedData.insert(encodedData.end(), result, result + 8);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 void BinaryEncoder::encodeByte(std::vector<char>& encodedData, uint8_t byte)
 {
 	try
@@ -150,6 +194,48 @@ void BinaryEncoder::encodeString(std::vector<uint8_t>& encodedData, std::string&
 	{
 		encodeInteger(encodedData, string.size());
 		if(string.size() > 0) encodedData.insert(encodedData.end(), string.begin(), string.end());
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void BinaryEncoder::encodeBinary(std::vector<char>& encodedData, std::vector<uint8_t>& data)
+{
+	try
+	{
+		encodeInteger(encodedData, data.size());
+		if(data.size() > 0) encodedData.insert(encodedData.end(), data.begin(), data.end());
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void BinaryEncoder::encodeBinary(std::vector<uint8_t>& encodedData, std::vector<uint8_t>& data)
+{
+	try
+	{
+		encodeInteger(encodedData, data.size());
+		if(data.size() > 0) encodedData.insert(encodedData.end(), data.begin(), data.end());
 	}
 	catch(const std::exception& ex)
     {

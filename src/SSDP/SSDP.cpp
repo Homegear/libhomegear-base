@@ -195,7 +195,7 @@ void SSDP::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 		fd_set readFileDescriptor;
 		timeval socketTimeout;
 		int32_t nfds = 0;
-		HTTP http;
+		Http http;
 		std::set<std::string> locations;
 		while(_bl->hf.getTime() - startTime <= (timeout + 500))
 		{
@@ -261,14 +261,14 @@ void SSDP::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
 
-void SSDP::processPacket(HTTP& http, const std::string& stHeader, std::set<std::string>& locations)
+void SSDP::processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations)
 {
 	try
 	{
-		HTTP::Header* header = http.getHeader();
-		if(!header || header->responseCode != 200 || header->fields.at("st") != stHeader) return;
+		Http::Header& header = http.getHeader();
+		if(header.responseCode != 200 || header.fields.at("st") != stHeader) return;
 
-		std::string location = header->fields.at("location");
+		std::string location = header.fields.at("location");
 		if(location.size() < 7) return;
 		locations.insert(location);
 	}
@@ -302,7 +302,7 @@ void SSDP::getDeviceInfo(std::set<std::string>& locations, std::vector<SSDPInfo>
 			if(port <= 0 || port > 65535) return;
 			std::string path = (*i).substr(posPath);
 
-			HTTPClient client(_bl, ip, port, false);
+			HttpClient client(_bl, ip, port, false);
 			std::string xml;
 			client.get(path, xml);
 

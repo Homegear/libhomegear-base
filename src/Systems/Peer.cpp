@@ -141,9 +141,9 @@ void Peer::raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vec
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onEvent(peerId, channel, variables, values);
 }
 
-void Peer::raiseRunScript(std::string& script, const std::string& args, bool keepAlive, int32_t interval)
+void Peer::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
-	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(script, _peerID, args, keepAlive, interval);
+	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
 
 int32_t Peer::raiseIsAddonClient(int32_t clientID)

@@ -195,6 +195,10 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::os
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer.");
 		encodeInteger(variable, s);
 		break;
+	case VariableType::tInteger64:
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer.");
+		encodeInteger(variable, s);
+		break;
 	case VariableType::tFloat:
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON float.");
 		encodeFloat(variable, s);
@@ -241,6 +245,10 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::ve
 		break;
 	case VariableType::tInteger:
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer.");
+		encodeInteger(variable, s);
+		break;
+	case VariableType::tInteger64:
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer.");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tFloat:

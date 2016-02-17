@@ -31,6 +31,8 @@
 #ifndef ISCRIPTINFO_H_
 #define ISCRIPTINFO_H_
 
+#include "../Sockets/SocketOperations.h"
+
 #include <string>
 #include <mutex>
 #include <condition_variable>
@@ -41,7 +43,13 @@ namespace ScriptEngine
 {
 
 class ScriptInfo;
+class ScriptInfoCli;
+class ScriptInfoWeb;
+class ScriptInfoDevice;
 typedef std::shared_ptr<ScriptInfo> PScriptInfo;
+typedef std::shared_ptr<ScriptInfoCli> PScriptInfoCli;
+typedef std::shared_ptr<ScriptInfoWeb> PScriptInfoWeb;
+typedef std::shared_ptr<ScriptInfoDevice> PScriptInfoDevice;
 
 /**
  * This class provides hooks into the script engine server so family modules can be notified about finished script executions.
@@ -57,25 +65,48 @@ public:
 	};
 
 	int32_t id = 0;
-	int32_t customId = 0;
 
-	std::string path;			//cli, web
-	std::string arguments;		//cli
-	std::string script;			//device
-	int64_t peerId = 0;			//device
-	bool keepAlive = false;		//device
-	int32_t interval = -1;		//device
+	// {{{ Input parameters
+		std::string path;
+		std::string arguments;
+		int32_t customId = 0;
+		bool returnOutput = false;
 
-	std::vector<char> output;
+		PVariable http; //Web
+		PVariable serverInfo; //Web
 
-	// Option 1: Call scriptFinishedCallback
-	std::function<void(PScriptInfo& scriptInfo, int32_t exitCode, std::string& output)> scriptFinishedCallback;
+		std::string script; //Device
+		int64_t peerId = 0; //Device
+	// }}}
 
-	// Option 2: Wait for script
-	std::mutex requestMutex;
-	std::condition_variable requestConditionVariable;
+	// {{{ Output parameters
+		int32_t exitCode = -1;
+		std::string output;
+	// }}}
 
+
+	std::function<void(PScriptInfo& scriptInfo, std::string& output)> scriptOutputCallback;
+
+	// {{{ Script finished notification. Can be combined.
+		// Option 1: Call scriptFinishedCallback
+		std::function<void(PScriptInfo& scriptInfo, int32_t exitCode)> scriptFinishedCallback;
+
+		// Option 2: Wait for script
+		std::mutex requestMutex;
+		std::condition_variable requestConditionVariable;
+
+		// Option 3: Write to socket
+		PSocketOperations socket;
+	// }}}
+
+	ScriptInfo(ScriptType type) { _type = type; }
+	ScriptInfo(ScriptType type, std::string& path, std::string& arguments) { _type = type; this->path = path; this->arguments = arguments; }
+	ScriptInfo(ScriptType type, std::string& path, PVariable http, PVariable serverInfo) { _type = type; this->path = path; this->http = http; this->serverInfo = serverInfo; }
+	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->path = path; this->script = script; this->arguments = arguments; this->peerId = peerId; }
 	virtual ~ScriptInfo() {}
+	ScriptType getType() { return _type; }
+protected:
+	ScriptType _type = ScriptType::cli;
 };
 }
 }
