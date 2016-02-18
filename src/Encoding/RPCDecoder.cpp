@@ -274,6 +274,10 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet,
 		else if(type == VariableType::tStruct)
 		{
 			variable->structValue = decodeStruct(packet, position);
+			if(variable->structValue->size() == 2 && variable->structValue->find("faultCode") != variable->structValue->end() && variable->structValue->find("faultString") != variable->structValue->end())
+			{
+				variable->errorStruct = true;
+			}
 		}
 		return variable;
 	}
@@ -329,6 +333,10 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& pack
 		else if(type == VariableType::tStruct)
 		{
 			variable->structValue = decodeStruct(packet, position);
+			if(variable->structValue->size() == 2 && variable->structValue->find("faultCode") != variable->structValue->end() && variable->structValue->find("faultString") != variable->structValue->end())
+			{
+				variable->errorStruct = true;
+			}
 		}
 		return variable;
 	}
