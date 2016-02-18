@@ -291,7 +291,6 @@ protected:
 
 	bool _disposing = false;
 	uint32_t _lastPacketReceived = 0;
-	std::mutex _databaseMutex;
 
 	// {{{ Event handling
 		//Hooks
