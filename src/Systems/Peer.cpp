@@ -2064,7 +2064,7 @@ std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t 
 			if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
 			PFunction rpcFunction = _rpcDevice->functions.at(channel);
 			//Return if there are no link roles defined
-			if(rpcFunction->linkSenderFunctionTypes.empty() || rpcFunction->linkReceiverFunctionTypes.empty()) return array;
+			if(rpcFunction->linkSenderFunctionTypes.empty() && rpcFunction->linkReceiverFunctionTypes.empty()) return array;
 			std::shared_ptr<ICentral> central(getCentral());
 			if(!central) return array; //central actually should always be set at this point
 			_peersMutex.lock();

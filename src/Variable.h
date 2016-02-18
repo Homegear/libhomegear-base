@@ -108,7 +108,7 @@ public:
 	Variable(xml_node<>* node);
 	virtual ~Variable();
 	static PVariable createError(int32_t faultCode, std::string faultString);
-	void print();
+	void print(bool stderr = false);
 	static std::string getTypeString(VariableType type);
 	static PVariable fromString(std::string& value, DeviceDescription::ILogical::Type::Enum type);
 	static PVariable fromString(std::string& value, DeviceDescription::IPhysical::Type::Enum type);
@@ -122,9 +122,9 @@ public:
 	bool operator>=(const Variable& rhs);
 	bool operator!=(const Variable& rhs);
 private:
-	void print(PVariable, std::string indent);
-	void printStruct(PStruct rpcStruct, std::string indent);
-	void printArray(PArray rpcArray, std::string indent);
+	void print(PVariable, std::string indent, bool stderr);
+	void printStruct(PStruct rpcStruct, std::string indent, bool stderr);
+	void printArray(PArray rpcArray, std::string indent, bool stderr);
 
 	/**
 	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
