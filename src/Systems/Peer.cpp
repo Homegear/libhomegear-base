@@ -596,10 +596,8 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
 
 		if(savePeer)
 		{
-			_databaseMutex.lock();
 			uint64_t result = _bl->db->savePeer(_peerID, _parentID, _address, _serialNumber, _deviceType.type());
 			if(_peerID == 0 && result > 0) setID(result);
-			_databaseMutex.unlock();
 		}
 		if(variables || centralConfig) _bl->db->createSavepointAsynchronous(savepointName);
 		if(variables) saveVariables();
@@ -607,17 +605,14 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
 	}
 	catch(const std::exception& ex)
     {
-		_databaseMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_databaseMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_databaseMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     if(variables || centralConfig) _bl->db->releaseSavepointAsynchronous(savepointName);
@@ -632,7 +627,6 @@ void Peer::saveParameter(uint32_t parameterID, std::vector<uint8_t>& value)
 			if(!isTeam()) _bl->out.printError("Error: Peer " + std::to_string(_peerID) + ": Tried to save parameter without parameterID");
 			return;
 		}
-		_databaseMutex.lock();
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterID)));
@@ -650,7 +644,6 @@ void Peer::saveParameter(uint32_t parameterID, std::vector<uint8_t>& value)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uint8_t>& value)
@@ -664,7 +657,6 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
 		}
 		if(_peerID == 0 || isTeam()) return;
 		//Creates a new entry for parameter in database
-		_databaseMutex.lock();
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(0)));
@@ -687,7 +679,6 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, std::string parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
@@ -701,7 +692,6 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
 		}
 		if(_peerID == 0 || isTeam()) return;
 		//Creates a new entry for parameter in database
-		_databaseMutex.lock();
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((uint32_t)parameterSetType)));
@@ -724,7 +714,6 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows)
@@ -732,7 +721,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 	try
 	{
 		if(!rows) return;
-		_databaseMutex.lock();
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
 			_variableDatabaseIDs[row->second.at(2)->intValue] = row->second.at(0)->intValue;
@@ -765,7 +753,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 				break;
 			}
 		}
-		_databaseMutex.unlock();
 		return;
 	}
 	catch(const std::exception& ex)
@@ -780,7 +767,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveVariables()
@@ -815,7 +801,6 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
 	try
 	{
 		if(isTeam()) return;
-		_databaseMutex.lock();
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -826,11 +811,7 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
 		}
 		else
 		{
-			if(_peerID == 0)
-			{
-				_databaseMutex.unlock();
-				return;
-			}
+			if(_peerID == 0) return;
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
@@ -851,7 +832,6 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveVariable(uint32_t index, int64_t intValue)
@@ -859,7 +839,6 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
 	try
 	{
 		if(isTeam()) return;
-		_databaseMutex.lock();
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -870,11 +849,7 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
 		}
 		else
 		{
-			if(_peerID == 0)
-			{
-				_databaseMutex.unlock();
-				return;
-			}
+			if(_peerID == 0) return;
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
@@ -895,7 +870,6 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveVariable(uint32_t index, std::string& stringValue)
@@ -903,7 +877,6 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
 	try
 	{
 		if(isTeam()) return;
-		_databaseMutex.lock();
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -914,11 +887,7 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
 		}
 		else
 		{
-			if(_peerID == 0)
-			{
-				_databaseMutex.unlock();
-				return;
-			}
+			if(_peerID == 0) return;
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
@@ -939,7 +908,6 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
@@ -947,7 +915,6 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 	try
 	{
 		if(isTeam()) return;
-		_databaseMutex.lock();
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -958,11 +925,7 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 		}
 		else
 		{
-			if(_peerID == 0)
-			{
-				_databaseMutex.unlock();
-				return;
-			}
+			if(_peerID == 0) return;
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
@@ -983,7 +946,6 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::saveConfig()
@@ -1061,7 +1023,6 @@ void Peer::loadConfig()
 {
 	try
 	{
-		_databaseMutex.lock();
 		Database::DataRow data;
 		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getPeerParameters(_peerID);
 		for(Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
@@ -1085,12 +1046,10 @@ void Peer::loadConfig()
 				if(parameterName->empty())
 				{
 					_bl->out.printCritical("Critical: Added central config parameter without id. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(channel));
-					_databaseMutex.lock();
 					data.clear();
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(std::string(""))));
 					_bl->db->deletePeerParameter(_peerID, data);
-					_databaseMutex.unlock();
 					continue;
 				}
 
@@ -1159,7 +1118,6 @@ void Peer::loadConfig()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 void Peer::initializeTypeString()
