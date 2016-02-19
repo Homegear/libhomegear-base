@@ -83,7 +83,7 @@ public:
 	PParameter parameterGroupSelector;
 
 	virtual Type::Enum type() = 0;
-	static Type::Enum typeFromString(std::string& type);
+	static Type::Enum typeFromString(std::string type);
 	PParameter getParameter(std::string id);
 	void getIndices(uint32_t startIndex, uint32_t endIndex, int32_t list, std::vector<PParameter>& result);
 protected:

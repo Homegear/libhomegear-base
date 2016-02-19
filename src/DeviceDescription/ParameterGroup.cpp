@@ -88,7 +88,7 @@ void ParameterGroup::parseElements(xml_node<>* node)
 	}
 }
 
-ParameterGroup::Type::Enum ParameterGroup::typeFromString(std::string& type)
+ParameterGroup::Type::Enum ParameterGroup::typeFromString(std::string type)
 {
 	HelperFunctions::toLower(HelperFunctions::trim(type));
 	if(type == "master" || type == "config") return Type::Enum::config;
