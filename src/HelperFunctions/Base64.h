@@ -55,6 +55,14 @@ public:
 	static void encode(const std::vector<char>& in, std::string& out);
 
 	/**
+	 * Encodes a byte vector to Base64.
+	 *
+	 * @param[in] in The binary data to encode.
+	 * @param[out] out The string the result is stored in.
+	 */
+	static void encode(const std::vector<uint8_t>& in, std::string& out);
+
+	/**
 	 * Decodes a Base64 encoded string.
 	 *
 	 * @param[in] in The data to decode.
