@@ -80,6 +80,8 @@ public:
 	// }}}
 
 	// {{{ Output parameters
+		bool started = false;
+		bool finished = false;
 		int32_t exitCode = -1;
 		std::string output;
 	// }}}
