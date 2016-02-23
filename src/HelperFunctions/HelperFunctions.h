@@ -342,6 +342,14 @@ public:
 	static int32_t getRandomNumber(int32_t min, int32_t max);
 
 	/**
+	 * Generates a random byte vector.
+	 *
+	 * @param size The number of bytes to generate.
+	 * @return Returns a random byte vector of size "size".
+	 */
+	static std::vector<uint8_t> getRandomBytes(uint32_t size);
+
+	/**
 	 * Copies binary values from one memory location to another reversing the byte order when the system is little endian.
 	 *
 	 * @param[out] to The destination array. No memory is allocated, so make sure, the array is large enough.
