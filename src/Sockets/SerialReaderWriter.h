@@ -66,7 +66,7 @@ public:
 
 	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor > -1; }
 	std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
-	void openDevice(bool events = true);
+	void openDevice(bool parity, bool oddParity, bool events = true);
 	void closeDevice();
 
 	/**
@@ -98,7 +98,7 @@ protected:
 	std::thread _openDeviceThread;
 
 	void createLockFile();
-	void readThread();
+	void readThread(bool parity, bool oddParity);
 };
 
 }
