@@ -52,7 +52,7 @@ SerialReaderWriter::~SerialReaderWriter()
 	closeDevice();
 }
 
-void SerialReaderWriter::openDevice(bool events)
+void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events)
 {
 	_handles++;
 	if(_fileDescriptor->descriptor > -1) return;
@@ -158,6 +158,8 @@ void SerialReaderWriter::openDevice(bool events)
 	}
 	memset(&_termios, 0, sizeof(termios));
 	_termios.c_cflag = baudrate | CS8 | CREAD;
+	if(parity) _termios.c_cflag |= PARENB;
+	if(oddParity) _termios.c_cflag |= PARENB | PARODD;
 	_termios.c_iflag = 0;
 	_termios.c_oflag = 0;
 	_termios.c_lflag = 0;
@@ -180,8 +182,8 @@ void SerialReaderWriter::openDevice(bool events)
 		_bl->threadManager.join(_readThread);
 		_stopped = false;
 		_stopReadThread = false;
-		if(_readThreadPriority > -1) _bl->threadManager.start(_readThread, true, _readThreadPriority, SCHED_FIFO, &SerialReaderWriter::readThread, this);
-		else _bl->threadManager.start(_readThread, true, &SerialReaderWriter::readThread, this);
+		if(_readThreadPriority > -1) _bl->threadManager.start(_readThread, true, _readThreadPriority, SCHED_FIFO, &SerialReaderWriter::readThread, this, parity, oddParity);
+		else _bl->threadManager.start(_readThread, true, &SerialReaderWriter::readThread, this, parity, oddParity);
 		_readThreadMutex.unlock();
 	}
 }
@@ -316,7 +318,7 @@ void SerialReaderWriter::writeLine(std::string& data)
     _sendMutex.unlock();
 }
 
-void SerialReaderWriter::readThread()
+void SerialReaderWriter::readThread(bool parity, bool oddParity)
 {
 	std::string data;
 	while(!_stopReadThread)
@@ -327,7 +329,7 @@ void SerialReaderWriter::readThread()
 			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 			_openDeviceThreadMutex.lock();
 			_bl->threadManager.join(_openDeviceThread);
-			_bl->threadManager.start(_openDeviceThread, true, &SerialReaderWriter::openDevice, this, true);
+			_bl->threadManager.start(_openDeviceThread, true, &SerialReaderWriter::openDevice, this, parity, oddParity, true);
 			_openDeviceThreadMutex.unlock();
 			return;
 		}
