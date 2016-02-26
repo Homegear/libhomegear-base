@@ -307,6 +307,7 @@ std::vector<std::string> HelperFunctions::splitAll(std::string string, char deli
 	{
 		elements.push_back(element);
 	}
+	if(string.back() == delimiter) elements.push_back(std::string());
 	return elements;
 }
 
