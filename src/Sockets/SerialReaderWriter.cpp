@@ -288,6 +288,8 @@ void SerialReaderWriter::writeLine(std::string& data)
     try
     {
         if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
+        if(data.empty() == 0) return;
+        if(data.back() != '\n') data.push_back('\n');
         int32_t bytesWritten = 0;
         int32_t i;
         _sendMutex.lock();
