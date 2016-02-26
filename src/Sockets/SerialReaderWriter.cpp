@@ -234,6 +234,47 @@ void SerialReaderWriter::createLockFile()
 	_bl->fileDescriptorManager.close(lockfileDescriptor);
 }
 
+int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
+{
+	int32_t i;
+	fd_set readFileDescriptor;
+	while(!_stopReadThread)
+	{
+		if(_fileDescriptor->descriptor == -1)
+		{
+			_bl->out.printError("Error: File descriptor is invalid.");
+			return -1;
+		}
+		FD_ZERO(&readFileDescriptor);
+		FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
+		//Timeout needs to be set every time, so don't put it outside of the while loop
+		timeval timeval;
+		timeval.tv_sec = timeout / 1000000;
+		timeval.tv_usec = timeout % 1000000;
+		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);
+		switch(i)
+		{
+			case 0: //Timeout
+				return 1;
+			case 1:
+				break;
+			default:
+				//Error
+				_bl->fileDescriptorManager.close(_fileDescriptor);
+				return -1;
+		}
+		i = read(_fileDescriptor->descriptor, &data, 1);
+		if(i == -1)
+		{
+			if(errno == EAGAIN) continue;
+			_bl->fileDescriptorManager.close(_fileDescriptor);
+			continue;
+		}
+		return 0;
+	}
+	return -1;
+}
+
 int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
 {
 	data.clear();
@@ -280,7 +321,7 @@ int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
 		}
 		if(localBuffer[0] == '\n') return 0;
 	}
-	return 0;
+	return -1;
 }
 
 void SerialReaderWriter::writeLine(std::string& data)

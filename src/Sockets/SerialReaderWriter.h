@@ -76,6 +76,15 @@ public:
 	 * @return Returns "0" on success, "1" on timeout or "-1" on error.
 	 */
 	int32_t readLine(std::string& data, uint32_t timeout = 500000);
+
+	/**
+	 * SerialReaderWriter can either be used through events (by implementing ISerialReaderWriterEventSink and usage of addEventHandler) or by polling using this method.
+	 * @param data The variable to write the returned character into.
+	 * @param timeout The maximum amount of time to wait in microseconds before the function returns (default: 500000).
+	 * @return Returns "0" on success, "1" on timeout or "-1" on error.
+	 */
+	int32_t readChar(char& data, uint32_t timeout = 500000);
+
 	void writeLine(std::string& data);
 protected:
 	BaseLib::Obj* _bl = nullptr;
