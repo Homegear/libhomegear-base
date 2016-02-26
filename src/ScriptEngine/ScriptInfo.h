@@ -104,6 +104,7 @@ public:
 	ScriptInfo(ScriptType type) { _type = type; }
 	ScriptInfo(ScriptType type, std::string& path, std::string& arguments) { _type = type; this->path = path; this->arguments = arguments; }
 	ScriptInfo(ScriptType type, std::string& path, PVariable http, PVariable serverInfo) { _type = type; this->path = path; this->http = http; this->serverInfo = serverInfo; }
+	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments) { _type = type; this->path = path; this->script = script; this->arguments = arguments; }
 	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->path = path; this->script = script; this->arguments = arguments; this->peerId = peerId; }
 	virtual ~ScriptInfo() {}
 	ScriptType getType() { return _type; }
