@@ -64,7 +64,7 @@ public:
 	SerialReaderWriter(BaseLib::Obj* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
 	virtual ~SerialReaderWriter();
 
-	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor > -1; }
+	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
 	std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
 	void openDevice(bool parity, bool oddParity, bool events = true);
 	void closeDevice();
