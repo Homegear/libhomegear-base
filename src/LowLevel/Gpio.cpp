@@ -68,6 +68,9 @@ void Gpio::openDevice(uint32_t index, bool readOnly)
 		std::string path = _gpioInfo[index].path + "value";
 		_gpioInfo[index].fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), readOnly ? O_RDONLY : O_RDWR));
 		if (_gpioInfo[index].fileDescriptor->descriptor == -1) throw(Exception("Failed to open GPIO value file \"" + path + "\": " + std::string(strerror(errno))));
+		_gpioMutex.unlock();
+		poll(index, 0, false);
+		return;
 	}
 	catch(const std::exception& ex)
     {
@@ -223,6 +226,64 @@ bool Gpio::get(uint32_t index)
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
+}
+
+int32_t Gpio::poll(uint32_t index, int32_t timeout, bool debounce)
+{
+	try
+	{
+		if(timeout > 30000) timeout = 30000;
+		if(timeout < 0) return -1;
+		BaseLib::PFileDescriptor fileDescriptor = getFileDescriptor(index);
+		if(!fileDescriptor || fileDescriptor->descriptor == -1) return -1;
+
+		pollfd pollstruct
+		{
+			(int)fileDescriptor->descriptor,
+			(short)(POLLPRI | POLLERR),
+			(short)0
+		};
+
+		int32_t pollResult = ::poll(&pollstruct, 1, timeout);
+		if(pollResult == 0) return -2;
+		else if(pollResult == -1)
+		{
+			closeDevice(index);
+			return -1;
+		}
+
+		if(debounce) std::this_thread::sleep_for(std::chrono::milliseconds(30));
+
+		if(lseek(fileDescriptor->descriptor, 0, SEEK_SET) == -1)
+		{
+			closeDevice(index);
+			return -1;
+		}
+
+		std::vector<char> readBuffer({'0'});
+		int32_t bytesRead = read(fileDescriptor->descriptor, &readBuffer[0], 1);
+		if(bytesRead <= 0)
+		{
+			closeDevice(index);
+			return -1;
+		}
+		if(readBuffer.at(0) == 0x30) return 0;
+		else if(readBuffer.at(0) == 0x31) return 1;
+		else return readBuffer.at(0);
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return -1;
 }
 
 void Gpio::set(uint32_t index, bool value)
