@@ -70,6 +70,7 @@ public:
 	virtual void getPath(uint32_t index);
 	virtual void closeDevice(uint32_t index);
 	virtual bool get(uint32_t index);
+	virtual int32_t poll(uint32_t index, int32_t timeout, bool debounce);
 	virtual void set(uint32_t index, bool value);
 	virtual void setPermission(uint32_t index, int32_t userID, int32_t groupID, bool readOnly);
 	virtual void exportGpio(uint32_t index);
