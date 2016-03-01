@@ -86,6 +86,7 @@ Packet::Packet(BaseLib::Obj* baseLib, xml_node<>* node) : Packet(baseLib)
 			if(!splitValue.second.empty()) channelSize = Math::getDouble(splitValue.second);
 		}
 		else if(nodeName == "doubleSend") { if(value == "true") doubleSend = true; }
+		else if(nodeName == "repeat") { if(value == "false") repeat = false; }
 		else if(nodeName == "splitAfter") splitAfter = Math::getNumber(value);
 		else if(nodeName == "maxPackets") maxPackets = Math::getNumber(value);
 		else if(nodeName == "binaryPayload")

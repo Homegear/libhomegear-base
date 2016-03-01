@@ -92,6 +92,7 @@ public:
 	double channelSize = 1;
 	bool doubleSend = false;
 	int32_t splitAfter = -1;
+	bool repeat = true;
 	int32_t maxPackets = -1;
 	JsonPayloads jsonPayloads;
 	BinaryPayloads binaryPayloads;
