@@ -2095,6 +2095,85 @@ std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(channel < 0) channel = 0;
+		if(remoteChannel < 0) remoteChannel = 0;
+		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
+		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
+		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
+		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
+		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
+		PVariable variables(new Variable(VariableType::tStruct));
+
+		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
+		{
+			if(i->second->id.empty() || !i->second->visible) continue;
+			if(!i->second->visible && !i->second->service && !i->second->internal && !i->second->transform)
+			{
+				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
+				continue;
+			}
+			PVariable element;
+			if(type == ParameterGroup::Type::Enum::variables)
+			{
+				if(!i->second->readable) continue;
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
+				if(valuesIterator == valuesCentral.end()) continue;
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
+				if(parameterIterator == valuesIterator->second.end()) continue;
+				element = i->second->convertFromPacket(parameterIterator->second.data);
+			}
+			else if(type == ParameterGroup::Type::Enum::config)
+			{
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configIterator = configCentral.find(channel);
+				if(configIterator == configCentral.end()) continue;
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configIterator->second.find(i->second->id);
+				if(parameterIterator == configIterator->second.end()) continue;
+				element = i->second->convertFromPacket(parameterIterator->second.data);
+			}
+			else if(type == ParameterGroup::Type::Enum::link)
+			{
+				std::shared_ptr<BasicPeer> remotePeer;
+				if(remoteID == 0) remoteID = 0xFFFFFFFFFFFFFFFF; //Remote peer is central
+				remotePeer = getPeer(channel, remoteID, remoteChannel);
+				if(!remotePeer) return Variable::createError(-3, "Not paired to this peer.");
+				if(remotePeer->channel != remoteChannel) continue;
+				std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>>::iterator linkIterator = linksCentral.find(channel);
+				if(linkIterator == linksCentral.end()) continue;
+				std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>::iterator addressIterator = linkIterator->second.find(remotePeer->address);
+				if(addressIterator == linkIterator->second.end()) continue;
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator remoteChannelIterator = addressIterator->second.find(remotePeer->channel);
+				if(remoteChannelIterator == addressIterator->second.end()) continue;
+				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = remoteChannelIterator->second.find(i->second->id);
+				if(parameterIterator == remoteChannelIterator->second.end()) continue;
+				element = i->second->convertFromPacket(parameterIterator->second.data);
+			}
+
+			if(!element) continue;
+			if(element->type == VariableType::tVoid) continue;
+			variables->structValue->insert(StructElement(i->second->id, element));
+		}
+		return variables;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGroup parameterGroup)
 {
 	try
@@ -2274,6 +2353,40 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 			descriptions->structValue->insert(StructElement(i->second->id, description));
 		}
 		return descriptions;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(channel < 0) channel = 0;
+		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
+		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
+		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
+		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
+		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
+		if(type == ParameterGroup::Type::link && remoteID > 0)
+		{
+			std::shared_ptr<BaseLib::Systems::BasicPeer> remotePeer = getPeer(channel, remoteID, remoteChannel);
+			if(!remotePeer) return Variable::createError(-2, "Unknown remote peer.");
+		}
+
+		return Peer::getParamsetDescription(clientInfo, parameterGroup);
 	}
 	catch(const std::exception& ex)
     {

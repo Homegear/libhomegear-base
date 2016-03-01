@@ -232,9 +232,9 @@ public:
     virtual std::shared_ptr<Variable> getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
 	virtual std::shared_ptr<Variable> setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description);
 	virtual std::shared_ptr<Variable> getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool returnID);
-    virtual std::shared_ptr<Variable> getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
+    virtual std::shared_ptr<Variable> getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, std::shared_ptr<ParameterGroup> parameterSet);
-    virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel) = 0;
+    virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual std::shared_ptr<Variable> getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual std::shared_ptr<Variable> getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual std::shared_ptr<Variable> getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
