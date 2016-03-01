@@ -244,6 +244,11 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 							std::string value(packetNode->value());
 							packet->conditionValue = Math::getNumber(value);
 						}
+						else if(packetNodeName == "delay")
+						{
+							std::string value(packetNode->value());
+							packet->delay = Math::getNumber(value);
+						}
 						else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\": " + packetsNodeName);
 					}
 				}

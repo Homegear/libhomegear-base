@@ -77,6 +77,7 @@ public:
 		std::string responseId;
 		ConditionOperator::Enum conditionOperator = ConditionOperator::none;
 		int32_t conditionValue = -1;
+		int32_t delay = -1;
 
 		Packet() {}
 		virtual ~Packet() {}
