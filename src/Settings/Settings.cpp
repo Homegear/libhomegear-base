@@ -69,9 +69,9 @@ void Settings::reset()
 	_prioritizeThreads = true;
 	_workerThreadWindow = 3000;
 	_scriptEngineThreadCount = 10;
-	_scriptEngineServerMaxConnections = 20;
+	_scriptEngineServerMaxConnections = 10;
 	_scriptEngineMaxThreadsPerScript = 4;
-	_scriptEngineMaxScriptsPerProcess = -1;
+	_scriptEngineMaxScriptsPerProcess = 50;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
