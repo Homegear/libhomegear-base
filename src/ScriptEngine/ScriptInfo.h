@@ -32,6 +32,8 @@
 #define ISCRIPTINFO_H_
 
 #include "../Sockets/SocketOperations.h"
+#include "../Sockets/ServerInfo.h"
+#include "../Encoding/Http.h"
 
 #include <string>
 #include <mutex>
@@ -72,8 +74,8 @@ public:
 		int32_t customId = 0;
 		bool returnOutput = false;
 
-		PVariable http; //Web
-		PVariable serverInfo; //Web
+		Http http; //Web
+		Rpc::PServerInfo serverInfo; //Web
 
 		std::string script; //Device
 		int64_t peerId = 0; //Device
@@ -88,6 +90,7 @@ public:
 
 
 	std::function<void(PScriptInfo& scriptInfo, std::string& output)> scriptOutputCallback;
+	std::function<void(PScriptInfo& scriptInfo, std::string& headers)> scriptHeadersCallback;
 
 	// {{{ Script finished notification. Can be combined.
 		// Option 1: Call scriptFinishedCallback
@@ -103,7 +106,8 @@ public:
 
 	ScriptInfo(ScriptType type) { _type = type; }
 	ScriptInfo(ScriptType type, std::string& path, std::string& arguments) { _type = type; this->path = path; this->arguments = arguments; }
-	ScriptInfo(ScriptType type, std::string& path, PVariable http, PVariable serverInfo) { _type = type; this->path = path; this->http = http; this->serverInfo = serverInfo; }
+	ScriptInfo(ScriptType type, std::string& path, Http& http, Rpc::PServerInfo& serverInfo) { _type = type; this->path = path; this->http = http; this->serverInfo = serverInfo; }
+	ScriptInfo(ScriptType type, std::string& path, PVariable http, PVariable serverInfo) { _type = type; this->path = path; this->http.unserialize(http); this->serverInfo.reset(new Rpc::ServerInfo::Info()); this->serverInfo->unserialize(serverInfo); }
 	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments) { _type = type; this->path = path; this->script = script; this->arguments = arguments; }
 	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->path = path; this->script = script; this->arguments = arguments; this->peerId = peerId; }
 	virtual ~ScriptInfo() {}
