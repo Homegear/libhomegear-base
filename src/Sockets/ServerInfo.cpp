@@ -60,6 +60,9 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(jsonrpcServer)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(redirectTo)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(address)));
+
+	// Module settings are not serialized
+
 	return serializedInfo;
 }
 
@@ -257,7 +260,8 @@ void ServerInfo::load(std::string filename)
 				}
 				else
 				{
-					_bl->out.printWarning("Warning: RPC client setting not found: " + std::string(input));
+					info->modSettings[name].push_back(value);
+					_bl->out.printDebug("Debug: Setting " + value + " added to module " + name + " of server " + info->name + ".");
 				}
 			}
 		}
