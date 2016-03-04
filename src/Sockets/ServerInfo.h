@@ -78,10 +78,16 @@ public:
 		bool jsonrpcServer = true;
 		std::string redirectTo;
 
+		// Mods
+		std::map<std::string, std::vector<std::string>> modSettings;
+
 		//Not settable
 		std::string address;
 		PVariable serializedInfo;
 
+		/**
+		 * Serializes the whole object except modSettings.
+		 */
 		PVariable serialize();
 		void unserialize(PVariable data);
 	};
