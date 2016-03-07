@@ -506,15 +506,20 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
 	{
 		if(!masterSet || masterSet->parameters.empty()) return;
 		BaseLib::Systems::RPCConfigurationParameter parameter;
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+		if(channelIterator == configCentral.end())
+		{
+			channelIterator = configCentral.insert(std::pair<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>(channel, std::unordered_map<std::string, RPCConfigurationParameter>())).first;
+		}
 		for(Parameters::iterator j = masterSet->parameters.begin(); j != masterSet->parameters.end(); ++j)
 		{
 			if(!j->second) continue;
-			if(!j->second->id.empty() && configCentral[channel].find(j->second->id) == configCentral[channel].end())
+			if(!j->second->id.empty() && channelIterator->second.find(j->second->id) == channelIterator->second.end())
 			{
 				parameter = BaseLib::Systems::RPCConfigurationParameter();
 				parameter.rpcParameter = j->second;
 				setDefaultValue(&parameter);
-				configCentral[channel][j->second->id] = parameter;
+				channelIterator->second[j->second->id] = parameter;
 				saveParameter(0, ParameterGroup::Type::config, channel, j->second->id, parameter.data);
 			}
 		}
