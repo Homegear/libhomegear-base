@@ -75,7 +75,7 @@ bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entr
 		if(index < 0 || index >= _queueCount || !entry) return false;
 		{
 			std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]);
-			if(_buffer[index].size() >= _bufferSize) return false;
+			if(_buffer[index].size() >= (unsigned)_bufferSize) return false;
 
 			id = entry->getTime();
 			while(_buffer[index].find(id) != _buffer[index].end()) id++;
