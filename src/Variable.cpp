@@ -218,155 +218,141 @@ bool Variable::operator!=(const Variable& rhs)
 	return !(operator==(rhs));
 }
 
-void Variable::print(bool stderr)
+std::string Variable::print(bool stdout, bool stderr)
 {
+	std::ostringstream result;
 	if(type == VariableType::tVoid)
 	{
-		std::cout << "(void)" << std::endl;
-		if(stderr) std::cerr << "(void)" << std::endl;
+		result << "(void)" << std::endl;
 	}
 	else if(type == VariableType::tBoolean)
 	{
-		std::cout << "(Boolean) " << booleanValue << std::endl;
-		if(stderr) std::cerr << "(Boolean) " << booleanValue << std::endl;
+		result << "(Boolean) " << booleanValue << std::endl;
 	}
 	else if(type == VariableType::tInteger)
 	{
-		std::cout << "(Integer) " << integerValue << std::endl;
-		if(stderr) std::cerr << "(Integer) " << integerValue << std::endl;
+		result << "(Integer) " << integerValue << std::endl;
 	}
 	else if(type == VariableType::tInteger64)
 	{
-		std::cout << "(Integer64) " << integerValue64 << std::endl;
-		if(stderr) std::cerr << "(Integer64) " << integerValue64 << std::endl;
+		result << "(Integer64) " << integerValue64 << std::endl;
 	}
 	else if(type == VariableType::tFloat)
 	{
-		std::cout << "(Float) " << floatValue << std::endl;
-		if(stderr) std::cerr << "(Float) " << floatValue << std::endl;
+		result << "(Float) " << floatValue << std::endl;
 	}
 	else if(type == VariableType::tString)
 	{
-		std::cout << "(String) " << stringValue << std::endl;
-		if(stderr) std::cerr << "(String) " << stringValue << std::endl;
+		result << "(String) " << stringValue << std::endl;
 	}
 	else if(type == VariableType::tBase64)
 	{
-		std::cout << "(Base64) " << stringValue << std::endl;
-		if(stderr) std::cerr << "(Base64) " << stringValue << std::endl;
+		result << "(Base64) " << stringValue << std::endl;
 	}
 	else if(type == VariableType::tArray)
 	{
 		std::string indent("");
-		printArray(arrayValue, indent, stderr);
+		result << printArray(arrayValue, indent);
 	}
 	else if(type == VariableType::tStruct)
 	{
 		std::string indent("");
-		printStruct(structValue, indent, stderr);
+		result << printStruct(structValue, indent);
 	}
 	else if(type == VariableType::tBinary)
 	{
-		std::cout << "(Binary) " << HelperFunctions::getHexString(binaryValue) << std::endl;
-		if(stderr) std::cerr << "(Binary) " << HelperFunctions::getHexString(binaryValue) << std::endl;
+		result << "(Binary) " << HelperFunctions::getHexString(binaryValue) << std::endl;
 	}
 	else
 	{
-		std::cout << "(unknown)" << std::endl;
-		if(stderr) std::cerr << "(unknown)" << std::endl;
+		result << "(unknown)" << std::endl;
 	}
+	if(stdout) std::cout << result;
+	if(stderr) std::cerr << result;
+	return result.str();
 }
 
-void Variable::print(std::shared_ptr<Variable> variable, std::string indent, bool stderr)
+std::string Variable::print(std::shared_ptr<Variable> variable, std::string indent)
 {
-	if(!variable) return;
+	if(!variable) return "";
+	std::ostringstream result;
 	if(variable->type == VariableType::tVoid)
 	{
-		std::cout << indent << "(void)" << std::endl;
-		if(stderr) std::cerr << indent << "(void)" << std::endl;
+		result << indent << "(void)" << std::endl;
 	}
 	else if(variable->type == VariableType::tInteger)
 	{
-		std::cout << indent << "(Integer) " << variable->integerValue << std::endl;
-		if(stderr) std::cerr << indent << "(Integer) " << variable->integerValue << std::endl;
+		result << indent << "(Integer) " << variable->integerValue << std::endl;
 	}
 	else if(variable->type == VariableType::tInteger64)
 	{
-		std::cout << indent << "(Integer64) " << variable->integerValue64 << std::endl;
-		if(stderr) std::cerr << indent << "(Integer64) " << variable->integerValue64 << std::endl;
+		result << indent << "(Integer64) " << variable->integerValue64 << std::endl;
 	}
 	else if(variable->type == VariableType::tFloat)
 	{
-		std::cout << indent << "(Float) " << variable->floatValue << std::endl;
-		if(stderr) std::cerr << indent << "(Float) " << variable->floatValue << std::endl;
+		result << indent << "(Float) " << variable->floatValue << std::endl;
 	}
 	else if(variable->type == VariableType::tBoolean)
 	{
-		std::cout << indent << "(Boolean) " << variable->booleanValue << std::endl;
-		if(stderr) std::cerr << indent << "(Boolean) " << variable->booleanValue << std::endl;
+		result << indent << "(Boolean) " << variable->booleanValue << std::endl;
 	}
 	else if(variable->type == VariableType::tString)
 	{
-		std::cout << indent << "(String) " << variable->stringValue << std::endl;
-		if(stderr) std::cerr << indent << "(String) " << variable->stringValue << std::endl;
+		result << indent << "(String) " << variable->stringValue << std::endl;
 	}
 	else if(type == VariableType::tBase64)
 	{
-		std::cout << indent << "(Base64) " << variable->stringValue << std::endl;
-		if(stderr) std::cerr << indent << "(Base64) " << variable->stringValue << std::endl;
+		result << indent << "(Base64) " << variable->stringValue << std::endl;
 	}
 	else if(variable->type == VariableType::tArray)
 	{
-		printArray(variable->arrayValue, indent, stderr);
+		return printArray(variable->arrayValue, indent);
 	}
 	else if(variable->type == VariableType::tStruct)
 	{
-		printStruct(variable->structValue, indent, stderr);
+		return printStruct(variable->structValue, indent);
 	}
 	else if(variable->type == VariableType::tBinary)
 	{
-		std::cout << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << std::endl;
-		if(stderr) std::cerr << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << std::endl;
+		result << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << std::endl;
 	}
 	else
 	{
-		std::cout << indent << "(Unknown)" << std::endl;
-		if(stderr) std::cerr << indent << "(Unknown)" << std::endl;
+		result << indent << "(Unknown)" << std::endl;
 	}
+	return result.str();
 }
 
-void Variable::printArray(PArray array, std::string indent, bool stderr)
+std::string Variable::printArray(PArray array, std::string indent)
 {
-	std::cout << indent << "(Array length=" << array->size() << ")" << std::endl << indent << "{" << std::endl;
-	if(stderr) std::cerr << indent << "(Array length=" << array->size() << ")" << std::endl << indent << "{" << std::endl;
+	std::ostringstream result;
+	result << indent << "(Array length=" << array->size() << ")" << std::endl << indent << "{" << std::endl;
 	std::string currentIndent = indent;
 	currentIndent.push_back(' ');
 	currentIndent.push_back(' ');
 	for(std::vector<std::shared_ptr<Variable>>::iterator i = array->begin(); i != array->end(); ++i)
 	{
-		print(*i, currentIndent, stderr);
+		result << print(*i, currentIndent);
 	}
-	std::cout << indent << "}" << std::endl;
-	if(stderr) std::cerr << indent << "}" << std::endl;
+	result << indent << "}" << std::endl;
+	return result.str();
 }
 
-void Variable::printStruct(PStruct tStruct, std::string indent, bool stderr)
+std::string Variable::printStruct(PStruct tStruct, std::string indent)
 {
-	std::cout << indent << "(Struct length=" << tStruct->size() << ")" << std::endl << indent << "{" << std::endl;
-	if(stderr) std::cerr << indent << "(Struct length=" << tStruct->size() << ")" << std::endl << indent << "{" << std::endl;
+	std::ostringstream result;
+	result << indent << "(Struct length=" << tStruct->size() << ")" << std::endl << indent << "{" << std::endl;
 	std::string currentIndent = indent;
 	currentIndent.push_back(' ');
 	currentIndent.push_back(' ');
 	for(std::map<std::string, std::shared_ptr<Variable>>::iterator i = tStruct->begin(); i != tStruct->end(); ++i)
 	{
-		std::cout << currentIndent << "[" << i->first << "]" << std::endl << currentIndent << "{" << std::endl;
-		if(stderr) std::cerr << currentIndent << "[" << i->first << "]" << std::endl << currentIndent << "{" << std::endl;
-		print(i->second, currentIndent + "  ", stderr);
-		std::cout << currentIndent << "}" << std::endl;
-		if(stderr) std::cerr << currentIndent << "}" << std::endl;
+		result << currentIndent << "[" << i->first << "]" << std::endl << currentIndent << "{" << std::endl;
+		result << print(i->second, currentIndent + "  ");
+		result << currentIndent << "}" << std::endl;
 	}
-	std::cout << indent << "}" << std::endl;
-	if(stderr) std::cerr << indent << "}" << std::endl;
+	result << indent << "}" << std::endl;
+	return result.str();
 }
 
 PVariable Variable::fromString(std::string& value, DeviceDescription::ILogical::Type::Enum type)
