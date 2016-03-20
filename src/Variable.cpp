@@ -267,9 +267,10 @@ std::string Variable::print(bool stdout, bool stderr)
 	{
 		result << "(unknown)" << std::endl;
 	}
-	if(stdout) std::cout << result;
-	if(stderr) std::cerr << result;
-	return result.str();
+	std::string resultString = result.str();
+	if(stdout) std::cout << resultString;
+	if(stderr) std::cerr << resultString;
+	return resultString;
 }
 
 std::string Variable::print(std::shared_ptr<Variable> variable, std::string indent)

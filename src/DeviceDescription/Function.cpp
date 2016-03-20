@@ -121,7 +121,7 @@ Function::Function(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& channelInd
 		else if(nodeName == "alternativeFunction")
 		{
 			uint32_t channel = 0;
-			alternativeFunction.reset(new Function(baseLib, subNode, channel));
+			alternativeFunctions.push_back(PFunction(new Function(baseLib, subNode, channel)));
 		}
 		else _bl->out.printWarning("Warning: Unknown node in \"function\": " + nodeName);
 	}

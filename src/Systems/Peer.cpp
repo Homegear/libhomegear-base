@@ -328,7 +328,7 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumb
 				std::shared_ptr<ICentral> central(getCentral());
 				if(central)
 				{
-					std::shared_ptr<Peer> peer(central->getPeer((*i)->address));
+					std::shared_ptr<Peer> peer(central->getPeer((*i)->id));
 					if(peer) (*i)->serialNumber = peer->getSerialNumber();
 				}
 			}
@@ -478,10 +478,10 @@ void Peer::initializeCentralConfig()
 		{
 			initializeMasterSet(i->first, i->second->configParameters);
 			initializeValueSet(i->first, i->second->variables);
-			if(i->second->alternativeFunction)
+			for(std::vector<PFunction>::iterator j = i->second->alternativeFunctions.begin(); j != i->second->alternativeFunctions.end(); ++j)
 			{
-				initializeMasterSet(i->first, i->second->alternativeFunction->configParameters);
-				initializeValueSet(i->first, i->second->alternativeFunction->variables);
+				initializeMasterSet(i->first, (*j)->configParameters);
+				initializeValueSet(i->first, (*j)->variables);
 			}
 		}
 	}
@@ -1028,8 +1028,21 @@ void Peer::loadConfig()
 {
 	try
 	{
+		struct ParameterInfo
+		{
+			ParameterGroup::Type::Enum parameterGroupType;
+			uint32_t channel;
+			int32_t remoteAddress;
+			int32_t remoteChannel;
+			std::string parameterName;
+			RPCConfigurationParameter parameter;
+			PFunction function;
+		};
+
 		Database::DataRow data;
 		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getPeerParameters(_peerID);
+		std::shared_ptr<ParameterInfo> parameterGroupSelector;
+		std::vector<std::shared_ptr<ParameterInfo>> parameters;
 		for(Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
 			uint32_t databaseID = row->second.at(0)->intValue;
@@ -1044,13 +1057,15 @@ void Peer::loadConfig()
 			}
 			else
 			{
-				uint32_t channel = row->second.at(3)->intValue;
-				int32_t remoteAddress = row->second.at(4)->intValue;
-				int32_t remoteChannel = row->second.at(5)->intValue;
-				std::string* parameterName = &row->second.at(6)->textValue;
-				if(parameterName->empty())
+				std::shared_ptr<ParameterInfo> parameterInfo(new ParameterInfo());
+				parameterInfo->parameterGroupType = parameterGroupType;
+				parameterInfo->channel = row->second.at(3)->intValue;
+				parameterInfo->remoteAddress = row->second.at(4)->intValue;
+				parameterInfo->remoteChannel = row->second.at(5)->intValue;
+				parameterInfo->parameterName = row->second.at(6)->textValue;
+				if(parameterInfo->parameterName.empty())
 				{
-					_bl->out.printCritical("Critical: Added central config parameter without id. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(channel));
+					_bl->out.printCritical("Critical: Added central config parameter without id. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
 					data.clear();
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(std::string(""))));
@@ -1058,56 +1073,92 @@ void Peer::loadConfig()
 					continue;
 				}
 
-				RPCConfigurationParameter parameter;
-				parameter.databaseID = databaseID;
-				parameter.data.insert(parameter.data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				parameterInfo->parameter.databaseID = databaseID;
+				parameterInfo->parameter.data.insert(parameterInfo->parameter.data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
 				if(!_rpcDevice)
 				{
-					_bl->out.printError("Critical: No xml rpc device found for peer " + std::to_string(_peerID) + ".");
+					_bl->out.printCritical("Critical: No xml rpc device found for peer " + std::to_string(_peerID) + ".");
 					continue;
 				}
-				if(_rpcDevice->functions.find(channel) != _rpcDevice->functions.end() && _rpcDevice->functions[channel])
+
+				Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
+				if(functionIterator == _rpcDevice->functions.end())
 				{
-					if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter.rpcParameter = _rpcDevice->functions[channel]->configParameters->parameters[*parameterName];
-					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter.rpcParameter = _rpcDevice->functions[channel]->variables->parameters[*parameterName];
-					else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter.rpcParameter = _rpcDevice->functions[channel]->linkParameters->parameters[*parameterName];
-					if(!parameter.rpcParameter && _rpcDevice->functions[channel]->alternativeFunction)
-					{
-						if(parameterGroupType == ParameterGroup::Type::Enum::config) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->configParameters->parameters[*parameterName];
-						else if(parameterGroupType == ParameterGroup::Type::Enum::variables) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->variables->parameters[*parameterName];
-						else if(parameterGroupType == ParameterGroup::Type::Enum::link) parameter.rpcParameter = _rpcDevice->functions[channel]->alternativeFunction->linkParameters->parameters[*parameterName];
-					}
+					_bl->out.printCritical("Critical: Added central config parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
+					continue;
 				}
-				if(!parameter.rpcParameter)
+				parameterInfo->function = functionIterator->second;
+				if(parameterGroupType == ParameterGroup::Type::Enum::config && parameterInfo->function->parameterGroupSelector && !parameterInfo->function->alternativeFunctions.empty() && parameterInfo->parameterName == parameterInfo->function->parameterGroupSelector->id)
 				{
-					_bl->out.printError("Error: Deleting parameter " + *parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string(channel) + " Parameter set type: " + std::to_string((uint32_t)parameterGroupType));
-					Database::DataRow data;
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)parameterGroupType)));
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(channel)));
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(*parameterName)));
-					if(parameterGroupType == ParameterGroup::Type::Enum::config)
+					int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterInfo->parameter.data)->integerValue;
+					if(index >= (signed)parameterInfo->function->alternativeFunctions.size())
 					{
-						configCentral[channel].erase(*parameterName);
+						_bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterInfo->parameter.data.back()) + "). Peer: " + std::to_string(_peerID) + ".");
+						continue;
 					}
-					else if(parameterGroupType == ParameterGroup::Type::Enum::variables)
-					{
-						valuesCentral[channel].erase(*parameterName);
-					}
-					else if(parameterGroupType == ParameterGroup::Type::Enum::link)
-					{
-						linksCentral[channel][remoteAddress][remoteChannel].erase(*parameterName);
-						data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(remoteAddress)));
-						data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(remoteChannel)));
-					}
-					_bl->db->deletePeerParameter(_peerID, data);
+					parameterInfo->parameter.rpcParameter = parameterInfo->function->parameterGroupSelector;
+					parameterGroupSelector = parameterInfo;
+				}
+				parameters.push_back(parameterInfo);
+			}
+		}
+
+		for(std::vector<std::shared_ptr<ParameterInfo>>::iterator i = parameters.begin(); i != parameters.end(); ++i)
+		{
+			if(parameterGroupSelector && (*i)->function->parameterGroupSelector && !(*i)->function->alternativeFunctions.empty())
+			{
+				int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->integerValue;
+				if(index == 0)
+				{
+					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = (*i)->function->configParameters->parameters[(*i)->parameterName];
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = (*i)->function->variables->parameters[(*i)->parameterName];
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = (*i)->function->linkParameters->parameters[(*i)->parameterName];
 				}
 				else
 				{
-					if(parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[channel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
-					else if(parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[channel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
-					else if(parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[channel][remoteAddress][remoteChannel].insert(std::pair<std::string, RPCConfigurationParameter>(*parameterName, parameter));
+					index--;
+					PFunction alternativeFunction = (*i)->function->alternativeFunctions.at(index);
+					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = alternativeFunction->configParameters->parameters[(*i)->parameterName];
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = alternativeFunction->variables->parameters[(*i)->parameterName];
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = alternativeFunction->linkParameters->parameters[(*i)->parameterName];
 				}
+			}
+			else
+			{
+				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = (*i)->function->configParameters->parameters[(*i)->parameterName];
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = (*i)->function->variables->parameters[(*i)->parameterName];
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = (*i)->function->linkParameters->parameters[(*i)->parameterName];
+			}
+
+			if(!(*i)->parameter.rpcParameter)
+			{
+				if(!parameterGroupSelector || !(*i)->function->parameterGroupSelector || (*i)->function->alternativeFunctions.empty()) _bl->out.printWarning("Warning: Deleting parameter " + (*i)->parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string((*i)->channel) + " Parameter set type: " + std::to_string((uint32_t)((*i)->parameterGroupType)));
+				Database::DataRow data;
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)((*i)->parameterGroupType))));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->channel)));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->parameterName)));
+				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+				{
+					configCentral[(*i)->channel].erase((*i)->parameterName);
+				}
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				{
+					valuesCentral[(*i)->channel].erase((*i)->parameterName);
+				}
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+				{
+					linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].erase((*i)->parameterName);
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->remoteAddress)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->remoteChannel)));
+				}
+				_bl->db->deletePeerParameter(_peerID, data);
+			}
+			else
+			{
+				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
 			}
 		}
 	}
@@ -1805,14 +1856,16 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 			for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
 				if((*i)->isVirtual) continue;
-				std::shared_ptr<Peer> remotePeer(central->getPeer((*i)->address));
+				if((*i)->hasSender) isSender = (*i)->isSender;
+				else (*i)->isSender = isSender; //Todo: Remove in future versions. Sets isSender of the peer if previously unset.
+				std::shared_ptr<Peer> remotePeer(central->getPeer((*i)->id));
 				if(!remotePeer)
 				{
-					_bl->out.printDebug("Debug: Can't return link description for peer with address 0x" + BaseLib::HelperFunctions::getHexString((*i)->address, 6) + ". The peer is not paired to Homegear.");
+					_bl->out.printDebug("Debug: Can't return link description for peer with id " + std::to_string((*i)->id) + ". The peer is not paired to Homegear.");
 					continue;
 				}
 				bool peerKnowsMe = false;
-				if(remotePeer && remotePeer->getPeer((*i)->channel, _address, channel)) peerKnowsMe = true;
+				if(remotePeer && remotePeer->getPeer((*i)->channel, _peerID, channel)) peerKnowsMe = true;
 
 				//Don't continue if peer is sender and exists in central's peer array to avoid generation of duplicate results when requesting all links (only generate results when we are sender)
 				if(!isSender && peerKnowsMe && avoidDuplicates) return array;
@@ -1824,7 +1877,7 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 				if(peerID == 0 || peerSerialNumber.empty())
 				{
 					if(peerKnowsMe ||
-					  (*i)->address == _address) //Link to myself with non-existing (virtual) channel (e. g. switches use this)
+					  (*i)->id == _peerID) //Link to myself with non-existing (virtual) channel (e. g. switches use this)
 					{
 						(*i)->id = remotePeer->getID();
 						(*i)->serialNumber = remotePeer->getSerialNumber();
@@ -1835,7 +1888,7 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 					{
 						//Peer not paired to central
 						std::ostringstream stringstream;
-						stringstream << '@' << std::hex << std::setw(6) << std::setfill('0') << (*i)->address;
+						stringstream << '@' << std::dec << (*i)->id;
 						peerSerialNumber = stringstream.str();
 						if(isSender) brokenFlags = 2; //LINK_FLAG_RECEIVER_BROKEN
 						else brokenFlags = 1; //LINK_FLAG_SENDER_BROKEN
@@ -2043,7 +2096,7 @@ std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t 
 			for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
 				if((*i)->isVirtual) continue;
-				std::shared_ptr<Peer> peer(central->getPeer((*i)->address));
+				std::shared_ptr<Peer> peer(central->getPeer((*i)->id));
 				if(returnID && !peer) continue;
 				bool peerKnowsMe = false;
 				if(peer && peer->getPeer(channel, _peerID)) peerKnowsMe = true;
@@ -2051,7 +2104,7 @@ std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t 
 				std::string peerSerial = (*i)->serialNumber;
 				if((*i)->serialNumber.empty() || (*i)->id == 0)
 				{
-					if(peerKnowsMe || (*i)->address == _address)
+					if(peerKnowsMe || (*i)->id == _peerID)
 					{
 						(*i)->serialNumber = peer->getSerialNumber();
 						(*i)->id = peer->getID();
@@ -2061,7 +2114,7 @@ std::shared_ptr<Variable> Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t 
 					{
 						//Peer not paired to central
 						std::ostringstream stringstream;
-						stringstream << '@' << std::hex << std::setw(6) << std::setfill('0') << (*i)->address;
+						stringstream << '@' << std::dec << (*i)->id;
 						peerSerial = stringstream.str();
 					}
 				}
@@ -2110,7 +2163,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
 		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
 		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
-		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
+		PParameterGroup parameterGroup = getParameterSet(channel, type);
 		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
 		PVariable variables(new Variable(VariableType::tStruct));
 
@@ -2380,10 +2433,8 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(channel < 0) channel = 0;
-		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
-		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
 		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
-		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
+		PParameterGroup parameterGroup = getParameterSet(channel, type);
 		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
 		if(type == ParameterGroup::Type::link && remoteID > 0)
 		{

@@ -351,7 +351,7 @@ public:
 	std::shared_ptr<LinkRole> linkRoles;
 	std::vector<std::shared_ptr<EnforceLink>> enforceLinks;
 	std::shared_ptr<HomeMaticParameter> specialParameter;
-	std::shared_ptr<DeviceChannel> subconfig;
+	std::vector<std::shared_ptr<DeviceChannel>> subconfigs;
 
 	DeviceChannel(BaseLib::Obj* baseLib);
 	DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& index);

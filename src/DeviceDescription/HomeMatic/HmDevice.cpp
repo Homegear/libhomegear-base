@@ -2043,6 +2043,7 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 					std::string valueID = parameter->physicalParameter->valueID;
 					parameter->physicalParameter = specialParameter->physicalParameter;
 					parameter->physicalParameter->valueID = valueID;
+					if(!specialParameter->conversion.empty()) parameter->conversion = specialParameter->conversion;
 				}
 			}
 		}
@@ -2062,7 +2063,7 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 		else if(nodeName == "subconfig")
 		{
 			uint32_t index = 0;
-			subconfig.reset(new DeviceChannel(baseLib, channelNode, index));
+			std::shared_ptr<DeviceChannel> subconfig(new DeviceChannel(baseLib, channelNode, index));
 			//Set physical settings of special_parameter
 			if(specialParameter && subconfig->parameterSets.find(ParameterSet::Type::Enum::master) != subconfig->parameterSets.end())
 			{
@@ -2072,8 +2073,10 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 					std::string valueID = parameter->physicalParameter->valueID;
 					parameter->physicalParameter = specialParameter->physicalParameter;
 					parameter->physicalParameter->valueID = valueID;
+					if(!specialParameter->conversion.empty()) parameter->conversion = specialParameter->conversion;
 				}
 			}
+			subconfigs.push_back(subconfig);
 		}
 		else _bl->out.printWarning("Warning: Unknown node name for \"device\": " + nodeName);
 	}
@@ -2423,6 +2426,28 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 					for(std::vector<std::shared_ptr<HomeMaticParameter>>::iterator k = parameterSet->parameters.begin(); k != parameterSet->parameters.end(); ++k)
 					{
 						(*k)->parentParameterSet = parameterSet.get();
+					}
+				}
+
+				for(std::vector<std::shared_ptr<DeviceChannel>>::iterator j = i->second->subconfigs.begin(); j != i->second->subconfigs.end(); ++j)
+				{
+					for(std::map<ParameterSet::Type::Enum, std::shared_ptr<ParameterSet>>::iterator k = (*j)->parameterSets.begin(); k != (*j)->parameterSets.end(); ++k)
+					{
+						if(k->second->subsetReference.empty() || parameterSetDefinitions.find(k->second->subsetReference) == parameterSetDefinitions.end()) continue;
+						std::shared_ptr<ParameterSet> parameterSet(new ParameterSet(_bl));
+						*parameterSet = *parameterSetDefinitions.at(k->second->subsetReference);
+						parameterSet->type = k->second->type;
+						parameterSet->id = k->second->id;
+						for(std::vector<std::shared_ptr<HomeMaticParameter>>::iterator l = k->second->parameters.begin(); l != k->second->parameters.end(); ++l)
+						{
+							if(!*l) continue;
+							parameterSet->parameters.push_back(*l);
+						}
+						for(std::vector<std::shared_ptr<HomeMaticParameter>>::iterator l = parameterSet->parameters.begin(); l != parameterSet->parameters.end(); ++l)
+						{
+							(*l)->parentParameterSet = parameterSet.get();
+						}
+						k->second = parameterSet;
 					}
 				}
 			}

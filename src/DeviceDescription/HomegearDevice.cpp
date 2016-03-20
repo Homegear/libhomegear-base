@@ -2202,11 +2202,11 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
 			linkParameters[function->linkParametersId] = function->linkParameters;
 		}
 
-		if(function->alternativeFunction)
+		for(std::vector<PFunction>::iterator i = function->alternativeFunctions.begin(); i != function->alternativeFunctions.end(); ++i)
 		{
 			xml_node<>* subnode = doc->allocate_node(node_element, "alternativeFunction");
 			parentNode->append_node(subnode);
-			saveFunction(doc, subnode, function->alternativeFunction, tempStrings, configParameters, variables, linkParameters);
+			saveFunction(doc, subnode, *i, tempStrings, configParameters, variables, linkParameters);
 		}
 	}
 	catch(const std::exception& ex)
@@ -2346,7 +2346,10 @@ void HomegearDevice::parseXML(xml_node<>* node)
 		for(Functions::iterator i = functions.begin(); i != functions.end(); ++i)
 		{
 			postProcessFunction(i->second, configParameters, variables, linkParameters);
-			if(i->second->alternativeFunction) postProcessFunction(i->second->alternativeFunction, configParameters, variables, linkParameters);
+			for(std::vector<PFunction>::iterator j = i->second->alternativeFunctions.begin(); j != i->second->alternativeFunctions.end(); ++j)
+			{
+				postProcessFunction(*j, configParameters, variables, linkParameters);
+			}
 		}
 	}
     catch(const std::exception& ex)
