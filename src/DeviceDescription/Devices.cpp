@@ -1131,6 +1131,41 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 				}
 			}
 		}
+		else if(filename == "rf_em_8.xml")
+		{
+			std::map<std::string, std::shared_ptr<HmDeviceDescription::DeviceFrame>>::iterator frameIterator = homeMaticDevice->framesByID.find("EVENT_SIM");
+			if(frameIterator != homeMaticDevice->framesByID.end())
+			{
+				HmDeviceDescription::HomeMaticParameter parameter(_bl);
+				parameter.type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+				parameter.index = 10.0;
+				parameter.size = 1.0;
+				parameter.param = "COUNTER";
+				frameIterator->second->parameters.push_back(parameter);
+			}
+
+			frameIterator = homeMaticDevice->framesByID.find("KEY_SIM_SHORT");
+			if(frameIterator != homeMaticDevice->framesByID.end())
+			{
+				HmDeviceDescription::HomeMaticParameter parameter(_bl);
+				parameter.type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+				parameter.index = 10.0;
+				parameter.size = 1.0;
+				parameter.param = "COUNTER";
+				frameIterator->second->parameters.push_back(parameter);
+			}
+
+			frameIterator = homeMaticDevice->framesByID.find("KEY_SIM_LONG");
+			if(frameIterator != homeMaticDevice->framesByID.end())
+			{
+				HmDeviceDescription::HomeMaticParameter parameter(_bl);
+				parameter.type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+				parameter.index = 10.0;
+				parameter.size = 1.0;
+				parameter.param = "COUNTER";
+				frameIterator->second->parameters.push_back(parameter);
+			}
+		}
 
 		HmDeviceDescription::HmConverter converter(_bl);
 		std::shared_ptr<HomegearDevice> device(new HomegearDevice(_bl, _family));
