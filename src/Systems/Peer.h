@@ -87,6 +87,7 @@ public:
 	virtual ~BasicPeer() {}
 
 	std::shared_ptr<Peer> peer;
+	bool hasSender = false; //Todo: Can be removed in future versions
 	bool isSender = false;
 	uint64_t id = 0;
 	int32_t address = 0;

@@ -90,7 +90,7 @@ public:
 	std::string configParametersId;
 	std::string variablesId;
 	std::string linkParametersId;
-	PFunction alternativeFunction;
+	std::vector<PFunction> alternativeFunctions;
 
 	//Helpers
 	PParameter parameterGroupSelector;

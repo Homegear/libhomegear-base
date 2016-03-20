@@ -266,13 +266,17 @@ void HmConverter::convertChannel(std::shared_ptr<DeviceChannel> homematicChannel
 	 * uiFlags => deletable
 	 */
 
-	if(homematicChannel->subconfig)
+	if(!homematicChannel->subconfigs.empty())
 	{
-		homegearFunction->alternativeFunction.reset(new Function(_bl));
-		homematicChannel->subconfig->startIndex = homematicChannel->startIndex;
-		homematicChannel->subconfig->type = homematicChannel->type;
-		homematicChannel->subconfig->count = homematicChannel->count;
-		convertChannel(homematicChannel->subconfig, homegearFunction->alternativeFunction);
+		for(std::vector<std::shared_ptr<DeviceChannel>>::iterator i = homematicChannel->subconfigs.begin(); i != homematicChannel->subconfigs.end(); ++i)
+		{
+			PFunction alternativeFunction(new Function(_bl));
+			homegearFunction->alternativeFunctions.push_back(alternativeFunction);
+			(*i)->startIndex = homematicChannel->startIndex;
+			(*i)->type = homematicChannel->type;
+			(*i)->count = homematicChannel->count;
+			convertChannel(*i, alternativeFunction);
+		}
 	}
 	homegearFunction->channel = homematicChannel->startIndex;
 	homegearFunction->channelCount = homematicChannel->count;
