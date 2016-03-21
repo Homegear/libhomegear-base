@@ -1110,24 +1110,61 @@ void Peer::loadConfig()
 				int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->integerValue;
 				if(index == 0)
 				{
-					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = (*i)->function->configParameters->parameters[(*i)->parameterName];
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = (*i)->function->variables->parameters[(*i)->parameterName];
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = (*i)->function->linkParameters->parameters[(*i)->parameterName];
+					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+					{
+						Parameters::iterator parameterIterator = (*i)->function->configParameters->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+					{
+						Parameters::iterator parameterIterator = (*i)->function->variables->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+					{
+						Parameters::iterator parameterIterator = (*i)->function->linkParameters->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
 				}
 				else
 				{
 					index--;
 					PFunction alternativeFunction = (*i)->function->alternativeFunctions.at(index);
-					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = alternativeFunction->configParameters->parameters[(*i)->parameterName];
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = alternativeFunction->variables->parameters[(*i)->parameterName];
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = alternativeFunction->linkParameters->parameters[(*i)->parameterName];
+
+					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+					{
+						Parameters::iterator parameterIterator = alternativeFunction->configParameters->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+					{
+						Parameters::iterator parameterIterator = alternativeFunction->variables->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
+					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+					{
+						Parameters::iterator parameterIterator = alternativeFunction->linkParameters->parameters.find((*i)->parameterName);
+						if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					}
 				}
 			}
 			else
 			{
-				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) (*i)->parameter.rpcParameter = (*i)->function->configParameters->parameters[(*i)->parameterName];
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) (*i)->parameter.rpcParameter = (*i)->function->variables->parameters[(*i)->parameterName];
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) (*i)->parameter.rpcParameter = (*i)->function->linkParameters->parameters[(*i)->parameterName];
+				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+				{
+					Parameters::iterator parameterIterator = (*i)->function->configParameters->parameters.find((*i)->parameterName);
+					if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+				}
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				{
+					Parameters::iterator parameterIterator = (*i)->function->variables->parameters.find((*i)->parameterName);
+					if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+				}
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+				{
+					Parameters::iterator parameterIterator = (*i)->function->linkParameters->parameters.find((*i)->parameterName);
+					if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+				}
 			}
 
 			if(!(*i)->parameter.rpcParameter)
