@@ -218,6 +218,7 @@ public:
     virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, int32_t address, int32_t remoteChannel = -1);
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, uint64_t id, int32_t remoteChannel = -1);
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel = -1);
+	virtual void updatePeer(uint64_t oldId, uint64_t newId);
 
     virtual std::shared_ptr<ICentral> getCentral() = 0;
 

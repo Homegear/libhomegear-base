@@ -404,25 +404,40 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, uint64_t id, int32_t r
 			return std::shared_ptr<BasicPeer>();
 		}
 
+		bool modified = false;
 		for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = _peers[channel].begin(); i != _peers[channel].end(); ++i)
 		{
-			//TODO: Remove a few versions after ID is saved
-			if((*i)->id == 0)
+			if((*i)->id == 0) //ID is not always available after pairing. So try to get ID if not there.
 			{
-				std::shared_ptr<Peer> peer = getCentral()->getPeer((*i)->serialNumber);
-				if(peer) (*i)->id = peer->getID();
+				std::shared_ptr<Peer> peer1 = getCentral()->getPeer((*i)->serialNumber);
+				std::shared_ptr<Peer> peer2 = getCentral()->getPeer((*i)->address);
+				if(peer1)
+				{
+					(*i)->id = peer1->getID();
+					modified = true;
+				}
+				else if(peer2)
+				{
+					(*i)->id = peer2->getID();
+					modified = true;
+				}
 				else if((*i)->isVirtual && (*i)->address == getCentral()->getAddress())
 				{
 					(*i)->id = 0xFFFFFFFFFFFFFFFF;
+					modified = true;
 				}
 			}
 			if((*i)->id == id && (remoteChannel < 0 || remoteChannel == (*i)->channel))
 			{
 				std::shared_ptr<BasicPeer> peer = *i;
 				_peersMutex.unlock();
+				if(modified) savePeers();
 				return peer;
 			}
 		}
+		_peersMutex.unlock();
+		if(modified) savePeers();
+		return std::shared_ptr<BasicPeer>();
 	}
 	catch(const std::exception& ex)
     {
@@ -438,6 +453,41 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, uint64_t id, int32_t r
     }
     _peersMutex.unlock();
 	return std::shared_ptr<BasicPeer>();
+}
+
+void Peer::updatePeer(uint64_t oldId, uint64_t newId)
+{
+	try
+	{
+		bool changed = false;
+		{
+			std::lock_guard<std::mutex> peersGuard(_peersMutex);
+			for(std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator i = _peers.begin(); i != _peers.end(); ++i)
+			{
+				for(std::vector<std::shared_ptr<BasicPeer>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+				{
+					if((*j)->id == oldId)
+					{
+						(*j)->id = newId;
+						changed = true;
+					}
+				}
+			}
+		}
+		if(changed) savePeers();
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
 }
 
 void Peer::deleteFromDatabase()
@@ -1091,7 +1141,7 @@ void Peer::loadConfig()
 				if(parameterGroupType == ParameterGroup::Type::Enum::config && parameterInfo->function->parameterGroupSelector && !parameterInfo->function->alternativeFunctions.empty() && parameterInfo->parameterName == parameterInfo->function->parameterGroupSelector->id)
 				{
 					int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterInfo->parameter.data)->integerValue;
-					if(index >= (signed)parameterInfo->function->alternativeFunctions.size())
+					if(parameterInfo->function->parameterGroupSelector->logical->type != ILogical::Type::Enum::tBoolean && index > (signed)parameterInfo->function->alternativeFunctions.size())
 					{
 						_bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterInfo->parameter.data.back()) + "). Peer: " + std::to_string(_peerID) + ".");
 						continue;

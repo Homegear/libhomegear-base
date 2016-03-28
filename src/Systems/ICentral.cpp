@@ -350,9 +350,13 @@ void ICentral::setPeerId(uint64_t oldPeerId, uint64_t newPeerId)
 	{
 		std::shared_ptr<Peer> peer = getPeer(oldPeerId);
 		if(!peer) return;
-		_peersMutex.lock();
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
 		if(_peersById.find(oldPeerId) != _peersById.end()) _peersById.erase(oldPeerId);
 		_peersById[newPeerId] = peer;
+		for(std::map<uint64_t, std::shared_ptr<Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
+		{
+			i->second->updatePeer(oldPeerId, newPeerId);
+		}
 	}
     catch(const std::exception& ex)
     {
@@ -366,7 +370,6 @@ void ICentral::setPeerId(uint64_t oldPeerId, uint64_t newPeerId)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
 }
 
 int32_t ICentral::deviceFamily()
