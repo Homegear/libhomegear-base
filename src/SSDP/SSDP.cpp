@@ -109,16 +109,25 @@ std::shared_ptr<FileDescriptor> SSDP::getSocketDescriptor()
 		}
 
 		int32_t reuse = 1;
-		setsockopt(serverSocketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+		if(setsockopt(serverSocketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == -1)
+		{
+			_bl->out.printWarning("Warning: Could send SSDP socket options: " + std::string(strerror(errno)));
+		}
 
 		if(_bl->debugLevel >= 5) _bl->out.printInfo("Debug: SSDP server: Binding to address: " + _address);
 
 		char loopch = 0;
-		setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopch, sizeof(loopch));
+		if(setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopch, sizeof(loopch)) == -1)
+		{
+			_bl->out.printWarning("Warning: Could send SSDP socket options: " + std::string(strerror(errno)));
+		}
 
 		struct in_addr localInterface;
 		localInterface.s_addr = inet_addr(_address.c_str());
-		setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface));
+		if(setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) == -1)
+		{
+			_bl->out.printWarning("Warning: Could send SSDP socket options: " + std::string(strerror(errno)));
+		}
 
 		struct sockaddr_in localSock;
 		memset((char *) &localSock, 0, sizeof(localSock));
@@ -136,7 +145,11 @@ std::shared_ptr<FileDescriptor> SSDP::getSocketDescriptor()
 		struct ip_mreq group;
 		group.imr_multiaddr.s_addr = inet_addr("239.255.255.250");
 		group.imr_interface.s_addr = inet_addr(_address.c_str());
-		setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
+
+		if(setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) == -1)
+		{
+			_bl->out.printWarning("Warning: Could send SSDP socket options: " + std::string(strerror(errno)));
+		}
 	}
 	catch(const std::exception& ex)
 	{
@@ -165,7 +178,10 @@ void SSDP::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDesc
 
 	std::string broadcastPacket("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: " + std::to_string(timeout / 1000) + "\r\nST: " + stHeader + "\r\nContent-Length: 0\r\n\r\n");
 
-	sendto(serverSocketDescriptor->descriptor, &broadcastPacket.at(0), broadcastPacket.size(), 0, (struct sockaddr*)&addessInfo, sizeof(addessInfo));
+	if(sendto(serverSocketDescriptor->descriptor, &broadcastPacket.at(0), broadcastPacket.size(), 0, (struct sockaddr*)&addessInfo, sizeof(addessInfo)) == -1)
+	{
+		_bl->out.printWarning("Warning: Could send SSDP search broadcast packet: " + std::string(strerror(errno)));
+	}
 }
 
 void SSDP::searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SSDPInfo>& devices)

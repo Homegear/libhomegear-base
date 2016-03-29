@@ -1184,17 +1184,17 @@ void Peer::loadConfig()
 					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
 					{
 						Parameters::iterator parameterIterator = alternativeFunction->configParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						if(parameterIterator != alternativeFunction->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
 					}
 					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
 					{
 						Parameters::iterator parameterIterator = alternativeFunction->variables->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						if(parameterIterator != alternativeFunction->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
 					}
 					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
 					{
 						Parameters::iterator parameterIterator = alternativeFunction->linkParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						if(parameterIterator != alternativeFunction->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
 					}
 				}
 			}
