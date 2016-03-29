@@ -62,7 +62,6 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json)
 		default:
 			throw JsonDecoderException("JSON does not start with '{' or '['.");
 		}
-		pos++;
 	}
 
 	return variable;
@@ -88,7 +87,6 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json)
 		default:
 			throw JsonDecoderException("JSON does not start with '{' or '['.");
 		}
-		pos++;
 	}
 
 	return variable;

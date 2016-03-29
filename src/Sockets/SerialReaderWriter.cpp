@@ -44,6 +44,7 @@ SerialReaderWriter::SerialReaderWriter(BaseLib::Obj* baseLib, std::string device
 	if(_flags == 0) _flags = O_RDWR | O_NOCTTY | O_NDELAY;
 	_createLockFile = createLockFile;
 	_readThreadPriority = readThreadPriority;
+	memset(&_termios, 0, sizeof(termios));
 }
 
 SerialReaderWriter::~SerialReaderWriter()

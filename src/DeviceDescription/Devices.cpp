@@ -269,7 +269,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			for(std::map<uint32_t, std::shared_ptr<HmDeviceDescription::DeviceChannel>>::iterator i = homeMaticDevice->channels.begin(); i != homeMaticDevice->channels.end(); ++i)
 			{
 				std::map<HmDeviceDescription::ParameterSet::Type::Enum, std::shared_ptr<HmDeviceDescription::ParameterSet>>::iterator paramsetIterator = i->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::values);
-				if(paramsetIterator != channelIterator->second->parameterSets.end() && paramsetIterator->second)
+				if(paramsetIterator != i->second->parameterSets.end() && paramsetIterator->second)
 				{
 					std::shared_ptr<HmDeviceDescription::HomeMaticParameter> parameter = paramsetIterator->second->getParameter("PRESS_SHORT");
 					if(parameter) parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::event);

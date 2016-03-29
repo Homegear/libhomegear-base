@@ -389,7 +389,8 @@ void JsonEncoder::encodeInteger(const std::shared_ptr<Variable>& variable, std::
 
 void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
 {
-	s << std::fixed << std::setprecision(15) << variable->floatValue;
+	s << std::fixed << std::setprecision(15) << variable->floatValue << std::setprecision(6);
+	s.unsetf(std::ios_base::floatfield);
 }
 
 void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::vector<char>& s)

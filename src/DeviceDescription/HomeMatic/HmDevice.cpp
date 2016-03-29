@@ -1670,7 +1670,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 							}
 							else _bl->out.printWarning("Warning: Array physical is not defined for peer_param.");
 
-							peerParamElement = peerParamElement->next_sibling("physical");
+							if(peerParamElement) peerParamElement = peerParamElement->next_sibling("physical");
 							if(peerParamElement)
 							{
 								xml_attribute<>* attr1 = peerParamElement->first_attribute("type");
@@ -2473,8 +2473,9 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 
 		for(std::map<uint32_t, std::shared_ptr<DeviceChannel>>::iterator i = channels.begin(); i != channels.end(); ++i)
 		{
-			if(!i->second || i->second->parameterSets.find(ParameterSet::Type::Enum::values) == i->second->parameterSets.end()) continue;
-			for(std::vector<std::shared_ptr<HomeMaticParameter>>::iterator j = i->second->parameterSets.at(ParameterSet::Type::Enum::values)->parameters.begin(); j != i->second->parameterSets.at(ParameterSet::Type::Enum::values)->parameters.end(); ++j)
+			std::map<ParameterSet::Type::Enum, std::shared_ptr<ParameterSet>>::iterator parameterSetIterator = i->second->parameterSets.find(ParameterSet::Type::Enum::values);
+			if(!i->second || parameterSetIterator == i->second->parameterSets.end()) continue;
+			for(std::vector<std::shared_ptr<HomeMaticParameter>>::iterator j = parameterSetIterator->second->parameters.begin(); j != parameterSetIterator->second->parameters.end(); ++j)
 			{
 				if(!*j) continue;
 				if(!(*j)->physicalParameter->getRequest.empty() && framesByID.find((*j)->physicalParameter->getRequest) != framesByID.end())
