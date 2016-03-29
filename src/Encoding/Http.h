@@ -82,6 +82,7 @@ public:
 		std::string args;
 		std::string host;
 		std::string contentType;
+		std::string contentTypeFull;
 		TransferEncoding::Enum transferEncoding = TransferEncoding::Enum::none;
 		Connection::Enum connection = Connection::Enum::none;
 		std::string authorization;
