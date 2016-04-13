@@ -308,6 +308,23 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
 void Peer::setLastPacketReceived()
 {
 	_lastPacketReceived = HelperFunctions::getTimeSeconds();
+	std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(0);
+	if(valuesIterator != valuesCentral.end())
+	{
+		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find("LAST_PACKET_RECEIVED");
+		if(parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter)
+		{
+			parameterIterator->second.rpcParameter->convertToPacket(PVariable(new Variable(_lastPacketReceived)), parameterIterator->second.data);
+			if(parameterIterator->second.databaseID > 0) saveParameter(parameterIterator->second.databaseID, parameterIterator->second.data);
+			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterIterator->second.data);
+
+			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({std::string("LAST_PACKET_RECEIVED")}));
+			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>{ PVariable(new Variable(_lastPacketReceived)) });
+
+			raiseEvent(_peerID, 0, valueKeys, rpcValues);
+			raiseRPCEvent(_peerID, 0, _serialNumber + ":0", valueKeys, rpcValues);
+		}
+	}
 }
 
 std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel)
