@@ -256,56 +256,14 @@ void HomegearDevice::postLoad()
 	try
 	{
 		PParameter parameter(new Parameter(_bl, nullptr));
-		parameter->id = "PAIRED_TO_CENTRAL";
-		parameter->visible = false;
-		parameter->logical.reset(new LogicalBoolean(_bl));
-		parameter->logical->type = ILogical::Type::Enum::tBoolean;
-		parameter->physical.reset(new PhysicalBoolean(_bl));
-		parameter->physical->operationType = IPhysical::OperationType::Enum::internal;
-		parameter->physical->type = IPhysical::Type::Enum::tBoolean;
-		parameter->physical->groupId = "PAIRED_TO_CENTRAL";
-		parameter->physical->list = 0;
-		parameter->physical->index = 2;
-		functions[0]->configParameters->parameters[parameter->id] = parameter;
-
-		parameter.reset(new Parameter(_bl, nullptr));
-		parameter->id = "CENTRAL_ADDRESS_BYTE_1";
-		parameter->visible = false;
+		parameter->id = "LAST_PACKET_RECEIVED";
 		parameter->logical.reset(new LogicalInteger(_bl));
 		parameter->logical->type = ILogical::Type::Enum::tInteger;
 		parameter->physical.reset(new PhysicalInteger(_bl));
 		parameter->physical->operationType = IPhysical::OperationType::Enum::internal;
 		parameter->physical->type = IPhysical::Type::Enum::tInteger;
-		parameter->physical->groupId = "CENTRAL_ADDRESS_BYTE_1";
-		parameter->physical->list = 0;
-		parameter->physical->index = 10;
-		functions[0]->configParameters->parameters[parameter->id] = parameter;
-
-		parameter.reset(new Parameter(_bl, nullptr));
-		parameter->id = "CENTRAL_ADDRESS_BYTE_2";
-		parameter->visible = false;
-		parameter->logical.reset(new LogicalInteger(_bl));
-		parameter->logical->type = ILogical::Type::Enum::tInteger;
-		parameter->physical.reset(new PhysicalInteger(_bl));
-		parameter->physical->operationType = IPhysical::OperationType::Enum::internal;
-		parameter->physical->type = IPhysical::Type::Enum::tInteger;
-		parameter->physical->groupId = "CENTRAL_ADDRESS_BYTE_2";
-		parameter->physical->list = 0;
-		parameter->physical->index = 11;
-		functions[0]->configParameters->parameters[parameter->id] = parameter;
-
-		parameter.reset(new Parameter(_bl, nullptr));
-		parameter->id = "CENTRAL_ADDRESS_BYTE_3";
-		parameter->visible = false;
-		parameter->logical.reset(new LogicalInteger(_bl));
-		parameter->logical->type = ILogical::Type::Enum::tInteger;
-		parameter->physical.reset(new PhysicalInteger(_bl));
-		parameter->physical->operationType = IPhysical::OperationType::Enum::internal;
-		parameter->physical->type = IPhysical::Type::Enum::tInteger;
-		parameter->physical->groupId = "CENTRAL_ADDRESS_BYTE_3";
-		parameter->physical->list = 0;
-		parameter->physical->index = 12;
-		functions[0]->configParameters->parameters[parameter->id] = parameter;
+		parameter->physical->groupId = "LAST_PACKET_RECEIVED";
+		functions[0]->variables->parameters[parameter->id] = parameter;
 
 		if(!encryption) return;
 		//For HomeMatic BidCoS: Set AES default value to "false", so a new AES key is set on pairing
