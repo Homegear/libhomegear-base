@@ -469,24 +469,28 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, uint32_t lastPacketRec
 	try
 	{
 		if(_bl->booting || _bl->shuttingDown) return;
-		uint32_t time = HelperFunctions::getTimeSeconds();
-		if(cyclicTimeout > 0 && (time - lastPacketReceived) > (unsigned)cyclicTimeout && !_unreach)
+		int32_t time = HelperFunctions::getTimeSeconds();
+		if(cyclicTimeout > 0 && (time - (signed)lastPacketReceived) > cyclicTimeout)
 		{
-			_unreach = true;
-			_stickyUnreach = true;
+			if(!_unreach)
+			{
+				_unreach = true;
+				_stickyUnreach = true;
 
-			std::vector<uint8_t> data = { 1 };
-			raiseSaveParameter("UNREACH", 0, data);
-			raiseSaveParameter("STICKY_UNREACH", 0, data);
+				std::vector<uint8_t> data = { 1 };
+				raiseSaveParameter("UNREACH", 0, data);
+				raiseSaveParameter("STICKY_UNREACH", 0, data);
 
-			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({std::string("UNREACH"), std::string("STICKY_UNREACH")}));
-			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
-			rpcValues->push_back(PVariable(new Variable(true)));
-			rpcValues->push_back(PVariable(new Variable(true)));
+				std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({std::string("UNREACH"), std::string("STICKY_UNREACH")}));
+				std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
+				rpcValues->push_back(PVariable(new Variable(true)));
+				rpcValues->push_back(PVariable(new Variable(true)));
 
-			raiseEvent(_peerID, 0, valueKeys, rpcValues);
-			raiseRPCEvent(_peerID, 0, _peerSerial + ":0", valueKeys, rpcValues);
+				raiseEvent(_peerID, 0, valueKeys, rpcValues);
+				raiseRPCEvent(_peerID, 0, _peerSerial + ":0", valueKeys, rpcValues);
+			}
 		}
+		else if(_unreach) endUnreach();
 	}
 	catch(const std::exception& ex)
     {
