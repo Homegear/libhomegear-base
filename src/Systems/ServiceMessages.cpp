@@ -477,6 +477,8 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, uint32_t lastPacketRec
 				_unreach = true;
 				_stickyUnreach = true;
 
+				_bl->out.printInfo("Info: Peer " + std::to_string(_peerID) + " is set to unreachable, because no packet was received within " + std::to_string(cyclicTimeout) + " seconds. The Last packet was received at " + BaseLib::HelperFunctions::getTimeString(lastPacketReceived));
+
 				std::vector<uint8_t> data = { 1 };
 				raiseSaveParameter("UNREACH", 0, data);
 				raiseSaveParameter("STICKY_UNREACH", 0, data);
@@ -514,6 +516,8 @@ void ServiceMessages::endUnreach()
 		{
 			_unreach = false;
 			_unreachResendCounter = 0;
+
+			_bl->out.printInfo("Info: Peer " + std::to_string(_peerID) + " is reachable again.");
 
 			std::vector<uint8_t> data = { 0 };
 			raiseSaveParameter("UNREACH", 0, data);
@@ -617,8 +621,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue)
 			raiseSaveParameter("UNREACH", 0, data);
 
 			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({std::string("UNREACH")}));
-			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
-			rpcValues->push_back(PVariable(new Variable(value)));
+			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable> { PVariable(new Variable(value)) });
 
 			if(value)
 			{
