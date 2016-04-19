@@ -67,6 +67,31 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json)
 	return variable;
 }
 
+std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json, uint32_t& bytesRead)
+{
+	bytesRead = 0;
+	std::shared_ptr<Variable> variable(new Variable());
+	skipWhitespace(json, bytesRead);
+	if(!posValid(json, bytesRead)) return variable;
+
+	while(bytesRead < json.length())
+	{
+		switch(json[bytesRead])
+		{
+		case '{':
+			decodeObject(json, bytesRead, variable);
+			return variable;
+		case '[':
+			decodeArray(json, bytesRead, variable);
+			return variable;
+		default:
+			throw JsonDecoderException("JSON does not start with '{' or '['.");
+		}
+	}
+
+	return variable;
+}
+
 std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json)
 {
 	uint32_t pos = 0;
@@ -83,6 +108,31 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json)
 			return variable;
 		case '[':
 			decodeArray(json, pos, variable);
+			return variable;
+		default:
+			throw JsonDecoderException("JSON does not start with '{' or '['.");
+		}
+	}
+
+	return variable;
+}
+
+std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json, uint32_t& bytesRead)
+{
+	bytesRead = 0;
+	std::shared_ptr<Variable> variable(new Variable());
+	skipWhitespace(json, bytesRead);
+	if(!posValid(json, bytesRead)) return variable;
+
+	while(bytesRead < json.size())
+	{
+		switch(json[bytesRead])
+		{
+		case '{':
+			decodeObject(json, bytesRead, variable);
+			return variable;
+		case '[':
+			decodeArray(json, bytesRead, variable);
 			return variable;
 		default:
 			throw JsonDecoderException("JSON does not start with '{' or '['.");

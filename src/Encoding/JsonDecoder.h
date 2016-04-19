@@ -54,7 +54,9 @@ public:
 	virtual ~JsonDecoder() {}
 
 	std::shared_ptr<Variable> decode(const std::string& json);
+	std::shared_ptr<Variable> decode(const std::string& json, uint32_t& bytesRead);
 	std::shared_ptr<Variable> decode(const std::vector<char>& json);
+	std::shared_ptr<Variable> decode(const std::vector<char>& json, uint32_t& bytesRead);
 private:
 	BaseLib::Obj* _bl = nullptr;
 

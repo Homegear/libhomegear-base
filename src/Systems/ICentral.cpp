@@ -1553,6 +1553,31 @@ PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_
 		PVariable result = peer->setId(clientInfo, newPeerId);
 		if(result->errorStruct) return result;
 		setPeerId(oldPeerId, newPeerId);
+
+		// {{{ Send deleteDevices event
+			PVariable deviceAddresses(new Variable(VariableType::tArray));
+			deviceAddresses->arrayValue->push_back(PVariable(new Variable(peer->getSerialNumber())));
+
+			PVariable deviceInfo(new Variable(VariableType::tStruct));
+			deviceInfo->structValue->insert(StructElement("ID", PVariable(new Variable((int32_t)peer->getID()))));
+			PVariable channels(new Variable(VariableType::tArray));
+			deviceInfo->structValue->insert(StructElement("CHANNELS", channels));
+
+			for(Functions::iterator i = peer->getRpcDevice()->functions.begin(); i != peer->getRpcDevice()->functions.end(); ++i)
+			{
+				deviceAddresses->arrayValue->push_back(PVariable(new Variable(peer->getSerialNumber() + ":" + std::to_string(i->first))));
+				channels->arrayValue->push_back(PVariable(new Variable(i->first)));
+			}
+
+			raiseRPCDeleteDevices(deviceAddresses, deviceInfo);
+		// }}}
+
+		// {{{ Send newDevices event
+			PVariable deviceDescriptions(new Variable(VariableType::tArray));
+			deviceDescriptions->arrayValue = peer->getDeviceDescriptions(nullptr, true, std::map<std::string, bool>());
+			raiseRPCNewDevices(deviceDescriptions);
+		// }}}
+
 		return PVariable(new Variable(VariableType::tVoid));
 	}
 	catch(const std::exception& ex)
