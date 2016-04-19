@@ -307,7 +307,9 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
 
 void Peer::setLastPacketReceived()
 {
-	_lastPacketReceived = HelperFunctions::getTimeSeconds();
+	uint32_t now = HelperFunctions::getTimeSeconds();
+	if(_lastPacketReceived == now) return;
+	_lastPacketReceived = now;
 	std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(0);
 	if(valuesIterator != valuesCentral.end())
 	{
