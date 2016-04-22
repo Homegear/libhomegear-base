@@ -59,6 +59,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
+	_workingDirectory = _bl->executablePath;
 	_socketPath = _bl->executablePath;
 	_databasePath = _bl->executablePath + "db.sql";
 	_databaseSynchronous = true;
@@ -238,6 +239,13 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
 					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
+				}
+				else if(name == "workingdirectory")
+				{
+					_workingDirectory = value;
+					if(_workingDirectory.empty()) _workingDirectory = _bl->executablePath;
+					if(_workingDirectory.back() != '/') _workingDirectory.push_back('/');
+					_bl->out.printDebug("Debug: workingDirectory set to " + _workingDirectory);
 				}
 				else if(name == "socketpath")
 				{
