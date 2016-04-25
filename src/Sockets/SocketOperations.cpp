@@ -666,7 +666,7 @@ void SocketOperations::getConnection()
 	if(_hostname.empty()) throw SocketInvalidParametersException("Hostname is empty");
 	if(_port.empty()) throw SocketInvalidParametersException("Port is empty");
 
-	_bl->out.printInfo("Info: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
 
 	//Retry for two minutes
 	for(uint32_t i = 0; i < 6; ++i)
@@ -808,6 +808,6 @@ void SocketOperations::getConnection()
 			}
 		}
 	}
-	_bl->out.printInfo("Info: Connected to host " + _hostname + " on port " + _port + ". Client number is: " + std::to_string(_socketDescriptor->id));
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connected to host " + _hostname + " on port " + _port + ". Client number is: " + std::to_string(_socketDescriptor->id));
 }
 }
