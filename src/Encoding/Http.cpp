@@ -356,6 +356,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 			_header.path = _header.path.substr(0, pos);
 		}
 		pos = _header.path.find(".php");
+		if(pos == (signed)std::string::npos) pos = _header.path.find(".hgs");
 		if(pos != (signed)std::string::npos)
 		{
 			pos = _header.path.find('/', pos);

@@ -69,7 +69,8 @@ public:
 	int32_t id = 0;
 
 	// {{{ Input parameters
-		std::string path;
+		std::string fullPath;
+		std::string relativePath;
 		std::string arguments;
 		int32_t customId = 0;
 		bool returnOutput = false;
@@ -105,11 +106,11 @@ public:
 	// }}}
 
 	ScriptInfo(ScriptType type) { _type = type; }
-	ScriptInfo(ScriptType type, std::string& path, std::string& arguments) { _type = type; this->path = path; this->arguments = arguments; }
-	ScriptInfo(ScriptType type, std::string& path, Http& http, Rpc::PServerInfo& serverInfo) { _type = type; this->path = path; this->http = http; this->serverInfo = serverInfo; }
-	ScriptInfo(ScriptType type, std::string& path, PVariable http, PVariable serverInfo) { _type = type; this->path = path; this->http.unserialize(http); this->serverInfo.reset(new Rpc::ServerInfo::Info()); this->serverInfo->unserialize(serverInfo); }
-	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments) { _type = type; this->path = path; this->script = script; this->arguments = arguments; }
-	ScriptInfo(ScriptType type, std::string& path, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->path = path; this->script = script; this->arguments = arguments; this->peerId = peerId; }
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& arguments) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->arguments = arguments; }
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, Http& http, Rpc::PServerInfo& serverInfo) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->http = http; this->serverInfo = serverInfo; }
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, PVariable http, PVariable serverInfo) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->http.unserialize(http); this->serverInfo.reset(new Rpc::ServerInfo::Info()); this->serverInfo->unserialize(serverInfo); }
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; }
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; this->peerId = peerId; }
 	virtual ~ScriptInfo() {}
 	ScriptType getType() { return _type; }
 protected:
