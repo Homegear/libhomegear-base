@@ -131,6 +131,15 @@ public:
 	static void writeFile(std::string& filename, std::string& content);
 
 	/**
+	 * Writes binary data to a file. If the file already exists it will be overwritten.
+	 *
+	 * @param filename The path to the file to write.
+	 * @param content The content to write to the file.
+	 * @param length The number of bytes to write.
+	 */
+	static void writeFile(std::string& filename, std::vector<char>& content, uint32_t length);
+
+	/**
 	 * Returns an array of all files within a path. The files are not prefixed with "path".
 	 *
 	 * @param path The path to get all files for.

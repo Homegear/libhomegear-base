@@ -77,6 +77,15 @@ void HttpClient::sendRequest(const std::string& request, std::string& response, 
 	}
 }
 
+void HttpClient::get(const std::string& path, Http& http)
+{
+	std::string fixedPath = path;
+	if(fixedPath.empty()) fixedPath = "/";
+	std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n\r\n";
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + getRequest);
+	sendRequest(getRequest, http);
+}
+
 void HttpClient::sendRequest(const std::string& request, Http& http, bool responseIsHeaderOnly)
 {
 	if(request.empty()) throw HttpClientException("Request is empty.");
@@ -113,16 +122,18 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 		}
 
 		ssize_t receivedBytes;
+		int32_t temp = 0;
 
 		int32_t bufferPos = 0;
-		int32_t bufferMax = 2048;
+		int32_t bufferMax = 4096;
 		char buffer[bufferMax + 1];
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
 
-		for(int32_t i = 0; i < 10000; i++) //Max 10000 reads.
+		bool firstLoop = true;
+		while(true)
 		{
-			if(i > 0 && !_socket->connected())
+			if(!firstLoop && !_socket->connected())
 			{
 				if(http.getContentSize() == 0)
 				{
@@ -135,6 +146,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 					break;
 				}
 			}
+			firstLoop = false;
 
 			try
 			{
@@ -143,6 +155,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 
 				//Some clients send only one byte in the first packet
 				if(receivedBytes == 1 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer + bufferPos + 1, bufferMax - bufferPos - 1);
+				temp += receivedBytes;
 			}
 			catch(const BaseLib::SocketTimeOutException& ex)
 			{
@@ -207,11 +220,11 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
 			}
-			if(http.getContentSize() > 10485760 || http.getHeader().contentLength > 10485760)
+			if(http.getContentSize() > 104857600 || http.getHeader().contentLength > 104857600)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 10 MiB received.");
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
 			}
 
 			if(http.isFinished()) break;

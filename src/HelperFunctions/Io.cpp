@@ -148,6 +148,15 @@ void Io::writeFile(std::string& filename, std::string& content)
 	file.close();
 }
 
+void Io::writeFile(std::string& filename, std::vector<char>& content, uint32_t length)
+{
+	std::ofstream file;
+	file.open(filename);
+	if(!file.is_open()) throw Exception("Could not open file.");
+	file.write(&content.at(0), length);
+	file.close();
+}
+
 std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 {
 	std::vector<std::string> files;
