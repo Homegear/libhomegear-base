@@ -497,7 +497,7 @@ bool SocketOperations::connected()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) return false;
 	char buffer[1];
-	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
+	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
 	return true;
 }
 
