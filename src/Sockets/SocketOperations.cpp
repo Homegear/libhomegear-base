@@ -198,7 +198,7 @@ int32_t SocketOperations::proofread(char* buffer, int32_t bufferSize)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_readMutex.lock();
-	if(!connected())
+	if(_autoConnect && !connected())
 	{
 		_readMutex.unlock();
 		autoConnect();
@@ -282,10 +282,10 @@ int32_t SocketOperations::proofwrite(const std::vector<char>& data)
 		_writeMutex.unlock();
 		return 0;
 	}
-	if(data.size() > 10485760)
+	if(data.size() > 104857600)
 	{
 		_writeMutex.unlock();
-		throw SocketDataLimitException("Data size is larger than 10 MiB.");
+		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
 	int32_t totalBytesWritten = 0;
@@ -357,10 +357,10 @@ int32_t SocketOperations::proofwrite(const char* buffer, int32_t bytesToWrite)
 		_writeMutex.unlock();
 		return 0;
 	}
-	if(bytesToWrite > 10485760)
+	if(bytesToWrite > 104857600)
 	{
 		_writeMutex.unlock();
-		throw SocketDataLimitException("Data size is larger than 10 MiB.");
+		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
 	int32_t totalBytesWritten = 0;
@@ -432,10 +432,10 @@ int32_t SocketOperations::proofwrite(const std::string& data)
 		_writeMutex.unlock();
 		return 0;
 	}
-	if(data.size() > 10485760)
+	if(data.size() > 104857600)
 	{
 		_writeMutex.unlock();
-		throw SocketDataLimitException("Data size is larger than 10 MiB.");
+		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
 	int32_t totalBytesWritten = 0;
@@ -497,7 +497,7 @@ bool SocketOperations::connected()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) return false;
 	char buffer[1];
-	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == 0) return false;
+	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
 	return true;
 }
 

@@ -251,7 +251,7 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXM
 				if(BaseLib::Math::isNumber(BaseLib::HelperFunctions::trim(chunk), true)) _header.transferEncoding = BaseLib::Http::TransferEncoding::chunked;
 			}
 		}
-		if(_header.contentLength > 10485760) throw HttpException("Data is larger than 10MiB.");
+		if(_header.contentLength > 104857600) throw HttpException("Data is larger than 100 MiB.");
 		_content.reserve(_header.contentLength);
 	}
 	_dataProcessingStarted = true;
@@ -502,7 +502,7 @@ void Http::setFinished()
 
 int32_t Http::processContent(char* buffer, int32_t bufferLength)
 {
-	if(_content.size() + bufferLength > 10485760) throw HttpException("Data is larger than 10MiB.");
+	if(_content.size() + bufferLength > 104857600) throw HttpException("Data is larger than 100 MiB.");
 	if(_header.contentLength == 0) _content.insert(_content.end(), buffer, buffer + bufferLength);
 	else
 	{
@@ -518,7 +518,7 @@ int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
 	int32_t initialBufferLength = bufferLength;
 	while(true)
 	{
-		if(_content.size() + bufferLength > 10485760) throw HttpException("Data is larger than 10MiB.");
+		if(_content.size() + bufferLength > 104857600) throw HttpException("Data is larger than 100 MiB.");
 		if(_chunkSize == -1)
 		{
 			readChunkSize(&buffer, bufferLength);

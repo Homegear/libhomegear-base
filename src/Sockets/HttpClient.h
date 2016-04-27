@@ -109,6 +109,14 @@ public:
 	 * @param[out] data The data returned.
 	 */
 	void get(const std::string& path, std::string& data);
+
+	/*
+	 * Sends an HTTP GET request and returns the response. This method can be used to download files.
+	 *
+	 * @param[in] url The path of the file to get.
+	 * @param[out] data The data returned.
+	 */
+	void get(const std::string& path, Http& data);
 protected:
 	/**
 	 * The common base library object.
