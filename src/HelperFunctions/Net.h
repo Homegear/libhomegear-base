@@ -80,6 +80,12 @@ public:
 	 * @return Returns the computers IPv4 address.
 	 */
 	static std::string getMyIpAddress();
+
+	/**
+	 * Returns a list of all defined network routes.
+	 *
+	 * @param[out] routeInfo The returned routes.
+	 */
 	static void getRoutes(RouteInfoList& routeInfo);
 private:
 	static int32_t readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, uint32_t messageIndex, uint32_t pid);
