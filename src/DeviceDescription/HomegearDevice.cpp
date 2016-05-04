@@ -257,6 +257,8 @@ void HomegearDevice::postLoad()
 	{
 		PParameter parameter(new Parameter(_bl, nullptr));
 		parameter->id = "LAST_PACKET_RECEIVED";
+		parameter->writeable = false;
+		parameter->visible = false;
 		parameter->logical.reset(new LogicalInteger(_bl));
 		parameter->logical->type = ILogical::Type::Enum::tInteger;
 		parameter->physical.reset(new PhysicalInteger(_bl));
