@@ -320,11 +320,7 @@ void Peer::setLastPacketReceived()
 			if(parameterIterator->second.databaseID > 0) saveParameter(parameterIterator->second.databaseID, parameterIterator->second.data);
 			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterIterator->second.data);
 
-			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({std::string("LAST_PACKET_RECEIVED")}));
-			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>{ PVariable(new Variable(_lastPacketReceived)) });
-
-			raiseEvent(_peerID, 0, valueKeys, rpcValues);
-			raiseRPCEvent(_peerID, 0, _serialNumber + ":0", valueKeys, rpcValues);
+			// Don't raise event as this is not necessary and some programs like OpenHAB have problems with it
 		}
 	}
 }
