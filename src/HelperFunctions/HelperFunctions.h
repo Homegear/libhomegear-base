@@ -238,7 +238,7 @@ public:
 	 * @param replace The substring to replace "search" with.
 	 * @return Returns a reference to the modified string.
 	 */
-	static inline std::string& stringReplace(std::string& haystack, std::string search, std::string replace)
+	static std::string& stringReplace(std::string& haystack, std::string search, std::string replace)
 	{
 		if(search.empty()) return haystack;
 		int32_t pos = 0;
