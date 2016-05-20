@@ -424,9 +424,9 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 	else if(!strnaicmp(name, "content-type", nameSize))
 	{
 		_header.contentType = std::string(value, valueSize);
-		HelperFunctions::toLower(_header.contentType);
 		_header.contentTypeFull = _header.contentType;
 		_header.contentType = HelperFunctions::splitFirst(_header.contentType, ';').first;
+		HelperFunctions::toLower(_header.contentType);
 	}
 	else if(!strnaicmp(name, "transfer-encoding", nameSize) || !strnaicmp(name, "te", nameSize))
 	{
