@@ -192,4 +192,44 @@ std::string Net::getMyIpAddress()
 	return address;
 }
 
+std::string Net::getMyIp6Address()
+{
+	std::string address;
+
+	RouteInfoList list;
+    getRoutes(list);
+    for(RouteInfoList::const_iterator i = list.begin(); i != list.end(); ++i)
+    {
+    	if((*i)->destinationAddress == 0)
+    	{
+    		//TODO: Implement
+    	}
+    }
+
+	if(address.empty()) //Alternative method
+	{
+		char buffer[101];
+		buffer[100] = 0;
+		bool addressFound = false;
+		ifaddrs* interfaces = nullptr;
+		if(getifaddrs(&interfaces) != 0) throw NetException("Could not get address information: " + std::string(strerror(errno)));
+		for(ifaddrs* info = interfaces; info != 0; info = info->ifa_next)
+		{
+			if (info->ifa_addr == NULL) continue;
+			switch (info->ifa_addr->sa_family)
+			{
+				case AF_INET6:
+					inet_ntop (info->ifa_addr->sa_family, &((struct sockaddr_in6 *)info->ifa_addr)->sin6_addr, buffer, 100);
+					address = std::string(buffer);
+					if(address.compare(0, 3, "::1") != 0 || address.compare(0, 4, "fe80") != 0) addressFound = true;
+					break;
+			}
+			if(addressFound) break;
+		}
+		freeifaddrs(interfaces);
+		if(!addressFound) throw NetException("No IP address could be found: " + std::string(strerror(errno)));
+	}
+	return address;
+}
+
 }

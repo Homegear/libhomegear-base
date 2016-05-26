@@ -47,7 +47,11 @@ EnumerationValue::EnumerationValue(BaseLib::Obj* baseLib, xml_node<>* node)
 		std::string nodeName(subnode->name());
 		std::string nodeValue(subnode->value());
 		if(nodeName == "id") id = nodeValue;
-		else if(nodeName == "index") index = Math::getNumber(nodeValue);
+		else if(nodeName == "index")
+		{
+			indexDefined = true;
+			index = Math::getNumber(nodeValue);
+		}
 		else baseLib->out.printWarning("Warning: Unknown node in \"logicalEnumeration\\value\": " + std::string(subnode->name(), subnode->name_size()));
 	}
 }
@@ -75,6 +79,7 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::Obj* baseLib, xml_node<>* node) 
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + std::string(attr->name()));
 		}
+		int32_t offset = 0;
 		int32_t index = 0;
 		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
@@ -83,9 +88,14 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::Obj* baseLib, xml_node<>* node) 
 			if(nodeName == "value")
 			{
 				EnumerationValue value(baseLib, subNode);
-				if(value.index > -1)
+				if(value.indexDefined)
 				{
-					while((unsigned)value.index > values.size()) values.push_back(EnumerationValue());
+					if(value.index < offset)
+					{
+						offset = value.index;
+						minimumValue = offset;
+					}
+					while(value.index > (signed)values.size() - offset) values.push_back(EnumerationValue());
 					index = value.index;
 				}
 				else value.index = index;

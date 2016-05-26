@@ -71,6 +71,7 @@ class EnumerationValue
 {
 public:
 	std::string id;
+	bool indexDefined = false;
 	int32_t index = -1;
 
 	EnumerationValue() {}

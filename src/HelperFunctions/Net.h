@@ -82,6 +82,13 @@ public:
 	static std::string getMyIpAddress();
 
 	/**
+	 * Tries to automatically determine the computers IPv6 address.
+	 *
+	 * @return Returns the computers IPv6 address.
+	 */
+	static std::string getMyIp6Address();
+
+	/**
 	 * Returns a list of all defined network routes.
 	 *
 	 * @param[out] routeInfo The returned routes.
