@@ -81,14 +81,25 @@ public:
 	 * Gets the current unix time stamp in milliseconds.
 	 *
 	 * @see getTimeSeconds()
+	 * @see getTimeMicroseconds()
 	 * @return The current unix time stamp in milliseconds.
 	 */
 	static int64_t getTime();
 
 	/**
+	 * Gets the current unix time stamp in microseconds.
+	 *
+	 * @see getTimeSeconds()
+	 * @see getTime()
+	 * @return The current unix time stamp in microseconds.
+	 */
+	static int64_t getTimeMicroseconds();
+
+	/**
 	 * Gets the current unix time stamp in seconds.
 	 *
 	 * @see getTime()
+	 * @see getTimeMicroseconds()
 	 * @return The current unix time stamp in seconds.
 	 */
 	static int32_t getTimeSeconds();

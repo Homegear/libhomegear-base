@@ -96,6 +96,11 @@ int64_t HelperFunctions::getTime()
 	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+int64_t HelperFunctions::getTimeMicroseconds()
+{
+	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 int32_t HelperFunctions::getTimeSeconds()
 	{
 		int32_t time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
