@@ -76,7 +76,9 @@ public:
 	bool fastSending = false;
 	bool sendFix = false;
 	uint32_t timeout = 10;
+	uint32_t interval = 100;
 	uint32_t waitForBus = 100;
+	uint32_t watchdogTimeout = 1000;
 	int32_t enableRXValue = -1;
 	int32_t enableTXValue = -1;
 	int32_t listenThreadPriority = -1;
