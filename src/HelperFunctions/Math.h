@@ -34,6 +34,7 @@
 #include <string>
 #include <map>
 #include <iomanip>
+#include <cmath>
 
 namespace BaseLib
 {
