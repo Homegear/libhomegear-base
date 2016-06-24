@@ -980,6 +980,44 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
     }
 }
 
+void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
+{
+	try
+	{
+		if(isTeam()) return;
+		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
+		Database::DataRow data;
+		if(idIsKnown)
+		{
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
+			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+		}
+		else
+		{
+			if(_peerID == 0) return;
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
+			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 {
 	try
