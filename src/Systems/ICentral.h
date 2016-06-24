@@ -185,7 +185,7 @@ protected:
     std::mutex _peersMutex;
 
 	//Event handling
-    PEventHandler _physicalInterfaceEventhandler;
+    std::map<std::string, PEventHandler> _physicalInterfaceEventhandlers;
 
 	ICentral(const ICentral&);
 	ICentral& operator=(const ICentral&);
