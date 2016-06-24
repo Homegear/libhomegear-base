@@ -193,6 +193,7 @@ public:
 	virtual void saveVariable(uint32_t index, int32_t intValue);
     virtual void saveVariable(uint32_t index, int64_t intValue);
     virtual void saveVariable(uint32_t index, std::string& stringValue);
+    virtual void saveVariable(uint32_t index, std::vector<char>& binaryValue);
     virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
     virtual void deleteFromDatabase();
     virtual void savePeers() = 0;

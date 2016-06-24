@@ -447,6 +447,14 @@ public:
 	static std::string getHexString(const std::vector<uint8_t>& data);
 
 	/**
+	 * Converts an int16 array to a hex string.
+	 *
+	 * @param data The array to convert.
+	 * @return Returns the hex string of the array.
+	 */
+	static std::string getHexString(const std::vector<uint16_t>& data);
+
+	/**
 	 * Converts an integer to a hex string.
 	 *
 	 * @param number The integer to convert.

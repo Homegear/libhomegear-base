@@ -301,4 +301,19 @@ std::string Math::toString(double number, int32_t precision)
     out << std::setiosflags(std::ios_base::fixed | std::ios_base::dec) << std::setprecision(precision) << number;
     return out.str();
 }
+
+int32_t Math::clamp(int32_t value, int32_t min, int32_t max)
+{
+	if (value > max) return max;
+	if (value < min) return min;
+	return value;
+}
+
+int32_t Math::scale(int32_t value, int32_t valueMin, int32_t valueMax, int32_t scaleMin, int32_t scaleMax)
+{
+	double vPerc = ((double)(value - valueMin)) / (valueMax - valueMin);
+	double bigSpan = vPerc * (scaleMax - scaleMin);
+
+	return std::lround(scaleMin + bigSpan);
+}
 }
