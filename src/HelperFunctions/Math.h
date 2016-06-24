@@ -269,6 +269,28 @@ public:
 	static std::string toString(double number, int32_t precision);
 
 	/**
+	 * Forces a value between 'min' and 'max'. If the value is larger than 'max' then it is set to 'max'. If the value is smaller than 'man' it is set to 'min'.
+	 *
+	 * @param value The number to clamp.
+	 * @param min The lower boundary.
+	 * @param max The upper boundary.
+	 * @return Returns the clamped number.
+	 */
+	static int32_t clamp(int32_t value, int32_t min, int32_t max);
+
+	/**
+	 * Scales 'value' between 'valueMin' and 'valueMax' to 'scaleMin' and 'scaleMax'.
+	 *
+	 * @param value The value to scale.
+	 * @param valueMin The lowest possible value of 'value'.
+	 * @param valueMax The highest possible value of 'value'.
+	 * @param scaleMin The lowest value to scale 'value' to.
+	 * @param scaleMax The highest value to scale 'value' to.
+	 * @return Returns the number.
+	 */
+	static int32_t scale(int32_t value, int32_t valueMin, int32_t valueMax, int32_t scaleMin, int32_t scaleMax);
+
+	/**
 	 * Calculates powers to the base 10.
 	 */
 	static inline double Pow10(int32_t exponent)
