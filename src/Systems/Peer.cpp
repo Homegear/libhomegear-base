@@ -1180,14 +1180,22 @@ void Peer::loadConfig()
 				parameterInfo->parameter.data.insert(parameterInfo->parameter.data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
 				if(!_rpcDevice)
 				{
-					_bl->out.printCritical("Critical: No xml rpc device found for peer " + std::to_string(_peerID) + ".");
+					_bl->out.printCritical("Critical: No xml-rpc device found for peer " + std::to_string(_peerID) + ".");
 					continue;
 				}
 
 				Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
 				if(functionIterator == _rpcDevice->functions.end())
 				{
-					_bl->out.printCritical("Critical: Added central config parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
+					_bl->out.printError("Error: Added central config parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
+					data.clear();
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int64_t)parameterInfo->parameterGroupType)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->channel)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->parameterName)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->remoteAddress)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->remoteChannel)));
+					_bl->db->deletePeerParameter(_peerID, data);
 					continue;
 				}
 				parameterInfo->function = functionIterator->second;

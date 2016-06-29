@@ -309,11 +309,26 @@ int32_t Math::clamp(int32_t value, int32_t min, int32_t max)
 	return value;
 }
 
+double Math::clamp(double value, double min, double max)
+{
+	if (value > max) return max;
+	if (value < min) return min;
+	return value;
+}
+
 int32_t Math::scale(int32_t value, int32_t valueMin, int32_t valueMax, int32_t scaleMin, int32_t scaleMax)
 {
 	double vPerc = ((double)(value - valueMin)) / (valueMax - valueMin);
 	double bigSpan = vPerc * (scaleMax - scaleMin);
 
 	return std::lround(scaleMin + bigSpan);
+}
+
+double Math::scale(double value, double valueMin, double valueMax, double scaleMin, double scaleMax)
+{
+	double vPerc = (value - valueMin) / (valueMax - valueMin);
+	double bigSpan = vPerc * (scaleMax - scaleMin);
+
+	return scaleMin + bigSpan;
 }
 }
