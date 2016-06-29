@@ -96,6 +96,11 @@ int64_t HelperFunctions::getTime()
 	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+int64_t HelperFunctions::getTimeMicroseconds()
+{
+	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 int32_t HelperFunctions::getTimeSeconds()
 	{
 		int32_t time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
@@ -389,6 +394,18 @@ std::string HelperFunctions::getHexString(const std::vector<char>& data)
 	for(std::vector<char>::const_iterator i = data.begin(); i != data.end(); ++i)
 	{
 		stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+	}
+	stringstream << std::dec;
+	return stringstream.str();
+}
+
+std::string HelperFunctions::getHexString(const std::vector<uint16_t>& data)
+{
+	std::ostringstream stringstream;
+	stringstream << std::hex << std::setfill('0') << std::uppercase;
+	for(std::vector<uint16_t>::const_iterator i = data.begin(); i != data.end(); ++i)
+	{
+		stringstream << std::setw(2) << (int32_t)((*i) >> 8) << std::setw(2) << (int32_t)((*i) & 0xFF);
 	}
 	stringstream << std::dec;
 	return stringstream.str();

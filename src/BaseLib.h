@@ -51,6 +51,7 @@
 #include "HelperFunctions/Crypt.h"
 #include "HelperFunctions/Base64.h"
 #include "HelperFunctions/Net.h"
+#include "HelperFunctions/Pid.h"
 #include "HelperFunctions/Io.h"
 #include "LowLevel/Gpio.h"
 #include "Output/Output.h"

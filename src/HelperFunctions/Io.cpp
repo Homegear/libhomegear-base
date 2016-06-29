@@ -194,6 +194,43 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 	return files;
 }
 
+std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
+{
+	std::vector<std::string> directories;
+	DIR* directory;
+	struct dirent* entry;
+	struct stat statStruct;
+
+	if(path.back() != '/') path += '/';
+	if((directory = opendir(path.c_str())) != 0)
+	{
+		while((entry = readdir(directory)) != 0)
+		{
+			std::string name(entry->d_name);
+			if(name == "." || name == "..") continue;
+			if(stat((path + name).c_str(), &statStruct) == -1)
+			{
+				_bl->out.printWarning("Warning: Could not stat file \"" + path + name + "\": " + std::string(strerror(errno)));
+				continue;
+			}
+			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
+			//Thanks to telkamp (https://github.com/Homegear/Homegear/issues/223)
+			if(S_ISDIR(statStruct.st_mode))
+			{
+				directories.push_back(name + '/');
+				std::vector<std::string> subdirs = getDirectories(path + name, recursive);
+				for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
+				{
+					directories.push_back(name + '/' + *i);
+				}
+			}
+		}
+		closedir(directory);
+	}
+	else throw(Exception("Could not open directory."));
+	return directories;
+}
+
 bool Io::copyFile(std::string source, std::string dest)
 {
 	try

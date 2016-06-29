@@ -2308,6 +2308,10 @@ void HomegearDevice::parseXML(xml_node<>* node)
 			postProcessFunction(i->second, configParameters, variables, linkParameters);
 			for(std::vector<PFunction>::iterator j = i->second->alternativeFunctions.begin(); j != i->second->alternativeFunctions.end(); ++j)
 			{
+				if(i->second->physicalChannelIndexOffset != (*j)->physicalChannelIndexOffset)
+				{
+					_bl->out.printWarning("Warning: physicalChannelIndexOffset of function and alternativeFunction differ.");
+				}
 				postProcessFunction(*j, configParameters, variables, linkParameters);
 			}
 		}

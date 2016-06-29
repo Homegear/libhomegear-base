@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#Copy this script to .git/hooks/pre-commit to enable automatic version incrementing
+
+SCRIPTDIR="$( cd "$(dirname $0)" && pwd )"
+
+REVISION_FILE=$SCRIPTDIR/../../revision.txt
+REVISION=$(cat $REVISION_FILE)
+echo $(($REVISION + 1)) > $REVISION_FILE
+cd $SCRIPTDIR/../..
+git add revision.txt

@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,65 +28,44 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef PHYSICALINTERFACESETTINGS_H_
-#define PHYSICALINTERFACESETTINGS_H_
-
-#include <iostream>
-#include <string>
-#include <map>
+#ifndef _PID_H_
+#define _PID_H_
 
 namespace BaseLib
 {
-namespace Systems
-{
 
-class GPIOSetting
+class Pid
 {
+private:
+	double _dt;
+	double _pMax;
+	double _pMin;
+	double _oMax;
+	double _oMin;
+	double _Kp;
+	double _Ki;
+	double _Kd;
+	double _previousError;
+	double _integral;
+
+	double clamp(double value, double min, double max);
+	double scale(double value, double valueMin, double valueMax, double scaleMin, double scaleMax);
 public:
-	GPIOSetting() {}
-	virtual ~GPIOSetting() {}
+	// Kp -  proportional gain
+	// Ki -  Integral gain
+	// Kd -  derivative gain
+	// dt -  loop interval time
+	// pMax - maximum value of process variable
+	// pMin - minimum value of process variable
+	// oMax - maximum value of output variable
+	// oMin - minimum value of output variable
+	Pid(double dt, double pMax, double pMin, double oMax, double oMin, double Kp, double Ki, double Kd);
 
-	int32_t number = -1;
-	std::string path;
-};
-
-class PhysicalInterfaceSettings
-{
-public:
-	PhysicalInterfaceSettings() {}
-	virtual ~PhysicalInterfaceSettings() {}
-	std::string id;
-	bool isDefault = false;
-	std::string device;
-	std::string type;
-	uint32_t responseDelay = 95;
-	std::map<uint32_t, GPIOSetting> gpio;
-	int32_t oscillatorFrequency = -1;
-	int32_t txPowerSetting = -1;
-	int32_t interruptPin = -1;
-	uint32_t stackPosition = 0;
-	std::string host;
-	std::string port;
-	std::string portKeepAlive;
-	std::string lanKey;
-	bool ssl = false;
-	std::string caFile;
-	bool verifyCertificate = true;
-	bool oneWay = false;
-	bool fastSending = false;
-	bool sendFix = false;
-	uint32_t timeout = 10;
-	uint32_t interval = 100;
-	uint32_t waitForBus = 100;
-	uint32_t watchdogTimeout = 1000;
-	int32_t enableRXValue = -1;
-	int32_t enableTXValue = -1;
-	int32_t listenThreadPriority = -1;
-	int32_t listenThreadPolicy = SCHED_OTHER;
-	std::string ttsProgram;
-	std::string dataPath;
+	// Returns the manipulated variable given a setpoint and current process value
+	double calculate(double setpoint, double processVariable);
+	virtual ~Pid();
 };
 
 }
-}
+
 #endif

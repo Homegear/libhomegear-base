@@ -109,7 +109,7 @@ public:
 	virtual std::shared_ptr<Variable> addDevice(PRpcClientInfo clientInfo, std::string serialNumber) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> addLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> addLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual std::shared_ptr<Variable> createDevice(PRpcClientInfo clientInfo, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual std::shared_ptr<Variable> createDevice(PRpcClientInfo clientInfo, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual std::shared_ptr<Variable> getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId);
@@ -185,7 +185,7 @@ protected:
     std::mutex _peersMutex;
 
 	//Event handling
-    PEventHandler _physicalInterfaceEventhandler;
+    std::map<std::string, PEventHandler> _physicalInterfaceEventhandlers;
 
 	ICentral(const ICentral&);
 	ICentral& operator=(const ICentral&);
