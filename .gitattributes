@@ -1,1 +1,2 @@
 getVersion.sh merge=ours
+revision.txt merge=ours
