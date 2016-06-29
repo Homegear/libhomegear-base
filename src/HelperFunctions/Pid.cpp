@@ -68,7 +68,7 @@ double Pid::scale(double value, double valueMin, double valueMax, double scaleMi
 
 double Pid::calculate(double setpoint, double processVariable)
 {
-    /* Pseudocode from Wikipedia:
+	/*  Pseudocode from Wikipedia:
 		previous_error = 0
 		integral = 0
 		start:
@@ -79,7 +79,7 @@ double Pid::calculate(double setpoint, double processVariable)
 			previous_error = error
 			wait(dt)
 			goto start
-	 */
+	*/
 
 	processVariable = clamp(processVariable, _pMin, _pMax);
 	processVariable = scale(processVariable, _pMin, _pMax, -1.0f, 1.0f);
@@ -95,10 +95,10 @@ double Pid::calculate(double setpoint, double processVariable)
 		_previousError = error;
     // }}}
 
-    output = clamp(output, -1.0f, 1.0f);
-    output = scale(output, -1.0f, 1.0f, _oMin, _oMax);
+	output = clamp(output, -1.0f, 1.0f);
+	output = scale(output, -1.0f, 1.0f, _oMin, _oMax);
 
-    return output;
+	return output;
 }
 
 Pid::~Pid()
