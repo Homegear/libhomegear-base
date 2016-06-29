@@ -46,8 +46,6 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include <vector>
-
 #include <gcrypt.h>
 
 namespace BaseLib
