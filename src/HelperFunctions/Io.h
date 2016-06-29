@@ -149,6 +149,15 @@ public:
 	std::vector<std::string> getFiles(std::string path, bool recursive = false);
 
 	/**
+	 * Returns an array of all directories within a path. The directories are not prefixed with "path".
+	 *
+	 * @param path The path to get all directories for.
+	 * @param recursive Also return directories within subdirectories. The directories are prefixed with the subdirectory.
+	 * @return Returns an array of all directory names within path.
+	 */
+	std::vector<std::string> getDirectories(std::string path, bool recursive = false);
+
+	/**
 	 * Gets the last modified time of a file.
 	 *
 	 * @param filename The file to get the last modified time for.

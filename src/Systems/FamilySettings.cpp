@@ -266,11 +266,23 @@ void FamilySettings::load(std::string filename)
 					else if(settings->waitForBus > 210) settings->waitForBus = 210;
 					_bl->out.printDebug("Debug: waitForBus set to " + std::to_string(settings->waitForBus));
 				}
+				else if(name == "interval")
+				{
+					settings->interval = BaseLib::Math::getNumber(value);
+					if(settings->interval > 100000) settings->interval = 100000;
+					_bl->out.printDebug("Debug: interval set to " + std::to_string(settings->interval));
+				}
 				else if(name == "timeout")
 				{
 					settings->timeout = BaseLib::Math::getNumber(value);
 					if(settings->timeout > 100000) settings->timeout = 100000;
 					_bl->out.printDebug("Debug: timeout set to " + std::to_string(settings->timeout));
+				}
+				else if(name == "watchdogtimeout")
+				{
+					settings->watchdogTimeout = BaseLib::Math::getNumber(value);
+					if(settings->watchdogTimeout > 100000) settings->timeout = 100000;
+					_bl->out.printDebug("Debug: watchdogTimeout set to " + std::to_string(settings->watchdogTimeout));
 				}
 				else if(name == "sendfix")
 				{
