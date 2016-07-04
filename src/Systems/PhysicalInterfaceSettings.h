@@ -68,6 +68,7 @@ public:
 	std::string host;
 	std::string port;
 	std::string portKeepAlive;
+	std::string listenPort;
 	std::string lanKey;
 	bool ssl = false;
 	std::string caFile;

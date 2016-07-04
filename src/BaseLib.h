@@ -49,6 +49,7 @@
 #include "HelperFunctions/Color.h"
 #include "HelperFunctions/Math.h"
 #include "HelperFunctions/Crypt.h"
+#include "HelperFunctions/DisposableLockGuard.h"
 #include "HelperFunctions/Base64.h"
 #include "HelperFunctions/Net.h"
 #include "HelperFunctions/Pid.h"
@@ -58,7 +59,6 @@
 #include "DeviceDescription/Devices.h"
 #include "ScriptEngine/ScriptInfo.h"
 #include "Settings/Settings.h"
-#include "Sockets/SocketOperations.h"
 #include "Sockets/IWebserverEventSink.h"
 #include "Sockets/ServerInfo.h"
 #include "Sockets/RpcClientInfo.h"
@@ -71,6 +71,8 @@
 #include "IQueue.h"
 #include "ITimedQueue.h"
 #include "Sockets/HttpClient.h"
+#include "Sockets/TcpSocket.h"
+#include "Sockets/UdpSocket.h"
 #include "StateGuard.h"
 
 namespace BaseLib
