@@ -28,10 +28,10 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef SOCKETOPERATIONS_H_
-#define SOCKETOPERATIONS_H_
+#ifndef TCPSOCKETOPERATIONS_H_
+#define TCPSOCKETOPERATIONS_H_
 
-#include "../Exception.h"
+#include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
 
 #include <thread>
@@ -69,57 +69,15 @@ namespace BaseLib
 
 class Obj;
 
-class SocketOperationException : public Exception
+class TcpSocket
 {
 public:
-	SocketOperationException(std::string message) : Exception(message) {}
-};
-
-class SocketSizeMismatchException : public SocketOperationException
-{
-public:
-	SocketSizeMismatchException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketTimeOutException : public SocketOperationException
-{
-public:
-	SocketTimeOutException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketClosedException : public SocketOperationException
-{
-public:
-	SocketClosedException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketInvalidParametersException : public SocketOperationException
-{
-public:
-	SocketInvalidParametersException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketDataLimitException : public SocketOperationException
-{
-public:
-	SocketDataLimitException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketSSLException : public SocketOperationException
-{
-public:
-	SocketSSLException(std::string message) : SocketOperationException(message) {}
-};
-
-class SocketOperations
-{
-public:
-	SocketOperations(BaseLib::Obj* baseLib);
-	SocketOperations(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
-	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port);
-	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
-	SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
-	virtual ~SocketOperations();
+	TcpSocket(BaseLib::Obj* baseLib);
+	TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
+	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port);
+	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
+	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
+	virtual ~TcpSocket();
 
 	std::shared_ptr<FileDescriptor> bindSocket(std::string address, std::string port);
 
@@ -163,7 +121,7 @@ protected:
 	void autoConnect();
 };
 
-typedef std::shared_ptr<BaseLib::SocketOperations> PSocketOperations;
+typedef std::shared_ptr<BaseLib::TcpSocket> PTcpSocket;
 
 }
 #endif
