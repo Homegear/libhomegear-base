@@ -346,6 +346,17 @@ public:
 	void toPacket(PVariable value);
 };
 
+class Invert : public ICast
+{
+public:
+	Invert(BaseLib::Obj* baseLib);
+	Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	virtual ~Invert() {}
+
+	void fromPacket(PVariable value);
+	void toPacket(PVariable value);
+};
+
 typedef std::shared_ptr<ICast> PICast;
 typedef std::vector<PICast> Casts;
 typedef std::shared_ptr<BlindTest> PBlindTest;
@@ -367,6 +378,7 @@ typedef std::shared_ptr<Toggle> PToggle;
 typedef std::shared_ptr<StringReplace> PStringReplace;
 typedef std::shared_ptr<HexStringByteArray> PHexStringByteArray;
 typedef std::shared_ptr<TimeStringSeconds> PTimeStringSeconds;
+typedef std::shared_ptr<Invert> PInvert;
 
 }
 }

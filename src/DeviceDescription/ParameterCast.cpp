@@ -977,6 +977,54 @@ void TimeStringSeconds::toPacket(PVariable value)
 	value->integerValue = 0;
 }
 
+Invert::Invert(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+Invert::Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"invert\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		_bl->out.printWarning("Warning: Unknown node in \"invert\": " + std::string(subNode->name()));
+	}
+}
+
+void Invert::fromPacket(PVariable value)
+{
+	if(!value) return;
+	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(value->type == VariableType::tInteger)
+	{
+		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
+		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
+	}
+	else if(value->type == VariableType::tFloat)
+	{
+		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
+		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
+	}
+}
+
+void Invert::toPacket(PVariable value)
+{
+	if(!value) return;
+	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(value->type == VariableType::tInteger)
+	{
+		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
+		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
+	}
+	else if(value->type == VariableType::tFloat)
+	{
+		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
+		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
+	}
+}
+
 }
 }
 }
