@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,43 +28,60 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef IWEBSERVEREVENTSINK_H_
-#define IWEBSERVEREVENTSINK_H_
+#ifndef UDPSOCKETOPERATIONS_H_
+#define UDPSOCKETOPERATIONS_H_
 
-#include "ServerInfo.h"
+#include "SocketExceptions.h"
+#include "../Managers/FileDescriptorManager.h"
 
 namespace BaseLib
 {
-namespace Rpc
-{
-/**
- * This class provides hooks into the web server so get and post requests can be passed into family modules.
- */
-class IWebserverEventSink : public IEventSinkBase
+
+class Obj;
+
+class UdpSocket
 {
 public:
-	virtual ~IWebserverEventSink() {}
+	UdpSocket(BaseLib::Obj* baseLib);
+	UdpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port);
+	virtual ~UdpSocket();
 
-	/**
-	 * Called on every HTTP GET request processed by the web server.
-	 * @param httpRequest The http request received by the webserver.
-	 * @param socket The socket to the client.
-	 * @param path The GET path called by the client.
-	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
-	 */
-	virtual bool onGet(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
+	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
+	void setHostname(std::string hostname) { close(); _hostname = hostname; }
+	void setPort(std::string port) { close(); _port = port; }
+	std::string getListenIp() { return _listenIp; }
+	int32_t getListenPort() { return _listenPort; }
 
-	/**
-	 * Called on every HTTP POST request processed by the web server.
-	 * @param httpRequest The http request received by the webserver.
-	 * @param socket The socket to the client.
-	 * @param path The POST path called by the client.
-	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
-	 */
-	virtual bool onPost(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	bool isOpen();
+	int32_t proofread(char* buffer, int32_t bufferSize);
+	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
+	int32_t proofwrite(const std::vector<char>& data);
+	int32_t proofwrite(const std::string& data);
+	int32_t proofwrite(const char* buffer, int32_t bytesToWrite);
+	void open();
+	void close();
+protected:
+	BaseLib::Obj* _bl = nullptr;
+	int64_t _readTimeout = 15000000;
+	bool _autoConnect = true;
+	std::string _hostname;
+	std::string _port;
+	std::string _listenIp;
+	int32_t _listenPort = -1;
+	struct addrinfo* _serverInfo = nullptr;
+	std::mutex _readMutex;
+	std::mutex _writeMutex;
+
+	std::shared_ptr<FileDescriptor> _socketDescriptor;
+
+	void getSocketDescriptor();
+	void getConnection();
+	void autoConnect();
 };
+
+typedef std::shared_ptr<BaseLib::UdpSocket> PUdpSocket;
+
 }
-}
+
 #endif
-
-

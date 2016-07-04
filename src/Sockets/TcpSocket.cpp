@@ -28,19 +28,19 @@
  * files in the program, then also delete it here.
 */
 
-#include "SocketOperations.h"
 #include "../BaseLib.h"
+#include "TcpSocket.h"
 
 namespace BaseLib
 {
-SocketOperations::SocketOperations(BaseLib::Obj* baseLib)
+TcpSocket::TcpSocket(BaseLib::Obj* baseLib)
 {
 	_bl = baseLib;
 	_autoConnect = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
+TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
 {
 	_bl = baseLib;
 	_autoConnect = false;
@@ -48,7 +48,7 @@ SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::shared_ptr<FileDe
 	else _socketDescriptor.reset(new FileDescriptor);
 }
 
-SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port)
+TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
 	signal(SIGPIPE, SIG_IGN);
@@ -58,7 +58,7 @@ SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, 
 	_port = port;
 }
 
-SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : SocketOperations(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSSL = useSSL;
 	_caFile = caFile;
@@ -67,7 +67,7 @@ SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, 
 	if(_useSSL) initSSL();
 }
 
-SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : SocketOperations(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
+TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
 {
 	_clientCertFile = clientCertFile;
 	_clientKeyFile = clientKeyFile;
@@ -75,13 +75,13 @@ SocketOperations::SocketOperations(BaseLib::Obj* baseLib, std::string hostname, 
 	if(_useSSL) initSSL();
 }
 
-SocketOperations::~SocketOperations()
+TcpSocket::~TcpSocket()
 {
 	_bl->fileDescriptorManager.close(_socketDescriptor);
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
 }
 
-std::shared_ptr<FileDescriptor> SocketOperations::bindSocket(std::string address, std::string port)
+std::shared_ptr<FileDescriptor> TcpSocket::bindSocket(std::string address, std::string port)
 {
 	std::shared_ptr<FileDescriptor> socketDescriptor;
 	addrinfo hostInfo;
@@ -126,7 +126,7 @@ std::shared_ptr<FileDescriptor> SocketOperations::bindSocket(std::string address
 	return socketDescriptor;
 }
 
-void SocketOperations::initSSL()
+void TcpSocket::initSSL()
 {
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
 
@@ -164,7 +164,7 @@ void SocketOperations::initSSL()
 	}
 }
 
-void SocketOperations::open()
+void TcpSocket::open()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
 	else if(!connected())
@@ -174,7 +174,7 @@ void SocketOperations::open()
 	}
 }
 
-void SocketOperations::autoConnect()
+void TcpSocket::autoConnect()
 {
 	if(!_autoConnect) return;
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
@@ -185,7 +185,7 @@ void SocketOperations::autoConnect()
 	}
 }
 
-void SocketOperations::close()
+void TcpSocket::close()
 {
 	_readMutex.lock();
 	_writeMutex.lock();
@@ -194,7 +194,7 @@ void SocketOperations::close()
 	_readMutex.unlock();
 }
 
-int32_t SocketOperations::proofread(char* buffer, int32_t bufferSize)
+int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_readMutex.lock();
@@ -254,7 +254,7 @@ int32_t SocketOperations::proofread(char* buffer, int32_t bufferSize)
 	return bytesRead;
 }
 
-int32_t SocketOperations::proofwrite(const std::shared_ptr<std::vector<char>> data)
+int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>> data)
 {
 	_writeMutex.lock();
 	if(!connected())
@@ -267,7 +267,7 @@ int32_t SocketOperations::proofwrite(const std::shared_ptr<std::vector<char>> da
 	return proofwrite(*data);
 }
 
-int32_t SocketOperations::proofwrite(const std::vector<char>& data)
+int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_writeMutex.lock();
@@ -342,7 +342,7 @@ int32_t SocketOperations::proofwrite(const std::vector<char>& data)
 	return totalBytesWritten;
 }
 
-int32_t SocketOperations::proofwrite(const char* buffer, int32_t bytesToWrite)
+int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_writeMutex.lock();
@@ -417,7 +417,7 @@ int32_t SocketOperations::proofwrite(const char* buffer, int32_t bytesToWrite)
 	return totalBytesWritten;
 }
 
-int32_t SocketOperations::proofwrite(const std::string& data)
+int32_t TcpSocket::proofwrite(const std::string& data)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_writeMutex.lock();
@@ -493,7 +493,7 @@ int32_t SocketOperations::proofwrite(const std::string& data)
 	return totalBytesWritten;
 }
 
-bool SocketOperations::connected()
+bool TcpSocket::connected()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) return false;
 	char buffer[1];
@@ -501,7 +501,7 @@ bool SocketOperations::connected()
 	return true;
 }
 
-void SocketOperations::getSocketDescriptor()
+void TcpSocket::getSocketDescriptor()
 {
 	_readMutex.lock();
 	_writeMutex.lock();
@@ -537,7 +537,7 @@ void SocketOperations::getSocketDescriptor()
 
 }
 
-void SocketOperations::getSSL()
+void TcpSocket::getSSL()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) throw SocketSSLException("Could not connect to server using SSL. File descriptor is invalid.");
 	if(!_x509Cred)
@@ -638,7 +638,7 @@ void SocketOperations::getSSL()
 	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
 }
 
-/*bool SocketOperations::waitForSocket()
+/*bool TcpSocket::waitForSocket()
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	timeval timeout;
@@ -660,7 +660,7 @@ void SocketOperations::getSSL()
 	return true;
 }*/
 
-void SocketOperations::getConnection()
+void TcpSocket::getConnection()
 {
 	_socketDescriptor.reset();
 	if(_hostname.empty()) throw SocketInvalidParametersException("Hostname is empty");

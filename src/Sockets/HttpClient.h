@@ -33,8 +33,8 @@
 
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
-#include "SocketOperations.h"
 #include "../Encoding/Http.h"
+#include "TcpSocket.h"
 
 namespace BaseLib
 {
@@ -133,7 +133,7 @@ protected:
 	/**
 	 * The socket object.
 	 */
-	std::unique_ptr<BaseLib::SocketOperations> _socket;
+	std::unique_ptr<TcpSocket> _socket;
 
 	/**
 	 * The hostname of the HTTP server.
