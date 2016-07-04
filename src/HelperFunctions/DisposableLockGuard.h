@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,43 +28,47 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef IWEBSERVEREVENTSINK_H_
-#define IWEBSERVEREVENTSINK_H_
+#ifndef DISPOSABLELOCKGUARD_H_
+#define DISPOSABLELOCKGUARD_H_
 
-#include "ServerInfo.h"
+#include <mutex>
 
 namespace BaseLib
 {
-namespace Rpc
+
+class DisposableLockGuard
 {
-/**
- * This class provides hooks into the web server so get and post requests can be passed into family modules.
- */
-class IWebserverEventSink : public IEventSinkBase
-{
+private:
+	bool _disposed = false;
+	std::mutex _disposeMutex;
+	std::mutex&  _mutex;
 public:
-	virtual ~IWebserverEventSink() {}
+	explicit DisposableLockGuard(std::mutex& mutex) : _mutex(mutex)
+	{
+		_mutex.lock();
+	}
 
-	/**
-	 * Called on every HTTP GET request processed by the web server.
-	 * @param httpRequest The http request received by the webserver.
-	 * @param socket The socket to the client.
-	 * @param path The GET path called by the client.
-	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
-	 */
-	virtual bool onGet(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	~DisposableLockGuard()
+	{
+		dispose();
+	}
 
-	/**
-	 * Called on every HTTP POST request processed by the web server.
-	 * @param httpRequest The http request received by the webserver.
-	 * @param socket The socket to the client.
-	 * @param path The POST path called by the client.
-	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
-	 */
-	virtual bool onPost(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	void dispose()
+	{
+		_disposeMutex.lock();
+		if(_disposed)
+		{
+			_disposeMutex.unlock();
+			return;
+		}
+		_disposed = true;
+		_mutex.unlock();
+		_disposeMutex.unlock();
+	}
+
+	DisposableLockGuard(const DisposableLockGuard&) = delete;
+	DisposableLockGuard& operator=(const DisposableLockGuard&) = delete;
 };
-}
+
 }
 #endif
-
-
