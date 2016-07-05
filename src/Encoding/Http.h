@@ -120,7 +120,7 @@ public:
 	 * @param checkForChunkedXML Optional. Only works for XML-like content (content needs to start with '<'). Needed when TransferEncoding is not set to chunked.
 	 * @return The number of processed bytes.
 	 */
-	int32_t process(char* buffer, int32_t bufferLength, bool checkForChunkedXML = false);
+	int32_t process(char* buffer, int32_t bufferLength, bool checkForChunkedXmx = false, bool checkForChunkedJson = false);
 	bool headerProcessingStarted() { return _headerProcessingStarted; }
 	bool dataProcessingStarted() { return _dataProcessingStarted; }
 	static std::string encodeURL(const std::string& url);
