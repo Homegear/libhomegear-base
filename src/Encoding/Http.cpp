@@ -222,7 +222,7 @@ void Http::unserialize(PVariable data)
 	processHeader(&pHeader, headerSize);
 }
 
-int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXML)
+int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXml, bool checkForChunkedJson)
 {
 	if(bufferLength <= 0 || _finished) return 0;
 	_headerProcessingStarted = true;
@@ -237,7 +237,7 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXM
 	}
 	if(!_dataProcessingStarted)
 	{
-		if(checkForChunkedXML)
+		if(checkForChunkedXml || checkForChunkedJson)
 		{
 			if(bufferLength + _partialChunkSize.length() < 8) //Not enough data.
 			{
@@ -245,8 +245,15 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXM
 				return processedBytes + bufferLength;
 			}
 			std::string chunk = _partialChunkSize + std::string(buffer, bufferLength);
-			int32_t pos = chunk.find('<');
-			if(pos != (signed)std::string::npos && pos != 0)
+			std::string::size_type pos = 0;
+			if(checkForChunkedXml) chunk.find('<');
+			else
+			{
+				pos = chunk.find('[');
+				std::string::size_type pos2 = chunk.find('{');
+				if(pos2 != std::string::npos && (pos == std::string::npos || pos != 0)) pos = pos2;
+			}
+			if(pos != std::string::npos && pos != 0)
 			{
 				if(BaseLib::Math::isNumber(BaseLib::HelperFunctions::trim(chunk), true)) _header.transferEncoding = BaseLib::Http::TransferEncoding::chunked;
 			}
