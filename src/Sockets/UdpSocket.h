@@ -54,7 +54,7 @@ public:
 	int32_t getListenPort() { return _listenPort; }
 
 	bool isOpen();
-	int32_t proofread(char* buffer, int32_t bufferSize);
+	int32_t proofread(char* buffer, int32_t bufferSize, std::string& senderIp);
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
 	int32_t proofwrite(const std::vector<char>& data);
 	int32_t proofwrite(const std::string& data);

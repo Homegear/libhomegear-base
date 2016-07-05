@@ -81,8 +81,9 @@ void UdpSocket::close()
 	_readMutex.unlock();
 }
 
-int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize)
+int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& senderIp)
 {
+	senderIp.clear();
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_readMutex.lock();
 	if(_autoConnect && !isOpen())
@@ -119,10 +120,12 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize)
 		_readMutex.unlock();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
 	}
+	struct addrinfo clientInfo;
+	memset(&clientInfo, 0, sizeof(addrinfo));
 	uint32_t addressLength = sizeof(sockaddr);
 	do
 	{
-		bytesRead = recvfrom(_socketDescriptor->descriptor, buffer, bufferSize, 0, _serverInfo->ai_addr, &addressLength);
+		bytesRead = recvfrom(_socketDescriptor->descriptor, buffer, bufferSize, 0, clientInfo.ai_addr, &addressLength);
 	} while(bytesRead < 0 && (errno == EAGAIN || errno == EINTR));
 	if(bytesRead <= 0)
 	{
@@ -130,6 +133,18 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize)
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();
+	char ipStringBuffer[INET6_ADDRSTRLEN];
+	if (_serverInfo->ai_family == AF_INET)
+	{
+		struct sockaddr_in *s = (struct sockaddr_in*)_serverInfo->ai_addr;
+		inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
+	}
+	else
+	{ // AF_INET6
+		struct sockaddr_in6 *s = (struct sockaddr_in6*)_serverInfo->ai_addr;
+		inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
+	}
+	senderIp = std::string(&ipStringBuffer[0]);
 	return bytesRead;
 }
 
