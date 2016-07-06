@@ -634,12 +634,43 @@ std::string HelperFunctions::getGCRYPTError(int32_t errorCode)
 	return result;
 }
 
-bool HelperFunctions::isShortCLICommand(const std::string& command)
+bool HelperFunctions::isShortCliCommand(const std::string& command)
 {
 	int32_t spaceIndex = command.find(' ');
 	if(spaceIndex < 0 && command.size() < 4) return true;
 	else if(spaceIndex > 0 && spaceIndex < 4) return true;
 	return false;
+}
+
+bool HelperFunctions::checkCliCommand(const std::string& command, const std::string& longCommand, const std::string& shortCommand1, const std::string& shortCommand2, uint32_t minArgumentCount, std::vector<std::string>& arguments, bool& showHelp)
+{
+	showHelp = false;
+	bool isLongCommand = command.compare(0, longCommand.size(), longCommand) == 0;
+	bool isShortCommand1 = command.compare(0, shortCommand1.size(), shortCommand1) == 0;
+	bool isShortCommand2 = !shortCommand2.empty() && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
+	if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
+
+	std::stringstream stream(command);
+	std::string element;
+	int32_t offset = isLongCommand ? 1 : 0;
+	int32_t index = 0;
+	arguments.reserve(10);
+	while(std::getline(stream, element, ' '))
+	{
+		if(index < 1 + offset)
+		{
+			index++;
+			continue;
+		}
+		if(element == "help")
+		{
+			showHelp = true;
+			return true;
+		}
+		arguments.push_back(element);
+	}
+	if(arguments.size() < minArgumentCount) showHelp = true;
+	return true;
 }
 
 void* HelperFunctions::memrchr(const void* s, int c, size_t n)
