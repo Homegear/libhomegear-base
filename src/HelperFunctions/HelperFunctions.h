@@ -571,7 +571,21 @@ public:
 	 * @param command The CLI command.
 	 * @return Returns "true" when the command is a short command, otherwise "false"
 	 */
-	static bool isShortCLICommand(const std::string& command);
+	static bool isShortCliCommand(const std::string& command);
+
+	/**
+	 * Checks if a string contains a CLI command and checks and returns the arguments.
+	 *
+	 * @param command The CLI command.
+	 * @param longCommand The long CLI command to search for at the beginning of command.
+	 * @param shortCommand1 The short CLI command to search for at the beginning of command.
+	 * @param shortCommand2 An optional second short CLI command to search for at the beginning of command. Set to empty string if not needed.
+	 * @param minArgumentCount The minimum number of arguments.
+	 * @param[out] arguments A string vector which is filled with the arguments.
+	 * @param[out] showHelp Set to true when help is requested.
+	 * @return Returns true on success and false if "command" doesn't start with "longCommand", "shortCommand1" or "shortCommand2".
+	 */
+	static bool checkCliCommand(const std::string& command, const std::string& longCommand, const std::string& shortCommand1, const std::string& shortCommand2, uint32_t minArgumentCount, std::vector<std::string>& arguments, bool& showHelp);
 
 	/**
 	 * Reverse memchr(). Searches the initial n bytes of buffer s for the last occurrence of 'c'.

@@ -143,8 +143,8 @@ protected:
 	virtual void setGPIO(uint32_t index, bool value);
 	virtual void setGPIOPermission(uint32_t index, int32_t userID, int32_t groupID, bool readOnly);
 	virtual void exportGPIO(uint32_t index);
-	virtual void setGPIODirection(uint32_t index, GPIODirection::Enum direction);
-	virtual void setGPIOEdge(uint32_t index, GPIOEdge::Enum edge);
+	virtual bool setGPIODirection(uint32_t index, GPIODirection::Enum direction);
+	virtual bool setGPIOEdge(uint32_t index, GPIOEdge::Enum edge);
 	virtual bool gpioDefined(uint32_t);
 	virtual bool gpioOpen(uint32_t);
 };
