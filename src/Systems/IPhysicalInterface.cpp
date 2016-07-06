@@ -650,26 +650,35 @@ void IPhysicalInterface::exportGPIO(uint32_t index)
     }
 }
 
-void IPhysicalInterface::setGPIODirection(uint32_t index, GPIODirection::Enum direction)
+bool IPhysicalInterface::setGPIODirection(uint32_t index, GPIODirection::Enum direction)
 {
 	try
 	{
 		if(!gpioDefined(index))
 		{
 			_bl->out.printError("Failed to set direction for GPIO with index \"" + std::to_string(index) + "\": GPIO not defined in physicel devices' settings.");
-			return;
+			return false;
 		}
 		if(_settings->gpio[index].path.empty()) getGPIOPath(index);
-		if(_settings->gpio[index].path.empty()) throw(Exception("Failed to open direction file for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\": Unable to retrieve path."));
+		if(_settings->gpio[index].path.empty())
+		{
+			_bl->out.printError("Failed to open direction file for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\": Unable to retrieve path.");
+			return false;
+		}
 		std::string path(_settings->gpio[index].path + "direction");
 		std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
-		if (fileDescriptor->descriptor == -1) throw(Exception("Could not write to direction file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno))));
+		if (fileDescriptor->descriptor == -1)
+		{
+			_bl->out.printError("Could not write to direction file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno)));
+			return false;
+		}
 		std::string temp((direction == GPIODirection::OUT) ? "out" : "in");
 		if(write(fileDescriptor->descriptor, temp.c_str(), temp.size()) <= 0)
 		{
 			_bl->out.printError("Could not write to direction file \"" + path + "\": " + std::string(strerror(errno)));
 		}
 		_bl->fileDescriptorManager.close(fileDescriptor);
+		return true;
 	}
 	catch(const std::exception& ex)
     {
@@ -683,28 +692,38 @@ void IPhysicalInterface::setGPIODirection(uint32_t index, GPIODirection::Enum di
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    return false;
 }
 
-void IPhysicalInterface::setGPIOEdge(uint32_t index, GPIOEdge::Enum edge)
+bool IPhysicalInterface::setGPIOEdge(uint32_t index, GPIOEdge::Enum edge)
 {
 	try
 	{
 		if(!gpioDefined(index))
 		{
 			_bl->out.printError("Failed to set edge for GPIO with index \"" + std::to_string(index) + "\": GPIO not defined in physicel devices' settings.");
-			return;
+			return false;
 		}
 		if(_settings->gpio[index].path.empty()) getGPIOPath(index);
-		if(_settings->gpio[index].path.empty()) throw(Exception("Failed to open edge file for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\": Unable to retrieve path."));
+		if(_settings->gpio[index].path.empty())
+		{
+			_bl->out.printError("Failed to open edge file for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\": Unable to retrieve path.");
+			return false;
+		}
 		std::string path(_settings->gpio[index].path + "edge");
 		std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
-		if (fileDescriptor->descriptor == -1) throw(Exception("Could not write to edge file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno))));
+		if (fileDescriptor->descriptor == -1)
+		{
+			_bl->out.printError("Could not write to edge file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno)));
+			return false;
+		}
 		std::string temp((edge == GPIOEdge::RISING) ? "rising" : ((edge == GPIOEdge::FALLING) ? "falling" : "both"));
 		if(write(fileDescriptor->descriptor, temp.c_str(), temp.size()) <= 0)
 		{
 			_bl->out.printError("Could not write to edge file \"" + path + "\": " + std::string(strerror(errno)));
 		}
 		_bl->fileDescriptorManager.close(fileDescriptor);
+		return true;
 	}
 	catch(const std::exception& ex)
     {
@@ -718,6 +737,7 @@ void IPhysicalInterface::setGPIOEdge(uint32_t index, GPIOEdge::Enum edge)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    return false;
 }
 
 }
