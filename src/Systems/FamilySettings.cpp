@@ -345,6 +345,11 @@ void FamilySettings::load(std::string filename)
 					settings->port = value;
 					_bl->out.printDebug("Debug: Port set to " + settings->port);
 				}
+				else if(name == "listenport")
+				{
+					settings->listenPort = value;
+					_bl->out.printDebug("Debug: listenPort set to " + settings->listenPort);
+				}
 				else if(name == "portkeepalive")
 				{
 					settings->portKeepAlive = value;

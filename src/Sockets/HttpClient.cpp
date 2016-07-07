@@ -42,7 +42,7 @@ HttpClient::HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port
 	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
-	_socket = std::unique_ptr<BaseLib::SocketOperations>(new BaseLib::SocketOperations(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
+	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
 }
 
 HttpClient::~HttpClient()

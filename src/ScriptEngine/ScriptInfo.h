@@ -31,13 +31,14 @@
 #ifndef ISCRIPTINFO_H_
 #define ISCRIPTINFO_H_
 
-#include "../Sockets/SocketOperations.h"
 #include "../Sockets/ServerInfo.h"
 #include "../Encoding/Http.h"
 
 #include <string>
 #include <mutex>
 #include <condition_variable>
+
+#include "../Sockets/TcpSocket.h"
 
 namespace BaseLib
 {
@@ -102,7 +103,7 @@ public:
 		std::condition_variable requestConditionVariable;
 
 		// Option 3: Write to socket
-		PSocketOperations socket;
+		PTcpSocket socket;
 	// }}}
 
 	ScriptInfo(ScriptType type) { _type = type; }
