@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,66 +28,60 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef PHYSICALINTERFACESETTINGS_H_
-#define PHYSICALINTERFACESETTINGS_H_
+#ifndef UDPSOCKETOPERATIONS_H_
+#define UDPSOCKETOPERATIONS_H_
 
-#include <iostream>
-#include <string>
-#include <map>
+#include "SocketExceptions.h"
+#include "../Managers/FileDescriptorManager.h"
 
 namespace BaseLib
 {
-namespace Systems
-{
 
-class GPIOSetting
-{
-public:
-	GPIOSetting() {}
-	virtual ~GPIOSetting() {}
+class Obj;
 
-	int32_t number = -1;
-	std::string path;
-};
-
-class PhysicalInterfaceSettings
+class UdpSocket
 {
 public:
-	PhysicalInterfaceSettings() {}
-	virtual ~PhysicalInterfaceSettings() {}
-	std::string id;
-	bool isDefault = false;
-	std::string device;
-	std::string type;
-	uint32_t responseDelay = 95;
-	std::map<uint32_t, GPIOSetting> gpio;
-	int32_t oscillatorFrequency = -1;
-	int32_t txPowerSetting = -1;
-	int32_t interruptPin = -1;
-	uint32_t stackPosition = 0;
-	std::string host;
-	std::string port;
-	std::string portKeepAlive;
-	std::string listenPort;
-	std::string lanKey;
-	bool ssl = false;
-	std::string caFile;
-	bool verifyCertificate = true;
-	bool oneWay = false;
-	bool fastSending = false;
-	bool sendFix = false;
-	uint32_t timeout = 10;
-	uint32_t interval = 100;
-	uint32_t waitForBus = 100;
-	uint32_t watchdogTimeout = 1000;
-	int32_t enableRXValue = -1;
-	int32_t enableTXValue = -1;
-	int32_t listenThreadPriority = -1;
-	int32_t listenThreadPolicy = SCHED_OTHER;
-	std::string ttsProgram;
-	std::string dataPath;
+	UdpSocket(BaseLib::Obj* baseLib);
+	UdpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port);
+	virtual ~UdpSocket();
+
+	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
+	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
+	void setHostname(std::string hostname) { close(); _hostname = hostname; }
+	void setPort(std::string port) { close(); _port = port; }
+	std::string getListenIp() { return _listenIp; }
+	int32_t getListenPort() { return _listenPort; }
+
+	bool isOpen();
+	int32_t proofread(char* buffer, int32_t bufferSize, std::string& senderIp);
+	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
+	int32_t proofwrite(const std::vector<char>& data);
+	int32_t proofwrite(const std::string& data);
+	int32_t proofwrite(const char* buffer, int32_t bytesToWrite);
+	void open();
+	void close();
+protected:
+	BaseLib::Obj* _bl = nullptr;
+	int64_t _readTimeout = 15000000;
+	bool _autoConnect = true;
+	std::string _hostname;
+	std::string _port;
+	std::string _listenIp;
+	int32_t _listenPort = -1;
+	struct addrinfo* _serverInfo = nullptr;
+	std::mutex _readMutex;
+	std::mutex _writeMutex;
+
+	std::shared_ptr<FileDescriptor> _socketDescriptor;
+
+	void getSocketDescriptor();
+	void getConnection();
+	void autoConnect();
 };
 
+typedef std::shared_ptr<BaseLib::UdpSocket> PUdpSocket;
+
 }
-}
+
 #endif
