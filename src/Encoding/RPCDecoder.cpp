@@ -36,10 +36,15 @@ namespace BaseLib
 namespace RPC
 {
 
-RPCDecoder::RPCDecoder(BaseLib::Obj* baseLib)
+RPCDecoder::RPCDecoder(BaseLib::Obj* baseLib) : RPCDecoder(baseLib, false)
+{
+
+}
+
+RPCDecoder::RPCDecoder(BaseLib::Obj* baseLib, bool ansi)
 {
 	_bl = baseLib;
-	_decoder = std::unique_ptr<BinaryDecoder>(new BinaryDecoder(baseLib));
+	_decoder = std::unique_ptr<BinaryDecoder>(new BinaryDecoder(baseLib, ansi));
 }
 
 std::shared_ptr<RPCHeader> RPCDecoder::decodeHeader(std::vector<char>& packet)

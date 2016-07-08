@@ -31,6 +31,7 @@
 #ifndef BINARYDECODER_H_
 #define BINARYDECODER_H_
 
+#include "Ansi.h"
 #include <iostream>
 #include <memory>
 #include <cstring>
@@ -46,6 +47,7 @@ class BinaryDecoder
 {
 public:
 	BinaryDecoder(BaseLib::Obj* baseLib);
+	BinaryDecoder(BaseLib::Obj* baseLib, bool ansi);
 	virtual ~BinaryDecoder() {}
 
 	virtual int32_t decodeInteger(std::vector<char>& encodedData, uint32_t& position);
@@ -64,6 +66,8 @@ public:
 	virtual double decodeFloat(std::vector<uint8_t>& encodedData, uint32_t& position);
 protected:
 	BaseLib::Obj* _bl = nullptr;
+	bool _ansi = false;
+	std::shared_ptr<Ansi> _ansiConverter;
 };
 }
 #endif
