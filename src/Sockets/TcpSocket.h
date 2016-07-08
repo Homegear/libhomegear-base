@@ -82,6 +82,7 @@ public:
 	std::shared_ptr<FileDescriptor> bindSocket(std::string address, std::string port);
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
+	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
 	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
 	void setHostname(std::string hostname) { close(); _hostname = hostname; }
 	void setPort(std::string port) { close(); _port = port; }
@@ -100,6 +101,7 @@ public:
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	int64_t _readTimeout = 15000000;
+	int64_t _writeTimeout = 15000000;
 	bool _autoConnect = true;
 	std::string _hostname;
 	std::string _port;
