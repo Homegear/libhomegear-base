@@ -292,8 +292,9 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 	while (totalBytesWritten < (signed)data.size())
 	{
 		timeval timeout;
-		timeout.tv_sec = 5;
-		timeout.tv_usec = 0;
+		int32_t seconds = _writeTimeout / 1000000;
+		timeout.tv_sec = seconds;
+		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
 		fd_set writeFileDescriptor;
 		FD_ZERO(&writeFileDescriptor);
 		_bl->fileDescriptorManager.lock();
@@ -367,8 +368,9 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 	while (totalBytesWritten < bytesToWrite)
 	{
 		timeval timeout;
-		timeout.tv_sec = 5;
-		timeout.tv_usec = 0;
+		int32_t seconds = _writeTimeout / 1000000;
+		timeout.tv_sec = seconds;
+		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
 		fd_set writeFileDescriptor;
 		FD_ZERO(&writeFileDescriptor);
 		_bl->fileDescriptorManager.lock();
@@ -442,8 +444,9 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 	while (totalBytesWritten < (signed)data.size())
 	{
 		timeval timeout;
-		timeout.tv_sec = 5;
-		timeout.tv_usec = 0;
+		int32_t seconds = _writeTimeout / 1000000;
+		timeout.tv_sec = seconds;
+		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
 		fd_set writeFileDescriptor;
 		FD_ZERO(&writeFileDescriptor);
 		_bl->fileDescriptorManager.lock();
