@@ -28,50 +28,25 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef ANSI_H_
+#define ANSI_H_
 
-#include <memory>
+#include <string.h>
+#include <string>
+#include <vector>
 
 namespace BaseLib
 {
-
-enum class RpcClientType
-{
-	generic,
-	ipsymcon,
-	ccu2
-};
-
-class RpcClientInfo
+class Ansi
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool xmlRpc = false;
-	bool jsonRpc = false;
-	bool binaryRpc = false;
-	bool webSocket = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
+	Ansi();
+	virtual ~Ansi() {}
 
-	RpcClientType type = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-
-	RpcClientInfo() {}
-	virtual ~RpcClientInfo() {}
+	std::string toUtf8(const std::string& ansiString);
+	std::string toUtf8(const char* ansiString, uint32_t length);
+protected:
+	std::vector<std::vector<uint8_t>> _lookup;
 };
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
 }
-
 #endif
