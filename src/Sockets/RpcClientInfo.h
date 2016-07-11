@@ -43,23 +43,30 @@ enum class RpcClientType
 	ccu2
 };
 
+enum class RpcType
+{
+	unknown,
+	xml,
+	binary,
+	json,
+	websocket,
+	mqtt
+};
+
 class RpcClientInfo
 {
 public:
 	int32_t id = -1;
 	bool closed = false;
 	bool addon = false;
-	bool xmlRpc = false;
-	bool jsonRpc = false;
-	bool binaryRpc = false;
-	bool webSocket = false;
 	std::string webSocketClientId;
 	std::string address;
 	int32_t port = 0;
 	std::string initUrl;
 	std::string initInterfaceId;
 
-	RpcClientType type = RpcClientType::generic;
+	RpcType rpcType = RpcType::unknown;
+	RpcClientType clientType = RpcClientType::generic;
 	bool initKeepAlive = false;
 	bool initBinaryMode = false;
 	bool initNewFormat = false;
