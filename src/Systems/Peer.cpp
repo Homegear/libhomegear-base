@@ -2331,6 +2331,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				if(valuesIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
 				if(parameterIterator == valuesIterator->second.end()) continue;
+				if(getParamsetHook2(clientInfo, i->second, channel, variables)) continue;
 				element = i->second->convertFromPacket(parameterIterator->second.data);
 			}
 			else if(type == ParameterGroup::Type::Enum::config)
