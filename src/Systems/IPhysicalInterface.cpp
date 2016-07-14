@@ -38,9 +38,10 @@ namespace BaseLib
 namespace Systems
 {
 
-IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib)
+IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId)
 {
 	_bl = baseLib;
+	_familyId = familyId;
 	_settings.reset(new PhysicalInterfaceSettings());
 	_fileDescriptor = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_gpioDescriptors[1] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
@@ -51,7 +52,7 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib)
 	_lifetick1.second = true;
 }
 
-IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib)
+IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib, familyId)
 {
 	if(settings) _settings = settings;
 }
@@ -738,6 +739,102 @@ bool IPhysicalInterface::setGPIOEdge(uint32_t index, GPIOEdge::Enum edge)
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
+}
+
+void IPhysicalInterface::saveSettingToDatabase(std::string setting, std::string& value)
+{
+	try
+	{
+		if(setting.empty()) return;
+		Database::DataRow data;
+		std::string name = _settings->id + '.' + setting;
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		_bl->db->saveFamilyVariableAsynchronous(_familyId, data);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void IPhysicalInterface::saveSettingToDatabase(std::string setting, int32_t value)
+{
+	try
+	{
+		if(setting.empty()) return;
+		Database::DataRow data;
+		std::string name = _settings->id + '.' + setting;
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		_bl->db->saveFamilyVariableAsynchronous(_familyId, data);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void IPhysicalInterface::saveSettingToDatabase(std::string setting, std::vector<char>& value)
+{
+	try
+	{
+		if(setting.empty()) return;
+		Database::DataRow data;
+		std::string name = _settings->id + '.' + setting;
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1000)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
+		_bl->db->saveFamilyVariableAsynchronous(_familyId, data);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
 }
 
 }

@@ -49,12 +49,12 @@ DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int
 	_eventHandler = eventHandler;
 	_family = id;
 	_name = name;
-	_physicalInterfaces.reset(new PhysicalInterfaces(bl, id, std::vector<std::shared_ptr<PhysicalInterfaceSettings>>()));
+	_physicalInterfaces.reset(new PhysicalInterfaces(bl, id, std::map<std::string, PPhysicalInterfaceSettings>()));
 	if(_eventHandler) setEventHandler(_eventHandler);
 	std::string filename = getName();
 	HelperFunctions::toLower(filename);
 	filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
-	_settings.reset(new FamilySettings(bl));
+	_settings.reset(new FamilySettings(bl, id));
 	_bl->out.printInfo(filename);
 	_settings->load(filename);
 	_rpcDevices.reset(new DeviceDescription::Devices(bl, this, id));
