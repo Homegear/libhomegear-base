@@ -56,6 +56,13 @@ HttpClient::~HttpClient()
 	_socketMutex.unlock();
 }
 
+void HttpClient::setTimeout(uint32_t value)
+{
+	if(value == 0) value = 1000;
+	_socket->setReadTimeout((int64_t)value * 1000);
+	_socket->setWriteTimeout((int64_t)value * 1000);
+}
+
 void HttpClient::get(const std::string& path, std::string& data)
 {
 	std::string fixedPath = path;

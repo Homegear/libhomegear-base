@@ -76,6 +76,12 @@ public:
 	virtual ~HttpClient();
 
 	/**
+	 * Sets the socket timeout.
+	 * @param value The timeout in milliseconds.
+	 */
+	void setTimeout(uint32_t value);
+
+	/**
 	 * Returns "true" if the socket is connected, otherwise "false".
 	 * @return "true" if the socket is connected, otherwise "false".
 	 */

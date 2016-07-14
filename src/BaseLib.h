@@ -32,6 +32,7 @@
 #define BASELIB_H_
 
 #include "Database/IDatabaseController.h"
+#include "Encoding/Ansi.h"
 #include "Encoding/XMLRPCDecoder.h"
 #include "Encoding/XMLRPCEncoder.h"
 #include "Encoding/RPCDecoder.h"

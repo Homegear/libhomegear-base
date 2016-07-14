@@ -39,6 +39,40 @@ Variable::Variable(xml_node<>* node) : Variable()
 	parseXmlNode(node, structValue);
 }
 
+Variable::Variable(DeviceDescription::ILogical::Type::Enum variableType) : Variable()
+{
+	switch(variableType)
+	{
+		case DeviceDescription::ILogical::Type::Enum::none:
+			type = VariableType::tVoid;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tAction:
+			type = VariableType::tBoolean;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tArray:
+			type = VariableType::tArray;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tBoolean:
+			type = VariableType::tBoolean;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tEnum:
+			type = VariableType::tInteger;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tFloat:
+			type = VariableType::tFloat;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tInteger:
+			type = VariableType::tInteger;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tString:
+			type = VariableType::tString;
+			break;
+		case DeviceDescription::ILogical::Type::Enum::tStruct:
+			type = VariableType::tStruct;
+			break;
+	}
+}
+
 Variable::~Variable()
 {
 }
