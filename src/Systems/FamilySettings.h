@@ -52,19 +52,33 @@ namespace Systems
 class FamilySettings
 {
 public:
-	FamilySettings(BaseLib::Obj* bl);
+	struct FamilySetting
+	{
+		std::string stringValue;
+		int32_t integerValue;
+		std::vector<char> binaryValue;
+	};
+	typedef std::shared_ptr<FamilySetting> PFamilySetting;
+
+	FamilySettings(BaseLib::Obj* bl, int32_t familyId);
 	virtual ~FamilySettings();
 	void dispose();
 	void load(std::string filename);
 	bool changed();
 	std::string get(std::string name);
 	int32_t getNumber(std::string name);
-	std::vector<std::shared_ptr<PhysicalInterfaceSettings>> getPhysicalInterfaceSettings();
+	std::vector<char> getBinary(std::string name);
+	std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
 private:
-	BaseLib::Obj* _bl = nullptr;;
+	BaseLib::Obj* _bl = nullptr;
+	int32_t _familyId = -1;
 	std::mutex _settingsMutex;
-	std::map<std::string, std::string> _settings;
-	std::vector<std::shared_ptr<PhysicalInterfaceSettings>> _physicalInterfaceSettings;
+	std::map<std::string, PFamilySetting> _settings;
+	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
+
+	void loadFromDatabase();
+	void processStringSetting(std::string& name, std::string& value, PPhysicalInterfaceSettings& settings);
+	void processDatabaseSetting(std::string& name, PFamilySetting& value, PPhysicalInterfaceSettings& settings);
 };
 
 }

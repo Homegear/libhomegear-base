@@ -1555,8 +1555,8 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				std::shared_ptr<Variable> value;
 				if(j->second->readable)
 				{
-					value = (j->second->convertFromPacket(parameterIterator->second.data));
-					if(j->second->password) value.reset(new Variable(value->type));
+					if(j->second->password || parameterIterator->second.data.empty()) value.reset(new Variable(j->second->logical->type));
+					else value = j->second->convertFromPacket(parameterIterator->second.data);
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
 				}

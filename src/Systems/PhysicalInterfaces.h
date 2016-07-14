@@ -53,7 +53,7 @@ class IPhysicalInterface;
 class PhysicalInterfaces
 {
 public:
-	PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::vector<std::shared_ptr<PhysicalInterfaceSettings>> physicalInterfaceSettings);
+	PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
 	virtual ~PhysicalInterfaces();
 	void dispose();
 
@@ -68,7 +68,7 @@ public:
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	int32_t _familyId = -1;
-	std::vector<std::shared_ptr<PhysicalInterfaceSettings>> _physicalInterfaceSettings;
+	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
 	std::mutex _physicalInterfacesMutex;
 	std::map<std::string, std::shared_ptr<IPhysicalInterface>> _physicalInterfaces;
 
