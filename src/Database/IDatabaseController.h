@@ -99,6 +99,13 @@ public:
 	virtual void deleteEvent(std::string& name) = 0;
 	//End events
 
+	//Family
+	virtual void deleteFamily(int32_t familyId) = 0;
+	virtual void saveFamilyVariableAsynchronous(int32_t familyId, BaseLib::Database::DataRow& data) = 0;
+	virtual std::shared_ptr<BaseLib::Database::DataTable> getFamilyVariables(int32_t familyId) = 0;
+	virtual void deleteFamilyVariable(BaseLib::Database::DataRow& data) = 0;
+	//End family
+
 	//Device
 	virtual std::shared_ptr<DataTable> getDevices(uint32_t family) = 0;
 	virtual void deleteDevice(uint64_t id) = 0;

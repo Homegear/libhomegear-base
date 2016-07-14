@@ -37,7 +37,7 @@ namespace BaseLib
 namespace Systems
 {
 
-PhysicalInterfaces::PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::vector<std::shared_ptr<PhysicalInterfaceSettings>> physicalInterfaceSettings)
+PhysicalInterfaces::PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings)
 {
 	try
 	{
