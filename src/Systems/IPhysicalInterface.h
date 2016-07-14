@@ -83,8 +83,8 @@ public:
 	};
 	//End event handling
 
-	IPhysicalInterface(BaseLib::Obj* baseLib);
-	IPhysicalInterface(BaseLib::Obj* baseLib, std::shared_ptr<PhysicalInterfaceSettings> settings);
+	IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId);
+	IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings);
 
 	virtual ~IPhysicalInterface();
 
@@ -105,6 +105,7 @@ public:
 	virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
 protected:
 	BaseLib::Obj* _bl = nullptr;
+	int32_t _familyId = -1;
 	std::shared_ptr<PhysicalInterfaceSettings> _settings;
 	std::thread _listenThread;
 	std::thread _callbackThread;
@@ -147,6 +148,10 @@ protected:
 	virtual bool setGPIOEdge(uint32_t index, GPIOEdge::Enum edge);
 	virtual bool gpioDefined(uint32_t);
 	virtual bool gpioOpen(uint32_t);
+
+	virtual void saveSettingToDatabase(std::string setting, std::string& value);
+	virtual void saveSettingToDatabase(std::string setting, int32_t value);
+	virtual void saveSettingToDatabase(std::string setting, std::vector<char>& value);
 };
 
 }

@@ -31,9 +31,9 @@
 #ifndef PHYSICALINTERFACESETTINGS_H_
 #define PHYSICALINTERFACESETTINGS_H_
 
-#include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 
 namespace BaseLib
 {
@@ -86,7 +86,11 @@ public:
 	int32_t listenThreadPolicy = SCHED_OTHER;
 	std::string ttsProgram;
 	std::string dataPath;
+	std::string user;
+	std::string password;
 };
+
+typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;
 
 }
 }

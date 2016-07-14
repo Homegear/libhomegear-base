@@ -1555,8 +1555,8 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				std::shared_ptr<Variable> value;
 				if(j->second->readable)
 				{
-					value = (j->second->convertFromPacket(parameterIterator->second.data));
-					if(j->second->password) value.reset(new Variable(value->type));
+					if(j->second->password || parameterIterator->second.data.empty()) value.reset(new Variable(j->second->logical->type));
+					else value = j->second->convertFromPacket(parameterIterator->second.data);
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
 				}
@@ -2331,6 +2331,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				if(valuesIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
 				if(parameterIterator == valuesIterator->second.end()) continue;
+				if(getParamsetHook2(clientInfo, i->second, channel, variables)) continue;
 				element = i->second->convertFromPacket(parameterIterator->second.data);
 			}
 			else if(type == ParameterGroup::Type::Enum::config)

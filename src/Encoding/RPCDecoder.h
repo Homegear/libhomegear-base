@@ -51,6 +51,7 @@ class RPCDecoder
 {
 public:
 	RPCDecoder(BaseLib::Obj* baseLib);
+	RPCDecoder(BaseLib::Obj* baseLib, bool ansi);
 	virtual ~RPCDecoder() {}
 
 	virtual std::shared_ptr<RPCHeader> decodeHeader(std::vector<char>& packet);
@@ -62,6 +63,7 @@ public:
 	virtual void decodeResponse(PVariable& variable, uint32_t offset = 0);
 private:
 	BaseLib::Obj* _bl = nullptr;
+	bool _ansi = false;
 	std::unique_ptr<BinaryDecoder> _decoder;
 
 	std::shared_ptr<Variable> decodeParameter(std::vector<char>& packet, uint32_t& position);

@@ -39,6 +39,12 @@ BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib)
 	_bl = baseLib;
 }
 
+BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib, bool ansi) : BinaryDecoder(baseLib)
+{
+	_ansi = ansi;
+	if(_ansi) _ansiConverter.reset(new Ansi());
+}
+
 int32_t BinaryDecoder::decodeInteger(std::vector<char>& encodedData, uint32_t& position)
 {
 	int32_t integer = 0;
@@ -205,9 +211,18 @@ std::string BinaryDecoder::decodeString(std::vector<char>& encodedData, uint32_t
 	{
 		int32_t stringLength = decodeInteger(encodedData, position);
 		if(position + stringLength > encodedData.size() || stringLength == 0) return "";
-		std::string string(&encodedData.at(position), stringLength);
-		position += stringLength;
-		return string;
+		if(_ansi && _ansiConverter)
+		{
+			std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
+			position += stringLength;
+			return string;
+		}
+		else
+		{
+			std::string string(&encodedData.at(position), stringLength);
+			position += stringLength;
+			return string;
+		}
 	}
 	catch(const std::exception& ex)
     {
@@ -230,9 +245,18 @@ std::string BinaryDecoder::decodeString(std::vector<uint8_t>& encodedData, uint3
 	{
 		int32_t stringLength = decodeInteger(encodedData, position);
 		if(position + stringLength > encodedData.size() || stringLength == 0) return "";
-		std::string string((char*)&encodedData.at(position), stringLength);
-		position += stringLength;
-		return string;
+		if(_ansi && _ansiConverter)
+		{
+			std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
+			position += stringLength;
+			return string;
+		}
+		else
+		{
+			std::string string((char*)&encodedData.at(position), stringLength);
+			position += stringLength;
+			return string;
+		}
 	}
 	catch(const std::exception& ex)
     {

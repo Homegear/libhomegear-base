@@ -1,19 +1,19 @@
 /* Copyright 2013-2016 Sathya Laufer
  *
- * Homegear is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
+ * libhomegear-base is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
- * Homegear is distributed in the hope that it will be useful,
+ *
+ * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Homegear.  If not, see
+ * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,54 +28,25 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef SYSTEMSPHYSICALINTERFACES_H_
-#define SYSTEMSPHYSICALINTERFACES_H_
+#ifndef ANSI_H_
+#define ANSI_H_
 
-#include "../Variable.h"
-#include "PhysicalInterfaceSettings.h"
-
-#include <memory>
-#include <mutex>
+#include <string.h>
 #include <string>
-#include <map>
 #include <vector>
 
 namespace BaseLib
 {
-
-class Obj;
-
-namespace Systems
-{
-
-class IPhysicalInterface;
-
-class PhysicalInterfaces
+class Ansi
 {
 public:
-	PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
-	virtual ~PhysicalInterfaces();
-	void dispose();
+	Ansi();
+	virtual ~Ansi() {}
 
-	uint32_t count();
-	void clear();
-	void stopListening();
-	void startListening();
-	bool lifetick();
-	bool isOpen();
-	void setup(int32_t userID, int32_t groupID);
-	PVariable listInterfaces(int32_t centralAddress);
+	std::string toUtf8(const std::string& ansiString);
+	std::string toUtf8(const char* ansiString, uint32_t length);
 protected:
-	BaseLib::Obj* _bl = nullptr;
-	int32_t _familyId = -1;
-	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
-	std::mutex _physicalInterfacesMutex;
-	std::map<std::string, std::shared_ptr<IPhysicalInterface>> _physicalInterfaces;
-
-	virtual void create() {};
+	std::vector<std::vector<uint8_t>> _lookup;
 };
-
-}
-
 }
 #endif
