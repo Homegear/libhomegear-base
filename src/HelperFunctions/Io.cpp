@@ -190,7 +190,7 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 		}
 		closedir(directory);
 	}
-	else throw(Exception("Could not open directory."));
+	else throw(Exception("Could not open directory \"" + path + "\""));
 	return files;
 }
 
@@ -227,7 +227,7 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 		}
 		closedir(directory);
 	}
-	else throw(Exception("Could not open directory."));
+	else throw(Exception("Could not open directory \"" + path + "\""));
 	return directories;
 }
 
