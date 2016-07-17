@@ -79,6 +79,26 @@ bool DeviceFamily::lifetick()
 	return true;
 }
 
+FamilySettings::PFamilySetting DeviceFamily::getFamilySetting(std::string& name)
+{
+	return _settings->get(name);
+}
+
+void DeviceFamily::setFamilySetting(std::string& name, std::string& value)
+{
+	_settings->set(name, value);
+}
+
+void DeviceFamily::setFamilySetting(std::string& name, int32_t value)
+{
+	_settings->set(name, value);
+}
+
+void DeviceFamily::setFamilySetting(std::string& name, std::vector<char>& value)
+{
+	_settings->set(name, value);
+}
+
 //Event handling
 void DeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
 {
