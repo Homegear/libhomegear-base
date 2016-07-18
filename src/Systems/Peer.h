@@ -216,6 +216,7 @@ public:
      */
     virtual void initializeCentralConfig();
 
+    virtual std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> getPeers();
     virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, int32_t address, int32_t remoteChannel = -1);
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, uint64_t id, int32_t remoteChannel = -1);
 	virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel = -1);

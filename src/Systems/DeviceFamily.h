@@ -89,6 +89,11 @@ public:
 	virtual bool locked();
 
 	virtual int32_t getFamily();
+	virtual FamilySettings::PFamilySetting getFamilySetting(std::string& name);
+	virtual void setFamilySetting(std::string& name, std::string& value);
+	virtual void setFamilySetting(std::string& name, int32_t value);
+	virtual void setFamilySetting(std::string& name, std::vector<char>& value);
+	virtual void deleteFamilySettingFromDatabase(std::string& name);
 	virtual std::shared_ptr<DeviceDescription::Devices> getRpcDevices();
 	virtual void load();
 	virtual void save(bool full);
