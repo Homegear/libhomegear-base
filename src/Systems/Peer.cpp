@@ -325,6 +325,31 @@ void Peer::setLastPacketReceived()
 	}
 }
 
+std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> Peer::getPeers()
+{
+	_peersMutex.lock();
+	try
+	{
+		std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> peers = _peers;
+		_peersMutex.unlock();
+		return peers;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	_peersMutex.unlock();
+	return std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>();
+}
+
 std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel)
 {
 	_peersMutex.lock();
