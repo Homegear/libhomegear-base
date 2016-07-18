@@ -99,6 +99,11 @@ void DeviceFamily::setFamilySetting(std::string& name, std::vector<char>& value)
 	_settings->set(name, value);
 }
 
+void DeviceFamily::deleteFamilySettingFromDatabase(std::string& name)
+{
+	_settings->deleteFromDatabase(name);
+}
+
 //Event handling
 void DeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
 {

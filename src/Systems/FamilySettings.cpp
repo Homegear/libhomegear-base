@@ -170,14 +170,14 @@ std::vector<char> FamilySettings::getBinary(std::string name)
     return std::vector<char>();
 }
 
-void FamilySettings::set(std::string& setting, std::string& value)
+void FamilySettings::set(std::string& name, std::string& value)
 {
 	try
 	{
-		if(setting.empty()) return;
+		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(setting);
+			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
 			if(settingIterator != _settings.end())
 			{
 				settingIterator->second->stringValue = value;
@@ -186,7 +186,6 @@ void FamilySettings::set(std::string& setting, std::string& value)
 			}
 		}
 		Database::DataRow data;
-		std::string name = setting;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(0)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
@@ -212,14 +211,14 @@ void FamilySettings::set(std::string& setting, std::string& value)
     }
 }
 
-void FamilySettings::set(std::string& setting, int32_t value)
+void FamilySettings::set(std::string& name, int32_t value)
 {
 	try
 	{
-		if(setting.empty()) return;
+		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(setting);
+			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
 			if(settingIterator != _settings.end())
 			{
 				settingIterator->second->stringValue.clear();
@@ -227,9 +226,7 @@ void FamilySettings::set(std::string& setting, int32_t value)
 				settingIterator->second->binaryValue.clear();
 			}
 		}
-		if(setting.empty()) return;
 		Database::DataRow data;
-		std::string name = setting;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
@@ -255,14 +252,14 @@ void FamilySettings::set(std::string& setting, int32_t value)
     }
 }
 
-void FamilySettings::set(std::string& setting, std::vector<char>& value)
+void FamilySettings::set(std::string& name, std::vector<char>& value)
 {
 	try
 	{
-		if(setting.empty()) return;
+		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(setting);
+			std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
 			if(settingIterator != _settings.end())
 			{
 				settingIterator->second->stringValue.clear();
@@ -270,9 +267,7 @@ void FamilySettings::set(std::string& setting, std::vector<char>& value)
 				settingIterator->second->binaryValue = value;
 			}
 		}
-		if(setting.empty()) return;
 		Database::DataRow data;
-		std::string name = setting;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(2)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
@@ -283,6 +278,30 @@ void FamilySettings::set(std::string& setting, std::vector<char>& value)
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
 		_bl->db->saveFamilyVariableAsynchronous(_familyId, data);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void FamilySettings::deleteFromDatabase(std::string& name)
+{
+	try
+	{
+		if(name.empty()) return;
+		Database::DataRow data;
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+		_bl->db->deleteFamilyVariable(data);
 	}
 	catch(const std::exception& ex)
     {
