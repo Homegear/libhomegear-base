@@ -184,6 +184,12 @@ void FamilySettings::set(std::string& name, std::string& value)
 				settingIterator->second->integerValue = 0;
 				settingIterator->second->binaryValue.clear();
 			}
+			else
+			{
+				PFamilySetting setting(new FamilySetting());
+				setting->stringValue = value;
+				_settings[name] = setting;
+			}
 		}
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
@@ -225,6 +231,12 @@ void FamilySettings::set(std::string& name, int32_t value)
 				settingIterator->second->integerValue = value;
 				settingIterator->second->binaryValue.clear();
 			}
+			else
+			{
+				PFamilySetting setting(new FamilySetting());
+				setting->integerValue = value;
+				_settings[name] = setting;
+			}
 		}
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
@@ -265,6 +277,12 @@ void FamilySettings::set(std::string& name, std::vector<char>& value)
 				settingIterator->second->stringValue.clear();
 				settingIterator->second->integerValue = 0;
 				settingIterator->second->binaryValue = value;
+			}
+			else
+			{
+				PFamilySetting setting(new FamilySetting());
+				setting->binaryValue = value;
+				_settings[name] = setting;
 			}
 		}
 		Database::DataRow data;
