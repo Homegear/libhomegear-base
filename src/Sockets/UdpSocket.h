@@ -50,6 +50,7 @@ public:
 	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
 	void setHostname(std::string hostname) { close(); _hostname = hostname; }
 	void setPort(std::string port) { close(); _port = port; }
+	std::string getClientIp() { return _clientIp; }
 	std::string getListenIp() { return _listenIp; }
 	int32_t getListenPort() { return _listenPort; }
 
@@ -66,6 +67,7 @@ protected:
 	int64_t _readTimeout = 15000000;
 	bool _autoConnect = true;
 	std::string _hostname;
+	std::string _clientIp;
 	std::string _port;
 	std::string _listenIp;
 	int32_t _listenPort = -1;
