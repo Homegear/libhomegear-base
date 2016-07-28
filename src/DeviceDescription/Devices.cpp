@@ -58,8 +58,28 @@ void Devices::load()
 	try
 	{
 		std::string path = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family);
+		load(path);
+	}
+    catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void Devices::load(std::string& xmlPath)
+{
+	try
+	{
 		_devices.clear();
-		std::string deviceDir(path);
+		std::string deviceDir(xmlPath);
 		std::vector<std::string> files;
 		try
 		{
@@ -67,18 +87,18 @@ void Devices::load()
 		}
 		catch(const Exception& ex)
 		{
-			_bl->out.printError("Could not read device description files in directory: \"" + path + "\": " + ex.what());
+			_bl->out.printError("Could not read device description files in directory: \"" + xmlPath + "\": " + ex.what());
 			return;
 		}
 		if(files.empty())
 		{
-			_bl->out.printError("No xml files found in \"" + path + "\".");
+			_bl->out.printError("No xml files found in \"" + xmlPath + "\".");
 			return;
 		}
 		for(std::vector<std::string>::iterator i = files.begin(); i != files.end(); ++i)
 		{
 			std::string filename(deviceDir + "/" + *i);
-			std::shared_ptr<HomegearDevice> device = load(filename);
+			std::shared_ptr<HomegearDevice> device = loadFile(filename);
 			if(device) _devices.push_back(device);
 		}
 
@@ -98,7 +118,7 @@ void Devices::load()
     }
 }
 
-std::shared_ptr<HomegearDevice> Devices::load(std::string& filepath)
+std::shared_ptr<HomegearDevice> Devices::loadFile(std::string& filepath)
 {
 	try
 	{
