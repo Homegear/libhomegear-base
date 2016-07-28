@@ -164,6 +164,8 @@ protected:
 		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
 	// }}}
 protected:
+	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
+
 	virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
 	virtual void createCentral() = 0;
 private:
@@ -173,7 +175,6 @@ private:
 	IFamilyEventSink* _eventHandler;
 	int32_t _family = -1;
 	std::string _name;
-	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
 };
 
 }
