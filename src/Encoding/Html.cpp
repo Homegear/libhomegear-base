@@ -310,6 +310,7 @@ Html::EntityNameMap Html::_entityNames;
 void Html::unescapeHtmlEntities(std::string& in, std::string& out)
 {
 	out.clear();
+	if(in.empty()) return;
 	out.reserve(in.size());
 	std::string entityName;
 	bool found = false;
