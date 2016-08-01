@@ -179,7 +179,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -204,7 +204,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
-		}
+		}*/
 
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
@@ -245,7 +245,7 @@ int32_t UdpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < bytesToWrite)
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -270,7 +270,7 @@ int32_t UdpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
-		}
+		}*/
 
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
@@ -311,7 +311,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -336,7 +336,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
-		}
+		}*/
 
 		int32_t bytesToSend = data.size() - totalBytesWritten;
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, 0, _serverInfo->ai_addr, sizeof(sockaddr));
@@ -476,7 +476,7 @@ void UdpSocket::getConnection()
 			}
 
 			struct sockaddr_in* s = (struct sockaddr_in*)&(clientInfo.sin_addr);
-			inet_ntop(AF_INET6, s, ipStringBuffer, sizeof(ipStringBuffer));
+			inet_ntop(AF_INET, s, ipStringBuffer, sizeof(ipStringBuffer));
 			_listenIp = std::string(ipStringBuffer);
 			_listenPort = ntohs(clientInfo.sin_port);
 		}

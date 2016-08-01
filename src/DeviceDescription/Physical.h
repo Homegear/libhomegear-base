@@ -50,7 +50,7 @@ class PhysicalInteger;
 class PhysicalBoolean;
 class PhysicalString;
 
-typedef std::shared_ptr<PhysicalInteger> PPhysicalNone;
+typedef std::shared_ptr<PhysicalNone> PPhysicalNone;
 typedef std::shared_ptr<PhysicalInteger> PPhysicalInteger;
 typedef std::shared_ptr<PhysicalBoolean> PPhysicalBoolean;
 typedef std::shared_ptr<PhysicalString> PPhysicalString;
