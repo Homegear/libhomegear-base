@@ -65,6 +65,7 @@ public:
 	void clear();
 	void load();
 	void load(std::string& xmlPath);
+	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
 	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 
 	// {{{ RPC
@@ -78,7 +79,6 @@ protected:
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
 
-	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);
 };
 
