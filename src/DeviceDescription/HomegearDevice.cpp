@@ -1154,6 +1154,12 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 			}
 
+			if(!parameter->metadata.empty())
+			{
+				xml_node<>* node = doc->allocate_node(node_element, "metadata", doc->allocate_string(parameter->metadata.c_str(), parameter->metadata.size() + 1));
+				propertiesNode->append_node(node);
+			}
+
 			xml_node<>* node = nullptr;
 			if(!parameter->casts.empty())
 			{
@@ -1769,6 +1775,11 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			else if(parameter->physical->type == IPhysical::Type::Enum::tString)
 			{
 				node = doc->allocate_node(node_element, "physicalString");
+				parentNode->append_node(node);
+			}
+			else if(parameter->physical->type == IPhysical::Type::Enum::none)
+			{
+				node = doc->allocate_node(node_element, "physicalNone");
 				parentNode->append_node(node);
 			}
 
