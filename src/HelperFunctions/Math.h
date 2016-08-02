@@ -203,6 +203,9 @@ public:
 	 *
 	 * @see getDouble()
 	 * @see getUnsignedNumber()
+	 * @see getNumber()
+	 * @see getNumber64()
+	 * @see getOctalNumber()
 	 * @param s The string to convert.
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the integer or "0" on error.
@@ -214,6 +217,8 @@ public:
 	 *
 	 * @see getDouble()
 	 * @see getUnsignedNumber()
+	 * @see getNumber64()
+	 * @see getOctalNumber()
 	 * @param s The string to convert.
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the integer or "0" on error.
@@ -221,10 +226,24 @@ public:
 	static int64_t getNumber64(std::string& s, bool isHex = false);
 
 	/**
+	 * Converts a octal string to an integer.
+	 *
+	 * @see getDouble()
+	 * @see getUnsignedNumber()
+	 * @see getNumber()
+	 * @see getNumber64()
+	 * @param s The string to convert.
+	 * @return Returns the integer or "0" on error.
+	 */
+	static int32_t getOctalNumber(std::string& s);
+
+	/**
 	 * Converts a hexadecimal character to an integer.
 	 *
 	 * @see getDouble()
 	 * @see getUnsignedNumber()
+	 * @see getNumber64()
+	 * @see getOctalNumber()
 	 * @param hexChar The hexadecimal character.
 	 * @return Returns the integer or "0" on error.
 	 */
@@ -235,6 +254,8 @@ public:
 	 *
 	 * @see getDouble()
 	 * @see getNumber()
+	 * @see getNumber64()
+	 * @see getOctalNumber()
 	 * @param s The string to convert.
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the unsigned integer or "0" on error.
