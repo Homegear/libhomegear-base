@@ -106,6 +106,7 @@ public:
 	std::string unit;
 	std::string formFieldType;
 	int32_t formPosition = -1;
+	std::string metadata;
 	Casts casts;
 
 	//Elements
