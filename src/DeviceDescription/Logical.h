@@ -75,6 +75,7 @@ public:
 	int32_t index = -1;
 
 	EnumerationValue() {}
+	EnumerationValue(std::string id, int32_t index) { this->id = id; this->index = index; indexDefined = true; }
 	EnumerationValue(BaseLib::Obj* baseLib, xml_node<>* node);
 	virtual ~EnumerationValue() {}
 };
@@ -120,7 +121,7 @@ public:
 class LogicalDecimal : public ILogical
 {
 public:
-	double minimumValue = 1.175494351e-38f;
+	double minimumValue = -3.40282347e+38f;
 	double maximumValue = 3.40282347e+38f;
 	double defaultValue = 0;
 	double setToValueOnPairing = 0;

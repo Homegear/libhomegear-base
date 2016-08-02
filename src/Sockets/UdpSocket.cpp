@@ -179,7 +179,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -204,7 +204,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
-		}
+		}*/
 
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
@@ -217,7 +217,6 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 		totalBytesWritten += bytesWritten;
 	}
 	_writeMutex.unlock();
-	std::cerr << "Wrote " << totalBytesWritten << std::endl;
 	return totalBytesWritten;
 }
 
@@ -246,7 +245,7 @@ int32_t UdpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < bytesToWrite)
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -271,7 +270,7 @@ int32_t UdpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
-		}
+		}*/
 
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
@@ -312,7 +311,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		/*timeval timeout;
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set writeFileDescriptor;
@@ -337,7 +336,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 		{
 			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
-		}
+		}*/
 
 		int32_t bytesToSend = data.size() - totalBytesWritten;
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, 0, _serverInfo->ai_addr, sizeof(sockaddr));
@@ -431,14 +430,14 @@ void UdpSocket::getConnection()
 			struct sockaddr_in6 *s = (struct sockaddr_in6*)_serverInfo->ai_addr;
 			inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
 		}
-		std::string ipAddress = std::string(&ipStringBuffer[0]);
+		_clientIp = std::string(&ipStringBuffer[0]);
 
 		_socketDescriptor = _bl->fileDescriptorManager.add(socket(_serverInfo->ai_family, _serverInfo->ai_socktype, _serverInfo->ai_protocol));
 		if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
 		{
 			freeaddrinfo(_serverInfo);
 			_serverInfo = nullptr;
-			throw SocketOperationException("Could not create UDP socket for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not create UDP socket for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
 		}
 
 		if(!(fcntl(_socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK))
@@ -448,7 +447,7 @@ void UdpSocket::getConnection()
 				freeaddrinfo(_serverInfo);
 				_serverInfo = nullptr;
 				_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-				throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+				throw SocketOperationException("Could not set socket options for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
 			}
 		}
 
@@ -477,7 +476,7 @@ void UdpSocket::getConnection()
 			}
 
 			struct sockaddr_in* s = (struct sockaddr_in*)&(clientInfo.sin_addr);
-			inet_ntop(AF_INET6, s, ipStringBuffer, sizeof(ipStringBuffer));
+			inet_ntop(AF_INET, s, ipStringBuffer, sizeof(ipStringBuffer));
 			_listenIp = std::string(ipStringBuffer);
 			_listenPort = ntohs(clientInfo.sin_port);
 		}
