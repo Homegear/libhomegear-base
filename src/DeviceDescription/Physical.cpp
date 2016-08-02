@@ -67,6 +67,7 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
 				else if(nodeValue == "memory") operationType = OperationType::Enum::memory;
 				else baseLib->out.printWarning("Warning: Unknown interface for \"parameter\\physical*\": " + nodeValue);
 			}
+			else if(nodeName == "type") typeString = nodeValue;
 			else if(nodeName == "endianess")
 			{
 				if(nodeValue == "little") endianess = Endianess::Enum::little;
@@ -112,12 +113,12 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
     }
 }
 
-PhysicalNone::PhysicalNone(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::none)
+PhysicalNone::Physical(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::none)
 {
 
 }
 
-PhysicalNone::PhysicalNone(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
+PhysicalNone::Physical(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
 {
 
 }
