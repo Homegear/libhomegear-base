@@ -1025,6 +1025,34 @@ void Invert::toPacket(PVariable value)
 	}
 }
 
+Generic::Generic(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+Generic::Generic(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"generic\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "type") type = value;
+		else _bl->out.printWarning("Warning: Unknown node in \"generic\": " + name);
+	}
+}
+
+void Generic::fromPacket(PVariable value)
+{
+}
+
+void Generic::toPacket(PVariable value)
+{
+}
+
 }
 }
 }

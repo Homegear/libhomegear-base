@@ -1566,6 +1566,46 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							continue;
 						}
 					}
+
+					{
+						PTimeStringSeconds timeStringSeconds;
+						timeStringSeconds = std::dynamic_pointer_cast<TimeStringSeconds>(*i);
+						if(timeStringSeconds)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "timeStringSeconds");
+							node->append_node(castNode);
+							continue;
+						}
+					}
+
+					{
+						PInvert invert;
+						invert = std::dynamic_pointer_cast<Invert>(*i);
+						if(invert)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "invert");
+							node->append_node(castNode);
+							continue;
+						}
+					}
+
+					{
+						PGeneric generic;
+						generic = std::dynamic_pointer_cast<Generic>(*i);
+						if(generic)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "generic");
+							node->append_node(castNode);
+
+							if(!generic->type.empty())
+							{
+								xml_node<>* subnode = doc->allocate_node(node_element, "type", doc->allocate_string(generic->type.c_str(), generic->type.size() + 1));
+								castNode->append_node(subnode);
+							}
+
+							continue;
+						}
+					}
 				}
 			}
 		// }}}
