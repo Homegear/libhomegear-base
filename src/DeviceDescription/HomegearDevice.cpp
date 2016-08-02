@@ -307,25 +307,23 @@ void HomegearDevice::postLoad()
 
 void HomegearDevice::save(std::string& filename)
 {
+	xml_document<> doc;
 	try
 	{
-		xml_document<> doc;
-
 		if(Io::fileExists(filename))
 		{
 			if(!Io::deleteFile(filename))
 			{
+				doc.clear();
 				_bl->out.printError("Error: File \"" + filename + "\" already exists and cannot be deleted.");
 				return;
 			}
 		}
 
-		std::vector<std::string> tempStrings; //We need to store all newly created strings as RapidXml doesn't copy strings.
-
 		xml_node<>* homegearDevice = doc.allocate_node(node_element, "homegearDevice");
 		doc.append_node(homegearDevice);
 
-		saveDevice(&doc, homegearDevice, this, tempStrings);
+		saveDevice(&doc, homegearDevice, this);
 
 		std::ofstream fileStream(filename, std::ios::out | std::ios::binary);
 		if(fileStream)
@@ -333,7 +331,6 @@ void HomegearDevice::save(std::string& filename)
 			fileStream << doc;
 		}
 		fileStream.close();
-		doc.clear();
 	}
 	catch(const std::exception& ex)
     {
@@ -347,14 +344,15 @@ void HomegearDevice::save(std::string& filename)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+    doc.clear();
 }
 
-void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, HomegearDevice* device, std::vector<std::string>& tempStrings)
+void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, HomegearDevice* device)
 {
 	try
 	{
-		tempStrings.push_back(std::to_string(device->version));
-		xml_attribute<>* versionAttr = doc->allocate_attribute("version", tempStrings.back().c_str());
+		std::string tempString = std::to_string(device->version);
+		xml_attribute<>* versionAttr = doc->allocate_attribute("version", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 		parentNode->append_attribute(versionAttr);
 
 		xml_node<>* node = doc->allocate_node(node_element, "supportedDevices");
@@ -364,42 +362,43 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* subnode = doc->allocate_node(node_element, "device");
 			node->append_node(subnode);
 
-			xml_attribute<>* attr = doc->allocate_attribute("id", (*i)->id.c_str());
+			xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string((*i)->id.c_str(), (*i)->id.size() + 1));
 			subnode->append_attribute(attr);
 
-			xml_node<>* deviceNode = doc->allocate_node(node_element, "description", (*i)->description.c_str());
+			xml_node<>* deviceNode = doc->allocate_node(node_element, "description", doc->allocate_string((*i)->description.c_str(), (*i)->description.size() + 1));
 			subnode->append_node(deviceNode);
 
 			if(!(*i)->longDescription.empty())
 			{
-				deviceNode = doc->allocate_node(node_element, "longDescription", (*i)->longDescription.c_str());
+				deviceNode = doc->allocate_node(node_element, "longDescription", doc->allocate_string((*i)->longDescription.c_str(), (*i)->longDescription.size() + 1));
 				subnode->append_node(deviceNode);
 			}
 
 			if(!(*i)->serialPrefix.empty())
 			{
-				deviceNode = doc->allocate_node(node_element, "serialPrefix", (*i)->serialPrefix.c_str());
+				deviceNode = doc->allocate_node(node_element, "serialPrefix", doc->allocate_string((*i)->serialPrefix.c_str(), (*i)->serialPrefix.size() + 1));
 				subnode->append_node(deviceNode);
 			}
 
 			if((*i)->typeNumber != (uint32_t)-1)
 			{
-				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString((*i)->typeNumber));
-				deviceNode = doc->allocate_node(node_element, "typeNumber", tempStrings.back().c_str());
+				std::string typeNumber = "0x" + BaseLib::HelperFunctions::getHexString((*i)->typeNumber);
+				char* pTypeNumber = doc->allocate_string(typeNumber.c_str(), typeNumber.size() + 1);
+				deviceNode = doc->allocate_node(node_element, "typeNumber", pTypeNumber);
 				subnode->append_node(deviceNode);
 			}
 
 			if((*i)->minFirmwareVersion != 0)
 			{
-				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString((*i)->minFirmwareVersion));
-				deviceNode = doc->allocate_node(node_element, "minFirmwareVersion", tempStrings.back().c_str());
+				tempString = "0x" + BaseLib::HelperFunctions::getHexString((*i)->minFirmwareVersion);
+				deviceNode = doc->allocate_node(node_element, "minFirmwareVersion", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(deviceNode);
 			}
 
 			if((*i)->maxFirmwareVersion != 0)
 			{
-				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString((*i)->maxFirmwareVersion));
-				deviceNode = doc->allocate_node(node_element, "maxFirmwareVersion", tempStrings.back().c_str());
+				tempString = "0x" + BaseLib::HelperFunctions::getHexString((*i)->maxFirmwareVersion);
+				deviceNode = doc->allocate_node(node_element, "maxFirmwareVersion", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(deviceNode);
 			}
 		}
@@ -409,7 +408,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			node = doc->allocate_node(node_element, "runProgram");
 			parentNode->append_node(node);
 
-			xml_node<>* subnode = doc->allocate_node(node_element, "path", device->runProgram->path.c_str());
+			xml_node<>* subnode = doc->allocate_node(node_element, "path", doc->allocate_string(device->runProgram->path.c_str(), device->runProgram->path.size() + 1));
 			node->append_node(subnode);
 
 			if(device->runProgram->arguments.size() > 0)
@@ -423,14 +422,14 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				}
 			}
 
-			tempStrings.push_back(device->runProgram->startType == RunProgram::StartType::Enum::once ? "once" : (device->runProgram->startType == RunProgram::StartType::Enum::interval ? "interval" : "permanent"));
-			subnode = doc->allocate_node(node_element, "startType", tempStrings.back().c_str());
+			tempString = device->runProgram->startType == RunProgram::StartType::Enum::once ? "once" : (device->runProgram->startType == RunProgram::StartType::Enum::interval ? "interval" : "permanent");
+			subnode = doc->allocate_node(node_element, "startType", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			node->append_node(subnode);
 
 			if(device->runProgram->interval > 0)
 			{
-				tempStrings.push_back(std::to_string(device->runProgram->interval));
-				subnode = doc->allocate_node(node_element, "interval", tempStrings.back().c_str());
+				tempString = std::to_string(device->runProgram->interval);
+				subnode = doc->allocate_node(node_element, "interval", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 		}
@@ -443,95 +442,95 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			{
 				if(device->receiveModes & ReceiveModes::Enum::always)
 				{
-					tempStrings.push_back("always");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "always";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 				if(device->receiveModes & ReceiveModes::Enum::wakeOnRadio)
 				{
-					tempStrings.push_back("wakeOnRadio");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "wakeOnRadio";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 				if(device->receiveModes & ReceiveModes::Enum::config)
 				{
-					tempStrings.push_back("config");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "config";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 				if(device->receiveModes & ReceiveModes::Enum::wakeUp)
 				{
-					tempStrings.push_back("wakeUp");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "wakeUp";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 				if(device->receiveModes & ReceiveModes::Enum::wakeUp2)
 				{
-					tempStrings.push_back("wakeUp2");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "wakeUp2";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 				if(device->receiveModes & ReceiveModes::Enum::lazyConfig)
 				{
-					tempStrings.push_back("lazyConfig");
-					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", tempStrings.back().c_str());
+					tempString = "lazyConfig";
+					xml_node<>* subnode = doc->allocate_node(node_element, "receiveMode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 			}
 
 			if(device->encryption)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* subnode = doc->allocate_node(node_element, "encryption", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* subnode = doc->allocate_node(node_element, "encryption", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(device->timeout > 0)
 			{
-				tempStrings.push_back(std::to_string(device->timeout));
-				xml_node<>* subnode = doc->allocate_node(node_element, "timeout", tempStrings.back().c_str());
+				tempString = std::to_string(device->timeout);
+				xml_node<>* subnode = doc->allocate_node(node_element, "timeout", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(device->memorySize != 1024)
 			{
-				tempStrings.push_back(std::to_string(device->memorySize));
-				xml_node<>* subnode = doc->allocate_node(node_element, "memorySize", tempStrings.back().c_str());
+				tempString = std::to_string(device->memorySize);
+				xml_node<>* subnode = doc->allocate_node(node_element, "memorySize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(!device->visible)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* subnode = doc->allocate_node(node_element, "visible", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* subnode = doc->allocate_node(node_element, "visible", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(!device->deletable)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* subnode = doc->allocate_node(node_element, "deletable", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* subnode = doc->allocate_node(node_element, "deletable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(device->internal)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* subnode = doc->allocate_node(node_element, "internal", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* subnode = doc->allocate_node(node_element, "internal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(device->needsTime)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* subnode = doc->allocate_node(node_element, "needsTime", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* subnode = doc->allocate_node(node_element, "needsTime", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 
 			if(device->hasBattery)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* subnode = doc->allocate_node(node_element, "hasBattery", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* subnode = doc->allocate_node(node_element, "hasBattery", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
 		// }}}
@@ -553,7 +552,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			}
 			xml_node<>* subnode = doc->allocate_node(node_element, "function");
 			node->append_node(subnode);
-			saveFunction(doc, subnode, i->second, tempStrings, configParameters, variables, linkParameters);
+			saveFunction(doc, subnode, i->second, configParameters, variables, linkParameters);
 		}
 
 		// {{{ Packets
@@ -564,111 +563,111 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* subnode = doc->allocate_node(node_element, "packet");
 			node->append_node(subnode);
 
-			xml_attribute<>* attr = doc->allocate_attribute("id", i->first.c_str());
+			xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 			subnode->append_attribute(attr);
 
-			tempStrings.push_back(i->second->direction == Packet::Direction::Enum::fromCentral ? "fromCentral" : "toCentral");
-			xml_node<>* packetNode = doc->allocate_node(node_element, "direction", tempStrings.back().c_str());
+			tempString = i->second->direction == Packet::Direction::Enum::fromCentral ? "fromCentral" : "toCentral";
+			xml_node<>* packetNode = doc->allocate_node(node_element, "direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			subnode->append_node(packetNode);
 
 			if(i->second->length != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->length));
-				packetNode = doc->allocate_node(node_element, "length", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->length);
+				packetNode = doc->allocate_node(node_element, "length", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->type != -1)
 			{
-				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString(i->second->type));
-				packetNode = doc->allocate_node(node_element, "type", tempStrings.back().c_str());
+				tempString = "0x" + BaseLib::HelperFunctions::getHexString(i->second->type);
+				packetNode = doc->allocate_node(node_element, "type", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->subtype != -1)
 			{
-				tempStrings.push_back("0x" + BaseLib::HelperFunctions::getHexString(i->second->subtype));
-				packetNode = doc->allocate_node(node_element, "subtype", tempStrings.back().c_str());
+				tempString = "0x" + BaseLib::HelperFunctions::getHexString(i->second->subtype);
+				packetNode = doc->allocate_node(node_element, "subtype", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->subtypeIndex != -1)
 			{
-				tempStrings.push_back((i->second->subtypeSize == 1.0 || i->second->subtypeSize == -1) ? std::to_string(i->second->subtypeIndex) : std::to_string(i->second->subtypeIndex) + ':' + Math::toString(i->second->subtypeSize, 1));
-				packetNode = doc->allocate_node(node_element, "subtypeIndex", tempStrings.back().c_str());
+				tempString = (i->second->subtypeSize == 1.0 || i->second->subtypeSize == -1) ? std::to_string(i->second->subtypeIndex) : std::to_string(i->second->subtypeIndex) + ':' + Math::toString(i->second->subtypeSize, 1);
+				packetNode = doc->allocate_node(node_element, "subtypeIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(!i->second->function1.empty())
 			{
-				packetNode = doc->allocate_node(node_element, "function1", i->second->function1.c_str());
+				packetNode = doc->allocate_node(node_element, "function1", doc->allocate_string(i->second->function1.c_str(), i->second->function1.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(!i->second->function2.empty())
 			{
-				packetNode = doc->allocate_node(node_element, "function2", i->second->function2.c_str());
+				packetNode = doc->allocate_node(node_element, "function2", doc->allocate_string(i->second->function2.c_str(), i->second->function2.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(!i->second->metaString1.empty())
 			{
-				packetNode = doc->allocate_node(node_element, "metaString1", i->second->metaString1.c_str());
+				packetNode = doc->allocate_node(node_element, "metaString1", doc->allocate_string(i->second->metaString1.c_str(), i->second->metaString1.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(!i->second->metaString2.empty())
 			{
-				packetNode = doc->allocate_node(node_element, "metaString2", i->second->metaString2.c_str());
+				packetNode = doc->allocate_node(node_element, "metaString2", doc->allocate_string(i->second->metaString2.c_str(), i->second->metaString2.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->responseType != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->responseType));
-				packetNode = doc->allocate_node(node_element, "responseType", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->responseType);
+				packetNode = doc->allocate_node(node_element, "responseType", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->responseSubtype != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->responseSubtype));
-				packetNode = doc->allocate_node(node_element, "responseSubtype", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->responseSubtype);
+				packetNode = doc->allocate_node(node_element, "responseSubtype", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->channel != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->channel));
-				packetNode = doc->allocate_node(node_element, "channel", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->channel);
+				packetNode = doc->allocate_node(node_element, "channel", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->channelIndex != -1)
 			{
-				tempStrings.push_back(i->second->channelSize == 1.0 ? std::to_string(i->second->channelIndex) : std::to_string(i->second->channelIndex) + ':' + Math::toString(i->second->channelSize, 1));
-				packetNode = doc->allocate_node(node_element, "channelIndex", tempStrings.back().c_str());
+				tempString = i->second->channelSize == 1.0 ? std::to_string(i->second->channelIndex) : std::to_string(i->second->channelIndex) + ':' + Math::toString(i->second->channelSize, 1);
+				packetNode = doc->allocate_node(node_element, "channelIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->doubleSend)
 			{
-				tempStrings.push_back("true");
-				packetNode = doc->allocate_node(node_element, "doubleSend", tempStrings.back().c_str());
+				tempString = "true";
+				packetNode = doc->allocate_node(node_element, "doubleSend", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->splitAfter != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->splitAfter));
-				packetNode = doc->allocate_node(node_element, "splitAfter", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->splitAfter);
+				packetNode = doc->allocate_node(node_element, "splitAfter", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
 			if(i->second->maxPackets != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->maxPackets));
-				packetNode = doc->allocate_node(node_element, "maxPackets", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->maxPackets);
+				packetNode = doc->allocate_node(node_element, "maxPackets", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
@@ -684,76 +683,76 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 
 					if((*j)->index != 0)
 					{
-						tempStrings.push_back(Math::toString((*j)->index, 1));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index", tempStrings.back().c_str());
+						tempString = Math::toString((*j)->index, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->index != 0 && (*j)->size != 1.0)
 					{
-						tempStrings.push_back(Math::toString((*j)->size, 1));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size", tempStrings.back().c_str());
+						tempString = Math::toString((*j)->size, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->index2 != 0)
 					{
-						tempStrings.push_back(Math::toString((*j)->index2, 1));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2", tempStrings.back().c_str());
+						tempString = Math::toString((*j)->index2, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->index2 != 0 && (*j)->size2 != 0)
 					{
-						tempStrings.push_back(Math::toString((*j)->size2, 1));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size2", tempStrings.back().c_str());
+						tempString = Math::toString((*j)->size2, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->index2Offset != -1)
 					{
-						tempStrings.push_back(std::to_string((*j)->index2Offset));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2Offset", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->index2Offset);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2Offset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if(!(*j)->parameterId.empty())
 					{
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "parameterId", (*j)->parameterId.c_str());
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "parameterId", doc->allocate_string((*j)->parameterId.c_str(), (*j)->parameterId.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueInteger != -1)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueInteger));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueInteger);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueDecimal != -1)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueDecimal));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueDecimal);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if(!(*j)->constValueString.empty())
 					{
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", (*j)->constValueString.c_str());
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", doc->allocate_string((*j)->constValueString.c_str(), (*j)->constValueString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->isSigned)
 					{
-						tempStrings.push_back("true");
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "isSigned", tempStrings.back().c_str());
+						tempString = "true";
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "isSigned", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->omitIfSet)
 					{
-						tempStrings.push_back(std::to_string((*j)->omitIf));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "omitIf", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->omitIf);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "omitIf", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 				}
@@ -769,45 +768,45 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 					xml_node<>* payloadNode = doc->allocate_node(node_element, "element");
 					packetNode->append_node(payloadNode);
 
-					xml_node<>* payloadElementNode = doc->allocate_node(node_element, "key", (*j)->key.c_str());
+					xml_node<>* payloadElementNode = doc->allocate_node(node_element, "key", doc->allocate_string((*j)->key.c_str(), (*j)->key.size() + 1));
 					payloadNode->append_node(payloadElementNode);
 
 					if(!(*j)->subkey.empty())
 					{
-						payloadElementNode = doc->allocate_node(node_element, "subkey", (*j)->subkey.c_str());
+						payloadElementNode = doc->allocate_node(node_element, "subkey", doc->allocate_string((*j)->subkey.c_str(), (*j)->subkey.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if(!(*j)->parameterId.empty())
 					{
-						payloadElementNode = doc->allocate_node(node_element, "parameterId", (*j)->parameterId.c_str());
+						payloadElementNode = doc->allocate_node(node_element, "parameterId", doc->allocate_string((*j)->parameterId.c_str(), (*j)->parameterId.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueBooleanSet)
 					{
-						tempStrings.push_back((*j)->constValueBoolean ? "true" : "false");
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueBoolean", tempStrings.back().c_str());
+						tempString = (*j)->constValueBoolean ? "true" : "false";
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueBoolean", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueIntegerSet)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueInteger));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueInteger);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueDecimalSet)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueDecimal));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueDecimal);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueStringSet)
 					{
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", (*j)->constValueString.c_str());
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", doc->allocate_string((*j)->constValueString.c_str(), (*j)->constValueString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 				}
@@ -823,39 +822,39 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 					xml_node<>* payloadNode = doc->allocate_node(node_element, "element");
 					packetNode->append_node(payloadNode);
 
-					xml_node<>* payloadElementNode = doc->allocate_node(node_element, "key", (*j)->key.c_str());
+					xml_node<>* payloadElementNode = doc->allocate_node(node_element, "key", doc->allocate_string((*j)->key.c_str(), (*j)->key.size() + 1));
 					payloadNode->append_node(payloadElementNode);
 
 					if(!(*j)->parameterId.empty())
 					{
-						payloadElementNode = doc->allocate_node(node_element, "parameterId", (*j)->parameterId.c_str());
+						payloadElementNode = doc->allocate_node(node_element, "parameterId", doc->allocate_string((*j)->parameterId.c_str(), (*j)->parameterId.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueBooleanSet)
 					{
-						tempStrings.push_back((*j)->constValueBoolean ? "true" : "false");
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueBoolean", tempStrings.back().c_str());
+						tempString = (*j)->constValueBoolean ? "true" : "false";
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueBoolean", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueIntegerSet)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueInteger));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueInteger);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueInteger", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueDecimalSet)
 					{
-						tempStrings.push_back(std::to_string((*j)->constValueDecimal));
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", tempStrings.back().c_str());
+						tempString = std::to_string((*j)->constValueDecimal);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueDecimal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
 					if((*j)->constValueStringSet)
 					{
-						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", (*j)->constValueString.c_str());
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "constValueString", doc->allocate_string((*j)->constValueString.c_str(), (*j)->constValueString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 				}
@@ -872,20 +871,20 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* subnode = doc->allocate_node(node_element, "configParameters");
 			node->append_node(subnode);
 
-			xml_attribute<>* attr = doc->allocate_attribute("id", i->first.c_str());
+			xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 			subnode->append_attribute(attr);
 
 			if(i->second->memoryAddressStart != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStart));
-				attr = doc->allocate_attribute("memoryAddressStart", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStart);
+				attr = doc->allocate_attribute("memoryAddressStart", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->memoryAddressStep != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStep));
-				attr = doc->allocate_attribute("memoryAddressStep", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStep);
+				attr = doc->allocate_attribute("memoryAddressStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
@@ -893,14 +892,14 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "parameter");
 				subnode->append_node(parameterNode);
-				saveParameter(doc, parameterNode, (*j), tempStrings);
+				saveParameter(doc, parameterNode, (*j));
 			}
 
 			for(Scenarios::iterator j = i->second->scenarios.begin(); j != i->second->scenarios.end(); ++j)
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "scenario");
 				subnode->append_node(parameterNode);
-				saveScenario(doc, parameterNode, j->second, tempStrings);
+				saveScenario(doc, parameterNode, j->second);
 			}
 		}
 
@@ -909,20 +908,20 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* subnode = doc->allocate_node(node_element, "variables");
 			node->append_node(subnode);
 
-			xml_attribute<>* attr = doc->allocate_attribute("id", i->first.c_str());
+			xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 			subnode->append_attribute(attr);
 
 			if(i->second->memoryAddressStart != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStart));
-				attr = doc->allocate_attribute("memoryAddressStart", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStart);
+				attr = doc->allocate_attribute("memoryAddressStart", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->memoryAddressStep != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStep));
-				attr = doc->allocate_attribute("memoryAddressStep", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStep);
+				attr = doc->allocate_attribute("memoryAddressStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
@@ -930,14 +929,14 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "parameter");
 				subnode->append_node(parameterNode);
-				saveParameter(doc, parameterNode, (*j), tempStrings);
+				saveParameter(doc, parameterNode, (*j));
 			}
 
 			for(Scenarios::iterator j = i->second->scenarios.begin(); j != i->second->scenarios.end(); ++j)
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "scenario");
 				subnode->append_node(parameterNode);
-				saveScenario(doc, parameterNode, j->second, tempStrings);
+				saveScenario(doc, parameterNode, j->second);
 			}
 		}
 
@@ -946,48 +945,48 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			xml_node<>* subnode = doc->allocate_node(node_element, "linkParameters");
 			node->append_node(subnode);
 
-			xml_attribute<>* attr = doc->allocate_attribute("id", i->first.c_str());
+			xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 			subnode->append_attribute(attr);
 
 			if(i->second->memoryAddressStart != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStart));
-				attr = doc->allocate_attribute("memoryAddressStart", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStart);
+				attr = doc->allocate_attribute("memoryAddressStart", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->memoryAddressStep != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->memoryAddressStep));
-				attr = doc->allocate_attribute("memoryAddressStep", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->memoryAddressStep);
+				attr = doc->allocate_attribute("memoryAddressStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->peerChannelMemoryOffset != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->peerChannelMemoryOffset));
-				attr = doc->allocate_attribute("peerChannelMemoryOffset", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->peerChannelMemoryOffset);
+				attr = doc->allocate_attribute("peerChannelMemoryOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->channelMemoryOffset != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->channelMemoryOffset));
-				attr = doc->allocate_attribute("channelMemoryOffset", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->channelMemoryOffset);
+				attr = doc->allocate_attribute("channelMemoryOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->peerAddressMemoryOffset != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->peerAddressMemoryOffset));
-				attr = doc->allocate_attribute("peerAddressMemoryOffset", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->peerAddressMemoryOffset);
+				attr = doc->allocate_attribute("peerAddressMemoryOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
 			if(i->second->maxLinkCount != -1)
 			{
-				tempStrings.push_back(std::to_string(i->second->maxLinkCount));
-				attr = doc->allocate_attribute("maxLinkCount", tempStrings.back().c_str());
+				tempString = std::to_string(i->second->maxLinkCount);
+				attr = doc->allocate_attribute("maxLinkCount", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				subnode->append_attribute(attr);
 			}
 
@@ -995,14 +994,14 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "parameter");
 				subnode->append_node(parameterNode);
-				saveParameter(doc, parameterNode, (*j), tempStrings);
+				saveParameter(doc, parameterNode, (*j));
 			}
 
 			for(Scenarios::iterator j = i->second->scenarios.begin(); j != i->second->scenarios.end(); ++j)
 			{
 				xml_node<>* parameterNode = doc->allocate_node(node_element, "scenario");
 				subnode->append_node(parameterNode);
-				saveScenario(doc, parameterNode, j->second, tempStrings);
+				saveScenario(doc, parameterNode, j->second);
 			}
 		}
 		/// }}}
@@ -1012,7 +1011,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 		{
 			node = doc->allocate_node(node_element, "group");
 			parentNode->append_node(node);
-			saveDevice(doc, node, device->group.get(), tempStrings);
+			saveDevice(doc, node, device->group.get());
 		}
 	}
 	catch(const std::exception& ex)
@@ -1029,11 +1028,12 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
     }
 }
 
-void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, PParameter& parameter, std::vector<std::string>& tempStrings)
+void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, PParameter& parameter)
 {
 	try
 	{
-		xml_attribute<>* attr = doc->allocate_attribute("id", parameter->id.c_str());
+		std::string tempString;
+		xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(parameter->id.c_str(), parameter->id.size() + 1));
 		parentNode->append_attribute(attr);
 
 		// {{{ Properties
@@ -1042,115 +1042,121 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 			if(!parameter->label.empty())
 			{
-				xml_node<>* node = doc->allocate_node(node_element, "label", parameter->label.c_str());
+				xml_node<>* node = doc->allocate_node(node_element, "label", doc->allocate_string(parameter->label.c_str(), parameter->label.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->description.empty())
 			{
-				xml_node<>* node = doc->allocate_node(node_element, "description", parameter->description.c_str());
+				xml_node<>* node = doc->allocate_node(node_element, "description", doc->allocate_string(parameter->description.c_str(), parameter->description.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->readable)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* node = doc->allocate_node(node_element, "readable", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "readable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->writeable)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* node = doc->allocate_node(node_element, "writeable", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "writeable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->addonWriteable)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* node = doc->allocate_node(node_element, "addonWriteable", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "addonWriteable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->password)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "password", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "password", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->visible)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* node = doc->allocate_node(node_element, "visible", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "visible", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->internal)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "internal", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "internal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->parameterGroupSelector)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "parameterGroupSelector", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "parameterGroupSelector", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->service)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "service", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "service", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->sticky)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "sticky", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "sticky", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->transform)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "transform", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "transform", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->isSigned)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* node = doc->allocate_node(node_element, "signed", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* node = doc->allocate_node(node_element, "signed", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->control.empty())
 			{
-				xml_node<>* node = doc->allocate_node(node_element, "control", parameter->control.c_str());
+				xml_node<>* node = doc->allocate_node(node_element, "control", doc->allocate_string(parameter->control.c_str(), parameter->control.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->unit.empty())
 			{
-				xml_node<>* node = doc->allocate_node(node_element, "unit", parameter->unit.c_str());
+				xml_node<>* node = doc->allocate_node(node_element, "unit", doc->allocate_string(parameter->unit.c_str(), parameter->unit.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(!parameter->formFieldType.empty())
 			{
-				xml_node<>* node = doc->allocate_node(node_element, "formFieldType", parameter->formFieldType.c_str());
+				xml_node<>* node = doc->allocate_node(node_element, "formFieldType", doc->allocate_string(parameter->formFieldType.c_str(), parameter->formFieldType.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
 			if(parameter->formPosition != -1)
 			{
-				tempStrings.push_back(std::to_string(parameter->formPosition));
-				xml_node<>* node = doc->allocate_node(node_element, "formPosition", tempStrings.back().c_str());
+				tempString = std::to_string(parameter->formPosition);
+				xml_node<>* node = doc->allocate_node(node_element, "formPosition", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				propertiesNode->append_node(node);
+			}
+
+			if(!parameter->metadata.empty())
+			{
+				xml_node<>* node = doc->allocate_node(node_element, "metadata", doc->allocate_string(parameter->metadata.c_str(), parameter->metadata.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
@@ -1170,15 +1176,15 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							node->append_node(castNode);
 							if(decimalIntegerScale->factor != 0)
 							{
-								tempStrings.push_back(Math::toString(decimalIntegerScale->factor, 6));
-								xml_node<>* subnode = doc->allocate_node(node_element, "factor", tempStrings.back().c_str());
+								tempString = Math::toString(decimalIntegerScale->factor, 6);
+								xml_node<>* subnode = doc->allocate_node(node_element, "factor", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(decimalIntegerScale->offset != 0)
 							{
-								tempStrings.push_back(Math::toString(decimalIntegerScale->offset, 6));
-								xml_node<>* subnode = doc->allocate_node(node_element, "offset", tempStrings.back().c_str());
+								tempString = Math::toString(decimalIntegerScale->offset, 6);
+								xml_node<>* subnode = doc->allocate_node(node_element, "offset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1194,22 +1200,22 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							node->append_node(castNode);
 							if(integerIntegerScale->operation != IntegerIntegerScale::Operation::Enum::none)
 							{
-								tempStrings.push_back(integerIntegerScale->operation == IntegerIntegerScale::Operation::Enum::division ? "division" : "multiplication");
-								xml_node<>* subnode = doc->allocate_node(node_element, "operation", tempStrings.back().c_str());
+								tempString = integerIntegerScale->operation == IntegerIntegerScale::Operation::Enum::division ? "division" : "multiplication";
+								xml_node<>* subnode = doc->allocate_node(node_element, "operation", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(integerIntegerScale->factor != 10)
 							{
-								tempStrings.push_back(std::to_string(integerIntegerScale->factor));
-								xml_node<>* subnode = doc->allocate_node(node_element, "factor", tempStrings.back().c_str());
+								tempString = std::to_string(integerIntegerScale->factor);
+								xml_node<>* subnode = doc->allocate_node(node_element, "factor", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(integerIntegerScale->offset != 0)
 							{
-								tempStrings.push_back(std::to_string(integerIntegerScale->offset));
-								xml_node<>* subnode = doc->allocate_node(node_element, "offset", tempStrings.back().c_str());
+								tempString = std::to_string(integerIntegerScale->offset);
+								xml_node<>* subnode = doc->allocate_node(node_element, "offset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1225,8 +1231,8 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							node->append_node(castNode);
 							if(integerIntegerMap->direction != IntegerIntegerMap::Direction::Enum::none)
 							{
-								tempStrings.push_back(integerIntegerMap->direction == IntegerIntegerMap::Direction::Enum::fromDevice ? "fromDevice" : (integerIntegerMap->direction == IntegerIntegerMap::Direction::Enum::toDevice ? "toDevice" : "both"));
-								xml_node<>* subnode = doc->allocate_node(node_element, "direction", tempStrings.back().c_str());
+								tempString = integerIntegerMap->direction == IntegerIntegerMap::Direction::Enum::fromDevice ? "fromDevice" : (integerIntegerMap->direction == IntegerIntegerMap::Direction::Enum::toDevice ? "toDevice" : "both");
+								xml_node<>* subnode = doc->allocate_node(node_element, "direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							for(std::map<int32_t, int32_t>::iterator j = integerIntegerMap->integerValueMapFromDevice.begin(); j != integerIntegerMap->integerValueMapFromDevice.end(); ++j)
@@ -1234,12 +1240,12 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 								xml_node<>* subnode = doc->allocate_node(node_element, "value");
 								castNode->append_node(subnode);
 
-								tempStrings.push_back(std::to_string(j->first));
-								xml_node<>* valueNode = doc->allocate_node(node_element, "physical", tempStrings.back().c_str());
+								tempString = std::to_string(j->first);
+								xml_node<>* valueNode = doc->allocate_node(node_element, "physical", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								subnode->append_node(valueNode);
 
-								tempStrings.push_back(std::to_string(j->second));
-								valueNode = doc->allocate_node(node_element, "logical", tempStrings.back().c_str());
+								tempString = std::to_string(j->second);
+								valueNode = doc->allocate_node(node_element, "logical", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								subnode->append_node(valueNode);
 							}
 							continue;
@@ -1256,29 +1262,29 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 							if(booleanInteger->trueValue != 0)
 							{
-								tempStrings.push_back(std::to_string(booleanInteger->trueValue));
-								xml_node<>* subnode = doc->allocate_node(node_element, "trueValue", tempStrings.back().c_str());
+								tempString = std::to_string(booleanInteger->trueValue);
+								xml_node<>* subnode = doc->allocate_node(node_element, "trueValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(booleanInteger->falseValue != 0)
 							{
-								tempStrings.push_back(std::to_string(booleanInteger->falseValue));
-								xml_node<>* subnode = doc->allocate_node(node_element, "falseValue", tempStrings.back().c_str());
+								tempString = std::to_string(booleanInteger->falseValue);
+								xml_node<>* subnode = doc->allocate_node(node_element, "falseValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(booleanInteger->invert)
 							{
-								tempStrings.push_back("true");
-								xml_node<>* subnode = doc->allocate_node(node_element, "invert", tempStrings.back().c_str());
+								tempString = "true";
+								xml_node<>* subnode = doc->allocate_node(node_element, "invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(booleanInteger->threshold != 1)
 							{
-								tempStrings.push_back(std::to_string(booleanInteger->threshold));
-								xml_node<>* subnode = doc->allocate_node(node_element, "threshold", tempStrings.back().c_str());
+								tempString = std::to_string(booleanInteger->threshold);
+								xml_node<>* subnode = doc->allocate_node(node_element, "threshold", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1295,20 +1301,20 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 							if(!booleanString->trueValue.empty())
 							{
-								xml_node<>* subnode = doc->allocate_node(node_element, "trueValue", booleanString->trueValue.c_str());
+								xml_node<>* subnode = doc->allocate_node(node_element, "trueValue", doc->allocate_string(booleanString->trueValue.c_str(), booleanString->trueValue.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(!booleanString->falseValue.empty())
 							{
-								xml_node<>* subnode = doc->allocate_node(node_element, "falseValue", booleanString->falseValue.c_str());
+								xml_node<>* subnode = doc->allocate_node(node_element, "falseValue", doc->allocate_string(booleanString->falseValue.c_str(), booleanString->falseValue.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(booleanString->invert)
 							{
-								tempStrings.push_back("true");
-								xml_node<>* subnode = doc->allocate_node(node_element, "invert", tempStrings.back().c_str());
+								tempString = "true";
+								xml_node<>* subnode = doc->allocate_node(node_element, "invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
@@ -1329,15 +1335,15 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 								xml_node<>* subnode = doc->allocate_node(node_element, "factors");
 								castNode->append_node(subnode);
 
-								tempStrings.push_back(std::to_string(*j));
-								xml_node<>* factorNode = doc->allocate_node(node_element, "factor", tempStrings.back().c_str());
+								tempString = std::to_string(*j);
+								xml_node<>* factorNode = doc->allocate_node(node_element, "factor", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								subnode->append_node(factorNode);
 							}
 
 							if(decimalConfigTime->valueSize != 0)
 							{
-								tempStrings.push_back(Math::toString(decimalConfigTime->valueSize, 6));
-								xml_node<>* subnode = doc->allocate_node(node_element, "valueSize", tempStrings.back().c_str());
+								tempString = Math::toString(decimalConfigTime->valueSize, 6);
+								xml_node<>* subnode = doc->allocate_node(node_element, "valueSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1354,29 +1360,29 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 							if(integerTinyFloat->mantissaStart != 5)
 							{
-								tempStrings.push_back(std::to_string(integerTinyFloat->mantissaStart));
-								xml_node<>* subnode = doc->allocate_node(node_element, "mantissaStart", tempStrings.back().c_str());
+								tempString = std::to_string(integerTinyFloat->mantissaStart);
+								xml_node<>* subnode = doc->allocate_node(node_element, "mantissaStart", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(integerTinyFloat->mantissaSize != 11)
 							{
-								tempStrings.push_back(std::to_string(integerTinyFloat->mantissaSize));
-								xml_node<>* subnode = doc->allocate_node(node_element, "mantissaSize", tempStrings.back().c_str());
+								tempString = std::to_string(integerTinyFloat->mantissaSize);
+								xml_node<>* subnode = doc->allocate_node(node_element, "mantissaSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(integerTinyFloat->exponentStart != 0)
 							{
-								tempStrings.push_back(std::to_string(integerTinyFloat->exponentStart));
-								xml_node<>* subnode = doc->allocate_node(node_element, "exponentStart", tempStrings.back().c_str());
+								tempString = std::to_string(integerTinyFloat->exponentStart);
+								xml_node<>* subnode = doc->allocate_node(node_element, "exponentStart", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(integerTinyFloat->exponentSize != 5)
 							{
-								tempStrings.push_back(std::to_string(integerTinyFloat->exponentSize));
-								xml_node<>* subnode = doc->allocate_node(node_element, "exponentSize", tempStrings.back().c_str());
+								tempString = std::to_string(integerTinyFloat->exponentSize);
+								xml_node<>* subnode = doc->allocate_node(node_element, "exponentSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1405,8 +1411,8 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 							if(blindTest->value != 0)
 							{
-								tempStrings.push_back(std::to_string(blindTest->value));
-								xml_node<>* subnode = doc->allocate_node(node_element, "value", tempStrings.back().c_str());
+								tempString = std::to_string(blindTest->value);
+								xml_node<>* subnode = doc->allocate_node(node_element, "value", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
@@ -1438,12 +1444,12 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 								xml_node<>* subnode = doc->allocate_node(node_element, "value");
 								castNode->append_node(subnode);
 
-								tempStrings.push_back(std::to_string(j->first));
-								xml_node<>* valueNode = doc->allocate_node(node_element, "physical", tempStrings.back().c_str());
+								tempString = std::to_string(j->first);
+								xml_node<>* valueNode = doc->allocate_node(node_element, "physical", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								subnode->append_node(valueNode);
 
-								tempStrings.push_back(std::to_string(j->second));
-								valueNode = doc->allocate_node(node_element, "logical", tempStrings.back().c_str());
+								tempString = std::to_string(j->second);
+								valueNode = doc->allocate_node(node_element, "logical", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								subnode->append_node(valueNode);
 							}
 							continue;
@@ -1482,20 +1488,20 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							xml_node<>* castNode = doc->allocate_node(node_element, "toggle");
 							node->append_node(castNode);
 
-							xml_node<>* subnode = doc->allocate_node(node_element, "parameter", toggleCast->parameter.c_str());
+							xml_node<>* subnode = doc->allocate_node(node_element, "parameter", doc->allocate_string(toggleCast->parameter.c_str(), toggleCast->parameter.size() + 1));
 							castNode->append_node(subnode);
 
 							if(toggleCast->on != 200)
 							{
-								tempStrings.push_back(std::to_string(toggleCast->on));
-								subnode = doc->allocate_node(node_element, "on", tempStrings.back().c_str());
+								tempString = std::to_string(toggleCast->on);
+								subnode = doc->allocate_node(node_element, "on", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(toggleCast->off != 0)
 							{
-								tempStrings.push_back(std::to_string(toggleCast->off));
-								subnode = doc->allocate_node(node_element, "off", tempStrings.back().c_str());
+								tempString = std::to_string(toggleCast->off);
+								subnode = doc->allocate_node(node_element, "off", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 								castNode->append_node(subnode);
 							}
 							continue;
@@ -1536,13 +1542,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 							if(!stringReplace->search.empty())
 							{
-								xml_node<>* subnode = doc->allocate_node(node_element, "search", stringReplace->search.c_str());
+								xml_node<>* subnode = doc->allocate_node(node_element, "search", doc->allocate_string(stringReplace->search.c_str(), stringReplace->search.size() + 1));
 								castNode->append_node(subnode);
 							}
 
 							if(!stringReplace->replace.empty())
 							{
-								xml_node<>* subnode = doc->allocate_node(node_element, "replace", stringReplace->replace.c_str());
+								xml_node<>* subnode = doc->allocate_node(node_element, "replace", doc->allocate_string(stringReplace->replace.c_str(), stringReplace->replace.size() + 1));
 								castNode->append_node(subnode);
 							}
 
@@ -1572,15 +1578,15 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				if(parameter->logical->defaultValueExists)
 				{
-					tempStrings.push_back(parameter->logical->getDefaultValue()->booleanValue ? "true" : "false");
-					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", tempStrings.back().c_str());
+					tempString = parameter->logical->getDefaultValue()->booleanValue ? "true" : "false";
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->logical->setToValueOnPairingExists)
 				{
-					tempStrings.push_back(parameter->logical->getSetToValueOnPairing()->booleanValue ? "true" : "false");
-					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", tempStrings.back().c_str());
+					tempString = parameter->logical->getSetToValueOnPairing()->booleanValue ? "true" : "false";
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 			}
@@ -1598,44 +1604,44 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				if(logical->minimumValue != -2147483648)
 				{
-					tempStrings.push_back(std::to_string(logical->minimumValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "minimumValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->minimumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "minimumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->maximumValue != 2147483647)
 				{
-					tempStrings.push_back(std::to_string(logical->maximumValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "maximumValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->maximumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "maximumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->defaultValueExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getDefaultValue()->integerValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getDefaultValue()->integerValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->setToValueOnPairingExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getSetToValueOnPairing()->integerValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getSetToValueOnPairing()->integerValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(!logical->specialValuesStringMap.empty())
 				{
-					xml_node<>* subnode = doc->allocate_node(node_element, "specialValues", tempStrings.back().c_str());
+					xml_node<>* subnode = doc->allocate_node(node_element, "specialValues", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 
 					for(std::unordered_map<std::string, int32_t>::iterator i = logical->specialValuesStringMap.begin(); i != logical->specialValuesStringMap.end(); ++i)
 					{
-						tempStrings.push_back(std::to_string(i->second));
-						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", tempStrings.back().c_str());
+						tempString = std::to_string(i->second);
+						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						subnode->append_node(specialValueNode);
 
-						attr = doc->allocate_attribute("id", i->first.c_str());
+						attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 						specialValueNode->append_attribute(attr);
 					}
 				}
@@ -1649,44 +1655,44 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				if(logical->minimumValue != 1.175494351e-38f)
 				{
-					tempStrings.push_back(std::to_string(logical->minimumValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "minimumValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->minimumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "minimumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->maximumValue != 3.40282347e+38f)
 				{
-					tempStrings.push_back(std::to_string(logical->maximumValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "maximumValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->maximumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "maximumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->defaultValueExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getDefaultValue()->floatValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getDefaultValue()->floatValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->setToValueOnPairingExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getSetToValueOnPairing()->floatValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getSetToValueOnPairing()->floatValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(!logical->specialValuesStringMap.empty())
 				{
-					xml_node<>* subnode = doc->allocate_node(node_element, "specialValues", tempStrings.back().c_str());
+					xml_node<>* subnode = doc->allocate_node(node_element, "specialValues", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 
 					for(std::unordered_map<std::string, double>::iterator i = logical->specialValuesStringMap.begin(); i != logical->specialValuesStringMap.end(); ++i)
 					{
-						tempStrings.push_back(std::to_string(i->second));
-						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", tempStrings.back().c_str());
+						tempString = std::to_string(i->second);
+						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						subnode->append_node(specialValueNode);
 
-						attr = doc->allocate_attribute("id", i->first.c_str());
+						attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 						specialValueNode->append_attribute(attr);
 					}
 				}
@@ -1698,13 +1704,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				if(parameter->logical->defaultValueExists)
 				{
-					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", parameter->logical->getDefaultValue()->stringValue.c_str());
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(parameter->logical->getDefaultValue()->stringValue.c_str(), parameter->logical->getDefaultValue()->stringValue.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->logical->setToValueOnPairingExists)
 				{
-					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", parameter->logical->getSetToValueOnPairing()->stringValue.c_str());
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(parameter->logical->getSetToValueOnPairing()->stringValue.c_str(), parameter->logical->getSetToValueOnPairing()->stringValue.size() + 1));
 					node->append_node(subnode);
 				}
 			}
@@ -1717,28 +1723,28 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				if(logical->defaultValueExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getDefaultValue()->integerValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getDefaultValue()->integerValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(logical->setToValueOnPairingExists)
 				{
-					tempStrings.push_back(std::to_string(logical->getSetToValueOnPairing()->integerValue));
-					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", tempStrings.back().c_str());
+					tempString = std::to_string(logical->getSetToValueOnPairing()->integerValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				for(std::vector<EnumerationValue>::iterator i = logical->values.begin(); i != logical->values.end(); ++i)
 				{
-					xml_node<>* subnode = doc->allocate_node(node_element, "value", tempStrings.back().c_str());
+					xml_node<>* subnode = doc->allocate_node(node_element, "value", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 
-					xml_node<>* valueNode = doc->allocate_node(node_element, "id", i->id.c_str());
+					xml_node<>* valueNode = doc->allocate_node(node_element, "id", doc->allocate_string(i->id.c_str(), i->id.size() + 1));
 					subnode->append_node(valueNode);
 
-					tempStrings.push_back(std::to_string(i->index));
-					valueNode = doc->allocate_node(node_element, "index", tempStrings.back().c_str());
+					tempString = std::to_string(i->index);
+					valueNode = doc->allocate_node(node_element, "index", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					subnode->append_node(valueNode);
 				}
 			}
@@ -1771,78 +1777,83 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				node = doc->allocate_node(node_element, "physicalString");
 				parentNode->append_node(node);
 			}
+			else if(parameter->physical->type == IPhysical::Type::Enum::none)
+			{
+				node = doc->allocate_node(node_element, "physicalNone");
+				parentNode->append_node(node);
+			}
 
 			if(node)
 			{
-				attr = doc->allocate_attribute("groupId", parameter->physical->groupId.c_str());
+				attr = doc->allocate_attribute("groupId", doc->allocate_string(parameter->physical->groupId.c_str(), parameter->physical->groupId.size() + 1));
 				node->append_attribute(attr);
 
 				if(parameter->physical->index != 0)
 				{
-					tempStrings.push_back(Math::toString(parameter->physical->index, 1));
-					xml_node<>* subnode = doc->allocate_node(node_element, "index", tempStrings.back().c_str());
+					tempString = Math::toString(parameter->physical->index, 1);
+					xml_node<>* subnode = doc->allocate_node(node_element, "index", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->sizeDefined)
 				{
-					tempStrings.push_back(Math::toString(parameter->physical->size, 1));
-					xml_node<>* subnode = doc->allocate_node(node_element, "size", tempStrings.back().c_str());
+					tempString = Math::toString(parameter->physical->size, 1);
+					xml_node<>* subnode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->mask != -1)
 				{
-					tempStrings.push_back(std::to_string(parameter->physical->mask));
-					xml_node<>* subnode = doc->allocate_node(node_element, "mask", tempStrings.back().c_str());
+					tempString = std::to_string(parameter->physical->mask);
+					xml_node<>* subnode = doc->allocate_node(node_element, "mask", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->list != -1)
 				{
-					tempStrings.push_back(std::to_string(parameter->physical->list));
-					xml_node<>* subnode = doc->allocate_node(node_element, "list", tempStrings.back().c_str());
+					tempString = std::to_string(parameter->physical->list);
+					xml_node<>* subnode = doc->allocate_node(node_element, "list", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->operationType != IPhysical::OperationType::Enum::none)
 				{
-					if(parameter->physical->operationType == IPhysical::OperationType::Enum::command) tempStrings.push_back("command");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::centralCommand) tempStrings.push_back("centralCommand");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::internal) tempStrings.push_back("internal");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::config) tempStrings.push_back("config");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::configString) tempStrings.push_back("configString");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::store) tempStrings.push_back("store");
-					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::memory) tempStrings.push_back("memory");
-					xml_node<>* subnode = doc->allocate_node(node_element, "operationType", tempStrings.back().c_str());
+					if(parameter->physical->operationType == IPhysical::OperationType::Enum::command) tempString = "command";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::centralCommand) tempString = "centralCommand";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::internal) tempString = "internal";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::config) tempString = "config";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::configString) tempString = "configString";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::store) tempString = "store";
+					else if(parameter->physical->operationType == IPhysical::OperationType::Enum::memory) tempString = "memory";
+					xml_node<>* subnode = doc->allocate_node(node_element, "operationType", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->endianess != IPhysical::Endianess::Enum::big)
 				{
-					tempStrings.push_back("little");
-					xml_node<>* subnode = doc->allocate_node(node_element, "endianess", tempStrings.back().c_str());
+					tempString = "little";
+					xml_node<>* subnode = doc->allocate_node(node_element, "endianess", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->memoryIndex != 0)
 				{
-					tempStrings.push_back(Math::toString(parameter->physical->memoryIndex, 1));
-					xml_node<>* subnode = doc->allocate_node(node_element, "memoryIndex", tempStrings.back().c_str());
+					tempString = Math::toString(parameter->physical->memoryIndex, 1);
+					xml_node<>* subnode = doc->allocate_node(node_element, "memoryIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->memoryIndexOperation != IPhysical::MemoryIndexOperation::Enum::none)
 				{
-					tempStrings.push_back(parameter->physical->memoryIndexOperation == IPhysical::MemoryIndexOperation::Enum::addition ? "addition" : "subtraction");
-					xml_node<>* subnode = doc->allocate_node(node_element, "memoryIndexOperation", tempStrings.back().c_str());
+					tempString = parameter->physical->memoryIndexOperation == IPhysical::MemoryIndexOperation::Enum::addition ? "addition" : "subtraction";
+					xml_node<>* subnode = doc->allocate_node(node_element, "memoryIndexOperation", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
 				if(parameter->physical->memoryChannelStep != 0)
 				{
-					tempStrings.push_back(Math::toString(parameter->physical->memoryChannelStep, 1));
-					xml_node<>* subnode = doc->allocate_node(node_element, "memoryChannelStep", tempStrings.back().c_str());
+					tempString = Math::toString(parameter->physical->memoryChannelStep, 1);
+					xml_node<>* subnode = doc->allocate_node(node_element, "memoryChannelStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 			}
@@ -1856,17 +1867,17 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 				for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator i = parameter->getPackets.begin(); i != parameter->getPackets.end(); ++i)
 				{
-					saveParameterPacket(doc, node, *i, tempStrings);
+					saveParameterPacket(doc, node, *i);
 				}
 
 				for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator i = parameter->setPackets.begin(); i != parameter->setPackets.end(); ++i)
 				{
-					saveParameterPacket(doc, node, *i, tempStrings);
+					saveParameterPacket(doc, node, *i);
 				}
 
 				for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator i = parameter->eventPackets.begin(); i != parameter->eventPackets.end(); ++i)
 				{
-					saveParameterPacket(doc, node, *i, tempStrings);
+					saveParameterPacket(doc, node, *i);
 				}
 			}
 		// }}}
@@ -1885,23 +1896,23 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
     }
 }
 
-void HomegearDevice::saveParameterPacket(xml_document<>* doc, xml_node<>* parentNode, std::shared_ptr<Parameter::Packet>& packet, std::vector<std::string>& tempStrings)
+void HomegearDevice::saveParameterPacket(xml_document<>* doc, xml_node<>* parentNode, std::shared_ptr<Parameter::Packet>& packet)
 {
 	try
 	{
 		xml_node<>* subnode = doc->allocate_node(node_element, "packet");
 		parentNode->append_node(subnode);
 
-		xml_attribute<>* attr = doc->allocate_attribute("id", packet->id.c_str());
+		xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(packet->id.c_str(), packet->id.size() + 1));
 		subnode->append_attribute(attr);
 
-		tempStrings.push_back((packet->type == Parameter::Packet::Type::Enum::get) ? "get" : ((packet->type == Parameter::Packet::Type::Enum::set) ? "set" : "event"));
-		xml_node<>* packetNode = doc->allocate_node(node_element, "type", tempStrings.back().c_str());
+		std::string tempString = (packet->type == Parameter::Packet::Type::Enum::get) ? "get" : ((packet->type == Parameter::Packet::Type::Enum::set) ? "set" : "event");
+		xml_node<>* packetNode = doc->allocate_node(node_element, "type", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 		subnode->append_node(packetNode);
 
 		if(!packet->responseId.empty())
 		{
-			packetNode = doc->allocate_node(node_element, "responseId", packet->responseId.c_str());
+			packetNode = doc->allocate_node(node_element, "responseId", doc->allocate_string(packet->responseId.c_str(), packet->responseId.size() + 1));
 			subnode->append_node(packetNode);
 		}
 
@@ -1922,29 +1933,29 @@ void HomegearDevice::saveParameterPacket(xml_document<>* doc, xml_node<>* parent
 			packetNode = doc->allocate_node(node_element, "delayedAutoReset");
 			subnode->append_node(packetNode);
 
-			xml_node<>* autoResetNode = doc->allocate_node(node_element, "resetDelayParameterId", packet->delayedAutoReset.first.c_str());
+			xml_node<>* autoResetNode = doc->allocate_node(node_element, "resetDelayParameterId", doc->allocate_string(packet->delayedAutoReset.first.c_str(), packet->delayedAutoReset.first.size() + 1));
 			packetNode->append_node(autoResetNode);
 
-			tempStrings.push_back(std::to_string(packet->delayedAutoReset.second));
-			autoResetNode = doc->allocate_node(node_element, "resetTo", tempStrings.back().c_str());
+			tempString = std::to_string(packet->delayedAutoReset.second);
+			autoResetNode = doc->allocate_node(node_element, "resetTo", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			packetNode->append_node(autoResetNode);
 		}
 
 		if(packet->conditionOperator != Parameter::Packet::ConditionOperator::Enum::none)
 		{
-			if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::e) tempStrings.push_back("e");
-			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::g) tempStrings.push_back("g");
-			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::l) tempStrings.push_back("l");
-			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::ge) tempStrings.push_back("ge");
-			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::le) tempStrings.push_back("le");
-			packetNode = doc->allocate_node(node_element, "conditionOperator", tempStrings.back().c_str());
+			if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::e) tempString = "e";
+			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::g) tempString = "g";
+			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::l) tempString = "l";
+			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::ge) tempString = "ge";
+			else if(packet->conditionOperator == Parameter::Packet::ConditionOperator::Enum::le) tempString = "le";
+			packetNode = doc->allocate_node(node_element, "conditionOperator", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			subnode->append_node(packetNode);
 		}
 
 		if(packet->conditionValue != -1)
 		{
-			tempStrings.push_back(std::to_string(packet->conditionValue));
-			packetNode = doc->allocate_node(node_element, "conditionValue", tempStrings.back().c_str());
+			tempString = std::to_string(packet->conditionValue);
+			packetNode = doc->allocate_node(node_element, "conditionValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			subnode->append_node(packetNode);
 		}
 	}
@@ -1962,19 +1973,19 @@ void HomegearDevice::saveParameterPacket(xml_document<>* doc, xml_node<>* parent
     }
 }
 
-void HomegearDevice::saveScenario(xml_document<>* doc, xml_node<>* parentNode, PScenario& scenario, std::vector<std::string>& tempStrings)
+void HomegearDevice::saveScenario(xml_document<>* doc, xml_node<>* parentNode, PScenario& scenario)
 {
 	try
 	{
-		xml_attribute<>* attr = doc->allocate_attribute("id", scenario->id.c_str());
+		xml_attribute<>* attr = doc->allocate_attribute("id", doc->allocate_string(scenario->id.c_str(), scenario->id.size() + 1));
 		parentNode->append_attribute(attr);
 
 		for(ScenarioEntries::iterator i = scenario->scenarioEntries.begin(); i != scenario->scenarioEntries.end(); ++i)
 		{
-			xml_node<>* parameterNode = doc->allocate_node(node_element, "parameter", i->second.c_str());
+			xml_node<>* parameterNode = doc->allocate_node(node_element, "parameter", doc->allocate_string(i->second.c_str(), i->second.size() + 1));
 			parentNode->append_node(parameterNode);
 
-			attr = doc->allocate_attribute("id", i->first.c_str());
+			attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
 			parameterNode->append_attribute(attr);
 		}
 	}
@@ -1992,21 +2003,21 @@ void HomegearDevice::saveScenario(xml_document<>* doc, xml_node<>* parentNode, P
     }
 }
 
-void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, PFunction& function, std::vector<std::string>& tempStrings, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters)
+void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, PFunction& function, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters)
 {
 	try
 	{
-		tempStrings.push_back(std::to_string(function->channel));
-		xml_attribute<>* attr = doc->allocate_attribute("channel", tempStrings.back().c_str());
+		std::string tempString = std::to_string(function->channel);
+		xml_attribute<>* attr = doc->allocate_attribute("channel", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 		parentNode->append_attribute(attr);
 
-		attr = doc->allocate_attribute("type", function->type.c_str());
+		attr = doc->allocate_attribute("type", doc->allocate_string(function->type.c_str(), function->type.size() + 1));
 		parentNode->append_attribute(attr);
 
 		if(function->channelCount > 1)
 		{
-			tempStrings.push_back(std::to_string(function->channelCount));
-			attr = doc->allocate_attribute("channelCount", tempStrings.back().c_str());
+			tempString = std::to_string(function->channelCount);
+			attr = doc->allocate_attribute("channelCount", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 			parentNode->append_attribute(attr);
 		}
 
@@ -2017,101 +2028,101 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
 
 			if(function->encryptionEnabledByDefault)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "encryptionEnabledByDefault", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "encryptionEnabledByDefault", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->visible)
 			{
-				tempStrings.push_back("false");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "visible", tempStrings.back().c_str());
+				tempString = "false";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "visible", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->internal)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "internal", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "internal", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->deletable)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "deletable", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "deletable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->dynamicChannelCountIndex != -1)
 			{
-				tempStrings.push_back(std::to_string(function->dynamicChannelCountIndex) + ':' + Math::toString(function->dynamicChannelCountSize, 1));
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "dynamicChannelCount", tempStrings.back().c_str());
+				tempString = std::to_string(function->dynamicChannelCountIndex) + ':' + Math::toString(function->dynamicChannelCountSize, 1);
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "dynamicChannelCount", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->countFromVariable.empty())
 			{
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "countFromVariable", function->countFromVariable.c_str());
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "countFromVariable", doc->allocate_string(function->countFromVariable.c_str(), function->countFromVariable.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->physicalChannelIndexOffset != 0)
 			{
-				tempStrings.push_back(std::to_string(function->physicalChannelIndexOffset));
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "physicalChannelIndexOffset", tempStrings.back().c_str());
+				tempString = std::to_string(function->physicalChannelIndexOffset);
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "physicalChannelIndexOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->grouped)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "grouped", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "grouped", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->direction != Function::Direction::Enum::none)
 			{
-				tempStrings.push_back(function->direction == Function::Direction::Enum::sender ? "sender" : "receiver");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "direction", tempStrings.back().c_str());
+				tempString = function->direction == Function::Direction::Enum::sender ? "sender" : "receiver";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->forceEncryption)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "forceEncryption", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "forceEncryption", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->defaultLinkScenarioElementId.empty())
 			{
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultLinkScenarioElementId", function->defaultLinkScenarioElementId.c_str());
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultLinkScenarioElementId", doc->allocate_string(function->defaultLinkScenarioElementId.c_str(), function->defaultLinkScenarioElementId.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->defaultGroupedLinkScenarioElementId1.empty())
 			{
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultGroupedLinkScenarioElementId1", function->defaultGroupedLinkScenarioElementId1.c_str());
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultGroupedLinkScenarioElementId1", doc->allocate_string(function->defaultGroupedLinkScenarioElementId1.c_str(), function->defaultGroupedLinkScenarioElementId1.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->defaultGroupedLinkScenarioElementId2.empty())
 			{
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultGroupedLinkScenarioElementId2", function->defaultGroupedLinkScenarioElementId2.c_str());
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "defaultGroupedLinkScenarioElementId2", doc->allocate_string(function->defaultGroupedLinkScenarioElementId2.c_str(), function->defaultGroupedLinkScenarioElementId2.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(function->hasGroup)
 			{
-				tempStrings.push_back("true");
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "hasGroup", tempStrings.back().c_str());
+				tempString = "true";
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "hasGroup", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
 			if(!function->groupId.empty())
 			{
-				xml_node<>* propertyNode = doc->allocate_node(node_element, "groupId", function->groupId.c_str());
+				xml_node<>* propertyNode = doc->allocate_node(node_element, "groupId", doc->allocate_string(function->groupId.c_str(), function->groupId.size() + 1));
 				propertiesNode->append_node(propertyNode);
 			}
 
@@ -2143,21 +2154,21 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
 
 		if(!function->configParametersId.empty())
 		{
-			xml_node<>* subnode = doc->allocate_node(node_element, "configParameters", function->configParametersId.c_str());
+			xml_node<>* subnode = doc->allocate_node(node_element, "configParameters", doc->allocate_string(function->configParametersId.c_str(), function->configParametersId.size() + 1));
 			parentNode->append_node(subnode);
 			configParameters[function->configParametersId] = function->configParameters;
 		}
 
 		if(!function->variablesId.empty())
 		{
-			xml_node<>* subnode = doc->allocate_node(node_element, "variables", function->variablesId.c_str());
+			xml_node<>* subnode = doc->allocate_node(node_element, "variables", doc->allocate_string(function->variablesId.c_str(), function->variablesId.size() + 1));
 			parentNode->append_node(subnode);
 			variables[function->variablesId] = function->variables;
 		}
 
 		if(!function->linkParametersId.empty())
 		{
-			xml_node<>* subnode = doc->allocate_node(node_element, "linkParameters", function->linkParametersId.c_str());
+			xml_node<>* subnode = doc->allocate_node(node_element, "linkParameters", doc->allocate_string(function->linkParametersId.c_str(), function->linkParametersId.size() + 1));
 			parentNode->append_node(subnode);
 			linkParameters[function->linkParametersId] = function->linkParameters;
 		}
@@ -2166,7 +2177,7 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
 		{
 			xml_node<>* subnode = doc->allocate_node(node_element, "alternativeFunction");
 			parentNode->append_node(subnode);
-			saveFunction(doc, subnode, *i, tempStrings, configParameters, variables, linkParameters);
+			saveFunction(doc, subnode, *i, configParameters, variables, linkParameters);
 		}
 	}
 	catch(const std::exception& ex)
