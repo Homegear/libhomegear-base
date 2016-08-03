@@ -67,7 +67,7 @@ public:
 	std::string workingDirectory() { return _workingDirectory; }
 	std::string socketPath() { return _socketPath; }
 	std::string dataPath() { return _dataPath; }
-	uid_t dataPathPermissions() { return _dataPathPermissions; }
+	uint32_t dataPathPermissions() { return _dataPathPermissions; }
 	std::string dataPathUser() { return _dataPathUser; }
 	std::string dataPathGroup() { return _dataPathGroup; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
@@ -105,7 +105,7 @@ public:
 	std::string mqttSettingsPath() { return _mqttSettingsPath; }
 	std::string modulePath() { return _modulePath; }
 	std::string scriptPath() { return _scriptPath; }
-	uid_t scriptPathPermissions() { return _scriptPathPermissions; }
+	uint32_t scriptPathPermissions() { return _scriptPathPermissions; }
 	std::string scriptPathUser() { return _scriptPathUser; }
 	std::string scriptPathGroup() { return _scriptPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
@@ -141,7 +141,7 @@ private:
 	std::string _workingDirectory;
 	std::string _socketPath;
 	std::string _dataPath;
-	uid_t _dataPathPermissions = 504;
+	uint32_t _dataPathPermissions = 504;
 	std::string _dataPathUser;
 	std::string _dataPathGroup;
 	bool _databaseSynchronous = true;
@@ -178,7 +178,7 @@ private:
 	std::string _mqttSettingsPath;
 	std::string _modulePath;
 	std::string _scriptPath;
-	uid_t _scriptPathPermissions = 360;
+	uint32_t _scriptPathPermissions = 360;
 	std::string _scriptPathUser;
 	std::string _scriptPathGroup;
 	std::string _firmwarePath;
