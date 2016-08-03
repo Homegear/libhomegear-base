@@ -66,7 +66,10 @@ public:
 	bool enableCoreDumps() { return _enableCoreDumps; };
 	std::string workingDirectory() { return _workingDirectory; }
 	std::string socketPath() { return _socketPath; }
-	std::string databasePath() { return _databasePath; }
+	std::string dataPath() { return _dataPath; }
+	uint32_t dataPathPermissions() { return _dataPathPermissions; }
+	std::string dataPathUser() { return _dataPathUser; }
+	std::string dataPathGroup() { return _dataPathGroup; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
 	bool databaseWALJournal() { return _databaseWALJournal; }
@@ -102,6 +105,9 @@ public:
 	std::string mqttSettingsPath() { return _mqttSettingsPath; }
 	std::string modulePath() { return _modulePath; }
 	std::string scriptPath() { return _scriptPath; }
+	uint32_t scriptPathPermissions() { return _scriptPathPermissions; }
+	std::string scriptPathUser() { return _scriptPathUser; }
+	std::string scriptPathGroup() { return _scriptPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string phpIniPath() { return _phpIniPath; }
@@ -126,15 +132,18 @@ private:
 	int32_t _debugLevel = 3;
 	bool _memoryDebugging = false;
 	bool _enableUPnP = true;
-	std::string _uPnPIpAddress = "";
-	std::string _ssdpIpAddress = "";
+	std::string _uPnPIpAddress;
+	std::string _ssdpIpAddress;
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
-	std::string _databasePath;
+	std::string _dataPath;
+	uint32_t _dataPathPermissions = 504;
+	std::string _dataPathUser;
+	std::string _dataPathGroup;
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
 	bool _databaseWALJournal = true;
@@ -169,6 +178,9 @@ private:
 	std::string _mqttSettingsPath;
 	std::string _modulePath;
 	std::string _scriptPath;
+	uint32_t _scriptPathPermissions = 360;
+	std::string _scriptPathUser;
+	std::string _scriptPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _phpIniPath;

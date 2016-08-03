@@ -44,6 +44,8 @@ namespace BaseLib
 {
 
 class Obj;
+class FileDescriptor;
+typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
 namespace Rpc
 {
@@ -71,12 +73,18 @@ public:
 		std::vector<std::string> validUsers;
 		int32_t diffieHellmanKeySize = 1024;
 		std::string contentPath;
+		uint32_t contentPathPermissions = 360;
+		std::string contentPathUser;
+		std::string contentPathGroup;
 		bool webServer = false;
 		bool webSocket = false;
 		AuthType websocketAuthType = AuthType::basic;
 		bool xmlrpcServer = true;
 		bool jsonrpcServer = true;
 		std::string redirectTo;
+
+		// Helpers
+		PFileDescriptor socketDescriptor;
 
 		// Mods
 		std::map<std::string, std::vector<std::string>> modSettings;

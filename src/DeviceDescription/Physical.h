@@ -45,11 +45,13 @@ class Obj;
 namespace DeviceDescription
 {
 
-class PhysicalNone;
+class Physical;
+typedef Physical PhysicalNone;
 class PhysicalInteger;
 class PhysicalBoolean;
 class PhysicalString;
 
+typedef std::shared_ptr<Physical> PPhysical;
 typedef std::shared_ptr<PhysicalNone> PPhysicalNone;
 typedef std::shared_ptr<PhysicalInteger> PPhysicalInteger;
 typedef std::shared_ptr<PhysicalBoolean> PPhysicalBoolean;
@@ -79,6 +81,7 @@ public:
 	};
 
 	std::string groupId;
+	std::string typeString;
 	Type::Enum type = Type::none;
 	OperationType::Enum operationType = OperationType::none;
 	Endianess::Enum endianess = Endianess::big;
@@ -102,12 +105,12 @@ protected:
 	BaseLib::Obj* _bl = nullptr;
 };
 
-class PhysicalNone : public IPhysical
+class Physical : public IPhysical
 {
 public:
-	PhysicalNone(BaseLib::Obj* baseLib);
-	PhysicalNone(BaseLib::Obj* baseLib, xml_node<>* node);
-	virtual ~PhysicalNone() {}
+	Physical(BaseLib::Obj* baseLib);
+	Physical(BaseLib::Obj* baseLib, xml_node<>* node);
+	virtual ~Physical() {}
 };
 
 class PhysicalInteger : public IPhysical

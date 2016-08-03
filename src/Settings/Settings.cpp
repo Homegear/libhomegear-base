@@ -61,7 +61,10 @@ void Settings::reset()
 	_enableCoreDumps = true;
 	_workingDirectory = _bl->executablePath;
 	_socketPath = _bl->executablePath;
-	_databasePath = _bl->executablePath + "db.sql";
+	_dataPath = _bl->executablePath;
+	_dataPathPermissions = 504;
+	_dataPathUser = "";
+	_dataPathGroup = "";
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
 	_databaseWALJournal = true;
@@ -96,6 +99,9 @@ void Settings::reset()
 	_mqttSettingsPath = "/etc/homegear/mqtt.conf";
 	_modulePath = "/var/lib/homegear/modules/";
 	_scriptPath = "/var/lib/homegear/scripts/";
+	_scriptPathPermissions = 360;
+	_scriptPathUser = "";
+	_scriptPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_phpIniPath = "/etc/homegear/php.ini";
@@ -254,11 +260,28 @@ void Settings::load(std::string filename)
 					if(_socketPath.back() != '/') _socketPath.push_back('/');
 					_bl->out.printDebug("Debug: socketPath set to " + _socketPath);
 				}
-				else if(name == "databasepath")
+				else if(name == "datapath")
 				{
-					_databasePath = value;
-					if(_databasePath.empty()) _databasePath = _bl->executablePath + "db.sql";
-					_bl->out.printDebug("Debug: databasePath set to " + _databasePath);
+					_dataPath = value;
+					if(_dataPath.empty()) _dataPath = _bl->executablePath;
+					if(_dataPath.back() != '/') _dataPath.push_back('/');
+					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
+				}
+				else if(name == "datapathpermissions")
+				{
+					_dataPathPermissions = Math::getOctalNumber(value);
+					if(_dataPathPermissions == 0) _dataPathPermissions = 504;
+					_bl->out.printDebug("Debug: dataPathPermissions set to " + _dataPathPermissions);
+				}
+				else if(name == "datapathuser")
+				{
+					_dataPathUser = value;
+					_bl->out.printDebug("Debug: dataPathUser set to " + _dataPathUser);
+				}
+				else if(name == "datapathgroup")
+				{
+					_dataPathGroup = value;
+					_bl->out.printDebug("Debug: dataPathGroup set to " + _dataPathGroup);
 				}
 				else if(name == "databasesynchronous")
 				{
@@ -462,6 +485,22 @@ void Settings::load(std::string filename)
 					if(_scriptPath.empty()) _scriptPath = "/var/lib/homegear/scripts/";
 					if(_scriptPath.back() != '/') _scriptPath.push_back('/');
 					_bl->out.printDebug("Debug: scriptPath set to " + _scriptPath);
+				}
+				else if(name == "scriptpathpermissions")
+				{
+					_scriptPathPermissions = Math::getOctalNumber(value);
+					if(_scriptPathPermissions == 0) _scriptPathPermissions = 360;
+					_bl->out.printDebug("Debug: scriptPathPermissions set to " + _scriptPathPermissions);
+				}
+				else if(name == "scriptpathuser")
+				{
+					_scriptPathUser = value;
+					_bl->out.printDebug("Debug: scriptPathUser set to " + _scriptPathUser);
+				}
+				else if(name == "scriptpathgroup")
+				{
+					_scriptPathGroup = value;
+					_bl->out.printDebug("Debug: scriptPathGroup set to " + _scriptPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{
