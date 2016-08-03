@@ -79,7 +79,7 @@ public:
 	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
 	virtual ~TcpSocket();
 
-	std::shared_ptr<FileDescriptor> bindSocket(std::string address, std::string port);
+	PFileDescriptor bindSocket(std::string address, std::string port, std::string& listenAddress);
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
@@ -112,7 +112,7 @@ protected:
 	std::mutex _writeMutex;
 	bool _verifyCertificate = true;
 
-	std::shared_ptr<FileDescriptor> _socketDescriptor;
+	PFileDescriptor _socketDescriptor;
 	bool _useSSL = false;
 	gnutls_certificate_credentials_t _x509Cred = nullptr;
 
