@@ -221,6 +221,22 @@ void ServerInfo::load(std::string filename)
 					if(info->contentPath.back() != '/') info->contentPath.push_back('/');
 					_bl->out.printDebug("Debug: contentPath of RPC server " + info->name + " set to " + info->contentPath);
 				}
+				else if(name == "contentpathpermissions")
+				{
+					info->contentPathPermissions = Math::getOctalNumber(value);
+					if(info->contentPathPermissions == 0) info->contentPathPermissions = 360;
+					_bl->out.printDebug("Debug: contentPathPermissions of RPC server " + info->name + " set to " + std::to_string(info->contentPathPermissions));
+				}
+				else if(name == "contentpathuser")
+				{
+					info->contentPathUser = value;
+					_bl->out.printDebug("Debug: contentPathUser of RPC server " + info->name + " set to " + info->contentPathUser);
+				}
+				else if(name == "contentpathgroup")
+				{
+					info->contentPathGroup = value;
+					_bl->out.printDebug("Debug: contentPathGroup of RPC server " + info->name + " set to " + info->contentPathGroup);
+				}
 				else if(name == "xmlrpcserver")
 				{
 					HelperFunctions::toLower(value);

@@ -73,6 +73,9 @@ public:
 		std::vector<std::string> validUsers;
 		int32_t diffieHellmanKeySize = 1024;
 		std::string contentPath;
+		uint32_t contentPathPermissions = 360;
+		std::string contentPathUser;
+		std::string contentPathGroup;
 		bool webServer = false;
 		bool webSocket = false;
 		AuthType websocketAuthType = AuthType::basic;
