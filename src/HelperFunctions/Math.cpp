@@ -268,6 +268,13 @@ uint32_t Math::getUnsignedNumber(std::string &s, bool isHex)
 	return number;
 }
 
+int32_t Math::getOctalNumber(std::string& s)
+{
+	int32_t number = 0;
+	try { number = std::stoll(s, 0, 8); } catch(...) {}
+	return number;
+}
+
 double Math::getDouble(const std::string& s)
 {
 	double number = 0;

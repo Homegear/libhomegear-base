@@ -130,6 +130,8 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 						else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, this)));
 						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, this)));
 						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, this)));
+						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, this)));
+						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
 					}
 				}
