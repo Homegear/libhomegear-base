@@ -44,6 +44,8 @@ namespace BaseLib
 {
 
 class Obj;
+class FileDescriptor;
+typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
 namespace Rpc
 {
@@ -77,6 +79,9 @@ public:
 		bool xmlrpcServer = true;
 		bool jsonrpcServer = true;
 		std::string redirectTo;
+
+		// Helpers
+		PFileDescriptor socketDescriptor;
 
 		// Mods
 		std::map<std::string, std::vector<std::string>> modSettings;

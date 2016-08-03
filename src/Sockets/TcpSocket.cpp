@@ -81,9 +81,9 @@ TcpSocket::~TcpSocket()
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
 }
 
-std::shared_ptr<FileDescriptor> TcpSocket::bindSocket(std::string address, std::string port)
+PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std::string& listenAddress)
 {
-	std::shared_ptr<FileDescriptor> socketDescriptor;
+	PFileDescriptor socketDescriptor;
 	addrinfo hostInfo;
 	addrinfo *serverInfo = nullptr;
 
@@ -94,10 +94,11 @@ std::shared_ptr<FileDescriptor> TcpSocket::bindSocket(std::string address, std::
 	hostInfo.ai_family = AF_UNSPEC;
 	hostInfo.ai_socktype = SOCK_STREAM;
 	hostInfo.ai_flags = AI_PASSIVE;
+	char buffer[100];
 	int32_t result;
 	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
 	{
-		_bl->out.printCritical("Error: Could not get address information: " + std::string(gai_strerror(result)));
+		_bl->out.printError("Error: Could not get address information: " + std::string(gai_strerror(result)));
 		return socketDescriptor;
 	}
 
@@ -118,11 +119,34 @@ std::shared_ptr<FileDescriptor> TcpSocket::bindSocket(std::string address, std::
 			error = errno;
 			continue;
 		}
+		switch (info->ai_family)
+		{
+			case AF_INET:
+				inet_ntop (info->ai_family, &((struct sockaddr_in *) info->ai_addr)->sin_addr, buffer, 100);
+				listenAddress = std::string(buffer);
+				break;
+			case AF_INET6:
+				inet_ntop (info->ai_family, &((struct sockaddr_in6 *) info->ai_addr)->sin6_addr, buffer, 100);
+				listenAddress = std::string(buffer);
+				break;
+		}
 		bound = true;
 		break;
 	}
 	freeaddrinfo(serverInfo);
-	if(!bound) _bl->out.printError("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
+	if(!bound)
+	{
+		_bl->out.printError("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
+		_bl->fileDescriptorManager.shutdown(socketDescriptor);
+		socketDescriptor.reset();
+	}
+	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, 100) == -1)
+	{
+		_bl->out.printError("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
+		_bl->fileDescriptorManager.shutdown(socketDescriptor);
+		socketDescriptor.reset();
+	}
+	if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
 	return socketDescriptor;
 }
 
