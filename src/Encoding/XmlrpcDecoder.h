@@ -28,60 +28,42 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef SSDP_H_
-#define SSDP_H_
+#ifndef XMLRPCDECODER_H_
+#define XMLRPCDECODER_H_
 
-#include "../Encoding/Http.h"
 #include "../Variable.h"
+#include "RapidXml/rapidxml.hpp"
 
-#include <string>
-#include <vector>
 #include <memory>
-#include <set>
+#include <vector>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
 class Obj;
-class FileDescriptor;
 
-class SSDPInfo
+namespace Rpc
 {
-public:
-	SSDPInfo(std::string ip, PVariable info);
-	virtual ~SSDPInfo();
-	std::string ip();
-	const PVariable info();
-private:
-	std::string _ip;
-	PVariable _info;
-};
 
-class SSDP
-{
+class XmlrpcDecoder {
 public:
-	SSDP(BaseLib::Obj* baseLib);
-	virtual ~SSDP();
+	XmlrpcDecoder(BaseLib::Obj* baseLib);
+	virtual ~XmlrpcDecoder() {}
 
-	/**
-	 * Searches for SSDP devices and returns the IPv4 addresses.
-	 *
-	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
-	 * @param[in] timeout The time to wait for responses
-	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
-	 */
-	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SSDPInfo>& devices);
+	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<char>& packet, std::string& methodName);
+	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet);
+	virtual std::shared_ptr<Variable> decodeResponse(std::string& packet);
 private:
 	BaseLib::Obj* _bl = nullptr;
-	std::string _address;
-	int32_t _port = 1900;
 
-	void getAddress();
-	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
-	void processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations);
-	void getDeviceInfo(std::set<std::string>& locations, std::vector<SSDPInfo>& devices);
-	std::shared_ptr<FileDescriptor> getSocketDescriptor();
+	std::shared_ptr<Variable> decodeParameter(xml_node<>* valueNode);
+	std::shared_ptr<Variable> decodeArray(xml_node<>* dataNode);
+	std::shared_ptr<Variable> decodeStruct(xml_node<>* structNode);
+	std::shared_ptr<Variable> decodeResponse(xml_document<>* doc);
 };
 
+} /* namespace Rpc */
 }
-#endif
+#endif /* XMLRPCDECODER_H_ */

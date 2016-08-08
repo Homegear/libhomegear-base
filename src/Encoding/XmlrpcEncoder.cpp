@@ -28,20 +28,20 @@
  * files in the program, then also delete it here.
 */
 
-#include "XMLRPCEncoder.h"
+#include "XmlrpcEncoder.h"
 #include "../BaseLib.h"
 
 namespace BaseLib
 {
-namespace RPC
+namespace Rpc
 {
 
-XMLRPCEncoder::XMLRPCEncoder(BaseLib::Obj* baseLib)
+XmlrpcEncoder::XmlrpcEncoder(BaseLib::Obj* baseLib)
 {
 	_bl = baseLib;
 }
 
-void XMLRPCEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
+void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
 {
 	xml_document<> doc;
 	try
@@ -80,7 +80,7 @@ void XMLRPCEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::l
     doc.clear();
 }
 
-void XMLRPCEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
+void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
 {
 	xml_document<> doc;
 	try
@@ -118,7 +118,7 @@ void XMLRPCEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::v
     doc.clear();
 }
 
-void XMLRPCEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData)
+void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData)
 {
 	xml_document<> doc;
 	try
@@ -157,7 +157,7 @@ void XMLRPCEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vect
     doc.clear();
 }
 
-void XMLRPCEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{
@@ -224,7 +224,7 @@ void XMLRPCEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::s
     }
 }
 
-void XMLRPCEncoder::encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{
@@ -255,7 +255,7 @@ void XMLRPCEncoder::encodeStruct(xml_document<>* doc, xml_node<>* node, std::sha
     }
 }
 
-void XMLRPCEncoder::encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{

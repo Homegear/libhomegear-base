@@ -220,6 +220,86 @@ std::shared_ptr<Variable> LogicalInteger::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
+LogicalInteger64::LogicalInteger64(BaseLib::Obj* baseLib) : ILogical(baseLib)
+{
+	type = Type::Enum::tInteger64;
+}
+
+LogicalInteger64::LogicalInteger64(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalInteger64(baseLib)
+{
+	try
+	{
+		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		{
+			_bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger64\": " + std::string(attr->name()));
+		}
+		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		{
+			std::string nodeName(subNode->name());
+			std::string nodeValue(subNode->value());
+			if(nodeName == "minimumValue") minimumValue = Math::getNumber64(nodeValue);
+			else if(nodeName == "maximumValue") maximumValue = Math::getNumber64(nodeValue);
+			else if(nodeName == "defaultValue")
+			{
+				defaultValueExists = true;
+				defaultValue = Math::getNumber64(nodeValue);
+			}
+			else if(nodeName == "setToValueOnPairing")
+			{
+				setToValueOnPairingExists = true;
+				setToValueOnPairing = Math::getNumber64(nodeValue);
+			}
+			else if(nodeName == "specialValues")
+			{
+				for(xml_node<>* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
+				{
+					std::string specialValueName(specialValueNode->name());
+					std::string specialValueString(specialValueNode->value());
+					if(specialValueName == "specialValue")
+					{
+						std::string id;
+						for(xml_attribute<>* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
+						{
+							std::string attributeName(attr->name());
+							if(attributeName == "id") id = std::string(attr->value());
+							else _bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger64\\specialValues\\specialValue\": " + std::string(attr->name()));
+						}
+
+						if(id.empty()) _bl->out.printWarning("Warning: No id set for \"logicalInteger64\\specialValues\\specialValue\"");
+						int64_t specialValue = Math::getNumber64(specialValueString);
+						specialValuesStringMap[id] = specialValue;
+						specialValuesIntegerMap[specialValue] = id;
+					}
+					else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger64\\specialValues\": " + nodeName);
+				}
+			}
+			else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger64\": " + nodeName);
+		}
+	}
+    catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+std::shared_ptr<Variable> LogicalInteger64::getSetToValueOnPairing()
+{
+	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+}
+
+std::shared_ptr<Variable> LogicalInteger64::getDefaultValue()
+{
+	return std::shared_ptr<Variable>(new Variable(defaultValue));
+}
+
 LogicalDecimal::LogicalDecimal(BaseLib::Obj* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tFloat;

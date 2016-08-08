@@ -282,6 +282,62 @@ double Math::getDouble(const std::string& s)
 	return number;
 }
 
+uint32_t Math::getIeee754Binary32(float value)
+{
+	int32_t sign = 0;
+	int32_t integer;
+	int32_t exponent = 127;
+	int32_t fraction = 0;
+
+	if(value < 0)
+	{
+		sign = 0x80000000;
+		value = -value;
+	}
+
+	integer = floor(value);
+	value -= integer;
+
+	for(int32_t i = 22; i >= 0; i--)
+	{
+		value += value;
+		fraction += floor(value) * pow(2, i);
+		value -= floor(value);
+	}
+
+	while((integer != 1) && (exponent > 0) && (exponent < 255))
+	{
+		if(integer > 1)
+		{
+			fraction = ((integer & 1) << 22) + (fraction >> 1);
+			integer = integer >>1;
+			exponent++;
+		}
+		else
+		{
+			integer = (fraction & 0x400000) >> 22;
+			fraction = (fraction & 0x3FFFFF) << 1;
+			value += value;
+			fraction += floor(value);
+			value -= floor(value);
+			exponent--;
+		}
+	}
+
+	return sign + (exponent << 23) + fraction;
+}
+
+float Math::getFloatFromIeee754Binary32(uint32_t binary32)
+{
+	int32_t sign = (binary32 & 0x80000000) ? -1 : 1;
+	int32_t exponent = ((binary32 & 0x7F800000) >> 23) - 127;
+	float fraction = (binary32 & 0x7FFFFF) + 0x800000;
+	fraction = fraction / 0x800000;
+	float result = sign * fraction * (float)pow(2, exponent);
+
+	return result;
+}
+
 std::string Math::toString(double number)
 {
 	std::stringstream out;

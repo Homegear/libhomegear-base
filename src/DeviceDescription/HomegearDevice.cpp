@@ -265,6 +265,7 @@ void HomegearDevice::postLoad()
 		parameter->physical->operationType = IPhysical::OperationType::Enum::internal;
 		parameter->physical->type = IPhysical::Type::Enum::tInteger;
 		parameter->physical->groupId = "LAST_PACKET_RECEIVED";
+		if(!functions[0]) functions[0].reset(new Function(_bl));
 		functions[0]->variables->parameters[parameter->id] = parameter;
 
 		if(!encryption) return;
@@ -1597,11 +1598,7 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 							xml_node<>* castNode = doc->allocate_node(node_element, "generic");
 							node->append_node(castNode);
 
-							if(!generic->type.empty())
-							{
-								xml_node<>* subnode = doc->allocate_node(node_element, "type", doc->allocate_string(generic->type.c_str(), generic->type.size() + 1));
-								castNode->append_node(subnode);
-							}
+							if(!generic->type.empty()) castNode->append_attribute(doc->allocate_attribute("type", doc->allocate_string(generic->type.c_str(), generic->type.size() + 1)));
 
 							continue;
 						}
@@ -1676,6 +1673,57 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 					node->append_node(subnode);
 
 					for(std::unordered_map<std::string, int32_t>::iterator i = logical->specialValuesStringMap.begin(); i != logical->specialValuesStringMap.end(); ++i)
+					{
+						tempString = std::to_string(i->second);
+						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						subnode->append_node(specialValueNode);
+
+						attr = doc->allocate_attribute("id", doc->allocate_string(i->first.c_str(), i->first.size() + 1));
+						specialValueNode->append_attribute(attr);
+					}
+				}
+			}
+			else if(parameter->logical->type == ILogical::Type::Enum::tInteger64)
+			{
+				node = doc->allocate_node(node_element, "logicalInteger64");
+				parentNode->append_node(node);
+
+				LogicalInteger64* logical = (LogicalInteger64*)parameter->logical.get();
+
+				if(logical->minimumValue != (signed)0x8000000000000000ll)
+				{
+					tempString = std::to_string(logical->minimumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "minimumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(logical->maximumValue != (signed)0x7FFFFFFFFFFFFFFFll)
+				{
+					tempString = std::to_string(logical->maximumValue);
+					xml_node<>* subnode = doc->allocate_node(node_element, "maximumValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(logical->defaultValueExists)
+				{
+					tempString = std::to_string(logical->getDefaultValue()->integerValue64);
+					xml_node<>* subnode = doc->allocate_node(node_element, "defaultValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(logical->setToValueOnPairingExists)
+				{
+					tempString = std::to_string(logical->getSetToValueOnPairing()->integerValue64);
+					xml_node<>* subnode = doc->allocate_node(node_element, "setToValueOnPairing", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(!logical->specialValuesStringMap.empty())
+				{
+					xml_node<>* subnode = doc->allocate_node(node_element, "specialValues", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+
+					for(std::unordered_map<std::string, int64_t>::iterator i = logical->specialValuesStringMap.begin(); i != logical->specialValuesStringMap.end(); ++i)
 					{
 						tempString = std::to_string(i->second);
 						xml_node<>* specialValueNode = doc->allocate_node(node_element, "specialValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
@@ -1819,7 +1867,7 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			}
 			else if(parameter->physical->type == IPhysical::Type::Enum::none)
 			{
-				node = doc->allocate_node(node_element, "physicalNone");
+				node = doc->allocate_node(node_element, "physical");
 				parentNode->append_node(node);
 			}
 
@@ -1894,6 +1942,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				{
 					tempString = Math::toString(parameter->physical->memoryChannelStep, 1);
 					xml_node<>* subnode = doc->allocate_node(node_element, "memoryChannelStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(parameter->physical->address != 0)
+				{
+					tempString = Math::toString(parameter->physical->address);
+					xml_node<>* subnode = doc->allocate_node(node_element, "address", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 			}

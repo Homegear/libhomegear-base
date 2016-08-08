@@ -28,14 +28,16 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef XMLRPCDECODER_H_
-#define XMLRPCDECODER_H_
-
-#include "../Variable.h"
-#include "RapidXml/rapidxml.hpp"
+#ifndef XMLRPCENCODER_H_
+#define XMLRPCENCODER_H_
 
 #include <memory>
-#include <vector>
+#include <list>
+
+#include "../Exception.h"
+#include "../Output/Output.h"
+#include "../Variable.h"
+#include "RapidXml/rapidxml_print.hpp"
 
 using namespace rapidxml;
 
@@ -44,26 +46,26 @@ namespace BaseLib
 
 class Obj;
 
-namespace RPC
+namespace Rpc
 {
 
-class XMLRPCDecoder {
+class XmlrpcEncoder
+{
 public:
-	XMLRPCDecoder(BaseLib::Obj* baseLib);
-	virtual ~XMLRPCDecoder() {}
+	XmlrpcEncoder(BaseLib::Obj* baseLib);
+	virtual ~XmlrpcEncoder() {}
 
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<char>& packet, std::string& methodName);
-	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet);
-	virtual std::shared_ptr<Variable> decodeResponse(std::string& packet);
+	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
+	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
+	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
 private:
 	BaseLib::Obj* _bl = nullptr;
 
-	std::shared_ptr<Variable> decodeParameter(xml_node<>* valueNode);
-	std::shared_ptr<Variable> decodeArray(xml_node<>* dataNode);
-	std::shared_ptr<Variable> decodeStruct(xml_node<>* structNode);
-	std::shared_ptr<Variable> decodeResponse(xml_document<>* doc);
+	void encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
+	void encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
+	void encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
 };
 
-} /* namespace RPC */
 }
-#endif /* XMLRPCDECODER_H_ */
+}
+#endif

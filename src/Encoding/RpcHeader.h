@@ -28,13 +28,23 @@
  * files in the program, then also delete it here.
 */
 
-#include "RPCHeader.h"
+#ifndef RPCHEADER_H_
+#define RPCHEADER_H_
+
+#include <string>
 
 namespace BaseLib
 {
-namespace RPC
+namespace Rpc
 {
+class RpcHeader
+{
+public:
+	RpcHeader() {}
+	virtual ~RpcHeader() {}
 
-
+	std::string authorization;
+};
+} /* namespace Rpc */
 }
-}
+#endif /* RPCHEADER_H_ */

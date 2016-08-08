@@ -38,24 +38,24 @@
 
 #include "../Variable.h"
 #include "BinaryDecoder.h"
-#include "RPCHeader.h"
+#include "RpcHeader.h"
 
 namespace BaseLib
 {
 
 class Obj;
 
-namespace RPC
+namespace Rpc
 {
-class RPCDecoder
+class RpcDecoder
 {
 public:
-	RPCDecoder(BaseLib::Obj* baseLib);
-	RPCDecoder(BaseLib::Obj* baseLib, bool ansi);
-	virtual ~RPCDecoder() {}
+	RpcDecoder(BaseLib::Obj* baseLib);
+	RpcDecoder(BaseLib::Obj* baseLib, bool ansi, bool setInteger32 = true);
+	virtual ~RpcDecoder() {}
 
-	virtual std::shared_ptr<RPCHeader> decodeHeader(std::vector<char>& packet);
-	virtual std::shared_ptr<RPCHeader> decodeHeader(std::vector<uint8_t>& packet);
+	virtual std::shared_ptr<RpcHeader> decodeHeader(std::vector<char>& packet);
+	virtual std::shared_ptr<RpcHeader> decodeHeader(std::vector<uint8_t>& packet);
 	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<char>& packet, std::string& methodName);
 	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<uint8_t>& packet, std::string& methodName);
 	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet, uint32_t offset = 0);
@@ -65,6 +65,7 @@ private:
 	BaseLib::Obj* _bl = nullptr;
 	bool _ansi = false;
 	std::unique_ptr<BinaryDecoder> _decoder;
+	bool _setInteger32 = true;
 
 	std::shared_ptr<Variable> decodeParameter(std::vector<char>& packet, uint32_t& position);
 	std::shared_ptr<Variable> decodeParameter(std::vector<uint8_t>& packet, uint32_t& position);

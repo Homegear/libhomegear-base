@@ -142,11 +142,12 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 		else if(nodeName == "logicalAction") logical.reset(new LogicalAction(_bl, subNode));
 		else if(nodeName == "logicalArray") logical.reset(new LogicalArray(_bl, subNode));
 		else if(nodeName == "logicalInteger") logical.reset(new LogicalInteger(_bl, subNode));
+		else if(nodeName == "logicalInteger64") logical.reset(new LogicalInteger64(_bl, subNode));
 		else if(nodeName == "logicalDecimal") logical.reset(new LogicalDecimal(_bl, subNode));
 		else if(nodeName == "logicalString") logical.reset(new LogicalString(_bl, subNode));
 		else if(nodeName == "logicalStruct") logical.reset(new LogicalStruct(_bl, subNode));
 		else if(nodeName == "logicalEnumeration") logical.reset(new LogicalEnumeration(_bl, subNode));
-		else if(nodeName == "physicalNone") physical.reset(new PhysicalNone(_bl, subNode));
+		else if(nodeName == "physical" || nodeName == "physicalNone") physical.reset(new Physical(_bl, subNode));
 		else if(nodeName == "physicalInteger") physical.reset(new PhysicalInteger(_bl, subNode));
 		else if(nodeName == "physicalBoolean") physical.reset(new PhysicalBoolean(_bl, subNode));
 		else if(nodeName == "physicalString") physical.reset(new PhysicalString(_bl, subNode));
@@ -457,8 +458,12 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 			}
 			else if(logical->type == ILogical::Type::Enum::tFloat)
 			{
-				if(variable->floatValue == 0 && variable->integerValue != 0) variable->floatValue = variable->integerValue;
-				else if(variable->integerValue == 0 && !variable->stringValue.empty()) variable->floatValue = Math::getDouble(variable->stringValue);
+				if(variable->floatValue == 0)
+				{
+					if(variable->integerValue != 0) variable->floatValue = variable->integerValue;
+					else if(variable->integerValue64 != 0) variable->floatValue = variable->integerValue64;
+					else if(!variable->stringValue.empty()) variable->floatValue = Math::getDouble(variable->stringValue);
+				}
 				LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
 				bool specialValue = (variable->floatValue == parameter->defaultValue);
 				if(!specialValue)
@@ -480,8 +485,12 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 			}
 			else if(logical->type == ILogical::Type::Enum::tInteger)
 			{
-				if(variable->integerValue == 0 && variable->floatValue != 0) variable->integerValue = variable->floatValue;
-				else if(variable->integerValue == 0 && !variable->stringValue.empty()) variable->integerValue = Math::getNumber(variable->stringValue);
+				if(variable->integerValue == 0)
+				{
+					if(variable->floatValue != 0) variable->integerValue = variable->floatValue;
+					if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64;
+					else if(!variable->stringValue.empty()) variable->integerValue = Math::getNumber(variable->stringValue);
+				}
 				LogicalInteger* parameter = (LogicalInteger*)logical.get();
 				bool specialValue = (variable->integerValue == parameter->defaultValue);
 				if(!specialValue)
@@ -499,6 +508,33 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				{
 					if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
 					else if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+				}
+			}
+			else if(logical->type == ILogical::Type::Enum::tInteger64)
+			{
+				if(variable->integerValue64 == 0)
+				{
+					if(variable->floatValue != 0) variable->integerValue64 = variable->floatValue;
+					if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
+					else if(!variable->stringValue.empty()) variable->integerValue64 = Math::getNumber(variable->stringValue);
+				}
+				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();
+				bool specialValue = (variable->integerValue64 == parameter->defaultValue);
+				if(!specialValue)
+				{
+					for(std::unordered_map<std::string, int64_t>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
+					{
+						if(i->second == variable->integerValue64)
+						{
+							specialValue = true;
+							break;
+						}
+					}
+				}
+				if(!specialValue)
+				{
+					if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
+					else if(variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tBoolean)
