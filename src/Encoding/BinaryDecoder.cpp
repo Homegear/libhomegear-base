@@ -42,7 +42,7 @@ BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib)
 BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib, bool ansi) : BinaryDecoder(baseLib)
 {
 	_ansi = ansi;
-	if(_ansi) _ansiConverter.reset(new Ansi());
+	if(_ansi) _ansiConverter.reset(new Ansi(true, false));
 }
 
 int32_t BinaryDecoder::decodeInteger(std::vector<char>& encodedData, uint32_t& position)

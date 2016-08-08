@@ -31,7 +31,7 @@
 #ifndef RPCENCODER_H_
 #define RPCENCODER_H_
 
-#include "RPCHeader.h"
+#include "RpcHeader.h"
 #include "../Variable.h"
 #include "BinaryEncoder.h"
 
@@ -44,32 +44,34 @@ namespace BaseLib
 
 class Obj;
 
-namespace RPC
+namespace Rpc
 {
 
-class RPCEncoder
+class RpcEncoder
 {
 public:
-	RPCEncoder(BaseLib::Obj* baseLib);
-	virtual ~RPCEncoder() {}
+	RpcEncoder(BaseLib::Obj* baseLib);
+	RpcEncoder(BaseLib::Obj* baseLib, bool forceInteger64);
+	virtual ~RpcEncoder() {}
 
-	virtual void insertHeader(std::vector<char>& packet, const RPCHeader& header);
-	virtual void insertHeader(std::vector<uint8_t>& packet, const RPCHeader& header);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<char>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RPCHeader> header = nullptr);
+	virtual void insertHeader(std::vector<char>& packet, const RpcHeader& header);
+	virtual void insertHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
+	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
+	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
+	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<char>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
+	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
 	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
 	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData);
 private:
 	BaseLib::Obj* _bl = nullptr;
+	bool _forceInteger64 = false;
 	std::unique_ptr<BinaryEncoder> _encoder;
 	char _packetStartRequest[4];
 	char _packetStartResponse[5];
 	char _packetStartError[5];
 
-	uint32_t encodeHeader(std::vector<char>& packet, const RPCHeader& header);
-	uint32_t encodeHeader(std::vector<uint8_t>& packet, const RPCHeader& header);
+	uint32_t encodeHeader(std::vector<char>& packet, const RpcHeader& header);
+	uint32_t encodeHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
 	void encodeVariable(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
 	void encodeVariable(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
 	void encodeInteger(std::vector<char>& packet, std::shared_ptr<Variable>& variable);

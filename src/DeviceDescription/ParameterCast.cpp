@@ -702,14 +702,14 @@ void StringJsonArrayDecimal::toPacket(PVariable value)
 
 RpcBinary::RpcBinary(BaseLib::Obj* baseLib) : ICast(baseLib)
 {
-	_binaryEncoder = std::shared_ptr<BaseLib::RPC::RPCEncoder>(new BaseLib::RPC::RPCEncoder(_bl));
-	_binaryDecoder = std::shared_ptr<BaseLib::RPC::RPCDecoder>(new BaseLib::RPC::RPCDecoder(_bl));
+	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
+	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 }
 
 RpcBinary::RpcBinary(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
-	_binaryEncoder = std::shared_ptr<BaseLib::RPC::RPCEncoder>(new BaseLib::RPC::RPCEncoder(_bl));
-	_binaryDecoder = std::shared_ptr<BaseLib::RPC::RPCDecoder>(new BaseLib::RPC::RPCDecoder(_bl));
+	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
+	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1002,6 +1002,11 @@ void Invert::fromPacket(PVariable value)
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
+	else if(value->type == VariableType::tInteger64)
+	{
+		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
+		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
+	}
 	else if(value->type == VariableType::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
@@ -1018,6 +1023,11 @@ void Invert::toPacket(PVariable value)
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
+	else if(value->type == VariableType::tInteger64)
+	{
+		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
+		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
+	}
 	else if(value->type == VariableType::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
@@ -1033,15 +1043,14 @@ Generic::Generic(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) 
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
-		_bl->out.printWarning("Warning: Unknown attribute for \"generic\": " + std::string(attr->name()));
+		std::string name(attr->name());
+		std::string value(attr->value());
+		if(name == "type") type = value;
+		else _bl->out.printWarning("Warning: Unknown attribute for \"generic\": " + name);
 	}
 	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
-
-		std::string name(subNode->name());
-		std::string value(subNode->value());
-		if(name == "type") type = value;
-		else _bl->out.printWarning("Warning: Unknown node in \"generic\": " + name);
+		_bl->out.printWarning("Warning: Unknown node in \"generic\": " + std::string(subNode->name()));
 	}
 }
 

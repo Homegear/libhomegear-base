@@ -61,4 +61,9 @@ esac
 #AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [enable debugging, default: no]), [case "${enableval}" in yes) debug=true ;; no)  debug=false ;; *)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;; esac], [debug=false])
 #AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 
+AC_ARG_WITH([ccu2], [AS_HELP_STRING([--with-ccu2], [Compile for CCU2])], [with_ccu2=yes], [])
+AS_IF([test "x$with_ccu2" = "xyes"], [
+	AC_DEFINE(CCU2, [], [Enables features specific for CCU2])
+	])
+
 AC_OUTPUT(Makefile src/Makefile)
