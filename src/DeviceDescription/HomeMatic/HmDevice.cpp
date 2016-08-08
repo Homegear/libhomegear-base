@@ -772,7 +772,7 @@ std::shared_ptr<Variable> HomeMaticParameter::convertFromPacket(std::vector<uint
 			{
 				if((*i)->type == ParameterConversion::Type::Enum::rpcBinary)
 				{
-					if(!_binaryDecoder) _binaryDecoder = std::shared_ptr<BaseLib::RPC::RPCDecoder>(new BaseLib::RPC::RPCDecoder(_bl));
+					if(!_binaryDecoder) _binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 					variable = _binaryDecoder->decodeResponse(*value);
 				}
 				else
@@ -1024,7 +1024,7 @@ void HomeMaticParameter::convertToPacket(const std::shared_ptr<Variable> value, 
 				{
 					if((*i)->type == ParameterConversion::Type::Enum::rpcBinary)
 					{
-						if(!_binaryEncoder) _binaryEncoder = std::shared_ptr<BaseLib::RPC::RPCEncoder>(new BaseLib::RPC::RPCEncoder(_bl));
+						if(!_binaryEncoder) _binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
 						_binaryEncoder->encodeResponse(variable, convertedValue); //No more conversions after this point.
 						return;
 					}

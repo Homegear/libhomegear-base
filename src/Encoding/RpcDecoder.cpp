@@ -28,28 +28,28 @@
  * files in the program, then also delete it here.
 */
 
-#include "RPCDecoder.h"
+#include "RpcDecoder.h"
 #include "../BaseLib.h"
 
 namespace BaseLib
 {
-namespace RPC
+namespace Rpc
 {
 
-RPCDecoder::RPCDecoder(BaseLib::Obj* baseLib) : RPCDecoder(baseLib, false)
+RpcDecoder::RpcDecoder(BaseLib::Obj* baseLib) : RpcDecoder(baseLib, false)
 {
 
 }
 
-RPCDecoder::RPCDecoder(BaseLib::Obj* baseLib, bool ansi)
+RpcDecoder::RpcDecoder(BaseLib::Obj* baseLib, bool ansi, bool setInteger32) : _bl(baseLib), _setInteger32(setInteger32)
 {
-	_bl = baseLib;
 	_decoder = std::unique_ptr<BinaryDecoder>(new BinaryDecoder(baseLib, ansi));
 }
 
-std::shared_ptr<RPCHeader> RPCDecoder::decodeHeader(std::vector<char>& packet)
+
+std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<char>& packet)
 {
-	std::shared_ptr<RPCHeader> header(new RPCHeader());
+	std::shared_ptr<RpcHeader> header(new RpcHeader());
 	try
 	{
 		if(!(packet.size() < 12 || (packet.at(3) & 0x40))) return header;
@@ -81,9 +81,9 @@ std::shared_ptr<RPCHeader> RPCDecoder::decodeHeader(std::vector<char>& packet)
     return header;
 }
 
-std::shared_ptr<RPCHeader> RPCDecoder::decodeHeader(std::vector<uint8_t>& packet)
+std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<uint8_t>& packet)
 {
-	std::shared_ptr<RPCHeader> header(new RPCHeader());
+	std::shared_ptr<RpcHeader> header(new RpcHeader());
 	try
 	{
 		if(!(packet.size() < 12 || (packet.at(3) & 0x40))) return header;
@@ -115,7 +115,7 @@ std::shared_ptr<RPCHeader> RPCDecoder::decodeHeader(std::vector<uint8_t>& packet
     return header;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RPCDecoder::decodeRequest(std::vector<char>& packet, std::string& methodName)
+std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeRequest(std::vector<char>& packet, std::string& methodName)
 {
 	try
 	{
@@ -152,7 +152,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RPCDecoder::decodeReques
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RPCDecoder::decodeRequest(std::vector<uint8_t>& packet, std::string& methodName)
+std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeRequest(std::vector<uint8_t>& packet, std::string& methodName)
 {
 	try
 	{
@@ -189,7 +189,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RPCDecoder::decodeReques
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
-std::shared_ptr<Variable> RPCDecoder::decodeResponse(std::vector<char>& packet, uint32_t offset)
+std::shared_ptr<Variable> RpcDecoder::decodeResponse(std::vector<char>& packet, uint32_t offset)
 {
 	uint32_t position = offset + 8;
 	std::shared_ptr<Variable> response = decodeParameter(packet, position);
@@ -203,7 +203,7 @@ std::shared_ptr<Variable> RPCDecoder::decodeResponse(std::vector<char>& packet, 
 	return response;
 }
 
-std::shared_ptr<Variable> RPCDecoder::decodeResponse(std::vector<uint8_t>& packet, uint32_t offset)
+std::shared_ptr<Variable> RpcDecoder::decodeResponse(std::vector<uint8_t>& packet, uint32_t offset)
 {
 	uint32_t position = offset + 8;
 	std::shared_ptr<Variable> response = decodeParameter(packet, position);
@@ -217,7 +217,7 @@ std::shared_ptr<Variable> RPCDecoder::decodeResponse(std::vector<uint8_t>& packe
 	return response;
 }
 
-void RPCDecoder::decodeResponse(PVariable& variable, uint32_t offset)
+void RpcDecoder::decodeResponse(PVariable& variable, uint32_t offset)
 {
 	uint32_t position = offset + 8;
 	decodeParameter(variable, position);
@@ -230,17 +230,17 @@ void RPCDecoder::decodeResponse(PVariable& variable, uint32_t offset)
 	}
 }
 
-VariableType RPCDecoder::decodeType(std::vector<char>& packet, uint32_t& position)
+VariableType RpcDecoder::decodeType(std::vector<char>& packet, uint32_t& position)
 {
 	return (VariableType)_decoder->decodeInteger(packet, position);
 }
 
-VariableType RPCDecoder::decodeType(std::vector<uint8_t>& packet, uint32_t& position)
+VariableType RpcDecoder::decodeType(std::vector<uint8_t>& packet, uint32_t& position)
 {
 	return (VariableType)_decoder->decodeInteger(packet, position);
 }
 
-std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet, uint32_t& position)
+std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<char>& packet, uint32_t& position)
 {
 	try
 	{
@@ -258,7 +258,8 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet,
 		else if(type == VariableType::tInteger64)
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
-			variable->integerValue = variable->integerValue64;
+			variable->integerValue = (int32_t)variable->integerValue64;
+			if(_setInteger32) variable->type = VariableType::tInteger;
 		}
 		else if(type == VariableType::tFloat)
 		{
@@ -301,7 +302,7 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<char>& packet,
     return std::shared_ptr<Variable>();
 }
 
-std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& packet, uint32_t& position)
+std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<uint8_t>& packet, uint32_t& position)
 {
 	try
 	{
@@ -314,10 +315,13 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& pack
 		else if(type == VariableType::tInteger)
 		{
 			variable->integerValue = _decoder->decodeInteger(packet, position);
+			variable->integerValue64 = variable->integerValue;
 		}
 		else if(type == VariableType::tInteger64)
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
+			variable->integerValue = (int32_t)variable->integerValue64;
+			if(_setInteger32) variable->type = VariableType::tInteger;
 		}
 		else if(type == VariableType::tFloat)
 		{
@@ -360,7 +364,7 @@ std::shared_ptr<Variable> RPCDecoder::decodeParameter(std::vector<uint8_t>& pack
     return std::shared_ptr<Variable>();
 }
 
-void RPCDecoder::decodeParameter(PVariable& variable, uint32_t& position)
+void RpcDecoder::decodeParameter(PVariable& variable, uint32_t& position)
 {
 	try
 	{
@@ -372,10 +376,13 @@ void RPCDecoder::decodeParameter(PVariable& variable, uint32_t& position)
 		else if(variable->type == VariableType::tInteger)
 		{
 			variable->integerValue = _decoder->decodeInteger(variable->binaryValue, position);
+			variable->integerValue64 = variable->integerValue;
 		}
 		else if(variable->type == VariableType::tInteger64)
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(variable->binaryValue, position);
+			variable->integerValue = (int32_t)variable->integerValue64;
+			if(_setInteger32) variable->type = VariableType::tInteger;
 		}
 		else if(variable->type == VariableType::tFloat)
 		{
@@ -412,7 +419,7 @@ void RPCDecoder::decodeParameter(PVariable& variable, uint32_t& position)
     }
 }
 
-PArray RPCDecoder::decodeArray(std::vector<char>& packet, uint32_t& position)
+PArray RpcDecoder::decodeArray(std::vector<char>& packet, uint32_t& position)
 {
 	try
 	{
@@ -439,7 +446,7 @@ PArray RPCDecoder::decodeArray(std::vector<char>& packet, uint32_t& position)
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
-PArray RPCDecoder::decodeArray(std::vector<uint8_t>& packet, uint32_t& position)
+PArray RpcDecoder::decodeArray(std::vector<uint8_t>& packet, uint32_t& position)
 {
 	try
 	{
@@ -466,7 +473,7 @@ PArray RPCDecoder::decodeArray(std::vector<uint8_t>& packet, uint32_t& position)
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
-PStruct RPCDecoder::decodeStruct(std::vector<char>& packet, uint32_t& position)
+PStruct RpcDecoder::decodeStruct(std::vector<char>& packet, uint32_t& position)
 {
 	try
 	{
@@ -494,7 +501,7 @@ PStruct RPCDecoder::decodeStruct(std::vector<char>& packet, uint32_t& position)
     return PStruct();
 }
 
-PStruct RPCDecoder::decodeStruct(std::vector<uint8_t>& packet, uint32_t& position)
+PStruct RpcDecoder::decodeStruct(std::vector<uint8_t>& packet, uint32_t& position)
 {
 	try
 	{

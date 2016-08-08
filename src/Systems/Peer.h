@@ -390,6 +390,26 @@ protected:
 		 * @return "true" means the function handled the parameter completely and there is nothing to do anymore in getParamset.
 		 */
 		virtual bool getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters) { return false; }
+
+		/*
+		 * This hook is executed every time "convertFromPacket" is called in case custom conversions are used.
+		 *
+		 * @param parameter The current parameter.
+		 * @param data The data to convert.
+		 * @param result The conversion result.
+		 * @return "true" means the function converted the parameter.
+		 */
+		virtual bool convertFromPacketHook(PParameter parameter, std::vector<uint8_t>& data, PVariable& result) { return false; }
+
+		/*
+		 * This hook is executed every time "convertToPacket" is called in case custom conversions are used.
+		 *
+		 * @param parameter The current parameter.
+		 * @param data The data to convert.
+		 * @param result The conversion result.
+		 * @return "true" means the function converted the parameter.
+		 */
+		virtual bool convertToPacketHook(PParameter parameter, PVariable data, std::vector<uint8_t>& result) { return false; }
 	// }}}
 };
 

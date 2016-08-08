@@ -28,7 +28,7 @@
  * files in the program, then also delete it here.
 */
 
-#include "SSDP.h"
+#include "Ssdp.h"
 #include "../BaseLib.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
 #include <ifaddrs.h>
@@ -36,38 +36,38 @@
 namespace BaseLib
 {
 
-SSDPInfo::SSDPInfo(std::string ip, PVariable info)
+SsdpInfo::SsdpInfo(std::string ip, PVariable info)
 {
 	_ip = ip;
 	_info = info;
 }
 
-SSDPInfo::~SSDPInfo()
+SsdpInfo::~SsdpInfo()
 {
 
 }
 
-std::string SSDPInfo::ip()
+std::string SsdpInfo::ip()
 {
 	return _ip;
 }
 
-const PVariable SSDPInfo::info()
+const PVariable SsdpInfo::info()
 {
 	return _info;
 }
 
-SSDP::SSDP(Obj* baseLib)
+Ssdp::Ssdp(Obj* baseLib)
 {
 	_bl = baseLib;
 	getAddress();
 }
 
-SSDP::~SSDP()
+Ssdp::~Ssdp()
 {
 }
 
-void SSDP::getAddress()
+void Ssdp::getAddress()
 {
 	try
 	{
@@ -94,7 +94,7 @@ void SSDP::getAddress()
 	}
 }
 
-std::shared_ptr<FileDescriptor> SSDP::getSocketDescriptor()
+std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor()
 {
 	std::shared_ptr<FileDescriptor> serverSocketDescriptor;
 	try
@@ -166,7 +166,7 @@ std::shared_ptr<FileDescriptor> SSDP::getSocketDescriptor()
 	return serverSocketDescriptor;
 }
 
-void SSDP::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout)
+void Ssdp::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout)
 {
 	if(!serverSocketDescriptor || serverSocketDescriptor->descriptor == -1) return;
 	struct sockaddr_in addessInfo;
@@ -184,7 +184,7 @@ void SSDP::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDesc
 	}
 }
 
-void SSDP::searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SSDPInfo>& devices)
+void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices)
 {
 	std::shared_ptr<FileDescriptor> serverSocketDescriptor;
 	try
@@ -277,7 +277,7 @@ void SSDP::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
 
-void SSDP::processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations)
+void Ssdp::processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations)
 {
 	try
 	{
@@ -302,7 +302,7 @@ void SSDP::processPacket(Http& http, const std::string& stHeader, std::set<std::
 	}
 }
 
-void SSDP::getDeviceInfo(std::set<std::string>& locations, std::vector<SSDPInfo>& devices)
+void Ssdp::getDeviceInfo(std::set<std::string>& locations, std::vector<SsdpInfo>& devices)
 {
 	try
 	{
@@ -337,7 +337,7 @@ void SSDP::getDeviceInfo(std::set<std::string>& locations, std::vector<SSDPInfo>
 					}
 				}
 			}
-			devices.push_back(SSDPInfo(ip, infoStruct));
+			devices.push_back(SsdpInfo(ip, infoStruct));
 		}
 	}
 	catch(const std::exception& ex)

@@ -509,6 +509,7 @@ std::vector<uint8_t> HelperFunctions::getUBinary(std::vector<uint8_t>& hexData)
 
 uid_t HelperFunctions::userId(std::string username)
 {
+	if(username.empty()) return -1;
 	struct passwd pwd;
 	struct passwd* pwdResult;
 	int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
@@ -526,6 +527,7 @@ uid_t HelperFunctions::userId(std::string username)
 
 gid_t HelperFunctions::groupId(std::string groupname)
 {
+	if(groupname.empty()) return -1;
 	struct group grp;
 	struct group* grpResult;
 	int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
