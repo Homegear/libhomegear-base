@@ -39,7 +39,7 @@ namespace BaseLib
 
 class Obj;
 
-namespace RPC
+namespace Rpc
 {
 class JsonDecoderException : public BaseLib::Exception
 {

@@ -85,6 +85,7 @@ public:
 	Type::Enum type = Type::none;
 	OperationType::Enum operationType = OperationType::none;
 	Endianess::Enum endianess = Endianess::big;
+	int32_t address = 0;
 	double index = 0;
 	bool sizeDefined = false;
 	double size = 1.0;

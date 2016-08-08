@@ -64,6 +64,9 @@ Variable::Variable(DeviceDescription::ILogical::Type::Enum variableType) : Varia
 		case DeviceDescription::ILogical::Type::Enum::tInteger:
 			type = VariableType::tInteger;
 			break;
+		case DeviceDescription::ILogical::Type::Enum::tInteger64:
+			type = VariableType::tInteger64;
+			break;
 		case DeviceDescription::ILogical::Type::Enum::tString:
 			type = VariableType::tString;
 			break;
@@ -411,6 +414,9 @@ PVariable Variable::fromString(std::string& value, DeviceDescription::ILogical::
 		break;
 	case DeviceDescription::ILogical::Type::Enum::tInteger:
 		variableType = VariableType::tInteger;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tInteger64:
+		variableType = VariableType::tInteger64;
 		break;
 	case DeviceDescription::ILogical::Type::Enum::tString:
 		variableType = VariableType::tString;

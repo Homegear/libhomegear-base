@@ -33,10 +33,10 @@
 
 #include "Database/IDatabaseController.h"
 #include "Encoding/Ansi.h"
-#include "Encoding/XMLRPCDecoder.h"
-#include "Encoding/XMLRPCEncoder.h"
-#include "Encoding/RPCDecoder.h"
-#include "Encoding/RPCEncoder.h"
+#include "Encoding/XmlrpcDecoder.h"
+#include "Encoding/XmlrpcEncoder.h"
+#include "Encoding/RpcDecoder.h"
+#include "Encoding/RpcEncoder.h"
 #include "Encoding/BinaryRpc.h"
 #include "Encoding/JsonDecoder.h"
 #include "Encoding/JsonEncoder.h"
@@ -68,7 +68,7 @@
 #include "Systems/SystemFactory.h"
 #include "Systems/UpdateInfo.h"
 #include "Licensing/LicensingFactory.h"
-#include "SSDP/SSDP.h"
+#include "Sockets/Ssdp.h"
 #include "IQueue.h"
 #include "ITimedQueue.h"
 #include "Sockets/HttpClient.h"
@@ -90,6 +90,16 @@ public:
 	 * The current debug level for logging.
 	 */
 	int32_t debugLevel = 3;
+
+	/*
+	 * User ID of the Homegear process.
+	 */
+	uid_t userId = 0;
+
+	/*
+	 * Group ID of the Homegear process.
+	 */
+	gid_t groupId = 0;
 
 	/**
 	 * True when Homegear is still starting. It is set to false, when start up is complete and isOpen() of all interfaces is "true" (plus 30 seconds).

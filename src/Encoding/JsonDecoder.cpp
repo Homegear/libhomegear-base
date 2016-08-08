@@ -34,7 +34,7 @@
 
 namespace BaseLib
 {
-namespace RPC
+namespace Rpc
 {
 
 JsonDecoder::JsonDecoder(BaseLib::Obj* baseLib)

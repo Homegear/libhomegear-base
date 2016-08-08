@@ -35,6 +35,7 @@
 #include <map>
 #include <iomanip>
 #include <cmath>
+#include <bitset>
 
 namespace BaseLib
 {
@@ -261,6 +262,22 @@ public:
 	 * @return Returns the unsigned integer or "0" on error.
 	 */
 	static uint32_t getUnsignedNumber(std::string &s, bool isHex = false);
+
+	/*
+	 * Converts a float value to it's IEEE 754 binary32 representation.
+	 *
+	 * @param value The float value to convert.
+	 * @return Returns a uint32_t with the converted value MSB first.
+	 */
+	static uint32_t getIeee754Binary32(float value);
+
+	/*
+	 * Converts a value in IEEE 754 binary32 representation to float data must be MSB first.
+	 *
+	 * @param binary32 The binary32 value to convert.
+	 * @return Returns the converted value as float.
+	 */
+	static float getFloatFromIeee754Binary32(uint32_t binary32);
 
 	/**
 	 * Converts a string to double.
