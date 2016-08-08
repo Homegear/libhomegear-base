@@ -28,6 +28,7 @@
  * files in the program, then also delete it here.
 */
 
+#include "../../config.h"
 #include "Peer.h"
 #include "ServiceMessages.h"
 #include "../BaseLib.h"
@@ -666,7 +667,7 @@ void Peer::setDefaultValue(RPCConfigurationParameter* parameter)
 	try
 	{
 		//parameter cannot be nullptr at this point.
-		parameter->rpcParameter->convertToPacket(parameter->rpcParameter->logical->getDefaultValue(), parameter->data);
+		if(!convertToPacketHook(parameter->rpcParameter, parameter->rpcParameter->logical->getDefaultValue(), parameter->data))	parameter->rpcParameter->convertToPacket(parameter->rpcParameter->logical->getDefaultValue(), parameter->data);
 	}
 	catch(const std::exception& ex)
     {
@@ -1421,12 +1422,15 @@ std::shared_ptr<Variable> Peer::getAllConfig(PRpcClientInfo clientInfo)
 				if(configCentralIterator == configCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configCentralIterator->second.find(j->second->id);
 				if(parameterIterator == configCentralIterator->second.end()) continue;
+#ifdef CCU2
+				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
+#endif
 
 				std::shared_ptr<Variable> element(new Variable(VariableType::tStruct));
 				std::shared_ptr<Variable> value;
 				if(j->second->readable)
 				{
-					value = (j->second->convertFromPacket(parameterIterator->second.data));
+					if(!convertFromPacketHook(j->second, parameterIterator->second.data, value)) value = (j->second->convertFromPacket(parameterIterator->second.data));
 					if(j->second->password) value.reset(new Variable(value->type));
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
@@ -1569,6 +1573,9 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 					continue;
 				}
 				if(!j->second->readable && !returnWriteOnly) continue;
+#ifdef CCU2
+				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
+#endif
 				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
 				if(valuesCentralIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
@@ -1581,7 +1588,10 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				if(j->second->readable)
 				{
 					if(j->second->password || parameterIterator->second.data.empty()) value.reset(new Variable(j->second->logical->type));
-					else value = j->second->convertFromPacket(parameterIterator->second.data);
+					else
+					{
+						if(!convertFromPacketHook(j->second, parameterIterator->second.data, value)) value = j->second->convertFromPacket(parameterIterator->second.data);
+					}
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
 				}
@@ -1611,6 +1621,26 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 					{
 						std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
 						for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+						{
+							std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
+							specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
+							specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+							specialValues->arrayValue->push_back(specialElement);
+						}
+						element->structValue->insert(StructElement("SPECIAL", specialValues));
+					}
+				}
+				else if(j->second->logical->type == ILogical::Type::tInteger64)
+				{
+					LogicalInteger64* parameter = (LogicalInteger64*)j->second->logical.get();
+					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER64")))));
+					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
+					element->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
+
+					if(!parameter->specialValuesStringMap.empty())
+					{
+						std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
+						for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
 						{
 							std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
 							specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
@@ -1706,7 +1736,7 @@ std::shared_ptr<Variable> Peer::getConfigParameter(PRpcClientInfo clientInfo, ui
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
 		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
 		std::shared_ptr<Variable> variable;
-		variable = parameter->convertFromPacket(parameterIterator->second.data);
+		if(!convertFromPacketHook(parameter, parameterIterator->second.data, variable)) variable = parameter->convertFromPacket(parameterIterator->second.data);
 		if(parameter->password) variable.reset(new Variable(variable->type));
 		return variable;
 	}
@@ -1894,9 +1924,9 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 				if(!rpcFunction->variables->parameters.empty() || !rpcFunction->variables->id.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("VALUES"))));
 				if(!rpcFunction->linkParameters->parameters.empty() || !rpcFunction->linkParameters->id.empty()) variable->arrayValue->push_back(PVariable(new Variable(std::string("LINK"))));
 			}
-			//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::link) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::link)->typeString())));
-			//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::master) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::master)->typeString())));
-			//if(rpcChannel->parameterSets.find(RPC::ParameterSet::Type::Enum::values) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(RPC::ParameterSet::Type::Enum::values)->typeString())));
+			//if(rpcChannel->parameterSets.find(Rpc::ParameterSet::Type::Enum::link) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(Rpc::ParameterSet::Type::Enum::link)->typeString())));
+			//if(rpcChannel->parameterSets.find(Rpc::ParameterSet::Type::Enum::master) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(Rpc::ParameterSet::Type::Enum::master)->typeString())));
+			//if(rpcChannel->parameterSets.find(Rpc::ParameterSet::Type::Enum::values) != rpcChannel->parameterSets.end()) variable->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(rpcChannel->parameterSets.at(Rpc::ParameterSet::Type::Enum::values)->typeString())));
 
 			if(fields.empty() || fields.find("PARENT") != fields.end()) description->structValue->insert(StructElement("PARENT", std::shared_ptr<Variable>(new Variable(_serialNumber))));
 
@@ -2356,8 +2386,11 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				if(valuesIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
 				if(parameterIterator == valuesIterator->second.end()) continue;
+#ifdef CCU2
+				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
+#endif
 				if(getParamsetHook2(clientInfo, i->second, channel, variables)) continue;
-				element = i->second->convertFromPacket(parameterIterator->second.data);
+				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
 			}
 			else if(type == ParameterGroup::Type::Enum::config)
 			{
@@ -2365,7 +2398,10 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				if(configIterator == configCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configIterator->second.find(i->second->id);
 				if(parameterIterator == configIterator->second.end()) continue;
-				element = i->second->convertFromPacket(parameterIterator->second.data);
+#ifdef CCU2
+				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
+#endif
+				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
 				if(i->second->password) element.reset(new Variable(element->type));
 			}
 			else if(type == ParameterGroup::Type::Enum::link)
@@ -2383,7 +2419,10 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				if(remoteChannelIterator == addressIterator->second.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = remoteChannelIterator->second.find(i->second->id);
 				if(parameterIterator == remoteChannelIterator->second.end()) continue;
-				element = i->second->convertFromPacket(parameterIterator->second.data);
+#ifdef CCU2
+				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
+#endif
+				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
 			}
 
 			if(!element) continue;
@@ -2425,6 +2464,9 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
 				continue;
 			}
+#ifdef CCU2
+				if(i->second->logical->type == ILogical::Type::tInteger64) continue;
+#endif
 			description.reset(new Variable(VariableType::tStruct));
 
 			int32_t operations = 0;
@@ -2505,6 +2547,34 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 
 				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
 				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER")))));
+			}
+			else if(i->second->logical->type == ILogical::Type::tInteger64)
+			{
+				LogicalInteger64* parameter = (LogicalInteger64*)i->second->logical.get();
+
+				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
+				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
+				description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
+				description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
+				description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
+				description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
+				description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+
+				if(!parameter->specialValuesStringMap.empty())
+				{
+					std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
+					for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+					{
+						std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
+						specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
+						specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+						specialValues->arrayValue->push_back(specialElement);
+					}
+					description->structValue->insert(StructElement("SPECIAL", specialValues));
+				}
+
+				description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
+				description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER64")))));
 			}
 			else if(i->second->logical->type == ILogical::Type::tEnum)
 			{
@@ -2706,7 +2776,7 @@ std::shared_ptr<Variable> Peer::getValue(PRpcClientInfo clientInfo, uint32_t cha
 			if(parameter->password) variable.reset(new Variable(variable->type));
 			if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
 		}
-		variable = parameter->convertFromPacket(valuesCentral[channel][valueKey].data);
+		if(!convertFromPacketHook(parameter, parameterIterator->second.data, variable)) variable = parameter->convertFromPacket(parameterIterator->second.data);
 		if(parameter->password) variable.reset(new Variable(variable->type));
 		return variable;
 	}
@@ -2878,7 +2948,8 @@ std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t cha
 		{
 			if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
 			{
-				std::shared_ptr<Variable> currentValue = rpcParameter->convertFromPacket(parameter->data);
+				std::shared_ptr<Variable> currentValue;
+				if(!convertFromPacketHook(rpcParameter, parameter->data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter->data);
 				std::string numberPart = value->stringValue.substr(2);
 				double factor = Math::getDouble(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
@@ -2891,7 +2962,8 @@ std::shared_ptr<Variable> Peer::setValue(PRpcClientInfo clientInfo, uint32_t cha
 			}
 			else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
 			{
-				std::shared_ptr<Variable> currentValue = rpcParameter->convertFromPacket(parameter->data);
+				std::shared_ptr<Variable> currentValue;
+				if(!convertFromPacketHook(rpcParameter, parameter->data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter->data);
 				std::string numberPart = value->stringValue.substr(2);
 				int32_t factor = Math::getNumber(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");

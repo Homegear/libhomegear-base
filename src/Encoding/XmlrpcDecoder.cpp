@@ -28,20 +28,20 @@
  * files in the program, then also delete it here.
 */
 
-#include "XMLRPCDecoder.h"
+#include "XmlrpcDecoder.h"
 #include "../BaseLib.h"
 
 namespace BaseLib
 {
-namespace RPC
+namespace Rpc
 {
 
-XMLRPCDecoder::XMLRPCDecoder(BaseLib::Obj* baseLib)
+XmlrpcDecoder::XmlrpcDecoder(BaseLib::Obj* baseLib)
 {
 	_bl = baseLib;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XMLRPCDecoder::decodeRequest(std::vector<char>& packet, std::string& methodName)
+std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeRequest(std::vector<char>& packet, std::string& methodName)
 {
 	xml_document<> doc;
 	try
@@ -104,7 +104,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XMLRPCDecoder::decodeReq
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. Not well formed.")});
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(std::string& packet)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::string& packet)
 {
 	xml_document<> doc;
 	try
@@ -134,7 +134,7 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(std::string& packet)
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(std::vector<char>& packet)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::vector<char>& packet)
 {
 	xml_document<> doc;
 	try
@@ -177,7 +177,7 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(std::vector<char>& packe
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(xml_document<>* doc)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document<>* doc)
 {
 	try
 	{
@@ -235,7 +235,7 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeResponse(xml_document<>* doc)
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeParameter(xml_node<>* valueNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeParameter(xml_node<>* valueNode)
 {
 	try
 	{
@@ -305,7 +305,7 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeParameter(xml_node<>* valueNode)
     return std::shared_ptr<Variable>(new Variable(0));
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeStruct(xml_node<>* structNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeStruct(xml_node<>* structNode)
 {
 	std::shared_ptr<Variable> rpcStruct(new Variable(VariableType::tStruct));
 	try
@@ -339,7 +339,7 @@ std::shared_ptr<Variable> XMLRPCDecoder::decodeStruct(xml_node<>* structNode)
 	return rpcStruct;
 }
 
-std::shared_ptr<Variable> XMLRPCDecoder::decodeArray(xml_node<>* arrayNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeArray(xml_node<>* arrayNode)
 {
 	std::shared_ptr<Variable> rpcArray(new Variable(VariableType::tArray));
 	try

@@ -40,10 +40,10 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-namespace RPC
+namespace Rpc
 {
-	class RPCEncoder;
-	class RPCDecoder;
+	class RpcEncoder;
+	class RpcDecoder;
 }
 
 namespace DeviceDescription
@@ -265,8 +265,8 @@ public:
 	void toPacket(PVariable value);
 private:
 	//Helpers
-	std::shared_ptr<BaseLib::RPC::RPCDecoder> _binaryDecoder;
-	std::shared_ptr<BaseLib::RPC::RPCEncoder> _binaryEncoder;
+	std::shared_ptr<BaseLib::Rpc::RpcDecoder> _binaryDecoder;
+	std::shared_ptr<BaseLib::Rpc::RpcEncoder> _binaryEncoder;
 };
 
 class Toggle : public ICast

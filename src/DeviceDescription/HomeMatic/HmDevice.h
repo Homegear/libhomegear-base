@@ -46,8 +46,8 @@
 #include "../../Systems/DeviceTypes.h"
 #include "HmLogicalParameter.h"
 #include "HmPhysicalParameter.h"
-#include "../../Encoding/RPCEncoder.h"
-#include "../../Encoding/RPCDecoder.h"
+#include "../../Encoding/RpcEncoder.h"
+#include "../../Encoding/RpcDecoder.h"
 
 using namespace rapidxml;
 
@@ -216,8 +216,8 @@ public:
 	virtual void adjustBitPosition(std::vector<uint8_t>& data);
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	std::shared_ptr<RPC::RPCDecoder> _binaryDecoder;
-	std::shared_ptr<RPC::RPCEncoder> _binaryEncoder;
+	std::shared_ptr<Rpc::RpcDecoder> _binaryDecoder;
+	std::shared_ptr<Rpc::RpcEncoder> _binaryEncoder;
 };
 
 class DeviceType

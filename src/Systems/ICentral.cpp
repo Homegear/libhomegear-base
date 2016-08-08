@@ -1006,10 +1006,10 @@ PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNum
 {
 	try
 	{
-		/*if(serialNumber == "BidCoS-RF" && (channel == 0 || channel == -1) && type == RPC::ParameterSet::Type::Enum::master)
+		/*if(serialNumber == "BidCoS-RF" && (channel == 0 || channel == -1) && type == Rpc::ParameterSet::Type::Enum::master)
 		{
 			PVariable paramset(new Variable(VariableType::rpcStruct));
-			paramset->structValue->insert(RPC::RPCStructElement("AES_KEY", PVariable(new Variable(1))));
+			paramset->structValue->insert(Rpc::RPCStructElement("AES_KEY", PVariable(new Variable(1))));
 			return paramset;
 		}*/
 		if(serialNumber == getSerialNumber() && (channel == 0 || channel == -1) && type == ParameterGroup::Type::Enum::config)
