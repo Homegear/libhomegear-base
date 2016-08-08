@@ -54,6 +54,7 @@ class LogicalBoolean;
 class LogicalDecimal;
 class LogicalEnumeration;
 class LogicalInteger;
+class LogicalInteger64;
 class LogicalString;
 class LogicalStruct;
 
@@ -63,6 +64,7 @@ typedef std::shared_ptr<LogicalBoolean> PLogicalBoolean;
 typedef std::shared_ptr<LogicalDecimal> PLogicalDecimal;
 typedef std::shared_ptr<LogicalEnumeration> PLogicalEnumeration;
 typedef std::shared_ptr<LogicalInteger> PLogicalInteger;
+typedef std::shared_ptr<LogicalInteger64> PLogicalInteger64;
 typedef std::shared_ptr<LogicalString> PLogicalString;
 typedef std::shared_ptr<LogicalStruct> PLogicalStruct;
 
@@ -85,7 +87,7 @@ class ILogical
 public:
 	struct Type
 	{
-		enum Enum { none = 0x00, tInteger = 0x01, tBoolean = 0x02, tString = 0x03, tFloat = 0x04, tEnum = 0x20, tAction = 0x30, tArray = 0x100, tStruct = 0x101 };
+		enum Enum { none = 0x00, tInteger = 0x01, tBoolean = 0x02, tString = 0x03, tFloat = 0x04, tEnum = 0x20, tAction = 0x30, tInteger64 = 0xD1, tArray = 0x100, tStruct = 0x101 };
 	};
 
 	ILogical(BaseLib::Obj* baseLib);
@@ -114,6 +116,23 @@ public:
 	LogicalInteger(BaseLib::Obj* baseLib);
 	LogicalInteger(BaseLib::Obj* baseLib, xml_node<>* node);
 	virtual ~LogicalInteger() {}
+	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
+	virtual std::shared_ptr<Variable> getDefaultValue();
+};
+
+class LogicalInteger64 : public ILogical
+{
+public:
+	int64_t minimumValue = -9223372036854775807ll - 1;
+	int64_t maximumValue = 9223372036854775807ll;
+	int64_t defaultValue = 0;
+	int64_t setToValueOnPairing = 0;
+	std::unordered_map<std::string, int64_t> specialValuesStringMap;
+	std::unordered_map<int64_t, std::string> specialValuesIntegerMap;
+
+	LogicalInteger64(BaseLib::Obj* baseLib);
+	LogicalInteger64(BaseLib::Obj* baseLib, xml_node<>* node);
+	virtual ~LogicalInteger64() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
 };

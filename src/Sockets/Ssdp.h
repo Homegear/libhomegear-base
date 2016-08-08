@@ -28,44 +28,60 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef XMLRPCENCODER_H_
-#define XMLRPCENCODER_H_
+#ifndef SSDP_H_
+#define SSDP_H_
 
-#include <memory>
-#include <list>
-
-#include "../Exception.h"
-#include "../Output/Output.h"
+#include "../Encoding/Http.h"
 #include "../Variable.h"
-#include "RapidXml/rapidxml_print.hpp"
 
-using namespace rapidxml;
+#include <string>
+#include <vector>
+#include <memory>
+#include <set>
 
 namespace BaseLib
 {
 
 class Obj;
+class FileDescriptor;
 
-namespace RPC
-{
-
-class XMLRPCEncoder
+class SsdpInfo
 {
 public:
-	XMLRPCEncoder(BaseLib::Obj* baseLib);
-	virtual ~XMLRPCEncoder() {}
-
-	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
+	SsdpInfo(std::string ip, PVariable info);
+	virtual ~SsdpInfo();
+	std::string ip();
+	const PVariable info();
 private:
-	BaseLib::Obj* _bl = nullptr;
-
-	void encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
-	void encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
-	void encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
+	std::string _ip;
+	PVariable _info;
 };
 
-}
+class Ssdp
+{
+public:
+	Ssdp(BaseLib::Obj* baseLib);
+	virtual ~Ssdp();
+
+	/**
+	 * Searches for SSDP devices and returns the IPv4 addresses.
+	 *
+	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
+	 * @param[in] timeout The time to wait for responses
+	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
+	 */
+	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices);
+private:
+	BaseLib::Obj* _bl = nullptr;
+	std::string _address;
+	int32_t _port = 1900;
+
+	void getAddress();
+	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
+	void processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations);
+	void getDeviceInfo(std::set<std::string>& locations, std::vector<SsdpInfo>& devices);
+	std::shared_ptr<FileDescriptor> getSocketDescriptor();
+};
+
 }
 #endif

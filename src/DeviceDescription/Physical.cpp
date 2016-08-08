@@ -75,6 +75,7 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
 				else baseLib->out.printWarning("Warning: Unknown endianess for \"parameter\\physical*\": " + nodeValue);
 			}
 			else if(nodeName == "list") list = Math::getNumber(nodeValue);
+			else if(nodeName == "address") address = Math::getNumber(nodeValue);
 			else if(nodeName == "index") index = Math::getDouble(nodeValue);
 			else if(nodeName == "size")
 			{

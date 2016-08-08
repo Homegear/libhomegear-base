@@ -41,7 +41,7 @@ namespace BaseLib
 
 class Obj;
 
-namespace RPC
+namespace Rpc
 {
 
 class JsonEncoder
