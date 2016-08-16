@@ -1873,8 +1873,11 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 
 			if(node)
 			{
-				attr = doc->allocate_attribute("groupId", doc->allocate_string(parameter->physical->groupId.c_str(), parameter->physical->groupId.size() + 1));
-				node->append_attribute(attr);
+				if(!parameter->physical->groupId.empty())
+				{
+					attr = doc->allocate_attribute("groupId", doc->allocate_string(parameter->physical->groupId.c_str(), parameter->physical->groupId.size() + 1));
+					node->append_attribute(attr);
+				}
 
 				if(parameter->physical->index != 0)
 				{
@@ -1887,6 +1890,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				{
 					tempString = Math::toString(parameter->physical->size, 1);
 					xml_node<>* subnode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(subnode);
+				}
+
+				if(parameter->physical->bitSize >= 0)
+				{
+					tempString = Math::toString(parameter->physical->bitSize);
+					xml_node<>* subnode = doc->allocate_node(node_element, "bitSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(subnode);
 				}
 
