@@ -82,6 +82,7 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
 				size = Math::getDouble(nodeValue);
 				sizeDefined = true;
 			}
+			else if(nodeName == "bitSize") bitSize = Math::getNumber(nodeValue);
 			else if(nodeName == "mask") mask = Math::getNumber(nodeValue);
 			else if(nodeName == "memoryIndex") memoryIndex = Math::getDouble(nodeValue);
 			else if(nodeName == "memoryIndexOperation")

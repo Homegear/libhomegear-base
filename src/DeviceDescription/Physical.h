@@ -89,6 +89,7 @@ public:
 	double index = 0;
 	bool sizeDefined = false;
 	double size = 1.0;
+	int32_t bitSize = -1;
 	int32_t mask = -1;
 	int32_t list = -1;
 	double memoryIndex = 0;
