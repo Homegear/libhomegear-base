@@ -267,6 +267,13 @@ void Settings::load(std::string filename)
 					if(_dataPath.back() != '/') _dataPath.push_back('/');
 					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
 				}
+				else if(name == "databasepath" && _dataPath.empty() && !value.empty())
+				{
+					_dataPath = value.substr(0, value.find_last_of("/") + 1);;
+					if(_dataPath.empty()) _dataPath = _bl->executablePath;
+					if(_dataPath.back() != '/') _dataPath.push_back('/');
+					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
+				}
 				else if(name == "datapathpermissions")
 				{
 					_dataPathPermissions = Math::getOctalNumber(value);
