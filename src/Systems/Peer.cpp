@@ -1600,18 +1600,22 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				element->structValue->insert(StructElement("WRITEABLE", std::shared_ptr<Variable>(new Variable(j->second->writeable))));
 				if(j->second->logical->type == ILogical::Type::tBoolean)
 				{
+					if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("BOOL")))));
 				}
 				else if(j->second->logical->type == ILogical::Type::tString)
 				{
+					if(value) value->type = VariableType::tString; //For some families/variables "convertFromPacket" returns wrong type
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRING")))));
 				}
 				else if(j->second->logical->type == ILogical::Type::tAction)
 				{
+					if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
 				}
 				else if(j->second->logical->type == ILogical::Type::tInteger)
 				{
+					if(value) value->type = VariableType::tInteger; //For some families/variables "convertFromPacket" returns wrong type
 					LogicalInteger* parameter = (LogicalInteger*)j->second->logical.get();
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER")))));
 					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
@@ -1632,6 +1636,7 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				}
 				else if(j->second->logical->type == ILogical::Type::tInteger64)
 				{
+					if(value) value->type = VariableType::tInteger64; //For some families/variables "convertFromPacket" returns wrong type
 					LogicalInteger64* parameter = (LogicalInteger64*)j->second->logical.get();
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER64")))));
 					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
@@ -1652,6 +1657,7 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				}
 				else if(j->second->logical->type == ILogical::Type::tEnum)
 				{
+					if(value) value->type = VariableType::tInteger; //For some families/variables "convertFromPacket" returns wrong type
 					LogicalEnumeration* parameter = (LogicalEnumeration*)j->second->logical.get();
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ENUM")))));
 					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
@@ -1666,6 +1672,7 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				}
 				else if(j->second->logical->type == ILogical::Type::tFloat)
 				{
+					if(value) value->type = VariableType::tFloat; //For some families/variables "convertFromPacket" returns wrong type
 					LogicalDecimal* parameter = (LogicalDecimal*)j->second->logical.get();
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("FLOAT")))));
 					element->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
@@ -1687,11 +1694,13 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 				else if(j->second->logical->type == ILogical::Type::tArray)
 				{
 					if(!clientInfo->initNewFormat) continue;
+					if(value) value->type = VariableType::tArray; //For some families/variables "convertFromPacket" returns wrong type
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ARRAY")))));
 				}
 				else if(j->second->logical->type == ILogical::Type::tStruct)
 				{
 					if(!clientInfo->initNewFormat) continue;
+					if(value) value->type = VariableType::tStruct; //For some families/variables "convertFromPacket" returns wrong type
 					element->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRUCT")))));
 				}
 				parameters->structValue->insert(StructElement(j->second->id, element));
