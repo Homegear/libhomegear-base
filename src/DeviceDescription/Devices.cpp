@@ -57,7 +57,7 @@ void Devices::load()
 {
 	try
 	{
-		std::string path = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family);
+		std::string path = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + '/';
 		load(path);
 	}
     catch(const std::exception& ex)
@@ -80,6 +80,7 @@ void Devices::load(std::string& xmlPath)
 	{
 		_devices.clear();
 		std::string deviceDir(xmlPath);
+		if(deviceDir.back() != '/') deviceDir.push_back('/');
 		std::vector<std::string> files;
 		try
 		{
@@ -97,7 +98,7 @@ void Devices::load(std::string& xmlPath)
 		}
 		for(std::vector<std::string>::iterator i = files.begin(); i != files.end(); ++i)
 		{
-			std::string filename(deviceDir + "/" + *i);
+			std::string filename(deviceDir + *i);
 			std::shared_ptr<HomegearDevice> device = loadFile(filename);
 			if(device) _devices.push_back(device);
 		}
