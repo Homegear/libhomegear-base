@@ -2387,6 +2387,8 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
 				continue;
 			}
+			if(clientInfo->clientType == RpcClientType::ccu2 && !i->second->ccu2Visible) continue;
+
 			PVariable element;
 			if(type == ParameterGroup::Type::Enum::variables)
 			{
@@ -2476,6 +2478,8 @@ std::shared_ptr<Variable> Peer::getParamsetDescription(PRpcClientInfo clientInfo
 #ifdef CCU2
 				if(i->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
+			if(clientInfo->clientType == RpcClientType::ccu2 && !i->second->ccu2Visible) continue;
+
 			description.reset(new Variable(VariableType::tStruct));
 
 			int32_t operations = 0;
