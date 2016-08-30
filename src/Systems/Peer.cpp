@@ -1576,6 +1576,8 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 #ifdef CCU2
 				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
+				if(clientInfo->clientType == RpcClientType::ccu2 && !j->second->ccu2Visible) continue;
+
 				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
 				if(valuesCentralIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
