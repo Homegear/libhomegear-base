@@ -1161,6 +1161,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 			}
 
+			if(!parameter->ccu2Visible)
+			{
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "ccu2Visible", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				propertiesNode->append_node(node);
+			}
+
 			xml_node<>* node = nullptr;
 			if(!parameter->casts.empty())
 			{

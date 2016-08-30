@@ -102,6 +102,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 				else if(propertyName == "formFieldType") formFieldType = propertyValue;
 				else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
 				else if(propertyName == "metadata") metadata = propertyValue;
+				else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
 				else if(propertyName == "casts")
 				{
 					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
