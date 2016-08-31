@@ -334,7 +334,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
-		if(_header.responseCode != 200) throw HttpException("Response code was: " + std::to_string(_header.responseCode));
+		if(_header.responseCode != 200) throw HttpException("Response code was: " + std::to_string(_header.responseCode), _header.responseCode);
 	}
 	else
 	{

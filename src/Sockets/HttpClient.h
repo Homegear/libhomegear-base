@@ -45,8 +45,13 @@ namespace BaseLib
  */
 class HttpClientException : public Exception
 {
+private:
+	int32_t _responseCode = -1;
 public:
 	HttpClientException(std::string message) : Exception(message) {}
+	HttpClientException(std::string message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
+
+	int32_t responseCode() { return _responseCode; }
 };
 
 /**
