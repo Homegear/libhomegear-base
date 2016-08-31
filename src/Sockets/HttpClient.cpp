@@ -201,7 +201,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			if(!http.headerIsFinished() && (!strncmp(buffer, "401", 3) || !strncmp(&buffer[9], "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
 			{
 				_socketMutex.unlock();
-				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.");
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
 			}
 			if(!http.headerIsFinished() && !strncmp(&buffer[9], "200", 3) && !strstr(buffer, "\r\n\r\n") && !strstr(buffer, "\n\n"))
 			{
@@ -225,7 +225,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what(), ex.responseCode());
 			}
 			if(http.getContentSize() > 104857600 || http.getHeader().contentLength > 104857600)
 			{
