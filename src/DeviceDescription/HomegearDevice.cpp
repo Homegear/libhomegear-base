@@ -1231,6 +1231,48 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 					}
 
 					{
+						PIntegerOffset integerOffset;
+						integerOffset = std::dynamic_pointer_cast<IntegerOffset>(*i);
+						if(integerOffset)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "integerOffset");
+							node->append_node(castNode);
+
+							if(!integerOffset->directionToPacket)
+							{
+								xml_node<>* subnode = doc->allocate_node(node_element, "direction", doc->allocate_string("fromPacket", 11));
+								castNode->append_node(subnode);
+							}
+
+							tempString = std::to_string(integerOffset->offset);
+							xml_node<>* subnode = doc->allocate_node(node_element, integerOffset->addOffset ? "addOffset" : "subtractFromOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
+							continue;
+						}
+					}
+
+					{
+						PDecimalOffset decimalOffset;
+						decimalOffset = std::dynamic_pointer_cast<DecimalOffset>(*i);
+						if(decimalOffset)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "decimalOffset");
+							node->append_node(castNode);
+
+							if(!decimalOffset->directionToPacket)
+							{
+								xml_node<>* subnode = doc->allocate_node(node_element, "direction", doc->allocate_string("fromPacket", 11));
+								castNode->append_node(subnode);
+							}
+
+							tempString = std::to_string(decimalOffset->offset);
+							xml_node<>* subnode = doc->allocate_node(node_element, decimalOffset->addOffset ? "addOffset" : "subtractFromOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
+							continue;
+						}
+					}
+
+					{
 						PIntegerIntegerMap integerIntegerMap;
 						integerIntegerMap = std::dynamic_pointer_cast<IntegerIntegerMap>(*i);
 						if(integerIntegerMap)
@@ -1593,6 +1635,21 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 						{
 							xml_node<>* castNode = doc->allocate_node(node_element, "invert");
 							node->append_node(castNode);
+							continue;
+						}
+					}
+
+					{
+						PRound round;
+						round = std::dynamic_pointer_cast<Round>(*i);
+						if(round)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "round");
+							node->append_node(castNode);
+
+							tempString = std::to_string(round->decimalPlaces);
+							xml_node<>* subnode = doc->allocate_node(node_element, "decimalPlaces", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
 							continue;
 						}
 					}
