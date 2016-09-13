@@ -85,7 +85,23 @@ public:
 	 */
 	int32_t readChar(char& data, uint32_t timeout = 500000);
 
+	/**
+	 * Writes one line of data.
+	 * @param data The data to write. If data is not terminated by a new line character, it is appended.
+	 */
 	void writeLine(std::string& data);
+
+	/**
+	 * Writes binary data to the serial device.
+	 * @param data The data to write. It is written as is without any modification.
+	 */
+	void writeData(const std::vector<char>& data);
+
+	/**
+	 * Writes one character to the serial device.
+	 * @param data The (binary) character to write.
+	 */
+	void writeChar(char data);
 protected:
 	BaseLib::Obj* _bl = nullptr;
 	std::shared_ptr<FileDescriptor> _fileDescriptor;
@@ -98,7 +114,6 @@ protected:
 	int32_t _readThreadPriority = 0;
 	int32_t _handles = 0;
 
-	bool _stopped = true;
 	bool _stopReadThread = false;
 	std::mutex _readThreadMutex;
 	std::thread _readThread;

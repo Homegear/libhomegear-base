@@ -339,14 +339,14 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 				variable.reset(new Variable(integerValue));
 				if(isSigned && !value->empty() && value->size() <= 4)
 				{
-					int32_t byteIndex = value->size() - std::lround(std::ceil(physical->size));
-					if(byteIndex >= 0 && byteIndex < (signed)value->size())
+					int32_t byteSize = std::lround(std::ceil(physical->size));
+					if(byteSize > 0 && (signed)value->size() == byteSize)
 					{
 						int32_t bitSize = std::lround(physical->size * 10) % 10;
 						int32_t signPosition = 0;
 						if(bitSize == 0) signPosition = 7;
 						else signPosition = bitSize - 1;
-						if(value->at(byteIndex) & (1 << signPosition))
+						if(value->at(0) & (1 << signPosition))
 						{
 							int32_t bits = (std::lround(std::floor(physical->size)) * 8) + bitSize;
 							variable->integerValue -= (1 << bits);
@@ -384,7 +384,8 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
 	{
 		PVariable rpcValue;
 		if(logical->type == ILogical::Type::Enum::tInteger) rpcValue.reset(new Variable(Math::getNumber(value)));
-		if(logical->type == ILogical::Type::Enum::tEnum)
+		else if(logical->type == ILogical::Type::Enum::tInteger64) rpcValue.reset(new Variable(Math::getNumber64(value)));
+		else if(logical->type == ILogical::Type::Enum::tEnum)
 		{
 			if(Math::isNumber(value)) rpcValue.reset(new Variable(Math::getNumber(value)));
 			else //value is id of enum element
@@ -489,7 +490,7 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				if(variable->integerValue == 0)
 				{
 					if(variable->floatValue != 0) variable->integerValue = variable->floatValue;
-					if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64;
+					//else if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64; //Dangerous
 					else if(!variable->stringValue.empty()) variable->integerValue = Math::getNumber(variable->stringValue);
 				}
 				LogicalInteger* parameter = (LogicalInteger*)logical.get();
@@ -516,7 +517,7 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				if(variable->integerValue64 == 0)
 				{
 					if(variable->floatValue != 0) variable->integerValue64 = variable->floatValue;
-					if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
+					//if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
 					else if(!variable->stringValue.empty()) variable->integerValue64 = Math::getNumber(variable->stringValue);
 				}
 				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();
