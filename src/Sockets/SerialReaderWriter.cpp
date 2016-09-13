@@ -177,12 +177,11 @@ void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events)
 		if(fcntl(_fileDescriptor->descriptor, F_SETFL, flags | O_NONBLOCK) == -1) throw SerialReaderWriterException("Couldn't set device to non blocking mode: " + _device);
 	}
 
+	_stopReadThread = false;
 	if(events)
 	{
 		_readThreadMutex.lock();
 		_bl->threadManager.join(_readThread);
-		_stopped = false;
-		_stopReadThread = false;
 		if(_readThreadPriority > -1) _bl->threadManager.start(_readThread, true, _readThreadPriority, SCHED_FIFO, &SerialReaderWriter::readThread, this, parity, oddParity);
 		else _bl->threadManager.start(_readThread, true, &SerialReaderWriter::readThread, this, parity, oddParity);
 		_readThreadMutex.unlock();
@@ -194,7 +193,6 @@ void SerialReaderWriter::closeDevice()
 	_handles--;
 	if(_handles > 0) return;
 	_readThreadMutex.lock();
-	_stopped = true;
 	_stopReadThread = true;
 	_bl->threadManager.join(_readThread);
 	_readThreadMutex.unlock();
@@ -221,7 +219,7 @@ void SerialReaderWriter::createLockFile()
 		lockfileStream >> processID;
 		if(getpid() != processID && kill(processID, 0) == 0)
 		{
-			throw SerialReaderWriterException("COC device is in use: " + _device);
+			throw SerialReaderWriterException("Device is in use: " + _device);
 		}
 		unlink(_lockfile.c_str());
 		lockfileDescriptor = _bl->fileDescriptorManager.add(open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
@@ -265,11 +263,11 @@ int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 				return -1;
 		}
 		i = read(_fileDescriptor->descriptor, &data, 1);
-		if(i == -1)
+		if(i == -1 || i == 0)
 		{
-			if(errno == EAGAIN) continue;
+			if(i == -1 && errno == EAGAIN) continue;
 			_bl->fileDescriptorManager.close(_fileDescriptor);
-			continue;
+			return -1;
 		}
 		return 0;
 	}
@@ -343,6 +341,83 @@ void SerialReaderWriter::writeLine(std::string& data)
             {
                 if(errno == EAGAIN) continue;
                 _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
+                _sendMutex.unlock();
+                return;
+            }
+            bytesWritten += i;
+        }
+    }
+    catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _sendMutex.unlock();
+}
+
+void SerialReaderWriter::writeData(const std::vector<char>& data)
+{
+	try
+    {
+        if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
+        if(data.empty()) return;
+        int32_t bytesWritten = 0;
+        int32_t i;
+        _sendMutex.lock();
+        while(bytesWritten < (signed)data.size())
+        {
+        	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + HelperFunctions::getHexString(data));
+            i = write(_fileDescriptor->descriptor, &data[0] + bytesWritten, data.size() - bytesWritten);
+            if(i == -1)
+            {
+                if(errno == EAGAIN) continue;
+                _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
+                _sendMutex.unlock();
+                return;
+            }
+            bytesWritten += i;
+        }
+    }
+    catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _sendMutex.unlock();
+}
+
+void SerialReaderWriter::writeChar(char data)
+{
+	try
+    {
+        if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
+        int32_t bytesWritten = 0;
+        int32_t i;
+        _sendMutex.lock();
+        while(bytesWritten < 1)
+        {
+        	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + data);
+            i = write(_fileDescriptor->descriptor, &data, 1);
+            if(i == -1)
+            {
+                if(errno == EAGAIN) continue;
+                _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
+                _sendMutex.unlock();
+                return;
             }
             bytesWritten += i;
         }
