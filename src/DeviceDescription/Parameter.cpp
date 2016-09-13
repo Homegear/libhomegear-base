@@ -96,7 +96,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 				else if(propertyName == "service") { if(propertyValue == "true") service = true; }
 				else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
 				else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
-				else if(propertyName == "signed") { if(propertyValue == "true") isSigned = true; }
+				else if(propertyName == "signed") { isSignedSet = true; isSigned = (propertyValue == "true"); }
 				else if(propertyName == "control") control = propertyValue;
 				else if(propertyName == "unit") unit = propertyValue;
 				else if(propertyName == "formFieldType") formFieldType = propertyValue;
@@ -114,6 +114,8 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 						std::string castName(castNode->name());
 						if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, this)));
 						else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, this)));
+						else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, this)));
+						else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, this)));
 						else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, this)));
 						else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, this)));
 						else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, this)));
@@ -132,6 +134,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, this)));
 						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, this)));
 						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, this)));
+						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, this)));
 						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
 					}
@@ -265,12 +268,12 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 	if(logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min()) isSigned = true;
+		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
 	}
 	else if(logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* parameter = (LogicalInteger*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min()) isSigned = true;
+		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
 	}
 }
 
