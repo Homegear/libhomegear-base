@@ -311,7 +311,7 @@ std::string Io::sha512(std::string file)
 		gcry_md_hd_t stribogHandle = nullptr;
 		if((result = gcry_md_open(&stribogHandle, GCRY_MD_SHA512, 0)) != GPG_ERR_NO_ERROR)
 		{
-			_bl->out.printError("Error: Could not initialize SHA512 handle: " + _bl->hf.getGCRYPTError(result));
+			_bl->out.printError("Error: Could not initialize SHA512 handle: " + Security::Gcrypt::getError(result));
 			return "";
 		}
 
@@ -326,7 +326,7 @@ std::string Io::sha512(std::string file)
 		uint8_t* digest = gcry_md_read(stribogHandle, GCRY_MD_SHA512);
 		if(!digest)
 		{
-			_bl->out.printError("Error Could not generate SHA-512 of file: " + _bl->hf.getGCRYPTError(result));
+			_bl->out.printError("Error Could not generate SHA-512 of file: " + Security::Gcrypt::getError(result));
 			gcry_md_close(stribogHandle);
 			return "";
 		}
