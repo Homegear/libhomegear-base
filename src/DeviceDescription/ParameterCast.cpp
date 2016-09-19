@@ -1078,18 +1078,18 @@ Invert::Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : 
 void Invert::fromPacket(PVariable value)
 {
 	if(!value) return;
-	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(value->type == VariableType::tInteger)
+	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tInteger64)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
 		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tFloat)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
@@ -1099,18 +1099,18 @@ void Invert::fromPacket(PVariable value)
 void Invert::toPacket(PVariable value)
 {
 	if(!value) return;
-	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(value->type == VariableType::tInteger)
+	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tInteger64)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
 		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tFloat)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
