@@ -28,22 +28,22 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef CRYPT_H_
-#define CRYPT_H_
-
-#include <vector>
+#ifndef HASH_H_
+#define HASH_H_
 
 namespace BaseLib
 {
+namespace Security
+{
 
-class Crypt
+class Hash
 {
 public:
 	/**
 	 * Destructor.
 	 * Does nothing.
 	 */
-	virtual ~Crypt();
+	virtual ~Hash();
 
 	/**
 	 * Calculates the SHA1 of the passed binary data.
@@ -52,7 +52,7 @@ public:
 	 * @param[out] out A vector to store the calculated SHA1 in.
 	 * @return Returns "true" on success and "false" on error.
 	 */
-	static bool sha1(const std::vector<char>& in, std::vector<char>& out);
+	template<typename Data> static bool sha1(const Data& in, Data& out);
 
 	/**
 	 * Calculates the MD5 of the passed binary data.
@@ -61,15 +61,15 @@ public:
 	 * @param[out] out A vector to store the calculated MD5 in.
 	 * @return Returns "true" on success and "false" on error.
 	 */
-	static bool md5(const std::vector<char>& in, std::vector<char>& out);
+	template<typename Data> static bool md5(const Data& in, Data& out);
 protected:
 	/**
 	 * Constructor. It is protected, because the class only contains static methods.
 	 * It does nothing.
 	 */
-	Crypt();
+	Hash();
 };
 
 }
-
+}
 #endif

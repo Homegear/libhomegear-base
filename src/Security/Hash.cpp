@@ -28,24 +28,38 @@
  * files in the program, then also delete it here.
 */
 
-#include "Crypt.h"
 #include <gcrypt.h>
+#include "Hash.h"
+
+#include <vector>
+#include <cstdint>
 
 namespace BaseLib
 {
-	bool Crypt::sha1(const std::vector<char>& in, std::vector<char>& out)
-	{
-		out.clear();
-		out.resize(gcry_md_get_algo_dlen(GCRY_MD_SHA1));
-		gcry_md_hash_buffer(GCRY_MD_SHA1, &out[0], &in[0], in.size());
-		return true;
-	}
+namespace Security
+{
 
-	bool Crypt::md5(const std::vector<char>& in, std::vector<char>& out)
-	{
-		out.clear();
-		out.resize(gcry_md_get_algo_dlen(GCRY_MD_MD5));
-		gcry_md_hash_buffer(GCRY_MD_MD5, &out[0], &in[0], in.size());
-		return true;
-	}
+template<typename Data> bool Hash::sha1(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_SHA1));
+	gcry_md_hash_buffer(GCRY_MD_SHA1, &out[0], &in[0], in.size());
+	return true;
+}
+
+template bool Hash::sha1<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::sha1<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
+template<typename Data> bool Hash::md5(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_MD5));
+	gcry_md_hash_buffer(GCRY_MD_MD5, &out[0], &in[0], in.size());
+	return true;
+}
+
+template bool Hash::md5<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::md5<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
+}
 }
