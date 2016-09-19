@@ -55,6 +55,8 @@ BinaryPayload::BinaryPayload(BaseLib::Obj* baseLib, xml_node<>* node) : BinaryPa
 		else if(nodeName == "size") size = Math::getDouble(value);
 		else if(nodeName == "index2") index2 = Math::getDouble(value);
 		else if(nodeName == "size2") size2 = Math::getDouble(value);
+		else if(nodeName == "bitIndex") bitIndex = Math::getUnsignedNumber(value);
+		else if(nodeName == "bitSize") bitSize = Math::getUnsignedNumber(value);
 		else if(nodeName == "index2Offset") index2Offset = Math::getNumber(value);
 		else if(nodeName == "constValueInteger") constValueInteger = Math::getNumber(value);
 		else if(nodeName == "constValueDecimal") constValueDecimal = Math::getDouble(value);
