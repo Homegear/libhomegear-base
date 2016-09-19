@@ -689,7 +689,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if((*j)->index != 0 && (*j)->size != 1.0)
+					if((*j)->size != 1.0)
 					{
 						tempString = Math::toString((*j)->size, 1);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
@@ -703,7 +703,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if((*j)->index2 != 0 && (*j)->size2 != 0)
+					if((*j)->size2 != 0)
 					{
 						tempString = Math::toString((*j)->size2, 1);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
@@ -714,6 +714,20 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 					{
 						tempString = std::to_string((*j)->index2Offset);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2Offset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->bitIndex != 0)
+					{
+						tempString = Math::toString((*j)->bitIndex, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "bitIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->bitSize != 0)
+					{
+						tempString = Math::toString((*j)->bitSize, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "bitSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
