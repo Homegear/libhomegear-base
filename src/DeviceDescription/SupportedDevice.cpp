@@ -68,7 +68,7 @@ SupportedDevice::SupportedDevice(BaseLib::Obj* baseLib, xml_node<>* node, Homege
 	}
 }
 
-bool SupportedDevice::matches(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion)
+bool SupportedDevice::matches(uint32_t typeNumber, uint32_t firmwareVersion)
 {
 	try
 	{
@@ -77,8 +77,7 @@ bool SupportedDevice::matches(Systems::LogicalDeviceType deviceType, uint32_t fi
 			_bl->out.printError("Error: Variable _device in SupportedDevice is nullptr.");
 			return false;
 		}
-		if(deviceType.family() != _device->family) return false;
-		if(deviceType.type() == typeNumber && checkFirmwareVersion(firmwareVersion)) return true;
+		if(typeNumber == this->typeNumber && checkFirmwareVersion(firmwareVersion)) return true;
 	}
 	catch(const std::exception& ex)
 	{
@@ -95,7 +94,7 @@ bool SupportedDevice::matches(Systems::LogicalDeviceType deviceType, uint32_t fi
     return false;
 }
 
-bool SupportedDevice::matches(int32_t family, std::string typeId)
+bool SupportedDevice::matches(const std::string& typeId)
 {
 	try
 	{
@@ -104,7 +103,6 @@ bool SupportedDevice::matches(int32_t family, std::string typeId)
 			_bl->out.printError("Error: Variable _device in SupportedDevice is nullptr.");
 			return false;
 		}
-		if(family != _device->family) return false;
 		if(id == typeId) return true;
 	}
 	catch(const std::exception& ex)

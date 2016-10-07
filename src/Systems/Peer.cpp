@@ -692,7 +692,7 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
 
 		if(savePeer)
 		{
-			uint64_t result = _bl->db->savePeer(_peerID, _parentID, _address, _serialNumber, _deviceType.type());
+			uint64_t result = _bl->db->savePeer(_peerID, _parentID, _address, _serialNumber, _deviceType);
 			if(_peerID == 0 && result > 0) setID(result);
 		}
 		if(variables || centralConfig) _bl->db->createSavepointAsynchronous(savepointName);
@@ -829,8 +829,8 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 				_firmwareVersion = row->second.at(3)->intValue;
 				break;
 			case 1002:
-				_deviceType = BaseLib::Systems::LogicalDeviceType(central->deviceFamily(), row->second.at(3)->intValue);
-				if(_deviceType.type() == (uint32_t)0xFFFFFFFF)
+				_deviceType = row->second.at(3)->intValue;
+				if(_deviceType == (uint32_t)0xFFFFFFFF)
 				{
 					_bl->out.printError("Error loading peer " + std::to_string(_peerID) + ": Device type unknown: 0x" + BaseLib::HelperFunctions::getHexString(row->second.at(3)->intValue) + " Firmware version: " + std::to_string(_firmwareVersion));
 				}
@@ -872,7 +872,7 @@ void Peer::saveVariables()
 		if(_peerID == 0 || isTeam()) return;
 		saveVariable(1000, _name);
 		saveVariable(1001, _firmwareVersion);
-		saveVariable(1002, (int32_t)_deviceType.type());
+		saveVariable(1002, (int32_t)_deviceType);
 		saveVariable(1003, _firmwareVersionString);
 		saveVariable(1004, _ip);
 		saveVariable(1005, _idString);
@@ -1362,7 +1362,7 @@ void Peer::initializeTypeString()
 		}
 		PSupportedDevice rpcDeviceType = _rpcDevice->getType(_deviceType, _firmwareVersion);
 		if(rpcDeviceType) _rpcTypeString = rpcDeviceType->id;
-		else if(_deviceType.type() == 0) _rpcTypeString = "HM-RCV-50"; //Central
+		else if(_deviceType == 0) _rpcTypeString = "HM-RCV-50"; //Central
 		else if(!_rpcDevice->supportedDevices.empty()) _rpcTypeString = _rpcDevice->supportedDevices.at(0)->id;
 	}
 	catch(const std::exception& ex)
@@ -1388,11 +1388,11 @@ std::shared_ptr<Variable> Peer::getAllConfig(PRpcClientInfo clientInfo)
 		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 		std::shared_ptr<Variable> config(new Variable(VariableType::tStruct));
 
-		config->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+		config->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_central->deviceFamily()))));
 		config->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
 		config->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
 		config->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
-		config->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType.type()))));
+		config->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType))));
 		config->structValue->insert(StructElement("NAME", std::shared_ptr<Variable>(new Variable(_name))));
 		std::shared_ptr<Variable> channels(new Variable(VariableType::tArray));
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
@@ -1542,11 +1542,11 @@ std::shared_ptr<Variable> Peer::getAllValues(PRpcClientInfo clientInfo, bool ret
 		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 		std::shared_ptr<Variable> values(new Variable(VariableType::tStruct));
 
-		values->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+		values->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_central->deviceFamily()))));
 		values->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
 		values->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
 		values->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
-		values->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType.type()))));
+		values->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType))));
 		values->structValue->insert(StructElement("NAME", std::shared_ptr<Variable>(new Variable(_name))));
 		std::shared_ptr<Variable> channels(new Variable(VariableType::tArray));
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
@@ -1777,7 +1777,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 		{
 			BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
 
-			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_central->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber))));
 			if(supportedDevice && !supportedDevice->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(supportedDevice->longDescription))));
@@ -1845,7 +1845,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 
 			if(!_rpcTypeString.empty() && (fields.empty() || fields.find("TYPE") != fields.end())) description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(_rpcTypeString))));
 
-			if(fields.empty() || fields.find("TYPE_ID") != fields.end()) description->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType.type()))));
+			if(fields.empty() || fields.find("TYPE_ID") != fields.end()) description->structValue->insert(StructElement("TYPE_ID", std::shared_ptr<Variable>(new Variable(_deviceType))));
 
 			if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", std::shared_ptr<Variable>(new Variable(_rpcDevice->version))));
 
@@ -1858,7 +1858,7 @@ std::shared_ptr<Variable> Peer::getDeviceDescription(PRpcClientInfo clientInfo, 
 			if(!rpcFunction->countFromVariable.empty() && configCentral[0].find(rpcFunction->countFromVariable) != configCentral[0].end() && configCentral[0][rpcFunction->countFromVariable].data.size() > 0 && channel >= (int32_t)rpcFunction->channel + configCentral[0][rpcFunction->countFromVariable].data.at(configCentral[0][rpcFunction->countFromVariable].data.size() - 1)) return Variable::createError(-2, "Channel index larger than defined.");
 			if(!rpcFunction->visible) return description;
 
-			if(fields.empty() || fields.find("FAMILYID") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_deviceType.family()))));
+			if(fields.empty() || fields.find("FAMILYID") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_central->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("CHANNEL") != fields.end()) description->structValue->insert(StructElement("CHANNEL", std::shared_ptr<Variable>(new Variable(channel))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", std::shared_ptr<Variable>(new Variable(_serialNumber + ":" + std::to_string(channel)))));
