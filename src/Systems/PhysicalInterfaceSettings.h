@@ -68,6 +68,7 @@ public:
 	std::string host;
 	std::string port;
 	std::string portKeepAlive;
+	uint32_t address = 0;
 	std::string listenIp;
 	std::string listenPort;
 	std::string lanKey;

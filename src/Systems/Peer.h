@@ -272,7 +272,7 @@ protected:
 	//In table variables:
 	int32_t _firmwareVersion = 0;
 	std::string _firmwareVersionString;
-	uint32_t _deviceType;
+	uint32_t _deviceType = 0;
 	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
 	std::string _name;
