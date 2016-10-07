@@ -668,6 +668,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->portKeepAlive = value;
 			_bl->out.printDebug("Debug: PortKeepAlive set to " + settings->portKeepAlive);
 		}
+		else if(name == "address")
+		{
+			settings->address = BaseLib::Math::getNumber(value);
+			_bl->out.printDebug("Debug: address set to " + std::to_string(settings->address));
+		}
 		else if(name == "oldrfkey")
 		{
 			_bl->out.printError("Error: OldRFKey now needs to be set in section [General] of homematicbidcos.conf.");
