@@ -1202,7 +1202,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
 				if(!*i) continue;
-				if((*i)->getDeviceType().type() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)(*i)->getID())));
+				if((*i)->getDeviceType() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)(*i)->getID())));
 			}
 		}
 		else if(filterType == 4) //Type string

@@ -104,19 +104,18 @@ void HomegearDevice::setDynamicChannelCount(int32_t value)
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib)
 {
 	_bl = baseLib;
-	family = deviceFamily;
 	runProgram.reset(new RunProgram(baseLib));
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, xml_node<>* node) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, xml_node<>* node) : HomegearDevice(baseLib)
 {
 	if(node) parseXML(node);
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib)
 {
 	try
 	{
@@ -136,7 +135,7 @@ HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std:
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib)
 {
 	try
 	{
@@ -2493,7 +2492,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 			}
 			else if(nodeName == "group")
 			{
-				group.reset(new HomegearDevice(_bl, family, subNode));
+				group.reset(new HomegearDevice(_bl, subNode));
 			}
 			else _bl->out.printWarning("Warning: Unknown node name for \"homegearDevice\": " + nodeName);
 		}
@@ -2605,13 +2604,13 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
     }
 }
 
-PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType)
+PSupportedDevice HomegearDevice::getType(uint32_t typeNumber)
 {
 	try
 	{
 		for(SupportedDevices::iterator j = supportedDevices.begin(); j != supportedDevices.end(); ++j)
 		{
-			if((*j)->matches(deviceType, -1)) return *j;
+			if((*j)->matches(typeNumber, -1)) return *j;
 		}
 	}
 	catch(const std::exception& ex)
@@ -2629,13 +2628,13 @@ PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType)
 	return PSupportedDevice();
 }
 
-PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion)
+PSupportedDevice HomegearDevice::getType(uint32_t typeNumber, int32_t firmwareVersion)
 {
 	try
 	{
 		for(SupportedDevices::iterator j = supportedDevices.begin(); j != supportedDevices.end(); ++j)
 		{
-			if((*j)->matches(deviceType, firmwareVersion)) return *j;
+			if((*j)->matches(typeNumber, firmwareVersion)) return *j;
 		}
 	}
 	catch(const std::exception& ex)
