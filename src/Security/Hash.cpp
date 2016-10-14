@@ -28,48 +28,38 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef CRYPT_H_
-#define CRYPT_H_
+#include <gcrypt.h>
+#include "Hash.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace BaseLib
 {
-
-class Crypt
+namespace Security
 {
-public:
-	/**
-	 * Destructor.
-	 * Does nothing.
-	 */
-	virtual ~Crypt();
 
-	/**
-	 * Calculates the SHA1 of the passed binary data.
-	 *
-	 * @param[in] in The data to calculate the SHA1 for.
-	 * @param[out] out A vector to store the calculated SHA1 in.
-	 * @return Returns "true" on success and "false" on error.
-	 */
-	static bool sha1(const std::vector<char>& in, std::vector<char>& out);
-
-	/**
-	 * Calculates the MD5 of the passed binary data.
-	 *
-	 * @param[in] in The data to calculate the MD5 for.
-	 * @param[out] out A vector to store the calculated MD5 in.
-	 * @return Returns "true" on success and "false" on error.
-	 */
-	static bool md5(const std::vector<char>& in, std::vector<char>& out);
-protected:
-	/**
-	 * Constructor. It is protected, because the class only contains static methods.
-	 * It does nothing.
-	 */
-	Crypt();
-};
-
+template<typename Data> bool Hash::sha1(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_SHA1));
+	gcry_md_hash_buffer(GCRY_MD_SHA1, &out[0], &in[0], in.size());
+	return true;
 }
 
-#endif
+template bool Hash::sha1<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::sha1<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
+template<typename Data> bool Hash::md5(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_MD5));
+	gcry_md_hash_buffer(GCRY_MD_MD5, &out[0], &in[0], in.size());
+	return true;
+}
+
+template bool Hash::md5<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::md5<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
+}
+}

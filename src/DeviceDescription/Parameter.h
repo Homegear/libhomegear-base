@@ -101,6 +101,7 @@ public:
 	bool service = false;
 	bool sticky = false;
 	bool transform = false;
+	bool isSignedSet = false;
 	bool isSigned = false;
 	std::string control;
 	std::string unit;

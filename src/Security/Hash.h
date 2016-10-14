@@ -28,30 +28,48 @@
  * files in the program, then also delete it here.
 */
 
-#include "DeviceTypes.h"
+#ifndef HASH_H_
+#define HASH_H_
 
 namespace BaseLib
 {
-namespace Systems
+namespace Security
 {
 
-LogicalDeviceType::LogicalDeviceType(int32_t family, uint32_t type)
+class Hash
 {
-	_family = family;
-	_type = type;
-}
+public:
+	/**
+	 * Destructor.
+	 * Does nothing.
+	 */
+	virtual ~Hash();
 
-bool LogicalDeviceType::operator==(LogicalDeviceType& other)
-{
-	if(other.family() == _family && other.type() == _type) return true;
-	return false;
-}
+	/**
+	 * Calculates the SHA1 of the passed binary data.
+	 *
+	 * @param[in] in The data to calculate the SHA1 for.
+	 * @param[out] out A vector to store the calculated SHA1 in.
+	 * @return Returns "true" on success and "false" on error.
+	 */
+	template<typename Data> static bool sha1(const Data& in, Data& out);
 
-bool LogicalDeviceType::operator!=(LogicalDeviceType& other)
-{
-	if(other.family() != _family || other.type() != _type) return true;
-	return false;
-}
+	/**
+	 * Calculates the MD5 of the passed binary data.
+	 *
+	 * @param[in] in The data to calculate the MD5 for.
+	 * @param[out] out A vector to store the calculated MD5 in.
+	 * @return Returns "true" on success and "false" on error.
+	 */
+	template<typename Data> static bool md5(const Data& in, Data& out);
+protected:
+	/**
+	 * Constructor. It is protected, because the class only contains static methods.
+	 * It does nothing.
+	 */
+	Hash();
+};
 
 }
 }
+#endif

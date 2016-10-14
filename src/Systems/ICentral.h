@@ -93,7 +93,7 @@ public:
 	virtual uint64_t getId() { return _deviceId; }
     virtual std::string getSerialNumber() { return _serialNumber; }
 	virtual std::string handleCliCommand(std::string command) { return ""; }
-	void getPeers(std::vector<std::shared_ptr<Peer>>& peers, std::shared_ptr<std::set<uint64_t>> knownDevices = std::shared_ptr<std::set<uint64_t>>());
+	std::vector<std::shared_ptr<Peer>> getPeers();
 	std::shared_ptr<Peer> getPeer(int32_t address);
     std::shared_ptr<Peer> getPeer(uint64_t id);
     std::shared_ptr<Peer> getPeer(std::string serialNumber);

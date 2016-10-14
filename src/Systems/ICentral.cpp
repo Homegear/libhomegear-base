@@ -148,16 +148,17 @@ void ICentral::dispose(bool wait)
 	}
 // }}}
 
-void ICentral::getPeers(std::vector<std::shared_ptr<Peer>>& peers, std::shared_ptr<std::set<uint64_t>> knownDevices)
+std::vector<std::shared_ptr<Peer>> ICentral::getPeers()
 {
 	try
 	{
-		_peersMutex.lock();
+		std::vector<std::shared_ptr<Peer>> peers;
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
 		for(std::map<uint64_t, std::shared_ptr<Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 		{
-			if(knownDevices && knownDevices->find(i->first) != knownDevices->end()) continue; //only add unknown devices
 			peers.push_back(i->second);
 		}
+		return peers;
 	}
 	catch(const std::exception& ex)
     {
@@ -171,18 +172,18 @@ void ICentral::getPeers(std::vector<std::shared_ptr<Peer>>& peers, std::shared_p
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
+    return std::vector<std::shared_ptr<Peer>>();
 }
 
 std::shared_ptr<Peer> ICentral::getPeer(int32_t address)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peers.find(address) != _peers.end())
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		std::unordered_map<int32_t, std::shared_ptr<Peer>>::iterator peerIterator = _peers.find(address);
+		if(peerIterator != _peers.end())
 		{
-			std::shared_ptr<Peer> peer(_peers.at(address));
-			_peersMutex.unlock();
+			std::shared_ptr<Peer> peer = peerIterator->second;
 			return peer;
 		}
 	}
@@ -198,7 +199,6 @@ std::shared_ptr<Peer> ICentral::getPeer(int32_t address)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return std::shared_ptr<Peer>();
 }
 
@@ -206,11 +206,11 @@ std::shared_ptr<Peer> ICentral::getPeer(uint64_t id)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peersById.find(id) != _peersById.end())
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		std::map<uint64_t, std::shared_ptr<Peer>>::iterator peerIterator = _peersById.find(id);
+		if(peerIterator != _peersById.end())
 		{
-			std::shared_ptr<Peer> peer(_peersById.at(id));
-			_peersMutex.unlock();
+			std::shared_ptr<Peer> peer = peerIterator->second;
 			return peer;
 		}
 	}
@@ -226,7 +226,6 @@ std::shared_ptr<Peer> ICentral::getPeer(uint64_t id)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return std::shared_ptr<Peer>();
 }
 
@@ -234,11 +233,11 @@ std::shared_ptr<Peer> ICentral::getPeer(std::string serialNumber)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peersBySerial.find(serialNumber) != _peersBySerial.end())
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		std::unordered_map<std::string, std::shared_ptr<Peer>>::iterator peerIterator = _peersBySerial.find(serialNumber);
+		if(peerIterator != _peersBySerial.end())
 		{
-			std::shared_ptr<Peer> peer(_peersBySerial.at(serialNumber));
-			_peersMutex.unlock();
+			std::shared_ptr<Peer> peer = peerIterator->second;
 			return peer;
 		}
 	}
@@ -254,7 +253,6 @@ std::shared_ptr<Peer> ICentral::getPeer(std::string serialNumber)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return std::shared_ptr<Peer>();
 }
 
@@ -267,12 +265,8 @@ bool ICentral::peerExists(int32_t address)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peers.find(address) != _peers.end())
-		{
-			_peersMutex.unlock();
-			return true;
-		}
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		if(_peers.find(address) != _peers.end()) return true;
 	}
 	catch(const std::exception& ex)
     {
@@ -286,7 +280,6 @@ bool ICentral::peerExists(int32_t address)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return false;
 }
 
@@ -294,12 +287,8 @@ bool ICentral::peerExists(uint64_t id)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peersById.find(id) != _peersById.end())
-		{
-			_peersMutex.unlock();
-			return true;
-		}
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		if(_peersById.find(id) != _peersById.end()) return true;
 	}
 	catch(const std::exception& ex)
     {
@@ -313,7 +302,6 @@ bool ICentral::peerExists(uint64_t id)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return false;
 }
 
@@ -321,12 +309,8 @@ bool ICentral::peerExists(std::string serialNumber)
 {
 	try
 	{
-		_peersMutex.lock();
-		if(_peersBySerial.find(serialNumber) != _peersBySerial.end())
-		{
-			_peersMutex.unlock();
-			return true;
-		}
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		if(_peersBySerial.find(serialNumber) != _peersBySerial.end()) return true;
 	}
 	catch(const std::exception& ex)
     {
@@ -340,7 +324,6 @@ bool ICentral::peerExists(std::string serialNumber)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _peersMutex.unlock();
     return false;
 }
 
@@ -350,12 +333,16 @@ void ICentral::setPeerId(uint64_t oldPeerId, uint64_t newPeerId)
 	{
 		std::shared_ptr<Peer> peer = getPeer(oldPeerId);
 		if(!peer) return;
-		std::lock_guard<std::mutex> peersGuard(_peersMutex);
-		if(_peersById.find(oldPeerId) != _peersById.end()) _peersById.erase(oldPeerId);
-		_peersById[newPeerId] = peer;
-		for(std::map<uint64_t, std::shared_ptr<Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 		{
-			i->second->updatePeer(oldPeerId, newPeerId);
+			std::lock_guard<std::mutex> peersGuard(_peersMutex);
+			if(_peersById.find(oldPeerId) != _peersById.end()) _peersById.erase(oldPeerId);
+			_peersById[newPeerId] = peer;
+		}
+
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+		{
+			(*i)->updatePeer(oldPeerId, newPeerId);
 		}
 	}
     catch(const std::exception& ex)
@@ -381,8 +368,7 @@ void ICentral::homegearStarted()
 {
 	try
 	{
-		std::vector<std::shared_ptr<Peer>> peers;
-		getPeers(peers);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 		{
 			(*i)->homegearStarted();
@@ -406,8 +392,7 @@ void ICentral::homegearShuttingDown()
 {
 	try
 	{
-		std::vector<std::shared_ptr<Peer>> peers;
-		getPeers(peers);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 		{
 			(*i)->homegearShuttingDown();
@@ -623,9 +608,8 @@ PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId)
 		}
 		else
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
 			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -671,9 +655,8 @@ PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, boo
 		}
 		else
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
 			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -930,9 +913,8 @@ PVariable ICentral::getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t
 		{
 			try
 			{
-				std::vector<std::shared_ptr<Peer>> peers;
 				//Copy all peers first, because getLinks takes very long and we don't want to lock _peersMutex too long
-				getPeers(peers);
+				std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 				for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 				{
@@ -1215,21 +1197,17 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		else if(filterType == 3) //Type id
 		{
 			uint32_t type = (uint32_t)Math::getNumber(filterValue);
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
 				if(!*i) continue;
-				if((*i)->getDeviceType().type() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)(*i)->getID())));
+				if((*i)->getDeviceType() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)(*i)->getID())));
 			}
 		}
 		else if(filterType == 4) //Type string
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1239,9 +1217,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		}
 		else if(filterType == 5) //Name
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1251,9 +1227,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		}
 		else if(filterType == 6) //Pending config
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1263,9 +1237,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		}
 		else if(filterType == 7) //Unreachable
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1275,9 +1247,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		}
 		else if(filterType == 8) //Reachable
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1287,9 +1257,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
 		}
 		else if(filterType == 9) //Low battery
 		{
-			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-			getPeers(peers);
+			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
@@ -1364,9 +1332,7 @@ PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId)
 {
 	try
 	{
-		std::vector<std::shared_ptr<Peer>> peers;
-		//Copy all peers first, because getServiceMessages takes very long and we don't want to lock _peersMutex too long
-		getPeers(peers);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 		PVariable serviceMessages(new Variable(VariableType::tArray));
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
@@ -1451,9 +1417,7 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
 	{
 		PVariable array(new Variable(VariableType::tArray));
 
-		std::vector<std::shared_ptr<Peer>> peers;
-		//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
-		getPeers(peers, knownDevices);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 		{
@@ -1513,9 +1477,7 @@ PVariable ICentral::rssiInfo(PRpcClientInfo clientInfo)
 	{
 		PVariable response(new Variable(VariableType::tStruct));
 
-		std::vector<std::shared_ptr<Peer>> peers;
-		//Copy all peers first, because rssiInfo takes very long and we don't want to lock _peersMutex too long
-		getPeers(peers);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 		{

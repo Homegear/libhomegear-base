@@ -43,7 +43,6 @@
 
 #include "../../Systems/Packet.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
-#include "../../Systems/DeviceTypes.h"
 #include "HmLogicalParameter.h"
 #include "HmPhysicalParameter.h"
 #include "../../Encoding/RpcEncoder.h"
@@ -243,7 +242,7 @@ public:
 
 	virtual bool matches(int32_t family, std::shared_ptr<Systems::Packet> packet);
 	virtual bool matches(int32_t family, std::string typeID);
-	virtual bool matches(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion);
+	virtual bool matches(uint32_t typeNumber, uint32_t firmwareVersion);
 	virtual bool checkFirmwareVersion(int32_t version);
 protected:
 	BaseLib::Obj* _bl = nullptr;
@@ -467,7 +466,7 @@ public:
 	Device(BaseLib::Obj* baseLib, int32_t family);
 	Device(BaseLib::Obj* baseLib, int32_t family, std::string xmlFilename);
 	virtual ~Device();
-	virtual std::shared_ptr<DeviceType> getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion);
+	virtual std::shared_ptr<DeviceType> getType(uint32_t typeNumber, int32_t firmwareVersion);
 	virtual int32_t getCountFromSysinfo() { return _countFromSysinfo; }
 	virtual int32_t getCountFromSysinfo(std::shared_ptr<Systems::Packet> packet);
 	virtual void setCountFromSysinfo(int32_t countFromSysinfo);

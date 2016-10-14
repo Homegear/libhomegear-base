@@ -105,6 +105,38 @@ public:
 	int32_t offset = 0;
 };
 
+class IntegerOffset : public ICast
+{
+public:
+	IntegerOffset(BaseLib::Obj* baseLib);
+	IntegerOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	virtual ~IntegerOffset() {}
+
+	void fromPacket(PVariable value);
+	void toPacket(PVariable value);
+
+	//Elements
+	bool directionToPacket = true;
+	bool addOffset = false;
+	int32_t offset = 0;
+};
+
+class DecimalOffset : public ICast
+{
+public:
+	DecimalOffset(BaseLib::Obj* baseLib);
+	DecimalOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	virtual ~DecimalOffset() {}
+
+	void fromPacket(PVariable value);
+	void toPacket(PVariable value);
+
+	//Elements
+	bool directionToPacket = true;
+	bool addOffset = false;
+	double offset = 0;
+};
+
 class IntegerIntegerMap : public ICast
 {
 public:
@@ -357,6 +389,20 @@ public:
 	void toPacket(PVariable value);
 };
 
+class Round : public ICast
+{
+public:
+	Round(BaseLib::Obj* baseLib);
+	Round(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	virtual ~Round() {}
+
+	void fromPacket(PVariable value);
+	void toPacket(PVariable value);
+
+	//Elements
+	int32_t decimalPlaces = 1;
+};
+
 class Generic : public ICast
 {
 public:
@@ -382,6 +428,8 @@ typedef std::shared_ptr<DecimalConfigTime> PDecimalConfigTime;
 typedef std::shared_ptr<DecimalIntegerScale> PDecimalIntegerScale;
 typedef std::shared_ptr<IntegerIntegerMap> PIntegerIntegerMap;
 typedef std::shared_ptr<IntegerIntegerScale> PIntegerIntegerScale;
+typedef std::shared_ptr<IntegerOffset> PIntegerOffset;
+typedef std::shared_ptr<DecimalOffset> PDecimalOffset;
 typedef std::shared_ptr<IntegerTinyFloat> PIntegerTinyFloat;
 typedef std::shared_ptr<OptionString> POptionString;
 typedef std::shared_ptr<OptionInteger> POptionInteger;
@@ -393,6 +441,7 @@ typedef std::shared_ptr<StringReplace> PStringReplace;
 typedef std::shared_ptr<HexStringByteArray> PHexStringByteArray;
 typedef std::shared_ptr<TimeStringSeconds> PTimeStringSeconds;
 typedef std::shared_ptr<Invert> PInvert;
+typedef std::shared_ptr<Round> PRound;
 typedef std::shared_ptr<Generic> PGeneric;
 
 }

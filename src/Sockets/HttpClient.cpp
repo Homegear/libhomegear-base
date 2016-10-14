@@ -129,7 +129,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 		}
 
 		ssize_t receivedBytes;
-		int32_t temp = 0;
 
 		int32_t bufferPos = 0;
 		int32_t bufferMax = 4096;
@@ -157,25 +156,28 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 
 			try
 			{
-				if(bufferPos > bufferMax - 1) bufferPos = 0;
+				if(bufferPos > bufferMax - 1)
+				{
+					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
+					bufferPos = 0;
+				}
 				receivedBytes = _socket->proofread(buffer + bufferPos, bufferMax - bufferPos);
 
 				//Some clients send only one byte in the first packet
 				if(receivedBytes == 1 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer + bufferPos + 1, bufferMax - bufferPos - 1);
-				temp += receivedBytes;
 			}
 			catch(const BaseLib::SocketTimeOutException& ex)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
 			}
 			catch(const BaseLib::SocketClosedException& ex)
 			{
 				if(http.getContentSize() == 0)
 				{
 					_socketMutex.unlock();
-					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): " + ex.what());
 				}
 				else
 				{
@@ -187,10 +189,11 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
-				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what());
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
 			}
-			if(bufferPos + receivedBytes > bufferMax)
+			if(bufferPos + receivedBytes >= bufferMax)
 			{
+				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
 				bufferPos = 0;
 				continue;
 			}
@@ -202,11 +205,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			{
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
-			}
-			if(!http.headerIsFinished() && !strncmp(&buffer[9], "200", 3) && !strstr(buffer, "\r\n\r\n") && !strstr(buffer, "\n\n"))
-			{
-				bufferPos = receivedBytes;
-				continue;
 			}
 			receivedBytes = bufferPos + receivedBytes;
 			bufferPos = 0;

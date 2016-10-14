@@ -104,19 +104,18 @@ void HomegearDevice::setDynamicChannelCount(int32_t value)
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib)
 {
 	_bl = baseLib;
-	family = deviceFamily;
 	runProgram.reset(new RunProgram(baseLib));
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, xml_node<>* node) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, xml_node<>* node) : HomegearDevice(baseLib)
 {
 	if(node) parseXML(node);
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib)
 {
 	try
 	{
@@ -136,7 +135,7 @@ HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std:
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib, deviceFamily)
+HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib)
 {
 	try
 	{
@@ -689,7 +688,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if((*j)->index != 0 && (*j)->size != 1.0)
+					if((*j)->size != 1.0)
 					{
 						tempString = Math::toString((*j)->size, 1);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
@@ -703,7 +702,7 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
-					if((*j)->index2 != 0 && (*j)->size2 != 0)
+					if((*j)->size2 != 0)
 					{
 						tempString = Math::toString((*j)->size2, 1);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "size2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
@@ -714,6 +713,20 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 					{
 						tempString = std::to_string((*j)->index2Offset);
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "index2Offset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->bitIndex != 0)
+					{
+						tempString = Math::toString((*j)->bitIndex, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "bitIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->bitSize != 0)
+					{
+						tempString = Math::toString((*j)->bitSize, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "bitSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 						payloadNode->append_node(payloadElementNode);
 					}
 
@@ -1231,6 +1244,48 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 					}
 
 					{
+						PIntegerOffset integerOffset;
+						integerOffset = std::dynamic_pointer_cast<IntegerOffset>(*i);
+						if(integerOffset)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "integerOffset");
+							node->append_node(castNode);
+
+							if(!integerOffset->directionToPacket)
+							{
+								xml_node<>* subnode = doc->allocate_node(node_element, "direction", doc->allocate_string("fromPacket", 11));
+								castNode->append_node(subnode);
+							}
+
+							tempString = std::to_string(integerOffset->offset);
+							xml_node<>* subnode = doc->allocate_node(node_element, integerOffset->addOffset ? "addOffset" : "subtractFromOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
+							continue;
+						}
+					}
+
+					{
+						PDecimalOffset decimalOffset;
+						decimalOffset = std::dynamic_pointer_cast<DecimalOffset>(*i);
+						if(decimalOffset)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "decimalOffset");
+							node->append_node(castNode);
+
+							if(!decimalOffset->directionToPacket)
+							{
+								xml_node<>* subnode = doc->allocate_node(node_element, "direction", doc->allocate_string("fromPacket", 11));
+								castNode->append_node(subnode);
+							}
+
+							tempString = std::to_string(decimalOffset->offset);
+							xml_node<>* subnode = doc->allocate_node(node_element, decimalOffset->addOffset ? "addOffset" : "subtractFromOffset", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
+							continue;
+						}
+					}
+
+					{
 						PIntegerIntegerMap integerIntegerMap;
 						integerIntegerMap = std::dynamic_pointer_cast<IntegerIntegerMap>(*i);
 						if(integerIntegerMap)
@@ -1593,6 +1648,21 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 						{
 							xml_node<>* castNode = doc->allocate_node(node_element, "invert");
 							node->append_node(castNode);
+							continue;
+						}
+					}
+
+					{
+						PRound round;
+						round = std::dynamic_pointer_cast<Round>(*i);
+						if(round)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "round");
+							node->append_node(castNode);
+
+							tempString = std::to_string(round->decimalPlaces);
+							xml_node<>* subnode = doc->allocate_node(node_element, "decimalPlaces", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+							castNode->append_node(subnode);
 							continue;
 						}
 					}
@@ -2422,7 +2492,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 			}
 			else if(nodeName == "group")
 			{
-				group.reset(new HomegearDevice(_bl, family, subNode));
+				group.reset(new HomegearDevice(_bl, subNode));
 			}
 			else _bl->out.printWarning("Warning: Unknown node name for \"homegearDevice\": " + nodeName);
 		}
@@ -2534,13 +2604,13 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
     }
 }
 
-PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType)
+PSupportedDevice HomegearDevice::getType(uint32_t typeNumber)
 {
 	try
 	{
 		for(SupportedDevices::iterator j = supportedDevices.begin(); j != supportedDevices.end(); ++j)
 		{
-			if((*j)->matches(deviceType, -1)) return *j;
+			if((*j)->matches(typeNumber, -1)) return *j;
 		}
 	}
 	catch(const std::exception& ex)
@@ -2558,13 +2628,13 @@ PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType)
 	return PSupportedDevice();
 }
 
-PSupportedDevice HomegearDevice::getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion)
+PSupportedDevice HomegearDevice::getType(uint32_t typeNumber, int32_t firmwareVersion)
 {
 	try
 	{
 		for(SupportedDevices::iterator j = supportedDevices.begin(); j != supportedDevices.end(); ++j)
 		{
-			if((*j)->matches(deviceType, firmwareVersion)) return *j;
+			if((*j)->matches(typeNumber, firmwareVersion)) return *j;
 		}
 	}
 	catch(const std::exception& ex)

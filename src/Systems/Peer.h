@@ -155,8 +155,8 @@ public:
 	virtual void setFirmwareVersion(int32_t value) { _firmwareVersion = value; saveVariable(1001, value); }
 	virtual std::string getFirmwareVersionString() { return _firmwareVersionString; }
 	virtual void setFirmwareVersionString(std::string value) { _firmwareVersionString = value; saveVariable(1003, value); }
-	virtual LogicalDeviceType getDeviceType() { return _deviceType; }
-	virtual void setDeviceType(LogicalDeviceType value) { _deviceType = value; saveVariable(1002, (int32_t)_deviceType.type()); initializeTypeString(); }
+	virtual uint32_t getDeviceType() { return _deviceType; }
+	virtual void setDeviceType(uint32_t value) { _deviceType = value; saveVariable(1002, (int32_t)_deviceType); initializeTypeString(); }
     virtual std::string getName() { return _name; }
 	virtual void setName(std::string value) { _name = value; saveVariable(1000, _name); }
 	virtual std::string getIp() { return _ip; }
@@ -272,7 +272,7 @@ protected:
 	//In table variables:
 	int32_t _firmwareVersion = 0;
 	std::string _firmwareVersionString;
-	LogicalDeviceType _deviceType;
+	uint32_t _deviceType = 0;
 	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
 	std::string _name;

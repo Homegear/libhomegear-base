@@ -272,7 +272,8 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 	if(bytesRead <= 0)
 	{
 		_readMutex.unlock();
-		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
+		if(bytesRead == -1) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();
 	return bytesRead;
