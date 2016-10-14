@@ -96,7 +96,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 				else if(propertyName == "service") { if(propertyValue == "true") service = true; }
 				else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
 				else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
-				else if(propertyName == "signed") { if(propertyValue == "true") isSigned = true; }
+				else if(propertyName == "signed") { isSignedSet = true; isSigned = (propertyValue == "true"); }
 				else if(propertyName == "control") control = propertyValue;
 				else if(propertyName == "unit") unit = propertyValue;
 				else if(propertyName == "formFieldType") formFieldType = propertyValue;
@@ -114,6 +114,8 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 						std::string castName(castNode->name());
 						if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, this)));
 						else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, this)));
+						else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, this)));
+						else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, this)));
 						else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, this)));
 						else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, this)));
 						else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, this)));
@@ -132,6 +134,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, this)));
 						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, this)));
 						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, this)));
+						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, this)));
 						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
 					}
@@ -265,12 +268,12 @@ Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* pa
 	if(logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min()) isSigned = true;
+		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
 	}
 	else if(logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* parameter = (LogicalInteger*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min()) isSigned = true;
+		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
 	}
 }
 
@@ -339,14 +342,14 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 				variable.reset(new Variable(integerValue));
 				if(isSigned && !value->empty() && value->size() <= 4)
 				{
-					int32_t byteIndex = value->size() - std::lround(std::ceil(physical->size));
-					if(byteIndex >= 0 && byteIndex < (signed)value->size())
+					int32_t byteSize = std::lround(std::ceil(physical->size));
+					if(byteSize > 0 && (signed)value->size() == byteSize)
 					{
 						int32_t bitSize = std::lround(physical->size * 10) % 10;
 						int32_t signPosition = 0;
 						if(bitSize == 0) signPosition = 7;
 						else signPosition = bitSize - 1;
-						if(value->at(byteIndex) & (1 << signPosition))
+						if(value->at(0) & (1 << signPosition))
 						{
 							int32_t bits = (std::lround(std::floor(physical->size)) * 8) + bitSize;
 							variable->integerValue -= (1 << bits);
@@ -384,7 +387,8 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
 	{
 		PVariable rpcValue;
 		if(logical->type == ILogical::Type::Enum::tInteger) rpcValue.reset(new Variable(Math::getNumber(value)));
-		if(logical->type == ILogical::Type::Enum::tEnum)
+		else if(logical->type == ILogical::Type::Enum::tInteger64) rpcValue.reset(new Variable(Math::getNumber64(value)));
+		else if(logical->type == ILogical::Type::Enum::tEnum)
 		{
 			if(Math::isNumber(value)) rpcValue.reset(new Variable(Math::getNumber(value)));
 			else //value is id of enum element
@@ -489,7 +493,7 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				if(variable->integerValue == 0)
 				{
 					if(variable->floatValue != 0) variable->integerValue = variable->floatValue;
-					if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64;
+					//else if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64; //Dangerous
 					else if(!variable->stringValue.empty()) variable->integerValue = Math::getNumber(variable->stringValue);
 				}
 				LogicalInteger* parameter = (LogicalInteger*)logical.get();
@@ -516,7 +520,7 @@ void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vect
 				if(variable->integerValue64 == 0)
 				{
 					if(variable->floatValue != 0) variable->integerValue64 = variable->floatValue;
-					if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
+					//if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
 					else if(!variable->stringValue.empty()) variable->integerValue64 = Math::getNumber(variable->stringValue);
 				}
 				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();

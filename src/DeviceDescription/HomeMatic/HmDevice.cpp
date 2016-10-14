@@ -1269,14 +1269,14 @@ void HomeMaticParameter::adjustBitPosition(std::vector<uint8_t>& data)
     }
 }
 
-bool DeviceType::matches(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion)
+bool DeviceType::matches(uint32_t typeNumber, uint32_t firmwareVersion)
 {
 	try
 	{
-		if((device && deviceType.family() != device->family)) return false;
+		if(!device) return false;
 		if(typeID != -1)
 		{
-			if((signed)deviceType.type() == typeID && (firmware == -1 || checkFirmwareVersion(firmwareVersion))) return true;
+			if((signed)typeNumber == typeID && (firmware == -1 || checkFirmwareVersion(firmwareVersion))) return true;
 		}
 		else
 		{
@@ -1286,10 +1286,10 @@ bool DeviceType::matches(Systems::LogicalDeviceType deviceType, uint32_t firmwar
 			{
 				//When the device type is not at index 10 of the pairing packet, the device is not supported
 				//The "priority" attribute is ignored, for the standard devices "priority" seems not important
-				if(i->index == 10.0) { if(i->constValue != (signed)deviceType.type()) match = false; }
+				if(i->index == 10.0) { if(i->constValue != (signed)typeNumber) match = false; }
 				else if(i->index == 9.0) { if(!i->checkCondition(firmwareVersion)) match = false; }
-				else if(i->index == 0) { if(((signed)deviceType.type() >> 8) != i->constValue) match = false; }
-				else if(i->index == 1.0) { if(((signed)deviceType.type() & 0xFF) != i->constValue) match = false; }
+				else if(i->index == 0) { if(((signed)typeNumber >> 8) != i->constValue) match = false; }
+				else if(i->index == 1.0) { if(((signed)typeNumber & 0xFF) != i->constValue) match = false; }
 				else if(i->index == 2.0) { if(!i->checkCondition(firmwareVersion)) match = false; }
 				else match = false; //Unknown index
 			}
@@ -2553,13 +2553,13 @@ void Device::setCountFromSysinfo(int32_t countFromSysinfo)
     }
 }
 
-std::shared_ptr<DeviceType> Device::getType(Systems::LogicalDeviceType deviceType, int32_t firmwareVersion)
+std::shared_ptr<DeviceType> Device::getType(uint32_t typeNumber, int32_t firmwareVersion)
 {
 	try
 	{
 		for(std::vector<std::shared_ptr<DeviceType>>::iterator j = supportedTypes.begin(); j != supportedTypes.end(); ++j)
 		{
-			if((*j)->matches(deviceType, firmwareVersion)) return *j;
+			if((*j)->matches(typeNumber, firmwareVersion)) return *j;
 		}
 	}
 	catch(const std::exception& ex)

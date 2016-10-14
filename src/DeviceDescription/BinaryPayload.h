@@ -62,6 +62,8 @@ public:
 	double size = 1.0;
 	double index2 = 0;
 	double size2 = 0;
+	uint32_t bitIndex = 0;
+	uint32_t bitSize = 0;
 	int32_t index2Offset = -1;
 	int32_t constValueInteger = -1;
 	double constValueDecimal = -1;

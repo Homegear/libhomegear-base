@@ -550,14 +550,6 @@ public:
 	static int32_t exec(std::string command, std::string& output);
 
 	/**
-	 * Gets the error message to a GCRYPT error code.
-	 *
-	 * @param errorCode The GCRYPT error code.
-	 * @return Returns the error message for the provided error code.
-	 */
-	std::string getGCRYPTError(int32_t errorCode);
-
-	/**
 	 * Converts GNUTLS certificate verification error codes to human readable error messages.
 	 *
 	 * @param errorCode The GNUTLS certificate verification error code.
@@ -611,16 +603,6 @@ private:
 	 * Map to faster convert hexadecimal numbers.
 	 */
 	char _binaryToASCIITable[16];
-
-	/**
-	 * Buffer to store GCRYPT error messages in. Needed for thread safety.
-	 */
-	char _gcryptBuffer[1024];
-
-	/**
-	 * Mutex to protect _gcryptBuffer. Needed for thread safety.
-	 */
-	std::mutex _gcryptBufferMutex;
 
 	/**
 	 * Checks if the system is little or big endian.

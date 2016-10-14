@@ -158,9 +158,9 @@ std::shared_ptr<HomegearDevice> Devices::loadFile(std::string& filepath)
 			std::vector<char> xml;
 			if(input.empty()) return device;
 			if(_eventHandler) ((IDevicesEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, xml);
-			if(!xml.empty()) device.reset(new HomegearDevice(_bl, _family, filepath, xml));
+			if(!xml.empty()) device.reset(new HomegearDevice(_bl, filepath, xml));
 		}
-		else device.reset(new HomegearDevice(_bl, _family, filepath, oldFormat));
+		else device.reset(new HomegearDevice(_bl, filepath, oldFormat));
 		if(oldFormat) return loadHomeMatic(filepath);
 		else if(device && device->loaded()) return device;
 	}
@@ -1167,7 +1167,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 		}
 
 		HmDeviceDescription::HmConverter converter(_bl);
-		std::shared_ptr<HomegearDevice> device(new HomegearDevice(_bl, _family));
+		std::shared_ptr<HomegearDevice> device(new HomegearDevice(_bl));
 		converter.convert(homeMaticDevice, device);
 		return device;
 	}
@@ -1186,7 +1186,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
     return std::shared_ptr<HomegearDevice>();
 }
 
-std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo)
+uint32_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
 {
 	try
 	{
@@ -1194,7 +1194,34 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
 		{
 			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
 			{
-				if((*j)->matches(deviceType, firmwareVersion))
+				if((*j)->matches(typeId)) return (*j)->typeNumber;
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return 0;
+}
+
+std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo)
+{
+	try
+	{
+		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
+		{
+			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
+			{
+				if((*j)->matches(typeNumber, firmwareVersion))
 				{
 					if(countFromSysinfo > -1 && (*i)->dynamicChannelCountIndex > -1)
 					{
@@ -1203,11 +1230,11 @@ std::shared_ptr<HomegearDevice> Devices::find(Systems::LogicalDeviceType deviceT
 						{
 							for(SupportedDevices::iterator l = (*k)->supportedDevices.begin(); l != (*k)->supportedDevices.end(); ++l)
 							{
-								if((*l)->matches(deviceType, firmwareVersion) && (*k)->getDynamicChannelCount() == countFromSysinfo) return *k;
+								if((*l)->matches(typeNumber, firmwareVersion) && (*k)->getDynamicChannelCount() == countFromSysinfo) return *k;
 							}
 						}
 						//No matching device was found
-						std::shared_ptr<HomegearDevice> newDevice(new HomegearDevice(_bl, _family));
+						std::shared_ptr<HomegearDevice> newDevice(new HomegearDevice(_bl));
 						*newDevice = **i;
 						newDevice->setDynamicChannelCount(countFromSysinfo);
 						_dynamicDevices.push_back(newDevice);
@@ -1238,7 +1265,7 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
 {
 	try
 	{
-		std::shared_ptr<HomegearDevice> device = find(Systems::LogicalDeviceType(_family, deviceId), firmwareVersion, -1);
+		std::shared_ptr<HomegearDevice> device = find(deviceId, firmwareVersion, -1);
 		if(!device) return Variable::createError(-2, "Unknown device");
 		if(channel < 0) channel = 0;
 		Functions::iterator functionIterator = device->functions.find(channel);

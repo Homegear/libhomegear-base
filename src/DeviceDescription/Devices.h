@@ -35,7 +35,6 @@
 #include <memory>
 
 #include "../Systems/Packet.h"
-#include "../Systems/DeviceTypes.h"
 #include "../Sockets/RpcClientInfo.h"
 #include "HomegearDevice.h"
 #include "../IEvents.h"
@@ -66,7 +65,8 @@ public:
 	void load();
 	void load(std::string& xmlPath);
 	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
-	std::shared_ptr<HomegearDevice> find(Systems::LogicalDeviceType deviceType, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
+	uint32_t getTypeNumberFromTypeId(const std::string& typeId);
+	std::shared_ptr<HomegearDevice> find(uint32_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 
 	// {{{ RPC
 	std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
@@ -75,7 +75,7 @@ public:
 	// }}}
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	int32_t _family;
+	int32_t _family = -1;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
 

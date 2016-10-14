@@ -249,7 +249,7 @@ void HmConverter::convert(std::shared_ptr<Device> homematicDevice, std::shared_p
 
 	if(homematicDevice->team)
 	{
-		homegearDevice->group.reset(new HomegearDevice(_bl, homegearDevice->family));
+		homegearDevice->group.reset(new HomegearDevice(_bl));
 		convert(homematicDevice->team, homegearDevice->group);
 		if(homegearDevice->group->receiveModes == HomegearDevice::ReceiveModes::Enum::always) homegearDevice->group->receiveModes = homegearDevice->receiveModes;
 	}

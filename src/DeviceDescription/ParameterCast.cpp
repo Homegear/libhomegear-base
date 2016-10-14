@@ -144,6 +144,88 @@ void IntegerIntegerScale::toPacket(PVariable value)
 	else _bl->out.printWarning("Warning: Operation is not set for parameter conversion integerIntegerScale.");
 }
 
+IntegerOffset::IntegerOffset(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+IntegerOffset::IntegerOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"integerOffset\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "addOffset")
+		{
+			offset = Math::getNumber(value);
+			addOffset = true;
+		}
+		else if(name == "subtractFromOffset") offset = Math::getNumber(value);
+		else if(name == "direction") directionToPacket = (value != "fromPacket");
+		else _bl->out.printWarning("Warning: Unknown node in \"integerOffset\": " + name);
+	}
+}
+
+void IntegerOffset::fromPacket(PVariable value)
+{
+	if(!value) return;
+	value->type = VariableType::tInteger;
+	if(directionToPacket) value->integerValue = addOffset ? value->integerValue - offset : offset - value->integerValue;
+	else value->integerValue = addOffset ? value->integerValue + offset : offset - value->integerValue;
+}
+
+void IntegerOffset::toPacket(PVariable value)
+{
+	if(!value) return;
+	value->type = VariableType::tInteger;
+	if(directionToPacket) value->integerValue = addOffset ? value->integerValue + offset : offset - value->integerValue;
+	else value->integerValue = addOffset ? value->integerValue - offset : offset - value->integerValue;
+}
+
+DecimalOffset::DecimalOffset(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+DecimalOffset::DecimalOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"decimalOffset\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "addOffset")
+		{
+			offset = Math::getDouble(value);
+			addOffset = true;
+		}
+		else if(name == "subtractFromOffset") offset = Math::getDouble(value);
+		else if(name == "direction") directionToPacket = (value != "fromPacket");
+		else _bl->out.printWarning("Warning: Unknown node in \"decimalOffset\": " + name);
+	}
+}
+
+void DecimalOffset::fromPacket(PVariable value)
+{
+	if(!value) return;
+	value->type = VariableType::tFloat;
+	if(directionToPacket) value->floatValue = addOffset ? value->floatValue - offset : offset - value->floatValue;
+	else value->floatValue = addOffset ? value->floatValue + offset : offset - value->floatValue;
+}
+
+void DecimalOffset::toPacket(PVariable value)
+{
+	if(!value) return;
+	value->type = VariableType::tFloat;
+	if(directionToPacket) value->floatValue = addOffset ? value->floatValue + offset : offset - value->floatValue;
+	else value->floatValue = addOffset ? value->floatValue - offset : offset - value->floatValue;
+}
+
 IntegerIntegerMap::IntegerIntegerMap(BaseLib::Obj* baseLib) : ICast(baseLib)
 {
 }
@@ -996,18 +1078,18 @@ Invert::Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : 
 void Invert::fromPacket(PVariable value)
 {
 	if(!value) return;
-	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(value->type == VariableType::tInteger)
+	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tInteger64)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
 		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tFloat)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
@@ -1017,22 +1099,53 @@ void Invert::fromPacket(PVariable value)
 void Invert::toPacket(PVariable value)
 {
 	if(!value) return;
-	if(value->type == VariableType::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(value->type == VariableType::tInteger)
+	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
 		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tInteger64)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
 		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(value->type == VariableType::tFloat)
+	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
 		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
 	}
+}
+
+Round::Round(BaseLib::Obj* baseLib) : ICast(baseLib)
+{
+}
+
+Round::Round(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"decimalPlaces\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "decimalPlaces") decimalPlaces = Math::getNumber(value);
+		else _bl->out.printWarning("Warning: Unknown node in \"decimalPlaces\": " + name);
+	}
+}
+
+void Round::fromPacket(PVariable value)
+{
+	if(!value) return;
+	value->floatValue = std::round(value->floatValue * Math::Pow10(decimalPlaces)) / Math::Pow10(decimalPlaces);
+}
+
+void Round::toPacket(PVariable value)
+{
+	if(!value) return;
+	value->floatValue = std::round(value->floatValue * Math::Pow10(decimalPlaces)) / Math::Pow10(decimalPlaces);
 }
 
 Generic::Generic(BaseLib::Obj* baseLib) : ICast(baseLib)

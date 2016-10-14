@@ -627,15 +627,6 @@ std::string HelperFunctions::getGNUTLSCertVerificationError(uint32_t errorCode)
 	return "Unknown error code.";
 }
 
-std::string HelperFunctions::getGCRYPTError(int32_t errorCode)
-{
-	_gcryptBufferMutex.lock();
-	gpg_strerror_r(errorCode, _gcryptBuffer, 1024);
-	std::string result(_gcryptBuffer);
-	_gcryptBufferMutex.unlock();
-	return result;
-}
-
 bool HelperFunctions::isShortCliCommand(const std::string& command)
 {
 	int32_t spaceIndex = command.find(' ');
