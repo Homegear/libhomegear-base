@@ -61,6 +61,7 @@ public:
 	std::string type;
 	uint32_t responseDelay = 95;
 	std::map<uint32_t, GPIOSetting> gpio;
+	int32_t baudrate = -1;
 	int32_t oscillatorFrequency = -1;
 	int32_t txPowerSetting = -1;
 	int32_t interruptPin = -1;
