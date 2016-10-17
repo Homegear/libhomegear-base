@@ -526,6 +526,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->device = value;
 			_bl->out.printDebug("Debug: device set to " + settings->device);
 		}
+		else if(name == "baudrate")
+		{
+			settings->baudrate = BaseLib::Math::getNumber(value);
+			_bl->out.printDebug("Debug: baudrate set to " + std::to_string(settings->baudrate));
+		}
 		else if(name == "responsedelay")
 		{
 			settings->responseDelay = BaseLib::Math::getNumber(value);
