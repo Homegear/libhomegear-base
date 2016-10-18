@@ -2072,7 +2072,10 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 				if((*i)->isVirtual) continue;
 				if((*i)->hasSender) isSender = (*i)->isSender;
 				else (*i)->isSender = isSender; //Todo: Remove in future versions. Sets isSender of the peer if previously unset.
-				std::shared_ptr<Peer> remotePeer(central->getPeer((*i)->id));
+				std::shared_ptr<Peer> remotePeer;
+				if((*i)->id != 0) remotePeer = central->getPeer((*i)->id);
+				else if((*i)->address != 0) remotePeer = central->getPeer((*i)->address);
+				else if(!(*i)->serialNumber.empty()) remotePeer = central->getPeer((*i)->serialNumber);
 				if(!remotePeer)
 				{
 					_bl->out.printDebug("Debug: Can't return link description for peer with id " + std::to_string((*i)->id) + ". The peer is not paired to Homegear.");
@@ -2085,13 +2088,12 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 				if(!isSender && peerKnowsMe && avoidDuplicates) return array;
 				//If we are receiver this point is only reached, when the sender is not paired to this central
 
-				uint64_t peerID = (*i)->id;
-				std::string peerSerialNumber = (*i)->serialNumber;
+				uint64_t peerID = remotePeer->getID();
+				std::string peerSerialNumber = remotePeer->getSerialNumber();
 				int32_t brokenFlags = 0;
-				if(peerID == 0 || peerSerialNumber.empty())
+				/*if(peerID == 0 || peerSerialNumber.empty())
 				{
-					if(peerKnowsMe ||
-					  (*i)->id == _peerID) //Link to myself with non-existing (virtual) channel (e. g. switches use this)
+					if(peerKnowsMe || (*i)->id == _peerID) //Link to myself with non-existing (virtual) channel (e. g. switches use this)
 					{
 						(*i)->id = remotePeer->getID();
 						(*i)->serialNumber = remotePeer->getSerialNumber();
@@ -2107,7 +2109,7 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 						if(isSender) brokenFlags = 2; //LINK_FLAG_RECEIVER_BROKEN
 						else brokenFlags = 1; //LINK_FLAG_SENDER_BROKEN
 					}
-				}
+				}*/
 				//Relevent for switches
 				if(peerID == _peerID && _rpcDevice->functions.find((*i)->channel) == _rpcDevice->functions.end())
 				{
