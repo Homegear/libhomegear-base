@@ -205,7 +205,7 @@ void SerialReaderWriter::closeDevice()
 
 void SerialReaderWriter::createLockFile()
 {
-	_lockfile = "/var/lock" + _device.substr(_device.find_last_of('/')) + ".lock";
+	_lockfile = _bl->settings.lockFilePath() + "LCK.." + _device.substr(_device.find_last_of('/') + 1);
 	std::shared_ptr<FileDescriptor> lockfileDescriptor = _bl->fileDescriptorManager.add(open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
 	if(lockfileDescriptor->descriptor == -1)
 	{
