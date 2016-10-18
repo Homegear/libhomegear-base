@@ -532,7 +532,7 @@ void Settings::load(std::string filename)
 					_lockFilePath = value;
 					if(_lockFilePath.empty()) _lockFilePath = _bl->executablePath;
 					if(_lockFilePath.back() != '/') _lockFilePath.push_back('/');
-					_bl->out.printDebug("Debug: lockFilePath set to " + _dataPath);
+					_bl->out.printDebug("Debug: lockFilePath set to " + _lockFilePath);
 				}
 				else if(name == "lockfilepathpermissions")
 				{
