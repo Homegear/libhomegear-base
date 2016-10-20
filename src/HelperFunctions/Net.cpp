@@ -47,6 +47,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <iostream>
+
 namespace BaseLib
 {
 int32_t Net::readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, uint32_t messageIndex, uint32_t pid)
@@ -71,8 +73,9 @@ int32_t Net::readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, ui
 	return messageLength;
 }
 
-void Net::getRoutes(RouteInfoList& routeInfo)
+Net::RouteInfoList Net::getRoutes()
 {
+	RouteInfoList routeInfo;
 	struct nlmsghdr* nlMessage = nullptr;
 	std::shared_ptr<RouteInfo> info;
 	uint32_t messageIndex = 0;
@@ -144,23 +147,26 @@ void Net::getRoutes(RouteInfoList& routeInfo)
 		routeInfo.push_back(info);
 	}
 	close(socketDescriptor);
+	return routeInfo;
 }
 
-std::string Net::getMyIpAddress()
+std::string Net::getMyIpAddress(std::string interfaceName)
 {
 	std::string address;
 
-	RouteInfoList list;
-    getRoutes(list);
-    for(RouteInfoList::const_iterator i = list.begin(); i != list.end(); ++i)
-    {
-    	if((*i)->destinationAddress == 0)
-    	{
-    		address = std::string(std::to_string((*i)->sourceAddress & 0xFF) + '.' + std::to_string(((*i)->sourceAddress >> 8) & 0xFF) + '.' + std::to_string(((*i)->sourceAddress >> 16) & 0xFF) + '.' + std::to_string((*i)->sourceAddress >> 24));
-    		if(address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) break;
-    		else address.clear();
-    	}
-    }
+	if(interfaceName.empty())
+	{
+		RouteInfoList list = getRoutes();
+		for(RouteInfoList::const_iterator i = list.begin(); i != list.end(); ++i)
+		{
+			if((*i)->destinationAddress == 0)
+			{
+				address = std::string(std::to_string((*i)->sourceAddress & 0xFF) + '.' + std::to_string(((*i)->sourceAddress >> 8) & 0xFF) + '.' + std::to_string(((*i)->sourceAddress >> 16) & 0xFF) + '.' + std::to_string((*i)->sourceAddress >> 24));
+				if(address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) break;
+				else address.clear();
+			}
+		}
+	}
 
 	if(address.empty()) //Alternative method
 	{
@@ -177,11 +183,12 @@ std::string Net::getMyIpAddress()
 				case AF_INET:
 					inet_ntop (info->ifa_addr->sa_family, &((struct sockaddr_in *)info->ifa_addr)->sin_addr, buffer, 100);
 					address = std::string(buffer);
-					if(address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) addressFound = true;
-					break;
-				case AF_INET6:
-					//Ignored currently
-					inet_ntop (info->ifa_addr->sa_family, &((struct sockaddr_in6 *)info->ifa_addr)->sin6_addr, buffer, 100);
+					if(!interfaceName.empty())
+					{
+						std::string currentInterfaceName(info->ifa_name);
+						if(currentInterfaceName == interfaceName) addressFound = true;
+					}
+					else if(address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) addressFound = true;
 					break;
 			}
 			if(addressFound) break;
@@ -192,19 +199,21 @@ std::string Net::getMyIpAddress()
 	return address;
 }
 
-std::string Net::getMyIp6Address()
+std::string Net::getMyIp6Address(std::string interfaceName)
 {
 	std::string address;
 
-	RouteInfoList list;
-    getRoutes(list);
-    for(RouteInfoList::const_iterator i = list.begin(); i != list.end(); ++i)
-    {
-    	if((*i)->destinationAddress == 0)
-    	{
-    		//TODO: Implement
-    	}
-    }
+	if(interfaceName.empty())
+	{
+		RouteInfoList list = getRoutes();
+		for(RouteInfoList::const_iterator i = list.begin(); i != list.end(); ++i)
+		{
+			if((*i)->destinationAddress == 0)
+			{
+				//TODO: Implement
+			}
+		}
+	}
 
 	if(address.empty()) //Alternative method
 	{
@@ -221,7 +230,12 @@ std::string Net::getMyIp6Address()
 				case AF_INET6:
 					inet_ntop (info->ifa_addr->sa_family, &((struct sockaddr_in6 *)info->ifa_addr)->sin6_addr, buffer, 100);
 					address = std::string(buffer);
-					if(address.compare(0, 3, "::1") != 0 || address.compare(0, 4, "fe80") != 0) addressFound = true;
+					if(!interfaceName.empty())
+					{
+						std::string currentInterfaceName(info->ifa_name);
+						if(currentInterfaceName == interfaceName) addressFound = true;
+					}
+					else if(address.compare(0, 3, "::1") != 0 || address.compare(0, 4, "fe80") != 0) addressFound = true;
 					break;
 			}
 			if(addressFound) break;
