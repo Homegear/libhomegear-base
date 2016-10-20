@@ -73,6 +73,14 @@ int32_t Net::readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, ui
 	return messageLength;
 }
 
+bool Net::isIp(std::string ipAddress)
+{
+	struct sockaddr_in sa;
+	struct sockaddr_in6 sa6;
+	if(inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr)) != 1 && inet_pton(AF_INET6, ipAddress.c_str(), &(sa6.sin6_addr)) != 1) return false;
+	return true;
+}
+
 Net::RouteInfoList Net::getRoutes()
 {
 	RouteInfoList routeInfo;
