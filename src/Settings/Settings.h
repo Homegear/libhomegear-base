@@ -110,6 +110,10 @@ public:
 	std::string scriptPathGroup() { return _scriptPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
+	std::string lockFilePath() { return _lockFilePath; }
+	uint32_t lockFilePathPermissions() { return _lockFilePathPermissions; }
+	std::string lockFilePathUser() { return _lockFilePathUser; }
+	std::string lockFilePathGroup() { return _lockFilePathGroup; }
 	std::string phpIniPath() { return _phpIniPath; }
 	std::map<std::string, bool>& tunnelClients() { return _tunnelClients; }
 	std::map<std::string, std::string>& clientAddressesToReplace() { return _clientAddressesToReplace; }
@@ -183,6 +187,10 @@ private:
 	std::string _scriptPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
+	std::string _lockFilePath;
+	uint32_t _lockFilePathPermissions = 504;
+	std::string _lockFilePathUser;
+	std::string _lockFilePathGroup;
 	std::string _phpIniPath;
 	std::map<std::string, bool> _tunnelClients;
 	std::map<std::string, std::string> _clientAddressesToReplace;
