@@ -75,25 +75,34 @@ public:
 	virtual ~Net();
 
 	/**
+	 * Checks is a string is a valid IPv4 or IPv6 address.
+	 *
+	 * @return Returns true if the string is an IP address.
+	 */
+	static bool isIp(std::string ipAddress);
+
+	/**
 	 * Tries to automatically determine the computers IPv4 address.
 	 *
+	 * @param interfaceName If specified, the IP address of this interface is returned.
 	 * @return Returns the computers IPv4 address.
 	 */
-	static std::string getMyIpAddress();
+	static std::string getMyIpAddress(std::string interfaceName = "");
 
 	/**
 	 * Tries to automatically determine the computers IPv6 address.
-	 *
+
+	 * @param interfaceName If specified, the IP address of this interface is returned.
 	 * @return Returns the computers IPv6 address.
 	 */
-	static std::string getMyIp6Address();
+	static std::string getMyIp6Address(std::string interfaceName = "");
 
 	/**
 	 * Returns a list of all defined network routes.
 	 *
-	 * @param[out] routeInfo The returned routes.
+	 * @return The returned routes of type RouteInfoList.
 	 */
-	static void getRoutes(RouteInfoList& routeInfo);
+	static RouteInfoList getRoutes();
 private:
 	static int32_t readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, uint32_t messageIndex, uint32_t pid);
 };
