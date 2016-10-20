@@ -75,6 +75,13 @@ public:
 	virtual ~Net();
 
 	/**
+	 * Checks is a string is a valid IPv4 or IPv6 address.
+	 *
+	 * @return Returns true if the string is an IP address.
+	 */
+	static bool isIp(std::string ipAddress);
+
+	/**
 	 * Tries to automatically determine the computers IPv4 address.
 	 *
 	 * @param interfaceName If specified, the IP address of this interface is returned.
