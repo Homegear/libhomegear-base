@@ -104,6 +104,10 @@ void Settings::reset()
 	_scriptPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
+	_lockFilePath = "/var/lock/";
+	_lockFilePathPermissions = 0;
+	_lockFilePathUser = "";
+	_lockFilePathGroup = "";
 	_phpIniPath = "/etc/homegear/php.ini";
 	_tunnelClients.clear();
 	_clientAddressesToReplace.clear();
@@ -522,6 +526,28 @@ void Settings::load(std::string filename)
 					if(_tempPath.empty()) _tempPath = "/var/lib/homegear/tmp/";
 					if(_tempPath.back() != '/') _tempPath.push_back('/');
 					_bl->out.printDebug("Debug: tempPath set to " + _tempPath);
+				}
+				else if(name == "lockfilepath")
+				{
+					_lockFilePath = value;
+					if(_lockFilePath.empty()) _lockFilePath = _bl->executablePath;
+					if(_lockFilePath.back() != '/') _lockFilePath.push_back('/');
+					_bl->out.printDebug("Debug: lockFilePath set to " + _lockFilePath);
+				}
+				else if(name == "lockfilepathpermissions")
+				{
+					_lockFilePathPermissions = Math::getOctalNumber(value);
+					_bl->out.printDebug("Debug: lockFilePathPermissions set to " + _lockFilePathPermissions);
+				}
+				else if(name == "lockfilepathuser")
+				{
+					_lockFilePathUser = value;
+					_bl->out.printDebug("Debug: lockFilePathUser set to " + _lockFilePathUser);
+				}
+				else if(name == "lockfilepathgroup")
+				{
+					_lockFilePathGroup = value;
+					_bl->out.printDebug("Debug: lockFilePathGroup set to " + _lockFilePathGroup);
 				}
 				else if(name == "phpinipath")
 				{
