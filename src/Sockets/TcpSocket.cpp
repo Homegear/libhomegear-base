@@ -775,7 +775,7 @@ void TcpSocket::getConnection()
 			{
 				freeaddrinfo(serverInfo);
 				_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
 				continue;
 			}
 			else
@@ -796,13 +796,13 @@ void TcpSocket::getConnection()
 				(short)0
 			};
 
-			int32_t pollResult = poll(&pollstruct, 1, 5000);
+			int32_t pollResult = poll(&pollstruct, 1, _readTimeout / 1000);
 			if(pollResult < 0 || (pollstruct.revents & POLLERR))
 			{
 				if(i < 5)
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-					std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+					std::this_thread::sleep_for(std::chrono::milliseconds(200));
 					continue;
 				}
 				else
