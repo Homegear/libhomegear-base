@@ -34,7 +34,6 @@
 #include "../Variable.h"
 
 #include <memory>
-#include <iostream>
 #include <string>
 #include <map>
 #include <cstring>
