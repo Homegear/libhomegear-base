@@ -2081,14 +2081,14 @@ std::shared_ptr<Variable> Peer::getLink(PRpcClientInfo clientInfo, int32_t chann
 					_bl->out.printDebug("Debug: Can't return link description for peer with id " + std::to_string((*i)->id) + ". The peer is not paired to Homegear.");
 					continue;
 				}
+				uint64_t peerID = remotePeer->getID();
 				bool peerKnowsMe = false;
-				if(remotePeer && remotePeer->getPeer((*i)->channel, _peerID, channel)) peerKnowsMe = true;
+				if(remotePeer->getPeer((*i)->channel, _peerID, channel)) peerKnowsMe = true;
 
 				//Don't continue if peer is sender and exists in central's peer array to avoid generation of duplicate results when requesting all links (only generate results when we are sender)
-				if(!isSender && peerKnowsMe && avoidDuplicates) return array;
+				if(!isSender && peerKnowsMe && avoidDuplicates && peerID != _peerID) return array;
 				//If we are receiver this point is only reached, when the sender is not paired to this central
 
-				uint64_t peerID = remotePeer->getID();
 				std::string peerSerialNumber = remotePeer->getSerialNumber();
 				int32_t brokenFlags = 0;
 				/*if(peerID == 0 || peerSerialNumber.empty())
