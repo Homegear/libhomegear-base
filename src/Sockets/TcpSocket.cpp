@@ -693,11 +693,13 @@ void TcpSocket::getConnection()
 	_socketDescriptor.reset();
 	if(_hostname.empty()) throw SocketInvalidParametersException("Hostname is empty");
 	if(_port.empty()) throw SocketInvalidParametersException("Port is empty");
+	if(_connectionRetries < 1) _connectionRetries = 1;
+	else if(_connectionRetries > 10) _connectionRetries = 10;
 
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
 
 	//Retry for two minutes
-	for(uint32_t i = 0; i < 6; ++i)
+	for(uint32_t i = 0; i < _connectionRetries; ++i)
 	{
 		struct addrinfo *serverInfo = nullptr;
 		struct addrinfo hostInfo;
@@ -771,7 +773,7 @@ void TcpSocket::getConnection()
 		int32_t connectResult;
 		if((connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen)) == -1 && errno != EINPROGRESS)
 		{
-			if(i < 5)
+			if(i < _connectionRetries - 1)
 			{
 				freeaddrinfo(serverInfo);
 				_bl->fileDescriptorManager.shutdown(_socketDescriptor);
@@ -799,7 +801,7 @@ void TcpSocket::getConnection()
 			int32_t pollResult = poll(&pollstruct, 1, _readTimeout / 1000);
 			if(pollResult < 0 || (pollstruct.revents & POLLERR))
 			{
-				if(i < 5)
+				if(i < _connectionRetries - 1)
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 					std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -823,7 +825,7 @@ void TcpSocket::getConnection()
 			}
 			else if(pollResult == 0)
 			{
-				if(i < 5)
+				if(i < _connectionRetries - 1)
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 					continue;
