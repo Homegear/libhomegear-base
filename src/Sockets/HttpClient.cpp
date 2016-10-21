@@ -43,6 +43,7 @@ HttpClient::HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
 	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
+	_socket->setConnectionRetries(1);
 }
 
 HttpClient::~HttpClient()
