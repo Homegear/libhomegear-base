@@ -1421,6 +1421,7 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
 
 		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 		{
+			if(knownDevices->find((*i)->getID()) != knownDevices->end()) continue;
 			//listDevices really needs a lot of resources, so wait a little bit after each device
 			std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			std::shared_ptr<std::vector<PVariable>> descriptions = (*i)->getDeviceDescriptions(clientInfo, channels, fields);
