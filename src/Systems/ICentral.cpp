@@ -156,7 +156,7 @@ std::vector<std::shared_ptr<Peer>> ICentral::getPeers()
 		std::lock_guard<std::mutex> peersGuard(_peersMutex);
 		for(std::map<uint64_t, std::shared_ptr<Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 		{
-			peers.push_back(i->second);
+			if(i->second) peers.push_back(i->second);
 		}
 		return peers;
 	}
@@ -1419,16 +1419,16 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
 
 		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
-		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+		for(std::shared_ptr<Peer> peer : peers)
 		{
-			if(knownDevices->find((*i)->getID()) != knownDevices->end()) continue;
+			if(!peer || knownDevices->find(peer->getID()) != knownDevices->end()) continue;
 			//listDevices really needs a lot of resources, so wait a little bit after each device
 			std::this_thread::sleep_for(std::chrono::milliseconds(3));
-			std::shared_ptr<std::vector<PVariable>> descriptions = (*i)->getDeviceDescriptions(clientInfo, channels, fields);
+			std::shared_ptr<std::vector<PVariable>> descriptions = peer->getDeviceDescriptions(clientInfo, channels, fields);
 			if(!descriptions) continue;
-			for(std::vector<PVariable>::iterator j = descriptions->begin(); j != descriptions->end(); ++j)
+			for(PVariable description : *descriptions)
 			{
-				array->arrayValue->push_back(*j);
+				array->arrayValue->push_back(description);
 			}
 		}
 
