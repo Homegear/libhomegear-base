@@ -101,7 +101,7 @@ public:
 	void close();
 protected:
 	BaseLib::Obj* _bl = nullptr;
-	int32_t _connectionRetries = 6;
+	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
 	int64_t _writeTimeout = 15000000;
 	bool _autoConnect = true;
