@@ -699,7 +699,7 @@ void TcpSocket::getConnection()
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
 
 	//Retry for two minutes
-	for(uint32_t i = 0; i < _connectionRetries; ++i)
+	for(int32_t i = 0; i < _connectionRetries; ++i)
 	{
 		struct addrinfo *serverInfo = nullptr;
 		struct addrinfo hostInfo;
