@@ -55,10 +55,10 @@ public:
 		enum Enum { none = 0, always = 1, wakeOnRadio = 2, config = 4, wakeUp = 8, lazyConfig = 16, wakeUp2 = 32 };
 	};
 
-	HomegearDevice(BaseLib::Obj* baseLib);
-	HomegearDevice(BaseLib::Obj* baseLib, xml_node<>* node);
-	HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, bool& oldFormat);
-	HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, std::vector<char>& xml);
+	HomegearDevice(BaseLib::SharedObjects* baseLib);
+	HomegearDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, bool& oldFormat);
+	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, std::vector<char>& xml);
 	virtual ~HomegearDevice();
 
 	bool loaded() { return _loaded; }
@@ -106,7 +106,7 @@ public:
 	void save(std::string& filename);
 	// }}}
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	bool _loaded = false;
 
 	// {{{ Helpers

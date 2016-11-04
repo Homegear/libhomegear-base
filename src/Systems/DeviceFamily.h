@@ -48,7 +48,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Systems
 {
@@ -77,7 +77,7 @@ public:
 	};
 	//End event handling
 
-	DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
+	DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
 	virtual ~DeviceFamily();
 
 	virtual bool init();
@@ -120,7 +120,7 @@ public:
     virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields);
     // }}}
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<ICentral> _central;
 	std::shared_ptr<FamilySettings> _settings;
 	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;

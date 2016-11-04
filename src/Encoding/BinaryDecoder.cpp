@@ -34,12 +34,12 @@
 namespace BaseLib
 {
 
-BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib)
+BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-BinaryDecoder::BinaryDecoder(BaseLib::Obj* baseLib, bool ansi) : BinaryDecoder(baseLib)
+BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi) : BinaryDecoder(baseLib)
 {
 	_ansi = ansi;
 	if(_ansi) _ansiConverter.reset(new Ansi(true, false));

@@ -36,7 +36,7 @@
 namespace BaseLib
 {
 
-Gpio::Gpio(BaseLib::Obj* baseLib)
+Gpio::Gpio(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

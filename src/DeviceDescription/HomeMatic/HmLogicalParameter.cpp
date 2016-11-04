@@ -36,7 +36,7 @@ namespace BaseLib
 namespace HmDeviceDescription
 {
 
-ParameterOption::ParameterOption(BaseLib::Obj* baseLib, xml_node<>* node)
+ParameterOption::ParameterOption(BaseLib::SharedObjects* baseLib, xml_node<>* node)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -53,7 +53,7 @@ ParameterOption::ParameterOption(BaseLib::Obj* baseLib, xml_node<>* node)
 	}
 }
 
-std::shared_ptr<LogicalParameter> LogicalParameter::fromXML(BaseLib::Obj* baseLib, xml_node<>* node)
+std::shared_ptr<LogicalParameter> LogicalParameter::fromXML(BaseLib::SharedObjects* baseLib, xml_node<>* node)
 {
 	std::shared_ptr<LogicalParameter> parameter;
 	try
@@ -94,7 +94,7 @@ std::shared_ptr<LogicalParameter> LogicalParameter::fromXML(BaseLib::Obj* baseLi
     return parameter;
 }
 
-LogicalParameter::LogicalParameter(BaseLib::Obj* baseLib)
+LogicalParameter::LogicalParameter(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
@@ -109,12 +109,12 @@ std::shared_ptr<Variable> LogicalParameter::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
 }
 
-LogicalParameterEnum::LogicalParameterEnum(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterEnum::LogicalParameterEnum(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeEnum;
 }
 
-LogicalParameterEnum::LogicalParameterEnum(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterEnum(baseLib)
+LogicalParameterEnum::LogicalParameterEnum(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterEnum(baseLib)
 {
 	try
 	{
@@ -175,12 +175,12 @@ std::shared_ptr<Variable> LogicalParameterEnum::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalParameterInteger::LogicalParameterInteger(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterInteger::LogicalParameterInteger(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeInteger;
 }
 
-LogicalParameterInteger::LogicalParameterInteger(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterInteger(baseLib)
+LogicalParameterInteger::LogicalParameterInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterInteger(baseLib)
 {
 	try
 	{
@@ -239,12 +239,12 @@ std::shared_ptr<Variable> LogicalParameterInteger::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalParameterFloat::LogicalParameterFloat(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterFloat::LogicalParameterFloat(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeFloat;
 }
 
-LogicalParameterFloat::LogicalParameterFloat(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterFloat(baseLib)
+LogicalParameterFloat::LogicalParameterFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterFloat(baseLib)
 {
 	try
 	{
@@ -303,12 +303,12 @@ std::shared_ptr<Variable> LogicalParameterFloat::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalParameterBoolean::LogicalParameterBoolean(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterBoolean::LogicalParameterBoolean(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeBoolean;
 }
 
-LogicalParameterBoolean::LogicalParameterBoolean(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterBoolean(baseLib)
+LogicalParameterBoolean::LogicalParameterBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterBoolean(baseLib)
 {
 	try
 	{
@@ -354,12 +354,12 @@ std::shared_ptr<Variable> LogicalParameterBoolean::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalParameterString::LogicalParameterString(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterString::LogicalParameterString(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeString;
 }
 
-LogicalParameterString::LogicalParameterString(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterString(baseLib)
+LogicalParameterString::LogicalParameterString(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterString(baseLib)
 {
 	try
 	{
@@ -406,12 +406,12 @@ std::shared_ptr<Variable> LogicalParameterString::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalParameterAction::LogicalParameterAction(BaseLib::Obj* baseLib) : LogicalParameter(baseLib)
+LogicalParameterAction::LogicalParameterAction(BaseLib::SharedObjects* baseLib) : LogicalParameter(baseLib)
 {
 	type = Type::Enum::typeAction;
 }
 
-LogicalParameterAction::LogicalParameterAction(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalParameterAction(baseLib)
+LogicalParameterAction::LogicalParameterAction(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalParameterAction(baseLib)
 {
 	try
 	{

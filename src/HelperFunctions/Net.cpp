@@ -202,7 +202,7 @@ std::string Net::getMyIpAddress(std::string interfaceName)
 			if(addressFound) break;
 		}
 		freeifaddrs(interfaces);
-		if(!addressFound) throw NetException("No IP address could be found: " + std::string(strerror(errno)));
+		if(!addressFound) throw NetException("No IP address could be found.");
 	}
 	return address;
 }
@@ -249,7 +249,7 @@ std::string Net::getMyIp6Address(std::string interfaceName)
 			if(addressFound) break;
 		}
 		freeifaddrs(interfaces);
-		if(!addressFound) throw NetException("No IP address could be found: " + std::string(strerror(errno)));
+		if(!addressFound) throw NetException("No IP address could be found.");
 	}
 	return address;
 }

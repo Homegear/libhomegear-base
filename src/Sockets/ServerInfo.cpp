@@ -96,7 +96,7 @@ ServerInfo::ServerInfo()
 {
 }
 
-ServerInfo::ServerInfo(BaseLib::Obj* baseLib)
+ServerInfo::ServerInfo(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
@@ -106,7 +106,7 @@ void ServerInfo::reset()
 	_servers.clear();
 }
 
-void ServerInfo::init(BaseLib::Obj* baseLib)
+void ServerInfo::init(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

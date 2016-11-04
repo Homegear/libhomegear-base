@@ -44,7 +44,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 class FileDescriptor
 {
@@ -65,7 +65,7 @@ class FileDescriptorManager
 public:
 	FileDescriptorManager();
 	virtual ~FileDescriptorManager() {}
-	void init(BaseLib::Obj* baseLib);
+	void init(BaseLib::SharedObjects* baseLib);
 	void dispose();
 
 	virtual PFileDescriptor add(int32_t fileDescriptor);
@@ -79,7 +79,7 @@ public:
 	virtual void unlock();
 private:
 	bool _disposed = false;
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	uint32_t _currentID = 0;
 	std::mutex _descriptorsMutex;
 	FileDescriptors _descriptors;

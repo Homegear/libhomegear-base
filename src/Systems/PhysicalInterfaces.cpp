@@ -37,7 +37,7 @@ namespace BaseLib
 namespace Systems
 {
 
-PhysicalInterfaces::PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings)
+PhysicalInterfaces::PhysicalInterfaces(BaseLib::SharedObjects* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings)
 {
 	try
 	{
@@ -75,16 +75,11 @@ bool PhysicalInterfaces::lifetick()
 {
 	try
 	{
-		_physicalInterfacesMutex.lock();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
 		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
 		{
-			if(!j->second->lifetick())
-			{
-				_physicalInterfacesMutex.unlock();
-				return false;
-			}
+			if(!j->second->lifetick()) return false;
 		}
-		_physicalInterfacesMutex.unlock();
 		return true;
 	}
 	catch(const std::exception& ex)
@@ -99,17 +94,15 @@ bool PhysicalInterfaces::lifetick()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _physicalInterfacesMutex.unlock();
     return false;
 }
 
 uint32_t PhysicalInterfaces::count()
 {
-	uint32_t size = 0;
 	try
 	{
-		_physicalInterfacesMutex.lock();
-		size = _physicalInterfaces.size();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
+		return _physicalInterfaces.size();
 	}
 	catch(const std::exception& ex)
     {
@@ -123,8 +116,7 @@ uint32_t PhysicalInterfaces::count()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _physicalInterfacesMutex.unlock();
-    return size;
+    return 0;
 }
 
 bool PhysicalInterfaces::isOpen()
@@ -132,16 +124,14 @@ bool PhysicalInterfaces::isOpen()
 	try
 	{
 		if(_physicalInterfaces.empty()) return true;
-		_physicalInterfacesMutex.lock();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
 		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
 		{
 			if(!j->second->isNetworkDevice() && !j->second->isOpen())
 			{
-				_physicalInterfacesMutex.unlock();
 				return false;
 			}
 		}
-		_physicalInterfacesMutex.unlock();
 		return true;
 	}
 	catch(const std::exception& ex)
@@ -156,7 +146,6 @@ bool PhysicalInterfaces::isOpen()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _physicalInterfacesMutex.unlock();
 	return false;
 }
 
@@ -164,12 +153,11 @@ void PhysicalInterfaces::startListening()
 {
 	try
 	{
-		_physicalInterfacesMutex.lock();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
 		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
 		{
 			j->second->startListening();
 		}
-		_physicalInterfacesMutex.unlock();
 	}
 	catch(const std::exception& ex)
     {
@@ -189,12 +177,11 @@ void PhysicalInterfaces::stopListening()
 {
 	try
 	{
-		_physicalInterfacesMutex.lock();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
 		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
 		{
 			j->second->stopListening();
 		}
-		_physicalInterfacesMutex.unlock();
 	}
 	catch(const std::exception& ex)
     {
@@ -214,7 +201,7 @@ void PhysicalInterfaces::setup(int32_t userID, int32_t groupID)
 {
 	try
 	{
-		_physicalInterfacesMutex.lock();
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
 		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
 		{
 			if(!j->second)
@@ -225,7 +212,6 @@ void PhysicalInterfaces::setup(int32_t userID, int32_t groupID)
 			_bl->out.printDebug("Debug: Setting up physical device.");
 			j->second->setup(userID, groupID);
 		}
-		_physicalInterfacesMutex.unlock();
 	}
 	catch(const std::exception& ex)
     {
@@ -247,19 +233,20 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces(int32_t centralAddress)
 	{
 		BaseLib::PVariable array(new BaseLib::Variable(BaseLib::VariableType::tArray));
 
-		for(std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j)
+		std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
+		for(auto interface : _physicalInterfaces)
 		{
-			BaseLib::PVariable interface(new BaseLib::Variable(BaseLib::VariableType::tStruct));
+			BaseLib::PVariable interfaceStruct(new BaseLib::Variable(BaseLib::VariableType::tStruct));
 
-			interface->structValue->insert(BaseLib::StructElement("FAMILYID", BaseLib::PVariable(new BaseLib::Variable(_familyId))));
-			interface->structValue->insert(BaseLib::StructElement("ID", BaseLib::PVariable(new BaseLib::Variable(j->second->getID()))));
-			interface->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", BaseLib::PVariable(new BaseLib::Variable(centralAddress))));
-			interface->structValue->insert(BaseLib::StructElement("TYPE", BaseLib::PVariable(new BaseLib::Variable(j->second->getType()))));
-			interface->structValue->insert(BaseLib::StructElement("CONNECTED", BaseLib::PVariable(new BaseLib::Variable(j->second->isOpen()))));
-			interface->structValue->insert(BaseLib::StructElement("DEFAULT", BaseLib::PVariable(new BaseLib::Variable(j->second->isDefault()))));
-			interface->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(j->second->lastPacketSent() / 1000)))));
-			interface->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(j->second->lastPacketReceived() / 1000)))));
-			array->arrayValue->push_back(interface);
+			interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", BaseLib::PVariable(new BaseLib::Variable(_familyId))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("ID", BaseLib::PVariable(new BaseLib::Variable(interface.second->getID()))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", BaseLib::PVariable(new BaseLib::Variable(centralAddress))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("TYPE", BaseLib::PVariable(new BaseLib::Variable(interface.second->getType()))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("CONNECTED", BaseLib::PVariable(new BaseLib::Variable(interface.second->isOpen()))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("DEFAULT", BaseLib::PVariable(new BaseLib::Variable(interface.second->isDefault()))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketSent() / 1000)))));
+			interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketReceived() / 1000)))));
+			array->arrayValue->push_back(interfaceStruct);
 		}
 		return array;
 	}

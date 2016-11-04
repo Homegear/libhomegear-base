@@ -36,12 +36,12 @@ namespace BaseLib
 namespace Rpc
 {
 
-RpcDecoder::RpcDecoder(BaseLib::Obj* baseLib) : RpcDecoder(baseLib, false)
+RpcDecoder::RpcDecoder(BaseLib::SharedObjects* baseLib) : RpcDecoder(baseLib, false)
 {
 
 }
 
-RpcDecoder::RpcDecoder(BaseLib::Obj* baseLib, bool ansi, bool setInteger32) : _bl(baseLib), _setInteger32(setInteger32)
+RpcDecoder::RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteger32) : _bl(baseLib), _setInteger32(setInteger32)
 {
 	_decoder = std::unique_ptr<BinaryDecoder>(new BinaryDecoder(baseLib, ansi));
 }

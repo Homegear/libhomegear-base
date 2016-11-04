@@ -36,7 +36,7 @@ namespace BaseLib
 namespace HmDeviceDescription
 {
 
-HmConverter::HmConverter(BaseLib::Obj* baseLib)
+HmConverter::HmConverter(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

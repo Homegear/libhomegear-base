@@ -53,7 +53,7 @@ ThreadManager::~ThreadManager()
 {
 }
 
-void ThreadManager::init(BaseLib::Obj* baseLib, bool testMaxThreadCount)
+void ThreadManager::init(BaseLib::SharedObjects* baseLib, bool testMaxThreadCount)
 {
 	_bl = baseLib;
 	if(testMaxThreadCount) this->testMaxThreadCount();

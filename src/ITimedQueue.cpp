@@ -34,9 +34,8 @@
 namespace BaseLib
 {
 
-ITimedQueue::ITimedQueue(Obj* baseLib)
+ITimedQueue::ITimedQueue(SharedObjects* baseLib) : IQueueBase(baseLib)
 {
-	_bl = baseLib;
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
 		_stopProcessingThread[i] = true;
@@ -144,11 +143,7 @@ void ITimedQueue::process(int32_t index)
 				if(_firstPositionChanged[index]) _firstPositionChanged[index] = false;
 			}
 			else _bufferMutex[index].unlock();
-			if(_stopProcessingThread[index])
-			{
-				lock.unlock();
-				return;
-			}
+			if(_stopProcessingThread[index]) return;
 
 			now = _bl->hf.getTime();
 

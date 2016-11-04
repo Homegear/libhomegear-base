@@ -42,7 +42,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -58,7 +58,7 @@ public:
 		};
 	// }}}
 
-	Devices(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler, int32_t family);
+	Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandler, int32_t family);
 	virtual ~Devices() {}
 	bool empty() { return _devices.empty(); }
 	void clear();
@@ -74,7 +74,7 @@ public:
 	PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields);
 	// }}}
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _family = -1;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;

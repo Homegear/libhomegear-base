@@ -39,7 +39,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Rpc
 {
@@ -47,7 +47,7 @@ namespace Rpc
 class JsonEncoder
 {
 public:
-	JsonEncoder(BaseLib::Obj* baseLib);
+	JsonEncoder(BaseLib::SharedObjects* baseLib);
 	virtual ~JsonEncoder() {}
 
 	void encode(const std::shared_ptr<Variable> variable, std::string& json);
@@ -56,7 +56,7 @@ public:
 	void encodeResponse(const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
 	void encodeMQTTResponse(const std::string methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _requestId = 1;
 
 	void encodeValue(const std::shared_ptr<Variable>& variable, std::ostringstream& s);

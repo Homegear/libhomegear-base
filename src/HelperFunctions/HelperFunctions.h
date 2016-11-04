@@ -52,7 +52,7 @@
 
 namespace BaseLib
 {
-class Obj;
+class SharedObjects;
 
 /**
  * This class provides functions to make your life easier.
@@ -77,7 +77,7 @@ public:
 	 *
 	 * @param baseLib Pointer to the common base library object.
 	 */
-	void init(Obj* baseLib);
+	void init(SharedObjects* baseLib);
 
 	/**
 	 * Gets the current unix time stamp in milliseconds.
@@ -587,7 +587,7 @@ private:
 	/**
 	 * Pointer to the common base library object.
 	 */
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	/**
 	 * The result of checkEndianness() is stored in this variable. This is done through calling "init".

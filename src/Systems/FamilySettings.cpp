@@ -37,7 +37,7 @@ namespace BaseLib
 namespace Systems
 {
 
-FamilySettings::FamilySettings(BaseLib::Obj* bl, int32_t familyId)
+FamilySettings::FamilySettings(BaseLib::SharedObjects* bl, int32_t familyId)
 {
 	_bl = bl;
 	_familyId = familyId;
@@ -469,7 +469,8 @@ void FamilySettings::loadFromDatabase()
 			}
 			else
 			{
-				std::map<std::string, PPhysicalInterfaceSettings>::iterator settingsIterator = _physicalInterfaceSettings.find(interfacePair.first);
+				_settings[row->second.at(3)->textValue] = setting;
+				auto settingsIterator = _physicalInterfaceSettings.find(interfacePair.first);
 				PPhysicalInterfaceSettings settings;
 				if(settingsIterator != _physicalInterfaceSettings.end()) settings = settingsIterator->second;
 				else
@@ -933,6 +934,11 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		{
 			settings->portKeepAlive = value->stringValue;
 			_bl->out.printDebug("Debug: PortKeepAlive set to " + settings->portKeepAlive);
+		}
+		else if(name == "address")
+		{
+			settings->address = value->integerValue;
+			_bl->out.printDebug("Debug: address set to " + std::to_string(settings->address));
 		}
 		else if(name == "lankey")
 		{

@@ -31,14 +31,13 @@
 #ifndef IQUEUE_H_
 #define IQUEUE_H_
 
-#include <memory>
-#include <condition_variable>
-#include <thread>
+#include "IQueueBase.h"
+
 #include <vector>
 
 namespace BaseLib
 {
-class Obj;
+class SharedObjects;
 
 class IQueueEntry
 {
@@ -47,10 +46,10 @@ public:
 	virtual ~IQueueEntry() {};
 };
 
-class IQueue
+class IQueue : public IQueueBase
 {
 public:
-	IQueue(Obj* baseLib, int32_t bufferSize);
+	IQueue(SharedObjects* baseLib, int32_t bufferSize);
 	virtual ~IQueue();
 	void startQueue(int32_t index, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
@@ -58,8 +57,6 @@ public:
 	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
 	bool queueEmpty(int32_t index);
 private:
-	Obj* _bl = nullptr;
-	static const int32_t _queueCount = 2;
 	int32_t _bufferSize = 1000;
 	int32_t _bufferHead[_queueCount];
 	int32_t _bufferTail[_queueCount];
@@ -69,7 +66,6 @@ private:
 	std::vector<std::shared_ptr<std::thread>> _processingThread[_queueCount];
 	std::condition_variable _produceConditionVariable[_queueCount];
 	std::condition_variable _processingConditionVariable[_queueCount];
-	bool _stopProcessingThread[_queueCount];
 
 	void process(int32_t index);
 };

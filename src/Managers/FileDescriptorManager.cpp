@@ -38,7 +38,7 @@ FileDescriptorManager::FileDescriptorManager()
 {
 }
 
-void FileDescriptorManager::init(BaseLib::Obj* baseLib)
+void FileDescriptorManager::init(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

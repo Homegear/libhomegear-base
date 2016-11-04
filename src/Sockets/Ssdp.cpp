@@ -57,7 +57,7 @@ const PVariable SsdpInfo::info()
 	return _info;
 }
 
-Ssdp::Ssdp(Obj* baseLib)
+Ssdp::Ssdp(SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	getAddress();

@@ -43,7 +43,7 @@ using namespace BaseLib::DeviceDescription::ParameterCast;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -121,8 +121,8 @@ public:
 	//Helpers
 	bool hasDelayedAutoResetParameters = false;
 
-	Parameter(BaseLib::Obj* baseLib, ParameterGroup* parent);
-	Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* parent);
+	Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent);
+	Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent);
 	virtual ~Parameter();
 
 	//Helpers
@@ -155,7 +155,7 @@ public:
 
 	ParameterGroup* parent();
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	//Helpers
 	ParameterGroup* _parent = nullptr;

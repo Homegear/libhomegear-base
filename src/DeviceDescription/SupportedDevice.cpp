@@ -36,13 +36,13 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-SupportedDevice::SupportedDevice(BaseLib::Obj* baseLib, HomegearDevice* device)
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, HomegearDevice* device)
 {
 	_bl = baseLib;
 	_device = device;
 }
 
-SupportedDevice::SupportedDevice(BaseLib::Obj* baseLib, xml_node<>* node, HomegearDevice* device) : SupportedDevice(baseLib, device)
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node, HomegearDevice* device) : SupportedDevice(baseLib, device)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

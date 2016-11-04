@@ -41,7 +41,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 /*
  * This class is used, when a device needs to be accessible from different modules.
@@ -51,14 +51,14 @@ class SerialDeviceManager
 public:
 	SerialDeviceManager();
 	virtual ~SerialDeviceManager() {}
-	void init(BaseLib::Obj* baseLib);
+	void init(BaseLib::SharedObjects* baseLib);
 
 	virtual void add(const std::string& device, std::shared_ptr<SerialReaderWriter> readerWriter);
 	virtual std::shared_ptr<SerialReaderWriter> create(std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
 	virtual std::shared_ptr<SerialReaderWriter> get(const std::string& device);
 	virtual void remove(const std::string& device);
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::mutex _devicesMutex;
 	std::map<std::string, std::shared_ptr<SerialReaderWriter>> _devices;
 };
