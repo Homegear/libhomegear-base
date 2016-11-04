@@ -45,7 +45,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -62,8 +62,8 @@ public:
 		enum Enum { none, once, interval, permanent };
 	};
 
-	RunProgram(BaseLib::Obj* baseLib);
-	RunProgram(BaseLib::Obj* baseLib, xml_node<>* node);
+	RunProgram(BaseLib::SharedObjects* baseLib);
+	RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~RunProgram() {}
 
 	//Elements
@@ -74,7 +74,7 @@ public:
 	std::string script;
 
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

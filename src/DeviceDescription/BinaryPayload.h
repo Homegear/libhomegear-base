@@ -41,7 +41,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -54,8 +54,8 @@ typedef std::vector<PBinaryPayload> BinaryPayloads;
 class BinaryPayload
 {
 public:
-	BinaryPayload(BaseLib::Obj* baseLib);
-	BinaryPayload(BaseLib::Obj* baseLib, xml_node<>* node);
+	BinaryPayload(BaseLib::SharedObjects* baseLib);
+	BinaryPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~BinaryPayload() {}
 
 	double index = 0;
@@ -73,7 +73,7 @@ public:
 	int32_t omitIf = 0;
 	std::string parameterId;
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

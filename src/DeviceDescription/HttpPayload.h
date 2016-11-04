@@ -41,7 +41,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -54,8 +54,8 @@ typedef std::vector<PHttpPayload> HttpPayloads;
 class HttpPayload
 {
 public:
-	HttpPayload(BaseLib::Obj* baseLib);
-	HttpPayload(BaseLib::Obj* baseLib, xml_node<>* node);
+	HttpPayload(BaseLib::SharedObjects* baseLib);
+	HttpPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~HttpPayload() {}
 
 	std::string key;
@@ -69,7 +69,7 @@ public:
 	bool constValueStringSet = false;
 	std::string constValueString;
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

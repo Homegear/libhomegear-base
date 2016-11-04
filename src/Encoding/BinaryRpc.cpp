@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Rpc
 {
 
-BinaryRpc::BinaryRpc(BaseLib::Obj* bl)
+BinaryRpc::BinaryRpc(BaseLib::SharedObjects* bl)
 {
 	_bl = bl;
 	if(_bl == nullptr) throw BinaryRpcException("Base library pointer is null.");

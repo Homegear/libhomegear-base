@@ -36,7 +36,7 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-EnumerationValue::EnumerationValue(BaseLib::Obj* baseLib, xml_node<>* node)
+EnumerationValue::EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node<>* node)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -56,22 +56,22 @@ EnumerationValue::EnumerationValue(BaseLib::Obj* baseLib, xml_node<>* node)
 	}
 }
 
-ILogical::ILogical(BaseLib::Obj* baseLib)
+ILogical::ILogical(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-ILogical::ILogical(BaseLib::Obj* baseLib, xml_node<>* node) : ILogical(baseLib)
+ILogical::ILogical(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ILogical(baseLib)
 {
 
 }
 
-LogicalEnumeration::LogicalEnumeration(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tEnum;
 }
 
-LogicalEnumeration::LogicalEnumeration(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalEnumeration(baseLib)
+LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalEnumeration(baseLib)
 {
 	try
 	{
@@ -140,12 +140,12 @@ std::shared_ptr<Variable> LogicalEnumeration::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalInteger::LogicalInteger(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tInteger;
 }
 
-LogicalInteger::LogicalInteger(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalInteger(baseLib)
+LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalInteger(baseLib)
 {
 	try
 	{
@@ -220,12 +220,12 @@ std::shared_ptr<Variable> LogicalInteger::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalInteger64::LogicalInteger64(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tInteger64;
 }
 
-LogicalInteger64::LogicalInteger64(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalInteger64(baseLib)
+LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalInteger64(baseLib)
 {
 	try
 	{
@@ -300,12 +300,12 @@ std::shared_ptr<Variable> LogicalInteger64::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalDecimal::LogicalDecimal(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tFloat;
 }
 
-LogicalDecimal::LogicalDecimal(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalDecimal(baseLib)
+LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalDecimal(baseLib)
 {
 	try
 	{
@@ -380,12 +380,12 @@ std::shared_ptr<Variable> LogicalDecimal::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalBoolean::LogicalBoolean(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tBoolean;
 }
 
-LogicalBoolean::LogicalBoolean(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalBoolean(baseLib)
+LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalBoolean(baseLib)
 {
 	try
 	{
@@ -434,12 +434,12 @@ std::shared_ptr<Variable> LogicalBoolean::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalString::LogicalString(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalString::LogicalString(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tString;
 }
 
-LogicalString::LogicalString(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalString(baseLib)
+LogicalString::LogicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalString(baseLib)
 {
 	try
 	{
@@ -488,12 +488,12 @@ std::shared_ptr<Variable> LogicalString::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalAction::LogicalAction(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tAction;
 }
 
-LogicalAction::LogicalAction(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalAction(baseLib)
+LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalAction(baseLib)
 {
 	try
 	{
@@ -542,12 +542,12 @@ std::shared_ptr<Variable> LogicalAction::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable(defaultValue));
 }
 
-LogicalArray::LogicalArray(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tArray;
 }
 
-LogicalArray::LogicalArray(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalArray(baseLib)
+LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalArray(baseLib)
 {
 	try
 	{
@@ -584,12 +584,12 @@ std::shared_ptr<Variable> LogicalArray::getDefaultValue()
 	return std::shared_ptr<Variable>(new Variable());
 }
 
-LogicalStruct::LogicalStruct(BaseLib::Obj* baseLib) : ILogical(baseLib)
+LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 {
 	type = Type::Enum::tStruct;
 }
 
-LogicalStruct::LogicalStruct(BaseLib::Obj* baseLib, xml_node<>* node) : LogicalStruct(baseLib)
+LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalStruct(baseLib)
 {
 	try
 	{

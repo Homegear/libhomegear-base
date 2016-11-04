@@ -40,13 +40,14 @@
 #include <mutex>
 #include <map>
 #include <condition_variable>
+#include <atomic>
 
 #include <dirent.h>
 
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Systems
 {
@@ -83,8 +84,8 @@ public:
 	};
 	//End event handling
 
-	IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId);
-	IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings);
+	IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId);
+	IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings);
 
 	virtual ~IPhysicalInterface();
 
@@ -104,12 +105,12 @@ public:
 	virtual bool isDefault() { return _settings->isDefault; }
 	virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _familyId = -1;
 	std::shared_ptr<PhysicalInterfaceSettings> _settings;
 	std::thread _listenThread;
 	std::thread _callbackThread;
-	bool _stopCallbackThread = false;
+	std::atomic_bool _stopCallbackThread;
 	static const int32_t _packetBufferSize = 1000;
 	std::mutex _packetBufferMutex;
 	int32_t _packetBufferHead = 0;
@@ -119,10 +120,10 @@ protected:
 	std::thread _packetProcessingThread;
 	bool _packetProcessingPacketAvailable = false;
 	std::condition_variable _packetProcessingConditionVariable;
-	bool _stopPacketProcessingThread = false;
+	std::atomic_bool _stopPacketProcessingThread;
 	std::string _lockfile;
 	std::mutex _sendMutex;
-	bool _stopped = false;
+	std::atomic_bool _stopped;
 	std::shared_ptr<FileDescriptor> _fileDescriptor;
 	std::map<uint32_t, std::shared_ptr<FileDescriptor>> _gpioDescriptors;
 	int64_t _lastPacketSent = -1;

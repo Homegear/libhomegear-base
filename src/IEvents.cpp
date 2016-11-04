@@ -37,12 +37,14 @@ namespace BaseLib
 EventHandler::EventHandler(int32_t id)
 {
 	_id = id;
+	_useCount = 0;
 }
 
 EventHandler::EventHandler(int32_t id, IEventSinkBase* handler)
 {
 	_id = id;
 	_handler = handler;
+	_useCount = 0;
 }
 
 EventHandler::~EventHandler()
@@ -66,16 +68,12 @@ IEventSinkBase* EventHandler::handler()
 
 void EventHandler::lock()
 {
-	_useCountMutex.lock();
 	_useCount++;
-	_useCountMutex.unlock();
 }
 
 void EventHandler::unlock()
 {
-	_useCountMutex.lock();
 	_useCount--;
-	_useCountMutex.unlock();
 }
 
 void EventHandler::invalidate()

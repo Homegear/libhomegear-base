@@ -39,7 +39,7 @@ HelperFunctions::HelperFunctions()
 {
 }
 
-void HelperFunctions::init(Obj* baseLib)
+void HelperFunctions::init(SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	checkEndianness();

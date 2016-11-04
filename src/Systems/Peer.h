@@ -131,8 +131,8 @@ public:
 	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>> linksCentral;
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
-	Peer(BaseLib::Obj* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
-	Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
 	virtual ~Peer();
 	virtual void dispose();
 
@@ -257,7 +257,7 @@ public:
 	virtual std::shared_ptr<BaseLib::Variable> setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, std::shared_ptr<BaseLib::Variable> value, bool wait);
     //End RPC methods
 protected:
-    BaseLib::Obj* _bl = nullptr;
+    BaseLib::SharedObjects* _bl = nullptr;
     std::shared_ptr<HomegearDevice> _rpcDevice;
     std::map<uint32_t, uint32_t> _variableDatabaseIDs;
     std::shared_ptr<ICentral> _central;
@@ -294,6 +294,7 @@ protected:
 	HomegearDevice::ReceiveModes::Enum _rxModes = HomegearDevice::ReceiveModes::Enum::none;
 
 	bool _disposing = false;
+	bool _saveTeam = false;
 	uint32_t _lastPacketReceived = 0;
 
 	// {{{ Event handling

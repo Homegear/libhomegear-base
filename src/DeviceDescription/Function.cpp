@@ -36,7 +36,7 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Function::Function(BaseLib::Obj* baseLib)
+Function::Function(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	configParameters.reset(new ConfigParameters(baseLib));
@@ -44,7 +44,7 @@ Function::Function(BaseLib::Obj* baseLib)
 	variables.reset(new Variables(baseLib));
 }
 
-Function::Function(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& channelIndex) : Function(baseLib)
+Function::Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& channelIndex) : Function(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
