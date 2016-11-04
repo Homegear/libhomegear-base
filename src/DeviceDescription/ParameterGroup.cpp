@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-ParameterGroup::ParameterGroup(BaseLib::Obj* baseLib)
+ParameterGroup::ParameterGroup(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-ParameterGroup::ParameterGroup(BaseLib::Obj* baseLib, xml_node<>* node) : ParameterGroup(baseLib)
+ParameterGroup::ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib)
 {
 	parseAttributes(node);
 	parseElements(node);
@@ -131,27 +131,27 @@ void ParameterGroup::getIndices(uint32_t startIndex, uint32_t endIndex, int32_t 
     }
 }
 
-ConfigParameters::ConfigParameters(BaseLib::Obj* baseLib) : ParameterGroup(baseLib)
+ConfigParameters::ConfigParameters(BaseLib::SharedObjects* baseLib) : ParameterGroup(baseLib)
 {
 }
 
-ConfigParameters::ConfigParameters(BaseLib::Obj* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
+ConfigParameters::ConfigParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
 {
 }
 
-Variables::Variables(BaseLib::Obj* baseLib) : ParameterGroup(baseLib)
+Variables::Variables(BaseLib::SharedObjects* baseLib) : ParameterGroup(baseLib)
 {
 }
 
-Variables::Variables(BaseLib::Obj* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
+Variables::Variables(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
 {
 }
 
-LinkParameters::LinkParameters(BaseLib::Obj* baseLib) : ParameterGroup(baseLib)
+LinkParameters::LinkParameters(BaseLib::SharedObjects* baseLib) : ParameterGroup(baseLib)
 {
 }
 
-LinkParameters::LinkParameters(BaseLib::Obj* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
+LinkParameters::LinkParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

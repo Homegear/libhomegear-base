@@ -35,7 +35,7 @@
 namespace BaseLib
 {
 
-HttpClient::HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
+HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
 {
 	_bl = baseLib;
 	_hostname = hostname;

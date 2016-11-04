@@ -66,12 +66,12 @@ ParameterDescription::ParameterDescription(xml_node<>* node)
 	}
 }
 
-DeviceFrame::DeviceFrame(BaseLib::Obj* baseLib)
+DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-DeviceFrame::DeviceFrame(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceFrame(baseLib)
+DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceFrame(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -153,12 +153,12 @@ DeviceFrame::DeviceFrame(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceFrame(
 	}
 }
 
-DeviceProgram::DeviceProgram(BaseLib::Obj* baseLib)
+DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-DeviceProgram::DeviceProgram(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceProgram(baseLib)
+DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceProgram(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -519,13 +519,13 @@ void ParameterConversion::toPacket(PVariable value)
     }
 }
 
-ParameterConversion::ParameterConversion(BaseLib::Obj* baseLib, HomeMaticParameter* parameter)
+ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter)
 {
 	_bl = baseLib;
 	_parameter = parameter;
 }
 
-ParameterConversion::ParameterConversion(BaseLib::Obj* baseLib, HomeMaticParameter* parameter, xml_node<>* node) : ParameterConversion(baseLib, parameter)
+ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter, xml_node<>* node) : ParameterConversion(baseLib, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1075,14 +1075,14 @@ void HomeMaticParameter::convertToPacket(const std::shared_ptr<Variable> value, 
     }
 }
 
-HomeMaticParameter::HomeMaticParameter(BaseLib::Obj* baseLib)
+HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	logicalParameter = std::shared_ptr<LogicalParameter>(new LogicalParameterInteger(baseLib));
 	physicalParameter = std::shared_ptr<PhysicalParameter>(new PhysicalParameter());
 }
 
-HomeMaticParameter::HomeMaticParameter(BaseLib::Obj* baseLib, xml_node<>* node, bool checkForID) : HomeMaticParameter(baseLib)
+HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, bool checkForID) : HomeMaticParameter(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1403,12 +1403,12 @@ bool DeviceType::checkFirmwareVersion(int32_t version)
 	return false;
 }
 
-DeviceType::DeviceType(BaseLib::Obj* baseLib)
+DeviceType::DeviceType(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-DeviceType::DeviceType(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceType(baseLib)
+DeviceType::DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceType(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1458,12 +1458,12 @@ DeviceType::DeviceType(BaseLib::Obj* baseLib, xml_node<>* node) : DeviceType(bas
 	}
 }
 
-ParameterSet::ParameterSet(BaseLib::Obj* baseLib)
+ParameterSet::ParameterSet(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-ParameterSet::ParameterSet(BaseLib::Obj* baseLib, xml_node<>* parameterSetNode) : ParameterSet(baseLib)
+ParameterSet::ParameterSet(BaseLib::SharedObjects* baseLib, xml_node<>* parameterSetNode) : ParameterSet(baseLib)
 {
 	init(parameterSetNode);
 }
@@ -1859,7 +1859,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 	}
 }
 
-LinkRole::LinkRole(BaseLib::Obj* baseLib, xml_node<>* node)
+LinkRole::LinkRole(BaseLib::SharedObjects* baseLib, xml_node<>* node)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1882,12 +1882,12 @@ LinkRole::LinkRole(BaseLib::Obj* baseLib, xml_node<>* node)
 	}
 }
 
-EnforceLink::EnforceLink(BaseLib::Obj* baseLib)
+EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-EnforceLink::EnforceLink(BaseLib::Obj* baseLib, xml_node<>* node) : EnforceLink(baseLib)
+EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib, xml_node<>* node) : EnforceLink(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1949,12 +1949,12 @@ PVariable EnforceLink::getValue(LogicalParameter::Type::Enum type)
     return std::shared_ptr<Variable>();
 }
 
-DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib)
+DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& index) : DeviceChannel(baseLib)
+DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& index) : DeviceChannel(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -2089,14 +2089,14 @@ DeviceChannel::DeviceChannel(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& 
 	}
 }
 
-Device::Device(BaseLib::Obj* baseLib, int32_t deviceFamily)
+Device::Device(BaseLib::SharedObjects* baseLib, int32_t deviceFamily)
 {
 	_bl = baseLib;
 	family = deviceFamily;
 	parameterSet.reset(new ParameterSet(baseLib));
 }
 
-Device::Device(BaseLib::Obj* baseLib, int32_t deviceFamily, std::string xmlFilename) : Device(baseLib, deviceFamily)
+Device::Device(BaseLib::SharedObjects* baseLib, int32_t deviceFamily, std::string xmlFilename) : Device(baseLib, deviceFamily)
 {
 	try
 	{

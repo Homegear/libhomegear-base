@@ -49,7 +49,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Systems
 {
@@ -72,7 +72,7 @@ public:
 	};
 	//End event handling
 
-	ServiceMessages(BaseLib::Obj* baseLib, uint64_t peerID, std::string peerSerial, IServiceEventSink* eventHandler);
+	ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerID, std::string peerSerial, IServiceEventSink* eventHandler);
 	virtual ~ServiceMessages();
 
 	virtual void setPeerID(uint64_t peerID) { _peerID = peerID; }
@@ -97,7 +97,7 @@ public:
 
     virtual bool getLowbat() { return _lowbat; }
 protected:
-    BaseLib::Obj* _bl = nullptr;
+    BaseLib::SharedObjects* _bl = nullptr;
     std::map<uint32_t, uint32_t> _variableDatabaseIDs;
     uint64_t _peerID = 0;
     std::string _peerSerial;

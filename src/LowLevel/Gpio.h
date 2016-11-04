@@ -38,7 +38,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 class FileDescriptor;
 
 class Gpio
@@ -63,7 +63,7 @@ public:
 			};
 	};
 
-	Gpio(BaseLib::Obj* baseLib);
+	Gpio(BaseLib::SharedObjects* baseLib);
 	virtual ~Gpio();
 
 	virtual void openDevice(uint32_t index, bool readOnly);
@@ -87,7 +87,7 @@ protected:
 		std::shared_ptr<FileDescriptor> fileDescriptor;
 	};
 
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::mutex _gpioMutex;
 	std::map<uint32_t, GpioInfo> _gpioInfo;
 };

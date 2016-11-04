@@ -41,7 +41,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -61,12 +61,12 @@ public:
 	//Elements
 	ScenarioEntries scenarioEntries;
 
-	Scenario(BaseLib::Obj* baseLib);
-	Scenario(BaseLib::Obj* baseLib, xml_node<>* node);
+	Scenario(BaseLib::SharedObjects* baseLib);
+	Scenario(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~Scenario();
 
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 
 }

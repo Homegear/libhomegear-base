@@ -38,7 +38,7 @@ Settings::Settings()
 {
 }
 
-void Settings::init(BaseLib::Obj* baseLib)
+void Settings::init(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

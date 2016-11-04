@@ -34,7 +34,7 @@
 namespace BaseLib
 {
 
-SerialReaderWriter::SerialReaderWriter(BaseLib::Obj* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority)
+SerialReaderWriter::SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority)
 {
 	_fileDescriptor = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_bl = baseLib;
@@ -44,6 +44,7 @@ SerialReaderWriter::SerialReaderWriter(BaseLib::Obj* baseLib, std::string device
 	if(_flags == 0) _flags = O_RDWR | O_NOCTTY | O_NDELAY;
 	_createLockFile = createLockFile;
 	_readThreadPriority = readThreadPriority;
+	_stopReadThread = false;
 	memset(&_termios, 0, sizeof(termios));
 }
 

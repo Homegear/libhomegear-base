@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-RunProgram::RunProgram(BaseLib::Obj* baseLib)
+RunProgram::RunProgram(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-RunProgram::RunProgram(BaseLib::Obj* baseLib, xml_node<>* node) : RunProgram(baseLib)
+RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : RunProgram(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

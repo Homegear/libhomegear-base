@@ -46,7 +46,7 @@ public:
 	LicensingFactory() {}
 	virtual ~LicensingFactory() {}
 
-	virtual Licensing* createLicensing(BaseLib::Obj* bl) = 0;
+	virtual Licensing* createLicensing(BaseLib::SharedObjects* bl) = 0;
 };
 
 }

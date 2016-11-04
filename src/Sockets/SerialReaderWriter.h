@@ -36,6 +36,7 @@
 #include "../IEvents.h"
 
 #include <thread>
+#include <atomic>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -61,7 +62,7 @@ public:
 	};
 	// }}}
 
-	SerialReaderWriter(BaseLib::Obj* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
+	SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
 	virtual ~SerialReaderWriter();
 
 	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
@@ -103,7 +104,7 @@ public:
 	 */
 	void writeChar(char data);
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<FileDescriptor> _fileDescriptor;
 	std::string _device;
 	struct termios _termios;
@@ -114,7 +115,7 @@ protected:
 	int32_t _readThreadPriority = 0;
 	int32_t _handles = 0;
 
-	bool _stopReadThread = false;
+	std::atomic_bool _stopReadThread;
 	std::mutex _readThreadMutex;
 	std::thread _readThread;
 	std::mutex _sendMutex;

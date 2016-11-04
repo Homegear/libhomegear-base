@@ -42,7 +42,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 class FileDescriptor;
 
 class SsdpInfo
@@ -60,7 +60,7 @@ private:
 class Ssdp
 {
 public:
-	Ssdp(BaseLib::Obj* baseLib);
+	Ssdp(BaseLib::SharedObjects* baseLib);
 	virtual ~Ssdp();
 
 	/**
@@ -72,7 +72,7 @@ public:
 	 */
 	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices);
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::string _address;
 	int32_t _port = 1900;
 

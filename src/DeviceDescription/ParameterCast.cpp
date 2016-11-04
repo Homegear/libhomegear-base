@@ -38,12 +38,12 @@ namespace DeviceDescription
 namespace ParameterCast
 {
 
-ICast::ICast(BaseLib::Obj* baseLib)
+ICast::ICast(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-ICast::ICast(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib)
+ICast::ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib)
 {
 	_parameter = parameter;
 }
@@ -56,11 +56,11 @@ void ICast::toPacket(PVariable value)
 {
 }
 
-DecimalIntegerScale::DecimalIntegerScale(BaseLib::Obj* baseLib) : ICast(baseLib)
+DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-DecimalIntegerScale::DecimalIntegerScale(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -96,11 +96,11 @@ void DecimalIntegerScale::toPacket(PVariable value)
 	value->floatValue = 0;
 }
 
-IntegerIntegerScale::IntegerIntegerScale(BaseLib::Obj* baseLib) : ICast(baseLib)
+IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerIntegerScale::IntegerIntegerScale(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -144,11 +144,11 @@ void IntegerIntegerScale::toPacket(PVariable value)
 	else _bl->out.printWarning("Warning: Operation is not set for parameter conversion integerIntegerScale.");
 }
 
-IntegerOffset::IntegerOffset(BaseLib::Obj* baseLib) : ICast(baseLib)
+IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerOffset::IntegerOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -185,11 +185,11 @@ void IntegerOffset::toPacket(PVariable value)
 	else value->integerValue = addOffset ? value->integerValue - offset : offset - value->integerValue;
 }
 
-DecimalOffset::DecimalOffset(BaseLib::Obj* baseLib) : ICast(baseLib)
+DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-DecimalOffset::DecimalOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -226,11 +226,11 @@ void DecimalOffset::toPacket(PVariable value)
 	else value->floatValue = addOffset ? value->floatValue - offset : offset - value->floatValue;
 }
 
-IntegerIntegerMap::IntegerIntegerMap(BaseLib::Obj* baseLib) : ICast(baseLib)
+IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerIntegerMap::IntegerIntegerMap(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -292,11 +292,11 @@ void IntegerIntegerMap::toPacket(PVariable value)
 	}
 }
 
-BooleanInteger::BooleanInteger(BaseLib::Obj* baseLib) : ICast(baseLib)
+BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanInteger::BooleanInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -343,11 +343,11 @@ void BooleanInteger::toPacket(PVariable value)
 	value->booleanValue = false;
 }
 
-BooleanString::BooleanString(BaseLib::Obj* baseLib) : ICast(baseLib)
+BooleanString::BooleanString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanString::BooleanString(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -383,11 +383,11 @@ void BooleanString::toPacket(PVariable value)
 	value->booleanValue = false;
 }
 
-DecimalConfigTime::DecimalConfigTime(BaseLib::Obj* baseLib) : ICast(baseLib)
+DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-DecimalConfigTime::DecimalConfigTime(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -506,11 +506,11 @@ void DecimalConfigTime::toPacket(PVariable value)
 	value->floatValue = 0;
 }
 
-IntegerTinyFloat::IntegerTinyFloat(BaseLib::Obj* baseLib) : ICast(baseLib)
+IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerTinyFloat::IntegerTinyFloat(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -559,11 +559,11 @@ void IntegerTinyFloat::toPacket(PVariable value)
 	value->integerValue = (mantissa << mantissaStart) | exponent;
 }
 
-StringUnsignedInteger::StringUnsignedInteger(BaseLib::Obj* baseLib) : ICast(baseLib)
+StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-StringUnsignedInteger::StringUnsignedInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -591,11 +591,11 @@ void StringUnsignedInteger::toPacket(PVariable value)
 	value->stringValue.clear();
 }
 
-BlindTest::BlindTest(BaseLib::Obj* baseLib) : ICast(baseLib)
+BlindTest::BlindTest(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BlindTest::BlindTest(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -624,11 +624,11 @@ void BlindTest::toPacket(PVariable value)
 	value->integerValue = this->value;
 }
 
-OptionString::OptionString(BaseLib::Obj* baseLib) : ICast(baseLib)
+OptionString::OptionString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionString::OptionString(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -678,11 +678,11 @@ void OptionString::toPacket(PVariable value)
 	}
 }
 
-OptionInteger::OptionInteger(BaseLib::Obj* baseLib) : ICast(baseLib)
+OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionInteger::OptionInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -731,11 +731,11 @@ void OptionInteger::toPacket(PVariable value)
 	if(element != valueMapToDevice.end()) value->integerValue = element->second;
 }
 
-StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::Obj* baseLib) : ICast(baseLib)
+StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -782,13 +782,13 @@ void StringJsonArrayDecimal::toPacket(PVariable value)
 	else _bl->out.printWarning("Warning: Only strings can be converted to Json arrays.");
 }
 
-RpcBinary::RpcBinary(BaseLib::Obj* baseLib) : ICast(baseLib)
+RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 }
 
-RpcBinary::RpcBinary(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
@@ -816,11 +816,11 @@ void RpcBinary::toPacket(PVariable value)
 	value->type = VariableType::tBinary;
 }
 
-Toggle::Toggle(BaseLib::Obj* baseLib) : ICast(baseLib)
+Toggle::Toggle(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Toggle::Toggle(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -846,11 +846,11 @@ void Toggle::toPacket(PVariable value)
 {
 }
 
-CcrtdnParty::CcrtdnParty(BaseLib::Obj* baseLib) : ICast(baseLib)
+CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-CcrtdnParty::CcrtdnParty(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -900,11 +900,11 @@ void CcrtdnParty::toPacket(PVariable value)
 	value->type = VariableType::tBinary;
 }
 
-Cfm::Cfm(BaseLib::Obj* baseLib) : ICast(baseLib)
+Cfm::Cfm(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Cfm::Cfm(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -957,11 +957,11 @@ void Cfm::toPacket(PVariable value)
 	value->type = VariableType::tBinary;
 }
 
-StringReplace::StringReplace(BaseLib::Obj* baseLib) : ICast(baseLib)
+StringReplace::StringReplace(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-StringReplace::StringReplace(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -989,11 +989,11 @@ void StringReplace::toPacket(PVariable value)
 	HelperFunctions::stringReplace(value->stringValue, search, replace);
 }
 
-HexStringByteArray::HexStringByteArray(BaseLib::Obj* baseLib) : ICast(baseLib)
+HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-HexStringByteArray::HexStringByteArray(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1017,11 +1017,11 @@ void HexStringByteArray::toPacket(PVariable value)
 	value->stringValue = _bl->hf.getBinaryString(value->stringValue);
 }
 
-TimeStringSeconds::TimeStringSeconds(BaseLib::Obj* baseLib) : ICast(baseLib)
+TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-TimeStringSeconds::TimeStringSeconds(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1059,11 +1059,11 @@ void TimeStringSeconds::toPacket(PVariable value)
 	value->integerValue = 0;
 }
 
-Invert::Invert(BaseLib::Obj* baseLib) : ICast(baseLib)
+Invert::Invert(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Invert::Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1117,11 +1117,11 @@ void Invert::toPacket(PVariable value)
 	}
 }
 
-Round::Round(BaseLib::Obj* baseLib) : ICast(baseLib)
+Round::Round(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Round::Round(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1148,11 +1148,11 @@ void Round::toPacket(PVariable value)
 	value->floatValue = std::round(value->floatValue * Math::Pow10(decimalPlaces)) / Math::Pow10(decimalPlaces);
 }
 
-Generic::Generic(BaseLib::Obj* baseLib) : ICast(baseLib)
+Generic::Generic(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Generic::Generic(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

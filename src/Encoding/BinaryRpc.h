@@ -37,7 +37,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Rpc
 {
@@ -58,7 +58,7 @@ public:
 		response
 	};
 
-	BinaryRpc(BaseLib::Obj* bl);
+	BinaryRpc(BaseLib::SharedObjects* bl);
 	virtual ~BinaryRpc();
 
 	Type getType() { return _type; }
@@ -78,7 +78,7 @@ public:
 	 */
 	int32_t process(char* buffer, int32_t bufferLength);
 private:
-	Obj* _bl = nullptr;
+	SharedObjects* _bl = nullptr;
 	bool _hasHeader = false;
 	bool _processingStarted = false;
 	bool _finished = false;

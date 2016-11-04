@@ -40,7 +40,7 @@ Io::Io()
 {
 }
 
-void Io::init(Obj* baseLib)
+void Io::init(SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

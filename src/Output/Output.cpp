@@ -53,7 +53,7 @@ Output::~Output()
 
 }
 
-void Output::init(Obj* baseLib)
+void Output::init(SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	_errorCallback = baseLib->out.getErrorCallback();

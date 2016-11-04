@@ -36,14 +36,16 @@ namespace BaseLib
 namespace Systems
 {
 
-ICentral::ICentral(int32_t deviceFamily, BaseLib::Obj* baseLib, ICentralEventSink* eventHandler)
+ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, ICentralEventSink* eventHandler)
 {
 	_bl = baseLib;
 	_deviceFamily = deviceFamily;
 	setEventHandler(eventHandler);
+	_initialized = false;
+	_disposing = false;
 }
 
-ICentral::ICentral(int32_t deviceFamily, BaseLib::Obj* baseLib, uint32_t deviceId, std::string serialNumber, int32_t address, ICentralEventSink* eventHandler) : ICentral(deviceFamily, baseLib, eventHandler)
+ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, uint32_t deviceId, std::string serialNumber, int32_t address, ICentralEventSink* eventHandler) : ICentral(deviceFamily, baseLib, eventHandler)
 {
 	_deviceId = deviceId;
 	_serialNumber = serialNumber;
@@ -1432,6 +1434,44 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
 			}
 		}
 
+		return array;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo)
+{
+	try
+	{
+		PVariable array(new Variable(VariableType::tArray));
+
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+
+		for(auto peer : peers)
+		{
+			//listTeams really needs a lot of ressources, so wait a little bit after each device
+			std::this_thread::sleep_for(std::chrono::milliseconds(3));
+			std::string serialNumber = peer->getSerialNumber();
+			if(serialNumber.empty() || serialNumber.at(0) != '*') continue;
+			auto descriptions = peer->getDeviceDescriptions(clientInfo, true, std::map<std::string, bool>());
+			if(!descriptions) continue;
+			for(auto description : *descriptions)
+			{
+				array->arrayValue->push_back(description);
+			}
+		}
 		return array;
 	}
 	catch(const std::exception& ex)

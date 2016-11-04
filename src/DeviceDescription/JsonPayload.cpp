@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib)
+JsonPayload::JsonPayload(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-JsonPayload::JsonPayload(BaseLib::Obj* baseLib, xml_node<>* node) : JsonPayload(baseLib)
+JsonPayload::JsonPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node) : JsonPayload(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

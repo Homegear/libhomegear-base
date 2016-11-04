@@ -36,13 +36,13 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type)
+IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type)
 {
 	_bl = baseLib;
 	this->type = type;
 }
 
-IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) : IPhysical(baseLib, type)
+IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node<>* node) : IPhysical(baseLib, type)
 {
 	try
 	{
@@ -115,42 +115,42 @@ IPhysical::IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node) :
     }
 }
 
-PhysicalNone::Physical(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::none)
+PhysicalNone::Physical(BaseLib::SharedObjects* baseLib) : IPhysical(baseLib, Type::Enum::none)
 {
 
 }
 
-PhysicalNone::Physical(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
+PhysicalNone::Physical(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
 {
 
 }
 
-PhysicalInteger::PhysicalInteger(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::tInteger)
+PhysicalInteger::PhysicalInteger(BaseLib::SharedObjects* baseLib) : IPhysical(baseLib, Type::Enum::tInteger)
 {
 
 }
 
-PhysicalInteger::PhysicalInteger(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tInteger, node)
+PhysicalInteger::PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tInteger, node)
 {
 
 }
 
-PhysicalBoolean::PhysicalBoolean(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::tBoolean)
+PhysicalBoolean::PhysicalBoolean(BaseLib::SharedObjects* baseLib) : IPhysical(baseLib, Type::Enum::tBoolean)
 {
 
 }
 
-PhysicalBoolean::PhysicalBoolean(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tBoolean, node)
+PhysicalBoolean::PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tBoolean, node)
 {
 
 }
 
-PhysicalString::PhysicalString(BaseLib::Obj* baseLib) : IPhysical(baseLib, Type::Enum::tString)
+PhysicalString::PhysicalString(BaseLib::SharedObjects* baseLib) : IPhysical(baseLib, Type::Enum::tString)
 {
 
 }
 
-PhysicalString::PhysicalString(BaseLib::Obj* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tString, node)
+PhysicalString::PhysicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tString, node)
 {
 
 }

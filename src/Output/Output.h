@@ -45,7 +45,7 @@
 
 namespace BaseLib
 {
-class Obj;
+class SharedObjects;
 
 /**
  * Class to print output of different kinds to the standard and error output.
@@ -72,7 +72,7 @@ public:
 	 * @param baseLib A pointer to the common base library object.
 	 * @param errorCallback
 	 */
-	void init(Obj* baseLib);
+	void init(SharedObjects* baseLib);
 
 	/**
 	 * Returns the prefix previously defined with setPrefix.
@@ -228,7 +228,7 @@ private:
 	/**
 	 * Pointer to the common base library object.
 	 */
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	/**
 	 * A prefix put before all messages.

@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-HttpPayload::HttpPayload(BaseLib::Obj* baseLib)
+HttpPayload::HttpPayload(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-HttpPayload::HttpPayload(BaseLib::Obj* baseLib, xml_node<>* node) : HttpPayload(baseLib)
+HttpPayload::HttpPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node) : HttpPayload(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

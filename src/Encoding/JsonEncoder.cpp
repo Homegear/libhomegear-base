@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Rpc
 {
 
-JsonEncoder::JsonEncoder(BaseLib::Obj* baseLib)
+JsonEncoder::JsonEncoder(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
