@@ -37,13 +37,13 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 class UdpSocket
 {
 public:
-	UdpSocket(BaseLib::Obj* baseLib);
-	UdpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port);
+	UdpSocket(BaseLib::SharedObjects* baseLib);
+	UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
 	virtual ~UdpSocket();
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
@@ -63,7 +63,7 @@ public:
 	void open();
 	void close();
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int64_t _readTimeout = 15000000;
 	bool _autoConnect = true;
 	std::string _hostname;

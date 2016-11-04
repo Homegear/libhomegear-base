@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Scenario::Scenario(BaseLib::Obj* baseLib)
+Scenario::Scenario(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-Scenario::Scenario(BaseLib::Obj* baseLib, xml_node<>* node) : Scenario(baseLib)
+Scenario::Scenario(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Scenario(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

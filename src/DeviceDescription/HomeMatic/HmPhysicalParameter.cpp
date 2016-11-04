@@ -35,7 +35,7 @@ namespace BaseLib
 {
 namespace HmDeviceDescription
 {
-SetRequestEx::SetRequestEx(Obj* baseLib, xml_node<char>* node)
+SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<char>* node)
 {
 	try
 	{
@@ -99,7 +99,7 @@ PhysicalParameter::PhysicalParameter()
 {
 }
 
-PhysicalParameter::PhysicalParameter(BaseLib::Obj* baseLib, xml_node<>* node) : PhysicalParameter()
+PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node) : PhysicalParameter()
 {
 	try
 	{

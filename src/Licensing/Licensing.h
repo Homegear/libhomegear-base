@@ -40,7 +40,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Licensing
 {
@@ -59,7 +59,7 @@ public:
 	typedef std::shared_ptr<DeviceInfo> PDeviceInfo;
 	typedef std::map<int32_t, std::map<int32_t, PDeviceInfo>> DeviceStates;
 
-	Licensing(BaseLib::Obj* bl);
+	Licensing(BaseLib::SharedObjects* bl);
 	virtual ~Licensing();
 
 	virtual bool init() = 0;
@@ -118,7 +118,7 @@ protected:
 		std::string activationKey;
 	};
 
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	bool _disposed = false;
 	int32_t _moduleId = -1;
 	std::map<uint64_t, uint32_t> _variableDatabaseIds;

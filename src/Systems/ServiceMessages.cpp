@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Systems
 {
 
-ServiceMessages::ServiceMessages(BaseLib::Obj* baseLib, uint64_t peerID, std::string peerSerial, IServiceEventSink* eventHandler)
+ServiceMessages::ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerID, std::string peerSerial, IServiceEventSink* eventHandler)
 {
 	_bl = baseLib;
 	_peerID = peerID;

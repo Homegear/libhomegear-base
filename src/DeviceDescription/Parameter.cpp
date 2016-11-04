@@ -55,7 +55,7 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::Obj* baseLib, ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
 {
 	_bl = baseLib;
 	_parent = parent;
@@ -63,7 +63,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, ParameterGroup* parent)
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

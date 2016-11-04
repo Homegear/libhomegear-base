@@ -48,7 +48,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace HmDeviceDescription
 {
@@ -61,7 +61,7 @@ public:
 	int32_t index = -1;
 
 	ParameterOption() {}
-	ParameterOption(BaseLib::Obj* baseLib, xml_node<>* node);
+	ParameterOption(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~ParameterOption() {}
 };
 
@@ -77,13 +77,13 @@ public:
 	bool enforce = false;
 	Type::Enum type = Type::none;
 
-	LogicalParameter(BaseLib::Obj* baseLib);
+	LogicalParameter(BaseLib::SharedObjects* baseLib);
 	virtual ~LogicalParameter() {}
-	static std::shared_ptr<LogicalParameter> fromXML(BaseLib::Obj* baseLib, xml_node<>* node);
+	static std::shared_ptr<LogicalParameter> fromXML(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();
 protected:
-	BaseLib::Obj* _bl;
+	BaseLib::SharedObjects* _bl;
 };
 
 class LogicalParameterInteger : public LogicalParameter
@@ -95,8 +95,8 @@ public:
 	int32_t enforceValue = 0;
 	std::unordered_map<std::string, int32_t> specialValues;
 
-	LogicalParameterInteger(BaseLib::Obj* baseLib);
-	LogicalParameterInteger(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterInteger(BaseLib::SharedObjects* baseLib);
+	LogicalParameterInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterInteger() {}
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -111,8 +111,8 @@ public:
 	double enforceValue = 0;
 	std::unordered_map<std::string, double> specialValues;
 
-	LogicalParameterFloat(BaseLib::Obj* baseLib);
-	LogicalParameterFloat(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterFloat(BaseLib::SharedObjects* baseLib);
+	LogicalParameterFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterFloat() {}
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -126,8 +126,8 @@ public:
 	int32_t defaultValue = 0;
 	int32_t enforceValue = 0;
 
-	LogicalParameterEnum(BaseLib::Obj* baseLib);
-	LogicalParameterEnum(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterEnum(BaseLib::SharedObjects* baseLib);
+	LogicalParameterEnum(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterEnum() {}
 	std::vector<ParameterOption> options;
 	virtual std::shared_ptr<Variable> getEnforceValue();
@@ -142,8 +142,8 @@ public:
 	bool defaultValue = false;
 	bool enforceValue = false;
 
-	LogicalParameterBoolean(BaseLib::Obj* baseLib);
-	LogicalParameterBoolean(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterBoolean(BaseLib::SharedObjects* baseLib);
+	LogicalParameterBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterBoolean() {}
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -157,8 +157,8 @@ public:
 	std::string defaultValue;
 	std::string enforceValue;
 
-	LogicalParameterString(BaseLib::Obj* baseLib);
-	LogicalParameterString(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterString(BaseLib::SharedObjects* baseLib);
+	LogicalParameterString(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterString() {}
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -172,8 +172,8 @@ public:
 	bool defaultValue = false;
 	bool enforceValue = false;
 
-	LogicalParameterAction(BaseLib::Obj* baseLib);
-	LogicalParameterAction(BaseLib::Obj* baseLib, xml_node<>* node);
+	LogicalParameterAction(BaseLib::SharedObjects* baseLib);
+	LogicalParameterAction(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LogicalParameterAction() {}
 	virtual std::shared_ptr<Variable> getEnforceValue();
 	virtual std::shared_ptr<Variable> getDefaultValue();

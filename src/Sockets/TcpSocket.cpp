@@ -33,14 +33,14 @@
 
 namespace BaseLib
 {
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	_autoConnect = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
 {
 	_bl = baseLib;
 	_autoConnect = false;
@@ -48,7 +48,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> sock
 	else _socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
 	signal(SIGPIPE, SIG_IGN);
@@ -58,7 +58,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string po
 	_port = port;
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSSL = useSSL;
 	_caFile = caFile;
@@ -67,7 +67,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string po
 	if(_useSSL) initSSL();
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
 {
 	_clientCertFile = clientCertFile;
 	_clientKeyFile = clientKeyFile;

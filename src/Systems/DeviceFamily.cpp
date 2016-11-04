@@ -43,7 +43,7 @@ bool DeviceFamily::peerSelected() { if(!_central) return false; return _central-
 bool DeviceFamily::hasPhysicalInterface() { return true; }
 std::shared_ptr<PhysicalInterfaces> DeviceFamily::physicalInterfaces() { return _physicalInterfaces; }
 
-DeviceFamily::DeviceFamily(BaseLib::Obj* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name)
+DeviceFamily::DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name)
 {
 	_bl = bl;
 	_eventHandler = eventHandler;

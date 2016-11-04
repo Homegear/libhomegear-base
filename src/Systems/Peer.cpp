@@ -38,7 +38,7 @@ namespace BaseLib
 namespace Systems
 {
 
-Peer::Peer(BaseLib::Obj* baseLib, uint32_t parentID, IPeerEventSink* eventHandler)
+Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler)
 {
 	try
 	{
@@ -63,7 +63,7 @@ Peer::Peer(BaseLib::Obj* baseLib, uint32_t parentID, IPeerEventSink* eventHandle
     }
 }
 
-Peer::Peer(BaseLib::Obj* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler) : Peer(baseLib, parentID, eventHandler)
+Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler) : Peer(baseLib, parentID, eventHandler)
 {
 	try
 	{
@@ -688,7 +688,7 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
 	std::string savepointName("peer_54" + std::to_string(_parentID) + std::to_string(_peerID));
 	try
 	{
-		if(deleting || isTeam()) return;
+		if(deleting || (isTeam() && !_saveTeam)) return;
 
 		if(savePeer)
 		{
@@ -720,7 +720,7 @@ void Peer::saveParameter(uint32_t parameterID, std::vector<uint8_t>& value)
 	{
 		if(parameterID == 0)
 		{
-			if(!isTeam()) _bl->out.printError("Error: Peer " + std::to_string(_peerID) + ": Tried to save parameter without parameterID");
+			if(!isTeam() || _saveTeam) _bl->out.printError("Error: Peer " + std::to_string(_peerID) + ": Tried to save parameter without parameterID");
 			return;
 		}
 		Database::DataRow data;
@@ -751,7 +751,7 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
 			saveParameter(parameterID, value);
 			return;
 		}
-		if(_peerID == 0 || isTeam()) return;
+		if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
 		//Creates a new entry for parameter in database
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
@@ -786,7 +786,7 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
 			saveParameter(parameterID, value);
 			return;
 		}
-		if(_peerID == 0 || isTeam()) return;
+		if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
 		//Creates a new entry for parameter in database
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
@@ -869,7 +869,7 @@ void Peer::saveVariables()
 {
 	try
 	{
-		if(_peerID == 0 || isTeam()) return;
+		if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
 		saveVariable(1000, _name);
 		saveVariable(1001, _firmwareVersion);
 		saveVariable(1002, (int32_t)_deviceType);
@@ -896,7 +896,7 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
 {
 	try
 	{
-		if(isTeam()) return;
+		if(isTeam() && !_saveTeam) return;
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -934,7 +934,7 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
 {
 	try
 	{
-		if(isTeam()) return;
+		if(isTeam() && !_saveTeam) return;
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -972,7 +972,7 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
 {
 	try
 	{
-		if(isTeam()) return;
+		if(isTeam() && !_saveTeam) return;
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -1010,7 +1010,7 @@ void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
 {
 	try
 	{
-		if(isTeam()) return;
+		if(isTeam() && !_saveTeam) return;
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -1048,7 +1048,7 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 {
 	try
 	{
-		if(isTeam()) return;
+		if(isTeam() && !_saveTeam) return;
 		bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
 		Database::DataRow data;
 		if(idIsKnown)
@@ -1086,7 +1086,7 @@ void Peer::saveConfig()
 {
 	try
 	{
-		if(_peerID == 0 || isTeam()) return;
+		if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
 		for(std::unordered_map<uint32_t, ConfigDataBlock>::iterator i = binaryConfig.begin(); i != binaryConfig.end(); ++i)
 		{
 			std::string emptyString;

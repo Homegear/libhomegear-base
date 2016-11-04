@@ -38,14 +38,14 @@
 
 namespace BaseLib
 {
-class Obj;
+class SharedObjects;
 
 class Settings
 {
 public:
 	Settings();
 	virtual ~Settings() {}
-	void init(BaseLib::Obj* baseLib);
+	void init(BaseLib::SharedObjects* baseLib);
 	void load(std::string filename);
 	bool changed();
 
@@ -120,7 +120,7 @@ public:
 	std::string gpioPath() { return _gpioPath; }
 	std::vector<uint32_t> exportGpios() { return _exportGpios; }
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::string _path;
 	int32_t _lastModified = -1;
 	int32_t _clientSettingsLastModified = -1;

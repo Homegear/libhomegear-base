@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Rpc
 {
 
-XmlrpcEncoder::XmlrpcEncoder(BaseLib::Obj* baseLib)
+XmlrpcEncoder::XmlrpcEncoder(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

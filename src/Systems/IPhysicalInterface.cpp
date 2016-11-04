@@ -38,7 +38,7 @@ namespace BaseLib
 namespace Systems
 {
 
-IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId)
+IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId)
 {
 	_bl = baseLib;
 	_familyId = familyId;
@@ -47,12 +47,15 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId)
 	_gpioDescriptors[1] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_gpioDescriptors[2] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_gpioDescriptors[3] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
+	_stopPacketProcessingThread = false;
+	_stopCallbackThread = false;
+	_stopped = false;
 
 	_lifetick1.first = 0;
 	_lifetick1.second = true;
 }
 
-IPhysicalInterface::IPhysicalInterface(BaseLib::Obj* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib, familyId)
+IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib, familyId)
 {
 	if(settings) _settings = settings;
 }
@@ -170,11 +173,8 @@ void IPhysicalInterface::processPackets()
 				_packetProcessingConditionVariable.wait(lock, [&]{ return _packetProcessingPacketAvailable; });
 			}
 			else _packetBufferMutex.unlock();
-			if(_stopPacketProcessingThread)
-			{
-				lock.unlock();
-				return;
-			}
+			if(_stopPacketProcessingThread) return;
+
 			//We need to copy all elements. In packetReceived so much can happen, that _homeMaticDevicesMutex might deadlock
 			EventHandlers eventHandlers = getEventHandlers();
 

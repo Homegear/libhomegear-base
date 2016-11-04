@@ -31,14 +31,13 @@
 #ifndef ITIMEDQUEUE_H_
 #define ITIMEDQUEUE_H_
 
-#include <memory>
-#include <condition_variable>
-#include <thread>
+#include "IQueueBase.h"
+
 #include <map>
 
 namespace BaseLib
 {
-class Obj;
+class SharedObjects;
 
 class ITimedQueueEntry
 {
@@ -53,10 +52,10 @@ private:
 	int64_t _time = 0;
 };
 
-class ITimedQueue
+class ITimedQueue : public IQueueBase
 {
 public:
-	ITimedQueue(Obj* baseLib);
+	ITimedQueue(SharedObjects* baseLib);
 	virtual ~ITimedQueue();
 	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
@@ -64,8 +63,6 @@ public:
 	void removeQueueEntry(int32_t index, int64_t id);
 	virtual void processQueueEntry(int32_t index, int64_t id, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
 private:
-	Obj* _bl = nullptr;
-	static const int32_t _queueCount = 2;
 	static const int32_t _bufferSize = 1000;
 	bool _firstPositionChanged[_queueCount];
 	std::mutex _bufferMutex[_queueCount];
@@ -73,7 +70,6 @@ private:
 	std::mutex _processingThreadMutex[_queueCount];
 	std::thread _processingThread[_queueCount];
 	std::condition_variable _processingConditionVariable[_queueCount];
-	bool _stopProcessingThread[_queueCount];
 
 	void process(int32_t index);
 };

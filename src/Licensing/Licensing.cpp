@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Licensing
 {
 
-Licensing::Licensing(BaseLib::Obj* bl)
+Licensing::Licensing(BaseLib::SharedObjects* bl)
 {
 	_bl = bl;
 }
