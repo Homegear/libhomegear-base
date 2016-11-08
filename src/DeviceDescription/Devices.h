@@ -47,6 +47,9 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
+/**
+ * Class to work with the device description files of one device family. It is used to load all device description files, list all device descriptions and to find the correct description for a device.
+ */
 class Devices : public IEvents
 {
 public:

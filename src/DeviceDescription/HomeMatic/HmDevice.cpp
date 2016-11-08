@@ -1333,35 +1333,6 @@ bool DeviceType::matches(int32_t family, std::string typeID)
     return false;
 }
 
-bool DeviceType::matches(int32_t family, std::shared_ptr<BaseLib::Systems::Packet> packet)
-{
-	try
-	{
-		if(parameters.empty() || (device && family != device->family)) return false;
-		for(std::vector<HomeMaticParameter>::iterator i = parameters.begin(); i != parameters.end(); ++i)
-		{
-			int32_t intValue = 0;
-			std::vector<uint8_t> data = packet->getPosition(i->index, i->size, -1);
-			_bl->hf.memcpyBigEndian(intValue, data);
-			if(!i->checkCondition(intValue)) return false;
-		}
-		return true;
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(const Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-    return false;
-}
-
 bool DeviceType::checkFirmwareVersion(int32_t version)
 {
 	try
