@@ -41,6 +41,9 @@ namespace BaseLib
 namespace HmDeviceDescription
 {
 
+/**
+ * This class converts HomeMatic device description files to Homegear's device description format.
+ */
 class HmConverter
 {
 public:
