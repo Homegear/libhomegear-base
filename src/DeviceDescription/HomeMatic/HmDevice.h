@@ -240,7 +240,6 @@ public:
 	DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* typeNode);
 	virtual ~DeviceType() {}
 
-	virtual bool matches(int32_t family, std::shared_ptr<BaseLib::Systems::Packet> packet);
 	virtual bool matches(int32_t family, std::string typeID);
 	virtual bool matches(uint32_t typeNumber, uint32_t firmwareVersion);
 	virtual bool checkFirmwareVersion(int32_t version);
