@@ -171,8 +171,9 @@ public:
 		 * Calculates the distance of a point to the triangle.
 		 *
 		 * @see <a href="http://wonderfl.net/c/b27F">Flash example by mutantleg</a>
+		 *
 		 * @param[in] p The point to check.
-		 * @param[out] (default nullptr) closestPoint When specified, the closest point in/on the triangle is stored in this variable.
+		 * @param[out] closestPoint (default nullptr) When specified, the closest point in/on the triangle is stored in this variable.
 		 * @return Returns the squared distance or 0 if the point is within the triangle.
 		 */
 		double distance(const Point2D& p, Point2D* closestPoint = nullptr);

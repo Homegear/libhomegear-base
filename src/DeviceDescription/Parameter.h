@@ -147,7 +147,7 @@ public:
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
-	 * @param[out] The converted binary data.
+	 * @param[out] convertedValue The converted binary data.
 	 */
 	void convertToPacket(std::string value, std::vector<uint8_t>& convertedValue);
 

@@ -122,10 +122,11 @@ public:
 	 *
 	 * @param buffer The buffer to parse
 	 * @param bufferLength The size of the buffer
-	 * @param checkForChunkedXML Optional. Only works for XML-like content (content needs to start with '<'). Needed when TransferEncoding is not set to chunked.
+	 * @param checkForChunkedXml (Optional, default "false") Only works for XML-like content (content needs to start with '<'). Needed when TransferEncoding is not set to chunked.
+	 * @param checkForChunkedJson (Optional, default "false") Only works for JSON-like content (content needs to start with '{' or '['). Needed when TransferEncoding is not set to chunked.
 	 * @return The number of processed bytes.
 	 */
-	int32_t process(char* buffer, int32_t bufferLength, bool checkForChunkedXmx = false, bool checkForChunkedJson = false);
+	int32_t process(char* buffer, int32_t bufferLength, bool checkForChunkedXml = false, bool checkForChunkedJson = false);
 	bool headerProcessingStarted() { return _headerProcessingStarted; }
 	bool dataProcessingStarted() { return _dataProcessingStarted; }
 	static std::string encodeURL(const std::string& url);

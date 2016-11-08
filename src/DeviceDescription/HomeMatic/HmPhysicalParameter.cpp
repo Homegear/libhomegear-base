@@ -35,7 +35,7 @@ namespace BaseLib
 {
 namespace HmDeviceDescription
 {
-SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<char>* node)
+SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<>* node)
 {
 	try
 	{

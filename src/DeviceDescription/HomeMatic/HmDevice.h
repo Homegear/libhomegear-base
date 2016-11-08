@@ -201,7 +201,7 @@ public:
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
-	 * @param[out] The converted binary data.
+	 * @param[out] convertedValue The converted binary data.
 	 */
 	virtual void convertToPacket(std::string value, std::vector<uint8_t>& convertedValue);
 
@@ -240,7 +240,7 @@ public:
 	DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* typeNode);
 	virtual ~DeviceType() {}
 
-	virtual bool matches(int32_t family, std::shared_ptr<Systems::Packet> packet);
+	virtual bool matches(int32_t family, std::shared_ptr<BaseLib::Systems::Packet> packet);
 	virtual bool matches(int32_t family, std::string typeID);
 	virtual bool matches(uint32_t typeNumber, uint32_t firmwareVersion);
 	virtual bool checkFirmwareVersion(int32_t version);
@@ -468,7 +468,7 @@ public:
 	virtual ~Device();
 	virtual std::shared_ptr<DeviceType> getType(uint32_t typeNumber, int32_t firmwareVersion);
 	virtual int32_t getCountFromSysinfo() { return _countFromSysinfo; }
-	virtual int32_t getCountFromSysinfo(std::shared_ptr<Systems::Packet> packet);
+	virtual int32_t getCountFromSysinfo(std::shared_ptr<BaseLib::Systems::Packet> packet);
 	virtual void setCountFromSysinfo(int32_t countFromSysinfo);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;

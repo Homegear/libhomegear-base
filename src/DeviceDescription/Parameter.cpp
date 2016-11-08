@@ -433,7 +433,7 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
     }
 }
 
-void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
