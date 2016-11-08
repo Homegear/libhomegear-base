@@ -48,9 +48,19 @@ namespace DeviceDescription
 
 class JsonPayload;
 
+/**
+ * Helper type for JsonPayload pointers.
+ */
 typedef std::shared_ptr<JsonPayload> PJsonPayload;
+
+/**
+ * Helper type for JsonPayload pointer arrays.
+ */
 typedef std::vector<PJsonPayload> JsonPayloads;
 
+/**
+ * Class describing JSON payloads.
+ */
 class JsonPayload
 {
 public:
