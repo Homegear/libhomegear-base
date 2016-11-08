@@ -45,8 +45,14 @@ namespace DeviceDescription
 
 class HomegearDevice;
 
+/**
+ * Helper type for HomegearDevice pointers.
+ */
 typedef std::shared_ptr<HomegearDevice> PHomegearDevice;
 
+/**
+ * Class defining a Homegear device. It is a direct representation of the device description XML file.
+ */
 class HomegearDevice
 {
 public:
