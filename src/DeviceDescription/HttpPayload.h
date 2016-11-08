@@ -48,9 +48,19 @@ namespace DeviceDescription
 
 class HttpPayload;
 
+/**
+ * Helper type for HttpPayload pointers.
+ */
 typedef std::shared_ptr<HttpPayload> PHttpPayload;
+
+/**
+ * Helper type for HttpPayload pointer arrays.
+ */
 typedef std::vector<PHttpPayload> HttpPayloads;
 
+/**
+ * Class describing HTTP payloads.
+ */
 class HttpPayload
 {
 public:
