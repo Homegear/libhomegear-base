@@ -174,6 +174,7 @@ public:
 	 *
 	 * @param exePath The path to the main executable.
 	 * @param errorCallback Callback function which will be called for all error messages. First parameter is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
+	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.
 	 */
 	SharedObjects(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount);
 
