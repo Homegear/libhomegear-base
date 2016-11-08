@@ -123,7 +123,7 @@ public:
 	bool operator>=(const Variable& rhs);
 	bool operator!=(const Variable& rhs);
 private:
-	std::string print(PVariable, std::string indent);
+	std::string print(PVariable variable, std::string indent);
 	std::string printStruct(PStruct rpcStruct, std::string indent);
 	std::string printArray(PArray rpcArray, std::string indent);
 

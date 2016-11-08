@@ -169,7 +169,7 @@ public:
 	 * Copys a file.
 	 *
 	 * @param source The path to the file.
-	 * @param target The destination path to copy the file to.
+	 * @param dest The destination path to copy the file to.
 	 * @return Returns true on success.
 	 */
 	bool copyFile(std::string source, std::string dest);
@@ -178,7 +178,7 @@ public:
 	 * Moves a file.
 	 *
 	 * @param source The path to the file.
-	 * @param target The destination path to move the file to.
+	 * @param dest The destination path to move the file to.
 	 * @return Returns true on success.
 	 */
 	static bool moveFile(std::string source, std::string dest);

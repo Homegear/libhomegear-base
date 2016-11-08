@@ -154,6 +154,7 @@ public:
 	/**
      * RPC function to change the Id of the peer.
      *
+     * @param clientInfo Information about the RPC client.
      * @param oldPeerId The current ID of the peer.
      * @param newPeerId The new ID of the peer.
      * @return Returns "RPC void" on success or RPC error "-100" when the new peer ID is invalid and error "-101" when the new peer ID is already in use.

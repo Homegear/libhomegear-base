@@ -1333,7 +1333,7 @@ bool DeviceType::matches(int32_t family, std::string typeID)
     return false;
 }
 
-bool DeviceType::matches(int32_t family, std::shared_ptr<Systems::Packet> packet)
+bool DeviceType::matches(int32_t family, std::shared_ptr<BaseLib::Systems::Packet> packet)
 {
 	try
 	{
@@ -2475,7 +2475,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
     }
 }
 
-int32_t Device::getCountFromSysinfo(std::shared_ptr<Systems::Packet> packet)
+int32_t Device::getCountFromSysinfo(std::shared_ptr<BaseLib::Systems::Packet> packet)
 {
 	try
 	{

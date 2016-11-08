@@ -129,8 +129,8 @@ public:
 		 * Constructor taking intensities between 0 and 255 which are being converted to the normalized intensity between 0 and 1.
 		 *
 		 * @param red Intensity of red between 0 and 255.
-		 * @param red Intensity of green between 0 and 255.
-		 * @param red Intensity of blue between 0 and 255.
+		 * @param green Intensity of green between 0 and 255.
+		 * @param blue Intensity of blue between 0 and 255.
 		 */
 		NormalizedRGB(uint8_t red, uint8_t green, uint8_t blue) { setRed(red); setGreen(green); setBlue(blue); }
 
