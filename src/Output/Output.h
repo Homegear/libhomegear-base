@@ -69,8 +69,8 @@ public:
 	/**
 	 * Initializes the object.
 	 * Not calling this method might cause segmentation faults as the base library pointer is unset.
+	 *
 	 * @param baseLib A pointer to the common base library object.
-	 * @param errorCallback
 	 */
 	void init(SharedObjects* baseLib);
 

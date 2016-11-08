@@ -67,8 +67,11 @@ template<typename Data> void Gcrypt::setIv(const Data& iv)
 	setIv(&iv[0], iv.size());
 }
 
+
+#ifndef DOXYGEN_SKIP
 template void Gcrypt::setIv<std::vector<char>>(const std::vector<char>& iv);
 template void Gcrypt::setIv<std::vector<uint8_t>>(const std::vector<uint8_t>& iv);
+#endif
 
 void Gcrypt::setIv(const void* iv, const size_t length)
 {
@@ -82,8 +85,10 @@ template<typename Data> void Gcrypt::setKey(const Data& key)
 	setKey(&key[0], key.size());
 }
 
+#ifndef DOXYGEN_SKIP
 template void Gcrypt::setKey<std::vector<char>>(const std::vector<char>& key);
 template void Gcrypt::setKey<std::vector<uint8_t>>(const std::vector<uint8_t>& key);
+#endif
 
 void Gcrypt::setKey(const void* key, const size_t length)
 {
@@ -106,10 +111,12 @@ template<typename DataOut, typename DataIn> void Gcrypt::encrypt(DataOut& out, c
 	encrypt(&out[0], out.size(), &in[0], in.size());
 }
 
+#ifndef DOXYGEN_SKIP
 template void Gcrypt::encrypt<std::vector<char>, std::vector<char>>(std::vector<char>& out, const std::vector<char>& in);
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+#endif
 
 void Gcrypt::decrypt(void* out, const size_t outLength, const void* in, const size_t inLength)
 {
@@ -125,10 +132,12 @@ template<typename DataOut, typename DataIn> void Gcrypt::decrypt(DataOut& out, c
 	decrypt(&out[0], out.size(), &in[0], in.size());
 }
 
+#ifndef DOXYGEN_SKIP
 template void Gcrypt::decrypt<std::vector<char>, std::vector<char>>(std::vector<char>& out, const std::vector<char>& in);
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+#endif
 
 }
 }

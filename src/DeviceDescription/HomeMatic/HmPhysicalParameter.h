@@ -91,7 +91,7 @@ public:
 	int32_t value = 0;
 
 	SetRequestEx() {}
-	SetRequestEx(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	SetRequestEx(SharedObjects* baseLib, xml_node<>* node);
 	virtual ~SetRequestEx() {}
 
 	bool checkCondition(int32_t value);
