@@ -1,7 +1,9 @@
-/// \dir DeviceDescription
-///
-/// \brief Contains all classes needed for loading, saving, converting and using Homegear's device description XML files.
-///
-/// \dir DeviceDescription/HomeMatic
-///
-/// \brief Contains classes to load and convert HomeMatic device description files.
+/*!
+\dir DeviceDescription
+
+\brief Contains all classes needed for loading, saving, converting and using Homegear's device description XML files.
+
+\dir DeviceDescription/HomeMatic
+
+\brief Contains classes to load and convert HomeMatic device description files.
+*/

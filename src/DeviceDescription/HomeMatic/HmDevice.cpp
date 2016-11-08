@@ -2475,33 +2475,6 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
     }
 }
 
-int32_t Device::getCountFromSysinfo(std::shared_ptr<BaseLib::Systems::Packet> packet)
-{
-	try
-	{
-		if(!packet) return -1;
-		uint32_t bitSize = 8;
-		if(countFromSysinfoSize < 1) bitSize = std::lround(countFromSysinfoSize * 10);
-		if(bitSize > 8) bitSize = 8;
-		int32_t bitMask = (1 << bitSize) - 1;
-		if(countFromSysinfoIndex > -1 && ((uint32_t)(countFromSysinfoIndex - 9) < packet->payload()->size())) return packet->payload()->at(countFromSysinfoIndex - 9) & bitMask;
-		return -1;
-	}
-    catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return -1;
-}
-
 void Device::setCountFromSysinfo(int32_t countFromSysinfo)
 {
 	try
