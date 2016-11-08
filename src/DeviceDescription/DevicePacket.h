@@ -53,12 +53,34 @@ namespace DeviceDescription
 
 class Packet;
 
+/**
+ * Helper type for Packet pointers.
+ */
 typedef std::shared_ptr<Packet> PPacket;
+
+/**
+ * Helper type to store packets by integer message type.
+ */
 typedef std::multimap<uint32_t, PPacket> PacketsByMessageType;
+
+/**
+ * Helper type to store packets sorted by packet ID.
+ */
 typedef std::map<std::string, PPacket> PacketsById;
+
+/**
+ * Helper type to store packets sorted by function.
+ */
 typedef std::multimap<std::string, PPacket> PacketsByFunction;
+
+/**
+ * Helper type to store packets used to request values from devices.
+ */
 typedef std::map<int32_t, std::map<std::string, PPacket>> ValueRequestPackets;
 
+/**
+ * Class defining a physical packet.
+ */
 class Packet
 {
 public:

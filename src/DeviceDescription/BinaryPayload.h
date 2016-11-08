@@ -48,9 +48,19 @@ namespace DeviceDescription
 
 class BinaryPayload;
 
+/**
+ * Helper type for BinaryPayload pointers.
+ */
 typedef std::shared_ptr<BinaryPayload> PBinaryPayload;
+
+/**
+ * Helper type for arrays of BinaryPayload pointers.
+ */
 typedef std::vector<PBinaryPayload> BinaryPayloads;
 
+/**
+ * Class describing binary payloads.
+ */
 class BinaryPayload
 {
 public:
