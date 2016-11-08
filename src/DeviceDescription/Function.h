@@ -49,6 +49,9 @@ typedef std::set<std::string> LinkFunctionTypes;
 typedef std::shared_ptr<Function> PFunction;
 typedef std::map<uint32_t, PFunction> Functions;
 
+/**
+ * Class defining a device function or channel. One device can have multiple functions.
+ */
 class Function
 {
 public:
