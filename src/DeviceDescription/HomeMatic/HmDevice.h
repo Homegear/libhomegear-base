@@ -468,7 +468,6 @@ public:
 	virtual ~Device();
 	virtual std::shared_ptr<DeviceType> getType(uint32_t typeNumber, int32_t firmwareVersion);
 	virtual int32_t getCountFromSysinfo() { return _countFromSysinfo; }
-	virtual int32_t getCountFromSysinfo(std::shared_ptr<BaseLib::Systems::Packet> packet);
 	virtual void setCountFromSysinfo(int32_t countFromSysinfo);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
