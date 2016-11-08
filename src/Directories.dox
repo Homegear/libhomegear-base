@@ -1,9 +1,43 @@
 /*!
-\dir DeviceDescription
+\dir Database
+\brief Database related classes.
 
-\brief Contains all classes needed for loading, saving, converting and using Homegear's device description XML files.
+\dir DeviceDescription
+\brief Load, save, convert and use Homegear's device description XML files.
 
 \dir DeviceDescription/HomeMatic
+\brief Load and convert HomeMatic device description files.
 
-\brief Contains classes to load and convert HomeMatic device description files.
+\dir Encoding
+\brief Encode and decode data.
+
+\dir HelperFunctions
+\brief Generic helpers.
+
+\dir Licensing
+\brief Licensing related classes.
+
+\dir LowLevel
+\brief Access low level interfaces (like GPIOs, I²C, ...).
+
+\dir Managers
+\brief Software-wide manager classes.
+
+\dir Output
+\brief Logging-related classes.
+
+\dir ScriptEngine
+\brief Script engine-related classes.
+
+\dir Security
+\brief Authentication, hashing, encryption or decryption.
+
+\dir Settings
+\brief Load, save and get settings.
+
+\dir Sockets
+\brief High and low level classes for socket communication.
+
+\dir Systems
+\brief Base classes for family modules.
 */

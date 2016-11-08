@@ -39,6 +39,9 @@ namespace BaseLib
 namespace Database
 {
 
+/**
+ * Base class for the database controller.
+ */
 class IDatabaseController
 {
 public:
