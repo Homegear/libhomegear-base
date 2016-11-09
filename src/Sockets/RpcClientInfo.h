@@ -40,7 +40,8 @@ enum class RpcClientType
 {
 	generic,
 	ipsymcon,
-	ccu2
+	ccu2,
+	homematicconfigurator
 };
 
 enum class RpcType
