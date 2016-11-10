@@ -179,7 +179,7 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
 			//Thanks to telkamp (https://github.com/Homegear/Homegear/issues/223)
 			if(S_ISREG(statStruct.st_mode)) files.push_back(name);
-			else if(S_ISDIR(statStruct.st_mode))
+			else if(recursive && S_ISDIR(statStruct.st_mode))
 			{
 				std::vector<std::string> subdirFiles = getFiles(path + name, recursive);
 				for(std::vector<std::string>::iterator i = subdirFiles.begin(); i != subdirFiles.end(); ++i)
