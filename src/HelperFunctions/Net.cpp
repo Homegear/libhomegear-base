@@ -133,23 +133,25 @@ Net::RouteInfoList Net::getRoutes()
 
 		for (; RTA_OK(routeAttribute, routeLength); routeAttribute = RTA_NEXT(routeAttribute, routeLength))
 		{
-                switch(routeAttribute->rta_type)
-                {
-                        case RTA_OIF:
-                                if_indextoname(*(uint32_t*)RTA_DATA(routeAttribute), interfaceNameBuffer);
-                                interfaceNameBuffer[IF_NAMESIZE] = 0;
-                                info->interfaceName = std::string(interfaceNameBuffer);
-                                break;
-                        case RTA_GATEWAY:
-                                info->gateway = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                        case RTA_PREFSRC:
-                                info->sourceAddress = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                        case RTA_DST:
-                                info->destinationAddress = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                }
+			switch(routeAttribute->rta_type)
+			{
+				case RTA_OIF:
+					if(if_indextoname(*(uint32_t*)RTA_DATA(routeAttribute), interfaceNameBuffer))
+					{
+						interfaceNameBuffer[IF_NAMESIZE] = 0;
+						info->interfaceName = std::string(interfaceNameBuffer);
+					}
+					break;
+				case RTA_GATEWAY:
+					info->gateway = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+				case RTA_PREFSRC:
+					info->sourceAddress = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+				case RTA_DST:
+					info->destinationAddress = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+			}
         }
 
 		routeInfo.push_back(info);
