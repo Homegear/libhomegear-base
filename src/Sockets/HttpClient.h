@@ -97,6 +97,12 @@ public:
 	 */
 	void disconnect() { if(_socket) _socket->close(); }
 
+	/**
+	 * Returns the IP address of the HTTP server.
+	 * @return The IP address.
+	 */
+	std::string getIpAddress() { return _socket ? _socket->getIpAddress() : ""; }
+
 	/*
 	 * Sends an HTTP request and returns the response.
 	 *
