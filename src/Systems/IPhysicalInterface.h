@@ -104,6 +104,9 @@ public:
 	virtual std::string getID() { return _settings->id; }
 	virtual bool isDefault() { return _settings->isDefault; }
 	virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
+	virtual int32_t getAddress() { return _myAddress; }
+	virtual std::string getIpAddress() { return _ipAddress; }
+	virtual std::string getHostname() { return _hostname; }
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _familyId = -1;
@@ -132,6 +135,10 @@ protected:
 	bool _updateMode = false;
 	std::mutex _lifetick1Mutex;
 	std::pair<int64_t, bool> _lifetick1;
+
+	int32_t _myAddress = 0;
+	std::string _hostname;
+	std::string _ipAddress;
 
 	//Event handling
 	virtual void raisePacketReceived(std::shared_ptr<Packet> packet);

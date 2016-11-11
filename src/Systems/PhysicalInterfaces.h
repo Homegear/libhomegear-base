@@ -65,7 +65,7 @@ public:
 	bool lifetick();
 	bool isOpen();
 	void setup(int32_t userID, int32_t groupID);
-	PVariable listInterfaces(int32_t centralAddress);
+	PVariable listInterfaces();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _familyId = -1;
