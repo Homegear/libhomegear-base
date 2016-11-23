@@ -56,6 +56,7 @@
 #include "HelperFunctions/Pid.h"
 #include "HelperFunctions/Io.h"
 #include "LowLevel/Gpio.h"
+#include "LowLevel/Spi.h"
 #include "Output/Output.h"
 #include "DeviceDescription/Devices.h"
 #include "ScriptEngine/ScriptInfo.h"
