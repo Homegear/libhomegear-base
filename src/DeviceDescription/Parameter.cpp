@@ -55,7 +55,7 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::Obj* baseLib, ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
 {
 	_bl = baseLib;
 	_parent = parent;
@@ -63,7 +63,7 @@ Parameter::Parameter(BaseLib::Obj* baseLib, ParameterGroup* parent)
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::Obj* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -433,7 +433,7 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
     }
 }
 
-void Parameter::convertToPacket(const std::shared_ptr<Variable> value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{

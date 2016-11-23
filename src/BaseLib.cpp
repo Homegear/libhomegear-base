@@ -34,8 +34,11 @@
 namespace BaseLib
 {
 
-Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount)
+SharedObjects::SharedObjects(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount)
 {
+	booting = true;
+	shuttingDown = false;
+
 	executablePath = exePath;
 	threadManager.init(this, testMaxThreadCount);
 	fileDescriptorManager.init(this);
@@ -47,11 +50,11 @@ Obj::Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCa
 	out.setErrorCallback(errorCallback);
 }
 
-Obj::~Obj()
+SharedObjects::~SharedObjects()
 {
 }
 
-std::string Obj::version()
+std::string SharedObjects::version()
 {
 	return VERSION;
 }

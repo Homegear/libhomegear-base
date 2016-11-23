@@ -38,14 +38,14 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 class ThreadManager
 {
 public:
 	ThreadManager();
 	virtual ~ThreadManager();
-	void init(BaseLib::Obj* baseLib, bool testMaxThreadCount);
+	void init(BaseLib::SharedObjects* baseLib, bool testMaxThreadCount);
 
 	static int32_t getThreadPolicyFromString(std::string policy);
 	static int32_t parseThreadPriority(int32_t priority, int32_t policy);
@@ -80,7 +80,7 @@ public:
 	uint32_t getMaxRegisteredThreadCount();
 	void testMaxThreadCount();
 protected:
-	Obj* _bl = nullptr;
+	SharedObjects* _bl = nullptr;
     std::mutex _threadCountMutex;
     uint32_t _maxRegisteredThreadCount = 0;
     uint32_t _maxThreadCount = 0;

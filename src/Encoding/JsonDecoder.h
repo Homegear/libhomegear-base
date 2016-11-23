@@ -37,7 +37,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Rpc
 {
@@ -50,7 +50,7 @@ public:
 class JsonDecoder
 {
 public:
-	JsonDecoder(BaseLib::Obj* baseLib);
+	JsonDecoder(BaseLib::SharedObjects* baseLib);
 	virtual ~JsonDecoder() {}
 
 	std::shared_ptr<Variable> decode(const std::string& json);
@@ -58,7 +58,7 @@ public:
 	std::shared_ptr<Variable> decode(const std::vector<char>& json);
 	std::shared_ptr<Variable> decode(const std::vector<char>& json, uint32_t& bytesRead);
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	static inline bool posValid(const std::string& json, uint32_t& pos);
 	static inline bool posValid(const std::vector<char>& json, uint32_t& pos);

@@ -42,11 +42,14 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
 
+/**
+ * Class to work with the device description files of one device family. It is used to load all device description files, list all device descriptions and to find the correct description for a device.
+ */
 class Devices : public IEvents
 {
 public:
@@ -58,7 +61,7 @@ public:
 		};
 	// }}}
 
-	Devices(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler, int32_t family);
+	Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandler, int32_t family);
 	virtual ~Devices() {}
 	bool empty() { return _devices.empty(); }
 	void clear();
@@ -74,7 +77,7 @@ public:
 	PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields);
 	// }}}
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _family = -1;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;

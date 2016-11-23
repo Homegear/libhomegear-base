@@ -49,6 +49,9 @@ typedef std::set<std::string> LinkFunctionTypes;
 typedef std::shared_ptr<Function> PFunction;
 typedef std::map<uint32_t, PFunction> Functions;
 
+/**
+ * Class defining a device function or channel. One device can have multiple functions.
+ */
 class Function
 {
 public:
@@ -57,8 +60,8 @@ public:
 		enum Enum { none = 0, sender = 1, receiver = 2 };
 	};
 
-	Function(BaseLib::Obj* baseLib);
-	Function(BaseLib::Obj* baseLib, xml_node<>* node, uint32_t& channel);
+	Function(BaseLib::SharedObjects* baseLib);
+	Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& channel);
 	virtual ~Function() {}
 
 	//Attributes
@@ -101,7 +104,7 @@ public:
 	bool parameterSetDefined(ParameterGroup::Type::Enum type);
 	PParameterGroup getParameterGroup(ParameterGroup::Type::Enum type);
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

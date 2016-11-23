@@ -34,7 +34,7 @@
 namespace BaseLib
 {
 
-BinaryEncoder::BinaryEncoder(BaseLib::Obj* baseLib)
+BinaryEncoder::BinaryEncoder(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

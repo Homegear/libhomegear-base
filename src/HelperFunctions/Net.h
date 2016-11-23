@@ -98,6 +98,14 @@ public:
 	static std::string getMyIp6Address(std::string interfaceName = "");
 
 	/**
+	 * Tries to get the IP address for a hostname.
+	 *
+	 * @param hostname The hostname to get the IP address for. It is ok to pass an IP address as hostname.
+	 * @return Returns the IP address or an empty String on error.
+	 */
+	static std::string resolveHostname(std::string& hostname);
+
+	/**
 	 * Returns a list of all defined network routes.
 	 *
 	 * @return The returned routes of type RouteInfoList.

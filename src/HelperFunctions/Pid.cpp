@@ -28,9 +28,6 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef _PID_SOURCE_
-#define _PID_SOURCE_
-
 #include <cmath>
 #include "Pid.h"
 
@@ -106,5 +103,3 @@ Pid::~Pid()
 }
 
 }
-
-#endif

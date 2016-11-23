@@ -38,6 +38,7 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/netlink.h>
@@ -79,6 +80,34 @@ bool Net::isIp(std::string ipAddress)
 	struct sockaddr_in6 sa6;
 	if(inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr)) != 1 && inet_pton(AF_INET6, ipAddress.c_str(), &(sa6.sin6_addr)) != 1) return false;
 	return true;
+}
+
+std::string Net::resolveHostname(std::string& hostname)
+{
+	struct addrinfo* serverInfo = nullptr;
+	struct addrinfo hostInfo;
+	memset(&hostInfo, 0, sizeof hostInfo);
+
+	hostInfo.ai_family = AF_UNSPEC;
+	hostInfo.ai_socktype = SOCK_STREAM;
+
+	if(getaddrinfo(hostname.c_str(), nullptr, &hostInfo, &serverInfo) != 0)
+	{
+		freeaddrinfo(serverInfo);
+		throw NetException("Could not get address information: " + std::string(strerror(errno)));
+	}
+
+	char ipStringBuffer[INET6_ADDRSTRLEN];
+	if (serverInfo->ai_family == AF_INET) {
+		struct sockaddr_in *s = (struct sockaddr_in *)serverInfo->ai_addr;
+		inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
+	} else { // AF_INET6
+		struct sockaddr_in6 *s = (struct sockaddr_in6 *)serverInfo->ai_addr;
+		inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
+	}
+	std::string ipAddress(&ipStringBuffer[0]);
+	freeaddrinfo(serverInfo);
+	return ipAddress;
 }
 
 Net::RouteInfoList Net::getRoutes()
@@ -133,23 +162,25 @@ Net::RouteInfoList Net::getRoutes()
 
 		for (; RTA_OK(routeAttribute, routeLength); routeAttribute = RTA_NEXT(routeAttribute, routeLength))
 		{
-                switch(routeAttribute->rta_type)
-                {
-                        case RTA_OIF:
-                                if_indextoname(*(uint32_t*)RTA_DATA(routeAttribute), interfaceNameBuffer);
-                                interfaceNameBuffer[IF_NAMESIZE] = 0;
-                                info->interfaceName = std::string(interfaceNameBuffer);
-                                break;
-                        case RTA_GATEWAY:
-                                info->gateway = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                        case RTA_PREFSRC:
-                                info->sourceAddress = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                        case RTA_DST:
-                                info->destinationAddress = *(uint32_t*)RTA_DATA(routeAttribute);
-                                break;
-                }
+			switch(routeAttribute->rta_type)
+			{
+				case RTA_OIF:
+					if(if_indextoname(*(uint32_t*)RTA_DATA(routeAttribute), interfaceNameBuffer))
+					{
+						interfaceNameBuffer[IF_NAMESIZE] = 0;
+						info->interfaceName = std::string(interfaceNameBuffer);
+					}
+					break;
+				case RTA_GATEWAY:
+					info->gateway = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+				case RTA_PREFSRC:
+					info->sourceAddress = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+				case RTA_DST:
+					info->destinationAddress = *(uint32_t*)RTA_DATA(routeAttribute);
+					break;
+			}
         }
 
 		routeInfo.push_back(info);
@@ -202,7 +233,7 @@ std::string Net::getMyIpAddress(std::string interfaceName)
 			if(addressFound) break;
 		}
 		freeifaddrs(interfaces);
-		if(!addressFound) throw NetException("No IP address could be found: " + std::string(strerror(errno)));
+		if(!addressFound) throw NetException("No IP address could be found.");
 	}
 	return address;
 }
@@ -249,7 +280,7 @@ std::string Net::getMyIp6Address(std::string interfaceName)
 			if(addressFound) break;
 		}
 		freeifaddrs(interfaces);
-		if(!addressFound) throw NetException("No IP address could be found: " + std::string(strerror(errno)));
+		if(!addressFound) throw NetException("No IP address could be found.");
 	}
 	return address;
 }

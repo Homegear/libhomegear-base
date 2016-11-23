@@ -73,7 +73,7 @@ public:
 	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
 	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
 	 */
-	HttpClient(BaseLib::Obj* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true);
+	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true);
 
 	/**
 	 * Destructor
@@ -96,6 +96,12 @@ public:
 	 * Closes the socket.
 	 */
 	void disconnect() { if(_socket) _socket->close(); }
+
+	/**
+	 * Returns the IP address of the HTTP server.
+	 * @return The IP address.
+	 */
+	std::string getIpAddress() { return _socket ? _socket->getIpAddress() : ""; }
 
 	/*
 	 * Sends an HTTP request and returns the response.
@@ -132,7 +138,7 @@ protected:
 	/**
 	 * The common base library object.
 	 */
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	/**
 	 * Protects _socket to only allow one operation at a time.

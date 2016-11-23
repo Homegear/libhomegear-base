@@ -38,7 +38,7 @@ SerialDeviceManager::SerialDeviceManager()
 {
 }
 
-void SerialDeviceManager::init(BaseLib::Obj* baseLib)
+void SerialDeviceManager::init(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }

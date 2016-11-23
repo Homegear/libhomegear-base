@@ -34,9 +34,8 @@
 namespace BaseLib
 {
 
-IQueue::IQueue(Obj* baseLib, int32_t bufferSize)
+IQueue::IQueue(SharedObjects* baseLib, int32_t bufferSize) : IQueueBase(baseLib)
 {
-	_bl = baseLib;
 	if(bufferSize > 0) _bufferSize = bufferSize;
 	for(int32_t i = 0; i < _queueCount; i++)
 	{

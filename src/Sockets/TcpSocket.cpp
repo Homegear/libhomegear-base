@@ -33,14 +33,14 @@
 
 namespace BaseLib
 {
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	_autoConnect = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
 {
 	_bl = baseLib;
 	_autoConnect = false;
@@ -48,7 +48,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> sock
 	else _socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
 	signal(SIGPIPE, SIG_IGN);
@@ -58,7 +58,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string po
 	_port = port;
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSSL = useSSL;
 	_caFile = caFile;
@@ -67,7 +67,7 @@ TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string po
 	if(_useSSL) initSSL();
 }
 
-TcpSocket::TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port, useSSL, caFile, verifyCertificate)
 {
 	_clientCertFile = clientCertFile;
 	_clientKeyFile = clientKeyFile;
@@ -79,6 +79,13 @@ TcpSocket::~TcpSocket()
 {
 	_bl->fileDescriptorManager.close(_socketDescriptor);
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+}
+
+std::string TcpSocket::getIpAddress()
+{
+	if(!_ipAddress.empty()) return _ipAddress;
+	_ipAddress = Net::resolveHostname(_hostname);
+	return _ipAddress;
 }
 
 PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std::string& listenAddress)
@@ -722,20 +729,20 @@ void TcpSocket::getConnection()
 			struct sockaddr_in6 *s = (struct sockaddr_in6 *)serverInfo->ai_addr;
 			inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
 		}
-		std::string ipAddress = std::string(&ipStringBuffer[0]);
+		_ipAddress = std::string(&ipStringBuffer[0]);
 
 		_socketDescriptor = _bl->fileDescriptorManager.add(socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol));
 		if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
 		{
 			freeaddrinfo(serverInfo);
-			throw SocketOperationException("Could not create socket for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not create socket for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		int32_t optValue = 1;
 		if(setsockopt(_socketDescriptor->descriptor, SOL_SOCKET, SO_KEEPALIVE, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-			throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 30;
 		//Don't use SOL_TCP, as this constant doesn't exists in BSD
@@ -743,21 +750,21 @@ void TcpSocket::getConnection()
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-			throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 4;
 		if(setsockopt(_socketDescriptor->descriptor, getprotobyname("TCP")->p_proto, TCP_KEEPCNT, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-			throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 15;
 		if(setsockopt(_socketDescriptor->descriptor, getprotobyname("TCP")->p_proto, TCP_KEEPINTVL, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-			throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 
 		if(!(fcntl(_socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK))
@@ -766,7 +773,7 @@ void TcpSocket::getConnection()
 			{
 				freeaddrinfo(serverInfo);
 				_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-				throw SocketOperationException("Could not set socket options for server " + ipAddress + " on port " + _port + ": " + strerror(errno));
+				throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 			}
 		}
 
@@ -784,7 +791,7 @@ void TcpSocket::getConnection()
 			{
 				freeaddrinfo(serverInfo);
 				_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-				throw SocketTimeOutException("Connecting to server " + ipAddress + " on port " + _port + " timed out: " + strerror(errno));
+				throw SocketTimeOutException("Connecting to server " + _ipAddress + " on port " + _port + " timed out: " + strerror(errno));
 			}
 		}
 		freeaddrinfo(serverInfo);
@@ -810,7 +817,7 @@ void TcpSocket::getConnection()
 				else
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-					throw SocketTimeOutException("Could not connect to server " + ipAddress + " on port " + _port + ". Poll failed with error code: " + std::to_string(pollResult) + ".");
+					throw SocketTimeOutException("Could not connect to server " + _ipAddress + " on port " + _port + ". Poll failed with error code: " + std::to_string(pollResult) + ".");
 				}
 			}
 			else if(pollResult > 0)
@@ -819,7 +826,7 @@ void TcpSocket::getConnection()
 				if(getsockopt(_socketDescriptor->descriptor, SOL_SOCKET, SO_ERROR, &connectResult, &resultLength) < 0)
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-					throw SocketOperationException("Could not connect to server " + ipAddress + " on port " + _port + ": " + strerror(errno) + ".");
+					throw SocketOperationException("Could not connect to server " + _ipAddress + " on port " + _port + ": " + strerror(errno) + ".");
 				}
 				break;
 			}
@@ -833,7 +840,7 @@ void TcpSocket::getConnection()
 				else
 				{
 					_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-					throw SocketTimeOutException("Connecting to server " + ipAddress + " on port " + _port + " timed out.");
+					throw SocketTimeOutException("Connecting to server " + _ipAddress + " on port " + _port + " timed out.");
 				}
 			}
 		}

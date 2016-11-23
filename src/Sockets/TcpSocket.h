@@ -67,20 +67,21 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 class TcpSocket
 {
 public:
-	TcpSocket(BaseLib::Obj* baseLib);
-	TcpSocket(BaseLib::Obj* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
-	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port);
-	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
-	TcpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
+	TcpSocket(BaseLib::SharedObjects* baseLib);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
 	virtual ~TcpSocket();
 
 	PFileDescriptor bindSocket(std::string address, std::string port, std::string& listenAddress);
 
+	std::string getIpAddress();
 	void setConnectionRetries(int32_t retries) { _connectionRetries = retries; }
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
@@ -100,11 +101,12 @@ public:
 	void open();
 	void close();
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
 	int64_t _writeTimeout = 15000000;
 	bool _autoConnect = true;
+	std::string _ipAddress;
 	std::string _hostname;
 	std::string _port;
 	std::string _caFile;
