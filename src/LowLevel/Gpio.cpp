@@ -36,6 +36,9 @@
 namespace BaseLib
 {
 
+namespace LowLevel
+{
+
 Gpio::Gpio(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
@@ -587,4 +590,5 @@ void Gpio::setEdge(uint32_t index, GpioEdge::Enum edge)
     _gpioMutex.unlock();
 }
 
+}
 }
