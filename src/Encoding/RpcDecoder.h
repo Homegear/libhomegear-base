@@ -43,15 +43,15 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Rpc
 {
 class RpcDecoder
 {
 public:
-	RpcDecoder(BaseLib::Obj* baseLib);
-	RpcDecoder(BaseLib::Obj* baseLib, bool ansi, bool setInteger32 = true);
+	RpcDecoder(BaseLib::SharedObjects* baseLib);
+	RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteger32 = true);
 	virtual ~RpcDecoder() {}
 
 	virtual std::shared_ptr<RpcHeader> decodeHeader(std::vector<char>& packet);
@@ -62,7 +62,7 @@ public:
 	virtual std::shared_ptr<Variable> decodeResponse(std::vector<uint8_t>& packet, uint32_t offset = 0);
 	virtual void decodeResponse(PVariable& variable, uint32_t offset = 0);
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;
 	std::unique_ptr<BinaryDecoder> _decoder;
 	bool _setInteger32 = true;

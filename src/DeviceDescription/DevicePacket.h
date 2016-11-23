@@ -46,19 +46,41 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
 
 class Packet;
 
+/**
+ * Helper type for Packet pointers.
+ */
 typedef std::shared_ptr<Packet> PPacket;
+
+/**
+ * Helper type to store packets by integer message type.
+ */
 typedef std::multimap<uint32_t, PPacket> PacketsByMessageType;
+
+/**
+ * Helper type to store packets sorted by packet ID.
+ */
 typedef std::map<std::string, PPacket> PacketsById;
+
+/**
+ * Helper type to store packets sorted by function.
+ */
 typedef std::multimap<std::string, PPacket> PacketsByFunction;
+
+/**
+ * Helper type to store packets used to request values from devices.
+ */
 typedef std::map<int32_t, std::map<std::string, PPacket>> ValueRequestPackets;
 
+/**
+ * Class defining a physical packet.
+ */
 class Packet
 {
 public:
@@ -67,8 +89,8 @@ public:
 		enum Enum { none = 0, toCentral = 1, fromCentral = 2 };
 	};
 
-	Packet(BaseLib::Obj* baseLib);
-	Packet(BaseLib::Obj* baseLib, xml_node<>* node);
+	Packet(BaseLib::SharedObjects* baseLib);
+	Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~Packet() {}
 
 	//Attributes
@@ -102,7 +124,7 @@ public:
 	int32_t channelIndexOffset = 0;
 	std::vector<PParameter> associatedVariables;
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

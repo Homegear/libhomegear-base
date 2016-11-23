@@ -36,7 +36,7 @@ namespace BaseLib
 namespace Rpc
 {
 
-RpcEncoder::RpcEncoder(BaseLib::Obj* baseLib)
+RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	_encoder = std::unique_ptr<BinaryEncoder>(new BinaryEncoder(baseLib));
@@ -50,7 +50,7 @@ RpcEncoder::RpcEncoder(BaseLib::Obj* baseLib)
 	_packetStartError[4] = 0;
 }
 
-RpcEncoder::RpcEncoder(BaseLib::Obj* baseLib, bool forceInteger64) : RpcEncoder(baseLib)
+RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64) : RpcEncoder(baseLib)
 {
 	_forceInteger64 = forceInteger64;
 }

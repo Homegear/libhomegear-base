@@ -104,18 +104,18 @@ void HomegearDevice::setDynamicChannelCount(int32_t value)
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib)
+HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	runProgram.reset(new RunProgram(baseLib));
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, xml_node<>* node) : HomegearDevice(baseLib)
+HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node) : HomegearDevice(baseLib)
 {
 	if(node) parseXML(node);
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib)
+HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, bool& oldFormat) : HomegearDevice(baseLib)
 {
 	try
 	{
@@ -135,7 +135,7 @@ HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, b
     }
 }
 
-HomegearDevice::HomegearDevice(BaseLib::Obj* baseLib, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib)
+HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, std::vector<char>& xml) : HomegearDevice(baseLib)
 {
 	try
 	{

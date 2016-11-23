@@ -41,15 +41,18 @@ namespace BaseLib
 namespace HmDeviceDescription
 {
 
+/**
+ * This class converts HomeMatic device description files to Homegear's device description format.
+ */
 class HmConverter
 {
 public:
-	HmConverter(BaseLib::Obj* baseLib);
+	HmConverter(BaseLib::SharedObjects* baseLib);
 	virtual ~HmConverter() {}
 
 	void convert(std::shared_ptr<Device> homematicDevice, std::shared_ptr<HomegearDevice> homegearDevice);
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	void convertChannel(std::shared_ptr<DeviceChannel> homematicChannel, PFunction function);
 	void convertParameter(std::shared_ptr<HomeMaticParameter> homematicParameter, PParameter parameter);

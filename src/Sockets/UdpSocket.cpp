@@ -34,14 +34,14 @@
 namespace BaseLib
 {
 
-UdpSocket::UdpSocket(BaseLib::Obj* baseLib)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 	_autoConnect = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-UdpSocket::UdpSocket(BaseLib::Obj* baseLib, std::string hostname, std::string port)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
 	signal(SIGPIPE, SIG_IGN);

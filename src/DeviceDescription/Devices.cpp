@@ -37,7 +37,7 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Devices::Devices(BaseLib::Obj* baseLib, IDevicesEventSink* eventHandler, int32_t family)
+Devices::Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandler, int32_t family)
 {
 	_bl = baseLib;
 	setEventHandler(eventHandler);

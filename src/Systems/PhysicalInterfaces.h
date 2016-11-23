@@ -39,11 +39,12 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <atomic>
 
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Systems
 {
@@ -53,7 +54,7 @@ class IPhysicalInterface;
 class PhysicalInterfaces
 {
 public:
-	PhysicalInterfaces(BaseLib::Obj* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
+	PhysicalInterfaces(BaseLib::SharedObjects* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
 	virtual ~PhysicalInterfaces();
 	void dispose();
 
@@ -64,9 +65,9 @@ public:
 	bool lifetick();
 	bool isOpen();
 	void setup(int32_t userID, int32_t groupID);
-	PVariable listInterfaces(int32_t centralAddress);
+	PVariable listInterfaces();
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _familyId = -1;
 	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
 	std::mutex _physicalInterfacesMutex;

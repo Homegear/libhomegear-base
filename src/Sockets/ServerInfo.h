@@ -42,7 +42,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 class FileDescriptor;
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
@@ -100,15 +100,15 @@ public:
 	};
 
 	ServerInfo();
-	ServerInfo(BaseLib::Obj* baseLib);
+	ServerInfo(BaseLib::SharedObjects* baseLib);
 	virtual ~ServerInfo() {}
-	void init(BaseLib::Obj* baseLib);
+	void init(BaseLib::SharedObjects* baseLib);
 	void load(std::string filename);
 
 	int32_t count() { return _servers.size(); }
 	std::shared_ptr<Info> get(int32_t index) { if(_servers.find(index) != _servers.end()) return _servers[index]; else return std::shared_ptr<Info>(); }
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::map<int32_t, std::shared_ptr<Info>> _servers;
 
 	void reset();

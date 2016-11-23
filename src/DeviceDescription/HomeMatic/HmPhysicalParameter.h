@@ -46,7 +46,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace HmDeviceDescription
 {
@@ -91,7 +91,7 @@ public:
 	int32_t value = 0;
 
 	SetRequestEx() {}
-	SetRequestEx(BaseLib::Obj* baseLib, xml_node<>* node);
+	SetRequestEx(SharedObjects* baseLib, xml_node<>* node);
 	virtual ~SetRequestEx() {}
 
 	bool checkCondition(int32_t value);
@@ -138,7 +138,7 @@ public:
 	PhysicalParameterAddress address;
 
 	PhysicalParameter();
-	PhysicalParameter(BaseLib::Obj* baseLib, xml_node<>* node);
+	PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~PhysicalParameter() {}
 };
 

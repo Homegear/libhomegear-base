@@ -57,23 +57,23 @@ namespace ParameterCast
 class ICast
 {
 public:
-	ICast(BaseLib::Obj* baseLib);
-	ICast(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	ICast(BaseLib::SharedObjects* baseLib);
+	ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~ICast() {}
 
 	virtual bool needsBinaryPacketData() { return false; }
 	virtual void fromPacket(PVariable value);
 	virtual void toPacket(PVariable value);
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	Parameter* _parameter = nullptr;
 };
 
 class DecimalIntegerScale : public ICast
 {
 public:
-	DecimalIntegerScale(BaseLib::Obj* baseLib);
-	DecimalIntegerScale(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	DecimalIntegerScale(BaseLib::SharedObjects* baseLib);
+	DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~DecimalIntegerScale() {}
 
 	void fromPacket(PVariable value);
@@ -92,8 +92,8 @@ public:
 		enum Enum { none = 0, division = 1, multiplication = 2 };
 	};
 
-	IntegerIntegerScale(BaseLib::Obj* baseLib);
-	IntegerIntegerScale(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	IntegerIntegerScale(BaseLib::SharedObjects* baseLib);
+	IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~IntegerIntegerScale() {}
 
 	void fromPacket(PVariable value);
@@ -108,8 +108,8 @@ public:
 class IntegerOffset : public ICast
 {
 public:
-	IntegerOffset(BaseLib::Obj* baseLib);
-	IntegerOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	IntegerOffset(BaseLib::SharedObjects* baseLib);
+	IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~IntegerOffset() {}
 
 	void fromPacket(PVariable value);
@@ -124,8 +124,8 @@ public:
 class DecimalOffset : public ICast
 {
 public:
-	DecimalOffset(BaseLib::Obj* baseLib);
-	DecimalOffset(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	DecimalOffset(BaseLib::SharedObjects* baseLib);
+	DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~DecimalOffset() {}
 
 	void fromPacket(PVariable value);
@@ -145,8 +145,8 @@ public:
 		enum Enum { none = 0, fromDevice = 1, toDevice = 2, both = 3 };
 	};
 
-	IntegerIntegerMap(BaseLib::Obj* baseLib);
-	IntegerIntegerMap(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	IntegerIntegerMap(BaseLib::SharedObjects* baseLib);
+	IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~IntegerIntegerMap() {}
 
 	void fromPacket(PVariable value);
@@ -161,8 +161,8 @@ public:
 class BooleanInteger : public ICast
 {
 public:
-	BooleanInteger(BaseLib::Obj* baseLib);
-	BooleanInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	BooleanInteger(BaseLib::SharedObjects* baseLib);
+	BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~BooleanInteger() {}
 
 	void fromPacket(PVariable value);
@@ -178,8 +178,8 @@ public:
 class BooleanString : public ICast
 {
 public:
-	BooleanString(BaseLib::Obj* baseLib);
-	BooleanString(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	BooleanString(BaseLib::SharedObjects* baseLib);
+	BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~BooleanString() {}
 
 	void fromPacket(PVariable value);
@@ -194,8 +194,8 @@ public:
 class DecimalConfigTime : public ICast
 {
 public:
-	DecimalConfigTime(BaseLib::Obj* baseLib);
-	DecimalConfigTime(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	DecimalConfigTime(BaseLib::SharedObjects* baseLib);
+	DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~DecimalConfigTime() {}
 
 	void fromPacket(PVariable value);
@@ -209,8 +209,8 @@ public:
 class IntegerTinyFloat : public ICast
 {
 public:
-	IntegerTinyFloat(BaseLib::Obj* baseLib);
-	IntegerTinyFloat(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	IntegerTinyFloat(BaseLib::SharedObjects* baseLib);
+	IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~IntegerTinyFloat() {}
 
 	void fromPacket(PVariable value);
@@ -226,8 +226,8 @@ public:
 class StringUnsignedInteger : public ICast
 {
 public:
-	StringUnsignedInteger(BaseLib::Obj* baseLib);
-	StringUnsignedInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	StringUnsignedInteger(BaseLib::SharedObjects* baseLib);
+	StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~StringUnsignedInteger() {}
 
 	void fromPacket(PVariable value);
@@ -237,8 +237,8 @@ public:
 class BlindTest : public ICast
 {
 public:
-	BlindTest(BaseLib::Obj* baseLib);
-	BlindTest(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	BlindTest(BaseLib::SharedObjects* baseLib);
+	BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~BlindTest() {}
 
 	void fromPacket(PVariable value);
@@ -251,8 +251,8 @@ public:
 class OptionString : public ICast
 {
 public:
-	OptionString(BaseLib::Obj* baseLib);
-	OptionString(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	OptionString(BaseLib::SharedObjects* baseLib);
+	OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~OptionString() {}
 
 	void fromPacket(PVariable value);
@@ -262,8 +262,8 @@ public:
 class OptionInteger : public ICast
 {
 public:
-	OptionInteger(BaseLib::Obj* baseLib);
-	OptionInteger(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	OptionInteger(BaseLib::SharedObjects* baseLib);
+	OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~OptionInteger() {}
 
 	void fromPacket(PVariable value);
@@ -277,8 +277,8 @@ public:
 class StringJsonArrayDecimal : public ICast
 {
 public:
-	StringJsonArrayDecimal(BaseLib::Obj* baseLib);
-	StringJsonArrayDecimal(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib);
+	StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~StringJsonArrayDecimal() {}
 
 	void fromPacket(PVariable value);
@@ -288,8 +288,8 @@ public:
 class RpcBinary : public ICast
 {
 public:
-	RpcBinary(BaseLib::Obj* baseLib);
-	RpcBinary(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	RpcBinary(BaseLib::SharedObjects* baseLib);
+	RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~RpcBinary() {}
 
 	bool needsBinaryPacketData() { return true; }
@@ -304,8 +304,8 @@ private:
 class Toggle : public ICast
 {
 public:
-	Toggle(BaseLib::Obj* baseLib);
-	Toggle(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	Toggle(BaseLib::SharedObjects* baseLib);
+	Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~Toggle() {}
 
 	void fromPacket(PVariable value);
@@ -320,8 +320,8 @@ public:
 class CcrtdnParty : public ICast
 {
 public:
-	CcrtdnParty(BaseLib::Obj* baseLib);
-	CcrtdnParty(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	CcrtdnParty(BaseLib::SharedObjects* baseLib);
+	CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~CcrtdnParty() {}
 
 	bool needsBinaryPacketData() { return true; }
@@ -332,8 +332,8 @@ public:
 class Cfm : public ICast
 {
 public:
-	Cfm(BaseLib::Obj* baseLib);
-	Cfm(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	Cfm(BaseLib::SharedObjects* baseLib);
+	Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~Cfm() {}
 
 	bool needsBinaryPacketData() { return true; }
@@ -344,8 +344,8 @@ public:
 class StringReplace : public ICast
 {
 public:
-	StringReplace(BaseLib::Obj* baseLib);
-	StringReplace(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	StringReplace(BaseLib::SharedObjects* baseLib);
+	StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~StringReplace() {}
 
 	void fromPacket(PVariable value);
@@ -359,8 +359,8 @@ public:
 class HexStringByteArray : public ICast
 {
 public:
-	HexStringByteArray(BaseLib::Obj* baseLib);
-	HexStringByteArray(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	HexStringByteArray(BaseLib::SharedObjects* baseLib);
+	HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~HexStringByteArray() {}
 
 	void fromPacket(PVariable value);
@@ -370,8 +370,8 @@ public:
 class TimeStringSeconds : public ICast
 {
 public:
-	TimeStringSeconds(BaseLib::Obj* baseLib);
-	TimeStringSeconds(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	TimeStringSeconds(BaseLib::SharedObjects* baseLib);
+	TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~TimeStringSeconds() {}
 
 	void fromPacket(PVariable value);
@@ -381,8 +381,8 @@ public:
 class Invert : public ICast
 {
 public:
-	Invert(BaseLib::Obj* baseLib);
-	Invert(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	Invert(BaseLib::SharedObjects* baseLib);
+	Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~Invert() {}
 
 	void fromPacket(PVariable value);
@@ -392,8 +392,8 @@ public:
 class Round : public ICast
 {
 public:
-	Round(BaseLib::Obj* baseLib);
-	Round(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	Round(BaseLib::SharedObjects* baseLib);
+	Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~Round() {}
 
 	void fromPacket(PVariable value);
@@ -406,8 +406,8 @@ public:
 class Generic : public ICast
 {
 public:
-	Generic(BaseLib::Obj* baseLib);
-	Generic(BaseLib::Obj* baseLib, xml_node<>* node, Parameter* parameter);
+	Generic(BaseLib::SharedObjects* baseLib);
+	Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
 	virtual ~Generic() {}
 
 	void fromPacket(PVariable value);

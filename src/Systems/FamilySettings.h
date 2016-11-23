@@ -44,7 +44,7 @@
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace Systems
 {
@@ -60,7 +60,7 @@ public:
 	};
 	typedef std::shared_ptr<FamilySetting> PFamilySetting;
 
-	FamilySettings(BaseLib::Obj* bl, int32_t familyId);
+	FamilySettings(BaseLib::SharedObjects* bl, int32_t familyId);
 	virtual ~FamilySettings();
 	void dispose();
 	void load(std::string filename);
@@ -75,7 +75,7 @@ public:
 	void deleteFromDatabase(std::string& name);
 	std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
 private:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _familyId = -1;
 	std::mutex _settingsMutex;
 	std::map<std::string, PFamilySetting> _settings;

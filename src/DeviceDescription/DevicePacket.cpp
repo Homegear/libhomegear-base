@@ -36,12 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-Packet::Packet(BaseLib::Obj* baseLib)
+Packet::Packet(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
 }
 
-Packet::Packet(BaseLib::Obj* baseLib, xml_node<>* node) : Packet(baseLib)
+Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{

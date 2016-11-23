@@ -41,21 +41,31 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
 
 class JsonPayload;
 
+/**
+ * Helper type for JsonPayload pointers.
+ */
 typedef std::shared_ptr<JsonPayload> PJsonPayload;
+
+/**
+ * Helper type for JsonPayload pointer arrays.
+ */
 typedef std::vector<PJsonPayload> JsonPayloads;
 
+/**
+ * Class describing JSON payloads.
+ */
 class JsonPayload
 {
 public:
-	JsonPayload(BaseLib::Obj* baseLib);
-	JsonPayload(BaseLib::Obj* baseLib, xml_node<>* node);
+	JsonPayload(BaseLib::SharedObjects* baseLib);
+	JsonPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~JsonPayload() {}
 
 	std::string key;
@@ -71,7 +81,7 @@ public:
 	bool constValueStringSet = false;
 	std::string constValueString;
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

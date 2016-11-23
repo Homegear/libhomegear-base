@@ -47,6 +47,8 @@ public:
 
 	/**
 	 * Called on every HTTP GET request processed by the web server.
+	 *
+	 * @param serverInfo Information about the RPC server.
 	 * @param httpRequest The http request received by the webserver.
 	 * @param socket The socket to the client.
 	 * @param path The GET path called by the client.
@@ -56,6 +58,8 @@ public:
 
 	/**
 	 * Called on every HTTP POST request processed by the web server.
+	 *
+	 * @param serverInfo Information about the RPC server.
 	 * @param httpRequest The http request received by the webserver.
 	 * @param socket The socket to the client.
 	 * @param path The POST path called by the client.

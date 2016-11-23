@@ -64,8 +64,8 @@ public:
 		enum Enum { none = 0, config = 1, variables = 2, link = 3 };
 	};
 
-	ParameterGroup(BaseLib::Obj* baseLib);
-	ParameterGroup(BaseLib::Obj* baseLib, xml_node<>* node);
+	ParameterGroup(BaseLib::SharedObjects* baseLib);
+	ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~ParameterGroup() {}
 
 	//Attributes
@@ -87,7 +87,7 @@ public:
 	PParameter getParameter(std::string id);
 	void getIndices(uint32_t startIndex, uint32_t endIndex, int32_t list, std::vector<PParameter>& result);
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 
 	void parseAttributes(xml_node<>* node);
 	void parseElements(xml_node<>* node);
@@ -96,8 +96,8 @@ protected:
 class ConfigParameters : public ParameterGroup
 {
 public:
-	ConfigParameters(BaseLib::Obj* baseLib);
-	ConfigParameters(BaseLib::Obj* baseLib, xml_node<>* node);
+	ConfigParameters(BaseLib::SharedObjects* baseLib);
+	ConfigParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~ConfigParameters() {}
 
 	//Helpers
@@ -107,8 +107,8 @@ public:
 class Variables : public ParameterGroup
 {
 public:
-	Variables(BaseLib::Obj* baseLib);
-	Variables(BaseLib::Obj* baseLib, xml_node<>* node);
+	Variables(BaseLib::SharedObjects* baseLib);
+	Variables(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~Variables() {}
 
 	//Helpers
@@ -118,8 +118,8 @@ public:
 class LinkParameters : public ParameterGroup
 {
 public:
-	LinkParameters(BaseLib::Obj* baseLib);
-	LinkParameters(BaseLib::Obj* baseLib, xml_node<>* node);
+	LinkParameters(BaseLib::SharedObjects* baseLib);
+	LinkParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~LinkParameters() {}
 
 	//Helpers

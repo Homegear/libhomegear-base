@@ -56,6 +56,7 @@
 #include "HelperFunctions/Pid.h"
 #include "HelperFunctions/Io.h"
 #include "LowLevel/Gpio.h"
+#include "LowLevel/Spi.h"
 #include "Output/Output.h"
 #include "DeviceDescription/Devices.h"
 #include "ScriptEngine/ScriptInfo.h"
@@ -85,7 +86,7 @@ namespace BaseLib
  * This is the base library main class.
  * It is used to share objects and data between all modules and the main program.
  */
-class Obj
+class SharedObjects
 {
 public:
 	/**
@@ -106,12 +107,12 @@ public:
 	/**
 	 * True when Homegear is still starting. It is set to false, when start up is complete and isOpen() of all interfaces is "true" (plus 30 seconds).
 	 */
-	bool booting = true;
+	std::atomic_bool booting;
 
 	/**
 	 * True when Homegear received signal 15.
 	 */
-	bool shuttingDown = false;
+	std::atomic_bool shuttingDown;
 
 	/**
 	 * The path of the main executable.
@@ -174,13 +175,14 @@ public:
 	 *
 	 * @param exePath The path to the main executable.
 	 * @param errorCallback Callback function which will be called for all error messages. First parameter is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
+	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.
 	 */
-	Obj(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount);
+	SharedObjects(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount);
 
 	/**
 	 * Destructor.
 	 */
-	virtual ~Obj();
+	virtual ~SharedObjects();
 
 	/**
 	 * Returns the Homegear version.
@@ -188,8 +190,8 @@ public:
 	 */
 	static std::string version();
 private:
-	Obj(const Obj&);
-	Obj& operator=(const Obj&);
+	SharedObjects(const SharedObjects&);
+	SharedObjects& operator=(const SharedObjects&);
 };
 }
 #endif

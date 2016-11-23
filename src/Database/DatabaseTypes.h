@@ -43,7 +43,7 @@ namespace Database
 {
 
 /**
- * Class to store data of a data column in.
+ * Class to store data of a database column in.
  */
 class DataColumn
 {

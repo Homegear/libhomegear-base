@@ -40,7 +40,7 @@ using namespace rapidxml;
 namespace BaseLib
 {
 
-class Obj;
+class SharedObjects;
 
 namespace DeviceDescription
 {
@@ -96,46 +96,46 @@ public:
 	MemoryIndexOperation::Enum memoryIndexOperation = MemoryIndexOperation::Enum::none;
 	double memoryChannelStep = 0;
 
-	IPhysical(BaseLib::Obj* baseLib, Type::Enum type);
-	IPhysical(BaseLib::Obj* baseLib, Type::Enum type, xml_node<>* node);
+	IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type);
+	IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node<>* node);
 	virtual ~IPhysical() {}
 
 	//Helpers
 	uint32_t startIndex = 0;
 	uint32_t endIndex = 0;
 protected:
-	BaseLib::Obj* _bl = nullptr;
+	BaseLib::SharedObjects* _bl = nullptr;
 };
 
 class Physical : public IPhysical
 {
 public:
-	Physical(BaseLib::Obj* baseLib);
-	Physical(BaseLib::Obj* baseLib, xml_node<>* node);
+	Physical(BaseLib::SharedObjects* baseLib);
+	Physical(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~Physical() {}
 };
 
 class PhysicalInteger : public IPhysical
 {
 public:
-	PhysicalInteger(BaseLib::Obj* baseLib);
-	PhysicalInteger(BaseLib::Obj* baseLib, xml_node<>* node);
+	PhysicalInteger(BaseLib::SharedObjects* baseLib);
+	PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~PhysicalInteger() {}
 };
 
 class PhysicalBoolean : public IPhysical
 {
 public:
-	PhysicalBoolean(BaseLib::Obj* baseLib);
-	PhysicalBoolean(BaseLib::Obj* baseLib, xml_node<>* node);
+	PhysicalBoolean(BaseLib::SharedObjects* baseLib);
+	PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~PhysicalBoolean() {}
 };
 
 class PhysicalString : public IPhysical
 {
 public:
-	PhysicalString(BaseLib::Obj* baseLib);
-	PhysicalString(BaseLib::Obj* baseLib, xml_node<>* node);
+	PhysicalString(BaseLib::SharedObjects* baseLib);
+	PhysicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node);
 	virtual ~PhysicalString() {}
 };
 

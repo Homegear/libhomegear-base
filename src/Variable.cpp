@@ -310,7 +310,7 @@ std::string Variable::print(bool stdout, bool stderr)
 	return resultString;
 }
 
-std::string Variable::print(std::shared_ptr<Variable> variable, std::string indent)
+std::string Variable::print(PVariable variable, std::string indent)
 {
 	if(!variable) return "";
 	std::ostringstream result;

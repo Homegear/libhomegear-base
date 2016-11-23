@@ -33,6 +33,7 @@
 
 #include "Output/Output.h"
 
+#include <atomic>
 #include <forward_list>
 #include <mutex>
 
@@ -56,8 +57,7 @@ public:
 	void invalidate();
 private:
 	int32_t _id;
-	std::mutex _useCountMutex;
-	int32_t _useCount = 0;
+	std::atomic<int32_t> _useCount;
 	IEventSinkBase* _handler = nullptr;
 };
 
