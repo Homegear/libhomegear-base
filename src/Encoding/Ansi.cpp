@@ -179,12 +179,12 @@ namespace BaseLib
 	{
 		if(!_utf8ToAnsi || utf8String.empty()) return "";
 		uint32_t currentUtfCharacter = 0;
-		std::vector<char> buffer(utf8String.size());
+		std::vector<char> buffer(utf8String.size() + 1);
 		uint32_t characterSize = 0;
 		uint32_t pos = 0;
 		for(uint32_t i = 0; i < utf8String.size(); ++i)
 		{
-			uint8_t c = (uint8_t)utf8String[i];
+			uint8_t c = (uint8_t)utf8String.at(i);
 			if(c == 0)
 			{
 				buffer[pos] = 0;
@@ -193,7 +193,7 @@ namespace BaseLib
 			}
 			else if(c < 128)
 			{
-				buffer[pos] = utf8String[i];
+				buffer[pos] = utf8String.at(i);
 				pos++;
 			}
 			else
@@ -211,7 +211,7 @@ namespace BaseLib
 				currentUtfCharacter = 0;
 				for(int32_t j = characterSize - 1; j >= 0; j--)
 				{
-					currentUtfCharacter |= ((uint32_t)(uint8_t)utf8String[i + (characterSize - j - 1)]) << (j * 8);
+					currentUtfCharacter |= ((uint32_t)(uint8_t)utf8String.at(i + (characterSize - j - 1))) << (j * 8);
 				}
 				i += characterSize - 1;
 				auto lookupIterator = _ansiLookup.find(currentUtfCharacter);
