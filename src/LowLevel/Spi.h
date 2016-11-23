@@ -31,9 +31,12 @@
 #ifndef SPI_H_
 #define SPI_H_
 
+#include "../Exception.h"
+
 #include <type_traits>
 #include <vector>
 #include <mutex>
+#include <memory>
 
 #include <linux/spi/spidev.h>
 #include <sys/ioctl.h>
@@ -41,7 +44,11 @@
 namespace BaseLib
 {
 
+class SharedObjects;
 class FileDescriptor;
+
+namespace LowLevel
+{
 
 /**
  * Exception class for SPI.
@@ -155,5 +162,6 @@ protected:
 	void setup();
 };
 
+}
 }
 #endif

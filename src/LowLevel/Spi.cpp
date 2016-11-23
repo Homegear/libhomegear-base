@@ -34,6 +34,9 @@
 namespace BaseLib
 {
 
+namespace LowLevel
+{
+
 Spi::Spi(BaseLib::SharedObjects* baseLib, std::string device, SpiModes mode, uint8_t bitsPerWord, uint32_t speed) : _device(device), _mode(mode), _bitsPerWord(bitsPerWord), _speed(speed)
 {
 	_bl = baseLib;
@@ -84,7 +87,7 @@ void Spi::setup()
 	if(ioctl(_fileDescriptor->descriptor, SPI_IOC_WR_BITS_PER_WORD, &_bitsPerWord)) throw SpiException("Couldn't set bits per word on device " + _device);
 	if(ioctl(_fileDescriptor->descriptor, SPI_IOC_RD_BITS_PER_WORD, &_bitsPerWord)) throw SpiException("Couldn't get bits per word off device " + _device);
 
-	if((bool)(_mode & SpiModes::LsbFirst))
+	if((bool)(_mode & SpiModes::lsbFirst))
 	{
 		uint8_t lsb = 1;
 		if(ioctl(_fileDescriptor->descriptor, SPI_IOC_WR_LSB_FIRST, &lsb)) throw SpiException("Couldn't set bits per word on device " + _device);
@@ -110,4 +113,5 @@ void Spi::readwrite(std::vector<uint8_t>& data)
 	if(!ioctl(_fileDescriptor->descriptor, SPI_IOC_MESSAGE(1), &_transfer)) throw SpiException("Couldn't write to device " + _device + ": " + std::string(strerror(errno)));
 }
 
+}
 }

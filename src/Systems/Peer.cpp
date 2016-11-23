@@ -2956,8 +2956,8 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		if(channel == 0 && serviceMessages->set(valueKey, value->booleanValue)) return PVariable(new Variable(VariableType::tVoid));
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
-		RPCConfigurationParameter* parameter = &valuesCentral[channel][valueKey];
-		PParameter rpcParameter = parameter->rpcParameter;
+		RPCConfigurationParameter& parameter = valuesCentral[channel][valueKey];
+		PParameter rpcParameter = parameter.rpcParameter;
 		if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 		//Perform operation on value
 		if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
@@ -2966,7 +2966,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 			if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
 			{
 				PVariable currentValue;
-				if(!convertFromPacketHook(rpcParameter, parameter->data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter->data);
+				if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
 				std::string numberPart = value->stringValue.substr(2);
 				double factor = Math::getDouble(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
@@ -2980,7 +2980,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 			else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
 			{
 				PVariable currentValue;
-				if(!convertFromPacketHook(rpcParameter, parameter->data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter->data);
+				if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
 				std::string numberPart = value->stringValue.substr(2);
 				int32_t factor = Math::getNumber(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
