@@ -41,6 +41,9 @@ namespace BaseLib
 class SharedObjects;
 class FileDescriptor;
 
+namespace LowLevel
+{
+
 class Gpio
 {
 public:
@@ -102,5 +105,6 @@ protected:
 	std::map<uint32_t, GpioInfo> _gpioInfo;
 };
 
+}
 }
 #endif
