@@ -49,7 +49,7 @@ public:
 class IQueue : public IQueueBase
 {
 public:
-	IQueue(SharedObjects* baseLib, int32_t bufferSize);
+	IQueue(SharedObjects* baseLib, uint32_t queueCount, uint32_t bufferSize);
 	virtual ~IQueue();
 	void startQueue(int32_t index, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
@@ -58,14 +58,14 @@ public:
 	bool queueEmpty(int32_t index);
 private:
 	int32_t _bufferSize = 1000;
-	int32_t _bufferHead[_queueCount];
-	int32_t _bufferTail[_queueCount];
-	int32_t _bufferCount[_queueCount];
-	std::shared_ptr<IQueueEntry>* _buffer[_queueCount];
-	std::mutex _queueMutex[_queueCount];
-	std::vector<std::shared_ptr<std::thread>> _processingThread[_queueCount];
-	std::condition_variable _produceConditionVariable[_queueCount];
-	std::condition_variable _processingConditionVariable[_queueCount];
+	std::vector<int32_t> _bufferHead;
+	std::vector<int32_t> _bufferTail;
+	std::vector<int32_t> _bufferCount;
+	std::vector<std::vector<std::shared_ptr<IQueueEntry>>> _buffer;
+	std::unique_ptr<std::mutex[]> _queueMutex = nullptr;
+	std::vector<std::vector<std::shared_ptr<std::thread>>> _processingThread;
+	std::unique_ptr<std::condition_variable[]> _produceConditionVariable = nullptr;
+	std::unique_ptr<std::condition_variable[]> _processingConditionVariable = nullptr;
 
 	void process(int32_t index);
 };
