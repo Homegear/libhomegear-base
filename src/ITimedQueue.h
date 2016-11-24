@@ -55,7 +55,7 @@ private:
 class ITimedQueue : public IQueueBase
 {
 public:
-	ITimedQueue(SharedObjects* baseLib);
+	ITimedQueue(SharedObjects* baseLib, uint32_t queueCount);
 	virtual ~ITimedQueue();
 	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
@@ -64,12 +64,12 @@ public:
 	virtual void processQueueEntry(int32_t index, int64_t id, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
 private:
 	static const int32_t _bufferSize = 1000;
-	bool _firstPositionChanged[_queueCount];
-	std::mutex _bufferMutex[_queueCount];
-	std::map<int64_t, std::shared_ptr<ITimedQueueEntry>> _buffer[_queueCount];
-	std::mutex _processingThreadMutex[_queueCount];
-	std::thread _processingThread[_queueCount];
-	std::condition_variable _processingConditionVariable[_queueCount];
+	std::vector<bool> _firstPositionChanged;
+	std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
+	std::vector<std::map<int64_t, std::shared_ptr<ITimedQueueEntry>>> _buffer;
+	std::unique_ptr<std::mutex[]> _processingThreadMutex = nullptr;
+	std::vector<std::thread> _processingThread;
+	std::unique_ptr<std::condition_variable[]> _processingConditionVariable = nullptr;
 
 	void process(int32_t index);
 };
