@@ -35,6 +35,7 @@
 #include <memory>
 #include <condition_variable>
 #include <thread>
+#include <vector>
 
 namespace BaseLib
 {
@@ -43,12 +44,12 @@ class SharedObjects;
 class IQueueBase
 {
 public:
-	IQueueBase(SharedObjects* baseLib);
+	IQueueBase(SharedObjects* baseLib, uint32_t queueCount);
 	virtual ~IQueueBase() {}
 protected:
 	SharedObjects* _bl = nullptr;
-	static const int32_t _queueCount = 2;
-	std::atomic_bool _stopProcessingThread[_queueCount];
+	int32_t _queueCount = 2;
+	std::unique_ptr<std::atomic_bool[]> _stopProcessingThread;
 };
 
 }
