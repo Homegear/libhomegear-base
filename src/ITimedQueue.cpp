@@ -34,8 +34,15 @@
 namespace BaseLib
 {
 
-ITimedQueue::ITimedQueue(SharedObjects* baseLib) : IQueueBase(baseLib)
+ITimedQueue::ITimedQueue(SharedObjects* baseLib, uint32_t queueCount) : IQueueBase(baseLib, queueCount)
 {
+	_firstPositionChanged.resize(queueCount);
+	_bufferMutex.reset(new std::mutex[queueCount]);
+	_buffer.resize(queueCount);
+	_processingThreadMutex.reset(new std::mutex[queueCount]);
+	_processingThread.resize(queueCount);
+	_processingConditionVariable.reset(new std::condition_variable[queueCount]);
+
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
 		_stopProcessingThread[i] = true;

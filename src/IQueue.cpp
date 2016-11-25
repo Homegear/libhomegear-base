@@ -34,12 +34,21 @@
 namespace BaseLib
 {
 
-IQueue::IQueue(SharedObjects* baseLib, int32_t bufferSize) : IQueueBase(baseLib)
+IQueue::IQueue(SharedObjects* baseLib, uint32_t queueCount, uint32_t bufferSize) : IQueueBase(baseLib, queueCount)
 {
-	if(bufferSize > 0) _bufferSize = bufferSize;
+	if(bufferSize < 2000000000) _bufferSize = (int32_t)bufferSize;
+
+	_bufferHead.resize(queueCount);
+	_bufferTail.resize(queueCount);
+	_bufferCount.resize(queueCount);
+	_buffer.resize(queueCount);
+	_queueMutex.reset(new std::mutex[queueCount]);
+	_processingThread.resize(queueCount);
+	_produceConditionVariable.reset(new std::condition_variable[queueCount]);
+	_processingConditionVariable.reset(new std::condition_variable[queueCount]);
+
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
-		_buffer[i] = nullptr;
 		_bufferHead[i] = 0;
 		_bufferTail[i] = 0;
 		_bufferCount[i] = 0;
@@ -52,7 +61,7 @@ IQueue::~IQueue()
 	for(int32_t i = 0; i < _queueCount; i++)
 	{
 		stopQueue(i);
-		if(_buffer[i]) delete[] _buffer[i];
+		_buffer[i].clear();
 	}
 }
 
@@ -74,7 +83,7 @@ void IQueue::startQueue(int32_t index, uint32_t processingThreadCount, int32_t t
 		_bl->threadManager.start(*thread, true, threadPriority, threadPolicy, &IQueue::process, this, index);
 		_processingThread[index].push_back(thread);
 	}
-	if(!_buffer[index]) _buffer[index] = new std::shared_ptr<IQueueEntry>[_bufferSize];
+	_buffer.at(index).resize(_bufferSize);
 }
 
 void IQueue::stopQueue(int32_t index)
@@ -89,8 +98,7 @@ void IQueue::stopQueue(int32_t index)
 		_bl->threadManager.join(*(_processingThread[index][i]));
 	}
 	_processingThread[index].clear();
-	delete[] _buffer[index];
-	_buffer[index] = nullptr;
+	_buffer[index].clear();
 
 }
 
@@ -98,7 +106,7 @@ bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry)
 {
 	try
 	{
-		if(index < 0 || index >= _queueCount || !entry || !_buffer[index] || _stopProcessingThread[index]) return false;
+		if(index < 0 || index >= _queueCount || !entry || _stopProcessingThread[index]) return false;
 		std::unique_lock<std::mutex> lock(_queueMutex[index]);
 		_produceConditionVariable[index].wait(lock, [&]{ return _bufferCount[index] < _bufferSize || _stopProcessingThread[index]; });
 		if(_stopProcessingThread[index]) return true;
