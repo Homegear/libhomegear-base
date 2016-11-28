@@ -78,6 +78,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		else if(nodeName == "metaString2") metaString2 = value;
 		else if(nodeName == "responseType") responseType = Math::getNumber(value);
 		else if(nodeName == "responseSubtype") responseSubtype = Math::getNumber(value);
+		else if(nodeName == "responseTypeId") responseTypeId = value;
 		else if(nodeName == "channel") channel = Math::getNumber(value);
 		else if(nodeName == "channelIndex")
 		{

@@ -400,6 +400,7 @@ public:
 	void toPacket(PVariable value);
 
 	//Elements
+	bool roundToPoint5 = false;
 	int32_t decimalPlaces = 1;
 };
 
