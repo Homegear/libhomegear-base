@@ -109,6 +109,7 @@ public:
 	std::string metaString2;
 	int32_t responseType = -1;
 	int32_t responseSubtype = -1;
+	std::string responseTypeId;
 	int32_t channel = -1;
 	int32_t channelIndex = -1;
 	double channelSize = 1;
