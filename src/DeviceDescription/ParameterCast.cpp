@@ -1131,7 +1131,15 @@ Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* param
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
-		if(name == "decimalPlaces") decimalPlaces = Math::getNumber(value);
+		if(name == "decimalPlaces")
+		{
+			if(value == "0.5")
+			{
+				decimalPlaces = 1;
+				roundToPoint5 = true;
+			}
+			else decimalPlaces = Math::getNumber(value);
+		}
 		else _bl->out.printWarning("Warning: Unknown node in \"decimalPlaces\": " + name);
 	}
 }
@@ -1139,13 +1147,13 @@ Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* param
 void Round::fromPacket(PVariable value)
 {
 	if(!value) return;
-	value->floatValue = std::round(value->floatValue * Math::Pow10(decimalPlaces)) / Math::Pow10(decimalPlaces);
+	value->floatValue = std::round(value->floatValue * (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces))) / (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces));
 }
 
 void Round::toPacket(PVariable value)
 {
 	if(!value) return;
-	value->floatValue = std::round(value->floatValue * Math::Pow10(decimalPlaces)) / Math::Pow10(decimalPlaces);
+	value->floatValue = std::round(value->floatValue * (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces))) / (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces));
 }
 
 Generic::Generic(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
