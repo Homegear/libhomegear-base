@@ -227,16 +227,17 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				socketTimeout.tv_sec = timeout / 1000;
 				socketTimeout.tv_usec = 500000;
 				FD_ZERO(&readFileDescriptor);
-				_bl->fileDescriptorManager.lock();
+				auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
+				fileDescriptorGuard.lock();
 				nfds = serverSocketDescriptor->descriptor + 1;
 				if(nfds <= 0)
 				{
-					_bl->fileDescriptorManager.unlock();
+					fileDescriptorGuard.unlock();
 					_bl->out.printError("Error: Socket closed (1).");
 					_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 				}
 				FD_SET(serverSocketDescriptor->descriptor, &readFileDescriptor);
-				_bl->fileDescriptorManager.unlock();
+				fileDescriptorGuard.unlock();
 				bytesReceived = select(nfds, &readFileDescriptor, NULL, NULL, &socketTimeout);
 				if(bytesReceived == 0) continue;
 				if(bytesReceived != 1)

@@ -99,16 +99,17 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& send
 	timeout.tv_usec = _readTimeout - (1000000 * seconds);
 	fd_set readFileDescriptor;
 	FD_ZERO(&readFileDescriptor);
-	_bl->fileDescriptorManager.lock();
+	auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
+	fileDescriptorGuard.lock();
 	int32_t nfds = _socketDescriptor->descriptor + 1;
 	if(nfds <= 0)
 	{
-		_bl->fileDescriptorManager.unlock();
+		fileDescriptorGuard.unlock();
 		_readMutex.unlock();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
-	_bl->fileDescriptorManager.unlock();
+	fileDescriptorGuard.unlock();
 	int32_t bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
 	if(bytesRead == 0)
 	{
