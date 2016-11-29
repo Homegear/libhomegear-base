@@ -46,23 +46,21 @@ void FileDescriptorManager::init(BaseLib::SharedObjects* baseLib)
 void FileDescriptorManager::dispose()
 {
 	_disposed = true;
-	_descriptorsMutex.lock();
+	std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 	for(FileDescriptors::iterator i = _descriptors.begin(); i != _descriptors.end(); ++i)
 	{
 		if(!i->second) continue;
 		::close(i->second->descriptor);
 	}
 	_descriptors.clear();
-	_descriptorsMutex.unlock();
 }
 
 PFileDescriptor FileDescriptorManager::add(int32_t fileDescriptor)
 {
 	try
 	{
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		if(fileDescriptor < 0 || _disposed) return PFileDescriptor(new FileDescriptor());
-		_descriptorsMutex.lock();
-
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(fileDescriptor);
 		if(descriptorIterator != _descriptors.end())
 		{
@@ -80,7 +78,6 @@ PFileDescriptor FileDescriptorManager::add(int32_t fileDescriptor)
 		descriptor->id = _currentID++;
 		descriptor->descriptor = fileDescriptor;
 		_descriptors[fileDescriptor] = descriptor;
-		_descriptorsMutex.unlock();
 		return descriptor;
 	}
 	catch(const std::exception& ex)
@@ -95,7 +92,6 @@ PFileDescriptor FileDescriptorManager::add(int32_t fileDescriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 	return PFileDescriptor(new FileDescriptor());
 }
 
@@ -104,7 +100,7 @@ void FileDescriptorManager::remove(PFileDescriptor descriptor)
 	try
 	{
 		if(!descriptor || descriptor->descriptor < 0) return;
-		_descriptorsMutex.lock();
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(descriptor->descriptor);
 		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == descriptor->id)
 		{
@@ -125,7 +121,6 @@ void FileDescriptorManager::remove(PFileDescriptor descriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 }
 
 void FileDescriptorManager::close(PFileDescriptor descriptor)
@@ -133,7 +128,7 @@ void FileDescriptorManager::close(PFileDescriptor descriptor)
 	try
 	{
 		if(!descriptor || descriptor->descriptor < 0) return;
-		_descriptorsMutex.lock();
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(descriptor->descriptor);
 		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == descriptor->id)
 		{
@@ -157,7 +152,6 @@ void FileDescriptorManager::close(PFileDescriptor descriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 }
 
 void FileDescriptorManager::shutdown(PFileDescriptor descriptor)
@@ -165,7 +159,7 @@ void FileDescriptorManager::shutdown(PFileDescriptor descriptor)
 	try
 	{
 		if(!descriptor || descriptor->descriptor < 0) return;
-		_descriptorsMutex.lock();
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(descriptor->descriptor);
 		if(descriptorIterator != _descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id)
 		{
@@ -191,17 +185,11 @@ void FileDescriptorManager::shutdown(PFileDescriptor descriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 }
 
-void FileDescriptorManager::lock()
+std::unique_lock<std::mutex> FileDescriptorManager::getLock()
 {
-	_descriptorsMutex.lock();
-}
-
-void FileDescriptorManager::unlock()
-{
-	_descriptorsMutex.unlock();
+	return std::unique_lock<std::mutex>(_descriptorsMutex, std::defer_lock);
 }
 
 PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
@@ -209,12 +197,9 @@ PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
 	try
 	{
 		if(fileDescriptor < 0) return PFileDescriptor();
-		PFileDescriptor descriptor;
-		_descriptorsMutex.lock();
-		FileDescriptors::iterator descriptorIterator = _descriptors.find(descriptor->descriptor);
-		if(descriptorIterator != _descriptors.end()) descriptor = descriptorIterator->second;
-		_descriptorsMutex.unlock();
-		return descriptor;
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
+		FileDescriptors::iterator descriptorIterator = _descriptors.find(fileDescriptor);
+		if(descriptorIterator != _descriptors.end()) return descriptorIterator->second;
 	}
 	catch(const std::exception& ex)
 	{
@@ -228,7 +213,6 @@ PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 	return PFileDescriptor();
 }
 
@@ -237,12 +221,9 @@ bool FileDescriptorManager::isValid(int32_t fileDescriptor, int32_t id)
 	try
 	{
 		if(fileDescriptor < 0) return false;
-		bool valid = false;
-		_descriptorsMutex.lock();
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(fileDescriptor);
-		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == id) valid = true;
-		_descriptorsMutex.unlock();
-		return valid;
+		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == id) return true;
 	}
 	catch(const std::exception& ex)
 	{
@@ -256,7 +237,6 @@ bool FileDescriptorManager::isValid(int32_t fileDescriptor, int32_t id)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 	return false;
 }
 
@@ -265,12 +245,9 @@ bool FileDescriptorManager::isValid(PFileDescriptor descriptor)
 	try
 	{
 		if(!descriptor || descriptor->descriptor < 0) return false;
-		bool valid = false;
-		_descriptorsMutex.lock();
+		std::lock_guard<std::mutex> descriptorsGuard(_descriptorsMutex);
 		FileDescriptors::iterator descriptorIterator = _descriptors.find(descriptor->descriptor);
-		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == descriptor->id) valid = true;
-		_descriptorsMutex.unlock();
-		return valid;
+		if(descriptorIterator != _descriptors.end() && descriptorIterator->second->id == descriptor->id) return true;
 	}
 	catch(const std::exception& ex)
 	{
@@ -284,7 +261,6 @@ bool FileDescriptorManager::isValid(PFileDescriptor descriptor)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_descriptorsMutex.unlock();
 	return false;
 }
 }
