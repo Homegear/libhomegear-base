@@ -75,8 +75,7 @@ public:
 	virtual PFileDescriptor get(int32_t fileDescriptor);
 	virtual bool isValid(int32_t fileDescriptor, int32_t id);
 	virtual bool isValid(PFileDescriptor descriptor);
-	virtual void lock();
-	virtual void unlock();
+	virtual std::unique_lock<std::mutex> getLock();
 private:
 	bool _disposed = false;
 	BaseLib::SharedObjects* _bl = nullptr;
