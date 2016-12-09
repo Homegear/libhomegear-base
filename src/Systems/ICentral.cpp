@@ -592,6 +592,28 @@ void ICentral::deletePeersFromDatabase()
     }
 }
 
+uint64_t ICentral::getPeerIdFromSerial(std::string& serialNumber)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(serialNumber);
+		if(peer) return peer->getID();
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return 0;
+}
+
 //RPC methods
 PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId)
 {

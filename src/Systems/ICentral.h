@@ -102,7 +102,7 @@ public:
 	virtual bool peerExists(int32_t address);
 	virtual bool peerExists(std::string serialNumber);
 	virtual bool peerExists(uint64_t id);
-	virtual uint64_t getPeerIdFromSerial(std::string serialNumber) { return 0; }
+	virtual uint64_t getPeerIdFromSerial(std::string& serialNumber);
 
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string remoteSerialNumber, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t remoteId, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
