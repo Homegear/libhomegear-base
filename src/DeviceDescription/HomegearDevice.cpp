@@ -533,6 +533,13 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				xml_node<>* subnode = doc->allocate_node(node_element, "hasBattery", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
+
+			if(device->addressSize != 0)
+			{
+				tempString = std::to_string(device->addressSize);
+				xml_node<>* subnode = doc->allocate_node(node_element, "addressSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				node->append_node(subnode);
+			}
 		// }}}
 
 		std::map<std::string, PConfigParameters> configParameters;
@@ -633,6 +640,12 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 			{
 				tempString = std::to_string(i->second->responseSubtype);
 				packetNode = doc->allocate_node(node_element, "responseSubtype", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				subnode->append_node(packetNode);
+			}
+
+			if(!i->second->responseTypeId.empty())
+			{
+				packetNode = doc->allocate_node(node_element, "responseTypeId", doc->allocate_string(i->second->responseTypeId.c_str(), i->second->responseTypeId.size() + 1));
 				subnode->append_node(packetNode);
 			}
 
@@ -2430,6 +2443,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
 					else if(propertyName == "needsTime") { if(propertyValue == "true") needsTime = true; }
 					else if(propertyName == "hasBattery") { if(propertyValue == "true") hasBattery = true; }
+					else if(propertyName == "addressSize") addressSize = Math::getUnsignedNumber(propertyValue);
 					else _bl->out.printWarning("Warning: Unknown device property: " + propertyName);
 				}
 				if(receiveModes == ReceiveModes::Enum::none) receiveModes = ReceiveModes::Enum::always;

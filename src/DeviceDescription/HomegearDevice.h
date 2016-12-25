@@ -88,6 +88,7 @@ public:
 	bool internal = false;
 	bool needsTime = false;
 	bool hasBattery = false;
+	uint32_t addressSize = 0;
 	// }}}
 
 	// {{{ Elements
