@@ -82,7 +82,7 @@ public:
 	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
 	uint32_t scriptEngineMaxThreadsPerScript() { return _scriptEngineMaxThreadsPerScript; }
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
-	uint32_t flowsThreadCount() { return _flowsProcessingThreadCount; }
+	uint32_t flowsThreadCount() { return _flowsThreadCount; }
 	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
 	int32_t maxFlowsPerProcess() { return _maxFlowsPerProcess; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
