@@ -59,6 +59,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
+	_enableFlows = false;
 	_workingDirectory = _bl->executablePath;
 	_socketPath = _bl->executablePath;
 	_dataPath = _bl->executablePath;
@@ -260,6 +261,11 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
 					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
+				}
+				else if(name == "enableflows")
+				{
+					_enableFlows = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: enableFlows set to " + std::to_string(_enableFlows));
 				}
 				else if(name == "workingdirectory")
 				{
