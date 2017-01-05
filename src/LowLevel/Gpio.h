@@ -90,7 +90,7 @@ public:
 	virtual void setDirection(uint32_t index, GpioDirection::Enum direction);
 	virtual void setEdge(uint32_t index, GpioEdge::Enum edge);
 	virtual bool isOpen(uint32_t index);
-	virtual void setup(int32_t userId, int32_t groupId);
+	virtual void setup(int32_t userId, int32_t groupId, bool setPermissions);
 	virtual std::shared_ptr<FileDescriptor> getFileDescriptor(uint32_t index);
 protected:
 	class GpioInfo

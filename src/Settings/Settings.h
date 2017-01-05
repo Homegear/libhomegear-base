@@ -65,6 +65,7 @@ public:
 	bool devLog() { return _devLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
 	bool enableFlows() { return _enableFlows; }
+	bool setDevicePermissions() { return _setDevicePermissions; }
 	std::string workingDirectory() { return _workingDirectory; }
 	std::string socketPath() { return _socketPath; }
 	std::string dataPath() { return _dataPath; }
@@ -156,6 +157,7 @@ private:
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
 	bool _enableFlows = false;
+	bool _setDevicePermissions = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
 	std::string _dataPath;
