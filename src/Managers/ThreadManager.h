@@ -55,6 +55,7 @@ public:
 	bool start(std::thread& thread, bool highPriority, Function&& function, Args&&... args)
 	{
 		if(!checkThreadCount(highPriority)) return false;
+		join(thread);
 		thread = std::thread(function, args...);
 		registerThread();
 		return true;
@@ -64,6 +65,7 @@ public:
 	bool start(std::thread& thread, bool highPriority, int32_t priority, int32_t policy, Function&& function, Args&&... args)
 	{
 		if(!checkThreadCount(highPriority)) return false;
+		join(thread);
 		thread = std::thread(function, args...);
 		setThreadPriority(thread.native_handle(), priority, policy);
 		registerThread();
