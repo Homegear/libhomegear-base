@@ -465,7 +465,7 @@ void Gpio::exportGpio(uint32_t index)
     _gpioMutex.unlock();
 }
 
-void Gpio::setup(int32_t userId, int32_t groupId)
+void Gpio::setup(int32_t userId, int32_t groupId, bool setPermissions)
 {
 	try
 	{
@@ -473,7 +473,7 @@ void Gpio::setup(int32_t userId, int32_t groupId)
 		for(std::vector<uint32_t>::iterator i = exportGpios.begin(); i != exportGpios.end(); ++i)
 		{
 			exportGpio(*i);
-			setPermission(*i, userId, groupId, false);
+			if(setPermissions) setPermission(*i, userId, groupId, false);
 		}
 	}
 	catch(const std::exception& ex)

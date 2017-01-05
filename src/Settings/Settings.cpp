@@ -60,6 +60,7 @@ void Settings::reset()
 	_devLog = false;
 	_enableCoreDumps = true;
 	_enableFlows = false;
+	_setDevicePermissions = true;
 	_workingDirectory = _bl->executablePath;
 	_socketPath = _bl->executablePath;
 	_dataPath = _bl->executablePath;
@@ -267,6 +268,11 @@ void Settings::load(std::string filename)
 				{
 					_enableFlows = HelperFunctions::toLower(value) == "true";
 					_bl->out.printDebug("Debug: enableFlows set to " + std::to_string(_enableFlows));
+				}
+				else if(name == "setdevicepermissions")
+				{
+					_setDevicePermissions = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: setDevicePermissions set to " + std::to_string(_setDevicePermissions));
 				}
 				else if(name == "workingdirectory")
 				{
