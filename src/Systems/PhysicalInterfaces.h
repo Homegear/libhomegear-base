@@ -64,7 +64,7 @@ public:
 	void startListening();
 	bool lifetick();
 	bool isOpen();
-	void setup(int32_t userID, int32_t groupID);
+	void setup(int32_t userID, int32_t groupID, bool setPermissions);
 	PVariable listInterfaces();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;

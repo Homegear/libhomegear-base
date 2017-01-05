@@ -197,7 +197,7 @@ void PhysicalInterfaces::stopListening()
     }
 }
 
-void PhysicalInterfaces::setup(int32_t userID, int32_t groupID)
+void PhysicalInterfaces::setup(int32_t userID, int32_t groupID, bool setPermissions)
 {
 	try
 	{
@@ -210,7 +210,7 @@ void PhysicalInterfaces::setup(int32_t userID, int32_t groupID)
 				continue;
 			}
 			_bl->out.printDebug("Debug: Setting up physical device.");
-			j->second->setup(userID, groupID);
+			j->second->setup(userID, groupID, setPermissions);
 		}
 	}
 	catch(const std::exception& ex)
