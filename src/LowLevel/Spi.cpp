@@ -48,6 +48,11 @@ Spi::~Spi()
 	close();
 }
 
+bool Spi::isOpen()
+{
+	 return _fileDescriptor && _fileDescriptor->descriptor != -1;
+}
+
 void Spi::open()
 {
 	if(_fileDescriptor && _fileDescriptor->descriptor != -1) close();

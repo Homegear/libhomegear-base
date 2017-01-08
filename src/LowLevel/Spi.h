@@ -147,6 +147,8 @@ public:
 	void open();
 	void close();
 	void readwrite(std::vector<uint8_t>& data);
+
+	bool isOpen();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<FileDescriptor> _fileDescriptor;
