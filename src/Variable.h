@@ -90,6 +90,7 @@ public:
 	std::vector<uint8_t> binaryValue;
 
 	Variable() { type = VariableType::tVoid; arrayValue = PArray(new Array()); structValue = PStruct(new Struct()); }
+	Variable(Variable const& rhs);
 	Variable(VariableType variableType) : Variable() { type = variableType; if(type == VariableType::tVariant) type = VariableType::tVoid; }
 	Variable(DeviceDescription::ILogical::Type::Enum variableType);
 	Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; }

@@ -43,6 +43,8 @@ local.properties
 *.launch
 # CDT-specific
 .cproject
+.project
+.che
 # PDT-specific
 .buildpath
 # sbteclipse plugin
