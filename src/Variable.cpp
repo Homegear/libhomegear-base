@@ -108,6 +108,30 @@ std::shared_ptr<Variable> Variable::createError(int32_t faultCode, std::string f
 	return error;
 }
 
+Variable::Variable(Variable const& rhs)
+{
+	errorStruct = rhs.errorStruct;
+	type = rhs.type;
+	stringValue = rhs.stringValue;
+	integerValue = rhs.integerValue;
+	integerValue64 = rhs.integerValue64;
+	floatValue = rhs.floatValue;
+	booleanValue = rhs.booleanValue;
+	binaryValue = rhs.binaryValue;
+	for(Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i)
+	{
+		PVariable lhs(new Variable());
+		*lhs = *(*i);
+		arrayValue->push_back(lhs);
+	}
+	for(Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i)
+	{
+		PVariable lhs(new Variable());
+		*lhs = *(i->second);
+		structValue->insert(std::pair<std::string, PVariable>(i->first, lhs));
+	}
+}
+
 Variable& Variable::operator=(const Variable& rhs)
 {
 	if(&rhs == this) return *this;
