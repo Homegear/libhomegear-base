@@ -64,6 +64,8 @@ public:
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
+	bool enableFlows() { return _enableFlows; }
+	bool setDevicePermissions() { return _setDevicePermissions; }
 	std::string workingDirectory() { return _workingDirectory; }
 	std::string socketPath() { return _socketPath; }
 	std::string dataPath() { return _dataPath; }
@@ -73,6 +75,7 @@ public:
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
 	bool databaseWALJournal() { return _databaseWALJournal; }
+	std::string databaseBackupPath() { return _databaseBackupPath; }
 	uint32_t databaseMaxBackups() { return _databaseMaxBackups; }
 	std::string logfilePath() { return _logfilePath; }
 	bool prioritizeThreads() { return _prioritizeThreads; }
@@ -82,6 +85,9 @@ public:
 	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
 	uint32_t scriptEngineMaxThreadsPerScript() { return _scriptEngineMaxThreadsPerScript; }
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
+	uint32_t flowsThreadCount() { return _flowsThreadCount; }
+	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
+	int32_t maxFlowsPerProcess() { return _maxFlowsPerProcess; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
 	uint32_t rpcServerMaxConnections() { return _rpcServerMaxConnections; }
 	int32_t rpcServerThreadPriority() { return _rpcServerThreadPriority; }
@@ -108,6 +114,14 @@ public:
 	uint32_t scriptPathPermissions() { return _scriptPathPermissions; }
 	std::string scriptPathUser() { return _scriptPathUser; }
 	std::string scriptPathGroup() { return _scriptPathGroup; }
+	std::string flowsPath() { return _flowsPath; }
+	uint32_t flowsPathPermissions() { return _flowsPathPermissions; }
+	std::string flowsPathUser() { return _flowsPathUser; }
+	std::string flowsPathGroup() { return _flowsPathGroup; }
+	std::string flowNodesPath() { return _flowNodesPath; }
+	uint32_t flowNodesPathPermissions() { return _flowNodesPathPermissions; }
+	std::string flowNodesPathUser() { return _flowNodesPathUser; }
+	std::string flowNodesPathGroup() { return _flowNodesPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -142,6 +156,8 @@ private:
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
+	bool _enableFlows = false;
+	bool _setDevicePermissions = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
 	std::string _dataPath;
@@ -151,6 +167,7 @@ private:
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
 	bool _databaseWALJournal = true;
+	std::string _databaseBackupPath;
 	uint32_t _databaseMaxBackups = 10;
 	std::string _logfilePath;
 	bool _prioritizeThreads = true;
@@ -159,6 +176,9 @@ private:
 	uint32_t _scriptEngineServerMaxConnections = 20;
 	uint32_t _scriptEngineMaxThreadsPerScript = 4;
 	int32_t _scriptEngineMaxScriptsPerProcess = -1;
+	uint32_t _flowsThreadCount = 10;
+	uint32_t _flowsServerMaxConnections = 20;
+	int32_t _maxFlowsPerProcess = 40;
 	uint32_t _cliServerMaxConnections = 50;
 	uint32_t _rpcServerMaxConnections = 50;
 	int32_t _rpcServerThreadPriority = 0;
@@ -185,6 +205,14 @@ private:
 	uint32_t _scriptPathPermissions = 360;
 	std::string _scriptPathUser;
 	std::string _scriptPathGroup;
+	std::string _flowsPath;
+	uint32_t _flowsPathPermissions = 504;
+	std::string _flowsPathUser;
+	std::string _flowsPathGroup;
+	std::string _flowNodesPath;
+	uint32_t _flowNodesPathPermissions = 360;
+	std::string _flowNodesPathUser;
+	std::string _flowNodesPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;

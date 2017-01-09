@@ -59,6 +59,8 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
+	_enableFlows = false;
+	_setDevicePermissions = true;
 	_workingDirectory = _bl->executablePath;
 	_socketPath = _bl->executablePath;
 	_dataPath = _bl->executablePath;
@@ -68,6 +70,7 @@ void Settings::reset()
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
 	_databaseWALJournal = true;
+	_databaseBackupPath = "";
 	_databaseMaxBackups = 10;
 	_logfilePath = "/var/log/homegear/";
 	_prioritizeThreads = true;
@@ -76,6 +79,9 @@ void Settings::reset()
 	_scriptEngineServerMaxConnections = 10;
 	_scriptEngineMaxThreadsPerScript = 4;
 	_scriptEngineMaxScriptsPerProcess = 50;
+	_flowsThreadCount = 10;
+	_flowsServerMaxConnections = 20;
+	_maxFlowsPerProcess = 40;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
@@ -102,6 +108,14 @@ void Settings::reset()
 	_scriptPathPermissions = 360;
 	_scriptPathUser = "";
 	_scriptPathGroup = "";
+	_flowsPath = "/var/lib/homegear/flows/";
+	_flowsPathPermissions = 504;
+	_flowsPathUser = "";
+	_flowsPathGroup = "";
+	_flowNodesPath = "/var/lib/homegear/flowNodes/";
+	_flowNodesPathPermissions = 360;
+	_flowNodesPathUser = "";
+	_flowNodesPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -250,6 +264,16 @@ void Settings::load(std::string filename)
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
 					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
 				}
+				else if(name == "enableflows")
+				{
+					_enableFlows = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: enableFlows set to " + std::to_string(_enableFlows));
+				}
+				else if(name == "setdevicepermissions")
+				{
+					_setDevicePermissions = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: setDevicePermissions set to " + std::to_string(_setDevicePermissions));
+				}
 				else if(name == "workingdirectory")
 				{
 					_workingDirectory = value;
@@ -309,6 +333,12 @@ void Settings::load(std::string filename)
 					if(HelperFunctions::toLower(value) == "false") _databaseWALJournal = false;
 					_bl->out.printDebug("Debug: databaseWALJournal set to " + std::to_string(_databaseWALJournal));
 				}
+				else if(name == "databasebackuppath")
+				{
+					_databaseBackupPath = value;
+					if(!_databaseBackupPath.empty() && _databaseBackupPath.back() != '/') _databaseBackupPath.push_back('/');
+					_bl->out.printDebug("Debug: databaseBackupPath set to " + _databaseBackupPath);
+				}
 				else if(name == "databasemaxbackups")
 				{
 					_databaseMaxBackups = Math::getNumber(value);
@@ -352,6 +382,21 @@ void Settings::load(std::string filename)
 				{
 					_scriptEngineMaxScriptsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptEngineMaxScriptsPerProcess set to " + std::to_string(_scriptEngineMaxScriptsPerProcess));
+				}
+				else if(name == "flowsthreadcount")
+				{
+					_flowsThreadCount = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsThreadCount set to " + std::to_string(_flowsThreadCount));
+				}
+				else if(name == "flowsservermaxconnections")
+				{
+					_flowsServerMaxConnections = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsServerMaxConnections set to " + std::to_string(_flowsServerMaxConnections));
+				}
+				else if(name == "maxflowsperprocess")
+				{
+					_maxFlowsPerProcess = Math::getNumber(value);
+					_bl->out.printDebug("Debug: maxFlowsPerProcess set to " + std::to_string(_maxFlowsPerProcess));
 				}
 				else if(name == "cliservermaxconnections")
 				{
@@ -512,6 +557,52 @@ void Settings::load(std::string filename)
 				{
 					_scriptPathGroup = value;
 					_bl->out.printDebug("Debug: scriptPathGroup set to " + _scriptPathGroup);
+				}
+				else if(name == "flowspath")
+				{
+					_flowsPath = value;
+					if(_flowsPath.empty()) _flowsPath = "/var/lib/homegear/flows/";
+					if(_flowsPath.back() != '/') _flowsPath.push_back('/');
+					_bl->out.printDebug("Debug: flowsPath set to " + _flowsPath);
+				}
+				else if(name == "flowspathpermissions")
+				{
+					_flowsPathPermissions = Math::getOctalNumber(value);
+					if(_flowsPathPermissions == 0) _flowsPathPermissions = 504;
+					_bl->out.printDebug("Debug: flowsPathPermissions set to " + _flowsPathPermissions);
+				}
+				else if(name == "flowspathuser")
+				{
+					_flowsPathUser = value;
+					_bl->out.printDebug("Debug: flowsPathUser set to " + _flowsPathUser);
+				}
+				else if(name == "flowspathgroup")
+				{
+					_flowsPathGroup = value;
+					_bl->out.printDebug("Debug: flowsPathGroup set to " + _flowsPathGroup);
+				}
+				else if(name == "flownodespath")
+				{
+					_flowNodesPath = value;
+					if(_flowNodesPath.empty()) _flowNodesPath = "/var/lib/homegear/flowNodes/";
+					if(_flowNodesPath.back() != '/') _flowNodesPath.push_back('/');
+					_bl->out.printDebug("Debug: flowNodesPath set to " + _flowNodesPath);
+				}
+				else if(name == "flownodespathpermissions")
+				{
+					_flowNodesPathPermissions = Math::getOctalNumber(value);
+					if(_flowNodesPathPermissions == 0) _flowNodesPathPermissions = 360;
+					_bl->out.printDebug("Debug: flowNodesPathPermissions set to " + _flowNodesPathPermissions);
+				}
+				else if(name == "flownodespathuser")
+				{
+					_flowNodesPathUser = value;
+					_bl->out.printDebug("Debug: flowNodesPathUser set to " + _flowNodesPathUser);
+				}
+				else if(name == "flownodespathgroup")
+				{
+					_flowNodesPathGroup = value;
+					_bl->out.printDebug("Debug: flowNodesPathGroup set to " + _flowNodesPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{

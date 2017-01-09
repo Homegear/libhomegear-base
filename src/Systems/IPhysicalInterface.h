@@ -99,7 +99,7 @@ public:
 	virtual uint32_t responseDelay() { return _settings->responseDelay; }
 	virtual int64_t lastPacketSent() { return _lastPacketSent; }
 	virtual int64_t lastPacketReceived() { return _lastPacketReceived; }
-	virtual void setup(int32_t userID, int32_t groupID) {}
+	virtual void setup(int32_t userID, int32_t groupID, bool setPermissions) {}
 	virtual std::string getType() { return _settings->type; }
 	virtual std::string getID() { return _settings->id; }
 	virtual bool isDefault() { return _settings->isDefault; }

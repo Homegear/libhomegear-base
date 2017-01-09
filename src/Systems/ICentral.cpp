@@ -592,6 +592,28 @@ void ICentral::deletePeersFromDatabase()
     }
 }
 
+uint64_t ICentral::getPeerIdFromSerial(std::string& serialNumber)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(serialNumber);
+		if(peer) return peer->getID();
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return 0;
+}
+
 //RPC methods
 PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId)
 {
@@ -733,14 +755,14 @@ PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, uint64_t id, u
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel)
+PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::map<std::string, bool> fields)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(serialNumber));
 		if(!peer) return Variable::createError(-2, "Unknown device.");
 
-		return peer->getDeviceDescription(clientInfo, channel, std::map<std::string, bool>());
+		return peer->getDeviceDescription(clientInfo, channel, fields);
 	}
 	catch(const std::exception& ex)
     {
@@ -757,14 +779,14 @@ PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, std::string 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel)
+PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::map<std::string, bool> fields)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
 		if(!peer) return Variable::createError(-2, "Unknown device.");
 
-		return peer->getDeviceDescription(clientInfo, channel, std::map<std::string, bool>());
+		return peer->getDeviceDescription(clientInfo, channel, fields);
 	}
 	catch(const std::exception& ex)
     {
