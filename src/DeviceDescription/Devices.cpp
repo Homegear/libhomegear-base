@@ -395,7 +395,11 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 						if(parameter) parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(parameter->operations | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write);
 
 						parameter = paramsetIterator->second->getParameter("INSTALL_TEST");
-						if(parameter) parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(parameter->operations | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write);
+						if(parameter)
+						{
+							parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(parameter->operations | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write);
+							if(filename == "rf_sec_sd_2.xml") parameter->logicalParameter.reset(new HmDeviceDescription::LogicalParameterBoolean(_bl));
+						}
 
 						if(!paramsetIterator->second->getParameter("SENDERADDRESS"))
 						{
@@ -408,6 +412,53 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 							parameter->physicalParameter->type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeString;
 							paramsetIterator->second->parameters.push_back(parameter);
 						}
+
+						if(!paramsetIterator->second->getParameter("SENDERID"))
+						{
+							parameter.reset(new HmDeviceDescription::HomeMaticParameter(_bl));
+							parameter->id = "SENDERID";
+							parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::event);
+							parameter->logicalParameter.reset(new HmDeviceDescription::LogicalParameterInteger(_bl));
+							parameter->logicalParameter->type = HmDeviceDescription::LogicalParameter::Type::Enum::typeInteger;
+							parameter->physicalParameter->interface = HmDeviceDescription::PhysicalParameter::Interface::Enum::command;
+							parameter->physicalParameter->type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+							paramsetIterator->second->parameters.push_back(parameter);
+						}
+
+						if(filename == "rf_sec_sd_2.xml")
+						{
+							if(!paramsetIterator->second->getParameter("ALARM_COUNTER"))
+							{
+								parameter.reset(new HmDeviceDescription::HomeMaticParameter(_bl));
+								parameter->id = "ALARM_COUNTER";
+								parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::event);
+								std::shared_ptr<HmDeviceDescription::LogicalParameterInteger> logicalParameter(new HmDeviceDescription::LogicalParameterInteger(_bl));
+								parameter->logicalParameter = logicalParameter;
+								parameter->logicalParameter->type = HmDeviceDescription::LogicalParameter::Type::Enum::typeInteger;
+								logicalParameter->min = 0;
+								logicalParameter->max = 65535;
+								parameter->physicalParameter->interface = HmDeviceDescription::PhysicalParameter::Interface::Enum::command;
+								parameter->physicalParameter->type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+								std::shared_ptr<HmDeviceDescription::PhysicalParameterEvent> eventFrame(new HmDeviceDescription::PhysicalParameterEvent());
+								eventFrame->frame = "EVENT";
+								parameter->physicalParameter->eventFrames.push_back(eventFrame);
+								paramsetIterator->second->parameters.push_back(parameter);
+							}
+						}
+					}
+				}
+
+				if(filename == "rf_sec_sd_2.xml")
+				{
+					std::map<std::string, std::shared_ptr<HmDeviceDescription::DeviceFrame>>::iterator frameIterator = homeMaticDevice->team->framesByID.find("EVENT");
+					if(frameIterator != homeMaticDevice->framesByID.end())
+					{
+						HmDeviceDescription::HomeMaticParameter parameter(_bl);
+						parameter.type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;
+						parameter.index = 13.0;
+						parameter.size = 2.0;
+						parameter.param = "ALARM_COUNTER";
+						frameIterator->second->parameters.push_back(parameter);
 					}
 				}
 			}
