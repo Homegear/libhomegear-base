@@ -1598,8 +1598,9 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 					element->structValue->insert(StructElement("VALUE", value));
 				}
 
-				if(returnWriteOnly) element->structValue->insert(StructElement("READABLE", PVariable(new Variable(j->second->readable))));
+				element->structValue->insert(StructElement("READABLE", PVariable(new Variable(j->second->readable))));
 				element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(j->second->writeable))));
+				element->structValue->insert(StructElement("UNIT", PVariable(new Variable(j->second->unit))));
 				if(j->second->logical->type == ILogical::Type::tBoolean)
 				{
 					if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
