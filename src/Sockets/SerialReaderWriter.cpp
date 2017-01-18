@@ -443,25 +443,55 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity)
 	std::string data;
 	while(!_stopReadThread)
 	{
-		if(_fileDescriptor->descriptor == -1)
+		try
 		{
-			closeDevice();
-			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-			_openDeviceThreadMutex.lock();
-			_bl->threadManager.join(_openDeviceThread);
-			_bl->threadManager.start(_openDeviceThread, true, &SerialReaderWriter::openDevice, this, parity, oddParity, true);
-			_openDeviceThreadMutex.unlock();
-			return;
-		}
-		if(readLine(data) == 0)
-		{
-			EventHandlers eventHandlers = getEventHandlers();
-			for(EventHandlers::const_iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
+			if(_fileDescriptor->descriptor == -1)
 			{
-				i->second->lock();
-				if(i->second->handler()) ((ISerialReaderWriterEventSink*)i->second->handler())->lineReceived(data);
-				i->second->unlock();
+				closeDevice();
+				std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+				_openDeviceThreadMutex.lock();
+				_bl->threadManager.join(_openDeviceThread);
+				_bl->threadManager.start(_openDeviceThread, true, &SerialReaderWriter::openDevice, this, parity, oddParity, true);
+				_openDeviceThreadMutex.unlock();
+				return;
 			}
+			if(readLine(data) == 0)
+			{
+				EventHandlers eventHandlers = getEventHandlers();
+				for(EventHandlers::const_iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
+				{
+					i->second->lock();
+					try
+					{
+						if(i->second->handler()) ((ISerialReaderWriterEventSink*)i->second->handler())->lineReceived(data);
+					}
+					catch(const std::exception& ex)
+					{
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+					}
+					catch(BaseLib::Exception& ex)
+					{
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+					}
+					catch(...)
+					{
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+					}
+					i->second->unlock();
+				}
+			}
+		}
+		catch(const std::exception& ex)
+		{
+			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+		}
+		catch(BaseLib::Exception& ex)
+		{
+			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+		}
+		catch(...)
+		{
+			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 		}
 	}
 }
