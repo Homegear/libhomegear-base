@@ -480,6 +480,7 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity)
 					i->second->unlock();
 				}
 			}
+			continue;
 		}
 		catch(const std::exception& ex)
 		{
@@ -493,6 +494,7 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity)
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 		}
+		_bl->fileDescriptorManager.close(_fileDescriptor);
 	}
 }
 }
