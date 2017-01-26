@@ -756,6 +756,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->password = value;
 			_bl->out.printDebug("Debug: password set");
 		}
+		else if(name == "additionalcommands")
+		{
+			settings->additionalCommands = value;
+			_bl->out.printDebug("Debug: additionalCommands set to " + settings->additionalCommands);
+		}
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);
