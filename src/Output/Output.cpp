@@ -118,6 +118,7 @@ void Output::printBinary(std::vector<unsigned char>& data)
 			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
 		}
 		stringstream << std::dec;
+		std::lock_guard<std::mutex> outputGuard(_outputMutex);
 		std::cout << stringstream.str() << std::endl;
 	}
 	catch(const std::exception& ex)
@@ -146,6 +147,7 @@ void Output::printBinary(std::shared_ptr<std::vector<char>> data)
 			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
 		}
 		stringstream << std::dec;
+		std::lock_guard<std::mutex> outputGuard(_outputMutex);
 		std::cout << stringstream.str() << std::endl;
 	}
 	catch(const std::exception& ex)
@@ -174,6 +176,7 @@ void Output::printBinary(std::vector<char>& data)
 			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
 		}
 		stringstream << std::dec;
+		std::lock_guard<std::mutex> outputGuard(_outputMutex);
 		std::cout << stringstream.str() << std::endl;
 	}
 	catch(const std::exception& ex)
@@ -196,12 +199,14 @@ void Output::printEx(std::string file, uint32_t line, std::string function, std:
 	if(!what.empty())
 	{
 		error = _prefix + "Error in file " + file + " line " + std::to_string(line) + " in function " + function + ": " + what;
+		std::lock_guard<std::mutex> outputGuard(_outputMutex);
 		std::cout << getTimeString() << " " << error << std::endl;
 		std::cerr << getTimeString() << " " << error << std::endl;
 	}
 	else
 	{
 		error = _prefix + "Unknown error in file " + file + " line " + std::to_string(line) + " in function " + function + ".";
+		std::lock_guard<std::mutex> outputGuard(_outputMutex);
 		std::cout << getTimeString() << " " << error << std::endl;
 		std::cerr << getTimeString() << " " << error << std::endl;
 	}
@@ -212,8 +217,11 @@ void Output::printCritical(std::string errorString, bool errorCallback)
 {
 	if(_bl && _bl->debugLevel < 1) return;
 	std::string error = _prefix + errorString;
-	std::cout << getTimeString() << " " << error << std::endl;
-	std::cerr << getTimeString() << " " << error << std::endl;
+	{
+    	std::lock_guard<std::mutex> outputGuard(_outputMutex);
+    	std::cout << getTimeString() << " " << error << std::endl;
+    	std::cerr << getTimeString() << " " << error << std::endl;
+	}
 	if(_errorCallback && *_errorCallback && errorCallback) (*_errorCallback)(1, error);
 }
 
@@ -221,8 +229,11 @@ void Output::printError(std::string errorString)
 {
 	if(_bl && _bl->debugLevel < 2) return;
 	std::string error = _prefix + errorString;
-	std::cout << getTimeString() << " " << error << std::endl;
-	std::cerr << getTimeString() << " " << error << std::endl;
+	{
+    	std::lock_guard<std::mutex> outputGuard(_outputMutex);
+    	std::cout << getTimeString() << " " << error << std::endl;
+    	std::cerr << getTimeString() << " " << error << std::endl;
+	}
 	if(_errorCallback && *_errorCallback) (*_errorCallback)(2, error);
 }
 
@@ -230,20 +241,25 @@ void Output::printWarning(std::string errorString)
 {
 	if(_bl && _bl->debugLevel < 3) return;
 	std::string error = _prefix + errorString;
-	std::cout << getTimeString() << " " << error << std::endl;
-	std::cerr << getTimeString() << " " << error << std::endl;
+	{
+	    std::lock_guard<std::mutex> outputGuard(_outputMutex);
+    	std::cout << getTimeString() << " " << error << std::endl;
+    	std::cerr << getTimeString() << " " << error << std::endl;
+	}
 	if(_errorCallback && *_errorCallback) (*_errorCallback)(3, error);
 }
 
 void Output::printInfo(std::string message)
 {
 	if(_bl && _bl->debugLevel < 4) return;
+	std::lock_guard<std::mutex> outputGuard(_outputMutex);
 	std::cout << getTimeString() << " " << _prefix << message << std::endl;
 }
 
 void Output::printDebug(std::string message, int32_t minDebugLevel)
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
+	std::lock_guard<std::mutex> outputGuard(_outputMutex);
 	std::cout << getTimeString() << " " << _prefix << message << std::endl;
 }
 
@@ -251,10 +267,12 @@ void Output::printMessage(std::string message, int32_t minDebugLevel, bool error
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
 	message = _prefix + message;
+	std::unique_lock<std::mutex> outputGuard(_outputMutex);
 	std::cout << getTimeString() << " " << message << std::endl;
 	if(minDebugLevel <= 3 && errorLog)
 	{
 		std::cerr << getTimeString() << " " << message << std::endl;
+		outputGuard.unlock();
 		if(_errorCallback && *_errorCallback) (*_errorCallback)(3, message);
 	}
 }
