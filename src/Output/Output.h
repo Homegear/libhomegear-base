@@ -236,10 +236,10 @@ private:
 	 */
 	std::string _prefix;
 
-    /**
-     * Mutex to only print one output at a time.
-     */
-    std::mutex _outputMutex;
+	/**
+	 * Mutex to only print one output at a time.
+	 */
+	static std::mutex _outputMutex;
 
 	/**
 	 * Pointer to an optional callback function, which will be called whenever printEx, printWarning, printCritical or printError are called.
