@@ -33,6 +33,8 @@
 
 namespace BaseLib
 {
+std::mutex Output::_outputMutex;
+
 std::function<void(int32_t, std::string)>* Output::getErrorCallback()
 {
 	return _errorCallback;
