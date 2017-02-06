@@ -75,6 +75,7 @@ public:
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
 	bool databaseWALJournal() { return _databaseWALJournal; }
+	std::string databasePath() { return _databasePath; }
 	std::string databaseBackupPath() { return _databaseBackupPath; }
 	uint32_t databaseMaxBackups() { return _databaseMaxBackups; }
 	std::string logfilePath() { return _logfilePath; }
@@ -167,6 +168,7 @@ private:
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
 	bool _databaseWALJournal = true;
+	std::string _databasePath;
 	std::string _databaseBackupPath;
 	uint32_t _databaseMaxBackups = 10;
 	std::string _logfilePath;

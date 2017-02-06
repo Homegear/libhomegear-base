@@ -46,32 +46,32 @@ Gpio::Gpio(BaseLib::SharedObjects* baseLib)
 
 Gpio::~Gpio()
 {
-	_gpioMutex.lock();
+	std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 	for(std::map<uint32_t, GpioInfo>::iterator i = _gpioInfo.begin(); i != _gpioInfo.end(); ++i)
 	{
 		_bl->fileDescriptorManager.close(i->second.fileDescriptor);
 	}
 	_gpioInfo.clear();
-	_gpioMutex.unlock();
 }
 
 void Gpio::openDevice(uint32_t index, bool readOnly)
 {
-	_gpioMutex.lock();
 	try
 	{
-		_gpioMutex.unlock();
 		getPath(index); //Creates gpioInfo entry if it doesn't exist
-		_gpioMutex.lock();
-		if(_gpioInfo[index].path.empty())
+
 		{
-			_gpioInfo.erase(index);
-			throw(Exception("Failed to open value file for GPIO with index " + std::to_string(index) + ": Unable to retrieve path."));
+			std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
+			if(_gpioInfo[index].path.empty())
+			{
+				_gpioInfo.erase(index);
+				throw(Exception("Failed to open value file for GPIO with index " + std::to_string(index) + ": Unable to retrieve path."));
+			}
+			std::string path = _gpioInfo[index].path + "value";
+			_gpioInfo[index].fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), readOnly ? O_RDONLY : O_RDWR));
+			if (_gpioInfo[index].fileDescriptor->descriptor == -1) throw(Exception("Failed to open GPIO value file \"" + path + "\": " + std::string(strerror(errno))));
 		}
-		std::string path = _gpioInfo[index].path + "value";
-		_gpioInfo[index].fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), readOnly ? O_RDONLY : O_RDWR));
-		if (_gpioInfo[index].fileDescriptor->descriptor == -1) throw(Exception("Failed to open GPIO value file \"" + path + "\": " + std::string(strerror(errno))));
-		_gpioMutex.unlock();
+
 		poll(index, 0, false);
 		return;
 	}
@@ -87,18 +87,16 @@ void Gpio::openDevice(uint32_t index, bool readOnly)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 void Gpio::getPath(uint32_t index)
 {
-	_gpioMutex.lock();
 	try
 	{
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		//Creates gpioInfo entry if it doesn't exist
 		if(!_gpioInfo[index].path.empty())
 		{
-			_gpioMutex.unlock();
 			return;
 		}
 		DIR* directory;
@@ -133,7 +131,6 @@ void Gpio::getPath(uint32_t index)
 							if(dirName.back() != '/') dirName.push_back('/');
 							_gpioInfo[index].path = dirName;
 							closedir(directory);
-							_gpioMutex.unlock();
 							return;
 						}
 					}
@@ -167,14 +164,13 @@ void Gpio::getPath(uint32_t index)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 void Gpio::closeDevice(uint32_t index)
 {
-	_gpioMutex.lock();
 	try
 	{
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		std::map<uint32_t, GpioInfo>::iterator gpioIterator = _gpioInfo.find(index);
 		if(gpioIterator != _gpioInfo.end())
 		{
@@ -193,7 +189,6 @@ void Gpio::closeDevice(uint32_t index)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 bool Gpio::get(uint32_t index)
@@ -206,14 +201,12 @@ bool Gpio::get(uint32_t index)
 			return false;
 		}
 		std::vector<char> buffer(1);
-		_gpioMutex.lock();
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		if(read(_gpioInfo[index].fileDescriptor->descriptor, &buffer.at(0), 1) != 1)
 		{
-			_gpioMutex.unlock();
 			_bl->out.printError("Could not read GPIO with index " + std::to_string(index) + ".");
 			return false;
 		}
-		_gpioMutex.unlock();
 		return buffer.at(0) == '1';
 	}
 	catch(const std::exception& ex)
@@ -299,13 +292,12 @@ void Gpio::set(uint32_t index, bool value)
 			return;
 		}
 		std::string temp(std::to_string((int32_t)value));
-		_gpioMutex.lock();
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		if(write(_gpioInfo[index].fileDescriptor->descriptor, temp.c_str(), temp.size()) <= 0)
 		{
-			_bl->out.printError("Could not write GPIO with index " + std::to_string(index) + ".");
+			_bl->out.printError("Could not write GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno)));
 		}
 		_bl->out.printDebug("Debug: GPIO " + std::to_string(index) + " set to " + std::to_string(value) + ".");
-		_gpioMutex.unlock();
 	}
 	catch(const std::exception& ex)
     {
@@ -326,7 +318,7 @@ void Gpio::setPermission(uint32_t index, int32_t userID, int32_t groupID, bool r
 	try
 	{
 		getPath(index);
-		_gpioMutex.lock();
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		if(_gpioInfo[index].path.empty())
 		{
 			_gpioInfo.erase(index);
@@ -381,18 +373,16 @@ void Gpio::setPermission(uint32_t index, int32_t userID, int32_t groupID, bool r
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 bool Gpio::isOpen(uint32_t index)
 {
-	_gpioMutex.lock();
 	try
 	{
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		std::map<uint32_t, GpioInfo>::iterator gpioIterator = _gpioInfo.find(index);
 		if(gpioIterator != _gpioInfo.end() && gpioIterator->second.fileDescriptor && gpioIterator->second.fileDescriptor->descriptor != -1)
 		{
-			_gpioMutex.unlock();
 			return true;
 		}
 	}
@@ -408,7 +398,6 @@ bool Gpio::isOpen(uint32_t index)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
     return false;
 }
 
@@ -416,12 +405,12 @@ void Gpio::exportGpio(uint32_t index)
 {
 	try
 	{
-		_gpioMutex.lock();
+		std::unique_lock<std::mutex> gpioGuard(_gpioMutex);
 		if(_gpioInfo[index].path.empty())
 		{
-			_gpioMutex.unlock();
+			gpioGuard.unlock();
 			getPath(index);
-			_gpioMutex.lock();
+			gpioGuard.lock();
 		}
 		std::string path;
 		std::shared_ptr<FileDescriptor> fileDescriptor;
@@ -462,7 +451,6 @@ void Gpio::exportGpio(uint32_t index)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 void Gpio::setup(int32_t userId, int32_t groupId, bool setPermissions)
@@ -492,13 +480,12 @@ void Gpio::setup(int32_t userId, int32_t groupId, bool setPermissions)
 
 PFileDescriptor Gpio::getFileDescriptor(uint32_t index)
 {
-	_gpioMutex.lock();
 	try
 	{
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		std::map<uint32_t, GpioInfo>::iterator gpioIterator = _gpioInfo.find(index);
 		if(gpioIterator != _gpioInfo.end() && gpioIterator->second.fileDescriptor && gpioIterator->second.fileDescriptor->descriptor != -1)
 		{
-			_gpioMutex.unlock();
 			return gpioIterator->second.fileDescriptor;
 		}
 	}
@@ -514,7 +501,6 @@ PFileDescriptor Gpio::getFileDescriptor(uint32_t index)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
     return PFileDescriptor();
 }
 
@@ -523,7 +509,7 @@ void Gpio::setDirection(uint32_t index, GpioDirection::Enum direction)
 	try
 	{
 		getPath(index);
-		_gpioMutex.lock();
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		if(_gpioInfo[index].path.empty())
 		{
 			_gpioInfo.erase(index);
@@ -551,7 +537,6 @@ void Gpio::setDirection(uint32_t index, GpioDirection::Enum direction)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 void Gpio::setEdge(uint32_t index, GpioEdge::Enum edge)
@@ -559,7 +544,7 @@ void Gpio::setEdge(uint32_t index, GpioEdge::Enum edge)
 	try
 	{
 		getPath(index);
-		_gpioMutex.lock();
+		std::lock_guard<std::mutex> gpioGuard(_gpioMutex);
 		if(_gpioInfo[index].path.empty())
 		{
 			_gpioInfo.erase(index);
@@ -587,7 +572,6 @@ void Gpio::setEdge(uint32_t index, GpioEdge::Enum edge)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _gpioMutex.unlock();
 }
 
 }
