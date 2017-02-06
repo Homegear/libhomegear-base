@@ -42,6 +42,7 @@
 #include <map>
 #include <chrono>
 #include <ctime>
+#include <mutex>
 
 namespace BaseLib
 {
@@ -234,6 +235,11 @@ private:
 	 * A prefix put before all messages.
 	 */
 	std::string _prefix;
+
+	/**
+	 * Mutex to only print one output at a time.
+	 */
+	static std::mutex _outputMutex;
 
 	/**
 	 * Pointer to an optional callback function, which will be called whenever printEx, printWarning, printCritical or printError are called.

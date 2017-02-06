@@ -70,6 +70,7 @@ void Settings::reset()
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
 	_databaseWALJournal = true;
+	_databasePath = "";
 	_databaseBackupPath = "";
 	_databaseMaxBackups = 10;
 	_logfilePath = "/var/log/homegear/";
@@ -332,6 +333,12 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _databaseWALJournal = false;
 					_bl->out.printDebug("Debug: databaseWALJournal set to " + std::to_string(_databaseWALJournal));
+				}
+				else if(name == "databasepath")
+				{
+					_databasePath = value;
+					if(!_databasePath.empty() && _databasePath.back() != '/') _databasePath.push_back('/');
+					_bl->out.printDebug("Debug: databasePath set to " + _databasePath);
 				}
 				else if(name == "databasebackuppath")
 				{

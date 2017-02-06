@@ -91,6 +91,7 @@ public:
 	std::string dataPath;
 	std::string user;
 	std::string password;
+	std::string additionalCommands;
 };
 
 typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;
