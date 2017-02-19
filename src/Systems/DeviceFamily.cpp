@@ -73,6 +73,14 @@ bool DeviceFamily::init()
 	return true;
 }
 
+bool DeviceFamily::enabled()
+{
+	std::string settingName = "moduleenabled";
+	FamilySettings::PFamilySetting setting = _settings->get(settingName);
+	if(!setting) return true;
+	return setting->integerValue != 0;
+}
+
 bool DeviceFamily::lifetick()
 {
 	if(_physicalInterfaces) return _physicalInterfaces->lifetick();

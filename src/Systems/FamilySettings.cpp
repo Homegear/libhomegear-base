@@ -414,8 +414,10 @@ void FamilySettings::load(std::string filename)
 					if(_settings.find(name) != _settings.end()) _bl->out.printWarning("Warning: Setting defined twice: " + name);
 					PFamilySetting setting(new FamilySetting());
 					setting->stringValue = value;
-					setting->integerValue = Math::getNumber(value);
+					if(value == "true" || value == "false") setting->integerValue = (int32_t)(value == "true");
+					else setting->integerValue = Math::getNumber(value);
 					setting->binaryValue = _bl->hf.getBinary(value);
+					HelperFunctions::toLower(value);
 					_settings[name] = std::move(setting);
 					_bl->out.printDebug("Debug: Family setting " + name + " set to " + value);
 				}
