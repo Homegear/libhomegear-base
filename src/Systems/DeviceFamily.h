@@ -80,6 +80,7 @@ public:
 	DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
 	virtual ~DeviceFamily();
 
+	virtual bool enabled();
 	virtual bool init();
 	virtual void dispose();
 
