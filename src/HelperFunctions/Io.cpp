@@ -218,10 +218,13 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 			if(S_ISDIR(statStruct.st_mode))
 			{
 				directories.push_back(name + '/');
-				std::vector<std::string> subdirs = getDirectories(path + name, recursive);
-				for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
+				if(recursive)
 				{
-					directories.push_back(name + '/' + *i);
+					std::vector<std::string> subdirs = getDirectories(path + name, recursive);
+					for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
+					{
+						directories.push_back(name + '/' + *i);
+					}
 				}
 			}
 		}

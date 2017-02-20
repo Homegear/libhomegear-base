@@ -112,6 +112,7 @@ std::string Licensing::getLicenseKey(int32_t familyId, int32_t deviceId)
 		if(familyIterator == _devices.end()) return "";
 		std::map<int32_t, PDeviceInfo>::iterator deviceIterator = familyIterator->second.find(deviceId);
 		if(deviceIterator == familyIterator->second.end() || !deviceIterator->second) return "";
+		if(deviceIterator->second->licenseKey.compare(0, 5, "trial") == 0) return "";
 		return deviceIterator->second->licenseKey;
 	}
 	catch(const std::exception& ex)
@@ -127,6 +128,36 @@ std::string Licensing::getLicenseKey(int32_t familyId, int32_t deviceId)
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return "";
+}
+
+int64_t Licensing::getTrialStartTime(int32_t familyId, int32_t deviceId)
+{
+	try
+	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
+		DeviceStates::iterator familyIterator = _devices.find(familyId);
+		if(familyIterator == _devices.end()) return -1;
+		std::map<int32_t, PDeviceInfo>::iterator deviceIterator = familyIterator->second.find(deviceId);
+		if(deviceIterator == familyIterator->second.end() || !deviceIterator->second) return -1;
+		if(deviceIterator->second->licenseKey.compare(0, 5, "trial") == 0)
+		{
+			std::string timestamp = deviceIterator->second->licenseKey.substr(5);
+			return BaseLib::Math::getNumber64(timestamp, false);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return -1;
 }
 
 void Licensing::removeLicense(int32_t familyId, int32_t deviceId)
