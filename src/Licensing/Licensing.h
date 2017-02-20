@@ -88,7 +88,7 @@ public:
 	 * @param familyId The family id the license key is for.
 	 * @param deviceId The device id the license key is for or -1 if not applicable.
 	 * @param licenseKey The license key to check. If empty the mothod reads the license key for this device from the database.
-	 * @return Returns -1 on application errors, -2 if the licensing module could not be found, -3 on communication errors, -4 if the activation server returned invalid data, -5 if the license key is invalid, -6 if the license key is valid but blocked, -7 if the activation key validation failed, -8 if no license key was passed and no license key was found in the database, -9 if no license key was passed and the activation key verification failed 0 if the license key is valid and already known and 1 if the license key is valid and on new activation.
+	 * @return Returns -1 on application errors, -2 if the licensing module could not be found, -3 on communication errors, -4 if the activation server returned invalid data, -5 if the license key is invalid, -6 if the license key is valid but blocked, -7 if the activation key validation failed, -8 if no license key was passed and no license key was found in the database, -9 if no license key was passed and the activation key verification failed, -10 if the trial period has expired, 0 if the license key is valid and already known, 1 if the license key is valid and on new activation, 2 on successful trial activation and 3 with valid trial key which is already known.
 	 */
 	virtual int32_t checkLicense(int32_t familyId, int32_t deviceId, const std::string& licenseKey = "") = 0;
 
@@ -108,6 +108,15 @@ public:
 	 * @return Returns the license key or an empty string if no license key was found.
 	 */
 	virtual std::string getLicenseKey(int32_t familyId, int32_t deviceId);
+
+	/**
+	 * Returns the start time of a trial version. The default method reads the start time from the license key, if it is the format: "trial<unix timestamp in milliseconds>", e. g. "trial1487608697439".
+	 *
+	 * @param familyId The family id the license key is for.
+	 * @param deviceId The device id the license key is for or -1 if not applicable.
+	 * @return Returns the start time of a trial version as unix timestamp in milliseconds or -1 if not applicable.
+	 */
+	virtual int64_t getTrialStartTime(int32_t familyId, int32_t deviceId);
 
 	virtual void decryptScript(const std::vector<char>& input, std::string& output) = 0;
 	virtual void decryptDeviceDescription(const std::vector<char>& input, std::vector<char>& output) = 0;
