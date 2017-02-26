@@ -84,27 +84,27 @@ void Variable::parseXmlNode(xml_node<>* node, PStruct& xmlStruct)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
-		xmlStruct->insert(std::pair<std::string, PVariable>(std::string(attr->name()), PVariable(new Variable(std::string(attr->value())))));
+		xmlStruct->insert(std::pair<std::string, PVariable>(std::string(attr->name()), std::make_shared<Variable>(std::string(attr->value()))));
 	}
 	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		if(subNode->first_node())
 		{
-			PVariable subStruct(new Variable(VariableType::tStruct));
+			PVariable subStruct = std::make_shared<Variable>(VariableType::tStruct);
 			parseXmlNode(subNode, subStruct->structValue);
 			if(subStruct->structValue->size() == 1 && subStruct->structValue->begin()->first.empty()) xmlStruct->insert(std::pair<std::string, PVariable>(std::string(subNode->name()), subStruct->structValue->begin()->second));
 			else xmlStruct->insert(std::pair<std::string, PVariable>(std::string(subNode->name()), subStruct));
 		}
-		else xmlStruct->insert(std::pair<std::string, PVariable>(std::string(subNode->name()), PVariable(new Variable(std::string(subNode->value())))));
+		else xmlStruct->insert(std::pair<std::string, PVariable>(std::string(subNode->name()), std::make_shared<Variable>(std::string(subNode->value()))));
 	}
 }
 
 std::shared_ptr<Variable> Variable::createError(int32_t faultCode, std::string faultString)
 {
-	std::shared_ptr<Variable> error(new Variable(VariableType::tStruct));
+	std::shared_ptr<Variable> error = std::make_shared<Variable>(VariableType::tStruct);
 	error->errorStruct = true;
-	error->structValue->insert(StructElement("faultCode", std::shared_ptr<Variable>(new Variable(faultCode))));
-	error->structValue->insert(StructElement("faultString", std::shared_ptr<Variable>(new Variable(faultString))));
+	error->structValue->insert(StructElement("faultCode", std::make_shared<Variable>(faultCode)));
+	error->structValue->insert(StructElement("faultString", std::make_shared<Variable>(faultString)));
 	return error;
 }
 
@@ -120,13 +120,13 @@ Variable::Variable(Variable const& rhs)
 	binaryValue = rhs.binaryValue;
 	for(Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i)
 	{
-		PVariable lhs(new Variable());
+		PVariable lhs = std::make_shared<Variable>();
 		*lhs = *(*i);
 		arrayValue->push_back(lhs);
 	}
 	for(Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i)
 	{
-		PVariable lhs(new Variable());
+		PVariable lhs = std::make_shared<Variable>();
 		*lhs = *(i->second);
 		structValue->insert(std::pair<std::string, PVariable>(i->first, lhs));
 	}
@@ -145,13 +145,13 @@ Variable& Variable::operator=(const Variable& rhs)
 	binaryValue = rhs.binaryValue;
 	for(Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i)
 	{
-		PVariable lhs(new Variable());
+		PVariable lhs = std::make_shared<Variable>();
 		*lhs = *(*i);
 		arrayValue->push_back(lhs);
 	}
 	for(Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i)
 	{
-		PVariable lhs(new Variable());
+		PVariable lhs = std::make_shared<Variable>();
 		*lhs = *(i->second);
 		structValue->insert(std::pair<std::string, PVariable>(i->first, lhs));
 	}
@@ -480,16 +480,16 @@ PVariable Variable::fromString(std::string& value, VariableType type)
 	if(type == VariableType::tBoolean)
 	{
 		HelperFunctions::toLower(value);
-		if(value == "1" || value == "true") return std::shared_ptr<Variable>(new Variable(true));
-		else return std::shared_ptr<Variable>(new Variable(false));
+		if(value == "1" || value == "true") return std::make_shared<Variable>(true);
+		else return std::make_shared<Variable>(false);
 	}
-	else if(type == VariableType::tString) return std::shared_ptr<Variable>(new Variable(value));
-	else if(type == VariableType::tInteger) return std::shared_ptr<Variable>(new Variable(Math::getNumber(value)));
-	else if(type == VariableType::tInteger64) return std::shared_ptr<Variable>(new Variable(Math::getNumber64(value)));
-	else if(type == VariableType::tFloat) return std::shared_ptr<Variable>(new Variable(Math::getDouble(value)));
+	else if(type == VariableType::tString) return std::make_shared<Variable>(value);
+	else if(type == VariableType::tInteger) return std::make_shared<Variable>(Math::getNumber(value));
+	else if(type == VariableType::tInteger64) return std::make_shared<Variable>(Math::getNumber64(value));
+	else if(type == VariableType::tFloat) return std::make_shared<Variable>(Math::getDouble(value));
 	else if(type == VariableType::tBase64)
 	{
-		std::shared_ptr<Variable> variable(new Variable(VariableType::tBase64));
+		std::shared_ptr<Variable> variable = std::make_shared<Variable>(VariableType::tBase64);
 		variable->stringValue = value;
 		return variable;
 	}
