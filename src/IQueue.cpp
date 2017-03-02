@@ -148,7 +148,7 @@ void IQueue::process(int32_t index)
 				_processingConditionVariable[index].wait(lock, [&]{ return _bufferCount[index] > 0 || _stopProcessingThread[index]; });
 				if(_stopProcessingThread[index]) return;
 
-				entry = std::move(_buffer[index][_bufferHead[index]]);
+				entry = _buffer[index][_bufferHead[index]];
 				_bufferHead[index] = (_bufferHead[index] + 1) % _bufferSize;
 				--(_bufferCount[index]);
 
