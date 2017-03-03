@@ -4,8 +4,10 @@
 
 SCRIPTDIR="$( cd "$(dirname $0)" && pwd )"
 
+cd $SCRIPTDIR/../..
+BRANCH=$(git branch | grep "\*")
+[ "$BRANCH" == "* master" ] && exit 0
 REVISION_FILE=$SCRIPTDIR/../../revision.txt
 REVISION=$(cat $REVISION_FILE)
 echo $(($REVISION + 1)) > $REVISION_FILE
-cd $SCRIPTDIR/../..
 git add revision.txt
