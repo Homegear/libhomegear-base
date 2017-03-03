@@ -635,7 +635,7 @@ void Settings::load(std::string filename)
 				else if(name == "lockfilepathpermissions")
 				{
 					_lockFilePathPermissions = Math::getOctalNumber(value);
-					_bl->out.printDebug("Debug: lockFilePathPermissions set to " + _lockFilePathPermissions);
+					_bl->out.printDebug("Debug: lockFilePathPermissions set to " + std::to_string(_lockFilePathPermissions));
 				}
 				else if(name == "lockfilepathuser")
 				{

@@ -61,6 +61,7 @@ private:
 	std::vector<int32_t> _bufferHead;
 	std::vector<int32_t> _bufferTail;
 	std::vector<int32_t> _bufferCount;
+	std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
 	std::vector<std::vector<std::shared_ptr<IQueueEntry>>> _buffer;
 	std::unique_ptr<std::mutex[]> _queueMutex = nullptr;
 	std::vector<std::vector<std::shared_ptr<std::thread>>> _processingThread;
