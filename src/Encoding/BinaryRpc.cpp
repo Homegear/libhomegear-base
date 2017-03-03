@@ -65,7 +65,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 		buffer += sizeToInsert;
 		bufferLength -= sizeToInsert;
 	}
-	if(strncmp(&_data[0], "Bin", 3) != 0)
+	if(strncmp(_data.data(), "Bin", 3) != 0)
 	{
 		_finished = true;
 		throw BinaryRpcException("Packet does not start with \"Bin\".");
@@ -74,12 +74,12 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 	if(_data[3] & 0x40)
 	{
 		_hasHeader = true;
-		_bl->hf.memcpyBigEndian((char*)&_headerSize, &_data[0] + 4, 4);
+		_bl->hf.memcpyBigEndian((char*)&_headerSize, _data.data() + 4, 4);
 		if(_headerSize > 10485760) throw BinaryRpcException("Header is larger than 10 MiB.");
 	}
 	else
 	{
-		_bl->hf.memcpyBigEndian((char*)&_dataSize, &_data[0] + 4, 4);
+		_bl->hf.memcpyBigEndian((char*)&_dataSize, _data.data() + 4, 4);
 		if(_dataSize > 10485760) throw BinaryRpcException("Data is data larger than 10 MiB.");
 	}
 	if(_dataSize == 0 && _headerSize == 0)
@@ -99,7 +99,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 		_data.insert(_data.end(), buffer, buffer + sizeToInsert);
 		buffer += sizeToInsert;
 		bufferLength -= sizeToInsert;
-		_bl->hf.memcpyBigEndian((char*)&_dataSize, &_data[0] + 8 + _headerSize, 4);
+		_bl->hf.memcpyBigEndian((char*)&_dataSize, _data.data() + 8 + _headerSize, 4);
 		_dataSize += _headerSize + 4;
 		if(_dataSize > 10485760) throw BinaryRpcException("Data is data larger than 10 MiB.");
 	}
@@ -120,7 +120,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 void BinaryRpc::reset()
 {
 	_data.clear();
-	_data.reserve(100);
+	_data.reserve(1024);
 	_type = Type::unknown;
 	_processingStarted = false;
 	_finished = false;
