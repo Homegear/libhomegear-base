@@ -47,6 +47,14 @@ ParameterGroup::ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node
 	parseElements(node);
 }
 
+ParameterGroup::~ParameterGroup()
+{
+	parameters.clear();
+	parametersOrdered.clear();
+	scenarios.clear();
+	lists.clear();
+}
+
 void ParameterGroup::parseAttributes(xml_node<>* node)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
@@ -70,7 +78,7 @@ void ParameterGroup::parseElements(xml_node<>* node)
 		std::string nodeName(subNode->name());
 		if(nodeName == "parameter")
 		{
-			PParameter parameter(new Parameter(_bl, subNode, this));
+			PParameter parameter = std::make_shared<Parameter>(_bl, subNode, this);
 			if(!parameter->id.empty())
 			{
 				parameters.insert(std::pair<std::string, PParameter>(parameter->id, parameter));
