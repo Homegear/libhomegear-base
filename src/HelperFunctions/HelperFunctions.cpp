@@ -638,9 +638,9 @@ bool HelperFunctions::isShortCliCommand(const std::string& command)
 bool HelperFunctions::checkCliCommand(const std::string& command, const std::string& longCommand, const std::string& shortCommand1, const std::string& shortCommand2, uint32_t minArgumentCount, std::vector<std::string>& arguments, bool& showHelp)
 {
 	showHelp = false;
-	bool isLongCommand = command.compare(0, longCommand.size(), longCommand) == 0;
-	bool isShortCommand1 = command.compare(0, shortCommand1.size(), shortCommand1) == 0;
-	bool isShortCommand2 = !shortCommand2.empty() && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
+	bool isLongCommand = command.size() == longCommand.size() && command.compare(0, longCommand.size(), longCommand) == 0;
+	bool isShortCommand1 = command.size() == shortCommand1.size() && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
+	bool isShortCommand2 = !shortCommand2.empty() && command.size() == shortCommand2.size() && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
 	if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
 
 	std::stringstream stream(command);
