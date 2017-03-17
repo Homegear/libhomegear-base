@@ -66,7 +66,7 @@ public:
 
 	ParameterGroup(BaseLib::SharedObjects* baseLib);
 	ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-	virtual ~ParameterGroup() {}
+	virtual ~ParameterGroup();
 
 	//Attributes
 	std::string id;
