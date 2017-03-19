@@ -1444,10 +1444,6 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 				{
 					element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
 				}
-				else if(j->second->logical->type == ILogical::Type::tAction)
-				{
-					element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
-				}
 				else if(j->second->logical->type == ILogical::Type::tInteger)
 				{
 					LogicalInteger* parameter = (LogicalInteger*)j->second->logical.get();
