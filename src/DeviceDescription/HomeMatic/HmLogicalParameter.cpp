@@ -123,7 +123,11 @@ LogicalParameterEnum::LogicalParameterEnum(BaseLib::SharedObjects* baseLib, xml_
 			std::string attributeName(attr->name());
 			std::string attributeValue(attr->value());
 			if(attributeName == "type") {}
-			else if(attributeName == "unit") unit = attributeValue;
+			else if(attributeName == "unit")
+			{
+				Ansi ansi(true, false);
+				unit = ansi.toUtf8(attributeValue);
+			}
 			else _bl->out.printWarning("Warning: Unknown attribute for \"logical\" with type enum: " + attributeName);
 		}
 		int32_t index = 0;
