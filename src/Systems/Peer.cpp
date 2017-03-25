@@ -2960,10 +2960,10 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
 				&& (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
 		{
+			PVariable currentValue;
+			if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
 			if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
 			{
-				PVariable currentValue;
-				if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
 				std::string numberPart = value->stringValue.substr(2);
 				double factor = Math::getDouble(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
@@ -2976,8 +2976,6 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 			}
 			else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
 			{
-				PVariable currentValue;
-				if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
 				std::string numberPart = value->stringValue.substr(2);
 				int32_t factor = Math::getNumber(numberPart);
 				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
@@ -2985,7 +2983,32 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 				else if(value->stringValue.at(0) == '-') value->integerValue = currentValue->integerValue - factor;
 				else if(value->stringValue.at(0) == '*') value->integerValue = currentValue->integerValue * factor;
 				else if(value->stringValue.at(0) == '/') value->integerValue = currentValue->integerValue / factor;
+				value->integerValue64 = value->integerValue;
 				value->type = VariableType::tInteger;
+				value->stringValue.clear();
+			}
+			else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger64)
+			{
+				std::string numberPart = value->stringValue.substr(2);
+				int32_t factor = Math::getNumber(numberPart);
+				if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
+				if(value->stringValue.at(0) == '+') value->integerValue64 = currentValue->integerValue64 + factor;
+				else if(value->stringValue.at(0) == '-') value->integerValue64 = currentValue->integerValue64 - factor;
+				else if(value->stringValue.at(0) == '*') value->integerValue64 = currentValue->integerValue64 * factor;
+				else if(value->stringValue.at(0) == '/') value->integerValue64 = currentValue->integerValue64 / factor;
+				value->integerValue = value->integerValue64;
+				value->type = VariableType::tInteger64;
+				value->stringValue.clear();
+			}
+		}
+		else if(value->stringValue == "!") // Toggle boolean
+		{
+			PVariable currentValue;
+			if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
+			if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
+			{
+				value->booleanValue = !currentValue->booleanValue;
+				value->type = VariableType::tBoolean;
 				value->stringValue.clear();
 			}
 		}
