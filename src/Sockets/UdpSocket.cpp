@@ -123,12 +123,12 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& send
 		_readMutex.unlock();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
 	}
-	struct addrinfo clientInfo;
-	memset(&clientInfo, 0, sizeof(addrinfo));
+	struct sockaddr clientInfo;
+	memset(&clientInfo, 0, sizeof(sockaddr));
 	uint32_t addressLength = sizeof(sockaddr);
 	do
 	{
-		bytesRead = recvfrom(_socketDescriptor->descriptor, buffer, bufferSize, 0, clientInfo.ai_addr, &addressLength);
+		bytesRead = recvfrom(_socketDescriptor->descriptor, buffer, bufferSize, 0, &clientInfo, &addressLength);
 	} while(bytesRead < 0 && (errno == EAGAIN || errno == EINTR));
 	if(bytesRead <= 0)
 	{
@@ -137,14 +137,14 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& send
 	}
 	_readMutex.unlock();
 	char ipStringBuffer[INET6_ADDRSTRLEN];
-	if (_serverInfo->ai_family == AF_INET)
+	if(clientInfo.sa_family == AF_INET)
 	{
-		struct sockaddr_in *s = (struct sockaddr_in*)_serverInfo->ai_addr;
+		struct sockaddr_in *s = (struct sockaddr_in*)&clientInfo;
 		inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
 	}
 	else
 	{ // AF_INET6
-		struct sockaddr_in6 *s = (struct sockaddr_in6*)_serverInfo->ai_addr;
+		struct sockaddr_in6 *s = (struct sockaddr_in6*)&clientInfo;
 		inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
 	}
 	senderIp = std::string(&ipStringBuffer[0]);
@@ -185,7 +185,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			throw SocketOperationException(strerror(errno));
@@ -224,7 +224,7 @@ int32_t UdpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			throw SocketOperationException(strerror(errno));
@@ -264,7 +264,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			throw SocketOperationException(strerror(errno));

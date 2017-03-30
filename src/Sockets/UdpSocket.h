@@ -55,7 +55,20 @@ public:
 	int32_t getListenPort() { return _listenPort; }
 
 	bool isOpen();
+
+	/**
+	 * Reads bytes from UDP socket into "buffer".
+	 *
+	 * @param[in] buffer The char array to write received bytes into.
+	 * @param[in] bufferSize The size of the buffer.
+	 * @param[out] senderIp The IP the packet was received from.
+	 * @return Returns the number of bytes written into "buffer". Never returns 0 or a negative number.
+	 * @throws SocketTimeOutException Thrown on timeout.
+	 * @throws SocketClosedException Thrown when socket was closed.
+	 * @throws SocketOperationException Thrown when socket is nullptr.
+	 */
 	int32_t proofread(char* buffer, int32_t bufferSize, std::string& senderIp);
+
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
 	int32_t proofwrite(const std::vector<char>& data);
 	int32_t proofwrite(const std::string& data);
