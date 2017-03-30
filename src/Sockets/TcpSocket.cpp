@@ -356,7 +356,7 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), data.size() - totalBytesWritten) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, MSG_NOSIGNAL);
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
@@ -433,7 +433,7 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten) : send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, MSG_NOSIGNAL);
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
@@ -511,7 +511,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && errno == EINTR) continue;
+			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			_writeMutex.unlock();
 			close();
 			_writeMutex.lock();
