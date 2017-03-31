@@ -1504,7 +1504,7 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::map<std::string, bool>& fields)
+PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::set<std::string>& fields)
 {
 	try
 	{
@@ -1642,7 +1642,7 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Devices::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields)
+PVariable Devices::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields)
 {
 	try
 	{
