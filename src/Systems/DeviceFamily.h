@@ -118,7 +118,7 @@ public:
     // {{{ RPC
     virtual std::shared_ptr<Variable> getPairingMethods() = 0;
     virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
-    virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields);
+    virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields);
     // }}}
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
