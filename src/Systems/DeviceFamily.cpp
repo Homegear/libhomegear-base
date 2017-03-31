@@ -420,7 +420,7 @@ std::shared_ptr<Variable> DeviceFamily::getParamsetDescription(PRpcClientInfo cl
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool>& fields)
+PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields)
 {
 	try
 	{
