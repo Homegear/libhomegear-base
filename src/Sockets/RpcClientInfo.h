@@ -51,7 +51,8 @@ enum class RpcType
 	binary,
 	json,
 	websocket,
-	mqtt
+	mqtt,
+	rest
 };
 
 class RpcClientInfo
