@@ -75,6 +75,7 @@ void Settings::reset()
 	_databaseMaxBackups = 10;
 	_logfilePath = "/var/log/homegear/";
 	_prioritizeThreads = true;
+	_secureMemorySize = 65536;
 	_workerThreadWindow = 3000;
 	_scriptEngineThreadCount = 10;
 	_scriptEngineServerMaxConnections = 10;
@@ -363,6 +364,12 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _prioritizeThreads = false;
 					_bl->out.printDebug("Debug: prioritizeThreads set to " + std::to_string(_prioritizeThreads));
+				}
+				else if(name == "securememorysize")
+				{
+					_secureMemorySize = Math::getNumber(value);
+					if(_secureMemorySize < 16384) _secureMemorySize = 16384;
+					_bl->out.printDebug("Debug: secureMemorySize set to " + std::to_string(_secureMemorySize));
 				}
 				else if(name == "workerthreadwindow")
 				{
