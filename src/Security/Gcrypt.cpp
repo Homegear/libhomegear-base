@@ -49,9 +49,11 @@ Gcrypt::~Gcrypt()
 
 std::string Gcrypt::getError(int32_t errorCode)
 {
-	std::string result("", 512);
-	gpg_strerror_r(errorCode, &result[0], result.size());
-	return result;
+	std::vector<char> result(512);
+	gpg_strerror_r(errorCode, result.data(), result.size());
+	result.at(result.size() - 1) = 0;
+	std::string resultString(result.data());
+	return resultString;
 }
 
 size_t Gcrypt::getBlockSize()
