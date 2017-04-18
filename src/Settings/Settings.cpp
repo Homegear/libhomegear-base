@@ -368,7 +368,8 @@ void Settings::load(std::string filename)
 				else if(name == "securememorysize")
 				{
 					_secureMemorySize = Math::getNumber(value);
-					if(_secureMemorySize < 16384) _secureMemorySize = 16384;
+					//Allow 0 => disable secure memory. 16384 is minimum size. Values smaller than 16384 are set to 16384 by gcrypt: https://gnupg.org/documentation/manuals/gcrypt-devel/Controlling-the-library.html
+					if(_secureMemorySize < 0) _secureMemorySize = 1;
 					_bl->out.printDebug("Debug: secureMemorySize set to " + std::to_string(_secureMemorySize));
 				}
 				else if(name == "workerthreadwindow")
