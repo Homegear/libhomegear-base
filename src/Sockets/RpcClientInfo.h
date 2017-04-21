@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 Sathya Laufer
+/* Copyright 2013-2017 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -51,7 +51,8 @@ enum class RpcType
 	binary,
 	json,
 	websocket,
-	mqtt
+	mqtt,
+	rest
 };
 
 class RpcClientInfo
