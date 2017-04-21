@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 Sathya Laufer
+/* Copyright 2013-2017 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -75,6 +75,7 @@ void Settings::reset()
 	_databaseMaxBackups = 10;
 	_logfilePath = "/var/log/homegear/";
 	_prioritizeThreads = true;
+	_secureMemorySize = 65536;
 	_workerThreadWindow = 3000;
 	_scriptEngineThreadCount = 10;
 	_scriptEngineServerMaxConnections = 10;
@@ -363,6 +364,13 @@ void Settings::load(std::string filename)
 				{
 					if(HelperFunctions::toLower(value) == "false") _prioritizeThreads = false;
 					_bl->out.printDebug("Debug: prioritizeThreads set to " + std::to_string(_prioritizeThreads));
+				}
+				else if(name == "securememorysize")
+				{
+					_secureMemorySize = Math::getNumber(value);
+					//Allow 0 => disable secure memory. 16384 is minimum size. Values smaller than 16384 are set to 16384 by gcrypt: https://gnupg.org/documentation/manuals/gcrypt-devel/Controlling-the-library.html
+					if(_secureMemorySize < 0) _secureMemorySize = 1;
+					_bl->out.printDebug("Debug: secureMemorySize set to " + std::to_string(_secureMemorySize));
 				}
 				else if(name == "workerthreadwindow")
 				{

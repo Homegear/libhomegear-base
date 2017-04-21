@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 Sathya Laufer
+/* Copyright 2013-2017 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -49,9 +49,11 @@ Gcrypt::~Gcrypt()
 
 std::string Gcrypt::getError(int32_t errorCode)
 {
-	std::string result("", 512);
-	gpg_strerror_r(errorCode, &result[0], result.size());
-	return result;
+	std::vector<char> result(512);
+	gpg_strerror_r(errorCode, result.data(), result.size());
+	result.at(result.size() - 1) = 0;
+	std::string resultString(result.data());
+	return resultString;
 }
 
 size_t Gcrypt::getBlockSize()

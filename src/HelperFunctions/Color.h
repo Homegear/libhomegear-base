@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 Sathya Laufer
+/* Copyright 2013-2017 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -150,7 +150,7 @@ public:
 		 *
 		 * @param value The intensity of red between 0 and 255.
 		 */
-		void setRed(uint8_t value) { _red = ((double)value) / 255; }
+		void setRed(uint8_t value) { _red = ((double)value) / 255.0; }
 		void setRed(double value) { _red = value; if(_red < 0) { _red = 0; } else if(_red > 1) { _red = 1; } }
 		double getGreen() const { return _green; }
 
@@ -159,7 +159,7 @@ public:
 		 *
 		 * @param value The intensity of green between 0 and 255.
 		 */
-		void setGreen(uint8_t value) { _green = ((double)value) / 255; }
+		void setGreen(uint8_t value) { _green = ((double)value) / 255.0; }
 		void setGreen(double value) { _green = value; if(_green < 0) { _green = 0; } else if(_green > 1) { _green = 1; } }
 		double getBlue() const { return _blue; }
 
@@ -168,7 +168,7 @@ public:
 		 *
 		 * @param value The intensity of blue between 0 and 255.
 		 */
-		void setBlue(uint8_t value) { _blue = ((double)value) / 255; }
+		void setBlue(uint8_t value) { _blue = ((double)value) / 255.0; }
 		void setBlue(double value) { _blue = value; if(_blue < 0) { _blue = 0; } else if(_blue > 1) { _blue = 1; } }
 
 		/**

@@ -1,4 +1,4 @@
-/* Copyright 2013-2016 Sathya Laufer
+/* Copyright 2013-2017 Sathya Laufer
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -80,30 +80,30 @@ Color::RGB::RGB(const std::string& rgbString)
 			if(rgbString.size() >= 9)
 			{
 				_opacityDefined = true;
-				try { _opacity = std::stoll(rgbString.substr(1, 2), 0, 16); } catch(...) {}
-				try { _red = std::stoll(rgbString.substr(3, 2), 0, 16); } catch(...) {}
-				try { _green = std::stoll(rgbString.substr(5, 2), 0, 16); } catch(...) {}
-				try { _blue = std::stoll(rgbString.substr(7, 2), 0, 16); } catch(...) {}
+				try { _opacity = std::stoul(rgbString.substr(1, 2), 0, 16); } catch(...) {}
+				try { _red = std::stoul(rgbString.substr(3, 2), 0, 16); } catch(...) {}
+				try { _green = std::stoul(rgbString.substr(5, 2), 0, 16); } catch(...) {}
+				try { _blue = std::stoul(rgbString.substr(7, 2), 0, 16); } catch(...) {}
 			}
 			else if(rgbString.size() >= 7)
 			{
-				try { _red = std::stoll(rgbString.substr(1, 2), 0, 16); } catch(...) {}
-				try { _green = std::stoll(rgbString.substr(3, 2), 0, 16); } catch(...) {}
-				try { _blue = std::stoll(rgbString.substr(5, 2), 0, 16); } catch(...) {}
+				try { _red = std::stoul(rgbString.substr(1, 2), 0, 16); } catch(...) {}
+				try { _green = std::stoul(rgbString.substr(3, 2), 0, 16); } catch(...) {}
+				try { _blue = std::stoul(rgbString.substr(5, 2), 0, 16); } catch(...) {}
 			}
 			else if(rgbString.size() >= 5)
 			{
 				_opacityDefined = true;
-				try { _opacity = std::stoll(rgbString.substr(1, 1), 0, 16); } catch(...) {}
-				try { _red = std::stoll(rgbString.substr(2, 1), 0, 16); } catch(...) {}
-				try { _green = std::stoll(rgbString.substr(3, 1), 0, 16); } catch(...) {}
-				try { _blue = std::stoll(rgbString.substr(4, 1), 0, 16); } catch(...) {}
+				try { _opacity = std::stoul(rgbString.substr(1, 1), 0, 16); } catch(...) {}
+				try { _red = std::stoul(rgbString.substr(2, 1), 0, 16); } catch(...) {}
+				try { _green = std::stoul(rgbString.substr(3, 1), 0, 16); } catch(...) {}
+				try { _blue = std::stoul(rgbString.substr(4, 1), 0, 16); } catch(...) {}
 			}
 			else
 			{
-				try { _red = std::stoll(rgbString.substr(1, 1), 0, 16); } catch(...) {}
-				try { _green = std::stoll(rgbString.substr(2, 1), 0, 16); } catch(...) {}
-				try { _blue = std::stoll(rgbString.substr(3, 1), 0, 16); } catch(...) {}
+				try { _red = std::stoul(rgbString.substr(1, 1), 0, 16); } catch(...) {}
+				try { _green = std::stoul(rgbString.substr(2, 1), 0, 16); } catch(...) {}
+				try { _blue = std::stoul(rgbString.substr(3, 1), 0, 16); } catch(...) {}
 			}
 		}
 	}
@@ -134,10 +134,10 @@ Color::HSV Color::NormalizedRGB::toHSV()
 
 	if(_red == max)	hue = (_green - _blue) / delta;
 	else if(_green == max) hue = 2 + (_blue - _red) / delta;
-	else hue = 4 + (_red - _green) / delta;
+	else hue = 4.0 + (_red - _green) / delta;
 
-	hue *= 60;
-	if(hue < 0) hue += 360;
+	hue *= 60.0;
+	if(hue < 0) hue += 360.0;
 
 	return HSV(hue, saturation, brightness);
 }
