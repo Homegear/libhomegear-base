@@ -360,7 +360,7 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 			if(!variable) variable.reset(new Variable(VariableType::tBinary));
 			for(std::vector<PICast>::reverse_iterator i = casts.rbegin(); i != casts.rend(); ++i)
 			{
-				if((*i)->needsBinaryPacketData() && variable->binaryValue.empty()) variable->binaryValue = data;
+				if((*i)->needsBinaryPacketData() && variable->binaryValue.empty()) variable->binaryValue = *value;
 				(*i)->fromPacket(variable);
 			}
 			return variable;
