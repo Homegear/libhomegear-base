@@ -192,12 +192,12 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::os
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer.");
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer.");
-		encodeInteger(variable, s);
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
+		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON float.");
@@ -244,12 +244,12 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::ve
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer.");
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer.");
-		encodeInteger(variable, s);
+		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
+		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON float.");
@@ -384,6 +384,17 @@ void JsonEncoder::encodeInteger(const std::shared_ptr<Variable>& variable, std::
 void JsonEncoder::encodeInteger(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
 {
 	std::string value(std::to_string(variable->integerValue));
+	s.insert(s.end(), value.begin(), value.end());
+}
+
+void JsonEncoder::encodeInteger64(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
+{
+	s << std::to_string(variable->integerValue64);
+}
+
+void JsonEncoder::encodeInteger64(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
+{
+	std::string value(std::to_string(variable->integerValue64));
 	s.insert(s.end(), value.begin(), value.end());
 }
 
