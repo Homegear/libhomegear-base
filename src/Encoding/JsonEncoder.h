@@ -69,6 +69,8 @@ private:
 	void encodeBoolean(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
 	void encodeInteger( const std::shared_ptr<Variable>& variable, std::ostringstream& s);
 	void encodeInteger( const std::shared_ptr<Variable>& variable, std::vector<char>& s);
+	void encodeInteger64( const std::shared_ptr<Variable>& variable, std::ostringstream& s);
+	void encodeInteger64( const std::shared_ptr<Variable>& variable, std::vector<char>& s);
 	void encodeFloat(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
 	void encodeFloat(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
 	void encodeString(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
