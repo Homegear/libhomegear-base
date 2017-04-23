@@ -279,54 +279,54 @@ bool Variable::operator!=(const Variable& rhs)
 	return !(operator==(rhs));
 }
 
-std::string Variable::print(bool stdout, bool stderr)
+std::string Variable::print(bool stdout, bool stderr, bool oneLine)
 {
 	std::ostringstream result;
 	if(type == VariableType::tVoid)
 	{
-		result << "(void)" << std::endl;
+		result << "(void)" << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tBoolean)
 	{
-		result << "(Boolean) " << booleanValue << std::endl;
+		result << "(Boolean) " << booleanValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tInteger)
 	{
-		result << "(Integer) " << integerValue << std::endl;
+		result << "(Integer) " << integerValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tInteger64)
 	{
-		result << "(Integer64) " << integerValue64 << std::endl;
+		result << "(Integer64) " << integerValue64 << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tFloat)
 	{
-		result << "(Float) " << floatValue << std::endl;
+		result << "(Float) " << floatValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tString)
 	{
-		result << "(String) " << stringValue << std::endl;
+		result << "(String) " << stringValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tBase64)
 	{
-		result << "(Base64) " << stringValue << std::endl;
+		result << "(Base64) " << stringValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tArray)
 	{
 		std::string indent("");
-		result << printArray(arrayValue, indent);
+		result << printArray(arrayValue, indent, oneLine);
 	}
 	else if(type == VariableType::tStruct)
 	{
 		std::string indent("");
-		result << printStruct(structValue, indent);
+		result << printStruct(structValue, indent, oneLine);
 	}
 	else if(type == VariableType::tBinary)
 	{
-		result << "(Binary) " << HelperFunctions::getHexString(binaryValue) << std::endl;
+		result << "(Binary) " << HelperFunctions::getHexString(binaryValue) << (oneLine ? " " : "\n");
 	}
 	else
 	{
-		result << "(unknown)" << std::endl;
+		result << "(unknown)" << (oneLine ? " " : "\n");
 	}
 	std::string resultString = result.str();
 	if(stdout) std::cout << resultString;
@@ -334,86 +334,86 @@ std::string Variable::print(bool stdout, bool stderr)
 	return resultString;
 }
 
-std::string Variable::print(PVariable variable, std::string indent)
+std::string Variable::print(PVariable variable, std::string indent, bool oneLine)
 {
 	if(!variable) return "";
 	std::ostringstream result;
 	if(variable->type == VariableType::tVoid)
 	{
-		result << indent << "(void)" << std::endl;
+		result << indent << "(void)" << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tInteger)
 	{
-		result << indent << "(Integer) " << variable->integerValue << std::endl;
+		result << indent << "(Integer) " << variable->integerValue << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tInteger64)
 	{
-		result << indent << "(Integer64) " << variable->integerValue64 << std::endl;
+		result << indent << "(Integer64) " << variable->integerValue64 << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tFloat)
 	{
-		result << indent << "(Float) " << variable->floatValue << std::endl;
+		result << indent << "(Float) " << variable->floatValue << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tBoolean)
 	{
-		result << indent << "(Boolean) " << variable->booleanValue << std::endl;
+		result << indent << "(Boolean) " << variable->booleanValue << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tString)
 	{
-		result << indent << "(String) " << variable->stringValue << std::endl;
+		result << indent << "(String) " << variable->stringValue << (oneLine ? " " : "\n");
 	}
 	else if(type == VariableType::tBase64)
 	{
-		result << indent << "(Base64) " << variable->stringValue << std::endl;
+		result << indent << "(Base64) " << variable->stringValue << (oneLine ? " " : "\n");
 	}
 	else if(variable->type == VariableType::tArray)
 	{
-		return printArray(variable->arrayValue, indent);
+		return printArray(variable->arrayValue, indent, oneLine);
 	}
 	else if(variable->type == VariableType::tStruct)
 	{
-		return printStruct(variable->structValue, indent);
+		return printStruct(variable->structValue, indent, oneLine);
 	}
 	else if(variable->type == VariableType::tBinary)
 	{
-		result << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << std::endl;
+		result << indent << "(Binary) " << HelperFunctions::getHexString(variable->binaryValue) << (oneLine ? " " : "\n");
 	}
 	else
 	{
-		result << indent << "(Unknown)" << std::endl;
+		result << indent << "(Unknown)" << (oneLine ? " " : "\n");
 	}
 	return result.str();
 }
 
-std::string Variable::printArray(PArray array, std::string indent)
+std::string Variable::printArray(PArray array, std::string indent, bool oneLine)
 {
 	std::ostringstream result;
-	result << indent << "(Array length=" << array->size() << ")" << std::endl << indent << "{" << std::endl;
+	result << indent << "(Array length=" << array->size() << ")" << (oneLine ? " " : "\n" + indent) << "{" << (oneLine ? " " : "\n");
 	std::string currentIndent = indent;
 	currentIndent.push_back(' ');
 	currentIndent.push_back(' ');
 	for(std::vector<std::shared_ptr<Variable>>::iterator i = array->begin(); i != array->end(); ++i)
 	{
-		result << print(*i, currentIndent);
+		result << print(*i, currentIndent, oneLine);
 	}
-	result << indent << "}" << std::endl;
+	result << (oneLine ? " } " : indent + "}\n");
 	return result.str();
 }
 
-std::string Variable::printStruct(PStruct tStruct, std::string indent)
+std::string Variable::printStruct(PStruct tStruct, std::string indent, bool oneLine)
 {
 	std::ostringstream result;
-	result << indent << "(Struct length=" << tStruct->size() << ")" << std::endl << indent << "{" << std::endl;
+	result << indent << "(Struct length=" << tStruct->size() << ")" << (oneLine ? " " : "\n" + indent) << "{" << (oneLine ? " " : "\n");
 	std::string currentIndent = indent;
 	currentIndent.push_back(' ');
 	currentIndent.push_back(' ');
 	for(std::map<std::string, std::shared_ptr<Variable>>::iterator i = tStruct->begin(); i != tStruct->end(); ++i)
 	{
-		result << currentIndent << "[" << i->first << "]" << std::endl << currentIndent << "{" << std::endl;
-		result << print(i->second, currentIndent + "  ");
-		result << currentIndent << "}" << std::endl;
+		result << currentIndent << "[" << i->first << "]" << (oneLine ? " " : "\n" + currentIndent) << "{" << (oneLine ? " " : "\n");
+		result << print(i->second, currentIndent + "  ", oneLine);
+		result << (oneLine ? " } " : currentIndent + "}\n");
 	}
-	result << indent << "}" << std::endl;
+	result << (oneLine ? " } " : indent + "}\n");
 	return result.str();
 }
 
