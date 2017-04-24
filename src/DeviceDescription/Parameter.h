@@ -108,6 +108,7 @@ public:
 	std::string formFieldType;
 	int32_t formPosition = -1;
 	std::string metadata;
+	bool resetAfterRestart = false;
 	bool ccu2Visible = true;
 	Casts casts;
 
