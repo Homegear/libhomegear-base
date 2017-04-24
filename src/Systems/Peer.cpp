@@ -1331,7 +1331,11 @@ void Peer::loadConfig()
 			else
 			{
 				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				{
+					if((*i)->parameter.rpcParameter->resetAfterRestart) (*i)->parameter.rpcParameter->convertToPacket((*i)->parameter.rpcParameter->logical->getDefaultValue(), (*i)->parameter.data);
+					valuesCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
+				}
 				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
 			}
 		}
