@@ -68,6 +68,12 @@ void RpcConfigurationParameter::unlock() noexcept
 	_binaryDataMutex.unlock();
 }
 
+std::vector<uint8_t>::size_type RpcConfigurationParameter::getBinaryDataSize() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData.size();
+}
+
 std::vector<uint8_t> RpcConfigurationParameter::getBinaryData() noexcept
 {
 	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
@@ -140,6 +146,12 @@ void ConfigDataBlock::lock() noexcept
 void ConfigDataBlock::unlock() noexcept
 {
 	_binaryDataMutex.unlock();
+}
+
+std::vector<uint8_t>::size_type ConfigDataBlock::getBinaryDataSize() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData.size();
 }
 
 std::vector<uint8_t> ConfigDataBlock::getBinaryData() noexcept
