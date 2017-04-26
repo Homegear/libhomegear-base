@@ -445,10 +445,11 @@ void Peer::setLastPacketReceived()
 		std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find("LAST_PACKET_RECEIVED");
 		if(parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter)
 		{
-			std::vector<uint8_t> data = parameterIterator->second.getBinaryData();
-			parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), data);
-			if(parameterIterator->second.databaseId > 0) saveParameter(parameterIterator->second.databaseId, data);
-			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", data);
+			std::vector<uint8_t> parameterData;
+			parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), parameterData);
+			parameterIterator->second.setBinaryData(parameterData);
+			if(parameterIterator->second.databaseId > 0) saveParameter(parameterIterator->second.databaseId, parameterData);
+			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterData);
 
 			// Don't raise event as this is not necessary and some programs like OpenHAB have problems with it
 		}
@@ -795,8 +796,9 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
 {
 	try
 	{
-		std::vector<uint8_t> data = parameter.getBinaryData();
-		if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), data))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), data);
+		std::vector<uint8_t> parameterData;
+		if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+		parameter.setBinaryData(parameterData);
 	}
 	catch(const std::exception& ex)
     {
@@ -1472,8 +1474,12 @@ void Peer::loadConfig()
 				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].emplace((*i)->parameterName, (*i)->parameter);
 				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
 				{
-					std::vector<uint8_t> parameterData = (*i)->parameter.getBinaryData();
-					if((*i)->parameter.rpcParameter->resetAfterRestart) (*i)->parameter.rpcParameter->convertToPacket((*i)->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+					if((*i)->parameter.rpcParameter->resetAfterRestart)
+					{
+						std::vector<uint8_t> parameterData;
+						(*i)->parameter.rpcParameter->convertToPacket((*i)->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+						(*i)->parameter.setBinaryData(parameterData);
+					}
 					valuesCentral[(*i)->channel].emplace((*i)->parameterName, (*i)->parameter);
 				}
 				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].emplace((*i)->parameterName, (*i)->parameter);
