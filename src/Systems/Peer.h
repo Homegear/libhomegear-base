@@ -76,6 +76,12 @@ public:
 	void unlock() noexcept;
 
 	/**
+	 * Returns the size of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns the size of the internal binary data vector.
+	 */
+	std::vector<uint8_t>::size_type getBinaryDataSize() noexcept;
+
+	/**
 	 * Returns a copy of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
 	 * @return Returns a copy of the internal binary data vector.
 	 */
@@ -164,6 +170,12 @@ public:
 	 * Unlocks the internal binary data vector.
 	 */
 	void unlock() noexcept;
+
+	/**
+	 * Returns the size of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns the size of the internal binary data vector.
+	 */
+	std::vector<uint8_t>::size_type getBinaryDataSize() noexcept;
 
 	/**
 	 * Returns a copy of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
