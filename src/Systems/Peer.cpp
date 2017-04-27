@@ -38,6 +38,145 @@ namespace BaseLib
 namespace Systems
 {
 
+RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter const& rhs)
+{
+	rpcParameter = rhs.rpcParameter;
+	databaseId = rhs.databaseId;
+	_binaryData = rhs._binaryData;
+	_partialBinaryData = rhs._partialBinaryData;
+	_logicalData = rhs._logicalData;
+}
+
+RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
+{
+	if(&rhs == this) return *this;
+	rpcParameter = rhs.rpcParameter;
+	databaseId = rhs.databaseId;
+	_binaryData = rhs._binaryData;
+	_partialBinaryData = rhs._partialBinaryData;
+	_logicalData = rhs._logicalData;
+	return *this;
+}
+
+void RpcConfigurationParameter::lock() noexcept
+{
+	_binaryDataMutex.lock();
+}
+
+void RpcConfigurationParameter::unlock() noexcept
+{
+	_binaryDataMutex.unlock();
+}
+
+std::vector<uint8_t>::size_type RpcConfigurationParameter::getBinaryDataSize() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData.size();
+}
+
+std::vector<uint8_t> RpcConfigurationParameter::getBinaryData() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData;
+}
+
+std::vector<uint8_t>& RpcConfigurationParameter::getBinaryDataReference() noexcept
+{
+	return _binaryData;
+}
+
+void RpcConfigurationParameter::setBinaryData(std::vector<uint8_t>& value) noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	_binaryData = value;
+}
+
+std::vector<uint8_t> RpcConfigurationParameter::getPartialBinaryData() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _partialBinaryData;
+}
+
+std::vector<uint8_t>& RpcConfigurationParameter::getPartialBinaryDataReference() noexcept
+{
+	return _partialBinaryData;
+}
+
+void RpcConfigurationParameter::setPartialBinaryData(std::vector<uint8_t>& value) noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	_partialBinaryData = value;
+}
+
+BaseLib::PVariable RpcConfigurationParameter::getLogicalData() noexcept
+{
+	return _logicalData;
+}
+
+void RpcConfigurationParameter::setLogicalData(BaseLib::PVariable value) noexcept
+{
+	_logicalData = value;
+}
+
+bool RpcConfigurationParameter::equals(std::vector<uint8_t>& value) noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return value == _binaryData;
+}
+
+ConfigDataBlock::ConfigDataBlock(ConfigDataBlock const& rhs)
+{
+	databaseId = rhs.databaseId;
+	_binaryData = rhs._binaryData;
+}
+
+ConfigDataBlock& ConfigDataBlock::operator=(const ConfigDataBlock& rhs)
+{
+	if(&rhs == this) return *this;
+	databaseId = rhs.databaseId;
+	_binaryData = rhs._binaryData;
+	return *this;
+}
+
+void ConfigDataBlock::lock() noexcept
+{
+	_binaryDataMutex.lock();
+}
+
+void ConfigDataBlock::unlock() noexcept
+{
+	_binaryDataMutex.unlock();
+}
+
+std::vector<uint8_t>::size_type ConfigDataBlock::getBinaryDataSize() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData.size();
+}
+
+std::vector<uint8_t> ConfigDataBlock::getBinaryData() noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return _binaryData;
+}
+
+std::vector<uint8_t>& ConfigDataBlock::getBinaryDataReference() noexcept
+{
+	return _binaryData;
+}
+
+void ConfigDataBlock::setBinaryData(std::vector<uint8_t>& value) noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	_binaryData = value;
+}
+
+bool ConfigDataBlock::equals(std::vector<uint8_t>& value) noexcept
+{
+	std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
+	return value == _binaryData;
+}
+
 Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler)
 {
 	try
@@ -187,10 +326,10 @@ void Peer::onSaveParameter(std::string name, uint32_t channel, std::vector<uint8
 			if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Could not set parameter " + name + " on channel " + std::to_string(channel) + " for peer " + std::to_string(_peerID) + ". Parameter does not exist.");
 			return;
 		}
-		RPCConfigurationParameter* parameter = &valuesCentral.at(channel).at(name);
-		if(parameter->data == data) return;
-		parameter->data = data;
-		saveParameter(parameter->databaseID, ParameterGroup::Type::Enum::variables, channel, name, parameter->data);
+		RpcConfigurationParameter& parameter = valuesCentral.at(channel).at(name);
+		if(parameter.equals(data)) return;
+		parameter.setBinaryData(data);
+		saveParameter(parameter.databaseId, ParameterGroup::Type::Enum::variables, channel, name, data);
 	}
 	catch(const std::exception& ex)
     {
@@ -269,16 +408,17 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
 		if(_rpcDevice)
 		{
 			_rxModes = _rpcDevice->receiveModes;
-			std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configIterator = configCentral.find(0);
+			std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator configIterator = configCentral.find(0);
 			if(configIterator != configCentral.end())
 			{
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configIterator->second.find("WAKE_ON_RADIO");
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = configIterator->second.find("WAKE_ON_RADIO");
 				if(parameterIterator == configIterator->second.end()) parameterIterator = configIterator->second.find("BURST_RX");
 				if(parameterIterator == configIterator->second.end()) parameterIterator = configIterator->second.find("LIVE_MODE_RX");
 				if(parameterIterator != configIterator->second.end())
 				{
 					if(!parameterIterator->second.rpcParameter) return _rxModes;
-					if(parameterIterator->second.rpcParameter->convertFromPacket(parameterIterator->second.data)->booleanValue)
+					std::vector<uint8_t> data = parameterIterator->second.getBinaryData();
+					if(parameterIterator->second.rpcParameter->convertFromPacket(data)->booleanValue)
 					{
 						_rxModes = (HomegearDevice::ReceiveModes::Enum)(_rxModes | HomegearDevice::ReceiveModes::Enum::wakeOnRadio);
 					}
@@ -311,15 +451,17 @@ void Peer::setLastPacketReceived()
 	uint32_t now = HelperFunctions::getTimeSeconds();
 	if(_lastPacketReceived == now) return;
 	_lastPacketReceived = now;
-	std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(0);
+	std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(0);
 	if(valuesIterator != valuesCentral.end())
 	{
-		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find("LAST_PACKET_RECEIVED");
+		std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find("LAST_PACKET_RECEIVED");
 		if(parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter)
 		{
-			parameterIterator->second.rpcParameter->convertToPacket(PVariable(new Variable(_lastPacketReceived)), parameterIterator->second.data);
-			if(parameterIterator->second.databaseID > 0) saveParameter(parameterIterator->second.databaseID, parameterIterator->second.data);
-			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterIterator->second.data);
+			std::vector<uint8_t> parameterData;
+			parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), parameterData);
+			parameterIterator->second.setBinaryData(parameterData);
+			if(parameterIterator->second.databaseId > 0) saveParameter(parameterIterator->second.databaseId, parameterData);
+			else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterData);
 
 			// Don't raise event as this is not necessary and some programs like OpenHAB have problems with it
 		}
@@ -596,22 +738,22 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
 	try
 	{
 		if(!masterSet || masterSet->parameters.empty()) return;
-		BaseLib::Systems::RPCConfigurationParameter parameter;
-		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
 		if(channelIterator == configCentral.end())
 		{
-			channelIterator = configCentral.insert(std::pair<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>(channel, std::unordered_map<std::string, RPCConfigurationParameter>())).first;
+			channelIterator = configCentral.insert(std::pair<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>(channel, std::unordered_map<std::string, RpcConfigurationParameter>())).first;
 		}
 		for(Parameters::iterator j = masterSet->parameters.begin(); j != masterSet->parameters.end(); ++j)
 		{
 			if(!j->second) continue;
 			if(!j->second->id.empty() && channelIterator->second.find(j->second->id) == channelIterator->second.end())
 			{
-				parameter = BaseLib::Systems::RPCConfigurationParameter();
+				RpcConfigurationParameter parameter;
 				parameter.rpcParameter = j->second;
-				setDefaultValue(&parameter);
-				channelIterator->second[j->second->id] = parameter;
-				saveParameter(0, ParameterGroup::Type::config, channel, j->second->id, parameter.data);
+				setDefaultValue(parameter);
+				channelIterator->second.emplace(j->second->id, parameter);
+				std::vector<uint8_t> data = parameter.getBinaryData();
+				saveParameter(0, ParameterGroup::Type::config, channel, j->second->id, data);
 			}
 		}
 	}
@@ -634,17 +776,17 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
 	try
 	{
 		if(!valueSet || valueSet->parameters.empty()) return;
-		BaseLib::Systems::RPCConfigurationParameter parameter;
 		for(Parameters::iterator j = valueSet->parameters.begin(); j != valueSet->parameters.end(); ++j)
 		{
 			if(!j->second) continue;
 			if(!j->second->id.empty() && valuesCentral[channel].find(j->second->id) == valuesCentral[channel].end())
 			{
-				parameter = BaseLib::Systems::RPCConfigurationParameter();
+				RpcConfigurationParameter parameter;
 				parameter.rpcParameter = j->second;
-				setDefaultValue(&parameter);
-				valuesCentral[channel][j->second->id] = parameter;
-				saveParameter(0, ParameterGroup::Type::variables, channel, j->second->id, parameter.data);
+				setDefaultValue(parameter);
+				valuesCentral[channel].emplace(j->second->id, parameter);
+				std::vector<uint8_t> data = parameter.getBinaryData();
+				saveParameter(0, ParameterGroup::Type::variables, channel, j->second->id, data);
 			}
 		}
 	}
@@ -662,12 +804,13 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
     }
 }
 
-void Peer::setDefaultValue(RPCConfigurationParameter* parameter)
+void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
 {
 	try
 	{
-		//parameter cannot be nullptr at this point.
-		if(!convertToPacketHook(parameter->rpcParameter, parameter->rpcParameter->logical->getDefaultValue(), parameter->data))	parameter->rpcParameter->convertToPacket(parameter->rpcParameter->logical->getDefaultValue(), parameter->data);
+		std::vector<uint8_t> parameterData;
+		if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+		parameter.setBinaryData(parameterData);
 	}
 	catch(const std::exception& ex)
     {
@@ -1090,50 +1233,54 @@ void Peer::saveConfig()
 		for(std::unordered_map<uint32_t, ConfigDataBlock>::iterator i = binaryConfig.begin(); i != binaryConfig.end(); ++i)
 		{
 			std::string emptyString;
-			if(i->second.databaseID > 0) saveParameter(i->second.databaseID, i->second.data);
-			else saveParameter(0, i->first, i->second.data);
+			std::vector<uint8_t> configData = i->second.getBinaryData();
+			if(i->second.databaseId > 0) saveParameter(i->second.databaseId, configData);
+			else saveParameter(0, i->first, configData);
 		}
-		for(std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator i = configCentral.begin(); i != configCentral.end(); ++i)
+		for(std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator i = configCentral.begin(); i != configCentral.end(); ++i)
 		{
-			for(std::unordered_map<std::string, RPCConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+			for(std::unordered_map<std::string, RpcConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 			{
 				if(j->first.empty())
 				{
 					_bl->out.printError("Error: Parameter has no id.");
 					continue;
 				}
-				if(j->second.databaseID > 0) saveParameter(j->second.databaseID, j->second.data);
-				else saveParameter(0, ParameterGroup::Type::Enum::config, i->first, j->first, j->second.data);
+				std::vector<uint8_t> data = j->second.getBinaryData();
+				if(j->second.databaseId > 0) saveParameter(j->second.databaseId, data);
+				else saveParameter(0, ParameterGroup::Type::Enum::config, i->first, j->first, data);
 			}
 		}
-		for(std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator i = valuesCentral.begin(); i != valuesCentral.end(); ++i)
+		for(std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator i = valuesCentral.begin(); i != valuesCentral.end(); ++i)
 		{
-			for(std::unordered_map<std::string, RPCConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+			for(std::unordered_map<std::string, RpcConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 			{
 				if(j->first.empty())
 				{
 					_bl->out.printError("Error: Parameter has no id.");
 					continue;
 				}
-				if(j->second.databaseID > 0) saveParameter(j->second.databaseID, j->second.data);
-				else saveParameter(0, ParameterGroup::Type::Enum::variables, i->first, j->first, j->second.data);
+				std::vector<uint8_t> data = j->second.getBinaryData();
+				if(j->second.databaseId > 0) saveParameter(j->second.databaseId, data);
+				else saveParameter(0, ParameterGroup::Type::Enum::variables, i->first, j->first, data);
 			}
 		}
-		for(std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>>::iterator i = linksCentral.begin(); i != linksCentral.end(); ++i)
+		for(std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>>::iterator i = linksCentral.begin(); i != linksCentral.end(); ++i)
 		{
-			for(std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+			for(std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 			{
-				for(std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator k = j->second.begin(); k != j->second.end(); ++k)
+				for(std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator k = j->second.begin(); k != j->second.end(); ++k)
 				{
-					for(std::unordered_map<std::string, RPCConfigurationParameter>::iterator l = k->second.begin(); l != k->second.end(); ++l)
+					for(std::unordered_map<std::string, RpcConfigurationParameter>::iterator l = k->second.begin(); l != k->second.end(); ++l)
 					{
 						if(l->first.empty())
 						{
 							_bl->out.printError("Error: Parameter has no id.");
 							continue;
 						}
-						if(l->second.databaseID > 0) saveParameter(l->second.databaseID, l->second.data);
-						else saveParameter(0, ParameterGroup::Type::Enum::link, i->first, l->first, l->second.data, j->first, k->first);
+						std::vector<uint8_t> data = l->second.getBinaryData();
+						if(l->second.databaseId > 0) saveParameter(l->second.databaseId, data);
+						else saveParameter(0, ParameterGroup::Type::Enum::link, i->first, l->first, data, j->first, k->first);
 					}
 				}
 			}
@@ -1164,7 +1311,7 @@ void Peer::loadConfig()
 			int32_t remoteAddress;
 			int32_t remoteChannel;
 			std::string parameterName;
-			RPCConfigurationParameter parameter;
+			RpcConfigurationParameter parameter;
 			PFunction function;
 		};
 
@@ -1174,15 +1321,17 @@ void Peer::loadConfig()
 		std::vector<std::shared_ptr<ParameterInfo>> parameters;
 		for(Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
-			uint32_t databaseID = row->second.at(0)->intValue;
+			uint32_t databaseId = row->second.at(0)->intValue;
 			ParameterGroup::Type::Enum parameterGroupType = (ParameterGroup::Type::Enum)row->second.at(2)->intValue;
 
 			if(parameterGroupType == ParameterGroup::Type::Enum::none)
 			{
 				uint32_t index = row->second.at(3)->intValue;
-				ConfigDataBlock* config = &binaryConfig[index];
-				config->databaseID = databaseID;
-				config->data.insert(config->data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				ConfigDataBlock& config = binaryConfig[index];
+				config.databaseId = databaseId;
+				std::vector<uint8_t> configData;
+				configData.insert(configData.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				config.setBinaryData(configData);
 			}
 			else
 			{
@@ -1202,8 +1351,10 @@ void Peer::loadConfig()
 					continue;
 				}
 
-				parameterInfo->parameter.databaseID = databaseID;
-				parameterInfo->parameter.data.insert(parameterInfo->parameter.data.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				parameterInfo->parameter.databaseId = databaseId;
+				std::vector<uint8_t> parameterData;
+				parameterData.insert(parameterData.begin(), row->second.at(7)->binaryValue->begin(), row->second.at(7)->binaryValue->end());
+				parameterInfo->parameter.setBinaryData(parameterData);
 				if(!_rpcDevice)
 				{
 					_bl->out.printCritical("Critical: No xml-rpc device found for peer " + std::to_string(_peerID) + ".");
@@ -1227,10 +1378,11 @@ void Peer::loadConfig()
 				parameterInfo->function = functionIterator->second;
 				if(parameterGroupType == ParameterGroup::Type::Enum::config && parameterInfo->function->parameterGroupSelector && !parameterInfo->function->alternativeFunctions.empty() && parameterInfo->parameterName == parameterInfo->function->parameterGroupSelector->id)
 				{
-					int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterInfo->parameter.data)->integerValue;
+					std::vector<uint8_t> parameterData = parameterInfo->parameter.getBinaryData();
+					int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterData)->integerValue;
 					if(parameterInfo->function->parameterGroupSelector->logical->type != ILogical::Type::Enum::tBoolean && index > (signed)parameterInfo->function->alternativeFunctions.size())
 					{
-						_bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterInfo->parameter.data.back()) + "). Peer: " + std::to_string(_peerID) + ".");
+						_bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterData.back()) + "). Peer: " + std::to_string(_peerID) + ".");
 						continue;
 					}
 					parameterInfo->parameter.rpcParameter = parameterInfo->function->parameterGroupSelector;
@@ -1244,7 +1396,8 @@ void Peer::loadConfig()
 		{
 			if(parameterGroupSelector && (*i)->function->parameterGroupSelector && !(*i)->function->alternativeFunctions.empty())
 			{
-				int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterGroupSelector->parameter.data)->integerValue;
+				std::vector<uint8_t> parameterData = parameterGroupSelector->parameter.getBinaryData();
+				int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->integerValue;
 				if(index == 0)
 				{
 					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
@@ -1330,9 +1483,18 @@ void Peer::loadConfig()
 			}
 			else
 			{
-				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables) valuesCentral[(*i)->channel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].insert(std::pair<std::string, RPCConfigurationParameter>((*i)->parameterName, (*i)->parameter));
+				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].emplace((*i)->parameterName, (*i)->parameter);
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				{
+					if((*i)->parameter.rpcParameter->resetAfterRestart)
+					{
+						std::vector<uint8_t> parameterData;
+						(*i)->parameter.rpcParameter->convertToPacket((*i)->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+						(*i)->parameter.setBinaryData(parameterData);
+					}
+					valuesCentral[(*i)->channel].emplace((*i)->parameterName, (*i)->parameter);
+				}
+				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].emplace((*i)->parameterName, (*i)->parameter);
 			}
 		}
 	}
@@ -1398,7 +1560,11 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 		{
 			if(!i->second) continue;
-			if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+			if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
+			{
+				std::vector<uint8_t> parameterData = configCentral[0][i->second->countFromVariable].getBinaryData();
+				if(parameterData.size() > 0 && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
+			}
 			PVariable channel(new Variable(VariableType::tStruct));
 			channel->structValue->insert(StructElement("INDEX", PVariable(new Variable(i->first))));
 			channel->structValue->insert(StructElement("TYPE", PVariable(new Variable(i->second->type))));
@@ -1418,9 +1584,9 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 					_bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
 					continue;
 				}
-				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configCentralIterator = configCentral.find(i->first);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator configCentralIterator = configCentral.find(i->first);
 				if(configCentralIterator == configCentral.end()) continue;
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configCentralIterator->second.find(j->second->id);
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = configCentralIterator->second.find(j->second->id);
 				if(parameterIterator == configCentralIterator->second.end()) continue;
 #ifdef CCU2
 				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
@@ -1430,7 +1596,8 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 				PVariable value;
 				if(j->second->readable)
 				{
-					if(!convertFromPacketHook(j->second, parameterIterator->second.data, value)) value = (j->second->convertFromPacket(parameterIterator->second.data));
+					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+					if(!convertFromPacketHook(j->second, parameterData, value)) value = j->second->convertFromPacket(parameterData);
 					if(j->second->password) value.reset(new Variable(value->type));
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
@@ -1548,7 +1715,11 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 		{
 			if(!i->second) continue;
-			if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+			if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
+			{
+				std::vector<uint8_t> parameterData = configCentral[0][i->second->countFromVariable].getBinaryData();
+				if(parameterData.size() > 0 && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
+			}
 			PVariable channel(new Variable(VariableType::tStruct));
 			channel->structValue->insert(StructElement("INDEX", PVariable(new Variable(i->first))));
 			channel->structValue->insert(StructElement("TYPE", PVariable(new Variable(i->second->type))));
@@ -1574,9 +1745,9 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 #endif
 				if(clientInfo->clientType == RpcClientType::ccu2 && !j->second->ccu2Visible) continue;
 
-				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
 				if(valuesCentralIterator == valuesCentral.end()) continue;
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
 				if(parameterIterator == valuesCentralIterator->second.end()) continue;
 
 				if(getAllValuesHook2(clientInfo, j->second, i->first, parameters)) continue;
@@ -1585,10 +1756,11 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 				PVariable value;
 				if(j->second->readable)
 				{
-					if(j->second->password || parameterIterator->second.data.empty()) value.reset(new Variable(j->second->logical->type));
+					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+					if(j->second->password || parameterData.empty()) value.reset(new Variable(j->second->logical->type));
 					else
 					{
-						if(!convertFromPacketHook(j->second, parameterIterator->second.data, value)) value = j->second->convertFromPacket(parameterIterator->second.data);
+						if(!convertFromPacketHook(j->second, parameterData, value)) value = j->second->convertFromPacket(parameterData);
 					}
 					if(!value) continue;
 					element->structValue->insert(StructElement("VALUE", value));
@@ -1730,9 +1902,9 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
-		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
 		if(channelIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
-		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(name);
+		std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(name);
 		if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
 
 		//Check if channel still exists in device description
@@ -1743,8 +1915,9 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
 		PParameter parameter = parameterGroup->parameters.at(name);
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
 		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+		std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 		PVariable variable;
-		if(!convertFromPacketHook(parameter, parameterIterator->second.data, variable)) variable = parameter->convertFromPacket(parameterIterator->second.data);
+		if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter->convertFromPacket(parameterData);
 		if(parameter->password) variable.reset(new Variable(variable->type));
 		return variable;
 	}
@@ -1790,7 +1963,11 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 				for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 				{
 					if(!i->second->visible) continue;
-					if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+					if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
+					{
+						std::vector<uint8_t> parameterData = configCentral[0][i->second->countFromVariable].getBinaryData();
+						if(parameterData.size() > 0 && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
+					}
 					if(fields.empty() || fields.find("CHILDREN") != fields.end()) variable->arrayValue->push_back(PVariable(new Variable(_serialNumber + ":" + std::to_string(i->first))));
 					if(fields.empty() || fields.find("CHANNELS") != fields.end()) variable2->arrayValue->push_back(PVariable(new Variable(i->first)));
 				}
@@ -1852,7 +2029,11 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 		{
 			if(_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
 			PFunction rpcFunction = _rpcDevice->functions.at(channel);
-			if(!rpcFunction->countFromVariable.empty() && configCentral[0].find(rpcFunction->countFromVariable) != configCentral[0].end() && configCentral[0][rpcFunction->countFromVariable].data.size() > 0 && channel >= (int32_t)rpcFunction->channel + configCentral[0][rpcFunction->countFromVariable].data.at(configCentral[0][rpcFunction->countFromVariable].data.size() - 1)) return Variable::createError(-2, "Channel index larger than defined.");
+			if(!rpcFunction->countFromVariable.empty() && configCentral[0].find(rpcFunction->countFromVariable) != configCentral[0].end())
+			{
+				std::vector<uint8_t> parameterData = configCentral[0][rpcFunction->countFromVariable].getBinaryData();
+				if(parameterData.size() > 0 && channel >= (int32_t)rpcFunction->channel + parameterData.at(parameterData.size() - 1)) return Variable::createError(-2, "Channel index larger than defined.");
+			}
 			if(!rpcFunction->visible) return description;
 
 			if(fields.empty() || fields.find("FAMILYID") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
@@ -1863,9 +2044,13 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 			if(fields.empty() || fields.find("AES_ACTIVE") != fields.end())
 			{
 				int32_t aesActive = 0;
-				if(configCentral.find(channel) != configCentral.end() && configCentral.at(channel).find("AES_ACTIVE") != configCentral.at(channel).end() && !configCentral.at(channel).at("AES_ACTIVE").data.empty() && configCentral.at(channel).at("AES_ACTIVE").data.at(0) != 0)
+				if(configCentral.find(channel) != configCentral.end() && configCentral.at(channel).find("AES_ACTIVE") != configCentral.at(channel).end())
 				{
-					aesActive = 1;
+					std::vector<uint8_t> parameterData = configCentral.at(channel).at("AES_ACTIVE").getBinaryData();
+					if(!parameterData.empty() && parameterData.at(0) != 0)
+					{
+						aesActive = 1;
+					}
 				}
 				//Integer for compatability
 				description->structValue->insert(StructElement("AES_ACTIVE", PVariable(new Variable(aesActive))));
@@ -1973,7 +2158,11 @@ std::shared_ptr<std::vector<PVariable>> Peer::getDeviceDescriptions(PRpcClientIn
 		{
 			for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 			{
-				if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end() && configCentral[0][i->second->countFromVariable].data.size() > 0 && i->first >= i->second->channel + configCentral[0][i->second->countFromVariable].data.at(configCentral[0][i->second->countFromVariable].data.size() - 1)) continue;
+				if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
+				{
+					std::vector<uint8_t> parameterData = configCentral[0][i->second->countFromVariable].getBinaryData();
+					if(parameterData.size() > 0 && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
+				}
 				description = getDeviceDescription(clientInfo, (int32_t)i->first, fields);
 				if(!description->errorStruct && !description->structValue->empty()) descriptions->push_back(description);
 			}
@@ -2013,7 +2202,8 @@ PVariable Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, b
 			{
 				if(valuesCentral.find(0) != valuesCentral.end() && valuesCentral.at(0).find("RSSI_DEVICE") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter)
 				{
-					info->structValue->insert(StructElement("RSSI", valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(valuesCentral.at(0).at("RSSI_DEVICE").data)));
+					std::vector<uint8_t> parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
+					info->structValue->insert(StructElement("RSSI", valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData)));
 				}
 			}
 		}
@@ -2394,26 +2584,28 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 			if(type == ParameterGroup::Type::Enum::variables)
 			{
 				if(!i->second->readable) continue;
-				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
 				if(valuesIterator == valuesCentral.end()) continue;
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
 				if(parameterIterator == valuesIterator->second.end()) continue;
 #ifdef CCU2
 				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 				if(getParamsetHook2(clientInfo, i->second, channel, variables)) continue;
-				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				if(!convertFromPacketHook(i->second, parameterData, element)) element = i->second->convertFromPacket(parameterData);
 			}
 			else if(type == ParameterGroup::Type::Enum::config)
 			{
-				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator configIterator = configCentral.find(channel);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator configIterator = configCentral.find(channel);
 				if(configIterator == configCentral.end()) continue;
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = configIterator->second.find(i->second->id);
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = configIterator->second.find(i->second->id);
 				if(parameterIterator == configIterator->second.end()) continue;
 #ifdef CCU2
 				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
-				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				if(!convertFromPacketHook(i->second, parameterData, element)) element = i->second->convertFromPacket(parameterData);
 				if(i->second->password) element.reset(new Variable(element->type));
 			}
 			else if(type == ParameterGroup::Type::Enum::link)
@@ -2423,18 +2615,19 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 				remotePeer = getPeer(channel, remoteID, remoteChannel);
 				if(!remotePeer) return Variable::createError(-3, "Not paired to this peer.");
 				if(remotePeer->channel != remoteChannel) continue;
-				std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>>::iterator linkIterator = linksCentral.find(channel);
+				std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>>::iterator linkIterator = linksCentral.find(channel);
 				if(linkIterator == linksCentral.end()) continue;
-				std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>::iterator addressIterator = linkIterator->second.find(remotePeer->address);
+				std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>::iterator addressIterator = linkIterator->second.find(remotePeer->address);
 				if(addressIterator == linkIterator->second.end()) continue;
-				std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator remoteChannelIterator = addressIterator->second.find(remotePeer->channel);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator remoteChannelIterator = addressIterator->second.find(remotePeer->channel);
 				if(remoteChannelIterator == addressIterator->second.end()) continue;
-				std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = remoteChannelIterator->second.find(i->second->id);
+				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = remoteChannelIterator->second.find(i->second->id);
 				if(parameterIterator == remoteChannelIterator->second.end()) continue;
 #ifdef CCU2
 				if(parameterIterator->second.rpcParameter && parameterIterator->second.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
-				if(!convertFromPacketHook(i->second, parameterIterator->second.data, element)) element = i->second->convertFromPacket(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				if(!convertFromPacketHook(i->second, parameterData, element)) element = i->second->convertFromPacket(parameterData);
 			}
 
 			if(!element) continue;
@@ -2770,9 +2963,9 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
 		if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
 		else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
-		std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>::iterator channelIterator = valuesCentral.find(channel);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator channelIterator = valuesCentral.find(channel);
 		if(channelIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
-		std::unordered_map<std::string, RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(valueKey);
+		std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(valueKey);
 		if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
 
 		//Check if channel still exists in device description
@@ -2790,7 +2983,8 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 			if(parameter->password) variable.reset(new Variable(variable->type));
 			if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
 		}
-		if(!convertFromPacketHook(parameter, parameterIterator->second.data, variable)) variable = parameter->convertFromPacket(parameterIterator->second.data);
+		std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+		if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter->convertFromPacket(parameterData);
 		if(parameter->password) variable.reset(new Variable(variable->type));
 		return variable;
 	}
@@ -2844,10 +3038,12 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
 		PVariable response(new Variable(VariableType::tStruct));
 		PVariable rpcArray(new Variable(VariableType::tArray));
 
+		std::vector<uint8_t> parameterData;
 		PVariable element;
 		if(valuesCentral.at(0).find("RSSI_PEER") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_PEER").rpcParameter)
 		{
-			element = valuesCentral.at(0).at("RSSI_PEER").rpcParameter->convertFromPacket(valuesCentral.at(0).at("RSSI_PEER").data);
+			parameterData = valuesCentral.at(0).at("RSSI_PEER").getBinaryData();
+			element = valuesCentral.at(0).at("RSSI_PEER").rpcParameter->convertFromPacket(parameterData);
 			if(element->integerValue == 0) element->integerValue = 65536;
 			rpcArray->arrayValue->push_back(element);
 		}
@@ -2857,7 +3053,8 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
 			rpcArray->arrayValue->push_back(element);
 		}
 
-		element = valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(valuesCentral.at(0).at("RSSI_DEVICE").data);
+		parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
+		element = valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData);
 		if(element->integerValue == 0) element->integerValue = 65536;
 		rpcArray->arrayValue->push_back(element);
 
@@ -2953,15 +3150,16 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		if(channel == 0 && serviceMessages->set(valueKey, value->booleanValue)) return PVariable(new Variable(VariableType::tVoid));
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
-		RPCConfigurationParameter& parameter = valuesCentral[channel][valueKey];
+		RpcConfigurationParameter& parameter = valuesCentral[channel][valueKey];
 		PParameter rpcParameter = parameter.rpcParameter;
 		if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 		//Perform operation on value
 		if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
 				&& (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
 		{
+			std::vector<uint8_t> parameterData = parameter.getBinaryData();
 			PVariable currentValue;
-			if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
+			if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
 			if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
 			{
 				std::string numberPart = value->stringValue.substr(2);
@@ -3003,8 +3201,9 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		}
 		else if(value->stringValue == "!") // Toggle boolean
 		{
+			std::vector<uint8_t> parameterData = parameter.getBinaryData();
 			PVariable currentValue;
-			if(!convertFromPacketHook(rpcParameter, parameter.data, currentValue)) currentValue = rpcParameter->convertFromPacket(parameter.data);
+			if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
 			if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
 			{
 				value->booleanValue = !currentValue->booleanValue;
