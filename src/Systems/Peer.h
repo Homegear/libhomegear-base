@@ -57,26 +57,157 @@ namespace Systems
 class ICentral;
 class Peer;
 
-class RPCConfigurationParameter
+class RpcConfigurationParameter
 {
 public:
-	RPCConfigurationParameter() {}
-	virtual ~RPCConfigurationParameter() {}
+	RpcConfigurationParameter() {}
+	RpcConfigurationParameter(RpcConfigurationParameter const& rhs);
+	virtual ~RpcConfigurationParameter() {}
+	RpcConfigurationParameter& operator=(const RpcConfigurationParameter& rhs);
 
-	uint64_t databaseID = 0;
+	/**
+	 * Locks the internal binary data vector so one can work with a reference to it externally.
+	 */
+	void lock() noexcept;
+
+	/**
+	 * Unlocks the internal binary data vector.
+	 */
+	void unlock() noexcept;
+
+	/**
+	 * Returns the size of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns the size of the internal binary data vector.
+	 */
+	std::vector<uint8_t>::size_type getBinaryDataSize() noexcept;
+
+	/**
+	 * Returns a copy of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns a copy of the internal binary data vector.
+	 */
+	std::vector<uint8_t> getBinaryData() noexcept;
+
+	/**
+	 * Returns a reference to the data vector. Call "lock()" before executing this method and "unlock()" when you're done working with the reference.
+	 * @return Returns a reference to the internal binary data vector.
+	 */
+	std::vector<uint8_t>& getBinaryDataReference() noexcept;
+
+	/**
+	 * Sets the internal binary data vector to "value". This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @param value The new data vector.
+	 */
+	void setBinaryData(std::vector<uint8_t>& value) noexcept;
+
+	/**
+	 * Returns a copy of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns a copy of the internal binary data vector.
+	 */
+	std::vector<uint8_t> getPartialBinaryData() noexcept;
+
+	/**
+	 * Returns a reference to the data vector. Call "lock()" before executing this method and "unlock()" when you're done working with the reference.
+	 * @return Returns a reference to the internal binary data vector.
+	 */
+	std::vector<uint8_t>& getPartialBinaryDataReference() noexcept;
+
+	/**
+	 * Sets the internal binary data vector to "value". This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @param value The new data vector.
+	 */
+	void setPartialBinaryData(std::vector<uint8_t>& value) noexcept;
+
+	/**
+	 * Returns the logical data object. This method is thread safe.
+	 * @return Returns the logical data object.
+	 */
+	BaseLib::PVariable getLogicalData() noexcept;
+
+	/**
+	 * Sets the logical data object. This method is thread safe.
+	 * @param value The new logical data object.
+	 */
+	void setLogicalData(PVariable value) noexcept;
+
+	/**
+	 * Compares the passed vector with the internal one. This method is thread safe.
+	 * @return Returns "true" if both vectors are equal. "false" otherwise.
+	 */
+	bool equals(std::vector<uint8_t>& value) noexcept;
+
+	/**
+	 * The id of this parameter in the database.
+	 */
+	uint64_t databaseId = 0;
+
+	/**
+	 * The RPC parameter as defined in the XML file.
+	 */
 	DeviceDescription::PParameter rpcParameter;
-	std::vector<uint8_t> data;
-	std::vector<uint8_t> partialData;
+
+private:
+	std::mutex _logicalDataMutex;
+	BaseLib::PVariable _logicalData;
+	std::mutex _binaryDataMutex;
+	std::vector<uint8_t> _binaryData;
+	std::vector<uint8_t> _partialBinaryData;
 };
 
 class ConfigDataBlock
 {
 public:
 	ConfigDataBlock() {}
+	ConfigDataBlock(ConfigDataBlock const& rhs);
 	virtual ~ConfigDataBlock() {}
+	ConfigDataBlock& operator=(const ConfigDataBlock& rhs);
 
-	uint32_t databaseID = 0;
-	std::vector<uint8_t> data;
+	/**
+	 * Locks the internal binary data vector so one can work with a reference to it externally.
+	 */
+	void lock() noexcept;
+
+	/**
+	 * Unlocks the internal binary data vector.
+	 */
+	void unlock() noexcept;
+
+	/**
+	 * Returns the size of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns the size of the internal binary data vector.
+	 */
+	std::vector<uint8_t>::size_type getBinaryDataSize() noexcept;
+
+	/**
+	 * Returns a copy of the data vector. This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @return Returns a copy of the internal binary data vector.
+	 */
+	std::vector<uint8_t> getBinaryData() noexcept;
+
+	/**
+	 * Returns a reference to the data vector. Call "lock()" before executing this method and "unlock()" when you're done working with the reference.
+	 * @return Returns a reference to the internal binary data vector.
+	 */
+	std::vector<uint8_t>& getBinaryDataReference() noexcept;
+
+	/**
+	 * Sets the internal binary data vector to "value". This method is thread safe. Make sure the vector is unlocked ("unlock()" was called after calling "lock()") before executing this method.
+	 * @param value The new data vector.
+	 */
+	void setBinaryData(std::vector<uint8_t>& value) noexcept;
+
+	/**
+	 * Compares the passed vector with the internal one. This method is thread safe.
+	 * @return Returns "true" if both vectors are equal. "false" otherwise.
+	 */
+	bool equals(std::vector<uint8_t>& value) noexcept;
+
+	/**
+	 * The id of this parameter in the database.
+	 */
+	uint64_t databaseId = 0;
+private:
+	std::mutex _binaryDataMutex;
+	std::vector<uint8_t> _binaryData;
 };
 
 class BasicPeer
@@ -126,9 +257,9 @@ public:
 	std::shared_ptr<HomegearDevice> getRpcDevice() { return _rpcDevice; }
 
 	std::unordered_map<uint32_t, ConfigDataBlock> binaryConfig;
-	std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>> configCentral;
-	std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>> valuesCentral;
-	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RPCConfigurationParameter>>>> linksCentral;
+	std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>> configCentral;
+	std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>> valuesCentral;
+	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>> linksCentral;
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
 	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
@@ -349,7 +480,7 @@ protected:
 	 * @param parameter The parameter to set the default value for.
 	 * @see initializeCentralConfig
 	 */
-	virtual void setDefaultValue(RPCConfigurationParameter* parameter);
+	virtual void setDefaultValue(RpcConfigurationParameter& parameter);
 
 	/**
 	 * Called by initializeCentralConfig().

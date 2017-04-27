@@ -96,12 +96,13 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 				else if(propertyName == "service") { if(propertyValue == "true") service = true; }
 				else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
 				else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
-				else if(propertyName == "signed") { isSignedSet = true; isSigned = (propertyValue == "true"); }
+				else if(propertyName == "signed") { isSignedSet = true; isSigned = propertyValue == "true"; }
 				else if(propertyName == "control") control = propertyValue;
 				else if(propertyName == "unit") unit = propertyValue;
 				else if(propertyName == "formFieldType") formFieldType = propertyValue;
 				else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
 				else if(propertyName == "metadata") metadata = propertyValue;
+				else if(propertyName == "resetAfterRestart") { resetAfterRestart = propertyValue == "true"; }
 				else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
 				else if(propertyName == "casts")
 				{
