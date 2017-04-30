@@ -84,6 +84,8 @@ void Settings::reset()
 	_flowsThreadCount = 10;
 	_flowsServerMaxConnections = 20;
 	_maxFlowsPerProcess = 40;
+	_ipcThreadCount = 10;
+	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
 	_rpcServerMaxConnections = 50;
 	_rpcServerThreadPriority = 0;
@@ -412,6 +414,16 @@ void Settings::load(std::string filename)
 				{
 					_maxFlowsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: maxFlowsPerProcess set to " + std::to_string(_maxFlowsPerProcess));
+				}
+				else if(name == "ipcthreadcount")
+				{
+					_ipcThreadCount = Math::getNumber(value);
+					_bl->out.printDebug("Debug: ipcThreadCount set to " + std::to_string(_ipcThreadCount));
+				}
+				else if(name == "ipcservermaxconnections")
+				{
+					_ipcServerMaxConnections = Math::getNumber(value);
+					_bl->out.printDebug("Debug: ipsServerMaxConnections set to " + std::to_string(_ipcServerMaxConnections));
 				}
 				else if(name == "cliservermaxconnections")
 				{
