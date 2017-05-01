@@ -1,17 +1,17 @@
 /* Copyright 2013-2017 Sathya Laufer
  *
- * libhomegear-base is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License as
+ * Homegear is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * libhomegear-base is distributed in the hope that it will be useful,
+ * Homegear is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with libhomegear-base.  If not, see
+ * License along with Homegear.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give
@@ -28,47 +28,35 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef DISPOSABLELOCKGUARD_H_
-#define DISPOSABLELOCKGUARD_H_
+#ifndef IIPCRESPONSE_H_
+#define IIPCRESPONSE_H_
 
-#include <mutex>
+#include "../Variable.h"
+
+#include <atomic>
 
 namespace BaseLib
 {
 
-class DisposableLockGuard
+namespace Ipc
 {
-private:
-	bool _disposed = false;
-	std::mutex _disposeMutex;
-	std::mutex&  _mutex;
+
+class IpcResponse
+{
 public:
-	explicit DisposableLockGuard(std::mutex& mutex) : _mutex(mutex)
-	{
-		_mutex.lock();
-	}
+	std::atomic_bool finished;
+	int32_t packetId = 0;
+	PVariable response;
 
-	~DisposableLockGuard()
+	IpcResponse()
 	{
-		dispose();
+		finished = false;
 	}
-
-	void dispose()
-	{
-		_disposeMutex.lock();
-		if(_disposed)
-		{
-			_disposeMutex.unlock();
-			return;
-		}
-		_disposed = true;
-		_mutex.unlock();
-		_disposeMutex.unlock();
-	}
-
-	DisposableLockGuard(const DisposableLockGuard&) = delete;
-	DisposableLockGuard& operator=(const DisposableLockGuard&) = delete;
 };
 
+typedef std::shared_ptr<IpcResponse> PIpcResponse;
+
 }
+}
+
 #endif

@@ -344,7 +344,7 @@ void FamilySettings::load(std::string filename)
 {
 	try
 	{
-		DisposableLockGuard settingsGuard(_settingsMutex);
+		std::unique_lock<std::mutex> settingsGuard(_settingsMutex);
 		_settings.clear();
 		char input[1024];
 		FILE *fin;
@@ -432,7 +432,7 @@ void FamilySettings::load(std::string filename)
 
 		fclose(fin);
 
-		settingsGuard.dispose();
+		settingsGuard.unlock();
 		loadFromDatabase();
 	}
 	catch(const std::exception& ex)
@@ -453,7 +453,7 @@ void FamilySettings::loadFromDatabase()
 {
 	try
 	{
-		DisposableLockGuard settingsGuard(_settingsMutex);
+		std::lock_guard<std::mutex> settingsGuard(_settingsMutex);
 		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getFamilyVariables(_familyId);
 		if(!rows) return;
 		for(Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
