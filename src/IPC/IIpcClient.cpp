@@ -411,7 +411,7 @@ PVariable IIpcClient::send(std::vector<char>& data)
     return PVariable(new Variable());
 }
 
-PVariable IIpcClient::sendRequest(std::string methodName, PArray& parameters)
+PVariable IIpcClient::invoke(std::string methodName, PArray& parameters)
 {
 	try
 	{
