@@ -34,12 +34,11 @@
 namespace BaseLib
 {
 
-SharedObjects::SharedObjects(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount)
+SharedObjects::SharedObjects(bool testMaxThreadCount)
 {
 	booting = true;
 	shuttingDown = false;
 
-	executablePath = exePath;
 	threadManager.init(this, testMaxThreadCount);
 	fileDescriptorManager.init(this);
 	serialDeviceManager.init(this);
@@ -47,7 +46,6 @@ SharedObjects::SharedObjects(std::string exePath, std::function<void(int32_t, st
 	io.init(this);
 	settings.init(this);
 	out.init(this);
-	out.setErrorCallback(errorCallback);
 }
 
 SharedObjects::~SharedObjects()
@@ -57,6 +55,11 @@ SharedObjects::~SharedObjects()
 std::string SharedObjects::version()
 {
 	return VERSION;
+}
+
+void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
+{
+	out.setErrorCallback(errorCallback);
 }
 
 }

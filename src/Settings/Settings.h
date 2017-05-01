@@ -46,7 +46,7 @@ public:
 	Settings();
 	virtual ~Settings() {}
 	void init(BaseLib::SharedObjects* baseLib);
-	void load(std::string filename);
+	void load(std::string filename, std::string executablePath);
 	bool changed();
 
 	std::string runAsUser() { return _runAsUser; }
@@ -139,6 +139,7 @@ public:
 	std::vector<uint32_t> exportGpios() { return _exportGpios; }
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
+	std::string _executablePath;
 	std::string _path;
 	int32_t _lastModified = -1;
 	int32_t _clientSettingsLastModified = -1;

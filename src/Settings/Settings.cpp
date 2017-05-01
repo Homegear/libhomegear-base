@@ -61,9 +61,9 @@ void Settings::reset()
 	_enableCoreDumps = true;
 	_enableFlows = false;
 	_setDevicePermissions = true;
-	_workingDirectory = _bl->executablePath;
-	_socketPath = _bl->executablePath;
-	_dataPath = _bl->executablePath;
+	_workingDirectory = _executablePath;
+	_socketPath = _executablePath;
+	_dataPath = _executablePath;
 	_dataPathPermissions = 504;
 	_dataPathUser = "";
 	_dataPathGroup = "";
@@ -144,10 +144,11 @@ bool Settings::changed()
 	return false;
 }
 
-void Settings::load(std::string filename)
+void Settings::load(std::string filename, std::string executablePath)
 {
 	try
 	{
+		_executablePath = executablePath;
 		reset();
 		_path = filename;
 		char input[1024];
@@ -281,28 +282,28 @@ void Settings::load(std::string filename)
 				else if(name == "workingdirectory")
 				{
 					_workingDirectory = value;
-					if(_workingDirectory.empty()) _workingDirectory = _bl->executablePath;
+					if(_workingDirectory.empty()) _workingDirectory = _executablePath;
 					if(_workingDirectory.back() != '/') _workingDirectory.push_back('/');
 					_bl->out.printDebug("Debug: workingDirectory set to " + _workingDirectory);
 				}
 				else if(name == "socketpath")
 				{
 					_socketPath = value;
-					if(_socketPath.empty()) _socketPath = _bl->executablePath;
+					if(_socketPath.empty()) _socketPath = _executablePath;
 					if(_socketPath.back() != '/') _socketPath.push_back('/');
 					_bl->out.printDebug("Debug: socketPath set to " + _socketPath);
 				}
 				else if(name == "datapath")
 				{
 					_dataPath = value;
-					if(_dataPath.empty()) _dataPath = _bl->executablePath;
+					if(_dataPath.empty()) _dataPath = _executablePath;
 					if(_dataPath.back() != '/') _dataPath.push_back('/');
 					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
 				}
 				else if(name == "databasepath" && _dataPath.empty() && !value.empty())
 				{
 					_dataPath = value.substr(0, value.find_last_of("/") + 1);;
-					if(_dataPath.empty()) _dataPath = _bl->executablePath;
+					if(_dataPath.empty()) _dataPath = _executablePath;
 					if(_dataPath.back() != '/') _dataPath.push_back('/');
 					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
 				}
@@ -648,7 +649,7 @@ void Settings::load(std::string filename)
 				else if(name == "lockfilepath")
 				{
 					_lockFilePath = value;
-					if(_lockFilePath.empty()) _lockFilePath = _bl->executablePath;
+					if(_lockFilePath.empty()) _lockFilePath = _executablePath;
 					if(_lockFilePath.back() != '/') _lockFilePath.push_back('/');
 					_bl->out.printDebug("Debug: lockFilePath set to " + _lockFilePath);
 				}
