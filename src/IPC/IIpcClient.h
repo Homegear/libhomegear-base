@@ -109,7 +109,7 @@ protected:
 
 	void connect();
 	void mainThread();
-	PVariable sendRequest(std::string methodName, PArray& parameters);
+	PVariable invoke(std::string methodName, PArray& parameters);
 	void sendResponse(PVariable& packetId, PVariable& variable);
 
 	void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry);
