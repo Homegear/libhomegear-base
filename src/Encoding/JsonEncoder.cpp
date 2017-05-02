@@ -447,10 +447,13 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
 {
 	if(s.size() + variable->stringValue.size() + 128 > s.capacity())
+
 	{
 		int32_t factor = variable->stringValue.size() / 1024;
-		s.reserve(s.capacity() + (factor * 1024) + 1024);
+		uint32_t neededSize = s.size() + (factor * 1024) + 1024;
+		if(neededSize > s.capacity()) s.reserve(neededSize);
 	}
+
 	//Source: https://github.com/miloyip/rapidjson/blob/master/include/rapidjson/writer.h
 	static const char hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 	static const char escape[256] =
@@ -468,21 +471,21 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
 	};
 	s.push_back('"');
-	for(std::string::iterator i = variable->stringValue.begin(); i != variable->stringValue.end(); ++i)
+	for(const uint8_t& c : variable->stringValue)
 	{
-		if(escape[(uint8_t)*i])
+		if(escape[c])
 		{
 			s.push_back('\\');
-			s.push_back(escape[(uint8_t)*i]);
-			if (escape[(uint8_t)*i] == 'u')
+			s.push_back(escape[c]);
+			if (escape[c] == 'u')
 			{
 				s.push_back('0');
 				s.push_back('0');
-				s.push_back(hexDigits[((uint8_t)*i) >> 4]);
-				s.push_back(hexDigits[((uint8_t)*i) & 0xF]);
+				s.push_back(hexDigits[c >> 4]);
+				s.push_back(hexDigits[c & 0xF]);
 			}
 		}
-		else s.push_back(*i);
+		else s.push_back(c);
 	}
 	s.push_back('"');
 }
