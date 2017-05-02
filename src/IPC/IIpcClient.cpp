@@ -160,7 +160,7 @@ void IIpcClient::connect()
 		_closed = false;
 
 		if (_maintenanceThread.joinable()) _maintenanceThread.join();
-		_maintenanceThread = std::thread(&IIpcClient::registerRpcMethods, this);
+		_maintenanceThread = std::thread(&IIpcClient::onConnect, this);
 
 		if(_bl->debugLevel >= 4) _out.printMessage("Connected.");
 	}

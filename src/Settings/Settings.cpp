@@ -195,7 +195,7 @@ void Settings::load(std::string filename, std::string executablePath)
 				else if(name == "runasgroup")
 				{
 					_runAsGroup = value;
-					_bl->out.printDebug("Debug: runAsGroup set to " + _keyPath);
+					_bl->out.printDebug("Debug: runAsGroup set to " + _runAsGroup);
 				}
 				else if(name == "certpath")
 				{
