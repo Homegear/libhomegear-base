@@ -62,6 +62,7 @@ public:
 	virtual ~IIpcClient();
 	virtual void dispose();
 
+	PVariable invoke(std::string methodName, PArray& parameters);
 	virtual void start();
 	virtual void stop();
 protected:
@@ -109,13 +110,12 @@ protected:
 
 	void connect();
 	void mainThread();
-	PVariable invoke(std::string methodName, PArray& parameters);
 	void sendResponse(PVariable& packetId, PVariable& variable);
 
 	void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry);
 	PVariable send(std::vector<char>& data);
 
-	virtual void registerRpcMethods() = 0;
+	virtual void onConnect() = 0;
 
 	// {{{ RPC methods
 		virtual BaseLib::PVariable broadcastEvent(BaseLib::PArray& parameters) { return BaseLib::PVariable(new BaseLib::Variable()); }
