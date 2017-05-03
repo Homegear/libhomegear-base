@@ -49,6 +49,8 @@ RpcMethod::ParameterError::Enum RpcMethod::checkParameters(std::shared_ptr<std::
 	for(uint32_t i = 0; i < types.size(); i++)
 	{
 		if(types.at(i) == VariableType::tVariant && parameters->at(i)->type != VariableType::tVoid) continue;
+		if(types.at(i) == VariableType::tInteger && parameters->at(i)->type == VariableType::tInteger64) continue;
+		if(types.at(i) == VariableType::tInteger64 && parameters->at(i)->type == VariableType::tInteger) continue;
 		if(types.at(i) != parameters->at(i)->type) return RpcMethod::ParameterError::Enum::wrongType;
 	}
 	return RpcMethod::ParameterError::Enum::noError;
