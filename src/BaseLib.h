@@ -45,6 +45,7 @@
 #include "Encoding/Html.h"
 #include "Encoding/WebSocket.h"
 #include "Encoding/BitReaderWriter.h"
+#include "Flows/NodeFactory.h"
 #include "Managers/SerialDeviceManager.h"
 #include "Managers/FileDescriptorManager.h"
 #include "Managers/ThreadManager.h"

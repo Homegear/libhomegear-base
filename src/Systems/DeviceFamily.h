@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -164,14 +164,14 @@ protected:
 	// {{{ Device description event handling
 		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
 	// }}}
-protected:
+
 	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
 
 	virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
 	virtual void createCentral() = 0;
 private:
-	DeviceFamily(const DeviceFamily&);
-	DeviceFamily& operator=(const DeviceFamily&);
+			DeviceFamily(const DeviceFamily&) = delete;
+			DeviceFamily& operator=(const DeviceFamily&) = delete;
 
 	IFamilyEventSink* _eventHandler;
 	int32_t _family = -1;
