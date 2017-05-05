@@ -32,6 +32,7 @@
 #define INODE_H_
 
 #include <atomic>
+#include <string>
 
 namespace BaseLib
 {
@@ -46,6 +47,8 @@ public:
 	INode(BaseLib::SharedObjects* bl);
 	virtual ~INode();
 	virtual void dispose();
+
+	virtual std::string getName() = 0;
 
 	void lock();
 	void unlock();
