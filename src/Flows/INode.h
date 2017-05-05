@@ -44,9 +44,15 @@ public:
 	INode(BaseLib::SharedObjects* bl);
 	virtual ~INode();
 	virtual void dispose();
+
+	void lock();
+	void unlock();
+	bool locked();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 private:
+	std::atomic_bool _locked;
+
 	INode(const INode&) = delete;
 	INode& operator=(const INode&) = delete;
 };
