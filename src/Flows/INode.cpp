@@ -38,6 +38,8 @@ namespace Flows
 
 INode::INode(BaseLib::SharedObjects* bl)
 {
+	_locked = false;
+
 	_bl = bl;
 }
 
@@ -47,6 +49,21 @@ INode::~INode()
 
 void INode::dispose()
 {
+}
+
+void INode::lock()
+{
+	_locked = true;
+}
+
+void INode::unlock()
+{
+	_locked = false;
+}
+
+bool INode::locked()
+{
+	return _locked;
 }
 
 }

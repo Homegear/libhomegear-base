@@ -125,7 +125,7 @@ protected:
 	std::shared_ptr<ICentral> _central;
 	std::shared_ptr<FamilySettings> _settings;
 	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
-	bool _locked = false;
+	std::atomic_bool _locked;
 	bool _disposed = false;
 
 	// {{{ Event handling
