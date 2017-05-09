@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -3142,17 +3142,22 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 {
 	try
 	{
-		//Nothing to do, return to save ressources
-		if(value->stringValue.size() < 3) return PVariable(new Variable(VariableType::tVoid));
-
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
 		if(channel == 0 && serviceMessages->set(valueKey, value->booleanValue)) return PVariable(new Variable(VariableType::tVoid));
-		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
-		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
-		RpcConfigurationParameter& parameter = valuesCentral[channel][valueKey];
+		auto channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
+		auto parameterIterator = channelIterator->second.find(valueKey);
+		if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+		RpcConfigurationParameter& parameter = parameterIterator->second;
 		PParameter rpcParameter = parameter.rpcParameter;
 		if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
+
+		value->type = (BaseLib::VariableType)rpcParameter->logical->type;
+
+		//Nothing to do, return to save ressources
+		if(value->stringValue.size() < 3) return PVariable(new Variable(VariableType::tVoid));
+
 		//Perform operation on value
 		if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
 				&& (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))

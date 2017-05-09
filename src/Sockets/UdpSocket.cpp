@@ -44,8 +44,6 @@ UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib)
 UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
-	signal(SIGPIPE, SIG_IGN);
-
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
 	_port = port;

@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -51,8 +51,6 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
-	signal(SIGPIPE, SIG_IGN);
-
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
 	_port = port;
@@ -153,7 +151,7 @@ PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std
 		_bl->fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
 	}
-	if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
+	if(listenAddress == "0.0.0.0" || listenAddress == "::") listenAddress = Net::getMyIpAddress();
 	return socketDescriptor;
 }
 

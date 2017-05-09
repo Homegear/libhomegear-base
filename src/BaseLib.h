@@ -37,6 +37,7 @@
 #include "Encoding/XmlrpcEncoder.h"
 #include "Encoding/RpcDecoder.h"
 #include "Encoding/RpcEncoder.h"
+#include "Encoding/RpcMethod.h"
 #include "Encoding/BinaryRpc.h"
 #include "Encoding/JsonDecoder.h"
 #include "Encoding/JsonEncoder.h"
@@ -44,17 +45,18 @@
 #include "Encoding/Html.h"
 #include "Encoding/WebSocket.h"
 #include "Encoding/BitReaderWriter.h"
+#include "Flows/NodeFactory.h"
 #include "Managers/SerialDeviceManager.h"
 #include "Managers/FileDescriptorManager.h"
 #include "Managers/ThreadManager.h"
 #include "HelperFunctions/HelperFunctions.h"
 #include "HelperFunctions/Color.h"
 #include "HelperFunctions/Math.h"
-#include "HelperFunctions/DisposableLockGuard.h"
 #include "HelperFunctions/Base64.h"
 #include "HelperFunctions/Net.h"
 #include "HelperFunctions/Pid.h"
 #include "HelperFunctions/Io.h"
+#include "IPC/IIpcClient.h"
 #include "LowLevel/Gpio.h"
 #include "LowLevel/Spi.h"
 #include "Output/Output.h"
@@ -115,11 +117,6 @@ public:
 	std::atomic_bool shuttingDown;
 
 	/**
-	 * The path of the main executable.
-	 */
-	std::string executablePath;
-
-	/**
 	 * The FileDescriptorManager object where all file or socket descriptors should be registered.
 	 * This should be done to avoid errors as it can happen, that a closed file descriptor is reopened and suddenly valid again without the object using the old descriptor noticing it.
 	 */
@@ -173,11 +170,9 @@ public:
 	/**
 	 * Main constructor.
 	 *
-	 * @param exePath The path to the main executable.
-	 * @param errorCallback Callback function which will be called for all error messages. First parameter is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
 	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.
 	 */
-	SharedObjects(std::string exePath, std::function<void(int32_t, std::string)>* errorCallback, bool testMaxThreadCount);
+	SharedObjects(bool testMaxThreadCount = false);
 
 	/**
 	 * Destructor.
@@ -189,6 +184,11 @@ public:
 	 * @return The Homegear version string.
 	 */
 	static std::string version();
+
+	/**
+	 * Sets a callback function which will be called for all error messages. First parameter is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
+	 */
+	void setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback);
 private:
 	SharedObjects(const SharedObjects&);
 	SharedObjects& operator=(const SharedObjects&);

@@ -46,7 +46,7 @@ public:
 	Settings();
 	virtual ~Settings() {}
 	void init(BaseLib::SharedObjects* baseLib);
-	void load(std::string filename);
+	void load(std::string filename, std::string executablePath);
 	bool changed();
 
 	std::string runAsUser() { return _runAsUser; }
@@ -90,6 +90,8 @@ public:
 	uint32_t flowsThreadCount() { return _flowsThreadCount; }
 	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
 	int32_t maxFlowsPerProcess() { return _maxFlowsPerProcess; }
+	uint32_t ipcThreadCount() { return _ipcThreadCount; }
+	uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
 	uint32_t rpcServerMaxConnections() { return _rpcServerMaxConnections; }
 	int32_t rpcServerThreadPriority() { return _rpcServerThreadPriority; }
@@ -137,6 +139,7 @@ public:
 	std::vector<uint32_t> exportGpios() { return _exportGpios; }
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
+	std::string _executablePath;
 	std::string _path;
 	int32_t _lastModified = -1;
 	int32_t _clientSettingsLastModified = -1;
@@ -183,6 +186,8 @@ private:
 	uint32_t _flowsThreadCount = 10;
 	uint32_t _flowsServerMaxConnections = 20;
 	int32_t _maxFlowsPerProcess = 40;
+	uint32_t _ipcThreadCount = 10;
+	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;
 	uint32_t _rpcServerMaxConnections = 50;
 	int32_t _rpcServerThreadPriority = 0;
