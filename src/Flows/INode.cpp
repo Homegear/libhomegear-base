@@ -28,47 +28,43 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef DISPOSABLELOCKGUARD_H_
-#define DISPOSABLELOCKGUARD_H_
-
-#include <mutex>
+#include "INode.h"
+#include "../BaseLib.h"
 
 namespace BaseLib
 {
-
-class DisposableLockGuard
+namespace Flows
 {
-private:
-	bool _disposed = false;
-	std::mutex _disposeMutex;
-	std::mutex&  _mutex;
-public:
-	explicit DisposableLockGuard(std::mutex& mutex) : _mutex(mutex)
-	{
-		_mutex.lock();
-	}
 
-	~DisposableLockGuard()
-	{
-		dispose();
-	}
+INode::INode(BaseLib::SharedObjects* bl)
+{
+	_locked = false;
 
-	void dispose()
-	{
-		_disposeMutex.lock();
-		if(_disposed)
-		{
-			_disposeMutex.unlock();
-			return;
-		}
-		_disposed = true;
-		_mutex.unlock();
-		_disposeMutex.unlock();
-	}
+	_bl = bl;
+}
 
-	DisposableLockGuard(const DisposableLockGuard&) = delete;
-	DisposableLockGuard& operator=(const DisposableLockGuard&) = delete;
-};
+INode::~INode()
+{
+}
+
+void INode::dispose()
+{
+}
+
+void INode::lock()
+{
+	_locked = true;
+}
+
+void INode::unlock()
+{
+	_locked = false;
+}
+
+bool INode::locked()
+{
+	return _locked;
+}
 
 }
-#endif
+}

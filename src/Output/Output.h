@@ -112,7 +112,7 @@ public:
 	 * Returns a time string like "08/27/14 14:13:53.471".
 	 * @return Returns a time string like "08/27/14 14:13:53.471".
 	 */
-	std::string getTimeString(int64_t time = 0);
+	static std::string getTimeString(int64_t time = 0);
 
 	/**
 	 * Prints the provided binary data as a hexadecimal string.

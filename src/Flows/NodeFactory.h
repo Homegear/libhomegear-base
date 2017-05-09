@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,38 +28,31 @@
  * files in the program, then also delete it here.
 */
 
-#include "BaseLib.h"
-#include "../config.h"
+#ifndef NODEFACTORY_H_
+#define NODEFACTORY_H_
+
+#include "INode.h"
+
+#include <memory>
 
 namespace BaseLib
 {
-
-SharedObjects::SharedObjects(bool testMaxThreadCount)
+namespace Flows
 {
-	booting = true;
-	shuttingDown = false;
 
-	threadManager.init(this, testMaxThreadCount);
-	fileDescriptorManager.init(this);
-	serialDeviceManager.init(this);
-	hf.init(this);
-	io.init(this);
-	settings.init(this);
-	out.init(this);
-}
-
-SharedObjects::~SharedObjects()
+class NodeFactory
 {
-}
+public:
+	NodeFactory()
+	{
+	}
+	virtual ~NodeFactory()
+	{
+	}
 
-std::string SharedObjects::version()
-{
-	return VERSION;
-}
-
-void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
-{
-	out.setErrorCallback(errorCallback);
-}
+	virtual INode* createNode(BaseLib::SharedObjects* bl) = 0;
+};
 
 }
+}
+#endif

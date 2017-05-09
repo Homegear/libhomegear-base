@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,38 +28,40 @@
  * files in the program, then also delete it here.
 */
 
-#include "BaseLib.h"
-#include "../config.h"
+#ifndef INODE_H_
+#define INODE_H_
+
+#include <atomic>
+#include <string>
 
 namespace BaseLib
 {
 
-SharedObjects::SharedObjects(bool testMaxThreadCount)
+class SharedObjects;
+
+namespace Flows
 {
-	booting = true;
-	shuttingDown = false;
-
-	threadManager.init(this, testMaxThreadCount);
-	fileDescriptorManager.init(this);
-	serialDeviceManager.init(this);
-	hf.init(this);
-	io.init(this);
-	settings.init(this);
-	out.init(this);
-}
-
-SharedObjects::~SharedObjects()
+class INode
 {
-}
+public:
+	INode(BaseLib::SharedObjects* bl);
+	virtual ~INode();
+	virtual void dispose();
 
-std::string SharedObjects::version()
-{
-	return VERSION;
-}
+	virtual std::string getName() = 0;
 
-void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
-{
-	out.setErrorCallback(errorCallback);
-}
+	void lock();
+	void unlock();
+	bool locked();
+protected:
+	BaseLib::SharedObjects* _bl = nullptr;
+private:
+	std::atomic_bool _locked;
+
+	INode(const INode&) = delete;
+	INode& operator=(const INode&) = delete;
+};
 
 }
+}
+#endif

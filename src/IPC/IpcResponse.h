@@ -1,19 +1,19 @@
 /* Copyright 2013-2017 Sathya Laufer
  *
- * libhomegear-base is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License as
+ * Homegear is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
- * libhomegear-base is distributed in the hope that it will be useful,
+ *
+ * Homegear is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
- * License along with libhomegear-base.  If not, see
+ * License along with Homegear.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,38 +28,35 @@
  * files in the program, then also delete it here.
 */
 
-#include "BaseLib.h"
-#include "../config.h"
+#ifndef IIPCRESPONSE_H_
+#define IIPCRESPONSE_H_
+
+#include "../Variable.h"
+
+#include <atomic>
 
 namespace BaseLib
 {
 
-SharedObjects::SharedObjects(bool testMaxThreadCount)
+namespace Ipc
 {
-	booting = true;
-	shuttingDown = false;
 
-	threadManager.init(this, testMaxThreadCount);
-	fileDescriptorManager.init(this);
-	serialDeviceManager.init(this);
-	hf.init(this);
-	io.init(this);
-	settings.init(this);
-	out.init(this);
-}
-
-SharedObjects::~SharedObjects()
+class IpcResponse
 {
+public:
+	std::atomic_bool finished;
+	int32_t packetId = 0;
+	PVariable response;
+
+	IpcResponse()
+	{
+		finished = false;
+	}
+};
+
+typedef std::shared_ptr<IpcResponse> PIpcResponse;
+
+}
 }
 
-std::string SharedObjects::version()
-{
-	return VERSION;
-}
-
-void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
-{
-	out.setErrorCallback(errorCallback);
-}
-
-}
+#endif
