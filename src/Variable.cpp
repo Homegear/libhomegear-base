@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -557,4 +557,42 @@ std::string Variable::getTypeString(VariableType type)
 	}
 	return "string";
 }
+
+void Variable::setType(DeviceDescription::ILogical::Type::Enum value)
+{
+	switch(value)
+	{
+	case DeviceDescription::ILogical::Type::Enum::none:
+		type = VariableType::tVoid;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tAction:
+		type = VariableType::tBoolean;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tArray:
+		type = VariableType::tArray;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tBoolean:
+		type = VariableType::tBoolean;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tEnum:
+		type = VariableType::tInteger;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tFloat:
+		type = VariableType::tFloat;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tInteger:
+		type = VariableType::tInteger;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tInteger64:
+		type = VariableType::tInteger64;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tString:
+		type = VariableType::tString;
+		break;
+	case DeviceDescription::ILogical::Type::Enum::tStruct:
+		type = VariableType::tStruct;
+		break;
+	}
+}
+
 }
