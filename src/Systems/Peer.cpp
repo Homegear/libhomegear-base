@@ -3153,7 +3153,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		PParameter rpcParameter = parameter.rpcParameter;
 		if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 
-		value->type = (BaseLib::VariableType)rpcParameter->logical->type;
+		value->setType(rpcParameter->logical->type);
 
 		//Nothing to do, return to save ressources
 		if(value->stringValue.size() < 3) return PVariable(new Variable(VariableType::tVoid));
