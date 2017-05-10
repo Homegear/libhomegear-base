@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -112,6 +112,8 @@ public:
 	static PVariable createError(int32_t faultCode, std::string faultString);
 	std::string print(bool stdout = false, bool stderr = false, bool oneLine = false);
 	static std::string getTypeString(VariableType type);
+	void setType(VariableType value) { type = value; };
+	void setType(DeviceDescription::ILogical::Type::Enum value);
 	static PVariable fromString(std::string& value, DeviceDescription::ILogical::Type::Enum type);
 	static PVariable fromString(std::string& value, DeviceDescription::IPhysical::Type::Enum type);
 	static PVariable fromString(std::string& value, VariableType type);
