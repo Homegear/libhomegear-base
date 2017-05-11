@@ -2659,7 +2659,6 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGrou
 		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 
 		PVariable descriptions(new Variable(VariableType::tStruct));
-		PVariable description;
 		uint32_t index = 0;
 		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
 		{
@@ -2669,195 +2668,9 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGrou
 				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
 				continue;
 			}
-#ifdef CCU2
-				if(i->second->logical->type == ILogical::Type::tInteger64) continue;
-#endif
-			if(clientInfo->clientType == RpcClientType::ccu2 && !i->second->ccu2Visible) continue;
 
-			description.reset(new Variable(VariableType::tStruct));
-
-			int32_t operations = 0;
-			if(i->second->readable) operations += 5;
-			if(i->second->writeable) operations += 2;
-			int32_t uiFlags = 0;
-			if(i->second->visible) uiFlags += 1;
-			if(i->second->internal) uiFlags += 2;
-			if(i->second->transform) uiFlags += 4;
-			if(i->second->service) uiFlags += 8;
-			if(i->second->sticky) uiFlags += 0x10;
-			if(i->second->logical->type == ILogical::Type::tBoolean)
-			{
-				LogicalBoolean* parameter = (LogicalBoolean*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tString)
-			{
-				LogicalString* parameter = (LogicalString*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(std::string("")))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(std::string("")))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tAction)
-			{
-				LogicalAction* parameter = (LogicalAction*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations & 0xFE)))); //Remove read
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tInteger)
-			{
-				LogicalInteger* parameter = (LogicalInteger*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-
-				if(!parameter->specialValuesStringMap.empty())
-				{
-					PVariable specialValues(new Variable(VariableType::tArray));
-					for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
-					{
-						PVariable specialElement(new Variable(VariableType::tStruct));
-						specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-						specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
-						specialValues->arrayValue->push_back(specialElement);
-					}
-					description->structValue->insert(StructElement("SPECIAL", specialValues));
-				}
-
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tInteger64)
-			{
-				LogicalInteger64* parameter = (LogicalInteger64*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-
-				if(!parameter->specialValuesStringMap.empty())
-				{
-					PVariable specialValues(new Variable(VariableType::tArray));
-					for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
-					{
-						PVariable specialElement(new Variable(VariableType::tStruct));
-						specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-						specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
-						specialValues->arrayValue->push_back(specialElement);
-					}
-					description->structValue->insert(StructElement("SPECIAL", specialValues));
-				}
-
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tEnum)
-			{
-				LogicalEnumeration* parameter = (LogicalEnumeration*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValueExists ? parameter->defaultValue : 0))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
-
-				PVariable valueList(new Variable(VariableType::tArray));
-				for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
-				{
-					valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
-				}
-				description->structValue->insert(StructElement("VALUE_LIST", valueList));
-			}
-			else if(i->second->logical->type == ILogical::Type::tFloat)
-			{
-				LogicalDecimal* parameter = (LogicalDecimal*)i->second->logical.get();
-
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-				description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-
-				if(!parameter->specialValuesStringMap.empty())
-				{
-					PVariable specialValues(new Variable(VariableType::tArray));
-					for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
-					{
-						PVariable specialElement(new Variable(VariableType::tStruct));
-						specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-						specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
-						specialValues->arrayValue->push_back(specialElement);
-					}
-					description->structValue->insert(StructElement("SPECIAL", specialValues));
-				}
-
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tArray)
-			{
-				if(!clientInfo->initNewFormat) continue;
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
-			}
-			else if(i->second->logical->type == ILogical::Type::tStruct)
-			{
-				if(!clientInfo->initNewFormat) continue;
-				if(!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(i->second->control))));
-				description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-				description->structValue->insert(StructElement("ID", PVariable(new Variable(i->second->id))));
-				description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-				description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-				description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
-			}
-
-			description->structValue->insert(StructElement("UNIT", PVariable(new Variable(i->second->unit))));
-			if(!i->second->label.empty()) description->structValue->insert(StructElement("LABEL", PVariable(new Variable(i->second->label))));
-			if(!i->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(i->second->description))));
-			if(!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(i->second->formFieldType))));
-			if(i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(i->second->formPosition))));
+			PVariable description = getVariableDescription(clientInfo, i, index);
+			if(!description || description->errorStruct) continue;
 
 			index++;
 			descriptions->structValue->insert(StructElement(i->second->id, description));
@@ -2987,6 +2800,254 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter->convertFromPacket(parameterData);
 		if(parameter->password) variable.reset(new Variable(variable->type));
 		return variable;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t index)
+{
+	try
+	{
+		if(!parameterIterator->second || parameterIterator->second->id.empty() || !parameterIterator->second->visible) return Variable::createError(-5, "Unknown parameter.");
+		if(!parameterIterator->second->visible && !parameterIterator->second->service && !parameterIterator->second->internal  && !parameterIterator->second->transform)
+		{
+			_bl->out.printDebug("Debug: Omitting parameter " + parameterIterator->second->id + " because of it's ui flag.");
+			 return Variable::createError(-5, "Unknown parameter.");
+		}
+#ifdef CCU2
+			if(parameterIterator->second->logical->type == ILogical::Type::tInteger64) continue;
+#endif
+		if(clientInfo->clientType == RpcClientType::ccu2 && !parameterIterator->second->ccu2Visible) return Variable::createError(-5, "Parameter is invisible on the CCU2.");
+
+		PVariable description = std::make_shared<Variable>(VariableType::tStruct);
+
+		int32_t operations = 0;
+		if(parameterIterator->second->readable) operations += 5;
+		if(parameterIterator->second->writeable) operations += 2;
+		int32_t uiFlags = 0;
+		if(parameterIterator->second->visible) uiFlags += 1;
+		if(parameterIterator->second->internal) uiFlags += 2;
+		if(parameterIterator->second->transform) uiFlags += 4;
+		if(parameterIterator->second->service) uiFlags += 8;
+		if(parameterIterator->second->sticky) uiFlags += 0x10;
+		if(parameterIterator->second->logical->type == ILogical::Type::tBoolean)
+		{
+			LogicalBoolean* parameter = (LogicalBoolean*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tString)
+		{
+			LogicalString* parameter = (LogicalString*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(std::string("")))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(std::string("")))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tAction)
+		{
+			LogicalAction* parameter = (LogicalAction*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations & 0xFE)))); //Remove read
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tInteger)
+		{
+			LogicalInteger* parameter = (LogicalInteger*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+
+			if(!parameter->specialValuesStringMap.empty())
+			{
+				PVariable specialValues(new Variable(VariableType::tArray));
+				for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+				{
+					PVariable specialElement(new Variable(VariableType::tStruct));
+					specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
+					specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+					specialValues->arrayValue->push_back(specialElement);
+				}
+				description->structValue->insert(StructElement("SPECIAL", specialValues));
+			}
+
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tInteger64)
+		{
+			LogicalInteger64* parameter = (LogicalInteger64*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+
+			if(!parameter->specialValuesStringMap.empty())
+			{
+				PVariable specialValues(new Variable(VariableType::tArray));
+				for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+				{
+					PVariable specialElement(new Variable(VariableType::tStruct));
+					specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
+					specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+					specialValues->arrayValue->push_back(specialElement);
+				}
+				description->structValue->insert(StructElement("SPECIAL", specialValues));
+			}
+
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tEnum)
+		{
+			LogicalEnumeration* parameter = (LogicalEnumeration*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValueExists ? parameter->defaultValue : 0))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
+
+			PVariable valueList(new Variable(VariableType::tArray));
+			for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
+			{
+				valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
+			}
+			description->structValue->insert(StructElement("VALUE_LIST", valueList));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tFloat)
+		{
+			LogicalDecimal* parameter = (LogicalDecimal*)parameterIterator->second->logical.get();
+
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+			description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+
+			if(!parameter->specialValuesStringMap.empty())
+			{
+				PVariable specialValues(new Variable(VariableType::tArray));
+				for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+				{
+					PVariable specialElement(new Variable(VariableType::tStruct));
+					specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
+					specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+					specialValues->arrayValue->push_back(specialElement);
+				}
+				description->structValue->insert(StructElement("SPECIAL", specialValues));
+			}
+
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tArray)
+		{
+			if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
+		}
+		else if(parameterIterator->second->logical->type == ILogical::Type::tStruct)
+		{
+			if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
+			if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+			description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+			description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+			description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+			if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+			description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
+		}
+
+		description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameterIterator->second->unit))));
+		if(!parameterIterator->second->label.empty()) description->structValue->insert(StructElement("LABEL", PVariable(new Variable(parameterIterator->second->label))));
+		if(!parameterIterator->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(parameterIterator->second->description))));
+		if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
+		if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
+
+		return description;
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+		PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::variables);
+		if(!parameterGroup) return Variable::createError(-2, "Unknown channel.");
+
+		Parameters::iterator parameterIterator = parameterGroup->parameters.find(valueKey);
+		if(parameterIterator == parameterGroup->parameters.end()) return Variable::createError(-5, "Unknown parameter.");
+
+		return getVariableDescription(clientInfo, parameterIterator);
+
 	}
 	catch(const std::exception& ex)
     {
