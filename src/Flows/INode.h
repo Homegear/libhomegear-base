@@ -41,13 +41,21 @@ class SharedObjects;
 
 namespace Flows
 {
+
+enum class NodeType
+{
+	binary = 0,
+	php = 1
+};
+
 class INode
 {
 public:
-	INode(BaseLib::SharedObjects* bl);
+	INode(BaseLib::SharedObjects* bl, NodeType type);
 	virtual ~INode();
 	virtual void dispose();
 
+	virtual NodeType getType() { return _type; }
 	virtual std::string getName() = 0;
 
 	void lock();
@@ -56,6 +64,7 @@ public:
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 private:
+	NodeType _type;
 	std::atomic_bool _locked;
 
 	INode(const INode&) = delete;
