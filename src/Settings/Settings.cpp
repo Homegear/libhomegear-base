@@ -83,7 +83,7 @@ void Settings::reset()
 	_scriptEngineMaxScriptsPerProcess = 50;
 	_flowsThreadCount = 10;
 	_flowsServerMaxConnections = 20;
-	_maxFlowsPerProcess = 40;
+	_maxNodeThreadsPerProcess = 50;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
@@ -411,10 +411,10 @@ void Settings::load(std::string filename, std::string executablePath)
 					_flowsServerMaxConnections = Math::getNumber(value);
 					_bl->out.printDebug("Debug: flowsServerMaxConnections set to " + std::to_string(_flowsServerMaxConnections));
 				}
-				else if(name == "maxflowsperprocess")
+				else if(name == "maxnodethreadsperprocess")
 				{
-					_maxFlowsPerProcess = Math::getNumber(value);
-					_bl->out.printDebug("Debug: maxFlowsPerProcess set to " + std::to_string(_maxFlowsPerProcess));
+					_maxNodeThreadsPerProcess = Math::getNumber(value);
+					_bl->out.printDebug("Debug: maxNodeThreadsPerProcess set to " + std::to_string(_maxNodeThreadsPerProcess));
 				}
 				else if(name == "ipcthreadcount")
 				{
