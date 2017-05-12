@@ -89,7 +89,7 @@ public:
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
 	uint32_t flowsThreadCount() { return _flowsThreadCount; }
 	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
-	int32_t maxFlowsPerProcess() { return _maxFlowsPerProcess; }
+	int32_t maxNodeThreadsPerProcess() { return _maxNodeThreadsPerProcess; }
 	uint32_t ipcThreadCount() { return _ipcThreadCount; }
 	uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -185,7 +185,7 @@ private:
 	int32_t _scriptEngineMaxScriptsPerProcess = -1;
 	uint32_t _flowsThreadCount = 10;
 	uint32_t _flowsServerMaxConnections = 20;
-	int32_t _maxFlowsPerProcess = 40;
+	int32_t _maxNodeThreadsPerProcess = 50;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;

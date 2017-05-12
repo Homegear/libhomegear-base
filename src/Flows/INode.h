@@ -56,7 +56,6 @@ public:
 	virtual void dispose();
 
 	virtual NodeType getType() { return _type; }
-	virtual std::string getName() = 0;
 
 	void lock();
 	void unlock();
