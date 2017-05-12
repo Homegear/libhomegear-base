@@ -36,9 +36,10 @@ namespace BaseLib
 namespace Flows
 {
 
-INode::INode(BaseLib::SharedObjects* bl)
+INode::INode(BaseLib::SharedObjects* bl, NodeType type)
 {
 	_locked = false;
+	_type = type;
 
 	_bl = bl;
 }
