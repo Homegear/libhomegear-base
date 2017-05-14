@@ -60,8 +60,8 @@ public:
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 
-	static inline bool posValid(const std::string& json, uint32_t& pos);
-	static inline bool posValid(const std::vector<char>& json, uint32_t& pos);
+	static inline bool posValid(const std::string& json, uint32_t pos);
+	static inline bool posValid(const std::vector<char>& json, uint32_t pos);
 	void skipWhitespace(const std::string& json, uint32_t& pos);
 	void skipWhitespace(const std::vector<char>& json, uint32_t& pos);
 	void decodeObject(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& variable);

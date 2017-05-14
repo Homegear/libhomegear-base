@@ -142,12 +142,12 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json, uin
 	return variable;
 }
 
-bool JsonDecoder::posValid(const std::string& json, uint32_t& pos)
+bool JsonDecoder::posValid(const std::string& json, uint32_t pos)
 {
 	return pos < json.length();
 }
 
-bool JsonDecoder::posValid(const std::vector<char>& json, uint32_t& pos)
+bool JsonDecoder::posValid(const std::vector<char>& json, uint32_t pos)
 {
 	return pos < json.size();
 }
@@ -410,7 +410,37 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 		{
 			pos++;
 			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			s.push_back(json[pos]);
+			c = json[pos];
+			switch(c)
+			{
+			case 'b':
+				s.push_back('\b');
+				break;
+			case 'f':
+				s.push_back('\f');
+				break;
+			case 'n':
+				s.push_back('\n');
+				break;
+			case 'r':
+				s.push_back('\r');
+				break;
+			case 't':
+				s.push_back('\t');
+				break;
+			case 'u':
+				{
+					pos += 4;
+					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+					std::string hex1(json.data() + (pos - 3), 2);
+					std::string hex2(json.data() + (pos - 1), 2);
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+				}
+				break;
+			default:
+				s.push_back(json[pos]);
+			}
 		}
 		else if(c == '"')
 		{
@@ -440,7 +470,37 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 		{
 			pos++;
 			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			s.push_back(json[pos]);
+			c = json[pos];
+			switch(c)
+			{
+			case 'b':
+				s.push_back('\b');
+				break;
+			case 'f':
+				s.push_back('\f');
+				break;
+			case 'n':
+				s.push_back('\n');
+				break;
+			case 'r':
+				s.push_back('\r');
+				break;
+			case 't':
+				s.push_back('\t');
+				break;
+			case 'u':
+				{
+					pos += 4;
+					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+					std::string hex1(json.data() + (pos - 3), 2);
+					std::string hex2(json.data() + (pos - 1), 2);
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+				}
+				break;
+			default:
+				s.push_back(json[pos]);
+			}
 		}
 		else if(c == '"')
 		{
