@@ -33,6 +33,7 @@
 
 #include <atomic>
 #include <string>
+#include <memory>
 
 namespace BaseLib
 {
@@ -69,6 +70,8 @@ private:
 	INode(const INode&) = delete;
 	INode& operator=(const INode&) = delete;
 };
+
+typedef std::shared_ptr<INode> PINode;
 
 }
 }
