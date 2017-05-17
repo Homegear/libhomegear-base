@@ -31,6 +31,8 @@
 #ifndef INODE_H_
 #define INODE_H_
 
+#include "../Variable.h"
+
 #include <atomic>
 #include <string>
 #include <memory>
@@ -43,29 +45,32 @@ class SharedObjects;
 namespace Flows
 {
 
-enum class NodeType
-{
-	binary = 0,
-	php = 1
-};
-
 class INode
 {
 public:
-	INode(BaseLib::SharedObjects* bl, NodeType type);
+	INode(BaseLib::SharedObjects* bl, std::string filename);
 	virtual ~INode();
-	virtual void dispose();
 
-	virtual NodeType getType() { return _type; }
+	virtual std::string getFilename() { return _filename; }
+
+	virtual std::atomic_int& getReferenceCounter() { return _referenceCounter; }
+	virtual void incrementReferenceCounter() { _referenceCounter++; }
+	virtual void decrementReferenceCounter() { _referenceCounter--; }
 
 	void lock();
 	void unlock();
 	bool locked();
+
+	virtual bool start() { return true; }
+	virtual void stop() {}
+
+	virtual PVariable input(PVariable message) { return PVariable(); }
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 private:
-	NodeType _type;
 	std::atomic_bool _locked;
+	std::atomic_int _referenceCounter;
+	std::string _filename;
 
 	INode(const INode&) = delete;
 	INode& operator=(const INode&) = delete;
