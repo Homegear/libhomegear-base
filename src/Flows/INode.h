@@ -48,29 +48,37 @@ namespace Flows
 class INode
 {
 public:
-	INode(BaseLib::SharedObjects* bl, std::string filename);
+	INode(std::string path, std::string name);
 	virtual ~INode();
 
-	virtual std::string getFilename() { return _filename; }
-
-	virtual std::atomic_int& getReferenceCounter() { return _referenceCounter; }
-	virtual void incrementReferenceCounter() { _referenceCounter++; }
-	virtual void decrementReferenceCounter() { _referenceCounter--; }
-
-	void lock();
-	void unlock();
-	bool locked();
+	std::string getName() { return _name; }
+	std::string getPath() { return _path; }
+	std::string getId() { return _id; }
+	void setId(std::string value) { _id = value; }
 
 	virtual bool start() { return true; }
 	virtual void stop() {}
 
+	virtual void variableEvent(uint64_t peerId, int32_t channel, std::string variable, BaseLib::PVariable value) {}
+
+	void setSubscribePeer(std::function<void(std::string, uint64_t, int32_t, std::string)> value) { _subscribePeer.swap(value); }
+	void setUnsubscribePeer(std::function<void(std::string, uint64_t, int32_t, std::string)> value) { _unsubscribePeer.swap(value); }
+	void setOutput(std::function<void(std::string, uint32_t, BaseLib::PVariable)> value) { _output.swap(value); }
+
 	virtual PVariable input(PVariable message) { return PVariable(); }
 protected:
-	BaseLib::SharedObjects* _bl = nullptr;
+	void suscribePeer(uint64_t peerId, int32_t channel = -1, std::string variable = "");
+	void unsuscribePeer(uint64_t peerId, int32_t channel = -1, std::string variable = "");
+	void output(uint32_t index, BaseLib::PVariable message);
 private:
 	std::atomic_bool _locked;
 	std::atomic_int _referenceCounter;
-	std::string _filename;
+	std::string _path;
+	std::string _name;
+	std::string _id;
+	std::function<void(std::string, uint64_t, int32_t, std::string)> _subscribePeer;
+	std::function<void(std::string, uint64_t, int32_t, std::string)> _unsubscribePeer;
+	std::function<void(std::string, uint32_t, BaseLib::PVariable)> _output;
 
 	INode(const INode&) = delete;
 	INode& operator=(const INode&) = delete;
