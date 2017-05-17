@@ -36,33 +36,32 @@ namespace BaseLib
 namespace Flows
 {
 
-INode::INode(BaseLib::SharedObjects* bl, std::string filename)
+INode::INode(std::string path, std::string name)
 {
 	_referenceCounter = 0;
 
 	_locked = false;
-	_filename = filename;
-
-	_bl = bl;
+	_path = path;
+	_name = name;
 }
 
 INode::~INode()
 {
 }
 
-void INode::lock()
+void INode::suscribePeer(uint64_t peerId, int32_t channel, std::string variable)
 {
-	_locked = true;
+	if(_subscribePeer) _subscribePeer(_id, peerId, channel, variable);
 }
 
-void INode::unlock()
+void INode::unsuscribePeer(uint64_t peerId, int32_t channel, std::string variable)
 {
-	_locked = false;
+	if(_unsubscribePeer) _unsubscribePeer(_id, peerId, channel, variable);
 }
 
-bool INode::locked()
+void INode::output(uint32_t index, BaseLib::PVariable message)
 {
-	return _locked;
+	if(_output) _output(_id, index, message);
 }
 
 }

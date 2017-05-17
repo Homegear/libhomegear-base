@@ -50,7 +50,7 @@ public:
 	{
 	}
 
-	virtual INode* createNode(BaseLib::SharedObjects* bl, std::string filename) = 0;
+	virtual INode* createNode(std::string path, std::string name) = 0;
 };
 
 }
