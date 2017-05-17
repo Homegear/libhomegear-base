@@ -36,19 +36,17 @@ namespace BaseLib
 namespace Flows
 {
 
-INode::INode(BaseLib::SharedObjects* bl, NodeType type)
+INode::INode(BaseLib::SharedObjects* bl, std::string filename)
 {
+	_referenceCounter = 0;
+
 	_locked = false;
-	_type = type;
+	_filename = filename;
 
 	_bl = bl;
 }
 
 INode::~INode()
-{
-}
-
-void INode::dispose()
 {
 }
 
