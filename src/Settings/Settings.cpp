@@ -81,7 +81,8 @@ void Settings::reset()
 	_scriptEngineServerMaxConnections = 10;
 	_scriptEngineMaxThreadsPerScript = 4;
 	_scriptEngineMaxScriptsPerProcess = 50;
-	_flowsThreadCount = 10;
+	_flowsProcessingThreadCountServer = 10;
+	_flowsProcessingThreadCountNodes = 10;
 	_flowsServerMaxConnections = 20;
 	_maxNodeThreadsPerProcess = 50;
 	_ipcThreadCount = 10;
@@ -401,10 +402,15 @@ void Settings::load(std::string filename, std::string executablePath)
 					_scriptEngineMaxScriptsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptEngineMaxScriptsPerProcess set to " + std::to_string(_scriptEngineMaxScriptsPerProcess));
 				}
-				else if(name == "flowsthreadcount")
+				else if(name == "flowsprocessingthreadcountserver")
 				{
-					_flowsThreadCount = Math::getNumber(value);
-					_bl->out.printDebug("Debug: flowsThreadCount set to " + std::to_string(_flowsThreadCount));
+					_flowsProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsProcessingThreadCountServer set to " + std::to_string(_flowsProcessingThreadCountServer));
+				}
+				else if(name == "flowsprocessingthreadcountnodes")
+				{
+					_flowsProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsProcessingThreadCountNodes set to " + std::to_string(_flowsProcessingThreadCountNodes));
 				}
 				else if(name == "flowsservermaxconnections")
 				{
