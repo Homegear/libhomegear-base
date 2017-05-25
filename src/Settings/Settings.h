@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -123,10 +123,6 @@ public:
 	uint32_t flowsPathPermissions() { return _flowsPathPermissions; }
 	std::string flowsPathUser() { return _flowsPathUser; }
 	std::string flowsPathGroup() { return _flowsPathGroup; }
-	std::string flowNodesPath() { return _flowNodesPath; }
-	uint32_t flowNodesPathPermissions() { return _flowNodesPathPermissions; }
-	std::string flowNodesPathUser() { return _flowNodesPathUser; }
-	std::string flowNodesPathGroup() { return _flowNodesPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -162,7 +158,7 @@ private:
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
-	bool _enableFlows = false;
+	bool _enableFlows = true;
 	bool _setDevicePermissions = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
@@ -220,10 +216,6 @@ private:
 	uint32_t _flowsPathPermissions = 504;
 	std::string _flowsPathUser;
 	std::string _flowsPathGroup;
-	std::string _flowNodesPath;
-	uint32_t _flowNodesPathPermissions = 360;
-	std::string _flowNodesPathUser;
-	std::string _flowNodesPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;

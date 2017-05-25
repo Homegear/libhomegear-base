@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -59,7 +59,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
-	_enableFlows = false;
+	_enableFlows = true;
 	_setDevicePermissions = true;
 	_workingDirectory = _executablePath;
 	_socketPath = _executablePath;
@@ -117,10 +117,6 @@ void Settings::reset()
 	_flowsPathPermissions = 504;
 	_flowsPathUser = "";
 	_flowsPathGroup = "";
-	_flowNodesPath = "/var/lib/homegear/flowNodes/";
-	_flowNodesPathPermissions = 360;
-	_flowNodesPathUser = "";
-	_flowNodesPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -614,29 +610,6 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_flowsPathGroup = value;
 					_bl->out.printDebug("Debug: flowsPathGroup set to " + _flowsPathGroup);
-				}
-				else if(name == "flownodespath")
-				{
-					_flowNodesPath = value;
-					if(_flowNodesPath.empty()) _flowNodesPath = "/var/lib/homegear/flowNodes/";
-					if(_flowNodesPath.back() != '/') _flowNodesPath.push_back('/');
-					_bl->out.printDebug("Debug: flowNodesPath set to " + _flowNodesPath);
-				}
-				else if(name == "flownodespathpermissions")
-				{
-					_flowNodesPathPermissions = Math::getOctalNumber(value);
-					if(_flowNodesPathPermissions == 0) _flowNodesPathPermissions = 360;
-					_bl->out.printDebug("Debug: flowNodesPathPermissions set to " + _flowNodesPathPermissions);
-				}
-				else if(name == "flownodespathuser")
-				{
-					_flowNodesPathUser = value;
-					_bl->out.printDebug("Debug: flowNodesPathUser set to " + _flowNodesPathUser);
-				}
-				else if(name == "flownodespathgroup")
-				{
-					_flowNodesPathGroup = value;
-					_bl->out.printDebug("Debug: flowNodesPathGroup set to " + _flowNodesPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{
