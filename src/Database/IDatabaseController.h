@@ -81,7 +81,7 @@ public:
 
 	// {{{ Node data
 	virtual BaseLib::PVariable setNodeData(std::string& node, std::string& key, BaseLib::PVariable& value) = 0;
-	virtual BaseLib::PVariable getNodeData(std::string& node, std::string& key) = 0;
+	virtual BaseLib::PVariable getNodeData(std::string& node, std::string& key, bool requestFromFlowsServer = false) = 0;
 	virtual std::set<std::string> getAllNodeDataNodes() = 0;
 	virtual BaseLib::PVariable deleteNodeData(std::string& node, std::string& key) = 0;
 	// }}}
