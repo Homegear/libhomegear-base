@@ -61,6 +61,7 @@ public:
 	int32_t id = -1;
 	bool closed = false;
 	bool addon = false;
+	bool flowsServer = false;
 	std::string webSocketClientId;
 	std::string address;
 	int32_t port = 0;
