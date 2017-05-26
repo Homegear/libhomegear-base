@@ -76,7 +76,9 @@ public:
 	TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
 	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
 	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData);
 	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
+	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
 	virtual ~TcpSocket();
 
 	PFileDescriptor bindSocket(std::string address, std::string port, std::string& listenAddress);
@@ -110,8 +112,11 @@ protected:
 	std::string _hostname;
 	std::string _port;
 	std::string _caFile;
+	std::string _caData;
 	std::string _clientCertFile;
+	std::string _clientCertData;
 	std::string _clientKeyFile;
+	std::string _clientKeyData;
 	std::mutex _readMutex;
 	std::mutex _writeMutex;
 	bool _verifyCertificate = true;
