@@ -74,7 +74,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSSL) initSSL();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port)
 {
 	_useSSL = useSSL;
 	_verifyCertificate = verifyCertificate;
@@ -85,7 +85,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSSL) initSSL();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port, useSSL, verifyCertificate, caData)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
 {
 	_useSSL = useSSL;
 	_verifyCertificate = verifyCertificate;
@@ -597,7 +597,7 @@ void TcpSocket::getSocketDescriptor()
 {
 	_readMutex.lock();
 	_writeMutex.lock();
-	_bl->out.printDebug("Debug: Calling getFileDescriptor...");
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Calling getFileDescriptor...");
 	_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 
 	try
