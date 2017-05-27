@@ -180,47 +180,47 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::os
 	switch(variable->type)
 	{
 	case VariableType::tArray:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON array.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON array.");
 		encodeArray(variable, s);
 		break;
 	case VariableType::tStruct:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON struct.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON struct.");
 		encodeStruct(variable, s);
 		break;
 	case VariableType::tBoolean:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON boolean.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON boolean.");
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
 		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON float.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON float.");
 		encodeFloat(variable, s);
 		break;
 	case VariableType::tBase64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON string.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tString:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON string.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tVoid:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tVariant:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tBinary:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	}
@@ -232,47 +232,47 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::ve
 	switch(variable->type)
 	{
 	case VariableType::tArray:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON array.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON array.");
 		encodeArray(variable, s);
 		break;
 	case VariableType::tStruct:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON struct.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON struct.");
 		encodeStruct(variable, s);
 		break;
 	case VariableType::tBoolean:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON boolean.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON boolean.");
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
 		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON float.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON float.");
 		encodeFloat(variable, s);
 		break;
 	case VariableType::tBase64:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON string.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tString:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON string.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tVoid:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tVariant:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tBinary:
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Encoding JSON null.");
+		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	}
