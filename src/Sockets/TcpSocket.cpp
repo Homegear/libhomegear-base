@@ -78,7 +78,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSSL = useSSL;
 	_verifyCertificate = verifyCertificate;
-	_caData = caFile;
+	_caFile = caFile;
 	_clientCertFile = clientCertFile;
 	_clientKeyFile = clientKeyFile;
 
