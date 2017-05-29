@@ -211,7 +211,7 @@ void TcpSocket::initSSL()
 	}
 	else
 	{
-		if(_verifyCertificate) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" is not specified for the host \"" + _hostname + "\".");
+		if(_verifyCertificate) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" and \"caData\" are not specified for the host \"" + _hostname + "\".");
 		else _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" and certificate verification is disabled. It is highly recommended to enable certificate verification.");
 	}
 	if(result == 0 && _verifyCertificate)
