@@ -123,6 +123,10 @@ public:
 	uint32_t flowsPathPermissions() { return _flowsPathPermissions; }
 	std::string flowsPathUser() { return _flowsPathUser; }
 	std::string flowsPathGroup() { return _flowsPathGroup; }
+	std::string flowsDataPath() { return _flowsDataPath; }
+	uint32_t flowsDataPathPermissions() { return _flowsDataPathPermissions; }
+	std::string flowsDataPathUser() { return _flowsDataPathUser; }
+	std::string flowsDataPathGroup() { return _flowsDataPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -216,6 +220,10 @@ private:
 	uint32_t _flowsPathPermissions = 504;
 	std::string _flowsPathUser;
 	std::string _flowsPathGroup;
+	std::string _flowsDataPath;
+	uint32_t _flowsDataPathPermissions = 504;
+	std::string _flowsDataPathUser;
+	std::string _flowsDataPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;

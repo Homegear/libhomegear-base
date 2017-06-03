@@ -117,6 +117,10 @@ void Settings::reset()
 	_flowsPathPermissions = 504;
 	_flowsPathUser = "";
 	_flowsPathGroup = "";
+	_flowsDataPath = "/var/lib/homegear/flows/data/";
+	_flowsDataPathPermissions = 504;
+	_flowsDataPathUser = "";
+	_flowsDataPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -610,6 +614,29 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_flowsPathGroup = value;
 					_bl->out.printDebug("Debug: flowsPathGroup set to " + _flowsPathGroup);
+				}
+				else if(name == "flowsdatapath")
+				{
+					_flowsDataPath = value;
+					if(_flowsDataPath.empty()) _flowsDataPath = "/var/lib/homegear/flows/data/";
+					if(_flowsDataPath.back() != '/') _flowsDataPath.push_back('/');
+					_bl->out.printDebug("Debug: flowsDataPath set to " + _flowsDataPath);
+				}
+				else if(name == "flowsdatapathpermissions")
+				{
+					_flowsDataPathPermissions = Math::getOctalNumber(value);
+					if(_flowsDataPathPermissions == 0) _flowsDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: flowsDataPathPermissions set to " + _flowsDataPathPermissions);
+				}
+				else if(name == "flowsdatapathuser")
+				{
+					_flowsDataPathUser = value;
+					_bl->out.printDebug("Debug: flowsDataPathUser set to " + _flowsDataPathUser);
+				}
+				else if(name == "flowsdatapathgroup")
+				{
+					_flowsDataPathGroup = value;
+					_bl->out.printDebug("Debug: flowsDataPathGroup set to " + _flowsDataPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{
