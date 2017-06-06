@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -72,6 +72,10 @@ public:
 	uint32_t dataPathPermissions() { return _dataPathPermissions; }
 	std::string dataPathUser() { return _dataPathUser; }
 	std::string dataPathGroup() { return _dataPathGroup; }
+	std::string familyDataPath() { return _familyDataPath; }
+	uint32_t familyDataPathPermissions() { return _familyDataPathPermissions; }
+	std::string familyDataPathUser() { return _familyDataPathUser; }
+	std::string familyDataPathGroup() { return _familyDataPathGroup; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
 	bool databaseWALJournal() { return _databaseWALJournal; }
@@ -87,9 +91,10 @@ public:
 	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
 	uint32_t scriptEngineMaxThreadsPerScript() { return _scriptEngineMaxThreadsPerScript; }
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
-	uint32_t flowsThreadCount() { return _flowsThreadCount; }
+	uint32_t flowsProcessingThreadCountServer() { return _flowsProcessingThreadCountServer; }
+	uint32_t flowsProcessingThreadCountNodes() { return _flowsProcessingThreadCountNodes; }
 	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
-	int32_t maxFlowsPerProcess() { return _maxFlowsPerProcess; }
+	int32_t maxNodeThreadsPerProcess() { return _maxNodeThreadsPerProcess; }
 	uint32_t ipcThreadCount() { return _ipcThreadCount; }
 	uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -122,10 +127,10 @@ public:
 	uint32_t flowsPathPermissions() { return _flowsPathPermissions; }
 	std::string flowsPathUser() { return _flowsPathUser; }
 	std::string flowsPathGroup() { return _flowsPathGroup; }
-	std::string flowNodesPath() { return _flowNodesPath; }
-	uint32_t flowNodesPathPermissions() { return _flowNodesPathPermissions; }
-	std::string flowNodesPathUser() { return _flowNodesPathUser; }
-	std::string flowNodesPathGroup() { return _flowNodesPathGroup; }
+	std::string flowsDataPath() { return _flowsDataPath; }
+	uint32_t flowsDataPathPermissions() { return _flowsDataPathPermissions; }
+	std::string flowsDataPathUser() { return _flowsDataPathUser; }
+	std::string flowsDataPathGroup() { return _flowsDataPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -161,7 +166,7 @@ private:
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
-	bool _enableFlows = false;
+	bool _enableFlows = true;
 	bool _setDevicePermissions = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
@@ -169,6 +174,10 @@ private:
 	uint32_t _dataPathPermissions = 504;
 	std::string _dataPathUser;
 	std::string _dataPathGroup;
+	std::string _familyDataPath;
+	uint32_t _familyDataPathPermissions = 504;
+	std::string _familyDataPathUser;
+	std::string _familyDataPathGroup;
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
 	bool _databaseWALJournal = true;
@@ -183,9 +192,10 @@ private:
 	uint32_t _scriptEngineServerMaxConnections = 20;
 	uint32_t _scriptEngineMaxThreadsPerScript = 4;
 	int32_t _scriptEngineMaxScriptsPerProcess = -1;
-	uint32_t _flowsThreadCount = 10;
+	uint32_t _flowsProcessingThreadCountServer = 10;
+	uint32_t _flowsProcessingThreadCountNodes = 10;
 	uint32_t _flowsServerMaxConnections = 20;
-	int32_t _maxFlowsPerProcess = 40;
+	int32_t _maxNodeThreadsPerProcess = 50;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;
@@ -218,10 +228,10 @@ private:
 	uint32_t _flowsPathPermissions = 504;
 	std::string _flowsPathUser;
 	std::string _flowsPathGroup;
-	std::string _flowNodesPath;
-	uint32_t _flowNodesPathPermissions = 360;
-	std::string _flowNodesPathUser;
-	std::string _flowNodesPathGroup;
+	std::string _flowsDataPath;
+	uint32_t _flowsDataPathPermissions = 504;
+	std::string _flowsDataPathUser;
+	std::string _flowsDataPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;
