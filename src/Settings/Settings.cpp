@@ -67,6 +67,10 @@ void Settings::reset()
 	_dataPathPermissions = 504;
 	_dataPathUser = "";
 	_dataPathGroup = "";
+	_familyDataPath = _executablePath + "families";
+	_familyDataPathPermissions = 504;
+	_familyDataPathUser = "";
+	_familyDataPathGroup = "";
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
 	_databaseWALJournal = true;
@@ -323,6 +327,29 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_dataPathGroup = value;
 					_bl->out.printDebug("Debug: dataPathGroup set to " + _dataPathGroup);
+				}
+				else if(name == "familydatapath")
+				{
+					_familyDataPath = value;
+					if(_familyDataPath.empty()) _familyDataPath = _executablePath + "families";
+					if(_familyDataPath.back() != '/') _familyDataPath.push_back('/');
+					_bl->out.printDebug("Debug: familyDataPath set to " + _familyDataPath);
+				}
+				else if(name == "familydatapathpermissions")
+				{
+					_familyDataPathPermissions = Math::getOctalNumber(value);
+					if(_familyDataPathPermissions == 0) _familyDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: familyDataPathPermissions set to " + _familyDataPathPermissions);
+				}
+				else if(name == "familydatapathuser")
+				{
+					_familyDataPathUser = value;
+					_bl->out.printDebug("Debug: familyDataPathUser set to " + _familyDataPathUser);
+				}
+				else if(name == "familydatapathgroup")
+				{
+					_familyDataPathGroup = value;
+					_bl->out.printDebug("Debug: familyDataPathGroup set to " + _familyDataPathGroup);
 				}
 				else if(name == "databasesynchronous")
 				{

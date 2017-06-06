@@ -72,6 +72,10 @@ public:
 	uint32_t dataPathPermissions() { return _dataPathPermissions; }
 	std::string dataPathUser() { return _dataPathUser; }
 	std::string dataPathGroup() { return _dataPathGroup; }
+	std::string familyDataPath() { return _familyDataPath; }
+	uint32_t familyDataPathPermissions() { return _familyDataPathPermissions; }
+	std::string familyDataPathUser() { return _familyDataPathUser; }
+	std::string familyDataPathGroup() { return _familyDataPathGroup; }
 	bool databaseSynchronous() { return _databaseSynchronous; }
 	bool databaseMemoryJournal() { return _databaseMemoryJournal; }
 	bool databaseWALJournal() { return _databaseWALJournal; }
@@ -170,6 +174,10 @@ private:
 	uint32_t _dataPathPermissions = 504;
 	std::string _dataPathUser;
 	std::string _dataPathGroup;
+	std::string _familyDataPath;
+	uint32_t _familyDataPathPermissions = 504;
+	std::string _familyDataPathUser;
+	std::string _familyDataPathGroup;
 	bool _databaseSynchronous = true;
 	bool _databaseMemoryJournal = false;
 	bool _databaseWALJournal = true;
