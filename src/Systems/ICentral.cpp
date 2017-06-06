@@ -1430,6 +1430,29 @@ PVariable ICentral::getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t ch
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer(getPeer(id));
+		if(peer) return peer->getVariableDescription(clientInfo, channel, valueKey);
+		return Variable::createError(-2, "Unknown device.");
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields)
 {
 	return listDevices(clientInfo, channels, fields, std::shared_ptr<std::set<std::uint64_t>>());

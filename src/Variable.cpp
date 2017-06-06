@@ -390,8 +390,11 @@ std::string Variable::printArray(PArray array, std::string indent, bool oneLine)
 	std::ostringstream result;
 	result << indent << "(Array length=" << array->size() << ")" << (oneLine ? " " : "\n" + indent) << "{" << (oneLine ? " " : "\n");
 	std::string currentIndent = indent;
-	currentIndent.push_back(' ');
-	currentIndent.push_back(' ');
+	if(!oneLine)
+	{
+		currentIndent.push_back(' ');
+		currentIndent.push_back(' ');
+	}
 	for(std::vector<std::shared_ptr<Variable>>::iterator i = array->begin(); i != array->end(); ++i)
 	{
 		result << print(*i, currentIndent, oneLine);
@@ -405,8 +408,11 @@ std::string Variable::printStruct(PStruct tStruct, std::string indent, bool oneL
 	std::ostringstream result;
 	result << indent << "(Struct length=" << tStruct->size() << ")" << (oneLine ? " " : "\n" + indent) << "{" << (oneLine ? " " : "\n");
 	std::string currentIndent = indent;
-	currentIndent.push_back(' ');
-	currentIndent.push_back(' ');
+	if(!oneLine)
+	{
+		currentIndent.push_back(' ');
+		currentIndent.push_back(' ');
+	}
 	for(std::map<std::string, std::shared_ptr<Variable>>::iterator i = tStruct->begin(); i != tStruct->end(); ++i)
 	{
 		result << currentIndent << "[" << i->first << "]" << (oneLine ? " " : "\n" + currentIndent) << "{" << (oneLine ? " " : "\n");

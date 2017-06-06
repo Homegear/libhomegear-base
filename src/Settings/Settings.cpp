@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -59,7 +59,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
-	_enableFlows = false;
+	_enableFlows = true;
 	_setDevicePermissions = true;
 	_workingDirectory = _executablePath;
 	_socketPath = _executablePath;
@@ -67,6 +67,10 @@ void Settings::reset()
 	_dataPathPermissions = 504;
 	_dataPathUser = "";
 	_dataPathGroup = "";
+	_familyDataPath = _executablePath + "families";
+	_familyDataPathPermissions = 504;
+	_familyDataPathUser = "";
+	_familyDataPathGroup = "";
 	_databaseSynchronous = true;
 	_databaseMemoryJournal = false;
 	_databaseWALJournal = true;
@@ -81,9 +85,10 @@ void Settings::reset()
 	_scriptEngineServerMaxConnections = 10;
 	_scriptEngineMaxThreadsPerScript = 4;
 	_scriptEngineMaxScriptsPerProcess = 50;
-	_flowsThreadCount = 10;
+	_flowsProcessingThreadCountServer = 10;
+	_flowsProcessingThreadCountNodes = 10;
 	_flowsServerMaxConnections = 20;
-	_maxFlowsPerProcess = 40;
+	_maxNodeThreadsPerProcess = 50;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
@@ -116,10 +121,10 @@ void Settings::reset()
 	_flowsPathPermissions = 504;
 	_flowsPathUser = "";
 	_flowsPathGroup = "";
-	_flowNodesPath = "/var/lib/homegear/flowNodes/";
-	_flowNodesPathPermissions = 360;
-	_flowNodesPathUser = "";
-	_flowNodesPathGroup = "";
+	_flowsDataPath = "/var/lib/homegear/flows/data/";
+	_flowsDataPathPermissions = 504;
+	_flowsDataPathUser = "";
+	_flowsDataPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -323,6 +328,29 @@ void Settings::load(std::string filename, std::string executablePath)
 					_dataPathGroup = value;
 					_bl->out.printDebug("Debug: dataPathGroup set to " + _dataPathGroup);
 				}
+				else if(name == "familydatapath")
+				{
+					_familyDataPath = value;
+					if(_familyDataPath.empty()) _familyDataPath = _executablePath + "families";
+					if(_familyDataPath.back() != '/') _familyDataPath.push_back('/');
+					_bl->out.printDebug("Debug: familyDataPath set to " + _familyDataPath);
+				}
+				else if(name == "familydatapathpermissions")
+				{
+					_familyDataPathPermissions = Math::getOctalNumber(value);
+					if(_familyDataPathPermissions == 0) _familyDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: familyDataPathPermissions set to " + _familyDataPathPermissions);
+				}
+				else if(name == "familydatapathuser")
+				{
+					_familyDataPathUser = value;
+					_bl->out.printDebug("Debug: familyDataPathUser set to " + _familyDataPathUser);
+				}
+				else if(name == "familydatapathgroup")
+				{
+					_familyDataPathGroup = value;
+					_bl->out.printDebug("Debug: familyDataPathGroup set to " + _familyDataPathGroup);
+				}
 				else if(name == "databasesynchronous")
 				{
 					if(HelperFunctions::toLower(value) == "false") _databaseSynchronous = false;
@@ -401,20 +429,25 @@ void Settings::load(std::string filename, std::string executablePath)
 					_scriptEngineMaxScriptsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptEngineMaxScriptsPerProcess set to " + std::to_string(_scriptEngineMaxScriptsPerProcess));
 				}
-				else if(name == "flowsthreadcount")
+				else if(name == "flowsprocessingthreadcountserver")
 				{
-					_flowsThreadCount = Math::getNumber(value);
-					_bl->out.printDebug("Debug: flowsThreadCount set to " + std::to_string(_flowsThreadCount));
+					_flowsProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsProcessingThreadCountServer set to " + std::to_string(_flowsProcessingThreadCountServer));
+				}
+				else if(name == "flowsprocessingthreadcountnodes")
+				{
+					_flowsProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: flowsProcessingThreadCountNodes set to " + std::to_string(_flowsProcessingThreadCountNodes));
 				}
 				else if(name == "flowsservermaxconnections")
 				{
 					_flowsServerMaxConnections = Math::getNumber(value);
 					_bl->out.printDebug("Debug: flowsServerMaxConnections set to " + std::to_string(_flowsServerMaxConnections));
 				}
-				else if(name == "maxflowsperprocess")
+				else if(name == "maxnodethreadsperprocess")
 				{
-					_maxFlowsPerProcess = Math::getNumber(value);
-					_bl->out.printDebug("Debug: maxFlowsPerProcess set to " + std::to_string(_maxFlowsPerProcess));
+					_maxNodeThreadsPerProcess = Math::getNumber(value);
+					_bl->out.printDebug("Debug: maxNodeThreadsPerProcess set to " + std::to_string(_maxNodeThreadsPerProcess));
 				}
 				else if(name == "ipcthreadcount")
 				{
@@ -609,28 +642,28 @@ void Settings::load(std::string filename, std::string executablePath)
 					_flowsPathGroup = value;
 					_bl->out.printDebug("Debug: flowsPathGroup set to " + _flowsPathGroup);
 				}
-				else if(name == "flownodespath")
+				else if(name == "flowsdatapath")
 				{
-					_flowNodesPath = value;
-					if(_flowNodesPath.empty()) _flowNodesPath = "/var/lib/homegear/flowNodes/";
-					if(_flowNodesPath.back() != '/') _flowNodesPath.push_back('/');
-					_bl->out.printDebug("Debug: flowNodesPath set to " + _flowNodesPath);
+					_flowsDataPath = value;
+					if(_flowsDataPath.empty()) _flowsDataPath = "/var/lib/homegear/flows/data/";
+					if(_flowsDataPath.back() != '/') _flowsDataPath.push_back('/');
+					_bl->out.printDebug("Debug: flowsDataPath set to " + _flowsDataPath);
 				}
-				else if(name == "flownodespathpermissions")
+				else if(name == "flowsdatapathpermissions")
 				{
-					_flowNodesPathPermissions = Math::getOctalNumber(value);
-					if(_flowNodesPathPermissions == 0) _flowNodesPathPermissions = 360;
-					_bl->out.printDebug("Debug: flowNodesPathPermissions set to " + _flowNodesPathPermissions);
+					_flowsDataPathPermissions = Math::getOctalNumber(value);
+					if(_flowsDataPathPermissions == 0) _flowsDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: flowsDataPathPermissions set to " + _flowsDataPathPermissions);
 				}
-				else if(name == "flownodespathuser")
+				else if(name == "flowsdatapathuser")
 				{
-					_flowNodesPathUser = value;
-					_bl->out.printDebug("Debug: flowNodesPathUser set to " + _flowNodesPathUser);
+					_flowsDataPathUser = value;
+					_bl->out.printDebug("Debug: flowsDataPathUser set to " + _flowsDataPathUser);
 				}
-				else if(name == "flownodespathgroup")
+				else if(name == "flowsdatapathgroup")
 				{
-					_flowNodesPathGroup = value;
-					_bl->out.printDebug("Debug: flowNodesPathGroup set to " + _flowNodesPathGroup);
+					_flowsDataPathGroup = value;
+					_bl->out.printDebug("Debug: flowsDataPathGroup set to " + _flowsDataPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{

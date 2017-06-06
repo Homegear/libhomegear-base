@@ -64,7 +64,9 @@ public:
 	{
 		cli,
 		device,
-		web
+		web,
+		simpleNode,
+		statefulNode
 	};
 
 	int32_t id = 0;
@@ -81,6 +83,12 @@ public:
 
 		std::string script; //Device
 		int64_t peerId = 0; //Device
+
+		PVariable nodeInfo; //Node
+		uint32_t inputPort = 0; //Node
+		PVariable message; //Node
+
+		uint32_t maxThreadCount = 0; //Node
 	// }}}
 
 	// {{{ Output parameters
@@ -112,6 +120,8 @@ public:
 	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, PVariable http, PVariable serverInfo) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->http.unserialize(http); this->serverInfo.reset(new Rpc::ServerInfo::Info()); this->serverInfo->unserialize(serverInfo); }
 	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; }
 	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; this->peerId = peerId; }
+	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t inputPort, PVariable message) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->nodeInfo = nodeInfo; this->inputPort = inputPort; this->message = message; }
+	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t maxThreadCount) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->nodeInfo = nodeInfo; this->maxThreadCount = maxThreadCount; }
 	virtual ~ScriptInfo() {}
 	ScriptType getType() { return _type; }
 protected:

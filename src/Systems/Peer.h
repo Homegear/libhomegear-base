@@ -373,6 +373,7 @@ public:
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
+    virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
     virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing = false) = 0;
     virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
     virtual PVariable rssiInfo(PRpcClientInfo clientInfo);
@@ -473,6 +474,8 @@ protected:
 	 * @return Returns the parameter set for the specified channel and type.
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
+
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t index = -1);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

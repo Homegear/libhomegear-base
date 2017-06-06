@@ -142,12 +142,12 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json, uin
 	return variable;
 }
 
-bool JsonDecoder::posValid(const std::string& json, uint32_t& pos)
+bool JsonDecoder::posValid(const std::string& json, uint32_t pos)
 {
 	return pos < json.length();
 }
 
-bool JsonDecoder::posValid(const std::vector<char>& json, uint32_t& pos)
+bool JsonDecoder::posValid(const std::vector<char>& json, uint32_t pos)
 {
 	return pos < json.size();
 }
@@ -410,7 +410,37 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 		{
 			pos++;
 			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			s.push_back(json[pos]);
+			c = json[pos];
+			switch(c)
+			{
+			case 'b':
+				s.push_back('\b');
+				break;
+			case 'f':
+				s.push_back('\f');
+				break;
+			case 'n':
+				s.push_back('\n');
+				break;
+			case 'r':
+				s.push_back('\r');
+				break;
+			case 't':
+				s.push_back('\t');
+				break;
+			case 'u':
+				{
+					pos += 4;
+					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+					std::string hex1(json.data() + (pos - 3), 2);
+					std::string hex2(json.data() + (pos - 1), 2);
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+				}
+				break;
+			default:
+				s.push_back(json[pos]);
+			}
 		}
 		else if(c == '"')
 		{
@@ -440,7 +470,37 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 		{
 			pos++;
 			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			s.push_back(json[pos]);
+			c = json[pos];
+			switch(c)
+			{
+			case 'b':
+				s.push_back('\b');
+				break;
+			case 'f':
+				s.push_back('\f');
+				break;
+			case 'n':
+				s.push_back('\n');
+				break;
+			case 'r':
+				s.push_back('\r');
+				break;
+			case 't':
+				s.push_back('\t');
+				break;
+			case 'u':
+				{
+					pos += 4;
+					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+					std::string hex1(json.data() + (pos - 3), 2);
+					std::string hex2(json.data() + (pos - 1), 2);
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+				}
+				break;
+			default:
+				s.push_back(json[pos]);
+			}
 		}
 		else if(c == '"')
 		{
@@ -459,31 +519,31 @@ void JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::share
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	switch (json[pos]) {
 		case 'n':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON null.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
 			decodeNull(json, pos, value);
 			break;
 		case 't':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON boolean.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
 			decodeBoolean(json, pos, value);
 			break;
 		case 'f':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON boolean.");
+			if(_bl->debugLevel >= 65) _bl->out.printDebug("Decoding JSON boolean.");
 			decodeBoolean(json, pos, value);
 			break;
 		case '"':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON string.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
 			decodeString(json, pos, value);
 			break;
 		case '{':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON object.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
 			decodeObject(json, pos, value);
 			break;
 		case '[':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON array.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
 			decodeArray(json, pos, value);
 			break;
 		default:
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON number.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
 			decodeNumber(json, pos, value);
 			break;
 	}
@@ -494,31 +554,31 @@ void JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std:
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	switch (json[pos]) {
 		case 'n':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON null.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
 			decodeNull(json, pos, value);
 			break;
 		case 't':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON boolean.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
 			decodeBoolean(json, pos, value);
 			break;
 		case 'f':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON boolean.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
 			decodeBoolean(json, pos, value);
 			break;
 		case '"':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON string.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
 			decodeString(json, pos, value);
 			break;
 		case '{':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON object.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
 			decodeObject(json, pos, value);
 			break;
 		case '[':
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON array.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
 			decodeArray(json, pos, value);
 			break;
 		default:
-			if(_bl->debugLevel >= 5) _bl->out.printDebug("Decoding JSON number.");
+			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
 			decodeNumber(json, pos, value);
 			break;
 	}
