@@ -290,7 +290,7 @@ Variable::operator Variable::bool_type() const
 			result = !arrayValue->empty();
 			break;
 		case VariableType::tBase64:
-			result = !stringValue.empty() && !stringValue == "0";
+			result = !stringValue.empty() && stringValue != "0";
 			break;
 		case VariableType::tBinary:
 			result = !binaryValue.empty();
@@ -307,7 +307,7 @@ Variable::operator Variable::bool_type() const
 			result = (bool)integerValue64;
 			break;
 		case VariableType::tString:
-			result = !stringValue.empty() && !stringValue == "0";
+			result = !stringValue.empty() && stringValue != "0";
 			break;
 		case VariableType::tStruct:
 			result = !structValue->empty();
