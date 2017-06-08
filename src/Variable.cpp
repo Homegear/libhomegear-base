@@ -279,6 +279,50 @@ bool Variable::operator!=(const Variable& rhs)
 	return !(operator==(rhs));
 }
 
+Variable::operator Variable::bool_type() const
+{
+	bool result = false;
+	if(type != VariableType::tBoolean)
+	{
+		switch(type)
+		{
+		case VariableType::tArray:
+			result = !arrayValue->empty();
+			break;
+		case VariableType::tBase64:
+			result = !stringValue.empty();
+			break;
+		case VariableType::tBinary:
+			result = !binaryValue.empty();
+			break;
+		case VariableType::tBoolean:
+			break;
+		case VariableType::tFloat:
+			result = (bool)floatValue;
+			break;
+		case VariableType::tInteger:
+			result = (bool)integerValue;
+			break;
+		case VariableType::tInteger64:
+			result = (bool)integerValue64;
+			break;
+		case VariableType::tString:
+			result = !stringValue.empty();
+			break;
+		case VariableType::tStruct:
+			result = !structValue->empty();
+			break;
+		case VariableType::tVariant:
+			break;
+		case VariableType::tVoid:
+			result = false;
+			break;
+		}
+	}
+	else result = booleanValue;
+	return result ? &Variable::this_type_does_not_support_comparisons : 0;
+}
+
 std::string Variable::print(bool stdout, bool stderr, bool oneLine)
 {
 	std::ostringstream result;

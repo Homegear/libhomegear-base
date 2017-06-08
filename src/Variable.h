@@ -77,6 +77,18 @@ typedef std::shared_ptr<List> PList;
 
 class Variable
 {
+private:
+	typedef void (Variable::*bool_type)() const;
+
+	void this_type_does_not_support_comparisons() const {}
+	std::string print(PVariable variable, std::string indent, bool oneLine);
+	std::string printStruct(PStruct rpcStruct, std::string indent, bool oneLine);
+	std::string printArray(PArray rpcArray, std::string indent, bool oneLine);
+
+	/**
+	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
+	 */
+	void parseXmlNode(xml_node<>* node, PStruct& xmlStruct);
 public:
 	bool errorStruct = false;
 	VariableType type;
@@ -125,15 +137,7 @@ public:
 	bool operator>(const Variable& rhs);
 	bool operator>=(const Variable& rhs);
 	bool operator!=(const Variable& rhs);
-private:
-	std::string print(PVariable variable, std::string indent, bool oneLine);
-	std::string printStruct(PStruct rpcStruct, std::string indent, bool oneLine);
-	std::string printArray(PArray rpcArray, std::string indent, bool oneLine);
-
-	/**
-	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
-	 */
-	void parseXmlNode(xml_node<>* node, PStruct& xmlStruct);
+	operator bool_type() const;
 };
 
 }
