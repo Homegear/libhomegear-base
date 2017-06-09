@@ -78,7 +78,9 @@ std::string Output::getTimeString(int64_t time)
 		milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
 	}
 	char timeString[50];
-	strftime(&timeString[0], 50, &timeFormat[0], std::localtime(&t));
+	std::tm localTime;
+	localtime_r(&t, &localTime);
+	strftime(&timeString[0], 50, &timeFormat[0], &localTime);
 	std::ostringstream timeStream;
 	timeStream << timeString << "." << std::setw(3) << std::setfill('0') << milliseconds;
 	return timeStream.str();

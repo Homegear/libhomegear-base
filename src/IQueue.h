@@ -51,16 +51,17 @@ class IQueue : public IQueueBase
 public:
 	IQueue(SharedObjects* baseLib, uint32_t queueCount, uint32_t bufferSize);
 	virtual ~IQueue();
-	void startQueue(int32_t index, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
+	void startQueue(int32_t index, bool waitWhenFull, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
 	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry);
 	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
 	bool queueEmpty(int32_t index);
 private:
-	int32_t _bufferSize = 1000;
+	int32_t _bufferSize = 10000;
 	std::vector<int32_t> _bufferHead;
 	std::vector<int32_t> _bufferTail;
 	std::vector<int32_t> _bufferCount;
+	std::vector<bool> _waitWhenFull;
 	std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
 	std::vector<std::vector<std::shared_ptr<IQueueEntry>>> _buffer;
 	std::unique_ptr<std::mutex[]> _queueMutex = nullptr;
