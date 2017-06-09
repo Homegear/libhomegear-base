@@ -184,7 +184,7 @@ void IIpcClient::start()
 	{
 		_stopped = false;
 
-		startQueue(0, 10, 0, SCHED_OTHER);
+		startQueue(0, false, 10, 0, SCHED_OTHER);
 
 		if(_bl->debugLevel >= 5) _out.printDebug("Debug: Socket path is " + _socketPath);
 
