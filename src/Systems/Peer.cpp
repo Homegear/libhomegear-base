@@ -3216,9 +3216,6 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 
 		value->setType(rpcParameter->logical->type);
 
-		//Nothing to do, return to save ressources
-		if(value->stringValue.size() < 3) return PVariable(new Variable(VariableType::tVoid));
-
 		//Perform operation on value
 		if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
 				&& (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
