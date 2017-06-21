@@ -179,7 +179,7 @@ int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 std::vector<uint8_t> HelperFunctions::getRandomBytes(uint32_t size)
 {
 	std::random_device rd;
-	std::default_random_engine generator(rd());
+	std::mt19937 generator(rd());
 	std::uniform_int_distribution<uint8_t> distribution(0, 255);
 	std::vector<uint8_t> bytes;
 	bytes.reserve(size);
