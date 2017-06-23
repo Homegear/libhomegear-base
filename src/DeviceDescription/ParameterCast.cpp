@@ -1014,6 +1014,20 @@ void HexStringByteArray::fromPacket(PVariable value)
 void HexStringByteArray::toPacket(PVariable value)
 {
 	if(!value) return;
+	if(value->stringValue.find(',') != std::string::npos)
+	{
+		std::vector<std::string> bytes = _bl->hf.splitAll(value->stringValue, ',');
+		value->stringValue = "";
+		value->stringValue.reserve(bytes.size() * 2);
+		for(auto byte : bytes)
+		{
+			_bl->hf.trim(byte);
+			if(byte.size() > 2) byte = byte.substr(2);
+			if(byte.size() > 2) byte = byte.substr(0, 2);
+			if(byte.size() == 1) value->stringValue.append("0" + byte);
+			else value->stringValue.append(byte);
+		}
+	}
 	value->stringValue = _bl->hf.getBinaryString(value->stringValue);
 }
 
