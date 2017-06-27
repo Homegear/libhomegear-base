@@ -55,7 +55,6 @@
 #include "HelperFunctions/Net.h"
 #include "HelperFunctions/Pid.h"
 #include "HelperFunctions/Io.h"
-#include "IPC/IIpcClient.h"
 #include "LowLevel/Gpio.h"
 #include "LowLevel/Spi.h"
 #include "Output/Output.h"

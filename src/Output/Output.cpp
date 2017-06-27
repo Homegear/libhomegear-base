@@ -199,6 +199,7 @@ void Output::printBinary(std::vector<char>& data)
 
 void Output::printEx(std::string file, uint32_t line, std::string function, std::string what)
 {
+	if(_bl && _bl->debugLevel < 2) return;
 	std::string error;
 	if(!what.empty())
 	{
