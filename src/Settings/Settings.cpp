@@ -88,7 +88,7 @@ void Settings::reset()
 	_flowsProcessingThreadCountServer = 10;
 	_flowsProcessingThreadCountNodes = 10;
 	_flowsServerMaxConnections = 20;
-	_maxNodeThreadsPerProcess = 50;
+	_maxNodeThreadsPerProcess = 80;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
