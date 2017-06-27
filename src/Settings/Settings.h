@@ -196,7 +196,7 @@ private:
 	uint32_t _flowsProcessingThreadCountServer = 10;
 	uint32_t _flowsProcessingThreadCountNodes = 10;
 	uint32_t _flowsServerMaxConnections = 20;
-	int32_t _maxNodeThreadsPerProcess = 50;
+	int32_t _maxNodeThreadsPerProcess = 80;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;

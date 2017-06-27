@@ -269,7 +269,7 @@ void IIpcClient::mainThread()
 					if(_binaryRpc->isFinished())
 					{
 						std::shared_ptr<IQueueEntry> queueEntry(new QueueEntry(_binaryRpc->getData(), _binaryRpc->getType() == Rpc::BinaryRpc::Type::request));
-						enqueue(0, queueEntry);
+						if(!enqueue(0, queueEntry)) printQueueFullError(_out, "Error: Could not queue RPC packet. Queue is full.");
 						_binaryRpc->reset();
 					}
 				}
