@@ -88,7 +88,7 @@ void Settings::reset()
 	_flowsProcessingThreadCountServer = 10;
 	_flowsProcessingThreadCountNodes = 10;
 	_flowsServerMaxConnections = 20;
-	_maxNodeThreadsPerProcess = 50;
+	_maxNodeThreadsPerProcess = 80;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
@@ -125,6 +125,7 @@ void Settings::reset()
 	_flowsDataPathPermissions = 504;
 	_flowsDataPathUser = "";
 	_flowsDataPathGroup = "";
+	_nodeBlueDebugOutput = false;
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -443,6 +444,11 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_flowsServerMaxConnections = Math::getNumber(value);
 					_bl->out.printDebug("Debug: flowsServerMaxConnections set to " + std::to_string(_flowsServerMaxConnections));
+				}
+				else if(name == "nodebluedebugoutput")
+				{
+					_nodeBlueDebugOutput = value == "true";
+					_bl->out.printDebug("Debug: nodeBlueDebugOutput set to " + std::to_string(_nodeBlueDebugOutput));
 				}
 				else if(name == "maxnodethreadsperprocess")
 				{
