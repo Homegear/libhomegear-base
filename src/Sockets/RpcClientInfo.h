@@ -62,6 +62,7 @@ public:
 	bool closed = false;
 	bool addon = false;
 	bool flowsServer = false;
+	bool scriptEngineServer = false;
 	std::string webSocketClientId;
 	std::string address;
 	int32_t port = 0;

@@ -131,6 +131,7 @@ public:
 	uint32_t flowsDataPathPermissions() { return _flowsDataPathPermissions; }
 	std::string flowsDataPathUser() { return _flowsDataPathUser; }
 	std::string flowsDataPathGroup() { return _flowsDataPathGroup; }
+	bool nodeBlueDebugOutput() { return _nodeBlueDebugOutput; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -195,7 +196,7 @@ private:
 	uint32_t _flowsProcessingThreadCountServer = 10;
 	uint32_t _flowsProcessingThreadCountNodes = 10;
 	uint32_t _flowsServerMaxConnections = 20;
-	int32_t _maxNodeThreadsPerProcess = 50;
+	int32_t _maxNodeThreadsPerProcess = 80;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;
@@ -232,6 +233,7 @@ private:
 	uint32_t _flowsDataPathPermissions = 504;
 	std::string _flowsDataPathUser;
 	std::string _flowsDataPathGroup;
+	bool _nodeBlueDebugOutput = false;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;
