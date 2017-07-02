@@ -43,6 +43,7 @@
 #include <chrono>
 #include <ctime>
 #include <mutex>
+#include <functional>
 
 namespace BaseLib
 {
