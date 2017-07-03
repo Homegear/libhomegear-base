@@ -37,6 +37,7 @@
 #include <string>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 #include "../Sockets/TcpSocket.h"
 
