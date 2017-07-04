@@ -50,9 +50,10 @@ RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib)
 	_packetStartError[4] = 0;
 }
 
-RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64) : RpcEncoder(baseLib)
+RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64, bool encodeVoid) : RpcEncoder(baseLib)
 {
 	_forceInteger64 = forceInteger64;
+	_encodeVoid = encodeVoid;
 }
 
 void RpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData, std::shared_ptr<RpcHeader> header)
@@ -837,14 +838,22 @@ void RpcEncoder::encodeBinary(std::vector<uint8_t>& packet, std::shared_ptr<Vari
 
 void RpcEncoder::encodeVoid(std::vector<char>& packet)
 {
-	std::shared_ptr<Variable> string(new Variable(VariableType::tString));
-	encodeString(packet, string);
+	if(_encodeVoid) encodeType(packet, VariableType::tVoid);
+	else
+	{
+		std::shared_ptr<Variable> string = std::make_shared<Variable>(VariableType::tString);
+		encodeString(packet, string);
+	}
 }
 
 void RpcEncoder::encodeVoid(std::vector<uint8_t>& packet)
 {
-	std::shared_ptr<Variable> string(new Variable(VariableType::tString));
-	encodeString(packet, string);
+	if(_encodeVoid) encodeType(packet, VariableType::tVoid);
+	else
+	{
+		std::shared_ptr<Variable> string = std::make_shared<Variable>(VariableType::tString);
+		encodeString(packet, string);
+	}
 }
 
 }
