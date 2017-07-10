@@ -288,6 +288,18 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 		autoConnect();
 		_readMutex.lock();
 	}
+
+	int32_t bytesRead = 0;
+
+	if(_socketDescriptor->tlsSession && gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0)
+	{
+		do
+		{
+			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
+		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
+		if(bytesRead > 0) return bytesRead;
+	}
+
 	timeval timeout;
 	int32_t seconds = _readTimeout / 1000000;
 	timeout.tv_sec = seconds;
@@ -305,7 +317,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
 	fileDescriptorGuard.unlock();
-	int32_t bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
+	bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
 	if(bytesRead == 0)
 	{
 		_readMutex.unlock();
