@@ -290,14 +290,17 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 	}
 
 	int32_t bytesRead = 0;
-
 	if(_socketDescriptor->tlsSession && gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0)
 	{
 		do
 		{
 			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
-		if(bytesRead > 0) return bytesRead;
+		if(bytesRead > 0)
+		{
+			_readMutex.unlock();
+			return bytesRead;
+		}
 	}
 
 	timeval timeout;
