@@ -51,7 +51,7 @@ class RpcEncoder
 {
 public:
 	RpcEncoder(BaseLib::SharedObjects* baseLib);
-	RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64);
+	RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64, bool encodeVoid);
 	virtual ~RpcEncoder() {}
 
 	virtual void insertHeader(std::vector<char>& packet, const RpcHeader& header);
@@ -65,6 +65,7 @@ public:
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	bool _forceInteger64 = false;
+	bool _encodeVoid = false;
 	std::unique_ptr<BinaryEncoder> _encoder;
 	char _packetStartRequest[4];
 	char _packetStartResponse[5];
