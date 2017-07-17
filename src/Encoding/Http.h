@@ -92,6 +92,7 @@ public:
 		Connection::Enum connection = Connection::Enum::none;
 		std::string authorization;
 		std::string cookie;
+		std::unordered_map<std::string, std::string> cookies;
 		std::string remoteAddress;
 		int32_t remotePort = 0;
 		std::map<std::string, std::string> fields;
