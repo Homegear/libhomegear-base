@@ -471,7 +471,16 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
-	else if(!strnaicmp(name, "cookie", nameSize)) _header.cookie = std::string(value, valueSize);
+	else if(!strnaicmp(name, "cookie", nameSize))
+	{
+		_header.cookie = std::string(value, valueSize);
+		std::vector<std::string> cookies = HelperFunctions::splitAll(_header.cookie, ';');
+		for(auto& cookie : cookies)
+		{
+			auto data = HelperFunctions::splitFirst(cookie, '=');
+			_header.cookies.emplace(HelperFunctions::trim(data.first), HelperFunctions::trim(data.second));
+		}
+	}
 	else if(!strnaicmp(name, "authorization", nameSize)) _header.authorization = std::string(value, valueSize);
 	std::string lowercaseName(name, nameSize);
 	HelperFunctions::toLower(lowercaseName);
