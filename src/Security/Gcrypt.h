@@ -79,6 +79,13 @@ public:
 	virtual ~Gcrypt();
 
 	/**
+	 * Returns the underlying gcry_cipher_hd_t.
+	 *
+	 * @return Returns the underlying gcry_cipher_hd_t.
+	 */
+	gcry_cipher_hd_t getHandle() { return _handle; };
+
+	/**
 	 * Gets the error message to a GCRYPT error code.
 	 *
 	 * @param errorCode The GCRYPT error code.
@@ -130,6 +137,16 @@ public:
 	 * Encrypt data.
 	 */
 	template<typename DataOut, typename DataIn> void decrypt(DataOut& out, const DataIn& in);
+
+	/**
+	 * Authenticates encrypted data if supported by the algorithm. Takes same parameters as gcry_cipher_authenticate() except for the handle.
+	 */
+	bool authenticate(const void* in, const size_t inLength);
+
+	/**
+	 * Authenticates encrypted data.
+	 */
+	template<typename DataIn> bool authenticate(const DataIn& in);
 };
 
 typedef std::shared_ptr<Gcrypt> PGcrypt;
