@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -72,8 +72,10 @@ public:
 	 * @param useSSL (default false) Set to "true" to use "https".
 	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
 	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
+	 * @param certPath (default "") Path to the PEM encoded client certificate
+	 * @param keyPath (default "") Path to the PEM encoded client keyfile
 	 */
-	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true);
+	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true, std::string certPath = "", std::string keyPath = "");
 
 	/**
 	 * Destructor
