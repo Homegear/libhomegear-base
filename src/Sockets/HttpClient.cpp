@@ -35,14 +35,14 @@
 namespace BaseLib
 {
 
-HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
+HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate, std::string certPath, std::string keyPath)
 {
 	_bl = baseLib;
 	_hostname = hostname;
 	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
-	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
+	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath));
 	_socket->setConnectionRetries(1);
 }
 
