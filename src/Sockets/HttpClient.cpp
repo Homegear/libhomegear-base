@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -35,14 +35,14 @@
 namespace BaseLib
 {
 
-HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate)
+HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, std::string caFile, bool verifyCertificate, std::string certPath, std::string keyPath)
 {
 	_bl = baseLib;
 	_hostname = hostname;
 	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
-	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate));
+	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath));
 	_socket->setConnectionRetries(1);
 }
 
@@ -175,16 +175,8 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			}
 			catch(const BaseLib::SocketClosedException& ex)
 			{
-				if(http.getContentSize() == 0)
-				{
-					_socketMutex.unlock();
-					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): " + ex.what());
-				}
-				else
-				{
-					http.setFinished();
-					break;
-				}
+				http.setFinished();
+				break;
 			}
 			catch(const BaseLib::SocketOperationException& ex)
 			{

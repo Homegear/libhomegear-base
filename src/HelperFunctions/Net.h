@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -112,7 +112,7 @@ public:
 	 */
 	static RouteInfoList getRoutes();
 private:
-	static int32_t readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, uint32_t messageIndex, uint32_t pid);
+	static int32_t readNlSocket(int32_t sockFd, std::vector<char>& buffer, uint32_t messageIndex, uint32_t pid);
 };
 
 }
