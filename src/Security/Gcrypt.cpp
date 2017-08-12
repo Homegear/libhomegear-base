@@ -110,7 +110,7 @@ template<typename DataOut, typename DataIn> void Gcrypt::encrypt(DataOut& out, c
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
-	encrypt(&out[0], out.size(), &in[0], in.size());
+	encrypt((void*)out.data(), out.size(), (void*)in.data(), in.size());
 }
 
 #ifndef DOXYGEN_SKIP
@@ -131,7 +131,7 @@ template<typename DataOut, typename DataIn> void Gcrypt::decrypt(DataOut& out, c
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
-	decrypt(&out[0], out.size(), &in[0], in.size());
+	decrypt((void*)out.data(), out.size(), (void*)in.data(), in.size());
 }
 
 #ifndef DOXYGEN_SKIP
@@ -139,6 +139,23 @@ template void Gcrypt::decrypt<std::vector<char>, std::vector<char>>(std::vector<
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+#endif
+
+bool Gcrypt::authenticate(const void* in, const size_t inLength)
+{
+	gcry_error_t result = gcry_cipher_authenticate(_handle, in, inLength);
+	return result == GPG_ERR_NO_ERROR;
+}
+
+template<typename DataIn> bool Gcrypt::authenticate(const DataIn& in)
+{
+	if(in.empty()) return false;
+	return authenticate((void*)in.data(), in.size());
+}
+
+#ifndef DOXYGEN_SKIP
+template bool Gcrypt::authenticate<std::vector<char>>(const std::vector<char>& in);
+template bool Gcrypt::authenticate<std::vector<uint8_t>>(const std::vector<uint8_t>& in);
 #endif
 
 }

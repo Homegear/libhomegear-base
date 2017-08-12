@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -52,21 +52,23 @@
 
 namespace BaseLib
 {
-int32_t Net::readNlSocket(int32_t sockFd, char* buffer, int32_t bufferLength, uint32_t messageIndex, uint32_t pid)
+int32_t Net::readNlSocket(int32_t sockFd, std::vector<char>& buffer, uint32_t messageIndex, uint32_t pid)
 {
 	struct nlmsghdr* nlHeader = nullptr;
 	int32_t readLength = 0;
-	int32_t messageLength = 0;
+	uint32_t messageLength = 0;
 	do
 	{
-		if(messageLength >= bufferLength) throw NetException("nlBuffer is too small.");
-		if((readLength = recv(sockFd, buffer, bufferLength - messageLength, 0)) < 0) throw NetException("Read from socket failed: " + std::string(strerror(errno)));
-		nlHeader = (struct nlmsghdr *)buffer;
+		if(messageLength >= buffer.size())
+		{
+			buffer.resize(buffer.size() + messageLength + 8192, 0);
+		}
+		if((readLength = recv(sockFd, buffer.data() + messageLength, buffer.size() - messageLength, 0)) < 0) throw NetException("Read from socket failed: " + std::string(strerror(errno)));
+		nlHeader = (struct nlmsghdr *)(buffer.data() + messageLength);
 
 		if((0 == NLMSG_OK(nlHeader, (uint32_t)readLength)) || (NLMSG_ERROR == nlHeader->nlmsg_type)) throw NetException("Error in received packet: " + std::string(strerror(errno)));
 		if (NLMSG_DONE == nlHeader->nlmsg_type) break;
 
-		buffer += readLength;
 		messageLength += readLength;
 
 		if ((nlHeader->nlmsg_flags & NLM_F_MULTI) == 0) break;
@@ -119,13 +121,11 @@ Net::RouteInfoList Net::getRoutes()
 	int32_t nlBufferLength = 8192;
 	int32_t socketDescriptor = 0;
 	int32_t length = 0;
-	char nlBuffer[nlBufferLength];
+	std::vector<char> nlBuffer(nlBufferLength, 0);
 
 	if((socketDescriptor = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) throw NetException("Could not create socket: " + std::string(strerror(errno)));
 
-	memset(nlBuffer, 0, nlBufferLength);
-
-	nlMessage = (struct nlmsghdr*)nlBuffer;
+	nlMessage = (struct nlmsghdr*)(nlBuffer.data());
 
 	nlMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
 	nlMessage->nlmsg_type = RTM_GETROUTE;
@@ -139,13 +139,15 @@ Net::RouteInfoList Net::getRoutes()
 		close(socketDescriptor);
 		throw NetException("Write to socket failed: " + std::string(strerror(errno)));
 	}
+	nlMessage = nullptr; //readNlSocket might change buffer address
 
-	length = readNlSocket(socketDescriptor, nlBuffer, nlBufferLength, messageIndex, getpid());
+	length = readNlSocket(socketDescriptor, nlBuffer, messageIndex, getpid());
 	if(length < 0)
 	{
 		close(socketDescriptor);
 		throw NetException("Read from socket failed: " + std::string(strerror(errno)));
 	}
+	nlMessage = (struct nlmsghdr*)(nlBuffer.data());
 
 	struct rtmsg* routeMessage = nullptr;
     struct rtattr* routeAttribute = nullptr;
