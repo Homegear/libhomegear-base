@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -333,7 +333,7 @@ void SerialReaderWriter::writeLine(std::string& data)
         if(data.back() != '\n') data.push_back('\n');
         int32_t bytesWritten = 0;
         int32_t i;
-        _sendMutex.lock();
+        std::lock_guard<std::mutex> sendGuard(_sendMutex);
         while(bytesWritten < (signed)data.length())
         {
         	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + data);
@@ -342,7 +342,6 @@ void SerialReaderWriter::writeLine(std::string& data)
             {
                 if(errno == EAGAIN) continue;
                 _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
-                _sendMutex.unlock();
                 return;
             }
             bytesWritten += i;
@@ -360,7 +359,6 @@ void SerialReaderWriter::writeLine(std::string& data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _sendMutex.unlock();
 }
 
 void SerialReaderWriter::writeData(const std::vector<char>& data)
@@ -371,16 +369,15 @@ void SerialReaderWriter::writeData(const std::vector<char>& data)
         if(data.empty()) return;
         int32_t bytesWritten = 0;
         int32_t i;
-        _sendMutex.lock();
+        std::lock_guard<std::mutex> sendGuard(_sendMutex);
         while(bytesWritten < (signed)data.size())
         {
         	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + HelperFunctions::getHexString(data));
-            i = write(_fileDescriptor->descriptor, &data[0] + bytesWritten, data.size() - bytesWritten);
+            i = write(_fileDescriptor->descriptor, data.data() + bytesWritten, data.size() - bytesWritten);
             if(i == -1)
             {
                 if(errno == EAGAIN) continue;
                 _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
-                _sendMutex.unlock();
                 return;
             }
             bytesWritten += i;
@@ -398,7 +395,42 @@ void SerialReaderWriter::writeData(const std::vector<char>& data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _sendMutex.unlock();
+}
+
+void SerialReaderWriter::writeData(const std::vector<uint8_t>& data)
+{
+	try
+    {
+        if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
+        if(data.empty()) return;
+        int32_t bytesWritten = 0;
+        int32_t i;
+        std::lock_guard<std::mutex> sendGuard(_sendMutex);
+        while(bytesWritten < (signed)data.size())
+        {
+        	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + HelperFunctions::getHexString(data));
+            i = write(_fileDescriptor->descriptor, (char*)data.data() + bytesWritten, data.size() - bytesWritten);
+            if(i == -1)
+            {
+                if(errno == EAGAIN) continue;
+                _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
+                return;
+            }
+            bytesWritten += i;
+        }
+    }
+    catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
 }
 
 void SerialReaderWriter::writeChar(char data)
@@ -408,7 +440,7 @@ void SerialReaderWriter::writeChar(char data)
         if(!_fileDescriptor || _fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't write to device \"" + _device + "\", because the file descriptor is not valid.");
         int32_t bytesWritten = 0;
         int32_t i;
-        _sendMutex.lock();
+        std::lock_guard<std::mutex> sendGuard(_sendMutex);
         while(bytesWritten < 1)
         {
         	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + data);
@@ -417,7 +449,6 @@ void SerialReaderWriter::writeChar(char data)
             {
                 if(errno == EAGAIN) continue;
                 _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
-                _sendMutex.unlock();
                 return;
             }
             bytesWritten += i;
@@ -435,7 +466,6 @@ void SerialReaderWriter::writeChar(char data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _sendMutex.unlock();
 }
 
 void SerialReaderWriter::readThread(bool parity, bool oddParity)
