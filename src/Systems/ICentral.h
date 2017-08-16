@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -106,7 +106,9 @@ public:
 
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string remoteSerialNumber, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t remoteId, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual PVariable addCategoryToDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId);
 	virtual PVariable addDevice(PRpcClientInfo clientInfo, std::string serialNumber) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual PVariable addDeviceToRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId);
 	virtual PVariable addLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable addLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable createDevice(PRpcClientInfo clientInfo, int32_t deviceType, std::string serialNumber, int32_t address, int32_t firmwareVersion, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
@@ -119,6 +121,8 @@ public:
 	virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::map<std::string, bool> fields);
 	virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::map<std::string, bool> fields);
 	virtual PVariable getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields) = 0;
+	virtual PVariable getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId);
+	virtual PVariable getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std::string filterValue);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t address);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, std::string serialNumber);
@@ -147,6 +151,8 @@ public:
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber);
+	virtual PVariable removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId);
+	virtual PVariable removeDeviceFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId);
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable rssiInfo(PRpcClientInfo clientInfo);
