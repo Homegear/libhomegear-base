@@ -105,12 +105,6 @@ void ICentral::dispose(bool wait)
 	{
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 	}
-
-	int32_t ICentral::raiseIsAddonClient(int32_t clientId)
-	{
-		if(_eventHandler) return ((ICentralEventSink*)_eventHandler)->onIsAddonClient(clientId);
-		return -1;
-	}
 // }}}
 
 // {{{ Peer event handling
@@ -142,11 +136,6 @@ void ICentral::dispose(bool wait)
 	void ICentral::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 	{
 		raiseRunScript(scriptInfo, wait);
-	}
-
-	int32_t ICentral::onIsAddonClient(int32_t clientId)
-	{
-		return raiseIsAddonClient(clientId);
 	}
 // }}}
 

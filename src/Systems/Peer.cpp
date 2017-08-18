@@ -285,12 +285,6 @@ void Peer::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
-
-int32_t Peer::raiseIsAddonClient(int32_t clientID)
-{
-	if(_eventHandler) return ((IPeerEventSink*)_eventHandler)->onIsAddonClient(clientID);
-	return -1;
-}
 //End event handling
 
 //ServiceMessages event handling
