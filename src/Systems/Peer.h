@@ -247,7 +247,6 @@ public:
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
-		virtual int32_t onIsAddonClient(int32_t clientID) = 0;
 	};
 	//End event handling
 
@@ -449,7 +448,6 @@ protected:
 		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values);
 		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
-		virtual int32_t raiseIsAddonClient(int32_t clientID);
 	// }}}
 
 	//ServiceMessages event handling
