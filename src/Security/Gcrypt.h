@@ -71,6 +71,7 @@ private:
 	 * The Gcrypt handle
 	 */
 	gcry_cipher_hd_t _handle = nullptr;
+
 public:
 	/**
 	 * Constructor. Takes the same arguments as gcry_cipher_open().
@@ -107,6 +108,16 @@ public:
 	 * Takes same parameters as gcry_cipher_setiv() except for the handle.
 	 */
 	void setIv(const void* iv, const size_t length);
+
+	/**
+	 * Sets the counter to use.
+	 */
+	template<typename Data> void setCounter(const Data& counter);
+
+	/**
+	 * Takes same parameters as gcry_cipher_setctr() except for the handle.
+	 */
+	void setCounter(const void* counter, const size_t length);
 
 	/**
 	 * Sets the key to use.

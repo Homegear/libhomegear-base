@@ -66,7 +66,7 @@ size_t Gcrypt::getBlockSize()
 template<typename Data> void Gcrypt::setIv(const Data& iv)
 {
 	if(iv.empty()) throw GcryptException("iv is empty.");
-	setIv(&iv[0], iv.size());
+	setIv(iv.data(), iv.size());
 }
 
 
@@ -81,10 +81,28 @@ void Gcrypt::setIv(const void* iv, const size_t length)
 	if (result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
 }
 
+template<typename Data> void Gcrypt::setCounter(const Data& counter)
+{
+	if(counter.empty()) throw GcryptException("counter is empty.");
+	setCounter(counter.data(), counter.size());
+}
+
+
+#ifndef DOXYGEN_SKIP
+template void Gcrypt::setCounter<std::vector<char>>(const std::vector<char>& counter);
+template void Gcrypt::setCounter<std::vector<uint8_t>>(const std::vector<uint8_t>& counter);
+#endif
+
+void Gcrypt::setCounter(const void* counter, const size_t length)
+{
+	gcry_error_t result = gcry_cipher_setctr(_handle, counter, length);
+	if (result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
+}
+
 template<typename Data> void Gcrypt::setKey(const Data& key)
 {
 	if(key.empty()) throw GcryptException("key is empty.");
-	setKey(&key[0], key.size());
+	setKey(key.data(), key.size());
 }
 
 #ifndef DOXYGEN_SKIP
