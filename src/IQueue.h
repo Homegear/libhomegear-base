@@ -53,7 +53,7 @@ public:
 	virtual ~IQueue();
 	void startQueue(int32_t index, bool waitWhenFull, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
-	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry);
+	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry, bool waitWhenFull = false);
 	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
 	bool queueEmpty(int32_t index);
 private:

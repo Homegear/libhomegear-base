@@ -58,48 +58,72 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
-	_useSSL = useSSL;
+	_useSsl = useSSL;
 	_caFile = caFile;
 	_verifyCertificate = verifyCertificate;
 
-	if(_useSSL) initSSL();
+	if(_useSsl) initSsl();
 }
 
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData) : TcpSocket(baseLib, hostname, port)
 {
-	_useSSL = useSSL;
+	_useSsl = useSSL;
 	_verifyCertificate = verifyCertificate;
 	_caData = caData;
 
-	if(_useSSL) initSSL();
+	if(_useSsl) initSsl();
 }
 
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port)
 {
-	_useSSL = useSSL;
+	_useSsl = useSSL;
 	_verifyCertificate = verifyCertificate;
 	_caFile = caFile;
 	_clientCertFile = clientCertFile;
 	_clientKeyFile = clientKeyFile;
 
-	if(_useSSL) initSSL();
+	if(_useSsl) initSsl();
 }
 
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
 {
-	_useSSL = useSSL;
+	_useSsl = useSSL;
 	_verifyCertificate = verifyCertificate;
 	_caData = caData;
 	_clientCertData = clientCertData;
 	_clientKeyData = clientKeyData;
 
-	if(_useSSL) initSSL();
+	if(_useSsl) initSsl();
+}
+
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, bool useSSL, std::string certFile, std::string keyFile, std::string dhParamFile)
+{
+	_isServer = true;
+	_useSsl = useSSL;
+	_serverCertFile = certFile;
+	_serverKeyFile = keyFile;
+	_dhParamFile = dhParamFile;
+
+	if(_useSsl) initSsl();
+}
+
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string certData, std::string keyData, std::string dhParamData)
+{
+	_isServer = true;
+	_useSsl = true;
+	_serverCertData = certData;
+	_serverKeyData = keyData;
+	_dhParamData = dhParamData;
+
+	initSsl();
 }
 
 TcpSocket::~TcpSocket()
 {
 	_bl->fileDescriptorManager.close(_socketDescriptor);
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
+	if(_dhParams) gnutls_dh_params_deinit(_dhParams);
 }
 
 std::string TcpSocket::getIpAddress()
@@ -109,7 +133,12 @@ std::string TcpSocket::getIpAddress()
 	return _ipAddress;
 }
 
-PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std::string& listenAddress)
+void TcpSocket::bindSocket(std::string address, std::string port, std::string& listenAddress)
+{
+	_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, address, port, listenAddress);
+}
+
+PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress)
 {
 	PFileDescriptor socketDescriptor;
 	addrinfo hostInfo;
@@ -126,21 +155,20 @@ PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std
 	int32_t result;
 	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
 	{
-		_bl->out.printError("Error: Could not get address information: " + std::string(gai_strerror(result)));
-		return socketDescriptor;
+		throw SocketOperationException("Error: Could not get address information: " + std::string(gai_strerror(result)));
 	}
 
 	bool bound = false;
 	int32_t error = 0;
 	for(struct addrinfo *info = serverInfo; info != 0; info = info->ai_next)
 	{
-		socketDescriptor = _bl->fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype, info->ai_protocol));
+		socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype, info->ai_protocol));
 		if(socketDescriptor->descriptor == -1) continue;
 		if(!(fcntl(socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK))
 		{
-			if(fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw BaseLib::Exception("Error: Could not set socket options.");
+			if(fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw SocketOperationException("Error: Could not set socket options.");
 		}
-		if(setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw BaseLib::Exception("Error: Could not set socket options.");
+		if(setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
 		if(bind(socketDescriptor->descriptor, info->ai_addr, info->ai_addrlen) == -1)
 		{
 			socketDescriptor.reset();
@@ -164,23 +192,25 @@ PFileDescriptor TcpSocket::bindSocket(std::string address, std::string port, std
 	freeaddrinfo(serverInfo);
 	if(!bound)
 	{
-		_bl->out.printError("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
-		_bl->fileDescriptorManager.shutdown(socketDescriptor);
+		fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
+		throw SocketOperationException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 	}
 	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, 100) == -1)
 	{
-		_bl->out.printError("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
-		_bl->fileDescriptorManager.shutdown(socketDescriptor);
+		fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
+		throw SocketOperationException("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
 	}
 	if(listenAddress == "0.0.0.0" || listenAddress == "::") listenAddress = Net::getMyIpAddress();
 	return socketDescriptor;
 }
 
-void TcpSocket::initSSL()
+void TcpSocket::initSsl()
 {
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
+	if(_dhParams) gnutls_dh_params_deinit(_dhParams);
 
 	int32_t result = 0;
 	if((result = gnutls_certificate_allocate_credentials(&_x509Cred)) != GNUTLS_E_SUCCESS)
@@ -188,62 +218,167 @@ void TcpSocket::initSSL()
 		_x509Cred = nullptr;
 		throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
 	}
-	if(!_caData.empty())
+
+	if(_isServer)
 	{
-		gnutls_datum_t caData;
-		caData.data = (unsigned char*)_caData.c_str();
-		caData.size = _caData.size();
-		if((result = gnutls_certificate_set_x509_trust_mem(_x509Cred, &caData, GNUTLS_X509_FMT_PEM)) < 0)
+		if(!_serverCertData.empty() && !_serverKeyData.empty())
 		{
-			gnutls_certificate_free_credentials(_x509Cred);
-			_x509Cred = nullptr;
-			throw SocketSSLException("Could not load trusted certificates from \"" + _caFile + "\": " + std::string(gnutls_strerror(result)));
+			gnutls_datum_t certData;
+			certData.data = (unsigned char*)_serverCertData.c_str();
+			certData.size = _serverCertData.size();
+
+			gnutls_datum_t keyData;
+			keyData.data = (unsigned char*)_serverKeyData.c_str();
+			keyData.size = _serverKeyData.size();
+
+			if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &certData, &keyData, GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load trusted certificates from \"" + _caFile + "\": " + std::string(gnutls_strerror(result)));
+			}
 		}
-	}
-	else if(!_caFile.empty())
-	{
-		if((result = gnutls_certificate_set_x509_trust_file(_x509Cred, _caFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+		else if(!_serverCertFile.empty() && !_serverKeyFile.empty())
+		{
+			if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _serverCertFile.c_str(), _serverKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load certificate or key file from \"" + _serverCertFile + "\" or \"" + _serverKeyFile + "\": " + std::string(gnutls_strerror(result)));
+			}
+		}
+		else if(_useSsl)
+		{
+			throw SocketSSLException("SSL is enabled but no certificates are specified.");
+		}
+
+		if(!_dhParamFile.empty() || !_dhParamData.empty())
+		{
+			if((result = gnutls_dh_params_init(&_dhParams)) != GNUTLS_E_SUCCESS)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				_dhParams = nullptr;
+				throw SocketSSLException("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
+			}
+
+			gnutls_datum_t data;
+			if(!_dhParamFile.empty())
+			{
+				std::vector<uint8_t> binaryData;
+				try
+				{
+					binaryData = Io::getUBinaryFileContent(_dhParamFile.c_str());
+					binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
+				}
+				catch(BaseLib::Exception& ex)
+				{
+					gnutls_certificate_free_credentials(_x509Cred);
+					gnutls_dh_params_deinit(_dhParams);
+					_x509Cred = nullptr;
+					_dhParams = nullptr;
+					throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\": " + std::string(ex.what()));
+				}
+				catch(...)
+				{
+					gnutls_certificate_free_credentials(_x509Cred);
+					gnutls_dh_params_deinit(_dhParams);
+					_x509Cred = nullptr;
+					_dhParams = nullptr;
+					throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
+				}
+				data.data = binaryData.data();
+				data.size = binaryData.size();
+			}
+			else
+			{
+				data.data = (unsigned char*)_dhParamData.c_str();
+				data.size = _dhParamData.size();
+			}
+
+			if((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				gnutls_dh_params_deinit(_dhParams);
+				_x509Cred = nullptr;
+				_dhParams = nullptr;
+				throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
+			}
+
+			gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+		}
+
+		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
 		{
 			gnutls_certificate_free_credentials(_x509Cred);
+			gnutls_dh_params_deinit(_dhParams);
 			_x509Cred = nullptr;
-			throw SocketSSLException("Could not load trusted certificates from \"" + _caFile + "\": " + std::string(gnutls_strerror(result)));
+			_dhParams = nullptr;
+			_tlsPriorityCache = nullptr;
+			throw SocketSSLException("Error: Could not initialize cipher priorities: " + std::string(gnutls_strerror(result)));
 		}
 	}
 	else
 	{
-		if(_verifyCertificate) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" and \"caData\" are not specified for the host \"" + _hostname + "\".");
-		else _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" and certificate verification is disabled. It is highly recommended to enable certificate verification.");
-	}
-	if(result == 0 && _verifyCertificate)
-	{
-		gnutls_certificate_free_credentials(_x509Cred);
-		_x509Cred = nullptr;
-		throw SocketSSLException("No certificates found in \"" + _caFile + "\".");
-	}
-	if(!_clientCertData.empty() && !_clientKeyData.empty())
-	{
-		gnutls_datum_t clientCertData;
-		clientCertData.data = (unsigned char*)_clientCertData.c_str();
-		clientCertData.size = _clientCertData.size();
-
-		gnutls_datum_t clientKeyData;
-		clientKeyData.data = (unsigned char*)_clientKeyData.c_str();
-		clientKeyData.size = _clientKeyData.size();
-
-		if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
+		if(!_caData.empty())
 		{
-			gnutls_certificate_free_credentials(_x509Cred);
-			_x509Cred = nullptr;
-			throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+			gnutls_datum_t caData;
+			caData.data = (unsigned char*)_caData.c_str();
+			caData.size = _caData.size();
+			if((result = gnutls_certificate_set_x509_trust_mem(_x509Cred, &caData, GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load trusted certificates from \"" + _caFile + "\": " + std::string(gnutls_strerror(result)));
+			}
 		}
-	}
-	else if(!_clientCertFile.empty() && !_clientKeyFile.empty())
-	{
-		if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _clientCertFile.c_str(), _clientKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+		else if(!_caFile.empty())
+		{
+			if((result = gnutls_certificate_set_x509_trust_file(_x509Cred, _caFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load trusted certificates from \"" + _caFile + "\": " + std::string(gnutls_strerror(result)));
+			}
+		}
+		else
+		{
+			if(_verifyCertificate) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" and \"caData\" are not specified for the host \"" + _hostname + "\".");
+			else _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" and certificate verification is disabled. It is highly recommended to enable certificate verification.");
+		}
+
+		if(result == 0 && _verifyCertificate)
 		{
 			gnutls_certificate_free_credentials(_x509Cred);
 			_x509Cred = nullptr;
-			throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+			throw SocketSSLException("No certificates found in \"" + _caFile + "\".");
+		}
+
+		if(!_clientCertData.empty() && !_clientKeyData.empty())
+		{
+			gnutls_datum_t clientCertData;
+			clientCertData.data = (unsigned char*)_clientCertData.c_str();
+			clientCertData.size = _clientCertData.size();
+
+			gnutls_datum_t clientKeyData;
+			clientKeyData.data = (unsigned char*)_clientKeyData.c_str();
+			clientKeyData.size = _clientKeyData.size();
+
+			if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+			}
+		}
+		else if(!_clientCertFile.empty() && !_clientKeyFile.empty())
+		{
+			if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _clientCertFile.c_str(), _clientKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+			{
+				gnutls_certificate_free_credentials(_x509Cred);
+				_x509Cred = nullptr;
+				throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+			}
 		}
 	}
 }
@@ -625,7 +760,7 @@ void TcpSocket::getSocketDescriptor()
 			throw SocketOperationException("Could not connect to server.");
 		}
 
-		if(_useSSL) getSSL();
+		if(_useSsl) getSsl();
 		_writeMutex.unlock();
 		_readMutex.unlock();
 	}
@@ -644,7 +779,7 @@ void TcpSocket::getSocketDescriptor()
 
 }
 
-void TcpSocket::getSSL()
+void TcpSocket::getSsl()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) throw SocketSSLException("Could not connect to server using SSL. File descriptor is invalid.");
 	if(!_x509Cred)
@@ -775,7 +910,7 @@ void TcpSocket::getConnection()
 	if(_connectionRetries < 1) _connectionRetries = 1;
 	else if(_connectionRetries > 10) _connectionRetries = 10;
 
-	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSSL ? " using SSL" : "") + "...");
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSsl ? " using SSL" : "") + "...");
 
 	//Retry for two minutes
 	for(int32_t i = 0; i < _connectionRetries; ++i)
@@ -919,4 +1054,106 @@ void TcpSocket::getConnection()
 	}
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connected to host " + _hostname + " on port " + _port + ". Client number is: " + std::to_string(_socketDescriptor->id));
 }
+
+PFileDescriptor TcpSocket::waitForConnection(std::string& address, std::string& port)
+{
+	if(!_isServer) throw SocketOperationException("Object is not initialized as server.");
+
+	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
+
+	PFileDescriptor fileDescriptor;
+
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 100000;
+	fd_set readFileDescriptor;
+	int32_t nfds = 0;
+	FD_ZERO(&readFileDescriptor);
+	{
+		auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
+		fileDescriptorGuard.lock();
+		nfds = _socketDescriptor->descriptor + 1;
+		if(nfds <= 0)
+		{
+			fileDescriptorGuard.unlock();
+			throw SocketOperationException("Server socket descriptor is invalid.");
+		}
+		FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
+	}
+	if(!select(nfds, &readFileDescriptor, NULL, NULL, &timeout)) return fileDescriptor;
+
+	struct sockaddr_storage clientInfo;
+	socklen_t addressSize = sizeof(addressSize);
+	fileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientInfo, &addressSize));
+	if(!fileDescriptor) return fileDescriptor;
+
+	getpeername(fileDescriptor->descriptor, (struct sockaddr*)&clientInfo, &addressSize);
+
+	char ipString[INET6_ADDRSTRLEN];
+	if (clientInfo.ss_family == AF_INET) {
+		struct sockaddr_in *s = (struct sockaddr_in *)&clientInfo;
+		port = ntohs(s->sin_port);
+		inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
+	} else { // AF_INET6
+		struct sockaddr_in6 *s = (struct sockaddr_in6 *)&clientInfo;
+		port = ntohs(s->sin6_port);
+		inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
+	}
+	address = std::string(&ipString[0]);
+
+	if(_useSsl)
+	{
+		if(!_tlsPriorityCache)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
+		}
+		if(!_x509Cred)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Cred is nullptr.");
+		}
+		int32_t result = 0;
+		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
+		{
+			fileDescriptor->tlsSession = nullptr;
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		if(!fileDescriptor->tlsSession)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Client TLS session is nullptr.");
+		}
+		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Cred)) != GNUTLS_E_SUCCESS)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not set x509 credentials on TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, GNUTLS_CERT_IGNORE);
+		if(!fileDescriptor || fileDescriptor->descriptor == -1)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
+		}
+		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
+		do
+		{
+			result = gnutls_handshake(fileDescriptor->tlsSession);
+        } while (result < 0 && gnutls_error_is_fatal(result) == 0);
+		if(result < 0)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
+		}
+	}
+
+	return fileDescriptor;
+}
+
 }

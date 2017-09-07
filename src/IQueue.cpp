@@ -105,13 +105,13 @@ void IQueue::stopQueue(int32_t index)
 
 }
 
-bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry)
+bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry, bool waitWhenFull)
 {
 	try
 	{
 		if(index < 0 || index >= _queueCount || !entry || _stopProcessingThread[index]) return false;
 		std::unique_lock<std::mutex> lock(_queueMutex[index]);
-		if(_waitWhenFull[index])
+		if(_waitWhenFull[index] || waitWhenFull)
 		{
 			_produceConditionVariable[index].wait(lock, [&]{ return _bufferCount[index] < _bufferSize || _stopProcessingThread[index]; });
 			if(_stopProcessingThread[index]) return true;
