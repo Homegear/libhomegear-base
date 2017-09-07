@@ -72,16 +72,28 @@ class SharedObjects;
 class TcpSocket
 {
 public:
-	TcpSocket(BaseLib::SharedObjects* baseLib);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
-	TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
+	// {{{ TCP server or client
+		TcpSocket(BaseLib::SharedObjects* baseLib);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
+	// }}}
+
+	// {{{ TCP client
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
+	// }}}
+
+	// {{{ TCP server
+		TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string keyFile, std::string dhParamFile);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string certData, std::string keyData, std::string dhParamData);
+	// }}}
+
 	virtual ~TcpSocket();
 
-	PFileDescriptor bindSocket(std::string address, std::string port, std::string& listenAddress);
+	void bindSocket(std::string address, std::string port, std::string& listenAddress);
+	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress);
 
 	std::string getIpAddress();
 	void setConnectionRetries(int32_t retries) { _connectionRetries = retries; }
@@ -90,11 +102,12 @@ public:
 	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
 	void setHostname(std::string hostname) { close(); _hostname = hostname; }
 	void setPort(std::string port) { close(); _port = port; }
-	void setUseSSL(bool useSSL) { close(); _useSSL = useSSL; if(_useSSL) initSSL(); }
+	void setUseSSL(bool useSsl) { close(); _useSsl = useSsl; if(_useSsl) initSsl(); }
 	void setCAFile(std::string caFile) { close(); _caFile = caFile; }
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
 
 	bool connected();
+	PFileDescriptor waitForConnection(std::string& address, std::string& port);
 	int32_t proofread(char* buffer, int32_t bufferSize);
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
 	int32_t proofwrite(const std::vector<char>& data);
@@ -121,14 +134,27 @@ protected:
 	std::mutex _writeMutex;
 	bool _verifyCertificate = true;
 
+	// {{{ For server only
+		bool _isServer = false;
+		std::string _serverCertFile;
+		std::string _serverCertData;
+		std::string _serverKeyFile;
+		std::string _serverKeyData;
+		std::string _dhParamFile;
+		std::string _dhParamData;
+
+		gnutls_dh_params_t _dhParams = nullptr;
+		gnutls_priority_t _tlsPriorityCache = nullptr;
+	// }}}
+
 	PFileDescriptor _socketDescriptor;
-	bool _useSSL = false;
+	bool _useSsl = false;
 	gnutls_certificate_credentials_t _x509Cred = nullptr;
 
 	void getSocketDescriptor();
 	void getConnection();
-	void getSSL();
-	void initSSL();
+	void getSsl();
+	void initSsl();
 	void autoConnect();
 };
 

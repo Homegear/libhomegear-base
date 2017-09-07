@@ -41,7 +41,7 @@ namespace BaseLib
 /**
  * Exception class for the HTTP client.
  *
- * @see HTTPClient
+ * @see HttpClient
  */
 class HttpClientException : public Exception
 {
