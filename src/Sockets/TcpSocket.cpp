@@ -56,27 +56,27 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	_port = port;
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
-	_useSsl = useSSL;
+	_useSsl = useSsl;
 	_caFile = caFile;
 	_verifyCertificate = verifyCertificate;
 
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData) : TcpSocket(baseLib, hostname, port)
 {
-	_useSsl = useSSL;
+	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
 	_caData = caData;
 
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile) : TcpSocket(baseLib, hostname, port)
 {
-	_useSsl = useSSL;
+	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
 	_caFile = caFile;
 	_clientCertFile = clientCertFile;
@@ -85,9 +85,9 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSSL, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
 {
-	_useSsl = useSSL;
+	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
 	_caData = caData;
 	_clientCertData = clientCertData;
@@ -96,26 +96,18 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, bool useSSL, std::string certFile, std::string keyFile, std::string dhParamFile)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData)
 {
 	_isServer = true;
-	_useSsl = useSSL;
+	_useSsl = useSsl;
 	_serverCertFile = certFile;
-	_serverKeyFile = keyFile;
-	_dhParamFile = dhParamFile;
-
-	if(_useSsl) initSsl();
-}
-
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string certData, std::string keyData, std::string dhParamData)
-{
-	_isServer = true;
-	_useSsl = true;
 	_serverCertData = certData;
+	_serverKeyFile = keyFile;
 	_serverKeyData = keyData;
+	_dhParamFile = dhParamFile;
 	_dhParamData = dhParamData;
 
-	initSsl();
+	if(_useSsl) initSsl();
 }
 
 TcpSocket::~TcpSocket()

@@ -86,8 +86,7 @@ public:
 	// }}}
 
 	// {{{ TCP server
-		TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string keyFile, std::string dhParamFile);
-		TcpSocket(BaseLib::SharedObjects* baseLib, std::string certData, std::string keyData, std::string dhParamData);
+		TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData);
 	// }}}
 
 	virtual ~TcpSocket();
