@@ -28,13 +28,25 @@
  * files in the program, then also delete it here.
 */
 
+#include "../BaseLib.h"
 #include "HttpServer.h"
 
 namespace BaseLib
 {
 
-HttpServer::HttpServer()
+HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, std::string listenAddress, uint16_t port, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData)
 {
+	_bl = baseLib;
+	_listenAddress = listenAddress;
+	_port = port;
+	_useSsl = useSsl;
+	_certFile = certFile;
+	_certData = certData;
+	_keyFile = keyFile;
+	_keyData = keyData;
+	_dhParamFile = dhParamFile;
+	_dhParamData = dhParamData;
+
 	_stopped = true;
 	_stopServer = true;
 }
@@ -48,137 +60,28 @@ void HttpServer::start()
 {
 	stop();
 	_stopServer = false;
-	if(_info->ssl)
-	{
-		int32_t result = 0;
-		if((result = gnutls_certificate_allocate_credentials(&_x509Cred)) != GNUTLS_E_SUCCESS)
-		{
-			_out.printError("Error: Could not allocate TLS certificate structure: " + std::string(gnutls_strerror(result)));
-			return;
-		}
-		if((result = gnutls_certificate_set_x509_key_file(_x509Cred, GD::bl->settings.certPath().c_str(), GD::bl->settings.keyPath().c_str(), GNUTLS_X509_FMT_PEM)) < 0)
-		{
-			_out.printError("Error: Could not load certificate or key file: " + std::string(gnutls_strerror(result)));
-			gnutls_certificate_free_credentials(_x509Cred);
-			return;
-		}
-		if(!_dhParams)
-		{
-		if(GD::bl->settings.loadDHParamsFromFile())
-		{
-			if((result = gnutls_dh_params_init(&_dhParams)) != GNUTLS_E_SUCCESS)
-			{
-				_out.printError("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-			std::vector<uint8_t> binaryData;
-			try
-			{
-				binaryData = GD::bl->io.getUBinaryFileContent(GD::bl->settings.dhParamPath().c_str());
-				binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
-			}
-			catch(BaseLib::Exception& ex)
-			{
-				_out.printError("Error: Could not load DH parameter file \"" + GD::bl->settings.dhParamPath() + "\": " + std::string(ex.what()));
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-			catch(...)
-			{
-				_out.printError("Error: Could not load DH parameter file \"" + GD::bl->settings.dhParamPath() + "\".");
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-			gnutls_datum_t data;
-			data.data = &binaryData.at(0);
-			data.size = binaryData.size();
-			if((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
-			{
-				_out.printError("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-		}
-		else
-		{
-			uint32_t bits = gnutls_sec_param_to_pk_bits(GNUTLS_PK_DH, GNUTLS_SEC_PARAM_ULTRA);
-			if((result = gnutls_dh_params_init(&_dhParams)) != GNUTLS_E_SUCCESS)
-			{
-				_out.printError("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-			if((result = gnutls_dh_params_generate2(_dhParams, bits)) != GNUTLS_E_SUCCESS)
-			{
-				_out.printError("Error: Could not generate DH parameters: " + std::string(gnutls_strerror(result)));
-				gnutls_certificate_free_credentials(_x509Cred);
-				return;
-			}
-		}
-		}
-		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
-		{
-			_out.printError("Error: Could not initialize cipher priorities: " + std::string(gnutls_strerror(result)));
-			gnutls_certificate_free_credentials(_x509Cred);
-			return;
-		}
-		gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
-	}
-	_webServer.reset(new WebServer::WebServer(_info));
-	GD::bl->threadManager.start(_mainThread, true, _threadPriority, _threadPolicy, &HttpServer::mainThread, this);
+
+	_bl->threadManager.start(_mainThread, true, &HttpServer::mainThread, this);
 	_stopped = false;
 }
 
 void HttpServer::stop()
 {
-	try
+	if(_stopped) return;
+	_stopped = true;
+	_stopServer = true;
+	_bl->threadManager.join(_mainThread);
+	_stateMutex.lock();
+	for(std::map<int32_t, std::shared_ptr<Client>>::iterator i = _clients.begin(); i != _clients.end(); ++i)
 	{
-		if(_stopped) return;
-		_stopped = true;
-		_stopServer = true;
-		GD::bl->threadManager.join(_mainThread);
-		_out.printInfo("Info: Waiting for threads to finish.");
-		_stateMutex.lock();
-		for(std::map<int32_t, std::shared_ptr<Client>>::iterator i = _clients.begin(); i != _clients.end(); ++i)
-		{
-			closeClientConnection(i->second);
-		}
-		_stateMutex.unlock();
-		while(_clients.size() > 0)
-		{
-			collectGarbage();
-			if(_clients.size() > 0) std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-		if(_x509Cred)
-		{
-			gnutls_certificate_free_credentials(_x509Cred);
-			_x509Cred = nullptr;
-		}
-		if(_tlsPriorityCache)
-		{
-			gnutls_priority_deinit(_tlsPriorityCache);
-			_tlsPriorityCache = nullptr;
-		}
-		if(_dhParams)
-		{
-			gnutls_dh_params_deinit(_dhParams);
-			_dhParams = nullptr;
-		}
-		_webServer.reset();
+		closeClientConnection(i->second);
 	}
-	catch(const std::exception& ex)
-    {
-    	_out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	_out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+	_stateMutex.unlock();
+	while(_clients.size() > 0)
+	{
+		collectGarbage();
+		if(_clients.size() > 0) std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
 }
 
 uint32_t HttpServer::connectionCount()
@@ -257,21 +160,25 @@ void HttpServer::mainThread()
 {
 	try
 	{
-		getSocketDescriptor();
-		std::string address;
-		int32_t port = -1;
+		_socket = std::make_shared<TcpSocket>(_bl, _useSsl, _certFile, _certData, _keyFile, _keyData, _dhParamFile, _dhParamData);
+		std::string boundAddress;
+		_socket->bindSocket(_listenAddress, std::to_string(_port), boundAddress);
+
+		std::string clientAddress;
+		std::string clientPort;
 		while(!_stopServer)
 		{
 			try
 			{
-				if(!_serverFileDescriptor || _serverFileDescriptor->descriptor == -1)
+				if(!_socket->connected())
 				{
 					if(_stopServer) break;
 					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-					getSocketDescriptor();
+					_socket = std::make_shared<TcpSocket>(_bl, _useSsl, _certFile, _certData, _keyFile, _keyData, _dhParamFile, _dhParamData);
+					_socket->bindSocket(_listenAddress, std::to_string(_port), boundAddress);
 					continue;
 				}
-				std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = getClientSocketDescriptor(address, port);
+				std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _socket->waitForConnection(clientAddress, clientPort);
 				if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
 				std::shared_ptr<Client> client(new Client());
 				{

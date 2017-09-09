@@ -48,13 +48,8 @@ namespace BaseLib
  */
 class HttpServerException : public Exception
 {
-private:
-	int32_t _responseCode = -1;
 public:
 	HttpServerException(std::string message) : Exception(message) {}
-	HttpServerException(std::string message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
-
-	int32_t responseCode() { return _responseCode; }
 };
 
 /**
@@ -64,7 +59,7 @@ public:
  */
 class HttpServer {
 public:
-	HttpServer();
+	HttpServer(BaseLib::SharedObjects* baseLib, std::string listenAddress, uint16_t port, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData);
 	virtual ~HttpServer();
 
 	bool isRunning() { return !_stopped; }
@@ -72,17 +67,29 @@ public:
 	void stop();
 	uint32_t connectionCount();
 protected:
+	BaseLib::SharedObjects* _bl = nullptr;
 	std::atomic_bool _stopped;
 	std::atomic_bool _stopServer;
-	int32_t _currentClientId = 0;
-	std::thread _mainThread;
-	int32_t _backlog = 100;
-	std::shared_ptr<BaseLib::FileDescriptor> _serverFileDescriptor;
+	std::shared_ptr<TcpSocket> _socket;
 	std::mutex _stateMutex;
 	std::map<int32_t, std::shared_ptr<BaseLib::FileDescriptor>> _clients;
-
-
 private:
+	int32_t _currentClientId = 0;
+	int32_t _backlog = 100;
+	std::thread _mainThread;
+
+	std::string _listenAddress;
+	uint16_t _port = 8080;
+
+	bool _useSsl = false;
+	std::string _certFile;
+	std::string _certData;
+	std::string _keyFile;
+	std::string _keyData;
+	std::string _dhParamFile;
+	std::string _dhParamData;
+
+	void mainThread();
 };
 
 }
