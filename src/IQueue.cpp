@@ -98,6 +98,8 @@ void IQueue::stopQueue(int32_t index)
 	if(index < 0 || index >= _queueCount) return;
 	if(_stopProcessingThread[index]) return;
 	_stopProcessingThread[index] = true;
+	std::unique_lock<std::mutex> lock(_queueMutex[index]);
+	lock.unlock();
 	_processingConditionVariable[index].notify_all();
 	_produceConditionVariable[index].notify_all();
 	for(uint32_t i = 0; i < _processingThread[index].size(); i++)
