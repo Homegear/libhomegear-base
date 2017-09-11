@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -64,6 +64,8 @@ IPhysicalInterface::~IPhysicalInterface()
 {
 	_stopPacketProcessingThread = true;
 	_packetProcessingPacketAvailable = true;
+	std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+	lock.unlock();
 	_packetProcessingConditionVariable.notify_one();
 	_bl->threadManager.join(_packetProcessingThread);
 }
@@ -104,6 +106,8 @@ void IPhysicalInterface::startListening()
 	{
 		_stopPacketProcessingThread = true;
 		_packetProcessingPacketAvailable = true;
+		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+		lock.unlock();
 		_packetProcessingConditionVariable.notify_one();
 		_bl->threadManager.join(_packetProcessingThread);
 		_stopPacketProcessingThread = false;
@@ -132,6 +136,8 @@ void IPhysicalInterface::stopListening()
 	{
 		_stopPacketProcessingThread = true;
 		_packetProcessingPacketAvailable = true;
+		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+		lock.unlock();
 		_packetProcessingConditionVariable.notify_one();
 		_bl->threadManager.join(_packetProcessingThread);
 	}
@@ -166,13 +172,10 @@ void IPhysicalInterface::processPackets()
 		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
 		try
 		{
-			_packetBufferMutex.lock();
-			if(_packetBufferHead == _packetBufferTail) //Only lock, when there is really no packet to process. This check is necessary, because the check of the while loop condition is outside of the mutex
+			if(_packetBufferHead == _packetBufferTail)
 			{
-				_packetBufferMutex.unlock();
 				_packetProcessingConditionVariable.wait(lock, [&]{ return _packetProcessingPacketAvailable; });
 			}
-			else _packetBufferMutex.unlock();
 			if(_stopPacketProcessingThread) return;
 
 			//We need to copy all elements. In packetReceived so much can happen, that _homeMaticDevicesMutex might deadlock
@@ -188,13 +191,14 @@ void IPhysicalInterface::processPackets()
 				int64_t processingTime = HelperFunctions::getTime();
 				_lastPacketReceived = processingTime;
 
-				_packetBufferMutex.lock();
 				std::shared_ptr<Packet> packet = _packetBuffer[_packetBufferTail];
 				_packetBuffer[_packetBufferTail].reset();
 				_packetBufferTail++;
 				if(_packetBufferTail >= _packetBufferSize) _packetBufferTail = 0;
 				if(_packetBufferHead == _packetBufferTail) _packetProcessingPacketAvailable = false; //Set here, because otherwise it might be set to "true" in raisePacketReceived and then set to false again after the while loop
-				_packetBufferMutex.unlock();
+
+				lock.unlock();
+
 				if(packet)
 				{
 					for(EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
@@ -213,6 +217,8 @@ void IPhysicalInterface::processPackets()
 				_lifetick1Mutex.lock();
 				_lifetick1.second = true;
 				_lifetick1Mutex.unlock();
+
+				lock.lock();
 			}
 		}
 		catch(const std::exception& ex)
@@ -227,7 +233,6 @@ void IPhysicalInterface::processPackets()
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 		}
-		lock.unlock();
 	}
 }
 
@@ -236,13 +241,12 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet)
 	try
 	{
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug (" + _settings->id + "): Packet " + packet->hexString() + " enters raisePacketReceived.");
-		_packetBufferMutex.lock();
+		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
 		int32_t tempHead = _packetBufferHead + 1;
 		if(tempHead >= _packetBufferSize) tempHead = 0;
 		if(tempHead == _packetBufferTail)
 		{
 			_bl->out.printError("Error (" + _settings->id + "): More than " + std::to_string(_packetBufferSize) + " packets are queued to be processed. Your packet processing is too slow. Dropping packet.");
-			_packetBufferMutex.unlock();
 			return;
 		}
 
@@ -252,12 +256,9 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet)
 		{
 			_packetBufferHead = 0;
 		}
-		//{
-			//std::lock_guard<std::mutex> lock(_packetProcessingThreadMutex);
-			_packetProcessingPacketAvailable = true;
-		//}
-		_packetBufferMutex.unlock();
+		_packetProcessingPacketAvailable = true;
 
+		lock.unlock();
 		_packetProcessingConditionVariable.notify_one();
 	}
     catch(const std::exception& ex)
