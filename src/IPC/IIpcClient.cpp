@@ -361,7 +361,12 @@ void IIpcClient::processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& 
 			}
 			std::lock_guard<std::mutex> requestInfoGuard(_requestInfoMutex);
 			std::map<int64_t, RequestInfo>::iterator requestIterator = _requestInfo.find(threadId);
-			if (requestIterator != _requestInfo.end()) requestIterator->second.conditionVariable.notify_all();
+			if (requestIterator != _requestInfo.end())
+			{
+				std::unique_lock<std::mutex> waitLock(requestInfo.waitMutex);
+				waitLock.unlock();
+				requestIterator->second.conditionVariable.notify_all();
+			}
 		}
 	}
 	catch(const std::exception& ex)
@@ -441,6 +446,7 @@ PVariable IIpcClient::invoke(std::string methodName, PArray& parameters)
 			return Variable::createError(-32500, "Unknown application error.");
 		}
 
+		std::unique_lock<std::mutex> waitLock(requestInfo.waitMutex);
 		PVariable result = send(data);
 		if(result->errorStruct)
 		{
@@ -450,7 +456,6 @@ PVariable IIpcClient::invoke(std::string methodName, PArray& parameters)
 			return result;
 		}
 
-		std::unique_lock<std::mutex> waitLock(requestInfo.waitMutex);
 		while (!requestInfo.conditionVariable.wait_for(waitLock, std::chrono::milliseconds(10000), [&]
 		{
 			return response->finished || _closed || _stopped || _disposing;

@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -115,7 +115,6 @@ protected:
 	std::thread _callbackThread;
 	std::atomic_bool _stopCallbackThread;
 	static const int32_t _packetBufferSize = 1000;
-	std::mutex _packetBufferMutex;
 	int32_t _packetBufferHead = 0;
 	int32_t _packetBufferTail = 0;
 	std::shared_ptr<Packet> _packetBuffer[_packetBufferSize];
