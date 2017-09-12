@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -48,6 +48,7 @@
 #include <unordered_map>
 #include <utility>
 #include <cstring>
+#include <atomic>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -57,6 +58,7 @@
 #include <netinet/in.h> //Needed for BSD
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <errno.h>
 #include <poll.h>
 #include <signal.h>
@@ -69,9 +71,77 @@ namespace BaseLib
 
 class SharedObjects;
 
+/**
+ * Class to easily create a TCP server or client.
+ *
+ * TCP server example:
+ *
+ * Save in main.cpp and compile with:
+ *     g++ -std=c++11 main.cpp -lhomegear-base -lgcrypt -lgnutls
+ *
+ * Start and connect using e. g. telnet:
+ *
+ *     telnet localhost 8082
+ *
+ * Code:
+ *
+ *     #include <homegear-base/BaseLib.h>
+ *
+ *     std::shared_ptr<BaseLib::SharedObjects> _bl;
+ *     std::shared_ptr<BaseLib::TcpSocket> _tcpServer;
+ *
+ *     void packetReceived(int32_t clientId, BaseLib::TcpSocket::TcpPacket packet)
+ *     {
+ *     	std::cout << BaseLib::HelperFunctions::getHexString(packet) << std::endl;
+ *     	std::vector<uint8_t> response;
+ *     	response.push_back('R');
+ *     	response.push_back(':');
+ *     	response.push_back(' ');
+ *     	response.insert(response.end(), packet.begin(), packet.end());
+ *     	_tcpServer->sendClientResponse(clientId, response);
+ *     }
+ *
+ *     int main()
+ *     {
+ *     	_bl.reset(new BaseLib::SharedObjects(false));
+ *
+ *     	BaseLib::TcpSocket::TcpServerInfo serverInfo;
+ *     	serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
+ *
+ *     	_tcpServer = std::make_shared<BaseLib::TcpSocket>(_bl.get(), serverInfo);
+ *
+ *     	std::string listenAddress;
+ *     	_tcpServer->startServer("0.0.0.0", "8082", listenAddress);
+ *     	std::cout << "Started listening on " + listenAddress << std::endl;
+ *
+ *     	for(int32_t i = 0; i < 300; i++) //Run for 300 seconds
+ *     	{
+ *     		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+ *     	}
+ *
+ *     	_tcpServer->stopServer();
+ *     	_tcpServer->waitForServerStopped();
+ *     }
+ *
+ */
 class TcpSocket
 {
 public:
+	typedef std::vector<uint8_t> TcpPacket;
+
+	struct TcpServerInfo
+	{
+		bool useSsl = false;
+		uint32_t maxConnections = 10;
+		std::string certFile;
+		std::string certData;
+		std::string keyFile;
+		std::string keyData;
+		std::string dhParamFile;
+		std::string dhParamData;
+		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
+	};
+
 	// {{{ TCP server or client
 		TcpSocket(BaseLib::SharedObjects* baseLib);
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
@@ -86,12 +156,11 @@ public:
 	// }}}
 
 	// {{{ TCP server
-		TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData);
+		TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo);
 	// }}}
 
 	virtual ~TcpSocket();
 
-	void bindSocket(std::string address, std::string port, std::string& listenAddress);
 	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress);
 
 	std::string getIpAddress();
@@ -106,7 +175,6 @@ public:
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
 
 	bool connected();
-	PFileDescriptor waitForConnection(std::string& address, std::string& port);
 	int32_t proofread(char* buffer, int32_t bufferSize);
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
 	int32_t proofwrite(const std::vector<char>& data);
@@ -114,7 +182,28 @@ public:
 	int32_t proofwrite(const char* buffer, int32_t bytesToWrite);
 	void open();
 	void close();
+
+	// {{{ Servers only
+		void startServer(std::string address, std::string port, std::string& listenAddress);
+		void stopServer();
+		void waitForServerStopped();
+		void sendClientResponse(int32_t clientId, TcpPacket packet);
+	// }}}
 protected:
+	struct TcpClientData
+	{
+		int32_t id = 0;
+		PFileDescriptor fileDescriptor;
+		std::vector<uint8_t> buffer;
+		std::shared_ptr<TcpSocket> socket;
+
+		TcpClientData()
+		{
+			buffer.resize(1024);
+		}
+	};
+	typedef std::shared_ptr<TcpClientData> PTcpClientData;
+
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
@@ -135,15 +224,29 @@ protected:
 
 	// {{{ For server only
 		bool _isServer = false;
+		uint32_t _maxConnections = 10;
 		std::string _serverCertFile;
 		std::string _serverCertData;
 		std::string _serverKeyFile;
 		std::string _serverKeyData;
 		std::string _dhParamFile;
 		std::string _dhParamData;
+		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
+
+		std::string _listenAddress;
+		std::string _listenPort;
 
 		gnutls_dh_params_t _dhParams = nullptr;
 		gnutls_priority_t _tlsPriorityCache = nullptr;
+
+		std::atomic_bool _stopServer;
+		std::thread _serverThread;
+
+		int64_t _lastGarbageCollection = 0;
+
+		int32_t _currentClientId = 0;
+		std::mutex _clientsMutex;
+		std::map<int32_t, PTcpClientData> _clients;
 	// }}}
 
 	PFileDescriptor _socketDescriptor;
@@ -155,6 +258,15 @@ protected:
 	void getSsl();
 	void initSsl();
 	void autoConnect();
+
+	// {{{ For server only
+		void bindSocket(std::string& listenAddress);
+
+		void serverThread();
+		void collectGarbage();
+		void initClientSsl(PFileDescriptor fileDescriptor);
+		void readClient(PTcpClientData clientData);
+	// }}}
 };
 
 typedef std::shared_ptr<BaseLib::TcpSocket> PTcpSocket;
