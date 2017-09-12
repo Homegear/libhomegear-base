@@ -68,60 +68,59 @@ public:
  *
  * Example code:
  *
- *    #include <homegear-base/BaseLib.h>
+ *     #include <homegear-base/BaseLib.h>
  *
- *    std::shared_ptr<BaseLib::SharedObjects> _bl;
- *    std::shared_ptr<BaseLib::HttpServer> _httpServer;
+ *     std::shared_ptr<BaseLib::SharedObjects> _bl;
+ *     std::shared_ptr<BaseLib::HttpServer> _httpServer;
  *
- *    void newConnection(int32_t clientId, std::string address, uint16_t port)
- *    {
- *        std::cout << "New connection from " << address << " on port " << port << std::endl;
- *    }
+ *     void newConnection(int32_t clientId, std::string address, uint16_t port)
+ *     {
+ *         std::cout << "New connection from " << address << " on port " << port << std::endl;
+ *     }
  *
- *    void packetReceived(int32_t clientId, BaseLib::Http http)
- *    {
- *        if(http.getHeader().method != "GET") return;
+ *     void packetReceived(int32_t clientId, BaseLib::Http http)
+ *     {
+ *         if(http.getHeader().method != "GET") return;
  *
- *        std::cout << "Client requested " << http.getHeader().path << std::endl;
+ *         std::cout << "Client requested " << http.getHeader().path << std::endl;
  *
- *        std::string json = "{\"result\":\"It worked!\",\"time\":" + std::to_string(BaseLib::HelperFunctions::getTime()) + ",\"path\":\"" + http.getHeader().path + "\"}";
+ *         std::string json = "{\"result\":\"It worked!\",\"time\":" + std::to_string(BaseLib::HelperFunctions::getTime()) + ",\"path\":\"" + http.getHeader().path + "\"}";
  *
- *        std::string header;
- *        header.append("HTTP/1.1 200 OK\r\n");
- *        header.append("Connection: close\r\n");
- *        header.append("Content-Type: application/json\r\n");
- *        header.append("Content-Length: ").append(std::to_string(json.size())).append("\r\n\r\n");
+ *         std::string header;
+ *         header.append("HTTP/1.1 200 OK\r\n");
+ *         header.append("Connection: close\r\n");
+ *         header.append("Content-Type: application/json\r\n");
+ *         header.append("Content-Length: ").append(std::to_string(json.size())).append("\r\n\r\n");
  *
- *        BaseLib::TcpSocket::TcpPacket response;
- *        response.insert(response.end(), header.begin(), header.end());
- *        response.insert(response.end(), json.begin(), json.end());
+ *         BaseLib::TcpSocket::TcpPacket response;
+ *         response.insert(response.end(), header.begin(), header.end());
+ *         response.insert(response.end(), json.begin(), json.end());
  *
- *        _httpServer->send(clientId, response);
- *    }
+ *         _httpServer->send(clientId, response);
+ *     }
  *
- *    int main()
- *    {
- *        _bl.reset(new BaseLib::SharedObjects(false));
+ *     int main()
+ *     {
+ *         _bl.reset(new BaseLib::SharedObjects(false));
  *
- *        BaseLib::HttpServer::HttpServerInfo serverInfo;
- *        serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
+ *         BaseLib::HttpServer::HttpServerInfo serverInfo;
+ *         serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
  *
- *        _httpServer = std::make_shared<BaseLib::HttpServer>(_bl.get(), serverInfo);
+ *         _httpServer = std::make_shared<BaseLib::HttpServer>(_bl.get(), serverInfo);
  *
- *        std::string listenAddress;
- *        _httpServer->start("::", "8082", listenAddress);
- *        std::cout << "Started listening on " + listenAddress << std::endl;
+ *         std::string listenAddress;
+ *         _httpServer->start("::", "8082", listenAddress);
+ *         std::cout << "Started listening on " + listenAddress << std::endl;
  *
- *        for(int32_t i = 0; i < 300; i++) //Run for 300 seconds
- *        {
- *            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
- *        }
+ *         for(int32_t i = 0; i < 300; i++) //Run for 300 seconds
+ *         {
+ *             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+ *         }
  *
- *        _httpServer->stop();
- *        _httpServer->waitForStop();
- *    }
+ *         _httpServer->stop();
+ *         _httpServer->waitForStop();
+ *     }
  *
- * @see HttpServerException
  */
 class HttpServer {
 public:
