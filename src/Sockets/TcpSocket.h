@@ -93,6 +93,11 @@ class SharedObjects;
  *     std::shared_ptr<BaseLib::SharedObjects> _bl;
  *     std::shared_ptr<BaseLib::TcpSocket> _tcpServer;
  *
+ *     void newConnection(int32_t clientId, std::string address, uint16_t port)
+ *     {
+ *     	std::cout << "New connection from " << address << " on port " << port << std::endl;
+ *     }
+ *
  *     void packetReceived(int32_t clientId, BaseLib::TcpSocket::TcpPacket packet)
  *     {
  *     	std::cout << BaseLib::HelperFunctions::getHexString(packet) << std::endl;
@@ -101,7 +106,7 @@ class SharedObjects;
  *     	response.push_back(':');
  *     	response.push_back(' ');
  *     	response.insert(response.end(), packet.begin(), packet.end());
- *     	_tcpServer->sendClientResponse(clientId, response);
+ *     	_tcpServer->sendToClient(clientId, response);
  *     }
  *
  *     int main()
@@ -109,6 +114,7 @@ class SharedObjects;
  *     	_bl.reset(new BaseLib::SharedObjects(false));
  *
  *     	BaseLib::TcpSocket::TcpServerInfo serverInfo;
+ *     	serverInfo.newConnectionCallback = std::bind(&newConnection, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
  *     	serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
  *
  *     	_tcpServer = std::make_shared<BaseLib::TcpSocket>(_bl.get(), serverInfo);
@@ -142,6 +148,7 @@ public:
 		std::string keyData;
 		std::string dhParamFile;
 		std::string dhParamData;
+		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
 
@@ -282,7 +289,7 @@ public:
 		 * @param clientId The ID of the client as passed to TcpSocket::TcpServerServer::packetReceivedCallback.
 		 * @param packet The data to send.
 		 */
-		void sendClientResponse(int32_t clientId, TcpPacket packet);
+		void sendToClient(int32_t clientId, TcpPacket packet);
 	// }}}
 protected:
 	struct TcpClientData
@@ -326,6 +333,7 @@ protected:
 		std::string _serverKeyData;
 		std::string _dhParamFile;
 		std::string _dhParamData;
+		std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
 
 		std::string _listenAddress;

@@ -109,6 +109,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_serverKeyData = serverInfo.keyData;
 	_dhParamFile = serverInfo.dhParamFile;
 	_dhParamData = serverInfo.dhParamData;
+	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
 	if(_useSsl) initSsl();
@@ -137,6 +138,7 @@ std::string TcpSocket::getIpAddress()
 	void TcpSocket::bindSocket(std::string& listenAddress)
 	{
 		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, listenAddress);
+		_ipAddress = listenAddress;
 	}
 
 	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
@@ -246,7 +248,7 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
-	void TcpSocket::sendClientResponse(int32_t clientId, TcpPacket packet)
+	void TcpSocket::sendToClient(int32_t clientId, TcpPacket packet)
 	{
 		PTcpClientData clientData;
 		try
@@ -328,13 +330,28 @@ std::string TcpSocket::getIpAddress()
 
 				if (FD_ISSET(_socketDescriptor->descriptor, &readFileDescriptor) && !_stopServer)
 				{
-					sockaddr_un clientAddress;
+					struct sockaddr_storage clientInfo;
 					socklen_t addressSize = sizeof(addressSize);
-					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientAddress, &addressSize));
+					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientInfo, &addressSize));
 					if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
 
 					try
 					{
+						getpeername(clientFileDescriptor->descriptor, (struct sockaddr*)&clientInfo, &addressSize);
+
+						uint16_t port = 0;
+						char ipString[INET6_ADDRSTRLEN];
+						if (clientInfo.ss_family == AF_INET) {
+							struct sockaddr_in *s = (struct sockaddr_in *)&clientInfo;
+							port = ntohs(s->sin_port);
+							inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
+						} else { // AF_INET6
+							struct sockaddr_in6 *s = (struct sockaddr_in6 *)&clientInfo;
+							port = ntohs(s->sin6_port);
+							inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
+						}
+						std::string address = std::string(ipString);
+
 						if(_clients.size() > _maxConnections)
 						{
 							collectGarbage();
@@ -345,25 +362,31 @@ std::string TcpSocket::getIpAddress()
 							}
 						}
 
-						std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-						if(_stopServer)
+						int32_t currentClientId = 0;
+
 						{
-							_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-							continue;
+							std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+							if(_stopServer)
+							{
+								_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+								continue;
+							}
+
+							if(_useSsl) initClientSsl(clientFileDescriptor);
+
+							currentClientId = _currentClientId++;
+
+							PTcpClientData clientData = std::make_shared<TcpClientData>();
+							clientData->id = currentClientId;
+							clientData->fileDescriptor = clientFileDescriptor;
+							clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
+							clientData->socket->setReadTimeout(100000);
+							clientData->socket->setWriteTimeout(15000000);
+
+							_clients[currentClientId] = clientData;
 						}
 
-						if(_useSsl) initClientSsl(clientFileDescriptor);
-
-						int32_t currentClientId = _currentClientId++;
-
-						PTcpClientData clientData = std::make_shared<TcpClientData>();
-						clientData->id = currentClientId;
-						clientData->fileDescriptor = clientFileDescriptor;
-						clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
-						clientData->socket->setReadTimeout(100000);
-						clientData->socket->setWriteTimeout(15000000);
-
-						_clients[currentClientId] = clientData;
+						if(_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
 					}
 					catch(const std::exception& ex)
 					{
