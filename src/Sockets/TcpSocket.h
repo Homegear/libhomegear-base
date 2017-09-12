@@ -74,16 +74,19 @@ class SharedObjects;
 /**
  * Class to easily create a TCP server or client.
  *
- * TCP server example:
+ * TCP Server Example Code
+ * =======================
  *
- * Save in main.cpp and compile with:
- *     g++ -std=c++11 main.cpp -lhomegear-base -lgcrypt -lgnutls
+ * Save the example below in `main.cpp` and compile with:
+ *
+ *     g++ -o main -std=c++11 main.cpp -lhomegear-base -lgcrypt -lgnutls
  *
  * Start and connect using e. g. telnet:
  *
+ *     ./main
  *     telnet localhost 8082
  *
- * Code:
+ * Example code:
  *
  *     #include <homegear-base/BaseLib.h>
  *
