@@ -146,19 +146,48 @@ public:
 	};
 
 	// {{{ TCP server or client
+		/*
+		 * Constructor to create an empty socket object.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib);
+
+		/*
+		 * Constructor to just wrap an existing file descriptor.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
 	// }}}
 
 	// {{{ TCP client
+		/*
+		 * Constructor to create a TCP client socket.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
+
+		/*
+		 * Constructor to create a TCP client socket with SSL enabled.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate);
+
+		/*
+		 * Constructor to create a TCP client socket with SSL enabled.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData);
+
+		/*
+		 * Constructor to create a TCP client socket with SSL enabled.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
+
+		/*
+		 * Constructor to create a TCP client socket with SSL enabled.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
 	// }}}
 
 	// {{{ TCP server
+		/*
+		 * Constructor to create a TCP server.
+		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo);
 	// }}}
 
