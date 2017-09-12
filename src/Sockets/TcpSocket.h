@@ -100,7 +100,9 @@ class SharedObjects;
  *
  *     void packetReceived(int32_t clientId, BaseLib::TcpSocket::TcpPacket packet)
  *     {
- *     	std::cout << BaseLib::HelperFunctions::getHexString(packet) << std::endl;
+ *     	std::string data((char*)packet.data(), packet.size());
+ *     	BaseLib::HelperFunctions::trim(data);
+ *     	std::cout << "Packet received: " << data << std::endl;
  *     	std::vector<uint8_t> response;
  *     	response.push_back('R');
  *     	response.push_back(':');
@@ -120,7 +122,7 @@ class SharedObjects;
  *     	_tcpServer = std::make_shared<BaseLib::TcpSocket>(_bl.get(), serverInfo);
  *
  *     	std::string listenAddress;
- *     	_tcpServer->startServer("0.0.0.0", "8082", listenAddress);
+ *     	_tcpServer->startServer("::", "8082", listenAddress);
  *     	std::cout << "Started listening on " + listenAddress << std::endl;
  *
  *     	for(int32_t i = 0; i < 300; i++) //Run for 300 seconds

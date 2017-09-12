@@ -55,41 +55,106 @@ public:
 /**
  * This class provides a basic HTTP server. The class is thread safe.
  *
+ * HTTP Server Example Code
+ * ========================
+ *
+ * Save the example below in `main.cpp` and compile with:
+ *
+ *     g++ -o main -std=c++11 main.cpp -lhomegear-base -lgcrypt -lgnutls
+ *
+ * Start and connect using a browser:
+ *
+ *     ./main
+ *
+ * Example code:
+ *
+ *    #include <homegear-base/BaseLib.h>
+ *
+ *    std::shared_ptr<BaseLib::SharedObjects> _bl;
+ *    std::shared_ptr<BaseLib::HttpServer> _httpServer;
+ *
+ *    void newConnection(int32_t clientId, std::string address, uint16_t port)
+ *    {
+ *        std::cout << "New connection from " << address << " on port " << port << std::endl;
+ *    }
+ *
+ *    void packetReceived(int32_t clientId, BaseLib::Http http)
+ *    {
+ *        if(http.getHeader().method != "GET") return;
+ *
+ *        std::cout << "Client requested " << http.getHeader().path << std::endl;
+ *
+ *        std::string json = "{\"result\":\"It worked!\",\"time\":" + std::to_string(BaseLib::HelperFunctions::getTime()) + ",\"path\":\"" + http.getHeader().path + "\"}";
+ *
+ *        std::string header;
+ *        header.append("HTTP/1.1 200 OK\r\n");
+ *        header.append("Connection: close\r\n");
+ *        header.append("Content-Type: application/json\r\n");
+ *        header.append("Content-Length: ").append(std::to_string(json.size())).append("\r\n\r\n");
+ *
+ *        BaseLib::TcpSocket::TcpPacket response;
+ *        response.insert(response.end(), header.begin(), header.end());
+ *        response.insert(response.end(), json.begin(), json.end());
+ *
+ *        _httpServer->send(clientId, response);
+ *    }
+ *
+ *    int main()
+ *    {
+ *        _bl.reset(new BaseLib::SharedObjects(false));
+ *
+ *        BaseLib::HttpServer::HttpServerInfo serverInfo;
+ *        serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
+ *
+ *        _httpServer = std::make_shared<BaseLib::HttpServer>(_bl.get(), serverInfo);
+ *
+ *        std::string listenAddress;
+ *        _httpServer->start("::", "8082", listenAddress);
+ *        std::cout << "Started listening on " + listenAddress << std::endl;
+ *
+ *        for(int32_t i = 0; i < 300; i++) //Run for 300 seconds
+ *        {
+ *            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+ *        }
+ *
+ *        _httpServer->stop();
+ *        _httpServer->waitForStop();
+ *    }
+ *
  * @see HttpServerException
  */
 class HttpServer {
 public:
-	HttpServer(BaseLib::SharedObjects* baseLib, std::string listenAddress, uint16_t port, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData);
+	struct HttpServerInfo
+	{
+		bool useSsl = false;
+		uint32_t maxConnections = 10;
+		std::string certFile;
+		std::string certData;
+		std::string keyFile;
+		std::string keyData;
+		std::string dhParamFile;
+		std::string dhParamData;
+
+		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
+	};
+
+	HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverInfo);
 	virtual ~HttpServer();
 
-	bool isRunning() { return !_stopped; }
-	void start();
+	void start(std::string address, std::string port, std::string& listenAddress);
 	void stop();
-	uint32_t connectionCount();
+	void waitForStop();
+
+	void send(int32_t clientId, TcpSocket::TcpPacket packet);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
-	std::atomic_bool _stopped;
-	std::atomic_bool _stopServer;
 	std::shared_ptr<TcpSocket> _socket;
-	std::mutex _stateMutex;
-	std::map<int32_t, std::shared_ptr<BaseLib::FileDescriptor>> _clients;
-private:
-	int32_t _currentClientId = 0;
-	int32_t _backlog = 100;
-	std::thread _mainThread;
+	Http _http;
 
-	std::string _listenAddress;
-	uint16_t _port = 8080;
+	std::function<void(int32_t clientId, Http& http)> _packetReceivedCallback;
 
-	bool _useSsl = false;
-	std::string _certFile;
-	std::string _certData;
-	std::string _keyFile;
-	std::string _keyData;
-	std::string _dhParamFile;
-	std::string _dhParamData;
-
-	void mainThread();
+	void packetReceived(int32_t clientId, TcpSocket::TcpPacket packet);
 };
 
 }
