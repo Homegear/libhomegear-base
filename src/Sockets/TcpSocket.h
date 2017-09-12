@@ -148,11 +148,16 @@ public:
 	// {{{ TCP server or client
 		/**
 		 * Constructor to create an empty socket object.
+		 *
+		 * @param baseLib The base library object.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib);
 
 		/**
-		 * Constructor to just wrap an existing file descriptor.
+		 * Constructor to just wrap an existing socket descriptor.
+		 *
+		 * @param baseLib The base library object.
+		 * @param socketDescriptor The socket descriptor to wrap.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor);
 	// }}}
@@ -160,26 +165,62 @@ public:
 	// {{{ TCP client
 		/**
 		 * Constructor to create a TCP client socket.
+		 *
+		 * @param baseLib The base library object.
+		 * @param hostname The host name or IP address to connect to.
+		 * @param port The port to connect to.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
 
 		/**
 		 * Constructor to create a TCP client socket with SSL enabled.
+		 *
+		 * @param baseLib The base library object.
+		 * @param hostname The host name or IP address to connect to.
+		 * @param port The port to connect to.
+		 * @param useSsl Set to `true` to enable SSL.
+		 * @param caFile Path to a file containing the PEM-encoded CA certificate used to sign the server certificate.
+		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate);
 
 		/**
 		 * Constructor to create a TCP client socket with SSL enabled.
+		 *
+		 * @param baseLib The base library object.
+		 * @param hostname The host name or IP address to connect to.
+		 * @param port The port to connect to.
+		 * @param useSsl Set to `true` to enable SSL.
+		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
+		 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData);
 
 		/**
-		 * Constructor to create a TCP client socket with SSL enabled.
+		 * Constructor to create a TCP client socket with SSL enabled using certificate login.
+		 *
+		 * @param baseLib The base library object.
+		 * @param hostname The host name or IP address to connect to.
+		 * @param port The port to connect to.
+		 * @param useSsl Set to `true` to enable SSL.
+		 * @param caFile Path to a file containing the PEM-encoded CA certificate used to sign the server certificate.
+		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
+		 * @param clientCertFile Path to a file containing the PEM-encoded client certificate.
+		 * @param clientKeyFile Path to a file containing the PEM-encoded client key file.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate, std::string clientCertFile, std::string clientKeyFile);
 
 		/**
-		 * Constructor to create a TCP client socket with SSL enabled.
+		 * Constructor to create a TCP client socket with SSL enabled using certificate login.
+		 *
+		 * @param baseLib The base library object.
+		 * @param hostname The host name or IP address to connect to.
+		 * @param port The port to connect to.
+		 * @param useSsl Set to `true` to enable SSL.
+		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
+		 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
+		 * @param clientCertData The PEM-encoded client certificate (not the path).
+		 * @param clientKeyData The PEM-encoded client key (not the path).
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
 	// }}}
@@ -216,9 +257,31 @@ public:
 	void close();
 
 	// {{{ Servers only
+		/**
+		 * Starts listening.
+		 *
+		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
+		 * @param port The port number to bind the server to.
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 */
 		void startServer(std::string address, std::string port, std::string& listenAddress);
+
+		/**
+		 * Starts stopping the server and returns immediately.
+		 */
 		void stopServer();
+
+		/**
+		 * Waits until the server is stopped.
+		 */
 		void waitForServerStopped();
+
+		/**
+		 * Sends a response to a TCP client connected to the server.
+		 *
+		 * @param clientId The ID of the client as passed to TcpSocket::TcpServerServer::packetReceivedCallback.
+		 * @param packet The data to send.
+		 */
 		void sendClientResponse(int32_t clientId, TcpPacket packet);
 	// }}}
 protected:
