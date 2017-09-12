@@ -96,22 +96,29 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, bool useSsl, std::string certFile, std::string certData, std::string keyFile, std::string keyData, std::string dhParamFile, std::string dhParamData)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 {
+	_bl = baseLib;
+
 	_isServer = true;
-	_useSsl = useSsl;
-	_serverCertFile = certFile;
-	_serverCertData = certData;
-	_serverKeyFile = keyFile;
-	_serverKeyData = keyData;
-	_dhParamFile = dhParamFile;
-	_dhParamData = dhParamData;
+	_useSsl = serverInfo.useSsl;
+	_maxConnections = serverInfo.maxConnections;
+	_serverCertFile = serverInfo.certFile;
+	_serverCertData = serverInfo.certData;
+	_serverKeyFile = serverInfo.keyFile;
+	_serverKeyData = serverInfo.keyData;
+	_dhParamFile = serverInfo.dhParamFile;
+	_dhParamData = serverInfo.dhParamData;
+	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
 	if(_useSsl) initSsl();
 }
 
 TcpSocket::~TcpSocket()
 {
+	_stopServer = true;
+	_bl->threadManager.join(_serverThread);
+
 	_bl->fileDescriptorManager.close(_socketDescriptor);
 	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
 	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
@@ -125,10 +132,307 @@ std::string TcpSocket::getIpAddress()
 	return _ipAddress;
 }
 
-void TcpSocket::bindSocket(std::string address, std::string port, std::string& listenAddress)
-{
-	_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, address, port, listenAddress);
-}
+
+// {{{ Server
+	void TcpSocket::bindSocket(std::string& listenAddress)
+	{
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, listenAddress);
+	}
+
+	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
+	{
+		waitForServerStopped();
+
+		_stopServer = false;
+		_listenAddress = address;
+		_listenPort = port;
+		bindSocket(listenAddress);
+		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
+	}
+
+	void TcpSocket::stopServer()
+	{
+		_stopServer = true;
+	}
+
+	void TcpSocket::waitForServerStopped()
+	{
+		_stopServer = true;
+		_bl->threadManager.join(_serverThread);
+
+		_bl->fileDescriptorManager.close(_socketDescriptor);
+		if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+		if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
+		if(_dhParams) gnutls_dh_params_deinit(_dhParams);
+		_x509Cred = nullptr;
+		_tlsPriorityCache = nullptr;
+		_dhParams = nullptr;
+	}
+
+	void TcpSocket::initClientSsl(PFileDescriptor fileDescriptor)
+	{
+		if(!_tlsPriorityCache)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
+		}
+		if(!_x509Cred)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Cred is nullptr.");
+		}
+		int32_t result = 0;
+		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
+		{
+			fileDescriptor->tlsSession = nullptr;
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		if(!fileDescriptor->tlsSession)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Client TLS session is nullptr.");
+		}
+		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Cred)) != GNUTLS_E_SUCCESS)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error: Could not set x509 credentials on TLS session: " + std::string(gnutls_strerror(result)));
+		}
+		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, GNUTLS_CERT_IGNORE);
+		if(!fileDescriptor || fileDescriptor->descriptor == -1)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
+		}
+		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
+		do
+		{
+			result = gnutls_handshake(fileDescriptor->tlsSession);
+		} while (result < 0 && gnutls_error_is_fatal(result) == 0);
+		if(result < 0)
+		{
+			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
+		}
+	}
+
+	void TcpSocket::readClient(PTcpClientData clientData)
+	{
+		try
+		{
+			int32_t bytesRead = 0;
+			bytesRead = clientData->socket->proofread((char*)clientData->buffer.data(), clientData->buffer.size());
+
+			if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
+			std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+			if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
+		}
+		catch(const std::exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+		catch(BaseLib::Exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+		catch(...)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+	}
+
+	void TcpSocket::sendClientResponse(int32_t clientId, TcpPacket packet)
+	{
+		PTcpClientData clientData;
+		try
+		{
+			{
+				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+				auto clientIterator = _clients.find(clientId);
+				if(clientIterator == _clients.end()) return;
+				clientData = clientIterator->second;
+			}
+
+			clientData->socket->proofwrite((char*)packet.data(), packet.size());
+		}
+		catch(const std::exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+		catch(BaseLib::Exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+		catch(...)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+		}
+	}
+
+	void TcpSocket::serverThread()
+	{
+		int32_t result = 0;
+		while(!_stopServer)
+		{
+			try
+			{
+				if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
+				{
+					if(_stopServer) break;
+					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+					std::string listenAddress;
+					bindSocket(listenAddress);
+					continue;
+				}
+
+				timeval timeout;
+				timeout.tv_sec = 0;
+				timeout.tv_usec = 100000;
+				fd_set readFileDescriptor;
+				int32_t maxfd = 0;
+				FD_ZERO(&readFileDescriptor);
+				{
+					auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
+					fileDescriptorGuard.lock();
+					maxfd = _socketDescriptor->descriptor;
+					FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
+
+					{
+						std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+						for(auto& client : _clients)
+						{
+							if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+							FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
+							if(client.second->fileDescriptor->descriptor > maxfd) maxfd = client.second->fileDescriptor->descriptor;
+						}
+					}
+				}
+
+				result = select(maxfd + 1, &readFileDescriptor, NULL, NULL, &timeout);
+				if(result == 0)
+				{
+					if(HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) collectGarbage();
+					continue;
+				}
+				else if(result == -1)
+				{
+					if(errno == EINTR) continue;
+					_bl->out.printError("Error: select returned -1: " + std::string(strerror(errno)));
+					continue;
+				}
+
+				if (FD_ISSET(_socketDescriptor->descriptor, &readFileDescriptor) && !_stopServer)
+				{
+					sockaddr_un clientAddress;
+					socklen_t addressSize = sizeof(addressSize);
+					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientAddress, &addressSize));
+					if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
+
+					try
+					{
+						if(_clients.size() > _maxConnections)
+						{
+							collectGarbage();
+							if(_clients.size() > _maxConnections)
+							{
+								_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+								continue;
+							}
+						}
+
+						std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+						if(_stopServer)
+						{
+							_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+							continue;
+						}
+
+						if(_useSsl) initClientSsl(clientFileDescriptor);
+
+						int32_t currentClientId = _currentClientId++;
+
+						PTcpClientData clientData = std::make_shared<TcpClientData>();
+						clientData->id = currentClientId;
+						clientData->fileDescriptor = clientFileDescriptor;
+						clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
+						clientData->socket->setReadTimeout(100000);
+						clientData->socket->setWriteTimeout(15000000);
+
+						_clients[currentClientId] = clientData;
+					}
+					catch(const std::exception& ex)
+					{
+						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+					}
+					catch(BaseLib::Exception& ex)
+					{
+						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+					}
+					catch(...)
+					{
+						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+					}
+					continue;
+				}
+
+				PTcpClientData clientData;
+				{
+					std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+					for(auto& client : _clients)
+					{
+						if(client.second->fileDescriptor->descriptor == -1) continue;
+						if(FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor))
+						{
+							clientData = client.second;
+							break;
+						}
+					}
+				}
+
+				if(clientData) readClient(clientData);
+			}
+			catch(const std::exception& ex)
+			{
+				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+			}
+			catch(BaseLib::Exception& ex)
+			{
+				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+			}
+			catch(...)
+			{
+				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+			}
+		}
+		_bl->fileDescriptorManager.close(_socketDescriptor);
+	}
+
+	void TcpSocket::collectGarbage()
+	{
+		_lastGarbageCollection = BaseLib::HelperFunctions::getTime();
+
+		std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+		std::vector<int32_t> clientsToRemove;
+		{
+			for(auto& client : _clients)
+			{
+				if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
+			}
+		}
+		for(auto& client : clientsToRemove)
+		{
+			_clients.erase(client);
+		}
+	}
+// }}}
 
 PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress)
 {
@@ -1045,107 +1349,6 @@ void TcpSocket::getConnection()
 		}
 	}
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connected to host " + _hostname + " on port " + _port + ". Client number is: " + std::to_string(_socketDescriptor->id));
-}
-
-PFileDescriptor TcpSocket::waitForConnection(std::string& address, std::string& port)
-{
-	if(!_isServer) throw SocketOperationException("Object is not initialized as server.");
-
-	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-
-	PFileDescriptor fileDescriptor;
-
-	timeval timeout;
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 100000;
-	fd_set readFileDescriptor;
-	int32_t nfds = 0;
-	FD_ZERO(&readFileDescriptor);
-	{
-		auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-		fileDescriptorGuard.lock();
-		nfds = _socketDescriptor->descriptor + 1;
-		if(nfds <= 0)
-		{
-			fileDescriptorGuard.unlock();
-			throw SocketOperationException("Server socket descriptor is invalid.");
-		}
-		FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
-	}
-	if(!select(nfds, &readFileDescriptor, NULL, NULL, &timeout)) return fileDescriptor;
-
-	struct sockaddr_storage clientInfo;
-	socklen_t addressSize = sizeof(addressSize);
-	fileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientInfo, &addressSize));
-	if(!fileDescriptor) return fileDescriptor;
-
-	getpeername(fileDescriptor->descriptor, (struct sockaddr*)&clientInfo, &addressSize);
-
-	char ipString[INET6_ADDRSTRLEN];
-	if (clientInfo.ss_family == AF_INET) {
-		struct sockaddr_in *s = (struct sockaddr_in *)&clientInfo;
-		port = ntohs(s->sin_port);
-		inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
-	} else { // AF_INET6
-		struct sockaddr_in6 *s = (struct sockaddr_in6 *)&clientInfo;
-		port = ntohs(s->sin6_port);
-		inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
-	}
-	address = std::string(&ipString[0]);
-
-	if(_useSsl)
-	{
-		if(!_tlsPriorityCache)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
-		}
-		if(!_x509Cred)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Cred is nullptr.");
-		}
-		int32_t result = 0;
-		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
-		{
-			fileDescriptor->tlsSession = nullptr;
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
-		}
-		if(!fileDescriptor->tlsSession)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Client TLS session is nullptr.");
-		}
-		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
-		}
-		if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Cred)) != GNUTLS_E_SUCCESS)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not set x509 credentials on TLS session: " + std::string(gnutls_strerror(result)));
-		}
-		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, GNUTLS_CERT_IGNORE);
-		if(!fileDescriptor || fileDescriptor->descriptor == -1)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
-		}
-		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
-		do
-		{
-			result = gnutls_handshake(fileDescriptor->tlsSession);
-        } while (result < 0 && gnutls_error_is_fatal(result) == 0);
-		if(result < 0)
-		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
-		}
-	}
-
-	return fileDescriptor;
 }
 
 }
