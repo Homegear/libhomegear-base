@@ -365,7 +365,7 @@ protected:
 	void autoConnect();
 
 	// {{{ For server only
-		void bindSocket(std::string& listenAddress);
+		void bindSocket();
 
 		void serverThread();
 		void collectGarbage();

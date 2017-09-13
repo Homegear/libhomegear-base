@@ -111,8 +111,6 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_dhParamData = serverInfo.dhParamData;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
-
-	if(_useSsl) initSsl();
 }
 
 TcpSocket::~TcpSocket()
@@ -135,20 +133,22 @@ std::string TcpSocket::getIpAddress()
 
 
 // {{{ Server
-	void TcpSocket::bindSocket(std::string& listenAddress)
+	void TcpSocket::bindSocket()
 	{
-		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, listenAddress);
-		_ipAddress = listenAddress;
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress);
 	}
 
 	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
 	{
 		waitForServerStopped();
 
+		if(_useSsl) initSsl();
+
 		_stopServer = false;
 		_listenAddress = address;
 		_listenPort = port;
-		bindSocket(listenAddress);
+		bindSocket();
+		listenAddress = _ipAddress;
 		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
 	}
 
@@ -287,8 +287,7 @@ std::string TcpSocket::getIpAddress()
 				{
 					if(_stopServer) break;
 					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-					std::string listenAddress;
-					bindSocket(listenAddress);
+					bindSocket();
 					continue;
 				}
 
