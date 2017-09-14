@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -153,7 +153,43 @@ void Io::writeFile(std::string& filename, std::vector<char>& content, uint32_t l
 	std::ofstream file;
 	file.open(filename);
 	if(!file.is_open()) throw Exception("Could not open file.");
-	file.write(&content.at(0), length);
+	file.write(content.data(), length);
+	file.close();
+}
+
+void Io::writeFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length)
+{
+	std::ofstream file;
+	file.open(filename);
+	if(!file.is_open()) throw Exception("Could not open file.");
+	file.write((char*)content.data(), length);
+	file.close();
+}
+
+void Io::appendToFile(std::string& filename, std::string& content)
+{
+	std::ofstream file;
+	file.open(filename, std::ios_base::app);
+	if(!file.is_open()) throw Exception("Could not open file.");
+	file.write(content.c_str(), content.size());
+	file.close();
+}
+
+void Io::appendToFile(std::string& filename, std::vector<char>& content, uint32_t length)
+{
+	std::ofstream file;
+	file.open(filename, std::ios_base::app);
+	if(!file.is_open()) throw Exception("Could not open file.");
+	file.write(content.data(), length);
+	file.close();
+}
+
+void Io::appendToFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length)
+{
+	std::ofstream file;
+	file.open(filename, std::ios_base::app);
+	if(!file.is_open()) throw Exception("Could not open file.");
+	file.write((char*)content.data(), length);
 	file.close();
 }
 
