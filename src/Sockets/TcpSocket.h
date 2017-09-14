@@ -257,7 +257,23 @@ public:
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
 
 	bool connected();
+
+	/**
+	 * Use this overload when there are no socket operations outside of this class.
+	 *
+	 * @param buffer The buffer to fill.
+	 * @param bufferSize The size of the buffer.
+	 */
 	int32_t proofread(char* buffer, int32_t bufferSize);
+
+	/**
+	 * Use this overload of proofread when select is called outside of this class.
+	 *
+	 * @param buffer The buffer to fill.
+	 * @param bufferSize The size of the buffer.
+	 * @param[out] moreData If true, call proofread immediately again (without calling e. g. select first).
+	 */
+	int32_t proofread(char* buffer, int32_t bufferSize, bool& moreData);
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
 	int32_t proofwrite(const std::vector<char>& data);
 	int32_t proofwrite(const std::string& data);
