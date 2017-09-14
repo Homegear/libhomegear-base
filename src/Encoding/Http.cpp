@@ -446,7 +446,9 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXm
 		_content.reserve(_header.contentLength);
 	}
 	_dataProcessingStarted = true;
+
 	if(_header.transferEncoding & TransferEncoding::Enum::chunked) processedBytes += processChunkedContent(buffer, bufferLength); else processedBytes += processContent(buffer, bufferLength);
+
 	return processedBytes;
 }
 

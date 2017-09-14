@@ -235,6 +235,7 @@ std::string TcpSocket::getIpAddress()
 				bytesRead = clientData->socket->proofread((char*)clientData->buffer.data(), clientData->buffer.size(), moreData);
 
 				if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
+
 				std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
 				if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
 			}
@@ -764,6 +765,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
 		if(bytesRead > 0)
 		{
+			if(gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
 			_readMutex.unlock();
 			return bytesRead;
 		}
@@ -804,7 +806,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
 
-		if(bytesRead > 0 && gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
+		if(gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
 	}
 	else
 	{
