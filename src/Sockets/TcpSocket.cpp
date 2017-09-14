@@ -228,11 +228,16 @@ std::string TcpSocket::getIpAddress()
 		try
 		{
 			int32_t bytesRead = 0;
-			bytesRead = clientData->socket->proofread((char*)clientData->buffer.data(), clientData->buffer.size());
+			bool moreData = true;
 
-			if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
-			std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
-			if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
+			while(moreData)
+			{
+				bytesRead = clientData->socket->proofread((char*)clientData->buffer.data(), clientData->buffer.size(), moreData);
+
+				if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
+				std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+				if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
+			}
 		}
 		catch(const std::exception& ex)
 		{
@@ -733,6 +738,14 @@ void TcpSocket::close()
 
 int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 {
+	bool moreData = false;
+	return proofread(buffer, bufferSize, moreData);
+}
+
+int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
+{
+	moreData = false;
+
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
 	_readMutex.lock();
 	if(_autoConnect && !connected())
@@ -790,6 +803,8 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
 		{
 			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
+
+		if(bytesRead > 0 && gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
 	}
 	else
 	{
