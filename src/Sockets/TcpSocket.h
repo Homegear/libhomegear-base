@@ -150,6 +150,9 @@ public:
 		std::string keyData;
 		std::string dhParamFile;
 		std::string dhParamData;
+		bool requireClientCert = false;
+		std::string caFile; //For client certificate verification
+		std::string caData; //For client certificate verification
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
@@ -351,6 +354,7 @@ protected:
 		std::string _serverKeyData;
 		std::string _dhParamFile;
 		std::string _dhParamData;
+		bool _requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
 
