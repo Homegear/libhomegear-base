@@ -134,6 +134,9 @@ public:
 		std::string keyData;
 		std::string dhParamFile;
 		std::string dhParamData;
+		bool requireClientCert = false;
+		std::string caFile; //For client certificate verification
+		std::string caData; //For client certificate verification
 
 		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
 	};
