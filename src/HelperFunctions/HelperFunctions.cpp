@@ -168,6 +168,17 @@ std::string HelperFunctions::stripNonAlphaNumeric(const std::string& s)
 	return strippedString;
 }
 
+std::string HelperFunctions::stripNonPrintable(const std::string& s)
+{
+	std::string strippedString;
+	strippedString.reserve(s.size());
+	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+	{
+		if(std::isprint(*i)) strippedString.push_back(*i);
+	}
+	return strippedString;
+}
+
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 {
 	std::random_device rd;
