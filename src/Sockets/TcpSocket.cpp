@@ -232,8 +232,7 @@ std::string TcpSocket::getIpAddress()
 		if(result < 0)
 		{
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			if(result == GNUTLS_E_CERTIFICATE_VERIFICATION_ERROR) throw SocketSSLException("Could not verify client certificate: " + HelperFunctions::getGNUTLSCertVerificationError(gnutls_session_get_verify_cert_status(fileDescriptor->tlsSession)));
-			else throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
+			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
 		}
 	}
 
