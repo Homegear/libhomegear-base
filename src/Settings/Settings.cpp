@@ -47,6 +47,7 @@ void Settings::reset()
 {
 	_runAsUser = "";
 	_runAsGroup = "";
+	_caPath = "/etc/homegear/homegearca.crt";
 	_certPath = "/etc/homegear/homegear.crt";
 	_keyPath = "/etc/homegear/homegear.key";
 	_dhParamPath = "/etc/homegear/dh2048.pem";
@@ -202,6 +203,12 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_runAsGroup = value;
 					_bl->out.printDebug("Debug: runAsGroup set to " + _runAsGroup);
+				}
+				else if(name == "capath")
+				{
+					_caPath = value;
+					if(_caPath.empty()) _caPath = "/etc/homegear/homegearca.crt";
+					_bl->out.printDebug("Debug: caPath set to " + _caPath);
 				}
 				else if(name == "certpath")
 				{
