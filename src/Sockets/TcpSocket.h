@@ -257,6 +257,8 @@ public:
 	void setPort(std::string port) { close(); _port = port; }
 	void setUseSSL(bool useSsl) { close(); _useSsl = useSsl; if(_useSsl) initSsl(); }
 	void setCAFile(std::string caFile) { close(); _caFile = caFile; }
+	void setCertFile(std::string certFile) { close(); _clientCertFile = certFile; }
+	void setKeyFile(std::string keyFile) { close(); _clientKeyFile = keyFile; }
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
 
 	bool connected();
