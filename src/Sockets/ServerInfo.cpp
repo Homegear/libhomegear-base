@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -58,6 +58,7 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->push_back(PVariable(new Variable((int32_t)websocketAuthType)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(xmlrpcServer)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(jsonrpcServer)));
+	serializedInfo->arrayValue->push_back(PVariable(new Variable(restServer)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(redirectTo)));
 	serializedInfo->arrayValue->push_back(PVariable(new Variable(address)));
 
@@ -88,6 +89,7 @@ void ServerInfo::Info::unserialize(PVariable data)
 	websocketAuthType = (AuthType)data->arrayValue->at(pos)->integerValue; pos++;
 	xmlrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	jsonrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
+	restServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	redirectTo = data->arrayValue->at(pos)->stringValue; pos++;
 	address = data->arrayValue->at(pos)->stringValue;
 }
@@ -188,7 +190,7 @@ void ServerInfo::load(std::string filename)
 				else if(name == "ssl")
 				{
 					HelperFunctions::toLower(value);
-					if(value == "false") info->ssl = false;
+					info->ssl = value == "true";;
 					_bl->out.printDebug("Debug: ssl of server " + info->name + " set to " + std::to_string(info->ssl));
 				}
 				else if(name == "authtype")
@@ -196,6 +198,7 @@ void ServerInfo::load(std::string filename)
 					HelperFunctions::toLower(value);
 					if(value == "none") info->authType = Info::AuthType::none;
 					else if(value == "basic") info->authType = Info::AuthType::basic;
+					else if(value == "cert") info->authType = Info::AuthType::cert;
 					_bl->out.printDebug("Debug: authType of server " + info->name + " set to " + std::to_string(info->authType));
 				}
 				else if(name == "validusers")
@@ -240,25 +243,31 @@ void ServerInfo::load(std::string filename)
 				else if(name == "xmlrpcserver")
 				{
 					HelperFunctions::toLower(value);
-					if(value == "false") info->xmlrpcServer = false;
+					info->xmlrpcServer = value == "true";;
 					_bl->out.printDebug("Debug: xmlrpcServer of server " + info->name + " set to " + std::to_string(info->xmlrpcServer));
 				}
 				else if(name == "jsonrpcserver")
 				{
 					HelperFunctions::toLower(value);
-					if(value == "false") info->jsonrpcServer = false;
+					info->jsonrpcServer = value == "true";
 					_bl->out.printDebug("Debug: jsonrpcServer of server " + info->name + " set to " + std::to_string(info->jsonrpcServer));
+				}
+				else if(name == "restserver")
+				{
+					HelperFunctions::toLower(value);
+					info->restServer = value == "true";
+					_bl->out.printDebug("Debug: restServer of server " + info->name + " set to " + std::to_string(info->restServer));
 				}
 				else if(name == "webserver")
 				{
 					HelperFunctions::toLower(value);
-					if(value == "true") info->webServer = true;
+					info->webServer = value == "true";;
 					_bl->out.printDebug("Debug: webServer of server " + info->name + " set to " + std::to_string(info->webServer));
 				}
 				else if(name == "websocket")
 				{
 					HelperFunctions::toLower(value);
-					if(value == "true") info->webSocket = true;
+					info->webSocket = value == "true";;
 					_bl->out.printDebug("Debug: webSocket of server " + info->name + " set to " + std::to_string(info->webSocket));
 				}
 				else if(name == "websocketauthtype")

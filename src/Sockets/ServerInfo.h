@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -55,7 +55,7 @@ public:
 	class Info
 	{
 	public:
-		enum AuthType { none, basic, session };
+		enum AuthType { none, basic, cert, session };
 
 		Info()
 		{
@@ -68,7 +68,7 @@ public:
 		std::string interface;
 		int32_t port = -1;
 		bool ssl = true;
-		AuthType authType = AuthType::basic;
+		AuthType authType = AuthType::cert;
 		std::vector<std::string> validUsers;
 		int32_t diffieHellmanKeySize = 1024;
 		std::string contentPath;
@@ -80,6 +80,7 @@ public:
 		AuthType websocketAuthType = AuthType::basic;
 		bool xmlrpcServer = true;
 		bool jsonrpcServer = true;
+		bool restServer = true;
 		std::string redirectTo;
 
 		// Helpers
