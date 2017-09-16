@@ -174,6 +174,16 @@ std::string TcpSocket::getIpAddress()
 		_dhParams = nullptr;
 	}
 
+	int verifyClientCert(gnutls_session_t tlsSession)
+	{
+		//Called during handshake just after the certificate message has been received.
+
+		uint32_t status = (uint32_t)-1;
+		if(gnutls_certificate_verify_peers3(tlsSession, 0, &status) != GNUTLS_E_SUCCESS) return -1; //Terminate handshake
+		if(status > 0) return -1;
+		return 0;
+	}
+
 	void TcpSocket::initClientSsl(PFileDescriptor fileDescriptor)
 	{
 		if(!_tlsPriorityCache)
@@ -214,7 +224,6 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
 			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
 		}
-		if(_requireClientCert) gnutls_session_set_verify_cert(fileDescriptor->tlsSession, 0, 0);
 		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
 		do
 		{
@@ -681,6 +690,8 @@ void TcpSocket::initSsl()
 			_tlsPriorityCache = nullptr;
 			throw SocketSSLException("Error: Could not initialize cipher priorities: " + std::string(gnutls_strerror(result)));
 		}
+
+		if(_requireClientCert) gnutls_certificate_set_verify_function(_x509Cred, &verifyClientCert);
 	}
 	else
 	{
