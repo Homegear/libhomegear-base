@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -105,12 +105,6 @@ void ICentral::dispose(bool wait)
 	{
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 	}
-
-	int32_t ICentral::raiseIsAddonClient(int32_t clientId)
-	{
-		if(_eventHandler) return ((ICentralEventSink*)_eventHandler)->onIsAddonClient(clientId);
-		return -1;
-	}
 // }}}
 
 // {{{ Peer event handling
@@ -143,11 +137,6 @@ void ICentral::dispose(bool wait)
 	{
 		raiseRunScript(scriptInfo, wait);
 	}
-
-	int32_t ICentral::onIsAddonClient(int32_t clientId)
-	{
-		return raiseIsAddonClient(clientId);
-	}
 // }}}
 
 std::vector<std::shared_ptr<Peer>> ICentral::getPeers()
@@ -156,6 +145,7 @@ std::vector<std::shared_ptr<Peer>> ICentral::getPeers()
 	{
 		std::vector<std::shared_ptr<Peer>> peers;
 		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		peers.reserve(_peersById.size());
 		for(std::map<uint64_t, std::shared_ptr<Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 		{
 			if(i->second) peers.push_back(i->second);
@@ -615,6 +605,56 @@ uint64_t ICentral::getPeerIdFromSerial(std::string& serialNumber)
 }
 
 //RPC methods
+PVariable ICentral::addCategoryToDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(peerId);
+		if(!peer) return Variable::createError(-2, "Unknown device.");
+		peer->addCategory(categoryId);
+
+		return std::make_shared<Variable>();
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::addDeviceToRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(peerId);
+		if(!peer) return Variable::createError(-2, "Unknown device.");
+		peer->setRoom(roomId);
+
+		return std::make_shared<Variable>();
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId)
 {
 	try
@@ -787,6 +827,62 @@ PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id,
 		if(!peer) return Variable::createError(-2, "Unknown device.");
 
 		return peer->getDeviceDescription(clientInfo, channel, fields);
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId)
+{
+	try
+	{
+		PVariable result = std::make_shared<Variable>(VariableType::tArray);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+		result->arrayValue->reserve(peers.size());
+		for(auto peer : peers)
+		{
+			if(peer->hasCategory(categoryId)) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
+		}
+		return result;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId)
+{
+	try
+	{
+		PVariable result = std::make_shared<Variable>(VariableType::tArray);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+		result->arrayValue->reserve(peers.size());
+		for(auto peer : peers)
+		{
+			if(peer->getRoom() == roomId) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
+		}
+		return result;
 	}
 	catch(const std::exception& ex)
     {
@@ -1518,6 +1614,56 @@ PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo)
 			}
 		}
 		return array;
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(peerId);
+		if(!peer) return Variable::createError(-2, "Unknown device.");
+		peer->removeCategory(categoryId);
+
+		return std::make_shared<Variable>();
+	}
+	catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::removeDeviceFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId)
+{
+	try
+	{
+		std::shared_ptr<Peer> peer = getPeer(peerId);
+		if(!peer) return Variable::createError(-2, "Unknown device.");
+		if(peer->getRoom() == roomId) peer->setRoom(0);
+
+		return std::make_shared<Variable>();
 	}
 	catch(const std::exception& ex)
     {

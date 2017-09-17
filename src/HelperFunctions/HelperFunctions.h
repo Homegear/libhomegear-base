@@ -339,6 +339,14 @@ public:
 	static std::string stripNonAlphaNumeric(const std::string& s);
 
 	/**
+	 * Strips all non printable characters from a string.
+	 *
+	 * @param s The string to strip.
+	 * @return Returns the stripped string.
+	 */
+	static std::string stripNonPrintable(const std::string& s);
+
+	/**
 	 * Returns the endianess of the system.
 	 *
 	 * @return Returns true if the system is big endian, otherwise false.

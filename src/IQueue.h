@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -53,16 +53,16 @@ public:
 	virtual ~IQueue();
 	void startQueue(int32_t index, bool waitWhenFull, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
-	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry);
+	bool enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry, bool waitWhenFull = false);
 	virtual void processQueueEntry(int32_t index, std::shared_ptr<IQueueEntry>& entry) = 0;
 	bool queueEmpty(int32_t index);
+	int32_t queueSize(int32_t index);
 private:
 	int32_t _bufferSize = 10000;
 	std::vector<int32_t> _bufferHead;
 	std::vector<int32_t> _bufferTail;
 	std::vector<int32_t> _bufferCount;
 	std::vector<bool> _waitWhenFull;
-	std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
 	std::vector<std::vector<std::shared_ptr<IQueueEntry>>> _buffer;
 	std::unique_ptr<std::mutex[]> _queueMutex = nullptr;
 	std::vector<std::vector<std::shared_ptr<std::thread>>> _processingThread;

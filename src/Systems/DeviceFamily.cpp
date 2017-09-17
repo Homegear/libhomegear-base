@@ -155,12 +155,6 @@ void DeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wa
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
 
-int32_t DeviceFamily::raiseIsAddonClient(int32_t clientId)
-{
-	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onIsAddonClient(clientId);
-	return -1;
-}
-
 int32_t DeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey)
 {
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onCheckLicense(moduleId, familyId, deviceId, licenseKey);
@@ -212,11 +206,6 @@ void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std
 void DeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
 	raiseRunScript(scriptInfo, wait);
-}
-
-int32_t DeviceFamily::onIsAddonClient(int32_t clientId)
-{
-	return raiseIsAddonClient(clientId);
 }
 
 void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)

@@ -75,6 +75,7 @@
 #include "IQueue.h"
 #include "ITimedQueue.h"
 #include "Sockets/HttpClient.h"
+#include "Sockets/HttpServer.h"
 #include "Sockets/TcpSocket.h"
 #include "Sockets/UdpSocket.h"
 #include "StateGuard.h"
