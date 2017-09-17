@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -42,6 +42,7 @@
 #include <memory>
 #include <vector>
 #include <iomanip>
+#include <set>
 
 namespace BaseLib
 {
@@ -98,6 +99,18 @@ public:
 		std::map<std::string, std::string> fields;
 	};
 
+	struct FormData
+	{
+		std::string contentDisposition;
+		std::string name;
+		std::string filename;
+		std::string contentType;
+		std::string contentTypeFull;
+		std::unordered_map<std::string, std::string> header;
+		std::shared_ptr<std::vector<char>> data;
+		std::set<std::shared_ptr<FormData>> multipartMixed;
+	};
+
 	Http();
 	virtual ~Http();
 
@@ -137,6 +150,8 @@ public:
 	size_t readFirstContentLine(char* buffer, size_t requestLength);
 	std::string getMimeType(std::string extension);
 	std::string getStatusText(int32_t code);
+	std::set<std::shared_ptr<FormData>> decodeMultipartFormdata();
+	std::set<std::shared_ptr<FormData>> decodeMultipartMixed(std::string& boundary, char* buffer, size_t bufferSize, char** pos);
 	static void constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header);
 	PVariable serialize();
 	void unserialize(PVariable data);
@@ -164,6 +179,8 @@ private:
 	int32_t processContent(char* buffer, int32_t bufferLength);
 	int32_t processChunkedContent(char* buffer, int32_t bufferLength);
 	void readChunkSize(char** buffer, int32_t& bufferLength);
+
+	char* findNextString(std::string& needle, char* buffer, size_t bufferSize);
 
 	int32_t strnaicmp(char const *a, char const *b, uint32_t size);
 };

@@ -285,12 +285,6 @@ void Peer::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
-
-int32_t Peer::raiseIsAddonClient(int32_t clientID)
-{
-	if(_eventHandler) return ((IPeerEventSink*)_eventHandler)->onIsAddonClient(clientID);
-	return -1;
-}
 //End event handling
 
 //ServiceMessages event handling
@@ -989,6 +983,18 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 				break;
 			case 1006:
 				_typeString = row->second.at(4)->textValue;
+				break;
+			case 1007:
+				_room = row->second.at(3)->intValue;
+				break;
+			case 1008:
+				std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ',');
+				for(auto categoryString : categoryStrings)
+				{
+					if(categoryString.empty()) continue;
+					uint64_t category = BaseLib::Math::getNumber64(categoryString);
+					if(category != 0) _categories.emplace(category);
+				}
 				break;
 			}
 		}
@@ -2024,6 +2030,19 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 			if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", PVariable(new Variable(_rpcDevice->version))));
 
 			if(fields.find("WIRELESS") != fields.end()) description->structValue->insert(StructElement("WIRELESS", PVariable(new Variable(wireless()))));
+
+			if(fields.find("ROOM") != fields.end() && _room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(_room));
+
+			if(fields.find("CATEGORIES") != fields.end() && !_categories.empty())
+			{
+				PVariable categories = std::make_shared<Variable>(VariableType::tArray);
+				categories->arrayValue->reserve(_categories.size());
+				for(auto category : _categories)
+				{
+					categories->arrayValue->push_back(std::make_shared<Variable>(category));
+				}
+				description->structValue->emplace("CATEGORIES", categories);
+			}
 		}
 		else
 		{

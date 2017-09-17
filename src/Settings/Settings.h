@@ -51,6 +51,7 @@ public:
 
 	std::string runAsUser() { return _runAsUser; }
 	std::string runAsGroup() { return _runAsGroup; }
+	std::string caPath() { return _caPath; }
 	std::string certPath() { return _certPath; }
 	std::string keyPath() { return _keyPath;  }
 	bool loadDHParamsFromFile() { return _loadDHParamsFromFile; }
@@ -154,6 +155,7 @@ private:
 
 	std::string _runAsUser;
 	std::string _runAsGroup;
+	std::string _caPath;
 	std::string _certPath;
 	std::string _keyPath;
 	bool _loadDHParamsFromFile = true;

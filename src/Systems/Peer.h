@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -247,7 +247,6 @@ public:
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
-		virtual int32_t onIsAddonClient(int32_t clientID) = 0;
 	};
 	//End event handling
 
@@ -296,6 +295,12 @@ public:
 	virtual void setIdString(std::string value) { _idString = value; saveVariable(1005, value); }
 	virtual std::string getTypeString() { return _typeString; }
 	virtual void setTypeString(std::string value) { _typeString = value; saveVariable(1006, value); }
+	virtual uint64_t getRoom() { return _room; }
+	virtual void setRoom(uint64_t value) { _room = value; saveVariable(1007, (int64_t)value); }
+	virtual std::set<uint64_t> getCategories() { return _categories; }
+	virtual bool hasCategory(uint64_t value) { return _categories.find(value) != _categories.end(); }
+	virtual void addCategory(uint64_t value) { _categories.emplace(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
+	virtual void removeCategory(uint64_t value) { _categories.erase(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
     //End
 
 	virtual std::string getRpcTypeString() { return _rpcTypeString; }
@@ -417,6 +422,9 @@ protected:
 	 * @see _rpcTypeString
 	 */
 	std::string _typeString;
+
+	uint64_t _room;
+	std::set<uint64_t> _categories;
 	//End
 
 	/*
@@ -440,7 +448,6 @@ protected:
 		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values);
 		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
-		virtual int32_t raiseIsAddonClient(int32_t clientID);
 	// }}}
 
 	//ServiceMessages event handling

@@ -47,6 +47,190 @@ std::string Http::getStatusText(int32_t code)
 	return "";
 }
 
+std::set<std::shared_ptr<Http::FormData>> Http::decodeMultipartFormdata()
+{
+	std::set<std::shared_ptr<FormData>> formData;
+	if(_header.contentType != "multipart/form-data") return formData;
+
+	std::string temp(_content.data(), _content.size());
+
+	std::string boundary;
+	std::vector<std::string> parts = HelperFunctions::splitAll(_header.contentTypeFull, ';');
+	for(auto& part : parts)
+	{
+		auto arg = HelperFunctions::splitFirst(part, '=');
+		HelperFunctions::trim(arg.first);
+		if(arg.first == "boundary")
+		{
+			boundary = HelperFunctions::trim(arg.second);
+			break;
+		}
+	}
+
+	if(boundary.empty()) return formData;
+
+	char* pos = _content.data();
+	formData = decodeMultipartMixed(boundary, _content.data(), _content.size(), &pos);
+
+	return formData;
+}
+
+char* Http::findNextString(std::string& needle, char* buffer, size_t bufferSize)
+{
+	if(needle.size() > bufferSize) return nullptr;
+	char* pos = buffer;
+	while(pos < buffer + bufferSize)
+	{
+		pos = (char*)memchr((void*)pos, needle.at(0), bufferSize - (pos - buffer));
+		if(pos == nullptr) return pos;
+
+		size_t remainingBytes = bufferSize - (pos - buffer);
+		if(needle.size() <= remainingBytes)
+		{
+			if(memcmp(pos, needle.data(), needle.size()) == 0) return pos;
+		}
+		pos++;
+	}
+	return pos;
+}
+
+std::set<std::shared_ptr<Http::FormData>> Http::decodeMultipartMixed(std::string& boundary, char* buffer, size_t bufferSize, char** pos)
+{
+	std::set<std::shared_ptr<FormData>> formData;
+
+	if(*pos < buffer) *pos = buffer;
+	*pos = findNextString(boundary, *pos, bufferSize - (*pos - buffer));
+	if(*pos == nullptr) return formData;
+	*pos += boundary.size() + 2; //boundary + CRLF
+
+	while(*pos < buffer + bufferSize)
+	{
+		char* startPos = *pos;
+		char* endPos = findNextString(boundary, *pos, bufferSize - (*pos - buffer));
+		if(endPos == nullptr) return formData;
+		endPos -= 4; //CRLF + "--"
+
+		//{{{ Decode block
+			std::shared_ptr<FormData> blockData = std::make_shared<FormData>();
+
+			uint32_t headerSize = 0;
+			int32_t crlfOffset = 2;
+			char* blockHeaderEnd = strstr(startPos, "\r\n\r\n");
+			if(blockHeaderEnd == nullptr)
+			{
+				blockHeaderEnd = strstr(startPos, "\n\n");
+				if(blockHeaderEnd == nullptr) return formData;
+				crlfOffset = 1;
+				headerSize = ((blockHeaderEnd + 1) - startPos) + 1;
+			}
+			else headerSize = ((blockHeaderEnd + 3) - startPos) + 1;
+
+			char* newlinePos = startPos;
+			char* colonPos = nullptr;
+			while(*pos < startPos + headerSize)
+			{
+				newlinePos = (crlfOffset == 2) ? (char*)memchr(*pos, '\r', endPos - *pos) : (char*)memchr(*pos, '\n', endPos - *pos);
+				if(!newlinePos || newlinePos > endPos) break;
+				colonPos = (char*)memchr(*pos, ':', newlinePos - *pos);
+				if(!colonPos || colonPos > newlinePos)
+				{
+					*pos = newlinePos + crlfOffset;
+					continue;
+				}
+
+				if(colonPos < newlinePos - 1)
+				{
+					char* valuePos = colonPos + 1;
+					uint32_t valueSize = newlinePos - colonPos - 1;
+					while(*valuePos == ' ' && valueSize > 0)
+					{
+						//Skip whitespace
+						valuePos++;
+						valueSize--;
+					}
+
+					std::string name(*pos, (uint32_t)(colonPos - *pos));
+					HelperFunctions::toLower(name);
+					std::string value(valuePos, valueSize);
+
+					blockData->header.emplace(name, value);
+					if(name == "content-disposition")
+					{
+						blockData->contentDisposition = value;
+
+						std::vector<std::string> parts;
+						std::string args = HelperFunctions::splitFirst(value, ';').second;
+						if(args.empty())
+						{
+							args = HelperFunctions::splitFirst(value, ',').second;
+							parts = HelperFunctions::splitAll(value, ',');
+						}
+						else parts = HelperFunctions::splitAll(value, ';');
+
+						for(auto& part : parts)
+						{
+							auto arg = HelperFunctions::splitFirst(part, '=');
+							HelperFunctions::trim(arg.first);
+							HelperFunctions::toLower(arg.first);
+							HelperFunctions::trim(arg.second);
+							if(arg.second.size() > 1 && arg.second.front() == '"' && arg.second.back() == '"') arg.second = arg.second.substr(1, arg.second.size() - 2);
+							if(arg.first == "name") blockData->name = arg.second;
+							if(arg.first == "filename") blockData->filename = arg.second;
+						}
+					}
+					else if(name == "content-type")
+					{
+						blockData->contentTypeFull = value;
+						blockData->contentType = HelperFunctions::splitFirst(value, ',').first;
+						blockData->contentType = HelperFunctions::splitFirst(value, ';').first;
+						HelperFunctions::toLower(blockData->contentType);
+					}
+				}
+
+				*pos = newlinePos + crlfOffset;
+			}
+
+			if(blockData->contentType == "multipart/mixed")
+			{
+				std::string innerBoundary;
+				std::vector<std::string> parts = HelperFunctions::splitAll(blockData->contentTypeFull, blockData->contentTypeFull.find(',') == std::string::npos ? ';' : ',');
+				for(auto& part : parts)
+				{
+					auto arg = HelperFunctions::splitFirst(part, '=');
+					HelperFunctions::trim(arg.first);
+					if(arg.first == "boundary")
+					{
+						innerBoundary = HelperFunctions::trim(arg.second);
+						break;
+					}
+				}
+
+				if(innerBoundary.empty()) continue;
+
+				blockData->multipartMixed = decodeMultipartMixed(innerBoundary, startPos + headerSize, (endPos - (startPos + headerSize)) + 1, pos);
+			}
+			else
+			{
+				blockData->data = std::make_shared<std::vector<char>>(startPos + headerSize, endPos);
+			}
+
+			formData.emplace(blockData);
+		//}}}
+
+		*pos = endPos + 4 + boundary.size();
+		if(*pos + 2 >= buffer + bufferSize) return formData;
+
+		if(*(*pos) == '-' && *(*pos + 1) == '-')
+		{
+			*pos += 4; //"--" + CRLF
+			return formData; //End
+		}
+		else *pos += 2; //CRLF
+	}
+
+	return formData;
+}
+
 void Http::constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header)
 {
 	std::string additionalHeader;
@@ -262,7 +446,9 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXm
 		_content.reserve(_header.contentLength);
 	}
 	_dataProcessingStarted = true;
+
 	if(_header.transferEncoding & TransferEncoding::Enum::chunked) processedBytes += processChunkedContent(buffer, bufferLength); else processedBytes += processContent(buffer, bufferLength);
+
 	return processedBytes;
 }
 
