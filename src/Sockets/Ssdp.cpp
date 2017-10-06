@@ -36,6 +36,10 @@
 namespace BaseLib
 {
 
+SsdpInfo::SsdpInfo()
+{
+}
+
 SsdpInfo::SsdpInfo(std::string ip, PVariable info)
 {
 	_ip = ip;
@@ -45,16 +49,6 @@ SsdpInfo::SsdpInfo(std::string ip, PVariable info)
 SsdpInfo::~SsdpInfo()
 {
 
-}
-
-std::string SsdpInfo::ip()
-{
-	return _ip;
-}
-
-const PVariable SsdpInfo::info()
-{
-	return _info;
 }
 
 Ssdp::Ssdp(SharedObjects* baseLib)
@@ -217,7 +211,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 		timeval socketTimeout;
 		int32_t nfds = 0;
 		Http http;
-		std::set<std::string> locations;
+		std::map<std::string, SsdpInfo> info;
 		while(_bl->hf.getTime() - startTime <= (timeout + 500))
 		{
 			try
@@ -251,7 +245,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				if(_bl->debugLevel >= 5)_bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer, bytesReceived));
 				http.reset();
 				http.process(buffer, bytesReceived, false);
-				if(http.headerIsFinished()) processPacket(http, stHeader, locations);
+				if(http.headerIsFinished()) processPacket(http, stHeader, info);
 			}
 			catch(const std::exception& ex)
 			{
@@ -266,7 +260,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 			}
 		}
-		getDeviceInfo(locations, devices);
+		getDeviceInfo(info, devices);
 	}
 	catch(const std::exception& ex)
 	{
@@ -283,7 +277,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
 
-void Ssdp::processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations)
+void Ssdp::processPacket(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info)
 {
 	try
 	{
@@ -292,7 +286,15 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::set<std::
 
 		std::string location = header.fields.at("location");
 		if(location.size() < 7) return;
-		locations.insert(location);
+		SsdpInfo currentInfo;
+		currentInfo.setLocation(location);
+
+		for(auto& field : header.fields)
+		{
+			currentInfo.addField(field.first, field.second);
+		}
+
+		info.emplace(location, currentInfo);
 	}
 	catch(const std::exception& ex)
 	{
@@ -308,21 +310,23 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::set<std::
 	}
 }
 
-void Ssdp::getDeviceInfo(std::set<std::string>& locations, std::vector<SsdpInfo>& devices)
+void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<SsdpInfo>& devices)
 {
 	try
 	{
-		for(std::set<std::string>::iterator i = locations.begin(); i != locations.end(); ++i)
+		devices.reserve(info.size());
+		for(auto& currentInfo : info)
 		{
-			std::string::size_type posPort = (*i).find(':', 7);
+			std::string location = currentInfo.second.location();
+			std::string::size_type posPort = location.find(':', 7);
 			if(posPort == std::string::npos) return;
-			std::string::size_type posPath = (*i).find('/', posPort);
+			std::string::size_type posPath = location.find('/', posPort);
 			if(posPath == std::string::npos) return;
-			std::string ip = (*i).substr(7, posPort - 7);
-			std::string portString = (*i).substr(posPort + 1, posPath - posPort - 1);
+			std::string ip = location.substr(7, posPort - 7);
+			std::string portString = location.substr(posPort + 1, posPath - posPort - 1);
 			int32_t port = Math::getNumber(portString, false);
 			if(port <= 0 || port > 65535) return;
-			std::string path = (*i).substr(posPath);
+			std::string path = location.substr(posPath);
 
 			HttpClient client(_bl, ip, port, false);
 			std::string xml;
