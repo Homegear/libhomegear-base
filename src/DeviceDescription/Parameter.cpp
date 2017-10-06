@@ -549,6 +549,10 @@ void Parameter::convertToPacket(const PVariable value, std::vector<uint8_t>& con
 				else if(variable->booleanValue == false && variable->floatValue != 0) variable->booleanValue = true;
 				else if(variable->booleanValue == false && variable->stringValue == "true") variable->booleanValue = true;
 			}
+			else if(logical->type == ILogical::Type::Enum::tString)
+			{
+				variable->booleanValue = variable->stringValue == "true" || variable->stringValue == "1";
+			}
 			if(casts.empty())
 			{
 				if(logical->type == ILogical::Type::Enum::tBoolean)
