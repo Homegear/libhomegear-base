@@ -408,7 +408,6 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_secureMemorySize = Math::getNumber(value);
 					//Allow 0 => disable secure memory. 16384 is minimum size. Values smaller than 16384 are set to 16384 by gcrypt: https://gnupg.org/documentation/manuals/gcrypt-devel/Controlling-the-library.html
-					if(_secureMemorySize < 0) _secureMemorySize = 1;
 					_bl->out.printDebug("Debug: secureMemorySize set to " + std::to_string(_secureMemorySize));
 				}
 				else if(name == "workerthreadwindow")
@@ -666,7 +665,7 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_flowsDataPathPermissions = Math::getOctalNumber(value);
 					if(_flowsDataPathPermissions == 0) _flowsDataPathPermissions = 504;
-					_bl->out.printDebug("Debug: flowsDataPathPermissions set to " + _flowsDataPathPermissions);
+					_bl->out.printDebug("Debug: flowsDataPathPermissions set to " + std::to_string(_flowsDataPathPermissions));
 				}
 				else if(name == "flowsdatapathuser")
 				{
