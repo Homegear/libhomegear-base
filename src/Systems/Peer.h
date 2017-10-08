@@ -423,7 +423,7 @@ protected:
 	 */
 	std::string _typeString;
 
-	uint64_t _room;
+	uint64_t _room = 0;
 	std::set<uint64_t> _categories;
 	//End
 
