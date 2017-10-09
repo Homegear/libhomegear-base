@@ -451,7 +451,7 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 				if(filename == "rf_sec_sd_2.xml")
 				{
 					std::map<std::string, std::shared_ptr<HmDeviceDescription::DeviceFrame>>::iterator frameIterator = homeMaticDevice->team->framesByID.find("EVENT");
-					if(frameIterator != homeMaticDevice->framesByID.end())
+					if(frameIterator != homeMaticDevice->team->framesByID.end())
 					{
 						HmDeviceDescription::HomeMaticParameter parameter(_bl);
 						parameter.type = HmDeviceDescription::PhysicalParameter::Type::Enum::typeInteger;

@@ -36,6 +36,7 @@ namespace BaseLib
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
+	_stopServer = false;
 	_autoConnect = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
@@ -43,6 +44,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
 {
 	_bl = baseLib;
+	_stopServer = false;
 	_autoConnect = false;
 	if(socketDescriptor) _socketDescriptor = socketDescriptor;
 	else _socketDescriptor.reset(new FileDescriptor);
@@ -51,6 +53,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
 {
 	_bl = baseLib;
+	_stopServer = false;
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
 	_port = port;
@@ -100,6 +103,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 {
 	_bl = baseLib;
 
+	_stopServer = false;
 	_isServer = true;
 	_useSsl = serverInfo.useSsl;
 	_maxConnections = serverInfo.maxConnections;

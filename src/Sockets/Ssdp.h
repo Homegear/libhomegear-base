@@ -38,6 +38,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <unordered_map>
 
 namespace BaseLib
 {
@@ -48,13 +49,22 @@ class FileDescriptor;
 class SsdpInfo
 {
 public:
+	SsdpInfo();
 	SsdpInfo(std::string ip, PVariable info);
 	virtual ~SsdpInfo();
-	std::string ip();
-	const PVariable info();
+	std::string ip() { return _ip; }
+	void setIp(std::string value) { _ip = value; }
+	std::string location() { return _location; }
+	void setLocation(std::string value) { _location = value; }
+	const PVariable info() { return _info; }
+	void setInfo(PVariable value) { _info = value; }
+	void addField(std::string key, std::string value) { _fields.emplace(key, value); }
+	std::string getField(std::string key) { auto fieldsIterator = _fields.find(key); if(fieldsIterator != _fields.end()) return fieldsIterator->second; else return ""; }
 private:
 	std::string _ip;
+	std::string _location;
 	PVariable _info;
+	std::unordered_map<std::string, std::string> _fields;
 };
 
 class Ssdp
@@ -78,8 +88,8 @@ private:
 
 	void getAddress();
 	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
-	void processPacket(Http& http, const std::string& stHeader, std::set<std::string>& locations);
-	void getDeviceInfo(std::set<std::string>& locations, std::vector<SsdpInfo>& devices);
+	void processPacket(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info);
+	void getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<SsdpInfo>& devices);
 	std::shared_ptr<FileDescriptor> getSocketDescriptor();
 };
 
