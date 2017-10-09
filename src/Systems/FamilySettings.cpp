@@ -597,7 +597,7 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 		else if(name == "watchdogtimeout")
 		{
 			settings->watchdogTimeout = BaseLib::Math::getNumber(value);
-			if(settings->watchdogTimeout > 100000) settings->timeout = 100000;
+			if(settings->watchdogTimeout > 100000) settings->watchdogTimeout = 100000;
 			_bl->out.printDebug("Debug: watchdogTimeout set to " + std::to_string(settings->watchdogTimeout));
 		}
 		else if(name == "sendfix")
@@ -864,7 +864,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		else if(name == "watchdogtimeout")
 		{
 			settings->watchdogTimeout = value->integerValue;
-			if(settings->watchdogTimeout > 100000) settings->timeout = 100000;
+			if(settings->watchdogTimeout > 100000) settings->watchdogTimeout = 100000;
 			_bl->out.printDebug("Debug: watchdogTimeout set to " + std::to_string(settings->watchdogTimeout));
 		}
 		else if(name == "sendfix")
