@@ -105,10 +105,10 @@ public:
 	Variable(Variable const& rhs);
 	Variable(VariableType variableType) : Variable() { type = variableType; if(type == VariableType::tVariant) type = VariableType::tVoid; }
 	Variable(DeviceDescription::ILogical::Type::Enum variableType);
-	Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; }
-	Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = integer; integerValue64 = integer; }
-	Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = integer; }
-	Variable(int64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = integer; }
+	Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
+	Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
+	Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
+	Variable(int64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
 	Variable(uint64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
 	Variable(std::string string) : Variable() { type = VariableType::tString; stringValue = string; }
 	Variable(const char* string) : Variable() { type = VariableType::tString; stringValue = std::string(string); }
