@@ -871,6 +871,7 @@ void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
 	else
 	{
 		value->integerValue = minus ? -number : number;
+		value->integerValue64 = value->integerValue;
 		value->floatValue = value->integerValue;
 	}
 }
