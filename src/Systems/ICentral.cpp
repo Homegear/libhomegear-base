@@ -105,6 +105,12 @@ void ICentral::dispose(bool wait)
 	{
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 	}
+
+	uint64_t ICentral::raiseGetRoomIdByName(std::string& name)
+	{
+		if(_eventHandler) return ((ICentralEventSink*)_eventHandler)->onGetRoomIdByName(name);
+		return 0;
+	}
 // }}}
 
 // {{{ Peer event handling

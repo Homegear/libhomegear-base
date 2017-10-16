@@ -70,6 +70,7 @@ public:
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
 		virtual int32_t onCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey) = 0;
+		virtual uint64_t onGetRoomIdByName(std::string& name) = 0;
 
 		//Device description
 		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output) = 0;
@@ -139,6 +140,7 @@ protected:
 		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
 		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 		virtual int32_t raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey);
+		virtual uint64_t raiseGetRoomIdByName(std::string& name);
 
 		// {{{ Device description event handling
 			virtual void raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
@@ -156,6 +158,7 @@ protected:
 		virtual void onRPCDeleteDevices(std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
+		virtual uint64_t onGetRoomIdByName(std::string& name);
 	// }}}
 
 	// {{{ Device description event handling
@@ -167,8 +170,8 @@ protected:
 	virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
 	virtual void createCentral() = 0;
 private:
-			DeviceFamily(const DeviceFamily&) = delete;
-			DeviceFamily& operator=(const DeviceFamily&) = delete;
+	DeviceFamily(const DeviceFamily&) = delete;
+	DeviceFamily& operator=(const DeviceFamily&) = delete;
 
 	IFamilyEventSink* _eventHandler;
 	int32_t _family = -1;

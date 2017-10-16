@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -1309,6 +1309,62 @@ std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firm
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return nullptr;
+}
+
+std::unordered_map<std::string, uint32_t> Devices::getIdTypeNumberMap()
+{
+	std::unordered_map<std::string, uint32_t> idTypeMap;
+	try
+	{
+		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
+		{
+			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
+			{
+				idTypeMap.emplace((*k)->id, (*k)->typeNumber);
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return idTypeMap;
+}
+
+std::unordered_set<uint32_t> Devices::getKnownTypeNumbers()
+{
+	std::unordered_set<uint32_t> typeNumbers;
+	try
+	{
+		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
+		{
+			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
+			{
+				typeNumbers.emplace((*k)->typeNumber);
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return typeNumbers;
 }
 
 // {{{ RPC
