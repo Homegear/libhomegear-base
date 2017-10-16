@@ -161,6 +161,12 @@ int32_t DeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int3
 	return -1;
 }
 
+uint64_t DeviceFamily::raiseGetRoomIdByName(std::string& name)
+{
+	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onGetRoomIdByName(name);
+	return 0;
+}
+
 void DeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
 {
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, output);
@@ -211,6 +217,11 @@ void DeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
 {
 	raiseDecryptDeviceDescription(moduleId, input, output);
+}
+
+uint64_t DeviceFamily::onGetRoomIdByName(std::string& name)
+{
+	return raiseGetRoomIdByName(name);
 }
 //End Device event handling
 
