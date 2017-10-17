@@ -156,6 +156,7 @@ void Settings::load(std::string filename, std::string executablePath)
 	try
 	{
 		_executablePath = executablePath;
+		if(_executablePath.back() != '/') _executablePath.push_back('/');
 		reset();
 		_path = filename;
 		char input[1024];
