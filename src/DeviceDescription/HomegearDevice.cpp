@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -2568,7 +2568,7 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
 						if(packetIterator != packetsById.end())
 						{
 							packetIterator->second->associatedVariables.push_back(j->second);
-							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
+							if(function->physicalChannelIndexOffset != 0) packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
 							valueRequestPackets[function->channel][(*k)->id] = packetIterator->second;
 						}
 					}
@@ -2578,7 +2578,7 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
 						if(packetIterator != packetsById.end())
 						{
 							packetIterator->second->associatedVariables.push_back(j->second);
-							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
+							if(function->physicalChannelIndexOffset != 0) packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
 						}
 					}
 					for(std::vector<std::shared_ptr<Parameter::Packet>>::iterator k = j->second->eventPackets.begin(); k != j->second->eventPackets.end(); ++k)
@@ -2587,7 +2587,7 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
 						if(packetIterator != packetsById.end())
 						{
 							packetIterator->second->associatedVariables.push_back(j->second);
-							packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
+							if(function->physicalChannelIndexOffset != 0) packetIterator->second->channelIndexOffset = function->physicalChannelIndexOffset;
 						}
 					}
 				}
