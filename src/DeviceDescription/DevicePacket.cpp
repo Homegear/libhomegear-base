@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -86,6 +86,8 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 			if(!splitValue.first.empty()) channelIndex = Math::getUnsignedNumber(splitValue.first);
 			if(!splitValue.second.empty()) channelSize = Math::getDouble(splitValue.second);
 		}
+		else if(nodeName == "channelSize") channelSize = Math::getDouble(value);
+		else if(nodeName == "channelIndexOffset") channelIndexOffset = Math::getNumber(value);
 		else if(nodeName == "doubleSend") { if(value == "true") doubleSend = true; }
 		else if(nodeName == "repeat") { if(value == "false") repeat = false; }
 		else if(nodeName == "splitAfter") splitAfter = Math::getNumber(value);

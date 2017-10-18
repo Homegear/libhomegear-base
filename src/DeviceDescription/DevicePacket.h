@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -112,6 +112,7 @@ public:
 	std::string responseTypeId;
 	int32_t channel = -1;
 	int32_t channelIndex = -1;
+	int32_t channelIndexOffset = 0;
 	double channelSize = 1;
 	bool doubleSend = false;
 	int32_t splitAfter = -1;
@@ -122,7 +123,6 @@ public:
 	HttpPayloads httpPayloads;
 
 	//Helpers
-	int32_t channelIndexOffset = 0;
 	std::vector<PParameter> associatedVariables;
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
