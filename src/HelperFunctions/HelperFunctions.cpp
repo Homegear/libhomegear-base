@@ -302,6 +302,63 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& f
     }
 }
 
+void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from)
+{
+	try
+	{
+		to = 0; //Necessary if length is < 8
+		if(from.empty()) return;
+		uint32_t length = from.size();
+		if(length > 8) length = 8;
+		if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (8 - length), &from.at(0), length);
+		else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from)
+{
+	try
+	{
+		if(!to.empty()) to.clear();
+		int32_t length = 8;
+		if(from < 0) length = 8;
+		else if(from <= 0xFF) length = 1;
+		else if(from <= 0xFFFF) length = 2;
+		else if(from <= 0xFFFFFF) length = 3;
+		else if(from <= 0xFFFFFFFFll) length = 4;
+		else if(from <= 0xFFFFFFFFFFll) length = 5;
+		else if(from <= 0xFFFFFFFFFFFFll) length = 6;
+		else if(from <= 0xFFFFFFFFFFFFFFll) length = 7;
+		to.resize(length, 0);
+		if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (8 - length), length);
+		else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
+	}
+	catch(const std::exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 std::pair<std::string, std::string> HelperFunctions::splitFirst(std::string string, char delimiter)
 {
 	int32_t pos = string.find_first_of(delimiter);

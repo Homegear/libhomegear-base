@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -29,6 +29,7 @@
 */
 
 #include "Html.h"
+#include "../HelperFunctions/Math.h"
 
 namespace BaseLib
 {
@@ -349,6 +350,32 @@ void Html::unescapeHtmlEntities(std::string& in, std::string& out)
 						out.push_back(0x80 | (character & 0x3F));
 					}
 					else out.push_back(character);
+				}
+				else if(entityName.size() > 2 && entityName.front() == '#' && entityName.at(1) == 'x')
+				{
+					std::string hex = entityName.substr(2);
+					uint32_t character = Math::getUnsignedNumber(hex, true);
+					if(character == 0)
+					{
+						out.push_back('&');
+						out.append(entityName);
+						out.push_back(';');
+					}
+					else
+					{
+						if(character >= 0x800)
+						{
+							out.push_back(0xE0 | ((character >> 12) & 0x0F));
+							out.push_back(0x80 | ((character >> 6) & 0x3F));
+							out.push_back(0x80 | (character & 0x3F));
+						}
+						else if(character >= 0x80)
+						{
+							out.push_back(0xC0 | ((character >> 6) & 0x1F));
+							out.push_back(0x80 | (character & 0x3F));
+						}
+						else out.push_back(character);
+					}
 				}
 				else
 				{

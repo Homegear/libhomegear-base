@@ -186,9 +186,9 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			}
 			if(bufferPos + receivedBytes > bufferMax)
 			{
+				if(!_keepAlive) _socket->close();
+				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
-				bufferPos = 0;
-				continue;
 			}
 			//We are using string functions to process the buffer. So just to make sure,
 			//they don't do something in the memory after buffer, we add '\0'

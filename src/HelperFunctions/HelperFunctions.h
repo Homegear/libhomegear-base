@@ -405,6 +405,22 @@ public:
 	void memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& from);
 
 	/**
+	 * Copies binary values from a vector to an integer reversing the byte order when the system is little endian.
+	 *
+	 * @param[out] to The destination integer.
+	 * @param[in] from The source array. A length less than 4 bytes is allowed.
+	 */
+	void memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from);
+
+	/**
+	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian.
+	 *
+	 * @param[out] to The destination array.
+	 * @param[in] from The source integer.
+	 */
+	void memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from);
+
+	/**
 	 * Converts a hex string to a byte array.
 	 *
 	 * @param data The hex string to convert.

@@ -225,7 +225,7 @@ public:
 	/**
 	 * Converts a RGB value to it's CIE 1931 color space chromaticity coordinates (x, y).
 	 *
-	 * @see <a href="https://github.com/mikz/PhilipsHueSDKiOS/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md">iOS Philips hue SDK</a>
+	 * @see <a href="https://github.com/mikz/NanoleafSDKiOS/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md">iOS Philips hue SDK</a>
 	 * @see <a href="http://www.brucelindbloom.com/Eqn_RGB_XYZ_Matrix.html">Some Common RGB Working Space Matrices</a>
 	 * @see <a href="http://www.brucelindbloom.com/WorkingSpaceInfo.html">RGB Working Space Information</a>
 	 * @param[in] rgb Normalized RGB intensities.
@@ -239,7 +239,7 @@ public:
 	/**
 	 * Converts CIE 1931 color space chromaticity coordinates (x, y) to RGB as reference white.
 	 *
-	 * @see <a href="https://github.com/mikz/PhilipsHueSDKiOS/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md">iOS Philips hue SDK</a>
+	 * @see <a href="https://github.com/mikz/NanoleafSDKiOS/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md">iOS Philips hue SDK</a>
 	 * @see <a href="http://www.brucelindbloom.com/Eqn_RGB_XYZ_Matrix.html">Some Common RGB Working Space Matrices</a>
 	 * @see <a href="http://www.brucelindbloom.com/WorkingSpaceInfo.html">RGB Working Space Information</a>
 	 * @param[in] xy Coordinate in CIE 1931 color space.

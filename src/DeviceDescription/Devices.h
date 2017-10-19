@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -33,6 +33,7 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_set>
 
 #include "../Systems/Packet.h"
 #include "../Sockets/RpcClientInfo.h"
@@ -70,6 +71,8 @@ public:
 	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
 	uint32_t getTypeNumberFromTypeId(const std::string& typeId);
 	std::shared_ptr<HomegearDevice> find(uint32_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
+	std::unordered_map<std::string, uint32_t> getIdTypeNumberMap();
+	std::unordered_set<uint32_t> getKnownTypeNumbers();
 
 	// {{{ RPC
 	std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
