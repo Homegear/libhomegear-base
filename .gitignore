@@ -84,5 +84,5 @@ stamp-h?
 contributors*
 
 #CLion
-cmake-build-debug
+cmake*
 .idea
