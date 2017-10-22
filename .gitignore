@@ -82,3 +82,7 @@ stamp-h?
 
 #getVersion.sh
 contributors*
+
+#CLion
+cmake-build-debug
+.idea
