@@ -28,6 +28,7 @@
  * files in the program, then also delete it here.
 */
 
+#include <gnutls/gnutls.h>
 #include "../BaseLib.h"
 #include "TcpSocket.h"
 
@@ -638,13 +639,13 @@ void TcpSocket::initSsl()
 				throw SocketSSLException("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
 			}
 
-			gnutls_datum_t data;
+            std::vector<uint8_t> binaryData;
+			gnutls_datum_t data{};
 			if(!_dhParamFile.empty())
 			{
-				std::vector<uint8_t> binaryData;
 				try
 				{
-					binaryData = Io::getUBinaryFileContent(_dhParamFile.c_str());
+					binaryData = Io::getUBinaryFileContent(_dhParamFile);
 					binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
 				}
 				catch(BaseLib::Exception& ex)
@@ -664,27 +665,30 @@ void TcpSocket::initSsl()
 					throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
 				}
 				data.data = binaryData.data();
-				data.size = binaryData.size();
+				data.size = static_cast<unsigned int>(binaryData.size());
 			}
 			else
 			{
 				data.data = (unsigned char*)_dhParamData.c_str();
-				data.size = _dhParamData.size();
+				data.size = static_cast<unsigned int>(_dhParamData.size());
 			}
 
-			if((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+			if(data.size > 0)
 			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				gnutls_dh_params_deinit(_dhParams);
-				_x509Cred = nullptr;
-				_dhParams = nullptr;
-				throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
-			}
+				if ((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+				{
+					gnutls_certificate_free_credentials(_x509Cred);
+					gnutls_dh_params_deinit(_dhParams);
+					_x509Cred = nullptr;
+					_dhParams = nullptr;
+					throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
+				}
 
-			gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+				gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+			}
 		}
 
-		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
 		{
 			gnutls_certificate_free_credentials(_x509Cred);
 			gnutls_dh_params_deinit(_dhParams);
@@ -700,13 +704,13 @@ void TcpSocket::initSsl()
 	{
 		if(!_clientCertData.empty() && !_clientKeyData.empty())
 		{
-			gnutls_datum_t clientCertData;
+			gnutls_datum_t clientCertData{};
 			clientCertData.data = (unsigned char*)_clientCertData.c_str();
-			clientCertData.size = _clientCertData.size();
+			clientCertData.size = static_cast<unsigned int>(_clientCertData.size());
 
-			gnutls_datum_t clientKeyData;
+			gnutls_datum_t clientKeyData{};
 			clientKeyData.data = (unsigned char*)_clientKeyData.c_str();
-			clientKeyData.size = _clientKeyData.size();
+			clientKeyData.size = static_cast<unsigned int>(_clientKeyData.size());
 
 			if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
 			{
@@ -781,7 +785,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	{
 		do
 		{
-			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
+			bytesRead = static_cast<int32_t>(gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize));
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
 		if(bytesRead > 0)
 		{
@@ -791,11 +795,11 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		}
 	}
 
-	timeval timeout;
+	timeval timeout{};
 	int32_t seconds = _readTimeout / 1000000;
 	timeout.tv_sec = seconds;
 	timeout.tv_usec = _readTimeout - (1000000 * seconds);
-	fd_set readFileDescriptor;
+	fd_set readFileDescriptor{};
 	FD_ZERO(&readFileDescriptor);
 	auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
 	fileDescriptorGuard.lock();
