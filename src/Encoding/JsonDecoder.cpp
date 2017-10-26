@@ -742,12 +742,12 @@ void JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shar
 	}
 	else
 	{
-		if(value->type == VariableType::tInteger && (number > 2147483647 || number < -2147483648))
+		if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
 		{
 			value->type = VariableType::tInteger64;
 		}
 
-		value->integerValue64 = minus ? -number : number;
+		value->integerValue64 = minus ? -((int64_t)number) : number;
 		value->integerValue = value->integerValue64;
 		value->floatValue = value->integerValue64;
 	}
@@ -867,12 +867,12 @@ void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
 	}
 	else
 	{
-		if(value->type == VariableType::tInteger && (number > 2147483647 || number < -2147483648))
+		if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
 		{
 			value->type = VariableType::tInteger64;
 		}
 
-		value->integerValue64 = minus ? -number : number;
+		value->integerValue64 = minus ? -((int64_t)number) : number;
 		value->integerValue = value->integerValue64;
 		value->floatValue = value->integerValue64;
 	}
