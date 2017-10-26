@@ -338,6 +338,17 @@ float Math::getFloatFromIeee754Binary32(uint32_t binary32)
 	return result;
 }
 
+double Math::getDoubleFromIeee754Binary64(uint64_t binary64)
+{
+	int64_t sign = (binary64 & 0x8000000000000000ll) ? -1 : 1;
+	int64_t exponent = ((binary64 & 0x7FF0000000000000ll) >> 52) - 1023;
+	double fraction = (binary64 & 0xFFFFFFFFFFFFFll) + 0x10000000000000ll;
+	fraction = fraction / 0x10000000000000ll;
+	double result = sign * fraction * (double)pow(2, exponent);
+
+	return result;
+}
+
 std::string Math::toString(double number)
 {
 	std::stringstream out;
