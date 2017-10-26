@@ -86,10 +86,12 @@ void Settings::reset()
 	_scriptEngineServerMaxConnections = 10;
 	_scriptEngineMaxThreadsPerScript = 4;
 	_scriptEngineMaxScriptsPerProcess = 50;
+    _scriptEngineWatchdogTimeout = -1;
 	_flowsProcessingThreadCountServer = 10;
 	_flowsProcessingThreadCountNodes = 10;
 	_flowsServerMaxConnections = 20;
 	_maxNodeThreadsPerProcess = 80;
+	_flowsWatchdogTimeout = -1;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
@@ -437,6 +439,13 @@ void Settings::load(std::string filename, std::string executablePath)
 					_scriptEngineMaxScriptsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: scriptEngineMaxScriptsPerProcess set to " + std::to_string(_scriptEngineMaxScriptsPerProcess));
 				}
+                else if(name == "scriptenginewatchdogtimeout")
+                {
+                    _scriptEngineWatchdogTimeout = Math::getNumber(value);
+                    if(_scriptEngineWatchdogTimeout < 0) _scriptEngineWatchdogTimeout = -1;
+                    else if(_scriptEngineWatchdogTimeout < 10000) _scriptEngineWatchdogTimeout = 10000;
+                    _bl->out.printDebug("Debug: scriptEngineWatchdogTimeout set to " + std::to_string(_scriptEngineWatchdogTimeout));
+                }
 				else if(name == "flowsprocessingthreadcountserver")
 				{
 					_flowsProcessingThreadCountServer = Math::getNumber(value);
@@ -462,6 +471,13 @@ void Settings::load(std::string filename, std::string executablePath)
 					_maxNodeThreadsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: maxNodeThreadsPerProcess set to " + std::to_string(_maxNodeThreadsPerProcess));
 				}
+                else if(name == "flowswatchdogtimeout")
+                {
+                    _flowsWatchdogTimeout = Math::getNumber(value);
+                    if(_flowsWatchdogTimeout < 0) _flowsWatchdogTimeout = -1;
+                    else if(_flowsWatchdogTimeout < 10000) _flowsWatchdogTimeout = 10000;
+                    _bl->out.printDebug("Debug: flowsWatchdogTimeout set to " + std::to_string(_flowsWatchdogTimeout));
+                }
 				else if(name == "ipcthreadcount")
 				{
 					_ipcThreadCount = Math::getNumber(value);
