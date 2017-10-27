@@ -327,6 +327,51 @@ uint32_t Math::getIeee754Binary32(float value)
 	return sign + (exponent << 23) + fraction;
 }
 
+uint64_t Math::getIeee754Binary64(double value)
+{
+    int64_t sign = 0;
+    int64_t integer;
+    int64_t exponent = 1023;
+    int64_t fraction = 0;
+
+    if(value < 0)
+    {
+        sign = 0x8000000000000000ll;
+        value = -value;
+    }
+
+    integer = floor(value);
+    value -= integer;
+
+    for(int32_t i = 51; i >= 0; i--)
+    {
+        value += value;
+        fraction += floor(value) * pow(2, i);
+        value -= floor(value);
+    }
+
+    while((integer != 1) && (exponent > 0) && (exponent < 2047))
+    {
+        if(integer > 1)
+        {
+            fraction = ((integer & 1) << 51) + (fraction >> 1);
+            integer = integer >>1;
+            exponent++;
+        }
+        else
+        {
+            integer = (fraction & 0x8000000000000ll) >> 51;
+            fraction = (fraction & 0x7FFFFFFFFFFFFll) << 1;
+            value += value;
+            fraction += floor(value);
+            value -= floor(value);
+            exponent--;
+        }
+    }
+
+    return sign + (exponent << 52) + fraction;
+}
+
 float Math::getFloatFromIeee754Binary32(uint32_t binary32)
 {
 	int32_t sign = (binary32 & 0x80000000) ? -1 : 1;
