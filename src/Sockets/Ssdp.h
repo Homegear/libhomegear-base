@@ -81,16 +81,25 @@ public:
 	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
 	 */
 	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices);
+
+	/**
+	 * Searches for SSDP devices by listening for NOTIFY packets and returns the IPv4 addresses.
+	 *
+	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
+	 * @param[in] timeout The time to wait for responses
+	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
+	 */
+	void searchDevicesPassive(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::string _address;
-	int32_t _port = 1900;
 
 	void getAddress();
 	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
 	void processPacket(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info);
+	void processPacketPassive(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info);
 	void getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<SsdpInfo>& devices);
-	std::shared_ptr<FileDescriptor> getSocketDescriptor();
+	std::shared_ptr<FileDescriptor> getSocketDescriptor(int32_t port);
 };
 
 }
