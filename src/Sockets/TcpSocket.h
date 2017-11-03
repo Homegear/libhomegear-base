@@ -235,6 +235,23 @@ public:
 		 * @param clientKeyData The PEM-encoded client key (not the path).
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
+
+        /**
+         * Constructor to create a TCP client socket with SSL enabled using certificate login.
+         *
+         * @param baseLib The base library object.
+         * @param hostname The host name or IP address to connect to.
+         * @param port The port to connect to.
+         * @param useSsl Set to `true` to enable SSL.
+         * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
+         * @param caFile Path to a file containing the PEM-encoded CA certificate used to sign the server certificate.
+         * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
+         * @param clientCertFile Path to a file containing the PEM-encoded client certificate.
+         * @param clientCertData The PEM-encoded client certificate (not the path).
+         * @param clientKeyFile Path to a file containing the PEM-encoded client key file.
+         * @param clientKeyData The PEM-encoded client key (not the path).
+         */
+        TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, std::string clientKeyData);
 	// }}}
 
 	// {{{ TCP server
