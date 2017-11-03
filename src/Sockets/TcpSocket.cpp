@@ -100,6 +100,20 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
+{
+    _useSsl = useSsl;
+    _verifyCertificate = verifyCertificate;
+    _caFile = caFile;
+    _caData = caData;
+    _clientCertFile = clientCertFile;
+    _clientCertData = clientCertData;
+    _clientKeyFile = clientKeyFile;
+    _clientKeyData = clientKeyData;
+
+    if(_useSsl) initSsl();
+}
+
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 {
 	_bl = baseLib;
@@ -583,10 +597,17 @@ void TcpSocket::initSsl()
 		}
 	}
 	else
-	{
-		if(_verifyCertificate && !_isServer) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" and \"caData\" are not specified for the host \"" + _hostname + "\".");
-		else if(_requireClientCert && _isServer) throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
-		else if(!_isServer) _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" and certificate verification is disabled. It is highly recommended to enable certificate verification.");
+    {
+        if(_requireClientCert && _isServer) throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
+        else if(!_isServer)
+        {
+            if((result =gnutls_certificate_set_x509_system_trust(_x509Cred)) < 0)
+            {
+                gnutls_certificate_free_credentials(_x509Cred);
+                _x509Cred = nullptr;
+                throw SocketSSLException("Could not load system certificates: " + std::string(gnutls_strerror(result)));
+            }
+        }
 	}
 
 	if(result == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))

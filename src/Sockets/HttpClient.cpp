@@ -46,6 +46,17 @@ HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, in
 	_socket->setConnectionRetries(1);
 }
 
+HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, bool verifyCertificate, std::string caFile, std::string caData, std::string certPath, std::string certData, std::string keyPath, std::string keyData)
+{
+	_bl = baseLib;
+	_hostname = hostname;
+	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
+	if(port > 0 && port < 65536) _port = port;
+	_keepAlive = keepAlive;
+	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, verifyCertificate, caFile, caData, certPath, certData, keyPath, keyData));
+	_socket->setConnectionRetries(1);
+}
+
 HttpClient::~HttpClient()
 {
 	_socketMutex.lock();

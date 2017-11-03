@@ -78,6 +78,24 @@ public:
 	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true, std::string certPath = "", std::string keyPath = "");
 
 	/**
+	 * Constructor. ...Data or ...File are chosen automatically. Just leave the one you don't want to use empty.
+	 *
+	 * @param baseLib The common base library object.
+	 * @param hostname The hostname of the client to connect to without "http://".
+	 * @param port (default 80) The port to connect to.
+	 * @param keepAlive (default true) Keep the socket open after each request.
+	 * @param useSSL (default false) Set to "true" to use "https".
+	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
+	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
+	 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
+	 * @param certPath (default "") Path to the PEM encoded client certificate
+	 * @param clientCertData The PEM-encoded client certificate (not the path).
+	 * @param keyPath (default "") Path to the PEM encoded client keyfile
+	 * @param clientKeyData The PEM-encoded client key (not the path).
+	 */
+	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, bool verifyCertificate, std::string caFile, std::string caData, std::string certPath, std::string certData, std::string keyPath, std::string keyData);
+
+	/**
 	 * Destructor
 	 */
 	virtual ~HttpClient();
