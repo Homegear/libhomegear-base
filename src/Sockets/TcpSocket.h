@@ -330,6 +330,12 @@ public:
 		 * @param packet The data to send.
 		 */
 		void sendToClient(int32_t clientId, TcpPacket packet);
+
+        /**
+         * Returns the number of clients connected to the TCP server
+         * @return The number of connected clients.
+         */
+        int32_t clientCount();
 	// }}}
 protected:
 	struct TcpClientData
