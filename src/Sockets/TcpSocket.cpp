@@ -314,6 +314,12 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
+    int32_t TcpSocket::clientCount()
+    {
+        std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+        return _clients.size();
+    }
+
 	void TcpSocket::serverThread()
 	{
 		int32_t result = 0;

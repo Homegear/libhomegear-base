@@ -75,6 +75,8 @@ public:
 	std::string lanKey;
 	bool ssl = false;
 	std::string caFile;
+	std::string certFile;
+	std::string keyFile;
 	bool verifyCertificate = true;
 	bool oneWay = false;
 	bool fastSending = false;
