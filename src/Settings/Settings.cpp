@@ -251,7 +251,7 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "enableupnp")
 				{
-					if(HelperFunctions::toLower(value) == "false") _enableUPnP = false;
+					_enableUPnP = BaseLib::HelperFunctions::toLower(value) == "true";
 					_bl->out.printDebug("Debug: enableUPnP set to " + std::to_string(_enableUPnP));
 				}
 				else if(name == "upnpipaddress")
