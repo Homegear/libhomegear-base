@@ -93,6 +93,7 @@ public:
 	std::string description;
 	bool readable = true;
 	bool writeable = true;
+	bool transmitted = true;
 	bool addonWriteable = true;
 	bool password = false;
 	bool visible = true;
