@@ -1093,6 +1093,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 			}
 
+			if(!parameter->transmitted)
+			{
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "transmitted", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				propertiesNode->append_node(node);
+			}
+
 			if(!parameter->addonWriteable)
 			{
 				tempString = "false";
