@@ -1745,7 +1745,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 					_bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
 					continue;
 				}
-				if(!j->second->readable && !returnWriteOnly) continue;
+				if(!j->second->readable && !j->second->transmitted && !returnWriteOnly) continue;
 #ifdef CCU2
 				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
@@ -1760,7 +1760,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 
 				PVariable element(new Variable(VariableType::tStruct));
 				PVariable value;
-				if(j->second->readable)
+				if(j->second->readable || j->second->transmitted)
 				{
 					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 					if(j->second->password || parameterData.empty()) value.reset(new Variable(j->second->logical->type));
@@ -1774,6 +1774,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 
 				element->structValue->insert(StructElement("READABLE", PVariable(new Variable(j->second->readable))));
 				element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(j->second->writeable))));
+                element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(j->second->transmitted))));
 				element->structValue->insert(StructElement("UNIT", PVariable(new Variable(j->second->unit))));
 				if(j->second->logical->type == ILogical::Type::tBoolean)
 				{
@@ -2603,7 +2604,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 			PVariable element;
 			if(type == ParameterGroup::Type::Enum::variables)
 			{
-				if(!i->second->readable) continue;
+				if(!i->second->readable && !i->second->transmitted) continue;
 				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
 				if(valuesIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
@@ -2808,7 +2809,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::variables);
 		PParameter parameter = parameterGroup->parameters.at(valueKey);
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
-		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+		if(!parameter->readable && !parameter->transmitted) return Variable::createError(-6, "Parameter is not readable.");
 		PVariable variable;
 		if(requestFromDevice)
 		{
@@ -2854,8 +2855,9 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		PVariable description = std::make_shared<Variable>(VariableType::tStruct);
 
 		int32_t operations = 0;
-		if(parameterIterator->second->readable) operations += 5;
+		if(parameterIterator->second->readable) operations += 4;
 		if(parameterIterator->second->writeable) operations += 2;
+        if(parameterIterator->second->transmitted) operations += 1;
 		int32_t uiFlags = 0;
 		if(parameterIterator->second->visible) uiFlags += 1;
 		if(parameterIterator->second->internal) uiFlags += 2;
