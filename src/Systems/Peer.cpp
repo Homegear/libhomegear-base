@@ -1954,12 +1954,24 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 		{
 			BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
 
+            std::shared_ptr<ICentral> central = getCentral();
+            if(!central) return description;
+            std::string language = clientInfo ? clientInfo->language : "en-US";
+            std::string filename = _rpcDevice->getFilename();
+
 			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
 			if(fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
-			if(supportedDevice && !supportedDevice->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(supportedDevice->longDescription))));
 			if(supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", PVariable(new Variable(supportedDevice->serialPrefix))));
+
+            if(supportedDevice)
+            {
+                std::string descriptionText = central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id);
+                if(!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(descriptionText))));
+                std::string longDescriptionText = central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id);
+                if(!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", PVariable(new Variable(longDescriptionText))));
+            }
 
 			PVariable variable = PVariable(new Variable(VariableType::tArray));
 			PVariable variable2 = PVariable(new Variable(VariableType::tArray));
@@ -3033,10 +3045,16 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		}
 
 		description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameterIterator->second->unit))));
-		if(!parameterIterator->second->label.empty()) description->structValue->insert(StructElement("LABEL", PVariable(new Variable(parameterIterator->second->label))));
-		if(!parameterIterator->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(parameterIterator->second->description))));
 		if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
 		if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
+
+        std::shared_ptr<ICentral> central = getCentral();
+        if(!central) return description;
+		std::string language = clientInfo ? clientInfo->language : "en-US";
+		std::string filename = _rpcDevice->getFilename();
+		auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameterIterator->second->parent()->type(), parameterIterator->second->parent()->id, parameterIterator->second->id);
+		if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
+		if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
 
 		return description;
 	}

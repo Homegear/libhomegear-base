@@ -42,14 +42,11 @@ Devices::Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandle
 	_bl = baseLib;
 	setEventHandler(eventHandler);
 	_family = family;
+	_translations = std::make_shared<DeviceTranslations>(baseLib, family);
 }
 
 void Devices::clear()
 {
-	for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-	{
-		(*i).reset();
-	}
 	_devices.clear();
 }
 
@@ -132,7 +129,7 @@ std::shared_ptr<HomegearDevice> Devices::loadFile(std::string& filepath)
 		std::string extension = filepath.substr(filepath.size() - 4, 4);
 		HelperFunctions::toLower(extension);
 		if(extension != ".xml" && extension != ".hgd") return std::shared_ptr<HomegearDevice>();
-		_bl->out.printDebug("Loading XML RPC device " + filepath);
+        if(_bl->debugLevel >= 5) _bl->out.printDebug("Loading XML RPC device " + filepath);
 		bool oldFormat = false;
 		std::shared_ptr<HomegearDevice> device;
 		if(extension == ".hgd")
@@ -1535,10 +1532,15 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
 			}
 
 			description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
-			if(!i->second->label.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(i->second->label))));
-			if(!i->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(i->second->description))));
 			if(!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::shared_ptr<Variable>(new Variable(i->second->formFieldType))));
 			if(i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::shared_ptr<Variable>(new Variable(i->second->formPosition))));
+
+            std::string language = clientInfo ? clientInfo->language : "en-US";
+            std::string filename = device->getFilename();
+            auto parameterTranslations = _translations->getParameterTranslations(filename, language, type, parameterGroup->id, i->second->id);
+
+            if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
+            if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
 
 			index++;
 			descriptions->structValue->insert(StructElement(i->second->id, description));
@@ -1568,8 +1570,14 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
 		if(channel == -1) //Base device
 		{
 			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", std::shared_ptr<Variable>(new Variable((uint32_t)_family))));
-			if(!deviceType->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(deviceType->longDescription))));
 			if(!deviceType->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", std::shared_ptr<Variable>(new Variable(deviceType->serialPrefix))));
+
+            std::string filename = device->getFilename();
+            std::string language = clientInfo ? clientInfo->language : "en-US";
+			std::string descriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
+            if(!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(descriptionText))));
+            std::string longDescriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
+			if(!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", std::shared_ptr<Variable>(new Variable(longDescriptionText))));
 
 			std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
 			std::shared_ptr<Variable> variable2 = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
