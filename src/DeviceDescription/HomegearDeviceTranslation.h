@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- *
+ * 
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,62 +28,64 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef HOMEGEARDEVICETRANSLATION_H_
+#define HOMEGEARDEVICETRANSLATION_H_
 
+#include <string>
 #include <memory>
+#include <unordered_map>
+#include "../Encoding/RapidXml/rapidxml.hpp"
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-enum class RpcClientType
-{
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
+class SharedObjects;
 
-enum class RpcType
+namespace DeviceDescription
 {
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
 
-class RpcClientInfo
+class HomegearDeviceTranslation;
+
+/**
+ * Helper type for HomegearDeviceTranslation pointers.
+ */
+typedef std::shared_ptr<HomegearDeviceTranslation> PHomegearDeviceTranslation;
+
+/**
+ * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
+ */
+class HomegearDeviceTranslation
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
+    struct ParameterTranslation
+    {
+        std::string label;
+        std::string description;
+    };
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
+	HomegearDeviceTranslation(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
+	virtual ~HomegearDeviceTranslation();
 
-	RpcClientInfo() {}
-	virtual ~RpcClientInfo() {}
+	//{{{ XML entries
+	std::string lang;
+    std::unordered_map<std::string, std::string> typeDescriptions;
+    std::unordered_map<std::string, std::string> typeLongDescriptions;
+    std::unordered_map<std::string, std::unordered_map<std::string, ParameterTranslation>> configParameters;
+    std::unordered_map<std::string, std::unordered_map<std::string, ParameterTranslation>> linkParameters;
+    std::unordered_map<std::string, std::unordered_map<std::string, ParameterTranslation>> variables;
+    //}}}
+
+	bool loaded() { return _loaded; }
+protected:
+	BaseLib::SharedObjects* _bl = nullptr;
+	bool _loaded = false;
+
+	void load(std::string xmlFilename);
+	void parseXML(xml_node<>* node);
 };
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

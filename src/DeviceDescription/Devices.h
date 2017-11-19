@@ -39,6 +39,7 @@
 #include "../Sockets/RpcClientInfo.h"
 #include "HomegearDevice.h"
 #include "../IEvents.h"
+#include "DeviceTranslations.h"
 
 namespace BaseLib
 {
@@ -84,6 +85,7 @@ protected:
 	int32_t _family = -1;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
+    std::shared_ptr<DeviceDescription::DeviceTranslations> _translations;
 
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);
 };

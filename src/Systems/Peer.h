@@ -36,6 +36,7 @@
 #include "../Sockets/RpcClientInfo.h"
 #include "../ScriptEngine/ScriptInfo.h"
 #include "ServiceMessages.h"
+#include "../DeviceDescription/DeviceTranslations.h"
 
 #include <string>
 #include <unordered_map>

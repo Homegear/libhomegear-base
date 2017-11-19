@@ -84,9 +84,7 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 			{
 				std::string propertyName(propertyNode->name());
 				std::string propertyValue(propertyNode->value());
-				if(propertyName == "label") label = propertyValue;
-				else if(propertyName == "description") description = propertyValue;
-				else if(propertyName == "readable") readable = propertyValue == "true";
+				if(propertyName == "readable") readable = propertyValue == "true";
 				else if(propertyName == "writeable") writeable = propertyValue == "true";
 				else if(propertyName == "transmitted") transmitted = propertyValue == "true";
 				else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }

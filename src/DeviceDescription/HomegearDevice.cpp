@@ -47,6 +47,16 @@ std::string HomegearDevice::getPath()
 	return _path;
 }
 
+void HomegearDevice::setFilename(std::string& value)
+{
+    _filename = value;
+}
+
+std::string HomegearDevice::getFilename()
+{
+    return _filename;
+}
+
 int32_t HomegearDevice::getDynamicChannelCount()
 {
 	return _dynamicChannelCount;
@@ -171,6 +181,7 @@ void HomegearDevice::load(std::string xmlFilename, std::vector<char>& xml)
 	try
 	{
 		_path = xmlFilename;
+        _filename = BaseLib::HelperFunctions::splitLast(xmlFilename, '/').second;
 		doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml[0]);
 		if(!doc.first_node("homegearDevice"))
 		{
@@ -204,6 +215,7 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 	try
 	{
 		_path = xmlFilename;
+        _filename = BaseLib::HelperFunctions::splitLast(xmlFilename, '/').second;
 		std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
 		if(fileStream)
 		{
@@ -1066,18 +1078,6 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 		// {{{ Properties
 			xml_node<>* propertiesNode = doc->allocate_node(node_element, "properties");
 			parentNode->append_node(propertiesNode);
-
-			if(!parameter->label.empty())
-			{
-				xml_node<>* node = doc->allocate_node(node_element, "label", doc->allocate_string(parameter->label.c_str(), parameter->label.size() + 1));
-				propertiesNode->append_node(node);
-			}
-
-			if(!parameter->description.empty())
-			{
-				xml_node<>* node = doc->allocate_node(node_element, "description", doc->allocate_string(parameter->description.c_str(), parameter->description.size() + 1));
-				propertiesNode->append_node(node);
-			}
 
 			if(!parameter->readable)
 			{

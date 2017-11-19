@@ -89,8 +89,6 @@ public:
 	std::string id;
 
 	//Properties
-	std::string label;
-	std::string description;
 	bool readable = true;
 	bool writeable = true;
 	bool transmitted = true;

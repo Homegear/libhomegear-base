@@ -20,10 +20,14 @@ set(SOURCE_FILES
         src/DeviceDescription/DevicePacket.h
         src/DeviceDescription/Devices.cpp
         src/DeviceDescription/Devices.h
+        src/DeviceDescription/DeviceTranslations.cpp
+        src/DeviceDescription/DeviceTranslations.h
         src/DeviceDescription/Function.cpp
         src/DeviceDescription/Function.h
         src/DeviceDescription/HomegearDevice.cpp
         src/DeviceDescription/HomegearDevice.h
+        src/DeviceDescription/HomegearDeviceTranslation.cpp
+        src/DeviceDescription/HomegearDeviceTranslation.h
         src/DeviceDescription/HttpPayload.cpp
         src/DeviceDescription/HttpPayload.h
         src/DeviceDescription/JsonPayload.cpp

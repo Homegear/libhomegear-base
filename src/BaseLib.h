@@ -59,6 +59,7 @@
 #include "LowLevel/Spi.h"
 #include "Output/Output.h"
 #include "DeviceDescription/Devices.h"
+#include "DeviceDescription/DeviceTranslations.h"
 #include "ScriptEngine/ScriptInfo.h"
 #include "Security/Hash.h"
 #include "Security/Gcrypt.h"

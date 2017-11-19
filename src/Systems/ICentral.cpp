@@ -43,6 +43,7 @@ ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, ICentr
 	setEventHandler(eventHandler);
 	_initialized = false;
 	_disposing = false;
+	_translations = std::make_shared<DeviceTranslations>(baseLib, deviceFamily);
 }
 
 ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, uint32_t deviceId, std::string serialNumber, int32_t address, ICentralEventSink* eventHandler) : ICentral(deviceFamily, baseLib, eventHandler)

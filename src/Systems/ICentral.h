@@ -89,6 +89,7 @@ public:
 
 	virtual int32_t deviceFamily();
 
+    std::shared_ptr<DeviceTranslations> getTranslations() { return _translations; }
 	virtual int32_t getAddress() { return _address; }
 	virtual uint64_t getId() { return _deviceId; }
     virtual std::string getSerialNumber() { return _serialNumber; }
@@ -189,6 +190,7 @@ protected:
     std::atomic_bool _initialized;
     std::atomic_bool _disposing;
 
+	std::shared_ptr<DeviceDescription::DeviceTranslations> _translations;
 	std::shared_ptr<Peer> _currentPeer;
     std::unordered_map<int32_t, std::shared_ptr<Peer>> _peers;
     std::unordered_map<std::string, std::shared_ptr<Peer>> _peersBySerial;
