@@ -79,6 +79,19 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		else if(nodeName == "responseType") responseType = Math::getNumber(value);
 		else if(nodeName == "responseSubtype") responseSubtype = Math::getNumber(value);
 		else if(nodeName == "responseTypeId") responseTypeId = value;
+		else if(nodeName == "responses")
+		{
+			for(xml_node<>* responsesNode = subNode->first_node(); responsesNode; responsesNode = responsesNode->next_sibling())
+			{
+				std::string packetsNodeName(responsesNode->name());
+				if(packetsNodeName == "response")
+				{
+					PDevicePacketResponse response = std::make_shared<DevicePacketResponse>(baseLib, responsesNode);
+					responses.push_back(response);
+				}
+				else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\": " + packetsNodeName);
+			}
+		}
 		else if(nodeName == "channel") channel = Math::getNumber(value);
 		else if(nodeName == "channelIndex")
 		{

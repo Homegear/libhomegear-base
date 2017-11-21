@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -28,13 +28,13 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef BINARYPAYLOAD_H_
-#define BINARYPAYLOAD_H_
+#ifndef DEVICEPACKETRESPONSE_H_
+#define DEVICEPACKETRESPONSE_H_
 
 #include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
-#include <vector>
 #include <memory>
+#include <vector>
 
 using namespace rapidxml;
 
@@ -46,45 +46,37 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class BinaryPayload;
+class DevicePacketResponse;
 
 /**
- * Helper type for BinaryPayload pointers.
+ * Helper type for Packet pointers.
  */
-typedef std::shared_ptr<BinaryPayload> PBinaryPayload;
+typedef std::shared_ptr<DevicePacketResponse> PDevicePacketResponse;
 
 /**
- * Helper type for arrays of BinaryPayload pointers.
+ * Class defining a physical packet.
  */
-typedef std::vector<PBinaryPayload> BinaryPayloads;
-
-/**
- * Class describing binary payloads.
- */
-class BinaryPayload
+class DevicePacketResponse
 {
 public:
-	BinaryPayload(BaseLib::SharedObjects* baseLib);
-	BinaryPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-	virtual ~BinaryPayload() {}
+    struct ConditionOperator
+    {
+        enum Enum { none, e, g, l, ge, le };
+    };
 
-	double index = 0;
-	double size = 1.0;
-	double index2 = 0;
-	double size2 = 0;
-	uint32_t bitIndex = 0;
-	uint32_t bitSize = 0;
-	int32_t index2Offset = -1;
-	int32_t constValueInteger = -1;
-	double constValueDecimal = -1;
-	std::string constValueString;
-	bool isSigned = false;
-	bool omitIfSet = false;
-	int32_t omitIf = 0;
-	std::string parameterId;
-	int32_t parameterChannel = -1;
+    DevicePacketResponse(BaseLib::SharedObjects* baseLib);
+    DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~DevicePacketResponse() = default;
+
+    bool checkCondition(int32_t value);
+
+    std::string responseId;
+    ConditionOperator::Enum conditionOperator = ConditionOperator::none;
+    std::string conditionParameterId;
+    int32_t conditionChannel = -1;
+    int32_t conditionValue = -1;
 protected:
-	BaseLib::SharedObjects* _bl = nullptr;
+    BaseLib::SharedObjects* _bl = nullptr;
 };
 }
 }

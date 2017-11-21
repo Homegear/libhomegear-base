@@ -18,6 +18,8 @@ set(SOURCE_FILES
         src/DeviceDescription/BinaryPayload.h
         src/DeviceDescription/DevicePacket.cpp
         src/DeviceDescription/DevicePacket.h
+        src/DeviceDescription/DevicePacketResponse.cpp
+        src/DeviceDescription/DevicePacketResponse.h
         src/DeviceDescription/Devices.cpp
         src/DeviceDescription/Devices.h
         src/DeviceDescription/DeviceTranslations.cpp
