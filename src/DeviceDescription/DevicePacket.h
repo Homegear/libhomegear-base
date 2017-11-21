@@ -35,7 +35,9 @@
 #include "BinaryPayload.h"
 #include "HttpPayload.h"
 #include "Parameter.h"
+#include "DevicePacketResponse.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -110,6 +112,7 @@ public:
 	int32_t responseType = -1;
 	int32_t responseSubtype = -1;
 	std::string responseTypeId;
+    std::vector<PDevicePacketResponse> responses;
 	int32_t channel = -1;
 	int32_t channelIndex = -1;
 	int32_t channelIndexOffset = 0;

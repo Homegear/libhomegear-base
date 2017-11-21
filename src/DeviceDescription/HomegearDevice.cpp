@@ -661,6 +661,55 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				subnode->append_node(packetNode);
 			}
 
+			if(!i->second->responses.empty())
+			{
+				packetNode = doc->allocate_node(node_element, "responses");
+				subnode->append_node(packetNode);
+
+                for(auto& response : i->second->responses)
+                {
+                    xml_node<>* responseNode = doc->allocate_node(node_element, "response");
+                    packetNode->append_node(responseNode);
+
+                    if(!response->responseId.empty())
+                    {
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "responseId", doc->allocate_string(response->responseId.c_str(), response->responseId.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionOperator != DevicePacketResponse::ConditionOperator::Enum::none)
+                    {
+                        if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::e) tempString = "e";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::g) tempString = "g";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::l) tempString = "l";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::ge) tempString = "ge";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::le) tempString = "le";
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionOperator", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(!response->conditionParameterId.empty())
+                    {
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionParameterId", doc->allocate_string(response->conditionParameterId.c_str(), response->conditionParameterId.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionChannel != -1)
+                    {
+                        tempString = std::to_string(response->conditionChannel);
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionChannel", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionValue != -1)
+                    {
+                        tempString = std::to_string(response->conditionValue);
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+                }
+			}
+
 			if(i->second->channel != -1)
 			{
 				tempString = std::to_string(i->second->channel);
