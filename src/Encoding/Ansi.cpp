@@ -136,6 +136,7 @@ namespace BaseLib
 		uint32_t pos = 0;
 		for(uint32_t i = 0; i < ansiString.size(); ++i)
 		{
+			if(ansiString[i] == 0) break;
 			if((uint8_t)ansiString[i] < 128)
 			{
 				buffer[pos] = ansiString[i];
@@ -149,7 +150,7 @@ namespace BaseLib
 			}
 		}
 		buffer[pos] = 0;
-		return std::string(&buffer[0], pos);
+		return std::string(buffer.data(), pos);
 	}
 
 	std::string Ansi::toUtf8(const char* ansiString, uint32_t length)

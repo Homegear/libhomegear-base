@@ -2558,7 +2558,7 @@ PVariable Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool re
 				{
 					PVariable address(new Variable(VariableType::tArray));
 					array->arrayValue->push_back(address);
-					address->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+					address->arrayValue->push_back(PVariable(new Variable(peer->getID())));
 					address->arrayValue->push_back(PVariable(new Variable((*i)->channel)));
 				}
 				else array->arrayValue->push_back(PVariable(new Variable(peerSerial + ":" + std::to_string((*i)->channel))));
