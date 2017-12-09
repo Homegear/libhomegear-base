@@ -1745,7 +1745,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 					_bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
 					continue;
 				}
-				if(!j->second->readable && !returnWriteOnly) continue;
+				if(!j->second->readable && !j->second->transmitted && !returnWriteOnly) continue;
 #ifdef CCU2
 				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
@@ -1760,7 +1760,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 
 				PVariable element(new Variable(VariableType::tStruct));
 				PVariable value;
-				if(j->second->readable)
+				if(j->second->readable || j->second->transmitted)
 				{
 					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 					if(j->second->password || parameterData.empty()) value.reset(new Variable(j->second->logical->type));
@@ -1774,6 +1774,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 
 				element->structValue->insert(StructElement("READABLE", PVariable(new Variable(j->second->readable))));
 				element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(j->second->writeable))));
+                element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(j->second->transmitted))));
 				element->structValue->insert(StructElement("UNIT", PVariable(new Variable(j->second->unit))));
 				if(j->second->logical->type == ILogical::Type::tBoolean)
 				{
@@ -1953,11 +1954,24 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 		{
 			BaseLib::DeviceDescription::PSupportedDevice supportedDevice = _rpcDevice->getType(_deviceType, _firmwareVersion);
 
+            std::shared_ptr<ICentral> central = getCentral();
+            if(!central) return description;
+            std::string language = clientInfo ? clientInfo->language : "en-US";
+            std::string filename = _rpcDevice->getFilename();
+
 			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
-			if(supportedDevice && !supportedDevice->longDescription.empty() && (fields.empty() || fields.find("DESCRIPTION") != fields.end())) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(supportedDevice->longDescription))));
+			if(fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
 			if(supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", PVariable(new Variable(supportedDevice->serialPrefix))));
+
+            if(supportedDevice)
+            {
+                std::string descriptionText = central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id);
+                if(!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(descriptionText))));
+                std::string longDescriptionText = central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id);
+                if(!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", PVariable(new Variable(longDescriptionText))));
+            }
 
 			PVariable variable = PVariable(new Variable(VariableType::tArray));
 			PVariable variable2 = PVariable(new Variable(VariableType::tArray));
@@ -2544,7 +2558,7 @@ PVariable Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool re
 				{
 					PVariable address(new Variable(VariableType::tArray));
 					array->arrayValue->push_back(address);
-					address->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+					address->arrayValue->push_back(PVariable(new Variable(peer->getID())));
 					address->arrayValue->push_back(PVariable(new Variable((*i)->channel)));
 				}
 				else array->arrayValue->push_back(PVariable(new Variable(peerSerial + ":" + std::to_string((*i)->channel))));
@@ -2602,7 +2616,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 			PVariable element;
 			if(type == ParameterGroup::Type::Enum::variables)
 			{
-				if(!i->second->readable) continue;
+				if(!i->second->readable && !i->second->transmitted) continue;
 				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
 				if(valuesIterator == valuesCentral.end()) continue;
 				std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesIterator->second.find(i->second->id);
@@ -2807,7 +2821,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 		PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::variables);
 		PParameter parameter = parameterGroup->parameters.at(valueKey);
 		if(!parameter) return Variable::createError(-5, "Unknown parameter.");
-		if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+		if(!parameter->readable && !parameter->transmitted) return Variable::createError(-6, "Parameter is not readable.");
 		PVariable variable;
 		if(requestFromDevice)
 		{
@@ -2853,8 +2867,9 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		PVariable description = std::make_shared<Variable>(VariableType::tStruct);
 
 		int32_t operations = 0;
-		if(parameterIterator->second->readable) operations += 5;
+		if(parameterIterator->second->readable) operations += 4;
 		if(parameterIterator->second->writeable) operations += 2;
+        if(parameterIterator->second->transmitted) operations += 1;
 		int32_t uiFlags = 0;
 		if(parameterIterator->second->visible) uiFlags += 1;
 		if(parameterIterator->second->internal) uiFlags += 2;
@@ -3030,10 +3045,16 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		}
 
 		description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameterIterator->second->unit))));
-		if(!parameterIterator->second->label.empty()) description->structValue->insert(StructElement("LABEL", PVariable(new Variable(parameterIterator->second->label))));
-		if(!parameterIterator->second->description.empty()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(parameterIterator->second->description))));
 		if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
 		if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
+
+        std::shared_ptr<ICentral> central = getCentral();
+        if(!central) return description;
+		std::string language = clientInfo ? clientInfo->language : "en-US";
+		std::string filename = _rpcDevice->getFilename();
+		auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameterIterator->second->parent()->type(), parameterIterator->second->parent()->id, parameterIterator->second->id);
+		if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
+		if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
 
 		return description;
 	}

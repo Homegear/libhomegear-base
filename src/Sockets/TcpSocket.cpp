@@ -28,6 +28,7 @@
  * files in the program, then also delete it here.
 */
 
+#include <gnutls/gnutls.h>
 #include "../BaseLib.h"
 #include "TcpSocket.h"
 
@@ -97,6 +98,20 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	_clientKeyData = clientKeyData;
 
 	if(_useSsl) initSsl();
+}
+
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
+{
+    _useSsl = useSsl;
+    _verifyCertificate = verifyCertificate;
+    _caFile = caFile;
+    _caData = caData;
+    _clientCertFile = clientCertFile;
+    _clientCertData = clientCertData;
+    _clientKeyFile = clientKeyFile;
+    _clientKeyData = clientKeyData;
+
+    if(_useSsl) initSsl();
 }
 
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
@@ -298,6 +313,12 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 		}
 	}
+
+    int32_t TcpSocket::clientCount()
+    {
+        std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+        return _clients.size();
+    }
 
 	void TcpSocket::serverThread()
 	{
@@ -582,10 +603,17 @@ void TcpSocket::initSsl()
 		}
 	}
 	else
-	{
-		if(_verifyCertificate && !_isServer) throw SocketSSLException("Certificate verification is enabled, but \"caFile\" and \"caData\" are not specified for the host \"" + _hostname + "\".");
-		else if(_requireClientCert && _isServer) throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
-		else if(!_isServer) _bl->out.printWarning("Warning: \"caFile\" is not specified for the host \"" + _hostname + "\" and certificate verification is disabled. It is highly recommended to enable certificate verification.");
+    {
+        if(_requireClientCert && _isServer) throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
+        else if(!_isServer)
+        {
+            if((result =gnutls_certificate_set_x509_system_trust(_x509Cred)) < 0)
+            {
+                gnutls_certificate_free_credentials(_x509Cred);
+                _x509Cred = nullptr;
+                throw SocketSSLException("Could not load system certificates: " + std::string(gnutls_strerror(result)));
+            }
+        }
 	}
 
 	if(result == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
@@ -638,13 +666,13 @@ void TcpSocket::initSsl()
 				throw SocketSSLException("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
 			}
 
-			gnutls_datum_t data;
+            std::vector<uint8_t> binaryData;
+			gnutls_datum_t data{};
 			if(!_dhParamFile.empty())
 			{
-				std::vector<uint8_t> binaryData;
 				try
 				{
-					binaryData = Io::getUBinaryFileContent(_dhParamFile.c_str());
+					binaryData = Io::getUBinaryFileContent(_dhParamFile);
 					binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
 				}
 				catch(BaseLib::Exception& ex)
@@ -664,27 +692,30 @@ void TcpSocket::initSsl()
 					throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
 				}
 				data.data = binaryData.data();
-				data.size = binaryData.size();
+				data.size = static_cast<unsigned int>(binaryData.size());
 			}
 			else
 			{
 				data.data = (unsigned char*)_dhParamData.c_str();
-				data.size = _dhParamData.size();
+				data.size = static_cast<unsigned int>(_dhParamData.size());
 			}
 
-			if((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+			if(data.size > 0)
 			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				gnutls_dh_params_deinit(_dhParams);
-				_x509Cred = nullptr;
-				_dhParams = nullptr;
-				throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
-			}
+				if ((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+				{
+					gnutls_certificate_free_credentials(_x509Cred);
+					gnutls_dh_params_deinit(_dhParams);
+					_x509Cred = nullptr;
+					_dhParams = nullptr;
+					throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
+				}
 
-			gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+				gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+			}
 		}
 
-		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
 		{
 			gnutls_certificate_free_credentials(_x509Cred);
 			gnutls_dh_params_deinit(_dhParams);
@@ -700,13 +731,13 @@ void TcpSocket::initSsl()
 	{
 		if(!_clientCertData.empty() && !_clientKeyData.empty())
 		{
-			gnutls_datum_t clientCertData;
+			gnutls_datum_t clientCertData{};
 			clientCertData.data = (unsigned char*)_clientCertData.c_str();
-			clientCertData.size = _clientCertData.size();
+			clientCertData.size = static_cast<unsigned int>(_clientCertData.size());
 
-			gnutls_datum_t clientKeyData;
+			gnutls_datum_t clientKeyData{};
 			clientKeyData.data = (unsigned char*)_clientKeyData.c_str();
-			clientKeyData.size = _clientKeyData.size();
+			clientKeyData.size = static_cast<unsigned int>(_clientKeyData.size());
 
 			if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
 			{
@@ -781,7 +812,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	{
 		do
 		{
-			bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
+			bytesRead = static_cast<int32_t>(gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize));
 		} while(bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
 		if(bytesRead > 0)
 		{
@@ -791,11 +822,11 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		}
 	}
 
-	timeval timeout;
+	timeval timeout{};
 	int32_t seconds = _readTimeout / 1000000;
 	timeout.tv_sec = seconds;
 	timeout.tv_usec = _readTimeout - (1000000 * seconds);
-	fd_set readFileDescriptor;
+	fd_set readFileDescriptor{};
 	FD_ZERO(&readFileDescriptor);
 	auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
 	fileDescriptorGuard.lock();

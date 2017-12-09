@@ -718,6 +718,16 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->caFile = value;
 			_bl->out.printDebug("Debug: CAFile set to " + settings->caFile);
 		}
+		else if(name == "certfile")
+		{
+			settings->certFile = value;
+			_bl->out.printDebug("Debug: CertFile set to " + settings->certFile);
+		}
+		else if(name == "keyfile")
+		{
+			settings->keyFile = value;
+			_bl->out.printDebug("Debug: KeyFile set to " + settings->keyFile);
+		}
 		else if(name == "verifycertificate")
 		{
 			BaseLib::HelperFunctions::toLower(value);

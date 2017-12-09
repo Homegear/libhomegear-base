@@ -28,62 +28,57 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef DEVICEPACKETRESPONSE_H_
+#define DEVICEPACKETRESPONSE_H_
 
+#include "../Encoding/RapidXml/rapidxml.hpp"
+#include <string>
 #include <memory>
+#include <vector>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-enum class RpcClientType
-{
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
+class SharedObjects;
 
-enum class RpcType
+namespace DeviceDescription
 {
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
 
-class RpcClientInfo
+class DevicePacketResponse;
+
+/**
+ * Helper type for Packet pointers.
+ */
+typedef std::shared_ptr<DevicePacketResponse> PDevicePacketResponse;
+
+/**
+ * Class defining a physical packet.
+ */
+class DevicePacketResponse
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
+    struct ConditionOperator
+    {
+        enum Enum { none, e, g, l, ge, le };
+    };
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
+    DevicePacketResponse(BaseLib::SharedObjects* baseLib);
+    DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~DevicePacketResponse() = default;
 
-	RpcClientInfo() {}
-	virtual ~RpcClientInfo() {}
+    bool checkCondition(int32_t value);
+
+    std::string responseId;
+    ConditionOperator::Enum conditionOperator = ConditionOperator::none;
+    std::string conditionParameterId;
+    int32_t conditionChannel = -1;
+    int32_t conditionValue = -1;
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
 };
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

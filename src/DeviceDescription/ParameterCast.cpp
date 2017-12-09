@@ -274,7 +274,7 @@ void IntegerIntegerMap::fromPacket(PVariable value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
-	if(Direction::Enum::fromDevice || Direction::Enum::both)
+	if(direction == Direction::Enum::fromDevice || direction == Direction::Enum::both)
 	{
 		std::map<int32_t, int32_t>::const_iterator element = integerValueMapFromDevice.find(value->integerValue);
 		if(element != integerValueMapFromDevice.end()) value->integerValue = element->second;
@@ -285,7 +285,7 @@ void IntegerIntegerMap::toPacket(PVariable value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
-	if(Direction::Enum::toDevice || Direction::Enum::both)
+	if(direction == Direction::Enum::toDevice || direction == Direction::Enum::both)
 	{
 		std::map<int32_t, int32_t>::const_iterator element = integerValueMapToDevice.find(value->integerValue);
 		if(element != integerValueMapToDevice.end()) value->integerValue = element->second;

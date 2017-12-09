@@ -82,6 +82,7 @@ public:
 	bool omitIfSet = false;
 	int32_t omitIf = 0;
 	std::string parameterId;
+	int32_t parameterChannel = -1;
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 };

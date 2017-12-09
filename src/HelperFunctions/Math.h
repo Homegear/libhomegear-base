@@ -272,6 +272,14 @@ public:
 	 */
 	static uint32_t getIeee754Binary32(float value);
 
+    /*
+	 * Converts a float value to it's IEEE 754 binary64 representation.
+	 *
+	 * @param value The float value to convert.
+	 * @return Returns a uint64_t with the converted value MSB first.
+	 */
+    static uint64_t getIeee754Binary64(double value);
+
 	/*
 	 * Converts a value in IEEE 754 binary32 representation to float data must be MSB first.
 	 *
@@ -279,6 +287,14 @@ public:
 	 * @return Returns the converted value as float.
 	 */
 	static float getFloatFromIeee754Binary32(uint32_t binary32);
+
+    /*
+     * Converts a value in IEEE 754 binary64 representation to float data must be MSB first.
+     *
+     * @param binary64 The binary64 value to convert.
+     * @return Returns the converted value as float.
+     */
+    static double getDoubleFromIeee754Binary64(uint64_t binary64);
 
 	/**
 	 * Converts a string to double.

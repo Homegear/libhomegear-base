@@ -106,6 +106,8 @@ public:
 	// {{{ Helpers
 	void setPath(std::string& value);
 	std::string getPath();
+    void setFilename(std::string& value);
+    std::string getFilename();
 	int32_t getDynamicChannelCount();
 	void setDynamicChannelCount(int32_t value);
 	PSupportedDevice getType(uint32_t typeNumber);
@@ -118,6 +120,7 @@ protected:
 
 	// {{{ Helpers
 	std::string _path;
+    std::string _filename;
 	int32_t _dynamicChannelCount = -1;
 	// }}}
 

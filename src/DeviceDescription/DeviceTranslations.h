@@ -28,62 +28,46 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef DEVICETRANSLATIONS_H_
+#define DEVICETRANSLATIONS_H_
 
+#include <vector>
 #include <memory>
+#include <mutex>
+
+#include "HomegearDeviceTranslation.h"
+#include "ParameterGroup.h"
 
 namespace BaseLib
 {
 
-enum class RpcClientType
-{
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
+class SharedObjects;
 
-enum class RpcType
+namespace DeviceDescription
 {
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
 
-class RpcClientInfo
+/**
+ * Class to work with translations of device description files of one device family. It is used to load all translations and retrieve the translation of a device.
+ */
+class DeviceTranslations
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
+	DeviceTranslations(BaseLib::SharedObjects* baseLib, int32_t family);
+	virtual ~DeviceTranslations() = default;
+	void clear();
+    std::string getTypeDescription(std::string& filename, std::string& language, std::string& deviceId);
+    std::string getTypeLongDescription(std::string& filename, std::string& language, std::string& deviceId);
+    std::pair<std::string, std::string> getParameterTranslations(std::string& filename, std::string& language, ParameterGroup::Type::Enum parameterGroupType, std::string& parameterGroupId, std::string& parameterId);
+protected:
+	BaseLib::SharedObjects* _bl = nullptr;
+	int32_t _family = -1;
+    std::mutex _deviceTranslationsMutex;
+	std::unordered_map<std::string, std::unordered_map<std::string, PHomegearDeviceTranslation>> _deviceTranslations;
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-
-	RpcClientInfo() {}
-	virtual ~RpcClientInfo() {}
+    PHomegearDeviceTranslation getTranslation(std::string& filename, std::string& language);
+	PHomegearDeviceTranslation load(std::string& filename, std::string& language);
 };
 
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
 }
-
+}
 #endif

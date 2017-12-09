@@ -47,6 +47,16 @@ std::string HomegearDevice::getPath()
 	return _path;
 }
 
+void HomegearDevice::setFilename(std::string& value)
+{
+    _filename = value;
+}
+
+std::string HomegearDevice::getFilename()
+{
+    return _filename;
+}
+
 int32_t HomegearDevice::getDynamicChannelCount()
 {
 	return _dynamicChannelCount;
@@ -171,6 +181,7 @@ void HomegearDevice::load(std::string xmlFilename, std::vector<char>& xml)
 	try
 	{
 		_path = xmlFilename;
+        _filename = BaseLib::HelperFunctions::splitLast(xmlFilename, '/').second;
 		doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml[0]);
 		if(!doc.first_node("homegearDevice"))
 		{
@@ -204,6 +215,7 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 	try
 	{
 		_path = xmlFilename;
+        _filename = BaseLib::HelperFunctions::splitLast(xmlFilename, '/').second;
 		std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
 		if(fileStream)
 		{
@@ -649,6 +661,55 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				subnode->append_node(packetNode);
 			}
 
+			if(!i->second->responses.empty())
+			{
+				packetNode = doc->allocate_node(node_element, "responses");
+				subnode->append_node(packetNode);
+
+                for(auto& response : i->second->responses)
+                {
+                    xml_node<>* responseNode = doc->allocate_node(node_element, "response");
+                    packetNode->append_node(responseNode);
+
+                    if(!response->responseId.empty())
+                    {
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "responseId", doc->allocate_string(response->responseId.c_str(), response->responseId.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionOperator != DevicePacketResponse::ConditionOperator::Enum::none)
+                    {
+                        if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::e) tempString = "e";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::g) tempString = "g";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::l) tempString = "l";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::ge) tempString = "ge";
+                        else if(response->conditionOperator == DevicePacketResponse::ConditionOperator::Enum::le) tempString = "le";
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionOperator", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(!response->conditionParameterId.empty())
+                    {
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionParameterId", doc->allocate_string(response->conditionParameterId.c_str(), response->conditionParameterId.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionChannel != -1)
+                    {
+                        tempString = std::to_string(response->conditionChannel);
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionChannel", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+
+                    if(response->conditionValue != -1)
+                    {
+                        tempString = std::to_string(response->conditionValue);
+                        xml_node<>* responseElementNode = doc->allocate_node(node_element, "conditionValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        responseNode->append_node(responseElementNode);
+                    }
+                }
+			}
+
 			if(i->second->channel != -1)
 			{
 				tempString = std::to_string(i->second->channel);
@@ -1067,18 +1128,6 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			xml_node<>* propertiesNode = doc->allocate_node(node_element, "properties");
 			parentNode->append_node(propertiesNode);
 
-			if(!parameter->label.empty())
-			{
-				xml_node<>* node = doc->allocate_node(node_element, "label", doc->allocate_string(parameter->label.c_str(), parameter->label.size() + 1));
-				propertiesNode->append_node(node);
-			}
-
-			if(!parameter->description.empty())
-			{
-				xml_node<>* node = doc->allocate_node(node_element, "description", doc->allocate_string(parameter->description.c_str(), parameter->description.size() + 1));
-				propertiesNode->append_node(node);
-			}
-
 			if(!parameter->readable)
 			{
 				tempString = "false";
@@ -1090,6 +1139,13 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			{
 				tempString = "false";
 				xml_node<>* node = doc->allocate_node(node_element, "writeable", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+				propertiesNode->append_node(node);
+			}
+
+			if(!parameter->transmitted)
+			{
+				tempString = "false";
+				xml_node<>* node = doc->allocate_node(node_element, "transmitted", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				propertiesNode->append_node(node);
 			}
 
