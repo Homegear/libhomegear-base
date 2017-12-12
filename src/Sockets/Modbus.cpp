@@ -146,7 +146,7 @@ std::vector<char> Modbus::getResponse(std::vector<char>& packet)
     return std::vector<char>(_readBuffer->begin(), _readBuffer->begin() + bytesread);
 }
 
-void Modbus::readCoils(uint16_t startingAddress, uint16_t coilCount, std::vector<uint8_t>& buffer)
+void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t coilCount)
 {
     if(coilCount == 0) throw ModbusException("coilCount can't be 0.");
 
@@ -194,7 +194,7 @@ void Modbus::readCoils(uint16_t startingAddress, uint16_t coilCount, std::vector
     }
 }
 
-void Modbus::readDiscreteInputs(uint16_t startingAddress, uint16_t inputCount, std::vector<uint8_t>& buffer)
+void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t inputCount)
 {
     if(inputCount == 0) throw ModbusException("inputCount can't be 0.");
 
@@ -242,7 +242,7 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, uint16_t inputCount, s
     }
 }
 
-void Modbus::readHoldingRegisters(uint16_t startingAddress, uint16_t registerCount, std::vector<uint16_t>& buffer)
+void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t>& buffer, uint16_t registerCount)
 {
     if(registerCount == 0) throw ModbusException("registerCount can't be 0.");
     if(buffer.size() < registerCount) throw ModbusException("Buffer is too small.");
@@ -290,7 +290,7 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, uint16_t registerCou
     }
 }
 
-void Modbus::readInputRegisters(uint16_t startingAddress, uint16_t registerCount, std::vector<uint16_t>& buffer)
+void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t>& buffer, uint16_t registerCount)
 {
     if(registerCount == 0) throw ModbusException("registerCount can't be 0.");
     if(buffer.size() < registerCount) throw ModbusException("Buffer is too small.");

@@ -91,8 +91,8 @@ public:
      * Executes modbus function 01 (0x01) "Read Coils".
      *
      * @param startingAddress Valid values range from 0x0000 to 0xFFFF.
-     * @param coilCount The number of coils to read (from 1 to 2000 [= 0x7D0]).
      * @param[out] buffer The buffer to fill. Make sure the size is at least number of coils bits.
+     * @param coilCount The number of coils to read (from 1 to 2000 [= 0x7D0]).
      * @returns Returns the coil states as a byte array. The least significant bit is to the left (in contrast to the Modbus packet). So the bits and bytes can be read from left to right.
      * @throws SocketOperationException On socket errors.
      * @throws SocketTimeOutException On socket timeout.
@@ -100,14 +100,14 @@ public:
      * @throws ModbusException Thrown on all Modbus errors.
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
-    void readCoils(uint16_t startingAddress, uint16_t coilCount, std::vector<uint8_t>& buffer);
+    void readCoils(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t coilCount);
 
     /**
      * Executes modbus function 02 (0x02) "Read Discrete Inputs".
      *
      * @param startingAddress Valid values range from 0x0000 to 0xFFFF.
-     * @param inputCount The number of inputs to read (from 1 to 2000 [= 0x7D0]).
      * @param[out] buffer The buffer to fill. Make sure the size is at least number of inputs bits.
+     * @param inputCount The number of inputs to read (from 1 to 2000 [= 0x7D0]).
      * @returns Returns the input states as a byte array. The least significant bit is to the left (in contrast to the Modbus packet). So the bits and bytes can be read from left to right.
      * @throws SocketOperationException On socket errors.
      * @throws SocketTimeOutException On socket timeout.
@@ -115,7 +115,7 @@ public:
      * @throws ModbusException Thrown on all Modbus errors.
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
-    void readDiscreteInputs(uint16_t startingAddress, uint16_t inputCount, std::vector<uint8_t>& buffer);
+    void readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t inputCount);
 
     /**
      * Executes modbus function 02 (0x02) "Read Discrete Inputs".
@@ -135,8 +135,8 @@ public:
      * Executes modbus function 03 (0x03) "Read Holding Registers".
      *
      * @param startingAddress Valid values range from 0x0000 to 0xFFFF.
-     * @param registerCount The number of registers to read (from 1 to 125 [= 0x7D]).
      * @param[out] buffer The buffer to fill. Make sure the size is at least number of number of registers.
+     * @param registerCount The number of registers to read (from 1 to 125 [= 0x7D]).
      * @returns Returns the register values.
      * @throws SocketOperationException On socket errors.
      * @throws SocketTimeOutException On socket timeout.
@@ -144,14 +144,14 @@ public:
      * @throws ModbusException Thrown on all Modbus errors.
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
-    void readHoldingRegisters(uint16_t startingAddress, uint16_t registerCount, std::vector<uint16_t>& buffer);
+    void readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t>& buffer, uint16_t registerCount);
 
     /**
      * Executes modbus function 04 (0x04) "Read Input Registers".
      *
      * @param startingAddress Valid values range from 0x0000 to 0xFFFF.
-     * @param registerCount The number of registers to read (from 1 to 125 [= 0x7D]).
      * @param[out] buffer The buffer to fill. Make sure the size is at least number of number of registers.
+     * @param registerCount The number of registers to read (from 1 to 125 [= 0x7D]).
      * @returns Returns the register values.
      * @throws SocketOperationException On socket errors.
      * @throws SocketTimeOutException On socket timeout.
@@ -159,7 +159,7 @@ public:
      * @throws ModbusException Thrown on all Modbus errors.
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
-    void readInputRegisters(uint16_t startingAddress, uint16_t registerCount, std::vector<uint16_t>& buffer);
+    void readInputRegisters(uint16_t startingAddress, std::vector<uint16_t>& buffer, uint16_t registerCount);
 
     /**
      * Executes modbus function 05 (0x05) "Write Single Coil".
