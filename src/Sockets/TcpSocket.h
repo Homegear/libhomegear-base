@@ -285,6 +285,10 @@ public:
 	 *
 	 * @param buffer The buffer to fill.
 	 * @param bufferSize The size of the buffer.
+	 * @returns The number of bytes read. The returned value is always greater than 0.
+	 * @throws SocketOperationException Thrown when socket is nullptr.
+	 * @throws SocketTimeOutException Thrown when reading times out.
+	 * @throws SocketClosedException Thrown when socket is closed.
 	 */
 	int32_t proofread(char* buffer, int32_t bufferSize);
 
@@ -294,6 +298,10 @@ public:
 	 * @param buffer The buffer to fill.
 	 * @param bufferSize The size of the buffer.
 	 * @param[out] moreData If true, call proofread immediately again (without calling e. g. select first).
+	 * @returns The number of bytes read. The returned value is always greater than 0.
+	 * @throws SocketOperationException Thrown when socket is nullptr.
+	 * @throws SocketTimeOutException Thrown when reading times out.
+	 * @throws SocketClosedException Thrown when socket is closed.
 	 */
 	int32_t proofread(char* buffer, int32_t bufferSize, bool& moreData);
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
