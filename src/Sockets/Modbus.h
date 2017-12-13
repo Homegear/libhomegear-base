@@ -61,6 +61,41 @@ public:
 
 /**
  * This class provides a Modbus client. The class is thread safe.
+ *
+ * Modbus Client Example Code
+ * ==========================
+ *
+ * Save the example below in `main.cpp` and compile with:
+ *
+ *     g++ -o main -std=c++11 main.cpp -lhomegear-base -lgcrypt -lgnutls
+ *
+ * Start with:
+ *
+ *     ./main
+ *
+ * Example code:
+ *
+ *     // This program connects to a Modbus server, sets a register to "0xFFFF" and 2 seconds later to "0x0000".
+ *     #include <homegear-base/BaseLib.h>
+ *
+ *     std::shared_ptr<BaseLib::SharedObjects> _bl;
+ *
+ *     int main()
+ *     {
+ *         _bl.reset(new BaseLib::SharedObjects(false));
+ *
+ *         BaseLib::Modbus::ModbusInfo modbusInfo;
+ *         modbusInfo.hostname = "192.168.0.206"; //Replace with the IP address or hostname of your Modbus server.
+ *
+ *         BaseLib::Modbus modbus(_bl.get(), modbusInfo);
+ *
+ *         modbus.connect();
+ *         modbus.writeSingleRegister(0x2001, 0xFFFF); //Replace with a working register address and value
+ *         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+ *         modbus.writeSingleRegister(0x2001, 0x0000);  //Replace with a working register address and value
+ *         modbus.disconnect();
+ *     }
+ *
  */
 class Modbus
 {
@@ -86,6 +121,23 @@ public:
 	 * Destructor
 	 */
     virtual ~Modbus();
+
+    /**
+     * Opens the connection to the Modbus server.
+     * @throws SocketOperationException When the connection cannot be established.
+     */
+    void connect();
+
+    /**
+     * Closes the connection to the Modbus server.
+     */
+    void disconnect();
+
+    /**
+     * Checks if the socket is connected.
+     * @return Returns true when the socket is connected and false otherwise.
+     */
+    bool isConnected() { return _socket && _socket->connected(); }
 
     /**
      * Executes modbus function 01 (0x01) "Read Coils".

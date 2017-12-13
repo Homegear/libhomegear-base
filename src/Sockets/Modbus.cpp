@@ -66,6 +66,7 @@ Modbus::Modbus(BaseLib::SharedObjects* baseLib, Modbus::ModbusInfo& serverInfo)
     _readBuffer.reset(new std::vector<char>(1024));
 
     _socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, _hostname, std::to_string(_port), serverInfo.useSsl, serverInfo.verifyCertificate, serverInfo.caFile, serverInfo.caData, serverInfo.certFile, serverInfo.certData, serverInfo.keyFile, serverInfo.keyData));
+    _socket->setAutoConnect(false);
     _socket->setConnectionRetries(1);
     _socket->setReadTimeout(serverInfo.timeout * 1000);
     _socket->setWriteTimeout(serverInfo.timeout * 1000);
@@ -79,6 +80,16 @@ Modbus::~Modbus()
         _socket->close();
         _socket.reset();
     }
+}
+
+void Modbus::connect()
+{
+    if(_socket) _socket->open();
+}
+
+void Modbus::disconnect()
+{
+    if(_socket) _socket->close();
 }
 
 void Modbus::insertHeader(std::vector<char>& packet, uint8_t functionCode, uint16_t payloadSize)
