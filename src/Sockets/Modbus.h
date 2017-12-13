@@ -46,6 +46,13 @@ class ModbusException : public Exception
 {
 public:
     ModbusException(std::string message) : Exception(message) {}
+    ModbusException(std::string message, uint8_t code, std::vector<char> packet) : Exception(message), _code(code), _packet(packet) {}
+
+    uint8_t getCode() { return _code; }
+    std::vector<char> getPacket() { return _packet; }
+private:
+    uint8_t _code = 0;
+    std::vector<char> _packet;
 };
 
 /**
@@ -57,6 +64,7 @@ class ModbusServerBusyException : public ModbusException
 {
 public:
     ModbusServerBusyException(std::string message) : ModbusException(message) {}
+    ModbusServerBusyException(std::string message, uint8_t code, std::vector<char> packet) : ModbusException(message, code, packet) {}
 };
 
 /**
@@ -89,11 +97,24 @@ public:
  *
  *         BaseLib::Modbus modbus(_bl.get(), modbusInfo);
  *
- *         modbus.connect();
- *         modbus.writeSingleRegister(0x2001, 0xFFFF); //Replace with a working register address and value
- *         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
- *         modbus.writeSingleRegister(0x2001, 0x0000);  //Replace with a working register address and value
- *         modbus.disconnect();
+ *         try
+ *         {
+ *             modbus.connect();
+ *             modbus.writeSingleRegister(0x2001, 0xFFFF); //Replace with a working register address and value
+ *             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+ *             modbus.writeSingleRegister(0x2001, 0x0000);  //Replace with a working register address and value
+ *             modbus.disconnect();
+ *         }
+ *         catch(BaseLib::ModbusException& ex)
+ *         {
+ *             std::cerr << "Code: " << (int32_t)ex.getCode()
+ *                       << ", response packet: " << BaseLib::HelperFunctions::getHexString(ex.getPacket())
+ *                       << ", message: " << ex.what() << std::endl;
+ *         }
+ *         catch(BaseLib::Exception& ex)
+ *         {
+ *             std::cerr << ex.what() << std::endl;
+ *         }
  *     }
  *
  */
@@ -113,6 +134,18 @@ public:
         std::string caFile; //For client certificate verification
         std::string caData; //For client certificate verification
         uint32_t timeout = 5000;
+    };
+
+    struct DeviceInfo
+    {
+        std::string vendorName;
+        std::string productCode;
+        std::string majorMinorRevision;
+        std::string vendorUrl;
+        std::string productName;
+        std::string modelName;
+        std::string userApplicationName;
+        std::map<uint8_t, std::vector<uint8_t>> objects;
     };
 
     Modbus(BaseLib::SharedObjects* baseLib, ModbusInfo& serverInfo);
@@ -168,20 +201,6 @@ public:
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
     void readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t inputCount);
-
-    /**
-     * Executes modbus function 02 (0x02) "Read Discrete Inputs".
-     *
-     * @param startingAddress Valid values range from 0x0000 to 0xFFFF.
-     * @param inputCount The number of inputs to read (from 1 to 2000 [= 0x7D0]).
-     * @returns Returns the input states as a byte array. The least significant bit is to the left (in contrast to the Modbus packet). So the bits and bytes can be read from left to right.
-     * @throws SocketOperationException On socket errors.
-     * @throws SocketTimeOutException On socket timeout.
-     * @throws SocketClosedException When the socket is closed during the request.
-     * @throws ModbusException Thrown on all Modbus errors.
-     * @throws ModbusServerBusyException Thrown when the server is currently busy.
-     */
-    std::vector<uint8_t> readDiscreteInputs(uint16_t startingAddress, uint16_t inputCount);
 
     /**
      * Executes modbus function 03 (0x03) "Read Holding Registers".
@@ -283,6 +302,17 @@ public:
      * @throws ModbusServerBusyException Thrown when the server is currently busy.
      */
     void readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<uint16_t>& readBuffer, uint16_t readRegisterCount, uint16_t writeStartAddress, const std::vector<uint16_t>& writeValues, uint16_t writeRegisterCount);
+
+    /**
+     * Reads all device identification and returns it as a DeviceInfo struct.
+     *
+     * @return A DeviceInfo struct containing all identification objects (basic, regular and extended).
+     * @throws SocketOperationException On socket errors.
+     * @throws SocketTimeOutException On socket timeout.
+     * @throws SocketClosedException When the socket is closed during the request.
+     * @throws ModbusServerBusyException Thrown when the server is currently busy.
+     */
+    DeviceInfo readDeviceIdentification();
 private:
     static const uint8_t _reverseByteMask[256];
 

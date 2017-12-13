@@ -131,26 +131,27 @@ std::vector<char> Modbus::getResponse(std::vector<char>& packet)
     else if(_readBuffer->at(7) & 0x80) //Error response
     {
         uint8_t exceptionCode = _readBuffer->at(8);
+        std::vector<char> packet(_readBuffer->begin(), _readBuffer->begin() + bytesread);
         switch(exceptionCode)
         {
             case 1:
-                throw ModbusException("Exception code 1: The function code (" + std::to_string(packet.at(7)) + ") is unknown by the server.");
+                throw ModbusException("Exception code 1: The function code (" + std::to_string(packet.at(7)) + ") is unknown by the server.", exceptionCode, packet);
             case 2:
-                throw ModbusException("Exception code 2: Illegal data address.");
+                throw ModbusException("Exception code 2: Illegal data address.", exceptionCode, packet);
             case 3:
-                throw ModbusException("Exception code 3: Illegal data value.");
+                throw ModbusException("Exception code 3: Illegal data value.", exceptionCode, packet);
             case 4:
-                throw ModbusException("Exception code 4: Server failure.");
+                throw ModbusException("Exception code 4: Server failure.", exceptionCode, packet);
             case 5:
-                throw ModbusException("Exception code 5: Acknowledge: The server accepted the service invocation but the service requires a relatively long time to execute. The server therefore returns only an acknowledgement of the service invocation receipt.");
+                throw ModbusException("Exception code 5: Acknowledge: The server accepted the service invocation but the service requires a relatively long time to execute. The server therefore returns only an acknowledgement of the service invocation receipt.", exceptionCode, packet);
             case 6:
-                throw ModbusServerBusyException("Exception code 6: Server busy");
+                throw ModbusServerBusyException("Exception code 6: Server busy", exceptionCode, packet);
             case 10:
-                throw ModbusException("Exception code 10: Gateway problem: Gateway paths not available.");
+                throw ModbusException("Exception code 10: Gateway problem: Gateway paths not available.", exceptionCode, packet);
             case 11:
-                throw ModbusException("Exception code 11: Gateway problem: The targeted device failed to respond.");
+                throw ModbusException("Exception code 11: Gateway problem: The targeted device failed to respond.", exceptionCode, packet);
             default:
-                throw ModbusException("Unknown Modbus exception: " + std::to_string(exceptionCode) + ". Response was: " + BaseLib::HelperFunctions::getHexString(_readBuffer->data(), bytesread));
+                throw ModbusException("Unknown Modbus exception: " + std::to_string(exceptionCode) + ". Response was: " + BaseLib::HelperFunctions::getHexString(_readBuffer->data(), bytesread), exceptionCode, packet);
         }
     }
 
@@ -568,6 +569,114 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
             readBuffer.at((i - 9) / 2) = (((uint16_t)response.at(i)) << 8) | response.at(i + 1);
         }
     }
+}
+
+Modbus::DeviceInfo Modbus::readDeviceIdentification()
+{
+    Modbus::DeviceInfo deviceInfo;
+
+    bool exception = false;
+    char currentDeviceId = 1;
+    char currentObjectId = 0;
+    char conformityLevel = 1;
+    bool moreFollows = false;
+
+    while(true)
+    {
+        std::vector<char> packet;
+        packet.reserve(MODBUS_HEADER_SIZE + 4);
+        insertHeader(packet, 43, 3);
+        packet.push_back(0x0E); //Modbus Encapsulated Interface (MEI) type
+        packet.push_back(currentDeviceId); //Device ID code
+        packet.push_back(currentObjectId); //Object ID
+
+        std::vector<char> response;
+        for(int32_t i = 0; i < 10; i++)
+        {
+            try
+            {
+                response = getResponse(packet);
+                if(response.size() >= 15 && response.at(8) == 0x2B && response.at(9) == 0x0E && response.at(10) == currentDeviceId) break;
+                else if(i == 9) throw ModbusException("Could not read Modbus device identification.");
+            }
+            catch(ModbusServerBusyException& ex)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                if(i == 9) throw ex;
+            }
+            catch(ModbusException& ex)
+            {
+                if(ex.getCode() != 2 && ex.getCode() != 3) throw ex;
+                exception = true;
+                response = ex.getPacket();
+                break;
+            }
+            catch(Exception& ex)
+            {
+                if(i == 9) throw ex;
+            }
+        }
+
+        if(exception || response.size() < 8 || response.at(7) & 0x80) //Exception
+        {
+            if((currentDeviceId == 1 && currentObjectId == 0) || currentDeviceId == 3) break;
+            currentDeviceId++;
+            if(currentDeviceId > conformityLevel) break;
+            if(currentDeviceId == 2) currentObjectId = 3;
+            else if(currentDeviceId == 3) currentObjectId = (char)(uint8_t)0x80;
+            exception = false;
+        }
+        else
+        {
+            conformityLevel = response.at(11) & 0x7F;
+            moreFollows = (uint8_t)response.at(12) == 0xFF;
+            if(moreFollows) currentObjectId = response.at(13);
+            uint8_t numberOfObjects = response.at(14);
+            uint32_t pos = 15;
+
+            for(int32_t i = 0; i < numberOfObjects; i++)
+            {
+                uint8_t objectId = response.at(pos++);
+                if(pos >= response.size()) break;
+                uint8_t length = response.at(pos++);
+                if(pos + length > response.size()) break;
+                std::vector<uint8_t> data(response.data() + pos, response.data() + pos + length);
+
+                deviceInfo.objects[objectId] = data;
+                switch(objectId)
+                {
+                    case 0:
+                        deviceInfo.vendorName = std::string((char*)data.data(), data.size());
+                        break;
+                    case 1:
+                        deviceInfo.productCode = std::string((char*)data.data(), data.size());
+                        break;
+                    case 2:
+                        deviceInfo.majorMinorRevision = std::string((char*)data.data(), data.size());
+                        break;
+                    case 3:
+                        deviceInfo.vendorUrl = std::string((char*)data.data(), data.size());
+                        break;
+                    case 4:
+                        deviceInfo.productName = std::string((char*)data.data(), data.size());
+                        break;
+                    case 5:
+                        deviceInfo.modelName = std::string((char*)data.data(), data.size());
+                        break;
+                    case 6:
+                        deviceInfo.userApplicationName = std::string((char*)data.data(), data.size());
+                        break;
+                }
+
+                pos += length;
+                if(pos >= response.size()) break;
+            }
+        }
+
+        if(currentDeviceId == 3 && !moreFollows) break;
+    }
+
+    return deviceInfo;
 }
 
 }
