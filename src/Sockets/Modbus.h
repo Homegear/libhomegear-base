@@ -156,6 +156,16 @@ public:
     virtual ~Modbus();
 
     /**
+     * Sets the slave ID. For Modbus over TCP this is normally unnecessary. It is needed to reach devices on a serial network or for devices with broken firmware. The default value is "0xFF".
+     */
+    void setSlaveId(uint8_t value) { _slaveId = value; }
+
+    /**
+     * Enables or disables debug mode (disabled by default). In debug mode all packets are written to the standard output.
+     */
+    void setDebug(bool value) { _debug = value; }
+
+    /**
      * Opens the connection to the Modbus server.
      * @throws SocketOperationException When the connection cannot be established.
      */
@@ -315,6 +325,16 @@ public:
     DeviceInfo readDeviceIdentification();
 private:
     static const uint8_t _reverseByteMask[256];
+
+    /**
+     * The Modbus slave ID
+     */
+    uint8_t _slaveId = 0xFF;
+
+    /**
+     * Debug mode
+     */
+    bool _debug = false;
 
     /**
 	 * The common base library object.
