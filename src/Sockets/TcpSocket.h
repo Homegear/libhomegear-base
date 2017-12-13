@@ -49,6 +49,7 @@
 #include <utility>
 #include <cstring>
 #include <atomic>
+#include <functional>
 
 #include <fcntl.h>
 #include <unistd.h>
