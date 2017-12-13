@@ -102,7 +102,7 @@ void Modbus::insertHeader(std::vector<char>& packet, uint8_t functionCode, uint1
     payloadSize += 2;
     packet.push_back((char)(uint8_t)(payloadSize >> 8)); //Length 1
     packet.push_back((char)(uint8_t)(payloadSize & 0xFF)); //Length 2
-    packet.push_back((char)(uint8_t)0xFF); //Unit identifier, always
+    packet.push_back((char)(uint8_t)_slaveId); //Slave ID/unit identifier for Modbus over TCP always 0xFF.
     packet.push_back((char)functionCode);
 }
 
@@ -111,6 +111,7 @@ std::vector<char> Modbus::getResponse(std::vector<char>& packet)
     if(packet.size() < 8) throw ModbusException("Could not send packet as it is invalid.");
 
     std::lock_guard<std::mutex> socketGuard(_socketMutex);
+    if(_debug) _bl->out.printMessage("Sending Modbus packet: " + BaseLib::HelperFunctions::getHexString(packet));
     _socket->proofwrite(packet);
 
     uint32_t bytesread = 0;
@@ -120,42 +121,45 @@ std::vector<char> Modbus::getResponse(std::vector<char>& packet)
         bytesread += _socket->proofread(_readBuffer->data() + bytesread, _readBuffer->size() - bytesread);
         if(bytesread == _readBuffer->size()) _readBuffer->resize(_readBuffer->size() + 1024);
         if(bytesread < 6) continue;
-        if(size == 0) size = ((((uint16_t) _readBuffer->operator[](4)) << 8) | _readBuffer->operator[](5)) + 6;
+        if(size == 0) size = ((((uint16_t)(uint8_t)_readBuffer->operator[](4)) << 8) | _readBuffer->operator[](5)) + 6;
         if(bytesread > size) bytesread = size;
         if(bytesread >= size) break;
     }
 
-    if(bytesread < 9) throw ModbusException("Invalid Modbus packet received: " + BaseLib::HelperFunctions::getHexString(_readBuffer->data(), bytesread));
-    else if((_readBuffer->at(7) & 0x7F) != packet.at(7)) throw ModbusException("Invalid response function code received: " + BaseLib::HelperFunctions::getHexString(_readBuffer->data(), bytesread));
+    std::vector<char> response(_readBuffer->begin(), _readBuffer->begin() + bytesread);
+
+    if(_debug) _bl->out.printMessage("Modbus packet received: " + BaseLib::HelperFunctions::getHexString(response));
+
+    if(bytesread < 9) throw ModbusException("Invalid Modbus packet received: " + BaseLib::HelperFunctions::getHexString(response));
+    else if((_readBuffer->at(7) & 0x7F) != packet.at(7)) throw ModbusException("Invalid response function code received: " + BaseLib::HelperFunctions::getHexString(response));
     else if(_readBuffer->at(0) != packet.at(0) || _readBuffer->at(1) != packet.at(1)) throw ModbusException("Response has invalid transaction ID.");
     else if(_readBuffer->at(7) & 0x80) //Error response
     {
         uint8_t exceptionCode = _readBuffer->at(8);
-        std::vector<char> packet(_readBuffer->begin(), _readBuffer->begin() + bytesread);
         switch(exceptionCode)
         {
             case 1:
-                throw ModbusException("Exception code 1: The function code (" + std::to_string(packet.at(7)) + ") is unknown by the server.", exceptionCode, packet);
+                throw ModbusException("Exception code 1: The function code (" + std::to_string(packet.at(7)) + ") is unknown by the server.", exceptionCode, response);
             case 2:
-                throw ModbusException("Exception code 2: Illegal data address.", exceptionCode, packet);
+                throw ModbusException("Exception code 2: Illegal data address.", exceptionCode, response);
             case 3:
-                throw ModbusException("Exception code 3: Illegal data value.", exceptionCode, packet);
+                throw ModbusException("Exception code 3: Illegal data value.", exceptionCode, response);
             case 4:
-                throw ModbusException("Exception code 4: Server failure.", exceptionCode, packet);
+                throw ModbusException("Exception code 4: Server failure.", exceptionCode, response);
             case 5:
-                throw ModbusException("Exception code 5: Acknowledge: The server accepted the service invocation but the service requires a relatively long time to execute. The server therefore returns only an acknowledgement of the service invocation receipt.", exceptionCode, packet);
+                throw ModbusException("Exception code 5: Acknowledge: The server accepted the service invocation but the service requires a relatively long time to execute. The server therefore returns only an acknowledgement of the service invocation receipt.", exceptionCode, response);
             case 6:
-                throw ModbusServerBusyException("Exception code 6: Server busy", exceptionCode, packet);
+                throw ModbusServerBusyException("Exception code 6: Server busy", exceptionCode, response);
             case 10:
-                throw ModbusException("Exception code 10: Gateway problem: Gateway paths not available.", exceptionCode, packet);
+                throw ModbusException("Exception code 10: Gateway problem: Gateway paths not available.", exceptionCode, response);
             case 11:
-                throw ModbusException("Exception code 11: Gateway problem: The targeted device failed to respond.", exceptionCode, packet);
+                throw ModbusException("Exception code 11: Gateway problem: The targeted device failed to respond.", exceptionCode, response);
             default:
-                throw ModbusException("Unknown Modbus exception: " + std::to_string(exceptionCode) + ". Response was: " + BaseLib::HelperFunctions::getHexString(_readBuffer->data(), bytesread), exceptionCode, packet);
+                throw ModbusException("Unknown Modbus exception: " + std::to_string(exceptionCode) + ". Response was: " + BaseLib::HelperFunctions::getHexString(response), exceptionCode, response);
         }
     }
 
-    return std::vector<char>(_readBuffer->begin(), _readBuffer->begin() + bytesread);
+    return response;
 }
 
 void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t>& buffer, uint16_t coilCount)
@@ -297,7 +301,7 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
     {
         for(uint32_t i = 9; i < response.size(); i+=2)
         {
-            buffer.at((i - 9) / 2) = (((uint16_t)response.at(i)) << 8) | response.at(i + 1);
+            buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
         }
     }
 }
@@ -345,7 +349,7 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t>&
     {
         for(uint32_t i = 9; i < response.size(); i+=2)
         {
-            buffer.at((i - 9) / 2) = (((uint16_t)response.at(i)) << 8) | response.at(i + 1);
+            buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
         }
     }
 }
@@ -566,7 +570,7 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
     {
         for(uint32_t i = 9; i < response.size(); i+=2)
         {
-            readBuffer.at((i - 9) / 2) = (((uint16_t)response.at(i)) << 8) | response.at(i + 1);
+            readBuffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
         }
     }
 }
