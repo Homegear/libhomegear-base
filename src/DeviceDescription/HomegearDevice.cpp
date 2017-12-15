@@ -865,6 +865,12 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
+					if(!(*j)->subsubkey.empty())
+					{
+						payloadElementNode = doc->allocate_node(node_element, "subsubkey", doc->allocate_string((*j)->subsubkey.c_str(), (*j)->subsubkey.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
 					if(!(*j)->parameterId.empty())
 					{
 						payloadElementNode = doc->allocate_node(node_element, "parameterId", doc->allocate_string((*j)->parameterId.c_str(), (*j)->parameterId.size() + 1));

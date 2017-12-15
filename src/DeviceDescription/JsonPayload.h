@@ -70,6 +70,7 @@ public:
 
 	std::string key;
 	std::string subkey;
+	std::string subsubkey;
 	std::vector<std::string> keyPath;
 	std::string parameterId;
 	bool constValueBooleanSet = false;

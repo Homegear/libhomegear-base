@@ -53,6 +53,7 @@ JsonPayload::JsonPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Js
 		std::string value(subNode->value());
 		if(nodeName == "key") key = value;
 		else if(nodeName == "subkey") subkey = value;
+		else if(nodeName == "subsubkey") subsubkey = value;
 		else if(nodeName == "keyPath") keyPath = std::move(BaseLib::HelperFunctions::splitAll(value, '\\'));
 		else if(nodeName == "parameterId") parameterId = value;
 		else if(nodeName == "constValueBoolean")
