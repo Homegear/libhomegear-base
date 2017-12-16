@@ -181,6 +181,8 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* e
 {
 	try
 	{
+        deleting = false;
+
 		_bl = baseLib;
 		_parentID = parentID;
 		serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
