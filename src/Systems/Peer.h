@@ -251,7 +251,7 @@ public:
 	};
 	//End event handling
 
-	bool deleting = false; //Needed, so the peer gets not saved in central's worker thread while being deleted
+	std::atomic_bool deleting; //Needed, so the peer gets not saved in central's worker thread while being deleted
 
 	void setRpcDevice(std::shared_ptr<HomegearDevice> value) { _rpcDevice = value; initializeTypeString(); }
 	std::shared_ptr<HomegearDevice> getRpcDevice() { return _rpcDevice; }
