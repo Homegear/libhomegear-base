@@ -59,13 +59,12 @@ HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, in
 
 HttpClient::~HttpClient()
 {
-	_socketMutex.lock();
+	std::lock_guard<std::mutex> socketGuard(_socketMutex);
 	if(_socket)
 	{
 		_socket->close();
 		_socket.reset();
 	}
-	_socketMutex.unlock();
 }
 
 void HttpClient::setTimeout(uint32_t value)
