@@ -42,6 +42,7 @@ SerialReaderWriter::SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::str
 	_baudrate = baudrate;
 	_flags = flags;
 	if(_flags == 0) _flags = O_RDWR | O_NOCTTY | O_NDELAY;
+	else _flags |= O_NDELAY;
 	_createLockFile = createLockFile;
 	_readThreadPriority = readThreadPriority;
 	_stopReadThread = false;

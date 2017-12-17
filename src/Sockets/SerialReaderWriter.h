@@ -62,12 +62,38 @@ public:
 	};
 	// }}}
 
+	/**
+	 * Constructor.
+	 *
+	 * @param baseLib The base library object.
+	 * @param device The device to use (e. g. "/dev/ttyUSB0")
+	 * @param baudrate The baudrate (e. g. 115200)
+	 * @param flags Flags passed to the C function "open". 0 should be fine for most cases. "O_NDELAY" is always added by the constructor. By default "O_RDWR | O_NOCTTY | O_NDELAY" is used.
+	 * @param createLockFile Set to "true" to create a lock file.
+	 * @param readThreadPriority The priority of the read thread between 0 and 99. Set to -1 to not prioritize the thread. Only relevent when "events" are enabled in "openDevice()".
+	 */
 	SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
+
+    /**
+     * Destructor.
+     */
 	virtual ~SerialReaderWriter();
 
 	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
 	std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
+
+    /**
+     * Opens the serial device.
+     *
+     * @param evenParity Enable parity checking using an even parity bit.
+     * @param oddParity Enable parity checking using an odd parity bit. "evenParity" and "oddParity" are mutually exclusive.
+     * @param events Enable events. This starts a thread which calls "lineReceived()" in a derived class for each received packet.
+     */
 	void openDevice(bool parity, bool oddParity, bool events = true);
+
+    /**
+     * Closes the serial device.
+     */
 	void closeDevice();
 
 	/**
