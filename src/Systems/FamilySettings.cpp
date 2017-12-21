@@ -773,6 +773,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->additionalCommands = value;
 			_bl->out.printDebug("Debug: additionalCommands set to " + settings->additionalCommands);
 		}
+		else if(name == "mode")
+		{
+			settings->mode = value;
+			_bl->out.printDebug("Debug: mode set to " + settings->mode);
+		}
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);
@@ -1011,6 +1016,16 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 			settings->password = value->stringValue;
 			_bl->out.printDebug("Debug: password set");
 		}
+        else if(name == "additionalcommands")
+        {
+            settings->additionalCommands = value->stringValue;
+            _bl->out.printDebug("Debug: additionalCommands set to " + settings->additionalCommands);
+        }
+        else if(name == "mode")
+        {
+            settings->mode = value->stringValue;
+            _bl->out.printDebug("Debug: mode set to " + settings->mode);
+        }
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);

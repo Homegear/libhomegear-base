@@ -156,7 +156,7 @@ public:
     virtual ~Modbus();
 
     /**
-     * Sets the slave ID. For Modbus over TCP this is normally unnecessary. It is needed to reach devices on a serial network or for devices with broken firmware. The default value is "0xFF".
+     * Sets the slave ID. For Modbus over TCP this is normally unnecessary. It is needed to reach devices on a serial network or for devices with broken firmware. The default value is "0xFF". Disconnecting doesn't change the ID. It can be set before "connect()" is executed.
      */
     void setSlaveId(uint8_t value) { _slaveId = value; }
 
