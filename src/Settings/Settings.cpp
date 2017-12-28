@@ -446,6 +446,11 @@ void Settings::load(std::string filename, std::string executablePath)
                     else if(_scriptEngineWatchdogTimeout < 10000) _scriptEngineWatchdogTimeout = 10000;
                     _bl->out.printDebug("Debug: scriptEngineWatchdogTimeout set to " + std::to_string(_scriptEngineWatchdogTimeout));
                 }
+				else if(name == "scriptenginemanualclientstart")
+				{
+					_scriptEngineManualClientStart = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: scriptEngineManualClientStart set to " + std::to_string(_scriptEngineManualClientStart));
+				}
 				else if(name == "flowsprocessingthreadcountserver")
 				{
 					_flowsProcessingThreadCountServer = Math::getNumber(value);
@@ -478,6 +483,11 @@ void Settings::load(std::string filename, std::string executablePath)
                     else if(_flowsWatchdogTimeout < 10000) _flowsWatchdogTimeout = 10000;
                     _bl->out.printDebug("Debug: flowsWatchdogTimeout set to " + std::to_string(_flowsWatchdogTimeout));
                 }
+				else if(name == "flowsmanualclientstart")
+				{
+					_flowsManualClientStart = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: flowsManualClientStart set to " + std::to_string(_flowsManualClientStart));
+				}
 				else if(name == "ipcthreadcount")
 				{
 					_ipcThreadCount = Math::getNumber(value);
