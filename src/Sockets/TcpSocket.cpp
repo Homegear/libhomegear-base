@@ -286,7 +286,7 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, TcpPacket packet)
+	void TcpSocket::sendToClient(int32_t clientId, TcpPacket packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -299,6 +299,7 @@ std::string TcpSocket::getIpAddress()
 			}
 
 			clientData->socket->proofwrite((char*)packet.data(), packet.size());
+			if(closeConnection) _bl->fileDescriptorManager.close(clientData->fileDescriptor);
 		}
 		catch(const std::exception& ex)
 		{

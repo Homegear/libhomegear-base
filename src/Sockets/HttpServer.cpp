@@ -104,9 +104,9 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 	_http.reset();
 }
 
-void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet)
+void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection)
 {
-	_socket->sendToClient(clientId, packet);
+	_socket->sendToClient(clientId, packet, closeConnection);
 }
 
 }

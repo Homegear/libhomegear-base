@@ -337,8 +337,9 @@ public:
 		 *
 		 * @param clientId The ID of the client as passed to TcpSocket::TcpServerServer::packetReceivedCallback.
 		 * @param packet The data to send.
+		 * @param closeConnection Close the connection after sending the packet.
 		 */
-		void sendToClient(int32_t clientId, TcpPacket packet);
+		void sendToClient(int32_t clientId, TcpPacket packet, bool closeConnection = false);
 
         /**
          * Returns the number of clients connected to the TCP server
