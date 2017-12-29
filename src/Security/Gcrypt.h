@@ -75,8 +75,17 @@ private:
 public:
 	/**
 	 * Constructor. Takes the same arguments as gcry_cipher_open().
+	 *
+	 * @param algorithm See https://www.gnupg.org/documentation/manuals/gcrypt/Available-ciphers.html#Available-ciphers for a list of ciphers and the according constants.
+	 * @param mode See https://www.gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html#Available-cipher-modes. Note that the mode needs to be compatible to the algorithm used.
+	 * @param flags 0 or the bit-wise OR of the following constants: GCRY_CIPHER_SECURE (allocate everything in secure memory), GCRY_CIPHER_ENABLE_SYNC (CFB sync mode for OpenPGP), GCRY_CIPHER_CBC_CTS (Enable cipher text stealing for CBC), GCRY_CIPHER_CBC_MAC (compute CBC-MAC checksums, same as CBC but only outputs the last block)
+	 * @throws GcryptException On error.
 	 */
 	Gcrypt(int algorithm, int mode, unsigned int flags);
+
+	/**
+	 * Destructor.
+	 */
 	virtual ~Gcrypt();
 
 	/**
@@ -101,51 +110,71 @@ public:
 
 	/**
 	 * Sets the IV to use.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	template<typename Data> void setIv(const Data& iv);
 
 	/**
 	 * Takes same parameters as gcry_cipher_setiv() except for the handle.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	void setIv(const void* iv, const size_t length);
 
 	/**
 	 * Sets the counter to use.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	template<typename Data> void setCounter(const Data& counter);
 
 	/**
 	 * Takes same parameters as gcry_cipher_setctr() except for the handle.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	void setCounter(const void* counter, const size_t length);
 
 	/**
 	 * Sets the key to use.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	template<typename Data> void setKey(const Data& key);
 
 	/**
 	 * Takes same parameters as gcry_cipher_setkey() except for the handle.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	void setKey(const void* key, const size_t length);
 
 	/**
 	 * Encrypts data. Takes same parameters as gcry_cipher_encrypt() except for the handle.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	void encrypt(void* out, const size_t outLength, const void* in, const size_t inLength);
 
 	/**
 	 * Encrypt data.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	template<typename DataOut, typename DataIn> void encrypt(DataOut& out, const DataIn& in);
 
 	/**
-	 * Encrypts data. Takes same parameters as gcry_cipher_decrypt() except for the handle.
+	 * Decrypts data. Takes same parameters as gcry_cipher_decrypt() except for the handle.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	void decrypt(void* out, const size_t outLength, const void* in, const size_t inLength);
 
 	/**
-	 * Encrypt data.
+	 * Decrypt data.
+	 *
+	 * @throws GcryptException On error.
 	 */
 	template<typename DataOut, typename DataIn> void decrypt(DataOut& out, const DataIn& in);
 
