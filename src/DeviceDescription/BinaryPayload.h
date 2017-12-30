@@ -83,6 +83,10 @@ public:
 	int32_t omitIf = 0;
 	std::string parameterId;
 	int32_t parameterChannel = -1;
+	int32_t metaInteger1 = -1;
+	int32_t metaInteger2 = -1;
+	int32_t metaInteger3 = -1;
+	int32_t metaInteger4 = -1;
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 };

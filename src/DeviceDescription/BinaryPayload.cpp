@@ -69,6 +69,10 @@ BinaryPayload::BinaryPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 		}
 		else if(nodeName == "parameterId") parameterId = value;
 		else if(nodeName == "parameterChannel") parameterChannel = Math::getNumber(value);
+		else if(nodeName == "metaInteger1") metaInteger1 = Math::getNumber(value);
+		else if(nodeName == "metaInteger2") metaInteger2 = Math::getNumber(value);
+		else if(nodeName == "metaInteger3") metaInteger3 = Math::getNumber(value);
+		else if(nodeName == "metaInteger4") metaInteger4 = Math::getNumber(value);
 		else _bl->out.printWarning("Warning: Unknown node in \"jsonPayload\": " + nodeName);
 	}
 }
