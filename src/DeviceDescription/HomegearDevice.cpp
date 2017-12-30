@@ -804,6 +804,41 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 						payloadNode->append_node(payloadElementNode);
 					}
 
+					if((*j)->parameterChannel != -1)
+					{
+						tempString = Math::toString((*j)->parameterChannel, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "parameterChannel", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->metaInteger1 != -1)
+					{
+						tempString = Math::toString((*j)->metaInteger1, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "metaInteger1", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->metaInteger2 != -1)
+					{
+						tempString = Math::toString((*j)->metaInteger2, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "metaInteger2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->metaInteger3 != -1)
+					{
+						tempString = Math::toString((*j)->metaInteger3, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "metaInteger3", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
+					if((*j)->metaInteger4 != -1)
+					{
+						tempString = Math::toString((*j)->metaInteger4, 1);
+						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "metaInteger4", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+						payloadNode->append_node(payloadElementNode);
+					}
+
 					if(!(*j)->parameterId.empty())
 					{
 						xml_node<>* payloadElementNode = doc->allocate_node(node_element, "parameterId", doc->allocate_string((*j)->parameterId.c_str(), (*j)->parameterId.size() + 1));
