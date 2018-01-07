@@ -284,26 +284,58 @@ bool ServiceMessages::set(std::string id, bool value)
 			_lowbat = value;
 			save(3, value);
 		}
-		else if(!value) //false == 0, a little dirty, but it works
+		else //false == 0, a little dirty, but it works
 		{
-			_errorMutex.lock();
-			for(std::map<uint32_t, std::map<std::string, uint8_t>>::iterator i = _errors.begin(); i != _errors.end(); ++i)
-			{
-				if(i->second.find(id) != i->second.end())
-				{
-					i->second.at(id) = 0;
-					std::vector<uint8_t> data = { (uint8_t)value };
-					save(i->first, id, value);
-					raiseSaveParameter(id, i->first, data);
+			std::lock_guard<std::mutex> errorGuard(_errorMutex);
+            if(!value)
+            {
+                auto channelIterator = _errors.find(0);
+                if(channelIterator != _errors.end())
+                {
+                    auto errorIterator = channelIterator->second.find(id);
+                    if(errorIterator != channelIterator->second.end())
+                    {
+                        channelIterator->second.erase(errorIterator);
+                        if(channelIterator->second.empty()) _errors.erase(0);
+                    }
+                }
+            }
+            else if(value > 0)
+            {
+                _errors[0][id] = value;
+            }
 
-					std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
-					std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
-					rpcValues->push_back(PVariable(new Variable((int32_t)0)));
-					raiseEvent(_peerID, 0, valueKeys, rpcValues);
-					raiseRPCEvent(_peerID, 0, _peerSerial + ":" + std::to_string(i->first), valueKeys, rpcValues);
-				}
-			}
-			_errorMutex.unlock();
+            std::vector<uint8_t> data = {(uint8_t) value};
+            save(0, id, value);
+            raiseSaveParameter(id, 0, data);
+
+            std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
+            std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
+            rpcValues->push_back(PVariable(new Variable((int32_t) 0)));
+            raiseEvent(_peerID, 0, valueKeys, rpcValues);
+            raiseRPCEvent(_peerID, 0, _peerSerial + ":" + std::to_string(0), valueKeys, rpcValues);
+
+            if(!value) //Set for all other channels
+            {
+                for(std::map<uint32_t, std::map<std::string, uint8_t>>::iterator i = _errors.begin(); i != _errors.end(); ++i)
+                {
+                    if(i->first == 0) continue;
+                    auto errorIterator = i->second.find(id);
+                    if(errorIterator != i->second.end())
+                    {
+                        errorIterator->second = 0;
+                        std::vector<uint8_t> data = {(uint8_t) value};
+                        save(i->first, id, value);
+                        raiseSaveParameter(id, i->first, data);
+
+                        std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
+                        std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
+                        rpcValues->push_back(PVariable(new Variable((int32_t) 0)));
+                        raiseEvent(_peerID, 0, valueKeys, rpcValues);
+                        raiseRPCEvent(_peerID, 0, _peerSerial + ":" + std::to_string(i->first), valueKeys, rpcValues);
+                    }
+                }
+            }
 			return true;
 		}
 
@@ -319,17 +351,14 @@ bool ServiceMessages::set(std::string id, bool value)
 	}
 	catch(const std::exception& ex)
     {
-		_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return true;
@@ -340,14 +369,23 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel)
 	try
 	{
 		if(_disposing) return;
-		_errorMutex.lock();
-		if(value == 0 && _errors.find(channel) != _errors.end() && _errors[channel].find(id) != _errors[channel].end())
 		{
-			_errors[channel].erase(id);
-			if(_errors[channel].empty()) _errors.erase(channel);
+			std::lock_guard<std::mutex> errorGuard(_errorMutex);
+			if(value == 0)
+			{
+				auto channelIterator = _errors.find(channel);
+				if(channelIterator != _errors.end())
+				{
+					auto errorIterator = channelIterator->second.find(id);
+					if(errorIterator != channelIterator->second.end())
+					{
+						channelIterator->second.erase(errorIterator);
+						if(channelIterator->second.empty()) _errors.erase(channel);
+					}
+				}
+			}
+			else if(value > 0) _errors[channel][id] = value;
 		}
-		if(value > 0) _errors[channel][id] = value;
-		_errorMutex.unlock();
 		save(channel, id, value);
 		//RPC Broadcast is done in peer's packetReceived
 	}

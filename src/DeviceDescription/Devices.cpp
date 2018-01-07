@@ -324,12 +324,12 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			frameIterator = homeMaticDevice->framesByID.find("KEY_EVENT_LONG_BIDI");
 			if(frameIterator != homeMaticDevice->framesByID.end() && frameIterator->second)
 			{
-				for(std::list<HmDeviceDescription::HomeMaticParameter>::iterator i = frameIterator->second->parameters.begin(); i != frameIterator->second->parameters.end(); ++i)
+				for(auto& frameParameter : frameIterator->second->parameters)
 				{
-					if(i->index == 1.5)
+					if(frameParameter.index == 1.5)
 					{
-						i->index = 1.2;
-						i->constValue = 0;
+						frameParameter.index = 1.2;
+						frameParameter.constValue = 0;
 						break;
 					}
 				}
@@ -695,12 +695,12 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			std::map<std::string, std::shared_ptr<HmDeviceDescription::DeviceFrame>>::iterator frameIterator = homeMaticDevice->framesByID.find("INSTALL_TEST");
 			if(frameIterator != homeMaticDevice->framesByID.end())
 			{
-				for(std::list<HmDeviceDescription::HomeMaticParameter>::iterator i = frameIterator->second->parameters.begin(); i != frameIterator->second->parameters.end(); ++i)
+				for(auto& frameParameter : frameIterator->second->parameters)
 				{
-					if(i->param == "IT_COMMAND")
+					if(frameParameter.param == "IT_COMMAND")
 					{
-						i->param = "";
-						i->constValue = 2;
+						frameParameter.param = "";
+						frameParameter.constValue = 2;
 						break;
 					}
 				}
@@ -835,9 +835,9 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			if(frameIterator != homeMaticDevice->framesByID.end())
 			{
 				std::list<HmDeviceDescription::HomeMaticParameter> newFrameParameters;
-				for(std::list<HmDeviceDescription::HomeMaticParameter>::iterator i = frameIterator->second->parameters.begin(); i != frameIterator->second->parameters.end(); ++i)
+				for(auto& frameParameter : frameIterator->second->parameters)
 				{
-					if(i->param != "BOOT") newFrameParameters.push_back(*i);
+					if(frameParameter.param != "BOOT") newFrameParameters.push_back(frameParameter);
 				}
 				frameIterator->second->parameters.clear();
 				frameIterator->second->parameters = newFrameParameters;
@@ -1093,9 +1093,9 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
 			if(frameIterator != homeMaticDevice->framesByID.end())
 			{
 				bool parameterExists = false;
-				for(std::list<HmDeviceDescription::HomeMaticParameter>::iterator i = frameIterator->second->parameters.begin(); i != frameIterator->second->parameters.end(); ++i)
+				for(auto& frameParameter : frameIterator->second->parameters)
 				{
-					if(i->param == "BOOT")
+					if(frameParameter.param == "BOOT")
 					{
 						parameterExists = true;
 						break;

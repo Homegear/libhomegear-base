@@ -94,6 +94,7 @@ public:
 	std::string user;
 	std::string password;
 	std::string additionalCommands;
+	std::string mode;
 };
 
 typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;

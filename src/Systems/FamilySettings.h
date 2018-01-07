@@ -65,14 +65,14 @@ public:
 	void dispose();
 	void load(std::string filename);
 	bool changed();
-	PFamilySetting get(std::string& name);
+	PFamilySetting get(std::string name);
 	std::string getString(std::string name);
 	int32_t getNumber(std::string name);
 	std::vector<char> getBinary(std::string name);
-	void set(std::string& name, std::string& value);
-	void set(std::string& name, int32_t value);
-	void set(std::string& name, std::vector<char>& value);
-	void deleteFromDatabase(std::string& name);
+	void set(std::string name, std::string& value);
+	void set(std::string name, int32_t value);
+	void set(std::string name, std::vector<char>& value);
+	void deleteFromDatabase(std::string name);
 	std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
 private:
 	BaseLib::SharedObjects* _bl = nullptr;

@@ -54,8 +54,9 @@ void FamilySettings::dispose()
 	_physicalInterfaceSettings.clear();
 }
 
-FamilySettings::PFamilySetting FamilySettings::get(std::string& name)
+FamilySettings::PFamilySetting FamilySettings::get(std::string name)
 {
+    BaseLib::HelperFunctions::toLower(name);
 	_settingsMutex.lock();
 	try
 	{
@@ -170,10 +171,11 @@ std::vector<char> FamilySettings::getBinary(std::string name)
     return std::vector<char>();
 }
 
-void FamilySettings::set(std::string& name, std::string& value)
+void FamilySettings::set(std::string name, std::string& value)
 {
 	try
 	{
+        BaseLib::HelperFunctions::toLower(name);
 		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
@@ -217,10 +219,11 @@ void FamilySettings::set(std::string& name, std::string& value)
     }
 }
 
-void FamilySettings::set(std::string& name, int32_t value)
+void FamilySettings::set(std::string name, int32_t value)
 {
 	try
 	{
+        BaseLib::HelperFunctions::toLower(name);
 		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
@@ -264,10 +267,11 @@ void FamilySettings::set(std::string& name, int32_t value)
     }
 }
 
-void FamilySettings::set(std::string& name, std::vector<char>& value)
+void FamilySettings::set(std::string name, std::vector<char>& value)
 {
 	try
 	{
+        BaseLib::HelperFunctions::toLower(name);
 		if(name.empty()) return;
 		{
 			std::lock_guard<std::mutex> settingGuard(_settingsMutex);
@@ -311,10 +315,11 @@ void FamilySettings::set(std::string& name, std::vector<char>& value)
     }
 }
 
-void FamilySettings::deleteFromDatabase(std::string& name)
+void FamilySettings::deleteFromDatabase(std::string name)
 {
 	try
 	{
+        BaseLib::HelperFunctions::toLower(name);
 		if(name.empty()) return;
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
@@ -773,6 +778,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->additionalCommands = value;
 			_bl->out.printDebug("Debug: additionalCommands set to " + settings->additionalCommands);
 		}
+		else if(name == "mode")
+		{
+			settings->mode = value;
+			_bl->out.printDebug("Debug: mode set to " + settings->mode);
+		}
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);
@@ -1011,6 +1021,16 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 			settings->password = value->stringValue;
 			_bl->out.printDebug("Debug: password set");
 		}
+        else if(name == "additionalcommands")
+        {
+            settings->additionalCommands = value->stringValue;
+            _bl->out.printDebug("Debug: additionalCommands set to " + settings->additionalCommands);
+        }
+        else if(name == "mode")
+        {
+            settings->mode = value->stringValue;
+            _bl->out.printDebug("Debug: mode set to " + settings->mode);
+        }
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);

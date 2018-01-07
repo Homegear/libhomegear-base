@@ -115,10 +115,10 @@ std::set<std::shared_ptr<Http::FormData>> Http::decodeMultipartMixed(std::string
 
 			uint32_t headerSize = 0;
 			int32_t crlfOffset = 2;
-			char* blockHeaderEnd = strstr(startPos, "\r\n\r\n");
+			char* blockHeaderEnd = (char*)memmem(startPos, bufferSize - (startPos - buffer), "\r\n\r\n", 4);
 			if(blockHeaderEnd == nullptr)
 			{
-				blockHeaderEnd = strstr(startPos, "\n\n");
+				blockHeaderEnd = (char*)memmem(startPos, bufferSize - (startPos - buffer), "\n\n", 2);
 				if(blockHeaderEnd == nullptr) return formData;
 				crlfOffset = 1;
 				headerSize = ((blockHeaderEnd + 1) - startPos) + 1;
@@ -454,12 +454,12 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXm
 
 int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 {
-	char* end = strstr(*buffer, "\r\n\r\n");
+	char* end = (char*)memmem(*buffer, bufferLength, "\r\n\r\n", 4);
 	uint32_t headerSize = 0;
 	int32_t crlfOffset = 2;
 	if(!end || ((end + 3) - *buffer) + 1 > bufferLength)
 	{
-		end = strstr(*buffer, "\n\n");
+		end = (char*)memmem(*buffer, bufferLength, "\n\n", 2);
 		if(!end || ((end + 1) - *buffer) + 1 > bufferLength)
 		{
 			if(_rawHeader.size() > 2 && (

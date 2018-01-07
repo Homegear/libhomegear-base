@@ -93,11 +93,13 @@ public:
 	uint32_t scriptEngineMaxThreadsPerScript() { return _scriptEngineMaxThreadsPerScript; }
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
     int32_t scriptEngineWatchdogTimeout() { return _scriptEngineWatchdogTimeout; }
+	bool scriptEngineManualClientStart() { return _scriptEngineManualClientStart; }
 	uint32_t flowsProcessingThreadCountServer() { return _flowsProcessingThreadCountServer; }
 	uint32_t flowsProcessingThreadCountNodes() { return _flowsProcessingThreadCountNodes; }
 	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
 	int32_t maxNodeThreadsPerProcess() { return _maxNodeThreadsPerProcess; }
     int32_t flowsWatchdogTimeout() { return _flowsWatchdogTimeout; }
+	bool flowsManualClientStart() { return _flowsManualClientStart; }
 	uint32_t ipcThreadCount() { return _ipcThreadCount; }
 	uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -198,11 +200,13 @@ private:
 	uint32_t _scriptEngineMaxThreadsPerScript = 4;
 	int32_t _scriptEngineMaxScriptsPerProcess = -1;
     int32_t _scriptEngineWatchdogTimeout = -1;
+	bool _scriptEngineManualClientStart = false;
 	uint32_t _flowsProcessingThreadCountServer = 10;
 	uint32_t _flowsProcessingThreadCountNodes = 10;
 	uint32_t _flowsServerMaxConnections = 20;
 	int32_t _maxNodeThreadsPerProcess = 80;
 	int32_t _flowsWatchdogTimeout = -1;
+	bool _flowsManualClientStart = false;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;

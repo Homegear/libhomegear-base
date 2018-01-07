@@ -148,7 +148,7 @@ public:
 	void stop();
 	void waitForStop();
 
-	void send(int32_t clientId, TcpSocket::TcpPacket packet);
+	void send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection = true);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<TcpSocket> _socket;
