@@ -264,9 +264,10 @@ public:
 
 	virtual ~TcpSocket();
 
-	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress);
+	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort);
 
 	std::string getIpAddress();
+	int32_t getPort() { return _boundListenPort; }
 	void setConnectionRetries(int32_t retries) { _connectionRetries = retries; }
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
@@ -321,6 +322,15 @@ public:
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 */
 		void startServer(std::string address, std::string port, std::string& listenAddress);
+
+		/**
+		 * Starts listening on a dynamically assigned port.
+		 *
+		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 * @param[out] listenPort The port the server was bound to (e. g. `45735`).
+		 */
+		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort);
 
 		/**
 		 * Starts stopping the server and returns immediately.
@@ -395,6 +405,7 @@ protected:
 
 		std::string _listenAddress;
 		std::string _listenPort;
+		int32_t _boundListenPort = -1;
 
 		gnutls_dh_params_t _dhParams = nullptr;
 		gnutls_priority_t _tlsPriorityCache = nullptr;
