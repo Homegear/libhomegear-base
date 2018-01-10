@@ -157,7 +157,7 @@ std::string TcpSocket::getIpAddress()
 // {{{ Server
 	void TcpSocket::bindSocket()
 	{
-		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress);
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
 	}
 
 	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
@@ -171,6 +171,21 @@ std::string TcpSocket::getIpAddress()
 		_listenPort = port;
 		bindSocket();
 		listenAddress = _ipAddress;
+		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
+	}
+
+	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort)
+	{
+		waitForServerStopped();
+
+		if(_useSsl) initSsl();
+
+		_stopServer = false;
+		_listenAddress = address;
+		_listenPort = "0";
+		bindSocket();
+		listenAddress = _ipAddress;
+		listenPort = _boundListenPort;
 		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
 	}
 
@@ -501,7 +516,7 @@ std::string TcpSocket::getIpAddress()
 	}
 // }}}
 
-PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress)
+PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort)
 {
 	PFileDescriptor socketDescriptor;
 	addrinfo hostInfo;
@@ -565,6 +580,17 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 		socketDescriptor.reset();
 		throw SocketOperationException("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
 	}
+
+	struct sockaddr_in addressInfo;
+	socklen_t addressInfoLength = sizeof(addressInfo);
+	if (getsockname(socketDescriptor->descriptor, (struct sockaddr*)&addressInfo, &addressInfoLength) == -1)
+	{
+		fileDescriptorManager.shutdown(socketDescriptor);
+		socketDescriptor.reset();
+		throw SocketOperationException("Error: Could get port listening on: " + std::string(strerror(error)));
+	}
+	listenPort = addressInfo.sin_port;
+
 	if(listenAddress == "0.0.0.0" || listenAddress == "::") listenAddress = Net::getMyIpAddress();
 	return socketDescriptor;
 }
