@@ -78,6 +78,18 @@ public:
 	SocketSSLException(std::string message) : SocketOperationException(message) {}
 };
 
+class SocketBindException : public SocketOperationException
+{
+public:
+	SocketBindException(std::string message) : SocketOperationException(message) {}
+};
+
+class SocketAddressInUseException : public SocketBindException
+{
+public:
+	SocketAddressInUseException(std::string message) : SocketBindException(message) {}
+};
+
 }
 
 #endif
