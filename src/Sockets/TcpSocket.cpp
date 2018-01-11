@@ -572,7 +572,8 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 	{
 		fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
-		throw SocketOperationException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
+        if(errno == EADDRINUSE) throw SocketAddressInUseException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
+		else throw SocketBindException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 	}
 	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, 100) == -1)
 	{
