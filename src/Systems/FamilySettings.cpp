@@ -666,6 +666,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->port = value;
 			_bl->out.printDebug("Debug: Port set to " + settings->port);
 		}
+		else if(name == "port2")
+		{
+			settings->port2 = value;
+			_bl->out.printDebug("Debug: Port2 set to " + settings->port2);
+		}
 		else if(name == "listenip")
 		{
 			settings->listenIp = value;
@@ -946,6 +951,11 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		{
 			settings->port = value->stringValue;
 			_bl->out.printDebug("Debug: Port set to " + settings->port);
+		}
+		else if(name == "port2")
+		{
+			settings->port2 = value->stringValue;
+			_bl->out.printDebug("Debug: Port2 set to " + settings->port2);
 		}
 		else if(name == "listenip")
 		{
