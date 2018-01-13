@@ -56,6 +56,7 @@ public:
 	virtual ~XmlrpcEncoder() {}
 
 	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
+	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData);
 	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
 	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData);
 private:
