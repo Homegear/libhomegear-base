@@ -157,6 +157,45 @@ void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vect
     doc.clear();
 }
 
+void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData)
+{
+	xml_document<> doc;
+	try
+	{
+		xml_node<> *node = doc.allocate_node(node_element, "methodResponse");
+		doc.append_node(node);
+		if(variable->errorStruct)
+		{
+			xml_node<> *faultNode = doc.allocate_node(node_element, "fault");
+			node->append_node(faultNode);
+			encodeVariable(&doc, faultNode, variable);
+		}
+		else
+		{
+			xml_node<> *paramsNode = doc.allocate_node(node_element, "params");
+			node->append_node(paramsNode);
+			xml_node<> *paramNode = doc.allocate_node(node_element, "param");
+			paramsNode->append_node(paramNode);
+			encodeVariable(&doc, paramNode, variable);
+		}
+		print(std::back_inserter(encodedData), doc, 1);
+		doc.clear();
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	doc.clear();
+}
+
 void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
 {
 	try

@@ -68,6 +68,7 @@ public:
 	uint32_t stackPosition = 0;
 	std::string host;
 	std::string port;
+	std::string port2;
 	std::string portKeepAlive;
 	uint32_t address = 0;
 	std::string listenIp;
