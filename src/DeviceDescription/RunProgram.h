@@ -72,6 +72,7 @@ public:
 	StartType::Enum startType = StartType::none;
 	uint32_t interval = 0;
 	std::string script;
+	std::string script2;
 
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
