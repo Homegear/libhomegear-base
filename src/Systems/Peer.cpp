@@ -287,6 +287,12 @@ void Peer::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
 	if(_eventHandler) ((IPeerEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
+
+BaseLib::PVariable Peer::raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
+{
+    if(_eventHandler) return ((IPeerEventSink*)_eventHandler)->onInvokeRpc(methodName, parameters);
+    else return std::make_shared<BaseLib::Variable>();
+}
 //End event handling
 
 //ServiceMessages event handling

@@ -77,6 +77,15 @@ RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : RunP
 			}
 			else _bl->out.printWarning("Warning: script in \"runProgram\" does not contain CDATA.");
 		}
+		else if(nodeName == "script2")
+		{
+			xml_node<>* cdataNode = subNode->first_node();
+			if(cdataNode && cdataNode->type() == node_type::node_cdata)
+			{
+				script2 = std::string(cdataNode->value());
+			}
+			else _bl->out.printWarning("Warning: script2 in \"runProgram\" does not contain CDATA.");
+		}
 		else _bl->out.printWarning("Warning: Unknown node in \"runProgram\": " + nodeName);
 	}
 }
