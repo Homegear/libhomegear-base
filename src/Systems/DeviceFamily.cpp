@@ -155,6 +155,12 @@ void DeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wa
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 }
 
+BaseLib::PVariable DeviceFamily::raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
+{
+	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onInvokeRpc(methodName, parameters);
+	else return std::make_shared<BaseLib::Variable>();
+}
+
 int32_t DeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey)
 {
 	if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onCheckLicense(moduleId, familyId, deviceId, licenseKey);
@@ -212,6 +218,11 @@ void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std
 void DeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 {
 	raiseRunScript(scriptInfo, wait);
+}
+
+BaseLib::PVariable DeviceFamily::onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
+{
+    return raiseInvokeRpc(methodName, parameters);
 }
 
 void DeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)

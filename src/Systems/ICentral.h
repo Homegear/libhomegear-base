@@ -65,6 +65,7 @@ public:
 		virtual void onRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo) = 0;
 		virtual void onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
+		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
 		virtual uint64_t onGetRoomIdByName(std::string& name) = 0;
 	};
 	//End event handling
@@ -214,6 +215,7 @@ protected:
 	virtual void raiseRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo);
 	virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
 	virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
+	virtual BaseLib::PVariable raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
 	virtual uint64_t raiseGetRoomIdByName(std::string& name);
 	//End event handling
 
@@ -230,6 +232,7 @@ protected:
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
+		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
 	// }}}
 
 	virtual void setPeerId(uint64_t oldPeerId, uint64_t newPeerId);

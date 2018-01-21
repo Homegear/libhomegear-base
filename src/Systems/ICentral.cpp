@@ -107,6 +107,12 @@ void ICentral::dispose(bool wait)
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
 	}
 
+	BaseLib::PVariable ICentral::raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
+	{
+		if(_eventHandler) return ((ICentralEventSink*)_eventHandler)->onInvokeRpc(methodName, parameters);
+		else return std::make_shared<BaseLib::Variable>();
+	}
+
 	uint64_t ICentral::raiseGetRoomIdByName(std::string& name)
 	{
 		if(_eventHandler) return ((ICentralEventSink*)_eventHandler)->onGetRoomIdByName(name);
@@ -143,6 +149,11 @@ void ICentral::dispose(bool wait)
 	void ICentral::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
 	{
 		raiseRunScript(scriptInfo, wait);
+	}
+
+	BaseLib::PVariable ICentral::onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
+	{
+		return raiseInvokeRpc(methodName, parameters);
 	}
 // }}}
 

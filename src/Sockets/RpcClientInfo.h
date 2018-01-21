@@ -77,6 +77,7 @@ public:
 	bool initNewFormat = false;
 	bool initSubscribePeers = false;
 	bool initJsonMode = false;
+	bool initSendNewDevices = true;
 
 	RpcClientInfo() {}
 	virtual ~RpcClientInfo() {}

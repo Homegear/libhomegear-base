@@ -65,6 +65,7 @@ public:
 	{
 		cli,
 		device,
+		device2,
 		web,
 		simpleNode,
 		statefulNode
