@@ -261,28 +261,40 @@ bool ServiceMessages::set(std::string id, bool value)
 	{
 		if(_disposing) return false;
 		if(id == "LOWBAT_REPORTING") id = "LOWBAT"; //HM-TC-IT-WM-W-EU
-		if(id == "UNREACH" && value != _unreach)
+		if(id == "UNREACH")
 		{
-			if(value && (_bl->booting || _bl->shuttingDown)) return true;
-			_unreach = value;
-			save(0, value);
+            if(value != _unreach)
+            {
+                if(value && (_bl->booting || _bl->shuttingDown)) return true;
+                _unreach = value;
+                save(0, value);
+            }
 		}
-		else if(id == "STICKY_UNREACH" && value != _stickyUnreach)
+		else if(id == "STICKY_UNREACH")
 		{
-			if(value && (_bl->booting || _bl->shuttingDown)) return true;
-			_stickyUnreach = value;
-			save(1, value);
+            if(value != _stickyUnreach)
+            {
+                if(value && (_bl->booting || _bl->shuttingDown)) return true;
+                _stickyUnreach = value;
+                save(1, value);
+            }
 		}
-		else if(id == "CONFIG_PENDING" && value != _configPending)
+		else if(id == "CONFIG_PENDING")
 		{
-			_configPending = value;
-			save(2, value);
-			if(_configPending) _configPendingSetTime = _bl->hf.getTime();
+            if(value != _configPending)
+            {
+                _configPending = value;
+                save(2, value);
+                if(_configPending) _configPendingSetTime = _bl->hf.getTime();
+            }
 		}
-		else if((id == "LOWBAT") && value != _lowbat)
+		else if(id == "LOWBAT")
 		{
-			_lowbat = value;
-			save(3, value);
+			if(value != _lowbat)
+			{
+				_lowbat = value;
+				save(3, value);
+			}
 		}
 		else //false == 0, a little dirty, but it works
 		{
