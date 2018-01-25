@@ -793,6 +793,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->mode = value;
 			_bl->out.printDebug("Debug: mode set to " + settings->mode);
 		}
+        else if(name == "serialnumber")
+        {
+            settings->serialNumber = value;
+            _bl->out.printDebug("Debug: serialNumber set to " + settings->mode);
+        }
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);
@@ -1050,6 +1055,11 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         {
             settings->mode = value->stringValue;
             _bl->out.printDebug("Debug: mode set to " + settings->mode);
+        }
+        else if(name == "serialnumber")
+        {
+            settings->serialNumber = value->stringValue;
+            _bl->out.printDebug("Debug: serialNumber set to " + settings->mode);
         }
 		else
 		{
