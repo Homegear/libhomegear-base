@@ -97,6 +97,7 @@ public:
 	std::string password;
 	std::string additionalCommands;
 	std::string mode;
+    std::string serialNumber;
 };
 
 typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;
