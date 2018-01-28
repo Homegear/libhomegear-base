@@ -118,6 +118,8 @@ set(SOURCE_FILES
         src/Security/Gcrypt.h
         src/Security/Hash.cpp
         src/Security/Hash.h
+        src/Security/Mac.cpp
+        src/Security/Mac.h
         src/Settings/Settings.cpp
         src/Settings/Settings.h
         src/Sockets/HttpClient.cpp
@@ -125,6 +127,8 @@ set(SOURCE_FILES
         src/Sockets/HttpServer.cpp
         src/Sockets/HttpServer.h
         src/Sockets/IWebserverEventSink.h
+        src/Sockets/Modbus.cpp
+        src/Sockets/Modbus.h
         src/Sockets/RpcClientInfo.h
         src/Sockets/SerialReaderWriter.cpp
         src/Sockets/SerialReaderWriter.h
@@ -171,6 +175,6 @@ set(SOURCE_FILES
         src/StateGuard.h
         src/Variable.cpp
         src/Variable.h
-        config.h src/Sockets/Modbus.cpp src/Sockets/Modbus.h)
+        config.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

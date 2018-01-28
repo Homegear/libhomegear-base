@@ -62,6 +62,7 @@
 #include "DeviceDescription/DeviceTranslations.h"
 #include "ScriptEngine/ScriptInfo.h"
 #include "Security/Hash.h"
+#include "Security/Mac.h"
 #include "Security/Gcrypt.h"
 #include "Settings/Settings.h"
 #include "Sockets/IWebserverEventSink.h"
