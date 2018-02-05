@@ -429,7 +429,6 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
 	};
 	s << "\"";
-	uint8_t lastByte = 0;
 	for(std::string::iterator i = variable->stringValue.begin(); i != variable->stringValue.end(); ++i)
 	{
 		if(escape[(uint8_t)*i])
@@ -441,7 +440,6 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 			}
 		}
 		else s << *i;
-        lastByte = *i;
 	}
 	s << "\"";
 }
@@ -473,7 +471,6 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
 	};
 	s.push_back('"');
-    uint8_t lastByte = 0;
 	for(const uint8_t& c : variable->stringValue)
 	{
 		if(escape[c])
@@ -489,7 +486,6 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 			}
 		}
 		else s.push_back(c);
-        lastByte = c;
 	}
 	s.push_back('"');
 }
