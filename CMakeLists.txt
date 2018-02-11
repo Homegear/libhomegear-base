@@ -114,6 +114,8 @@ set(SOURCE_FILES
         src/Output/Output.cpp
         src/Output/Output.h
         src/ScriptEngine/ScriptInfo.h
+        src/Security/Acl.cpp
+        src/Security/Acl.h
         src/Security/Gcrypt.cpp
         src/Security/Gcrypt.h
         src/Security/Hash.cpp
