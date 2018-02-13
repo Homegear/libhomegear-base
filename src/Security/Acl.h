@@ -53,48 +53,21 @@ public:
 };
 
 /**
- * This class is used to store ACL rules. The elements are checked in the following order. If a field is set to "no access", access is denied immediately without checking further rules.
+ * This class is used to store ACL rules. The elements are checked in the following order. Unset elements are skipped. If a field is set to "no access", access is denied immediately without checking further rules.
  *
- * 1. Methods
- * 2. Variables
- * 3. Devices
- * 4. Rooms
- * 5. Categories
+ * 1. Variables
+ * 2. Devices
+ * 3. Rooms
+ * 4. Categories
+ * 5. Methods
  */
 class Acl
 {
 private:
     /**
-     * Key: Room ID; value: access/no access
-     *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
+     * When set to "true", _devicesRead is included in the ACL checks.
      */
-    std::unordered_map<uint64_t, bool> _roomsRead;
-
-    /**
-     * Key: Room ID; value: access/no access
-     *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
-     */
-    std::unordered_map<uint64_t, bool> _roomsWrite;
-
-    /**
-     * Key: Category ID; value: access/no access
-     *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
-     */
-    std::unordered_map<uint64_t, bool> _categoriesRead;
-
-    /**
-     * Key: Category ID; value: access/no access
-     *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
-     */
-    std::unordered_map<uint64_t, bool> _categoriesWrite;
+    bool _devicesReadSet = false;
 
     /**
      * Key: Peer ID; value: access/no access
@@ -105,12 +78,22 @@ private:
     std::unordered_map<uint64_t, bool> _devicesRead;
 
     /**
+     * When set to "true", _devicesWrite is included in the ACL checks.
+     */
+    bool _devicesWriteSet = false;
+
+    /**
      * Key: Peer ID; value: access/no access
      *
      * Grant all entry: 0 (all devices) => true
      * Deny all entry: 0 (all devices) => true
      */
     std::unordered_map<uint64_t, bool> _devicesWrite;
+
+    /**
+     * When set to "true", _variablesRead is included in the ACL checks.
+     */
+    bool _variablesReadSet = false;
 
     /**
      * Key: Channel; key 2: variable name; value: access/no access
@@ -121,6 +104,11 @@ private:
     std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesRead;
 
     /**
+     * When set to "true", _variablesWrite is included in the ACL checks.
+     */
+    bool _variablesWriteSet = false;
+
+    /**
      * Key: Channel; key 2: variable name; value: access/no access
      *
      * Grant all entry: -2 (all channels) => "*" => true
@@ -129,13 +117,69 @@ private:
     std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesWrite;
 
     /**
+     * When set to "true", _roomsRead is included in the ACL checks.
+     */
+    bool _roomsReadSet = false;
+
+    /**
+     * Key: Room ID; value: access/no access
+     *
+     * Grant all entry: 0 (all rooms) => true
+     * Deny all entry: 0 (all rooms) => true
+     */
+    std::unordered_map<uint64_t, bool> _roomsRead;
+
+    /**
+     * When set to "true", _roomsWrite is included in the ACL checks.
+     */
+    bool _roomsWriteSet = false;
+
+    /**
+     * Key: Room ID; value: access/no access
+     *
+     * Grant all entry: 0 (all rooms) => true
+     * Deny all entry: 0 (all rooms) => true
+     */
+    std::unordered_map<uint64_t, bool> _roomsWrite;
+
+    /**
+     * When set to "true", _categoriesRead is included in the ACL checks.
+     */
+    bool _categoriesReadSet = false;
+
+    /**
+     * Key: Category ID; value: access/no access
+     *
+     * Grant all entry: 0 (all categories) => true
+     * Deny all entry: 0 (all categories) => true
+     */
+    std::unordered_map<uint64_t, bool> _categoriesRead;
+
+    /**
+     * When set to "true", _categoriesWrite is included in the ACL checks.
+     */
+    bool _categoriesWriteSet = false;
+
+    /**
+     * Key: Category ID; value: access/no access
+     *
+     * Grant all entry: 0 (all categories) => true
+     * Deny all entry: 0 (all categories) => true
+     */
+    std::unordered_map<uint64_t, bool> _categoriesWrite;
+
+    /**
+     * When set to "true", _methods is included in the ACL checks.
+     */
+    bool _methodsSet = false;
+
+    /**
      * Key: Method name; value: access/no access.
      *
      * Grant all entry: "*" => true
      * Deny all entry: "*" => true
      */
     std::unordered_map<std::string, bool> _methods;
-
 public:
     Acl();
 
@@ -144,8 +188,8 @@ public:
      */
     virtual ~Acl();
 
-    PVariable serialize();
-    void unserialize(PVariable serializedData);
+    PVariable toVariable();
+    void fromVariable(PVariable serializedData);
 };
 
 typedef std::shared_ptr<Acl> PAcl;
