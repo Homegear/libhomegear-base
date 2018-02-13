@@ -89,6 +89,7 @@ public:
 	bool needsTime = false;
 	bool hasBattery = false;
 	uint32_t addressSize = 0;
+	std::string pairingMethod;
 	// }}}
 
 	// {{{ Elements
