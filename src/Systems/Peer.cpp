@@ -1981,6 +1981,8 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
                 if(!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", PVariable(new Variable(longDescriptionText))));
             }
 
+			if(fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(_rpcDevice->pairingMethod)));
+
 			PVariable variable = PVariable(new Variable(VariableType::tArray));
 			PVariable variable2 = PVariable(new Variable(VariableType::tArray));
 			if(fields.empty() || fields.find("CHILDREN") != fields.end()) description->structValue->insert(StructElement("CHILDREN", variable));
