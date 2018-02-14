@@ -39,6 +39,7 @@
 #include <mutex>
 #include <random>
 #include <vector>
+#include <regex>
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -264,6 +265,17 @@ public:
 		}
 		return haystack;
 	}
+
+	/**
+	 * Replaces substrings within a string using regex.
+	 *
+	 * @param[in,out] haystack The string to search the substring in.
+	 * @param regex The regex to search.
+	 * @param replace The substring to replace "search" with.
+	 * @param ignoreCase Set to true, to ignore the case.
+	 * @return Returns a reference to the modified string.
+	 */
+	static std::string& stringReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
 
 	/**
 	 * Splits a string at the first occurrence of a delimiter.
