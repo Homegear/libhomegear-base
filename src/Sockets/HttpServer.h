@@ -128,15 +128,15 @@ public:
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
-		std::string certFile;
-		std::string certData;
-		std::string keyFile;
-		std::string keyData;
+		std::vector<std::string> certFiles;
+        std::vector<std::string> certData;
+        std::vector<std::string> keyFiles;
+        std::vector<std::string> keyData;
 		std::string dhParamFile;
 		std::string dhParamData;
 		bool requireClientCert = false;
-		std::string caFile; //For client certificate verification
-		std::string caData; //For client certificate verification
+        std::vector<std::string> caFiles; //For client certificate verification
+        std::vector<std::string> caData; //For client certificate verification
 
 		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
 	};
