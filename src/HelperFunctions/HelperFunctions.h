@@ -275,7 +275,7 @@ public:
 	 * @param ignoreCase Set to true, to ignore the case.
 	 * @return Returns a reference to the modified string.
 	 */
-	static std::string& stringReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
+	static std::string& regexReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
 
 	/**
 	 * Splits a string at the first occurrence of a delimiter.

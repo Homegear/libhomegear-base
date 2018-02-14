@@ -359,7 +359,7 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& f
     }
 }
 
-std::string& HelperFunctions::stringReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
+std::string& HelperFunctions::regexReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
 {
 	std::regex regex(search, std::regex::icase);
 
