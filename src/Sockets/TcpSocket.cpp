@@ -63,7 +63,9 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSsl = useSsl;
-	_caFiles.push_back(caFile);
+    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+    certificateInfo->caFile = caFile;
+    _certificates.emplace("*", certificateInfo);
 	_verifyCertificate = verifyCertificate;
 
 	if(_useSsl) initSsl();
@@ -73,7 +75,9 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-	_caData.push_back(caData);
+    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+    certificateInfo->caData = caData;
+    _certificates.emplace("*", certificateInfo);
 
 	if(_useSsl) initSsl();
 }
@@ -82,9 +86,11 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-	_caFiles.push_back(caFile);
-	_clientCertFile = clientCertFile;
-	_clientKeyFile = clientKeyFile;
+    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+    certificateInfo->caFile = caFile;
+    certificateInfo->certFile = clientCertFile;
+    certificateInfo->keyFile = clientKeyFile;
+    _certificates.emplace("*", certificateInfo);
 
 	if(_useSsl) initSsl();
 }
@@ -93,9 +99,11 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-	_caData.push_back(caData);
-	_clientCertData = clientCertData;
-	_clientKeyData = clientKeyData;
+    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+    certificateInfo->caData = caData;
+    certificateInfo->certData = clientCertData;
+    certificateInfo->keyData = clientKeyData;
+    _certificates.emplace("*", certificateInfo);
 
 	if(_useSsl) initSsl();
 }
@@ -104,12 +112,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
     _useSsl = useSsl;
     _verifyCertificate = verifyCertificate;
-    _caFiles.push_back(caFile);
-    _caData.push_back(caData);
-    _clientCertFile = clientCertFile;
-    _clientCertData = clientCertData;
-    _clientKeyFile = clientKeyFile;
-    _clientKeyData = clientKeyData;
+    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+    certificateInfo->caFile = caFile;
+    certificateInfo->caData = caData;
+    certificateInfo->certFile = clientCertFile;
+    certificateInfo->certData = clientCertData;
+    certificateInfo->keyFile = clientKeyFile;
+    certificateInfo->keyData = clientKeyData;
+    _certificates.emplace("*", certificateInfo);
 
     if(_useSsl) initSsl();
 }
@@ -122,15 +132,10 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_isServer = true;
 	_useSsl = serverInfo.useSsl;
 	_maxConnections = serverInfo.maxConnections;
-	_serverCertFiles = serverInfo.certFiles;
-	_serverCertData = serverInfo.certData;
-	_serverKeyFiles = serverInfo.keyFiles;
-	_serverKeyData = serverInfo.keyData;
+	_certificates = serverInfo.certificates;
 	_dhParamFile = serverInfo.dhParamFile;
 	_dhParamData = serverInfo.dhParamData;
 	_requireClientCert = serverInfo.requireClientCert;
-	_caFiles = serverInfo.caFiles;
-	_caData = serverInfo.caData;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 }
@@ -141,7 +146,11 @@ TcpSocket::~TcpSocket()
 	_bl->threadManager.join(_serverThread);
 
 	_bl->fileDescriptorManager.close(_socketDescriptor);
-	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+    for(auto& credentials : _x509Credentials)
+    {
+        if(credentials.second) gnutls_certificate_free_credentials(credentials.second);
+    }
+    _x509Credentials.clear();
 	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
 	if(_dhParams) gnutls_dh_params_deinit(_dhParams);
 }
@@ -200,10 +209,13 @@ std::string TcpSocket::getIpAddress()
 		_bl->threadManager.join(_serverThread);
 
 		_bl->fileDescriptorManager.close(_socketDescriptor);
-		if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+        for(auto& credentials : _x509Credentials)
+        {
+            if(credentials.second) gnutls_certificate_free_credentials(credentials.second);
+        }
+        _x509Credentials.clear();
 		if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
 		if(_dhParams) gnutls_dh_params_deinit(_dhParams);
-		_x509Cred = nullptr;
 		_tlsPriorityCache = nullptr;
 		_dhParams = nullptr;
 	}
@@ -225,10 +237,10 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
 			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
 		}
-		if(!_x509Cred)
+		if(_x509Credentials.empty())
 		{
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
-			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Cred is nullptr.");
+			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Credentials is empty.");
 		}
 		int32_t result = 0;
 		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
@@ -599,212 +611,218 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 
 void TcpSocket::initSsl()
 {
-	if(_x509Cred) gnutls_certificate_free_credentials(_x509Cred);
+    for(auto& credentials : _x509Credentials)
+    {
+        if(credentials.second) gnutls_certificate_free_credentials(credentials.second);
+    }
+    _x509Credentials.clear();
 	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
 	if(_dhParams) gnutls_dh_params_deinit(_dhParams);
 
 	int32_t result = 0;
-	if((result = gnutls_certificate_allocate_credentials(&_x509Cred)) != GNUTLS_E_SUCCESS)
-	{
-		_x509Cred = nullptr;
-		throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
-	}
 
-	if(!_caData.empty())
-	{
-		for(auto& element : _caData)
-		{
-			gnutls_datum_t caData;
-			caData.data = (unsigned char*) element.c_str();
-			caData.size = element.size();
-			if((result = gnutls_certificate_set_x509_trust_mem(_x509Cred, &caData, GNUTLS_X509_FMT_PEM)) < 0)
-			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				_x509Cred = nullptr;
-				throw SocketSSLException("Could not load trusted certificates: " + std::string(gnutls_strerror(result)));
-			}
-		}
-	}
-	else if(!_caFiles.empty())
-	{
-		for(auto& element : _caFiles)
-		{
-			if((result = gnutls_certificate_set_x509_trust_file(_x509Cred, element.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
-			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				_x509Cred = nullptr;
-				throw SocketSSLException("Could not load trusted certificates from \"" + element + "\": " + std::string(gnutls_strerror(result)));
-			}
-		}
-	}
-	else
+    if(_certificates.empty())
     {
-        if(_requireClientCert && _isServer) throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
-        else if(!_isServer)
+        if((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer))
         {
-            if((result = gnutls_certificate_set_x509_system_trust(_x509Cred)) < 0)
+            throw SocketSSLException("No CA certificates specified.");
+        }
+
+        if(!_isServer)
+        {
+            gnutls_certificate_credentials_t x509Credentials = nullptr;
+            if((result = gnutls_certificate_allocate_credentials(&x509Credentials)) != GNUTLS_E_SUCCESS)
             {
-                gnutls_certificate_free_credentials(_x509Cred);
-                _x509Cred = nullptr;
+                x509Credentials = nullptr;
+                throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
+            }
+
+            if((result = gnutls_certificate_set_x509_system_trust(x509Credentials)) < 0)
+            {
+                gnutls_certificate_free_credentials(x509Credentials);
+                x509Credentials = nullptr;
                 throw SocketSSLException("Could not load system certificates: " + std::string(gnutls_strerror(result)));
             }
+            _x509Credentials.emplace("*", x509Credentials);
         }
-	}
+    }
 
-	if(result == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
-	{
-		gnutls_certificate_free_credentials(_x509Cred);
-		_x509Cred = nullptr;
-		throw SocketSSLException("No CA certificates specified.");
-	}
+    for(auto& certificateInfo : _certificates)
+    {
+        gnutls_certificate_credentials_t x509Credentials = nullptr;
+        if((result = gnutls_certificate_allocate_credentials(&x509Credentials)) != GNUTLS_E_SUCCESS)
+        {
+            x509Credentials = nullptr;
+            throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
+        }
 
-	if(_isServer)
-	{
-		if(!_serverCertData.empty() && !_serverKeyData.empty())
-		{
-			if(_serverCertData.size() == _serverKeyData.size())
-			{
-				for(uint32_t i = 0; i < _serverCertData.size(); i++)
-				{
-					gnutls_datum_t certData;
-					certData.data = (unsigned char*) _serverCertData.at(i).c_str();
-					certData.size = _serverCertData.at(i).size();
+        if(!certificateInfo.second->caData.empty())
+        {
+            gnutls_datum_t caData;
+            caData.data = (unsigned char*) certificateInfo.second->caData.c_str();
+            caData.size = certificateInfo.second->caData.size();
+            if((result = gnutls_certificate_set_x509_trust_mem(x509Credentials, &caData, GNUTLS_X509_FMT_PEM)) < 0)
+            {
+                gnutls_certificate_free_credentials(x509Credentials);
+                x509Credentials = nullptr;
+                throw SocketSSLException("Could not load trusted certificates: " + std::string(gnutls_strerror(result)));
+            }
+        }
+        else if(!certificateInfo.second->caFile.empty())
+        {
+            if((result = gnutls_certificate_set_x509_trust_file(x509Credentials, certificateInfo.second->caFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+            {
+                gnutls_certificate_free_credentials(x509Credentials);
+                x509Credentials = nullptr;
+                throw SocketSSLException("Could not load trusted certificates from \"" + certificateInfo.second->caFile + "\": " + std::string(gnutls_strerror(result)));
+            }
+        }
+        else if(_requireClientCert && _isServer)
+        {
+            throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
+        }
 
-					gnutls_datum_t keyData;
-					keyData.data = (unsigned char*) _serverKeyData.at(i).c_str();
-					keyData.size = _serverKeyData.at(i).size();
+        if((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer))
+        {
+            gnutls_certificate_free_credentials(x509Credentials);
+            x509Credentials = nullptr;
+            throw SocketSSLException("No CA certificates specified.");
+        }
 
-					if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &certData, &keyData, GNUTLS_X509_FMT_PEM)) < 0)
-					{
-						gnutls_certificate_free_credentials(_x509Cred);
-						_x509Cred = nullptr;
-						throw SocketSSLException("Could not load server certificate or key file: " + std::string(gnutls_strerror(result)));
-					}
-				}
-			}
-			else throw SocketSSLException("Cert and key file count doesn't match.");
-		}
-		else if(!_serverCertFiles.empty() && !_serverKeyFiles.empty())
-		{
-			if(_serverCertFiles.size() == _serverKeyFiles.size())
-			{
-				for(uint32_t i = 0; i < _serverCertFiles.size(); i++)
-				{
-					if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _serverCertFiles.at(i).c_str(), _serverKeyFiles.at(i).c_str(), GNUTLS_X509_FMT_PEM)) < 0)
-					{
-						gnutls_certificate_free_credentials(_x509Cred);
-						_x509Cred = nullptr;
-						throw SocketSSLException("Could not load certificate or key file from \"" + _serverCertFiles.at(i) + "\" or \"" + _serverKeyFiles.at(i) + "\": " + std::string(gnutls_strerror(result)));
-					}
-				}
-			}
-			else throw SocketSSLException("Cert and key file count doesn't match.");
-		}
-		else if(_useSsl)
-		{
-			throw SocketSSLException("SSL is enabled but no certificates are specified.");
-		}
+        if(_isServer)
+        {
+            if(!certificateInfo.second->certData.empty() && !certificateInfo.second->keyData.empty())
+            {
+                gnutls_datum_t certData;
+                certData.data = (unsigned char*) certificateInfo.second->certData.c_str();
+                certData.size = certificateInfo.second->certData.size();
 
-		if(!_dhParamFile.empty() || !_dhParamData.empty())
-		{
-			if((result = gnutls_dh_params_init(&_dhParams)) != GNUTLS_E_SUCCESS)
-			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				_x509Cred = nullptr;
-				_dhParams = nullptr;
-				throw SocketSSLException("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
-			}
+                gnutls_datum_t keyData;
+                keyData.data = (unsigned char*)certificateInfo.second->keyData.c_str();
+                keyData.size = certificateInfo.second->keyData.size();
 
-            std::vector<uint8_t> binaryData;
-			gnutls_datum_t data{};
-			if(!_dhParamFile.empty())
-			{
-				try
-				{
-					binaryData = Io::getUBinaryFileContent(_dhParamFile);
-					binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
-				}
-				catch(BaseLib::Exception& ex)
-				{
-					gnutls_certificate_free_credentials(_x509Cred);
-					gnutls_dh_params_deinit(_dhParams);
-					_x509Cred = nullptr;
-					_dhParams = nullptr;
-					throw SocketSSLException("Error: Could not load DH parameters: " + std::string(ex.what()));
-				}
-				catch(...)
-				{
-					gnutls_certificate_free_credentials(_x509Cred);
-					gnutls_dh_params_deinit(_dhParams);
-					_x509Cred = nullptr;
-					_dhParams = nullptr;
-					throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
-				}
-				data.data = binaryData.data();
-				data.size = static_cast<unsigned int>(binaryData.size());
-			}
-			else
-			{
-				data.data = (unsigned char*)_dhParamData.c_str();
-				data.size = static_cast<unsigned int>(_dhParamData.size());
-			}
+                if((result = gnutls_certificate_set_x509_key_mem(x509Credentials, &certData, &keyData, GNUTLS_X509_FMT_PEM)) < 0)
+                {
+                    gnutls_certificate_free_credentials(x509Credentials);
+                    x509Credentials = nullptr;
+                    throw SocketSSLException("Could not load server certificate or key file: " + std::string(gnutls_strerror(result)));
+                }
+            }
+            else if(!certificateInfo.second->certFile.empty() && !certificateInfo.second->keyFile.empty())
+            {
+                if((result = gnutls_certificate_set_x509_key_file(x509Credentials, certificateInfo.second->certFile.c_str(), certificateInfo.second->keyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+                {
+                    gnutls_certificate_free_credentials(x509Credentials);
+                    x509Credentials = nullptr;
+                    throw SocketSSLException("Could not load certificate or key file from \"" + certificateInfo.second->certFile + "\" or \"" + certificateInfo.second->keyFile + "\": " + std::string(gnutls_strerror(result)));
+                }
+            }
+            else if(_useSsl)
+            {
+                throw SocketSSLException("SSL is enabled but no certificates are specified.");
+            }
 
-			if(data.size > 0)
-			{
-				if ((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
-				{
-					gnutls_certificate_free_credentials(_x509Cred);
-					gnutls_dh_params_deinit(_dhParams);
-					_x509Cred = nullptr;
-					_dhParams = nullptr;
-					throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
-				}
+            if(!_dhParamFile.empty() || !_dhParamData.empty())
+            {
+                if((result = gnutls_dh_params_init(&_dhParams)) != GNUTLS_E_SUCCESS)
+                {
+                    gnutls_certificate_free_credentials(_x509Cred);
+                    _x509Cred = nullptr;
+                    _dhParams = nullptr;
+                    throw SocketSSLException("Error: Could not initialize DH parameters: " + std::string(gnutls_strerror(result)));
+                }
 
-				gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
-			}
-		}
+                std::vector<uint8_t> binaryData;
+                gnutls_datum_t data{};
+                if(!_dhParamFile.empty())
+                {
+                    try
+                    {
+                        binaryData = Io::getUBinaryFileContent(_dhParamFile);
+                        binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
+                    }
+                    catch(BaseLib::Exception& ex)
+                    {
+                        gnutls_certificate_free_credentials(_x509Cred);
+                        gnutls_dh_params_deinit(_dhParams);
+                        _x509Cred = nullptr;
+                        _dhParams = nullptr;
+                        throw SocketSSLException("Error: Could not load DH parameters: " + std::string(ex.what()));
+                    }
+                    catch(...)
+                    {
+                        gnutls_certificate_free_credentials(_x509Cred);
+                        gnutls_dh_params_deinit(_dhParams);
+                        _x509Cred = nullptr;
+                        _dhParams = nullptr;
+                        throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
+                    }
+                    data.data = binaryData.data();
+                    data.size = static_cast<unsigned int>(binaryData.size());
+                }
+                else
+                {
+                    data.data = (unsigned char*) _dhParamData.c_str();
+                    data.size = static_cast<unsigned int>(_dhParamData.size());
+                }
 
-		if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
-		{
-			gnutls_certificate_free_credentials(_x509Cred);
-			gnutls_dh_params_deinit(_dhParams);
-			_x509Cred = nullptr;
-			_dhParams = nullptr;
-			_tlsPriorityCache = nullptr;
-			throw SocketSSLException("Error: Could not initialize cipher priorities: " + std::string(gnutls_strerror(result)));
-		}
+                if(data.size > 0)
+                {
+                    if((result = gnutls_dh_params_import_pkcs3(_dhParams, &data, GNUTLS_X509_FMT_PEM)) != GNUTLS_E_SUCCESS)
+                    {
+                        gnutls_certificate_free_credentials(_x509Cred);
+                        gnutls_dh_params_deinit(_dhParams);
+                        _x509Cred = nullptr;
+                        _dhParams = nullptr;
+                        throw SocketSSLException("Error: Could not import DH parameters: " + std::string(gnutls_strerror(result)));
+                    }
 
-		if(_requireClientCert) gnutls_certificate_set_verify_function(_x509Cred, &verifyClientCert);
-	}
-	else
-	{
-		if(!_clientCertData.empty() && !_clientKeyData.empty())
-		{
-			gnutls_datum_t clientCertData{};
-			clientCertData.data = (unsigned char*)_clientCertData.c_str();
-			clientCertData.size = static_cast<unsigned int>(_clientCertData.size());
+                    gnutls_certificate_set_dh_params(_x509Cred, _dhParams);
+                }
+            }
 
-			gnutls_datum_t clientKeyData{};
-			clientKeyData.data = (unsigned char*)_clientKeyData.c_str();
-			clientKeyData.size = static_cast<unsigned int>(_clientKeyData.size());
+            if((result = gnutls_priority_init(&_tlsPriorityCache, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
+            {
+                gnutls_certificate_free_credentials(_x509Cred);
+                gnutls_dh_params_deinit(_dhParams);
+                _x509Cred = nullptr;
+                _dhParams = nullptr;
+                _tlsPriorityCache = nullptr;
+                throw SocketSSLException("Error: Could not initialize cipher priorities: " + std::string(gnutls_strerror(result)));
+            }
 
-			if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
-			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				_x509Cred = nullptr;
-				throw SocketSSLException("Could not load client certificate or key: " + std::string(gnutls_strerror(result)));
-			}
-		}
-		else if(!_clientCertFile.empty() && !_clientKeyFile.empty())
-		{
-			if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _clientCertFile.c_str(), _clientKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
-			{
-				gnutls_certificate_free_credentials(_x509Cred);
-				_x509Cred = nullptr;
-				throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
-			}
-		}
-	}
+            if(_requireClientCert) gnutls_certificate_set_verify_function(_x509Cred, &verifyClientCert);
+        }
+        else
+        {
+            if(!_clientCertData.empty() && !_clientKeyData.empty())
+            {
+                gnutls_datum_t clientCertData{};
+                clientCertData.data = (unsigned char*) _clientCertData.c_str();
+                clientCertData.size = static_cast<unsigned int>(_clientCertData.size());
+
+                gnutls_datum_t clientKeyData{};
+                clientKeyData.data = (unsigned char*) _clientKeyData.c_str();
+                clientKeyData.size = static_cast<unsigned int>(_clientKeyData.size());
+
+                if((result = gnutls_certificate_set_x509_key_mem(_x509Cred, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
+                {
+                    gnutls_certificate_free_credentials(_x509Cred);
+                    _x509Cred = nullptr;
+                    throw SocketSSLException("Could not load client certificate or key: " + std::string(gnutls_strerror(result)));
+                }
+            }
+            else if(!_clientCertFile.empty() && !_clientKeyFile.empty())
+            {
+                if((result = gnutls_certificate_set_x509_key_file(_x509Cred, _clientCertFile.c_str(), _clientKeyFile.c_str(), GNUTLS_X509_FMT_PEM)) < 0)
+                {
+                    gnutls_certificate_free_credentials(_x509Cred);
+                    _x509Cred = nullptr;
+                    throw SocketSSLException("Could not load client certificate and key from \"" + _clientCertFile + "\" and \"" + _clientKeyFile + "\": " + std::string(gnutls_strerror(result)));
+                }
+            }
+        }
+    }
 }
 
 void TcpSocket::open()
