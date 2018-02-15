@@ -417,13 +417,14 @@ protected:
 
 	PFileDescriptor _socketDescriptor;
 	bool _useSsl = false;
-	std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials = nullptr;
+	std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials;
 
 	void getSocketDescriptor();
 	void getConnection();
 	void getSsl();
 	void initSsl();
 	void autoConnect();
+    void freeCredentials();
 
 	// {{{ For server only
 		void bindSocket();

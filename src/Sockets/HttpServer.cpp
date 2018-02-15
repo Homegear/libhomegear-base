@@ -41,15 +41,10 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
 	TcpSocket::TcpServerInfo tcpServerInfo;
 	tcpServerInfo.useSsl = serverInfo.useSsl;
 	tcpServerInfo.maxConnections = serverInfo.maxConnections;
-	tcpServerInfo.certFiles = serverInfo.certFiles;
-	tcpServerInfo.certData = serverInfo.certData;
-	tcpServerInfo.keyFiles = serverInfo.keyFiles;
-	tcpServerInfo.keyData = serverInfo.keyData;
+	tcpServerInfo.certificates = serverInfo.certificates;
 	tcpServerInfo.dhParamFile = serverInfo.dhParamFile;
 	tcpServerInfo.dhParamData = serverInfo.dhParamData;
 	tcpServerInfo.requireClientCert = serverInfo.requireClientCert;
-	tcpServerInfo.caFiles = serverInfo.caFiles;
-	tcpServerInfo.caData = serverInfo.caData;
 	tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
 
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
