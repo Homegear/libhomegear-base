@@ -283,6 +283,7 @@ public:
 	void setUseSSL(bool useSsl) { close(); _useSsl = useSsl; if(_useSsl) initSsl(); }
 	void setCertificates(std::unordered_map<std::string, PCertificateInfo>& certificates) { close(); _certificates = certificates; }
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
+	std::unordered_map<std::string, gnutls_certificate_credentials_t>& getCredentials() { return _x509Credentials; }
 
 	bool connected();
 
