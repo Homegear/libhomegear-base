@@ -128,15 +128,10 @@ public:
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
-		std::unordered_map<std::string, std::string> certFiles;
-		std::unordered_map<std::string, std::string> certData;
-		std::unordered_map<std::string, std::string> keyFiles;
-		std::unordered_map<std::string, std::string> keyData;
+		std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
 		std::string dhParamFile;
 		std::string dhParamData;
 		bool requireClientCert = false;
-		std::unordered_map<std::string, std::string> caFiles; //For client certificate verification
-		std::unordered_map<std::string, std::string> caData; //For client certificate verification
 
 		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
 	};
