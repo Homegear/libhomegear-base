@@ -217,10 +217,62 @@ std::string TcpSocket::getIpAddress()
 		//Called during handshake just after the certificate message has been received.
 
 		uint32_t status = (uint32_t)-1;
-		if(gnutls_certificate_verify_peers3(tlsSession, 0, &status) != GNUTLS_E_SUCCESS) return -1; //Terminate handshake
-		if(status > 0) return -1;
-		return 0;
+		if(gnutls_certificate_verify_peers3(tlsSession, 0, &status) != GNUTLS_E_SUCCESS) return GNUTLS_E_INTERNAL_ERROR; //Terminate handshake
+		if(status > 0) return GNUTLS_E_INTERNAL_ERROR;
+		return GNUTLS_E_SUCCESS;
 	}
+
+    int postClientHello(gnutls_session_t tlsSession)
+    {
+        TcpSocket* tcpSocket = (TcpSocket*)gnutls_session_get_ptr(tlsSession);
+        if(!tcpSocket) return GNUTLS_E_INTERNAL_ERROR;
+
+        auto& credentials = tcpSocket->getCredentials();
+
+        int32_t result = 0;
+        if(credentials.size() > 1)
+        {
+            std::array<char, 300> nameBuffer;
+            size_t dataSize = nameBuffer.size() - 1;
+            unsigned  int type = GNUTLS_NAME_DNS;
+            if(gnutls_server_name_get(tlsSession, nameBuffer.data(), &dataSize, &type, 0) != GNUTLS_E_SUCCESS)
+            {
+                if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentials.begin()->second)) != GNUTLS_E_SUCCESS)
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                nameBuffer.at(nameBuffer.size() - 1) = 0;
+                std::string serverName(nameBuffer.data());
+                auto credentialsIterator = credentials.find(serverName);
+                if(credentialsIterator != credentials.end())
+                {
+                    if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentialsIterator->second)) != GNUTLS_E_SUCCESS)
+                    {
+                        return result;
+                    }
+                }
+                else
+                {
+                    if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentials.begin()->second)) != GNUTLS_E_SUCCESS)
+                    {
+                        return result;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentials.begin()->second)) != GNUTLS_E_SUCCESS)
+            {
+                return result;
+            }
+        }
+
+        return GNUTLS_E_SUCCESS;
+    }
 
 	void TcpSocket::initClientSsl(PFileDescriptor fileDescriptor)
 	{
@@ -246,56 +298,16 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
 			throw SocketSSLException("Error: Client TLS session is nullptr.");
 		}
+
+        gnutls_session_set_ptr(fileDescriptor->tlsSession, this);
+
 		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
 		{
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
 			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
 		}
 
-        if(_x509Credentials.size() > 1)
-        {
-            std::array<char, 300> nameBuffer;
-            size_t dataSize = nameBuffer.size() - 1;
-            unsigned  int type = GNUTLS_NAME_DNS;
-            if(gnutls_server_name_get(fileDescriptor->tlsSession, nameBuffer.data(), &dataSize, &type, 0) != GNUTLS_E_SUCCESS)
-            {
-                if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Credentials.begin()->second)) != GNUTLS_E_SUCCESS)
-                {
-                    _bl->fileDescriptorManager.shutdown(fileDescriptor);
-                    throw SocketSSLException("Could not set x509 credentials on TLS session (1): " + std::string(gnutls_strerror(result)));
-                }
-            }
-            else
-            {
-                nameBuffer.at(nameBuffer.size() - 1) = 0;
-                std::string serverName(nameBuffer.data());
-                auto credentialsIterator = _x509Credentials.find(serverName);
-                if(credentialsIterator != _x509Credentials.end())
-                {
-                    if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, credentialsIterator->second)) != GNUTLS_E_SUCCESS)
-                    {
-                        _bl->fileDescriptorManager.shutdown(fileDescriptor);
-                        throw SocketSSLException("Could not set x509 credentials on TLS session (2): " + std::string(gnutls_strerror(result)));
-                    }
-                }
-                else
-                {
-                    if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Credentials.begin()->second)) != GNUTLS_E_SUCCESS)
-                    {
-                        _bl->fileDescriptorManager.shutdown(fileDescriptor);
-                        throw SocketSSLException("Could not set x509 credentials on TLS session (3): " + std::string(gnutls_strerror(result)));
-                    }
-                }
-            }
-        }
-        else
-        {
-            if((result = gnutls_credentials_set(fileDescriptor->tlsSession, GNUTLS_CRD_CERTIFICATE, _x509Credentials.begin()->second)) != GNUTLS_E_SUCCESS)
-            {
-                _bl->fileDescriptorManager.shutdown(fileDescriptor);
-                throw SocketSSLException("Could not set x509 credentials on TLS session (4): " + std::string(gnutls_strerror(result)));
-            }
-        }
+        gnutls_handshake_set_post_client_hello_function(fileDescriptor->tlsSession, &postClientHello);
 
 		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, _requireClientCert ? GNUTLS_CERT_REQUIRE : GNUTLS_CERT_IGNORE);
 		if(!fileDescriptor || fileDescriptor->descriptor == -1)
