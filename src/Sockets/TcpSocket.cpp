@@ -786,7 +786,7 @@ void TcpSocket::initSsl()
         {
             throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
         }
-		
+
         if(caCertificateCount == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
         {
             gnutls_certificate_free_credentials(x509Credentials);
