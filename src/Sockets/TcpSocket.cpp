@@ -756,6 +756,7 @@ void TcpSocket::initSsl()
             throw SocketSSLException("Could not allocate certificate credentials: " + std::string(gnutls_strerror(result)));
         }
 
+		int32_t caCertificateCount = 0;
         if(!certificateInfo.second->caData.empty())
         {
             gnutls_datum_t caData;
@@ -768,6 +769,7 @@ void TcpSocket::initSsl()
 				freeCredentials();
                 throw SocketSSLException("Could not load trusted certificates: " + std::string(gnutls_strerror(result)));
             }
+			caCertificateCount = result;
         }
         else if(!certificateInfo.second->caFile.empty())
         {
@@ -778,13 +780,14 @@ void TcpSocket::initSsl()
 				freeCredentials();
                 throw SocketSSLException("Could not load trusted certificates from \"" + certificateInfo.second->caFile + "\": " + std::string(gnutls_strerror(result)));
             }
+			caCertificateCount = result;
         }
         else if(_requireClientCert && _isServer)
         {
             throw SocketSSLException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
         }
-
-        if((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer))
+		
+        if(caCertificateCount == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
         {
             gnutls_certificate_free_credentials(x509Credentials);
             x509Credentials = nullptr;
