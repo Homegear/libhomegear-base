@@ -1292,7 +1292,7 @@ void TcpSocket::getSocketDescriptor()
 void TcpSocket::getSsl()
 {
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) throw SocketSSLException("Could not connect to server using SSL. File descriptor is invalid.");
-	if(!_x509Credentials.empty())
+	if(_x509Credentials.empty())
 	{
 		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSSLException("Could not connect to server using SSL. Certificate credentials are not initialized. Look for previous error messages.");
