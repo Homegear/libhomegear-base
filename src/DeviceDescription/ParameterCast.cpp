@@ -864,6 +864,8 @@ CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Para
 
 void CcrtdnParty::fromPacket(PVariable value)
 {
+	value->stringValue = "";
+	value->type = VariableType::tString;
 }
 
 void CcrtdnParty::toPacket(PVariable value)
@@ -918,6 +920,8 @@ Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter
 
 void Cfm::fromPacket(PVariable value)
 {
+	value->stringValue = "";
+	value->type = VariableType::tString;
 }
 
 void Cfm::toPacket(PVariable value)

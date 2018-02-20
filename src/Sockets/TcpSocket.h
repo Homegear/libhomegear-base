@@ -141,19 +141,25 @@ class TcpSocket
 public:
 	typedef std::vector<uint8_t> TcpPacket;
 
+    struct CertificateInfo
+    {
+        std::string certFile;
+        std::string certData;
+        std::string keyFile;
+        std::string keyData;
+        std::string caFile; //For client certificate verification
+        std::string caData; //For client certificate verification
+    };
+    typedef std::shared_ptr<CertificateInfo> PCertificateInfo;
+
 	struct TcpServerInfo
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
-		std::string certFile;
-		std::string certData;
-		std::string keyFile;
-		std::string keyData;
+		std::unordered_map<std::string, PCertificateInfo> certificates;
 		std::string dhParamFile;
 		std::string dhParamData;
 		bool requireClientCert = false;
-		std::string caFile; //For client certificate verification
-		std::string caData; //For client certificate verification
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
@@ -275,10 +281,9 @@ public:
 	void setHostname(std::string hostname) { close(); _hostname = hostname; }
 	void setPort(std::string port) { close(); _port = port; }
 	void setUseSSL(bool useSsl) { close(); _useSsl = useSsl; if(_useSsl) initSsl(); }
-	void setCAFile(std::string caFile) { close(); _caFile = caFile; }
-	void setCertFile(std::string certFile) { close(); _clientCertFile = certFile; }
-	void setKeyFile(std::string keyFile) { close(); _clientKeyFile = keyFile; }
+	void setCertificates(std::unordered_map<std::string, PCertificateInfo>& certificates) { close(); _certificates = certificates; }
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
+	std::unordered_map<std::string, gnutls_certificate_credentials_t>& getCredentials() { return _x509Credentials; }
 
 	bool connected();
 
@@ -380,23 +385,14 @@ protected:
 	std::string _ipAddress;
 	std::string _hostname;
 	std::string _port;
-	std::string _caFile;
-	std::string _caData;
-	std::string _clientCertFile;
-	std::string _clientCertData;
-	std::string _clientKeyFile;
-	std::string _clientKeyData;
 	std::mutex _readMutex;
 	std::mutex _writeMutex;
+    std::unordered_map<std::string, PCertificateInfo> _certificates;
 	bool _verifyCertificate = true;
 
 	// {{{ For server only
 		bool _isServer = false;
 		uint32_t _maxConnections = 10;
-		std::string _serverCertFile;
-		std::string _serverCertData;
-		std::string _serverKeyFile;
-		std::string _serverKeyData;
 		std::string _dhParamFile;
 		std::string _dhParamData;
 		bool _requireClientCert = false;
@@ -422,13 +418,14 @@ protected:
 
 	PFileDescriptor _socketDescriptor;
 	bool _useSsl = false;
-	gnutls_certificate_credentials_t _x509Cred = nullptr;
+	std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials;
 
 	void getSocketDescriptor();
 	void getConnection();
 	void getSsl();
 	void initSsl();
 	void autoConnect();
+    void freeCredentials();
 
 	// {{{ For server only
 		void bindSocket();

@@ -276,7 +276,7 @@ std::string Net::getMyIp6Address(std::string interfaceName)
 						std::string currentInterfaceName(info->ifa_name);
 						if(currentInterfaceName == interfaceName) addressFound = true;
 					}
-					else if(address.compare(0, 3, "::1") != 0 || address.compare(0, 4, "fe80") != 0) addressFound = true;
+					else if(address.compare(0, 3, "::1") != 0 && address.compare(0, 4, "fe80") != 0) addressFound = true;
 					break;
 			}
 			if(addressFound) break;

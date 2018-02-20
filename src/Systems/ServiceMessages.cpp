@@ -477,7 +477,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
 			array->arrayValue->push_back(PVariable(new Variable(true)));
 			serviceMessages->arrayValue->push_back(array);
 		}
-		_errorMutex.lock();
+		std::lock_guard<std::mutex> errorGuard(_errorMutex);
 		for(std::map<uint32_t, std::map<std::string, uint8_t>>::const_iterator i = _errors.begin(); i != _errors.end(); ++i)
 		{
 			for(std::map<std::string, uint8_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
@@ -495,7 +495,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
 				serviceMessages->arrayValue->push_back(array);
 			}
 		}
-		_errorMutex.unlock();
 		return serviceMessages;
 	}
 	catch(const std::exception& ex)
@@ -510,7 +509,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _errorMutex.unlock();
     return Variable::createError(-32500, "Unknown application error.");
 }
 

@@ -158,6 +158,8 @@ public:
 	virtual std::shared_ptr<DataTable> getPeerVariables(uint64_t peerID) = 0;
 	virtual void deletePeerParameter(uint64_t peerID, DataRow& data) = 0;
 
+	virtual bool peerExists(uint64_t peerId) = 0;
+
 	/**
 	 * Changes the ID of a peer.
 	 *

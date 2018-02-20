@@ -1579,6 +1579,8 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
             std::string longDescriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
 			if(!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", std::shared_ptr<Variable>(new Variable(longDescriptionText))));
 
+			if(fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(device->pairingMethod)));
+
 			std::shared_ptr<Variable> variable = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
 			std::shared_ptr<Variable> variable2 = std::shared_ptr<Variable>(new Variable(VariableType::tArray));
 			if(fields.empty() || fields.find("CHANNELS") != fields.end()) description->structValue->insert(StructElement("CHANNELS", variable2));

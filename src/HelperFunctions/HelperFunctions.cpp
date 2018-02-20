@@ -359,6 +359,16 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& f
     }
 }
 
+std::string& HelperFunctions::regexReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
+{
+	std::regex regex(search, std::regex::icase);
+
+	std::string result = std::regex_replace(haystack, regex, replace);
+	haystack = result;
+
+	return haystack;
+}
+
 std::pair<std::string, std::string> HelperFunctions::splitFirst(std::string string, char delimiter)
 {
 	int32_t pos = string.find_first_of(delimiter);
