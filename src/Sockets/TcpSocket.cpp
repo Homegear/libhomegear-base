@@ -1300,7 +1300,8 @@ void TcpSocket::getSsl()
 	int32_t result = 0;
 	//Disable TCP Nagle algorithm to improve performance
 	const int32_t value = 1;
-	if ((result = setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value))) < 0) {
+	if ((result = setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value))) < 0)
+    {
 		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSSLException("Could not disable Nagle algorithm.");
 	}
