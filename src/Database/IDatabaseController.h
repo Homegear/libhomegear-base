@@ -117,14 +117,15 @@ public:
 	//End system variables
 
 	//Users
+	virtual bool createUser(const std::string& name, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups) = 0;
+	virtual bool deleteUser(uint64_t userId) = 0;
+    virtual std::shared_ptr<DataTable> getPassword(const std::string& name) = 0;
+	virtual uint64_t getUserId(const std::string& name) = 0;
+	virtual BaseLib::PVariable getUserMetadata(uint64_t userId) = 0;
 	virtual std::shared_ptr<DataTable> getUsers() = 0;
-	virtual BaseLib::PVariable getUserMetadata() = 0;
-	virtual bool userNameExists(const std::string& name) = 0;
-	virtual uint64_t getUserID(const std::string& name) = 0;
-	virtual bool createUser(const std::string& name, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups, BaseLib::PVariable metadata) = 0;
-	virtual bool updateUser(uint64_t id, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups, BaseLib::PVariable metadata) = 0;
-	virtual bool deleteUser(uint64_t id) = 0;
-	virtual std::shared_ptr<DataTable> getPassword(const std::string& name) = 0;
+	virtual bool updateUser(uint64_t userId, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups) = 0;
+    virtual BaseLib::PVariable setUserMetadata(uint64_t userId, BaseLib::PVariable metadata) = 0;
+    virtual bool userNameExists(const std::string& name) = 0;
 	//End users
 
     //Groups
