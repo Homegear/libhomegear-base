@@ -71,9 +71,6 @@ private:
 
     /**
      * Key: Peer ID; value: access/no access
-     *
-     * Grant all entry: 0 (all devices) => true
-     * Deny all entry: 0 (all devices) => true
      */
     std::unordered_map<uint64_t, bool> _devicesRead;
 
@@ -84,9 +81,6 @@ private:
 
     /**
      * Key: Peer ID; value: access/no access
-     *
-     * Grant all entry: 0 (all devices) => true
-     * Deny all entry: 0 (all devices) => true
      */
     std::unordered_map<uint64_t, bool> _devicesWrite;
 
@@ -96,12 +90,9 @@ private:
     bool _variablesReadSet = false;
 
     /**
-     * Key: Channel; key 2: variable name; value: access/no access
-     *
-     * Grant all entry: -2 (all channels) => "*" => true
-     * Deny all entry: -2 (all channels) => "*" => true
+     * Key: Device; key2: channel; key 3: variable name; value: access/no access
      */
-    std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesRead;
+    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
     /**
      * When set to "true", _variablesWrite is included in the ACL checks.
@@ -109,12 +100,9 @@ private:
     bool _variablesWriteSet = false;
 
     /**
-     * Key: Channel; key 2: variable name; value: access/no access
-     *
-     * Grant all entry: -2 (all channels) => "*" => true
-     * Deny all entry: -2 (all channels) => "*" => true
+     * Key: Device; key2: Channel; key 3: variable name; value: access/no access
      */
-    std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesWrite;
+    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
     /**
      * When set to "true", _roomsRead is included in the ACL checks.
@@ -123,9 +111,6 @@ private:
 
     /**
      * Key: Room ID; value: access/no access
-     *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
      */
     std::unordered_map<uint64_t, bool> _roomsRead;
 
@@ -136,9 +121,6 @@ private:
 
     /**
      * Key: Room ID; value: access/no access
-     *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
      */
     std::unordered_map<uint64_t, bool> _roomsWrite;
 
@@ -149,9 +131,6 @@ private:
 
     /**
      * Key: Category ID; value: access/no access
-     *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
      */
     std::unordered_map<uint64_t, bool> _categoriesRead;
 
@@ -162,9 +141,6 @@ private:
 
     /**
      * Key: Category ID; value: access/no access
-     *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
      */
     std::unordered_map<uint64_t, bool> _categoriesWrite;
 
@@ -190,6 +166,8 @@ public:
 
     PVariable toVariable();
     void fromVariable(PVariable serializedData);
+
+    std::string toString(int32_t indentation = 0);
 };
 
 typedef std::shared_ptr<Acl> PAcl;

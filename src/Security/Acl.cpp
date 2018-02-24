@@ -28,6 +28,7 @@
  * files in the program, then also delete it here.
 */
 
+#include <sstream>
 #include "Acl.h"
 #include "../HelperFunctions/Math.h"
 
@@ -62,16 +63,23 @@ PVariable Acl::toVariable()
         {
             PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-            for(auto& channel : _variablesRead)
+            for(auto& device : _variablesRead)
             {
-                PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
+                PVariable deviceElement = std::make_shared<Variable>(VariableType::tStruct);
 
-                for(auto& variable : channel.second)
+                for(auto& channel : device.second)
                 {
-                    channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
+                    PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
+
+                    for(auto& variable : channel.second)
+                    {
+                        channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
+                    }
+
+                    deviceElement->structValue->emplace(std::to_string(channel.first), channelElement);
                 }
 
-                rootElement->structValue->emplace(std::to_string(channel.first), channelElement);
+                rootElement->structValue->emplace(std::to_string(device.first), deviceElement);
             }
 
             acl->structValue->emplace("variablesRead", rootElement);
@@ -81,16 +89,23 @@ PVariable Acl::toVariable()
         {
             PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-            for(auto& channel : _variablesWrite)
+            for(auto& device : _variablesWrite)
             {
-                PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
+                PVariable deviceElement = std::make_shared<Variable>(VariableType::tStruct);
 
-                for(auto& variable : channel.second)
+                for(auto& channel : device.second)
                 {
-                    channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
+                    PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
+
+                    for(auto& variable : channel.second)
+                    {
+                        channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
+                    }
+
+                    deviceElement->structValue->emplace(std::to_string(channel.first), channelElement);
                 }
 
-                rootElement->structValue->emplace(std::to_string(channel.first), channelElement);
+                rootElement->structValue->emplace(std::to_string(device.first), deviceElement);
             }
 
             acl->structValue->emplace("variablesWrite", rootElement);
@@ -204,38 +219,57 @@ void Acl::fromVariable(PVariable serializedData)
         {
             if(rootElement.first == "variablesRead")
             {
-                for(auto& channelElement : *rootElement.second->structValue)
+                _variablesReadSet = true;
+                for(auto& deviceElement : *rootElement.second->structValue)
                 {
-                    if(channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
-                    std::string channelString = channelElement.first;
-                    if(!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
-                    int32_t channel = Math::getNumber(channelString, false);
+                    if(deviceElement.second->type != VariableType::tStruct) throw AclException("Device element is not of type Struct.");
+                    std::string deviceString = deviceElement.first;
+                    if(!Math::isNumber(deviceString, false)) throw AclException("Peer ID is not a valid number.");
+                    uint64_t peerId = Math::getNumber64(deviceString, false);
 
-                    for(auto& variableElement: *channelElement.second->structValue)
+                    for(auto& channelElement : *deviceElement.second->structValue)
                     {
-                        if(variableElement.second->type != VariableType::tBoolean) throw AclException("Variable element is not of type bool.");
-                        _variablesRead[channel][variableElement.first] = variableElement.second->booleanValue;
+                        if(channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
+                        std::string channelString = channelElement.first;
+                        if(!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
+                        int32_t channel = Math::getNumber(channelString, false);
+
+                        for(auto& variableElement: *channelElement.second->structValue)
+                        {
+                            if(variableElement.second->type != VariableType::tBoolean) throw AclException("Variable element is not of type bool.");
+                            _variablesRead[peerId][channel][variableElement.first] = variableElement.second->booleanValue;
+                        }
                     }
                 }
             }
             else if(rootElement.first == "variablesWrite")
             {
-                for(auto& channelElement : *rootElement.second->structValue)
+                _variablesWriteSet = true;
+                for(auto& deviceElement : *rootElement.second->structValue)
                 {
-                    if(channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
-                    std::string channelString = channelElement.first;
-                    if(!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
-                    int32_t channel = Math::getNumber(channelString, false);
+                    if(deviceElement.second->type != VariableType::tStruct) throw AclException("Device element is not of type Struct.");
+                    std::string deviceString = deviceElement.first;
+                    if(!Math::isNumber(deviceString, false)) throw AclException("Peer ID is not a valid number.");
+                    uint64_t peerId = Math::getNumber64(deviceString, false);
 
-                    for(auto& variableElement: *channelElement.second->structValue)
+                    for(auto& channelElement : *deviceElement.second->structValue)
                     {
-                        if(variableElement.second->type != VariableType::tBoolean) throw AclException("Variable element is not of type bool.");
-                        _variablesWrite[channel][variableElement.first] = variableElement.second->booleanValue;
+                        if(channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
+                        std::string channelString = channelElement.first;
+                        if(!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
+                        int32_t channel = Math::getNumber(channelString, false);
+
+                        for(auto& variableElement: *channelElement.second->structValue)
+                        {
+                            if(variableElement.second->type != VariableType::tBoolean) throw AclException("Variable element is not of type bool.");
+                            _variablesWrite[peerId][channel][variableElement.first] = variableElement.second->booleanValue;
+                        }
                     }
                 }
             }
             else if(rootElement.first == "devicesRead")
             {
+                _devicesReadSet = true;
                 for(auto& deviceElement : *rootElement.second->structValue)
                 {
                     if(deviceElement.second->type != VariableType::tBoolean) throw AclException("Device element is not of type bool.");
@@ -246,6 +280,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "devicesWrite")
             {
+                _devicesWriteSet = true;
                 for(auto& deviceElement : *rootElement.second->structValue)
                 {
                     if(deviceElement.second->type != VariableType::tBoolean) throw AclException("Device element is not of type bool.");
@@ -256,6 +291,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "roomsRead")
             {
+                _roomsReadSet = true;
                 for(auto& roomElement : *rootElement.second->structValue)
                 {
                     if(roomElement.second->type != VariableType::tBoolean) throw AclException("Room element is not of type bool.");
@@ -266,6 +302,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "roomsWrite")
             {
+                _roomsWriteSet = true;
                 for(auto& roomElement : *rootElement.second->structValue)
                 {
                     if(roomElement.second->type != VariableType::tBoolean) throw AclException("Room element is not of type bool.");
@@ -276,6 +313,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "categoriesRead")
             {
+                _categoriesReadSet = true;
                 for(auto& categoryElement : *rootElement.second->structValue)
                 {
                     if(categoryElement.second->type != VariableType::tBoolean) throw AclException("Category element is not of type bool.");
@@ -286,6 +324,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "categoriesWrite")
             {
+                _categoriesWriteSet = true;
                 for(auto& categoryElement : *rootElement.second->structValue)
                 {
                     if(categoryElement.second->type != VariableType::tBoolean) throw AclException("Category element is not of type bool.");
@@ -296,6 +335,7 @@ void Acl::fromVariable(PVariable serializedData)
             }
             else if(rootElement.first == "methods")
             {
+                _methodsSet = true;
                 for(auto& methodElement : *rootElement.second->structValue)
                 {
                     if(methodElement.second->type != VariableType::tBoolean) throw AclException("Method element is not of type bool.");
@@ -313,6 +353,120 @@ void Acl::fromVariable(PVariable serializedData)
     {
         throw AclException("Unknown error.");
     }
+}
+
+std::string Acl::toString(int32_t indentation)
+{
+    if(indentation < 0) indentation = 0;
+    if(indentation > 100) indentation = 100;
+
+    std::string prefix;
+    prefix.resize(indentation, ' ');
+
+    std::ostringstream stream;
+    if(_variablesReadSet)
+    {
+        stream << prefix << "Readable variables:" << std::endl;
+        for(auto& device : _variablesRead)
+        {
+            stream << prefix << "  * Device " << device.first << ":" << std::endl;
+            for(auto& channel : device.second)
+            {
+                stream << prefix << "    - Channel " << channel.first << ":" << std::endl;
+
+                for(auto& variable : channel.second)
+                {
+                    stream << prefix << "      " << variable.first << ": " << variable.second << std::endl;
+                }
+            }
+        }
+        stream << std::endl;
+    }
+
+    if(_variablesWriteSet)
+    {
+        stream << prefix << "Writeable variables:" << std::endl;
+        for(auto& device : _variablesWrite)
+        {
+            stream << prefix << "  * Device " << device.first << ":" << std::endl;
+            for(auto& channel : device.second)
+            {
+                stream << prefix << "    - Channel " << channel.first << ":" << std::endl;
+
+                for(auto& variable : channel.second)
+                {
+                    stream << prefix << "      " << variable.first << ": " << (variable.second ? "accept" : "deny") << std::endl;
+                }
+            }
+        }
+        stream << std::endl;
+    }
+
+    if(_devicesReadSet)
+    {
+        stream << prefix << "Readable devices:" << std::endl;
+        for(auto& device : _devicesRead)
+        {
+            stream << prefix << "  * " << device.first << ": " << (device.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_devicesWriteSet)
+    {
+        stream << prefix << "Writeable devices:" << std::endl;
+        for(auto& device : _devicesWrite)
+        {
+            stream << prefix << "  * " << device.first << ": " << (device.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_roomsReadSet)
+    {
+        stream << prefix << "Readable room IDs:" << std::endl;
+        for(auto& room : _roomsRead)
+        {
+            stream << prefix << "  * " << room.first << ": " << (room.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_roomsWriteSet)
+    {
+        stream << prefix << "Writeable room IDs:" << std::endl;
+        for(auto& room : _roomsWrite)
+        {
+            stream << prefix << "  * " << room.first << ": " << (room.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_categoriesReadSet)
+    {
+        stream << prefix << "Readable category IDs:" << std::endl;
+        for(auto& category : _categoriesRead)
+        {
+            stream << prefix << "  * " << category.first << ": " << (category.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_categoriesWriteSet)
+    {
+        stream << prefix << "Writeable category IDs:" << std::endl;
+        for(auto& category : _categoriesWrite)
+        {
+            stream << prefix << "  * " << category.first << ": " << (category.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_methodsSet)
+    {
+        stream << prefix << "Executable RPC methods:" << std::endl;
+        for(auto& method : _methods)
+        {
+            std::string methodString = method.first == "*" ? "all" : method.first;
+            stream << prefix << "  * " << methodString << ": " << (method.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    return stream.str();
 }
 
 }
