@@ -177,6 +177,6 @@ set(SOURCE_FILES
         src/StateGuard.h
         src/Variable.cpp
         src/Variable.h
-        config.h)
+        config.h src/Security/Acls.cpp src/Security/Acls.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

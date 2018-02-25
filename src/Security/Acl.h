@@ -53,13 +53,39 @@ public:
 };
 
 /**
- * This class is used to store ACL rules. The elements are checked in the following order. Unset elements are skipped. If a field is set to "no access", access is denied immediately without checking further rules.
+ * This class is used to store ACL rules. The elements are checked in the following order. Unset elements are skipped. If a field is set to "no access", access is denied immediately without checking further rules. When set to "access", the rule checking continues.
  *
  * 1. Variables
  * 2. Devices
  * 3. Rooms
  * 4. Categories
  * 5. Methods
+ *
+ * Security needs to be applied here:
+ *
+ * RpcServer:
+ *  - Most RPC methods are defined in file RPCMethods.cpp
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in map => IpcServer::callRpcMethod()
+ *
+ * IpcServer:
+ *  - All methods on clients are called within callRpcMethod()
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - Has it's own RPC methods
+ *
+ * NodeBlueServer:
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - Has it's own RPC methods
+ *
+ * ScriptEngineServer:
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - Has it's own RPC methods
+ *
+ * RPC::Client
+ *  - Don't broadcast events a client has no access to
  */
 class Acl
 {
