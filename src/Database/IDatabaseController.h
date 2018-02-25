@@ -123,6 +123,7 @@ public:
 	virtual uint64_t getUserId(const std::string& name) = 0;
 	virtual BaseLib::PVariable getUserMetadata(uint64_t userId) = 0;
 	virtual std::shared_ptr<DataTable> getUsers() = 0;
+    virtual std::vector<uint64_t> getUsersGroups(uint64_t userId) = 0;
 	virtual bool updateUser(uint64_t userId, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups) = 0;
     virtual BaseLib::PVariable setUserMetadata(uint64_t userId, BaseLib::PVariable metadata) = 0;
     virtual bool userNameExists(const std::string& name) = 0;
@@ -131,6 +132,7 @@ public:
     //Groups
     virtual BaseLib::PVariable createGroup(BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;
     virtual BaseLib::PVariable deleteGroup(uint64_t groupId) = 0;
+	virtual BaseLib::PVariable getAcl(uint64_t groupId) = 0;
     virtual BaseLib::PVariable getGroups(std::string languageCode) = 0;
     virtual bool groupExists(uint64_t groupId) = 0;
     virtual BaseLib::PVariable updateGroup(uint64_t groupId, BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;

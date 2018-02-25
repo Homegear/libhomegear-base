@@ -60,7 +60,7 @@ void Settings::reset()
 	_enableMonitoring = true;
 	_devLog = false;
 	_enableCoreDumps = true;
-	_enableFlows = true;
+	_enableNodeBlue = true;
 	_setDevicePermissions = true;
 	_workingDirectory = _executablePath;
 	_socketPath = _executablePath;
@@ -87,11 +87,11 @@ void Settings::reset()
 	_scriptEngineMaxThreadsPerScript = 4;
 	_scriptEngineMaxScriptsPerProcess = 50;
     _scriptEngineWatchdogTimeout = -1;
-	_flowsProcessingThreadCountServer = 10;
-	_flowsProcessingThreadCountNodes = 10;
-	_flowsServerMaxConnections = 20;
+	_nodeBlueProcessingThreadCountServer = 10;
+	_nodeBlueProcessingThreadCountNodes = 10;
+	_nodeBlueServerMaxConnections = 20;
 	_maxNodeThreadsPerProcess = 80;
-	_flowsWatchdogTimeout = -1;
+	_nodeBlueWatchdogTimeout = -1;
 	_ipcThreadCount = 10;
 	_ipcServerMaxConnections = 20;
 	_cliServerMaxConnections = 50;
@@ -120,14 +120,14 @@ void Settings::reset()
 	_scriptPathPermissions = 360;
 	_scriptPathUser = "";
 	_scriptPathGroup = "";
-	_flowsPath = "/var/lib/homegear/flows/";
-	_flowsPathPermissions = 504;
-	_flowsPathUser = "";
-	_flowsPathGroup = "";
-	_flowsDataPath = "/var/lib/homegear/flows/data/";
-	_flowsDataPathPermissions = 504;
-	_flowsDataPathUser = "";
-	_flowsDataPathGroup = "";
+	_nodeBluePath = "/var/lib/homegear/node-blue/";
+	_nodeBluePathPermissions = 504;
+	_nodeBluePathUser = "";
+	_nodeBluePathGroup = "";
+	_nodeBlueDataPath = "/var/lib/homegear/node-blue/data/";
+	_nodeBlueDataPathPermissions = 504;
+	_nodeBlueDataPathUser = "";
+	_nodeBlueDataPathGroup = "";
 	_nodeBlueDebugOutput = false;
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
@@ -285,10 +285,10 @@ void Settings::load(std::string filename, std::string executablePath)
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
 					_bl->out.printDebug("Debug: enableCoreDumps set to " + std::to_string(_enableCoreDumps));
 				}
-				else if(name == "enableflows")
+				else if(name == "enableflows" || name == "enablenodeblue")
 				{
-					_enableFlows = HelperFunctions::toLower(value) == "true";
-					_bl->out.printDebug("Debug: enableFlows set to " + std::to_string(_enableFlows));
+					_enableNodeBlue = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: enableNodeBlue set to " + std::to_string(_enableNodeBlue));
 				}
 				else if(name == "setdevicepermissions")
 				{
@@ -451,20 +451,20 @@ void Settings::load(std::string filename, std::string executablePath)
 					_scriptEngineManualClientStart = HelperFunctions::toLower(value) == "true";
 					_bl->out.printDebug("Debug: scriptEngineManualClientStart set to " + std::to_string(_scriptEngineManualClientStart));
 				}
-				else if(name == "flowsprocessingthreadcountserver")
+				else if(name == "flowsprocessingthreadcountserver" || name == "nodeblueprocessingthreadcountserver")
 				{
-					_flowsProcessingThreadCountServer = Math::getNumber(value);
-					_bl->out.printDebug("Debug: flowsProcessingThreadCountServer set to " + std::to_string(_flowsProcessingThreadCountServer));
+					_nodeBlueProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: nodeBlueProcessingThreadCountServer set to " + std::to_string(_nodeBlueProcessingThreadCountServer));
 				}
-				else if(name == "flowsprocessingthreadcountnodes")
+				else if(name == "flowsprocessingthreadcountnodes" || name == "nodeblueprocessingthreadcountnodes")
 				{
-					_flowsProcessingThreadCountServer = Math::getNumber(value);
-					_bl->out.printDebug("Debug: flowsProcessingThreadCountNodes set to " + std::to_string(_flowsProcessingThreadCountNodes));
+					_nodeBlueProcessingThreadCountServer = Math::getNumber(value);
+					_bl->out.printDebug("Debug: nodeBlueProcessingThreadCountNodes set to " + std::to_string(_nodeBlueProcessingThreadCountNodes));
 				}
-				else if(name == "flowsservermaxconnections")
+				else if(name == "flowsservermaxconnections" || name == "nodeblueservermaxconnections")
 				{
-					_flowsServerMaxConnections = Math::getNumber(value);
-					_bl->out.printDebug("Debug: flowsServerMaxConnections set to " + std::to_string(_flowsServerMaxConnections));
+					_nodeBlueServerMaxConnections = Math::getNumber(value);
+					_bl->out.printDebug("Debug: nodeBlueServerMaxConnections set to " + std::to_string(_nodeBlueServerMaxConnections));
 				}
 				else if(name == "nodebluedebugoutput")
 				{
@@ -476,17 +476,17 @@ void Settings::load(std::string filename, std::string executablePath)
 					_maxNodeThreadsPerProcess = Math::getNumber(value);
 					_bl->out.printDebug("Debug: maxNodeThreadsPerProcess set to " + std::to_string(_maxNodeThreadsPerProcess));
 				}
-                else if(name == "flowswatchdogtimeout")
+                else if(name == "flowswatchdogtimeout" || name == "nodebluewatchdogtimeout")
                 {
-                    _flowsWatchdogTimeout = Math::getNumber(value);
-                    if(_flowsWatchdogTimeout < 0) _flowsWatchdogTimeout = -1;
-                    else if(_flowsWatchdogTimeout < 10000) _flowsWatchdogTimeout = 10000;
-                    _bl->out.printDebug("Debug: flowsWatchdogTimeout set to " + std::to_string(_flowsWatchdogTimeout));
+                    _nodeBlueWatchdogTimeout = Math::getNumber(value);
+                    if(_nodeBlueWatchdogTimeout < 0) _nodeBlueWatchdogTimeout = -1;
+                    else if(_nodeBlueWatchdogTimeout < 10000) _nodeBlueWatchdogTimeout = 10000;
+                    _bl->out.printDebug("Debug: nodeBlueWatchdogTimeout set to " + std::to_string(_nodeBlueWatchdogTimeout));
                 }
-				else if(name == "flowsmanualclientstart")
+				else if(name == "flowsmanualclientstart" || name == "nodebluemanualclientstart")
 				{
-					_flowsManualClientStart = HelperFunctions::toLower(value) == "true";
-					_bl->out.printDebug("Debug: flowsManualClientStart set to " + std::to_string(_flowsManualClientStart));
+					_nodeBlueManualClientStart = HelperFunctions::toLower(value) == "true";
+					_bl->out.printDebug("Debug: nodeBlueManualClientStart set to " + std::to_string(_nodeBlueManualClientStart));
 				}
 				else if(name == "ipcthreadcount")
 				{
@@ -658,51 +658,51 @@ void Settings::load(std::string filename, std::string executablePath)
 					_scriptPathGroup = value;
 					_bl->out.printDebug("Debug: scriptPathGroup set to " + _scriptPathGroup);
 				}
-				else if(name == "flowspath")
+				else if(name == "flowspath" || name == "nodebluepath")
 				{
-					_flowsPath = value;
-					if(_flowsPath.empty()) _flowsPath = "/var/lib/homegear/flows/";
-					if(_flowsPath.back() != '/') _flowsPath.push_back('/');
-					_bl->out.printDebug("Debug: flowsPath set to " + _flowsPath);
+					_nodeBluePath = value;
+					if(_nodeBluePath.empty()) _nodeBluePath = "/var/lib/homegear/node-blue/";
+					if(_nodeBluePath.back() != '/') _nodeBluePath.push_back('/');
+					_bl->out.printDebug("Debug: nodeBluePath set to " + _nodeBluePath);
 				}
-				else if(name == "flowspathpermissions")
+				else if(name == "flowspathpermissions" || name == "nodebluepathpermissions")
 				{
-					_flowsPathPermissions = Math::getOctalNumber(value);
-					if(_flowsPathPermissions == 0) _flowsPathPermissions = 504;
-					_bl->out.printDebug("Debug: flowsPathPermissions set to " + _flowsPathPermissions);
+					_nodeBluePathPermissions = Math::getOctalNumber(value);
+					if(_nodeBluePathPermissions == 0) _nodeBluePathPermissions = 504;
+					_bl->out.printDebug("Debug: nodebluePathPermissions set to " + _nodeBluePathPermissions);
 				}
-				else if(name == "flowspathuser")
+				else if(name == "flowspathuser" || name == "nodebluepathuser")
 				{
-					_flowsPathUser = value;
-					_bl->out.printDebug("Debug: flowsPathUser set to " + _flowsPathUser);
+					_nodeBluePathUser = value;
+					_bl->out.printDebug("Debug: nodeBluePathUser set to " + _nodeBluePathUser);
 				}
-				else if(name == "flowspathgroup")
+				else if(name == "flowspathgroup" || name == "nodebluepathgroup")
 				{
-					_flowsPathGroup = value;
-					_bl->out.printDebug("Debug: flowsPathGroup set to " + _flowsPathGroup);
+					_nodeBluePathGroup = value;
+					_bl->out.printDebug("Debug: nodeBluePathGroup set to " + _nodeBluePathGroup);
 				}
-				else if(name == "flowsdatapath")
+				else if(name == "flowsdatapath" || name == "nodebluedatapath")
 				{
-					_flowsDataPath = value;
-					if(_flowsDataPath.empty()) _flowsDataPath = "/var/lib/homegear/flows/data/";
-					if(_flowsDataPath.back() != '/') _flowsDataPath.push_back('/');
-					_bl->out.printDebug("Debug: flowsDataPath set to " + _flowsDataPath);
+					_nodeBlueDataPath = value;
+					if(_nodeBlueDataPath.empty()) _nodeBlueDataPath = "/var/lib/homegear/node-blue/data/";
+					if(_nodeBlueDataPath.back() != '/') _nodeBlueDataPath.push_back('/');
+					_bl->out.printDebug("Debug: nodeBlueDataPath set to " + _nodeBlueDataPath);
 				}
-				else if(name == "flowsdatapathpermissions")
+				else if(name == "flowsdatapathpermissions" || name == "nodebluedatapathpermissions")
 				{
-					_flowsDataPathPermissions = Math::getOctalNumber(value);
-					if(_flowsDataPathPermissions == 0) _flowsDataPathPermissions = 504;
-					_bl->out.printDebug("Debug: flowsDataPathPermissions set to " + std::to_string(_flowsDataPathPermissions));
+					_nodeBlueDataPathPermissions = Math::getOctalNumber(value);
+					if(_nodeBlueDataPathPermissions == 0) _nodeBlueDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: nodeBlueDataPathPermissions set to " + std::to_string(_nodeBlueDataPathPermissions));
 				}
-				else if(name == "flowsdatapathuser")
+				else if(name == "flowsdatapathuser" || name == "nodebluedatapathuser")
 				{
-					_flowsDataPathUser = value;
-					_bl->out.printDebug("Debug: flowsDataPathUser set to " + _flowsDataPathUser);
+					_nodeBlueDataPathUser = value;
+					_bl->out.printDebug("Debug: nodeBlueDataPathUser set to " + _nodeBlueDataPathUser);
 				}
-				else if(name == "flowsdatapathgroup")
+				else if(name == "flowsdatapathgroup" || name == "nodebluedatapathgroup")
 				{
-					_flowsDataPathGroup = value;
-					_bl->out.printDebug("Debug: flowsDataPathGroup set to " + _flowsDataPathGroup);
+					_nodeBlueDataPathGroup = value;
+					_bl->out.printDebug("Debug: nodeBlueDataPathGroup set to " + _nodeBlueDataPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{
