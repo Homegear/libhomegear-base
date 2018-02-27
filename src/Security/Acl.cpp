@@ -28,10 +28,9 @@
  * files in the program, then also delete it here.
 */
 
-#include <sstream>
 #include <error.h>
 #include "Acl.h"
-#include "../HelperFunctions/Math.h"
+#include "../BaseLib.h"
 
 namespace BaseLib
 {
@@ -470,13 +469,61 @@ std::string Acl::toString(int32_t indentation)
     return stream.str();
 }
 
+AclResult Acl::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
+{
+    try
+    {
+        if(!_categoriesWriteSet) return AclResult::notInList;
+
+        AclResult categoryResult = AclResult::notInList;
+        for(auto& categoryId : categories)
+        {
+            auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access first in case of "no access".
+            if(categoriesIterator != _categoriesWrite.end())
+            {
+                categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+            }
+        }
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkDeviceWriteAccess(uint64_t peerId)
+{
+    try
+    {
+        if(!_devicesWriteSet) return AclResult::notInList;
+
+        auto devicesIterator = _devicesWrite.find(peerId); //Check specific access first in case of "no access".
+        if(devicesIterator != _devicesWrite.end()) return devicesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
 AclResult Acl::checkMethodAccess(std::string& methodName)
 {
     try
     {
         if(!_methodsSet) return AclResult::notInList;
 
-        auto methodsIterator = _methods.find(methodName); //Check specific access fist in case of "no access".
+        auto methodsIterator = _methods.find(methodName); //Check specific access first in case of "no access".
         if(methodsIterator != _methods.end()) return methodsIterator->second ? AclResult::accept : AclResult::deny;
 
         methodsIterator = _methods.find("*");
@@ -502,7 +549,7 @@ AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64
         AclResult categoryResult = AclResult::notInList;
         if(_categoriesWriteSet)
         {
-            auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access fist in case of "no access".
+            auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access first in case of "no access".
             if(categoriesIterator != _categoriesWrite.end())
             {
                 categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
@@ -535,7 +582,7 @@ AclResult Acl::checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t r
         AclResult roomResult = AclResult::notInList;
         if(_roomsWriteSet)
         {
-            auto roomIterator = _roomsWrite.find(roomId); //Check specific access fist in case of "no access".
+            auto roomIterator = _roomsWrite.find(roomId); //Check specific access first in case of "no access".
             if(roomIterator != _roomsWrite.end())
             {
                 roomResult = roomIterator->second ? AclResult::accept : AclResult::deny;
@@ -547,6 +594,59 @@ AclResult Acl::checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t r
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
         if(roomResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId)
+{
+    try
+    {
+        if(!_methodsSet && !_devicesWriteSet) return AclResult::notInList;
+
+        AclResult deviceResult = AclResult::notInList;
+        if(_devicesWriteSet)
+        {
+            auto deviceIterator = _devicesWrite.find(peerId); //Check specific access first in case of "no access".
+            if(deviceIterator != _devicesWrite.end())
+            {
+                deviceResult = deviceIterator->second ? AclResult::accept : AclResult::deny;
+                if(!deviceIterator->second) return deviceResult; //Deny access
+            }
+        }
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(deviceResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRoomWriteAccess(uint64_t roomId)
+{
+    try
+    {
+        if(!_roomsWriteSet) return AclResult::notInList;
+
+        auto roomsIterator = _roomsWrite.find(roomId); //Check specific access first in case of "no access".
+        if(roomsIterator != _roomsWrite.end()) return roomsIterator->second ? AclResult::accept : AclResult::deny;
 
         return AclResult::notInList;
     }

@@ -38,6 +38,7 @@
 
 namespace BaseLib
 {
+
 namespace Security
 {
 
@@ -198,12 +199,23 @@ public:
      */
     virtual ~Acl();
 
+    bool categoriesReadSet() { return _categoriesReadSet; }
+    bool categoriesWriteSet() { return _categoriesWriteSet; }
+    bool devicesReadSet() { return _devicesReadSet; }
+    bool devicesWriteSet() { return _devicesWriteSet; }
+    bool roomsReadSet() { return _roomsReadSet; }
+    bool roomsWriteSet() { return _roomsWriteSet; }
+
     PVariable toVariable();
     void fromVariable(PVariable serializedData);
 
+    AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
+    AclResult checkDeviceWriteAccess(uint64_t peerId);
     AclResult checkMethodAccess(std::string& methodName);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
+    AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
+    AclResult checkRoomWriteAccess(uint64_t roomId);
 
     std::string toString(int32_t indentation = 0);
 };
