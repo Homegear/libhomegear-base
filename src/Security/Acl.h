@@ -41,6 +41,14 @@ namespace BaseLib
 namespace Security
 {
 
+enum class AclResult
+{
+    error = -3,
+    notInList = -2,
+    deny = -1,
+    accept = 0
+};
+
 /**
  * Exception class for Acl.
  *
@@ -192,6 +200,10 @@ public:
 
     PVariable toVariable();
     void fromVariable(PVariable serializedData);
+
+    AclResult checkMethodAccess(std::string& methodName);
+    AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
 
     std::string toString(int32_t indentation = 0);
 };
