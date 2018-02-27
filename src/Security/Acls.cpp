@@ -88,5 +88,98 @@ bool Acls::fromGroups(std::vector<uint64_t>& groupIds)
     return false;
 }
 
+bool Acls::checkMethodAccess(std::string methodName)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAccess(methodName);
+            if(result == AclResult::error || result == AclResult::deny) return false;
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t categoryId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndCategoryWriteAccess(methodName, categoryId);
+            if(result == AclResult::error || result == AclResult::deny) return false;
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkMethodAndRoomWriteAccess(std::string methodName, uint64_t roomId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndRoomWriteAccess(methodName, roomId);
+            if(result == AclResult::error || result == AclResult::deny) return false;
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 }
 }

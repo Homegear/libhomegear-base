@@ -29,6 +29,7 @@
 */
 
 #include <sstream>
+#include <error.h>
 #include "Acl.h"
 #include "../HelperFunctions/Math.h"
 
@@ -467,6 +468,95 @@ std::string Acl::toString(int32_t indentation)
     }
 
     return stream.str();
+}
+
+AclResult Acl::checkMethodAccess(std::string& methodName)
+{
+    try
+    {
+        if(!_methodsSet) return AclResult::notInList;
+
+        auto methodsIterator = _methods.find(methodName); //Check specific access fist in case of "no access".
+        if(methodsIterator != _methods.end()) return methodsIterator->second ? AclResult::accept : AclResult::deny;
+
+        methodsIterator = _methods.find("*");
+        if(methodsIterator != _methods.end()) return methodsIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId)
+{
+    try
+    {
+        if(!_methodsSet && !_categoriesWriteSet) return AclResult::notInList;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesWriteSet)
+        {
+            auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access fist in case of "no access".
+            if(categoriesIterator != _categoriesWrite.end())
+            {
+                categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                if(!categoriesIterator->second) return categoryResult; //Deny access
+            }
+        }
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(categoryResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId)
+{
+    try
+    {
+        if(!_methodsSet && !_roomsWriteSet) return AclResult::notInList;
+
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsWriteSet)
+        {
+            auto roomIterator = _roomsWrite.find(roomId); //Check specific access fist in case of "no access".
+            if(roomIterator != _roomsWrite.end())
+            {
+                roomResult = roomIterator->second ? AclResult::accept : AclResult::deny;
+                if(!roomIterator->second) return roomResult; //Deny access
+            }
+        }
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(roomResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
 }
 
 }

@@ -29,6 +29,32 @@ public:
     void clear();
     bool fromUser(std::string& userName);
     bool fromGroups(std::vector<uint64_t>& groupIds);
+
+    /**
+     * Checks if the ACLs grant access to a method.
+     *
+     * @param methodName The name of the method to check.
+     * @return "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the method is not in at least one of the ACLs. "true" if (1) the method is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkMethodAccess(std::string methodName);
+
+    /**
+     * Checks if the ACLs grant access to a method and category.
+     *
+     * @param methodName The name of the method to check.
+     * @param categoryId The ID of the category to check.
+     * @return "methodName" and "categoryId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t categoryId);
+
+    /**
+     * Checks if the ACLs grant access to a method and room.
+     *
+     * @param methodName The name of the method to check.
+     * @param roomId The ID of the room to check.
+     * @return "methodName" and "roomId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkMethodAndRoomWriteAccess(std::string methodName, uint64_t roomId);
 };
 typedef std::shared_ptr<Acls> PAcls;
 
