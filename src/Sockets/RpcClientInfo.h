@@ -36,6 +36,12 @@
 namespace BaseLib
 {
 
+namespace Security
+{
+    class Acls;
+    typedef std::shared_ptr<Acls> PAcls;
+}
+
 enum class RpcClientType
 {
 	generic,
@@ -63,12 +69,17 @@ public:
 	bool addon = false;
 	bool flowsServer = false;
 	bool scriptEngineServer = false;
+    bool ipcServer = false;
+    bool mqttClient = false;
+    bool familyModule = false;
 	std::string webSocketClientId;
 	std::string address;
 	int32_t port = 0;
 	std::string initUrl;
 	std::string initInterfaceId;
 	std::string language = "en-US";
+	std::string user;
+	Security::PAcls acls;
 
 	RpcType rpcType = RpcType::unknown;
 	RpcClientType clientType = RpcClientType::generic;
@@ -79,8 +90,8 @@ public:
 	bool initJsonMode = false;
 	bool initSendNewDevices = true;
 
-	RpcClientInfo() {}
-	virtual ~RpcClientInfo() {}
+	RpcClientInfo() = default;
+	virtual ~RpcClientInfo() = default;
 };
 
 typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
