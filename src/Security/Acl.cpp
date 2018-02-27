@@ -497,14 +497,57 @@ AclResult Acl::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
     return AclResult::error;
 }
 
-AclResult Acl::checkDeviceWriteAccess(uint64_t peerId)
+AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
 {
     try
     {
-        if(!_devicesWriteSet) return AclResult::notInList;
+        if(!peer) return AclResult::error;
+        if(!_roomsWriteSet && !_categoriesWriteSet && !_devicesWriteSet) return AclResult::notInList;
 
-        auto devicesIterator = _devicesWrite.find(peerId); //Check specific access first in case of "no access".
-        if(devicesIterator != _devicesWrite.end()) return devicesIterator->second ? AclResult::accept : AclResult::deny;
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsWriteSet)
+        {
+            auto roomId = peer->getRoom();
+            if(roomId != 0)
+            {
+                auto roomsIterator = _roomsWrite.find(roomId); //Check specific access first in case of "no access".
+                if(roomsIterator != _roomsWrite.end())
+                {
+                    roomResult = roomsIterator->second ? AclResult::accept : AclResult::deny;
+                    if(roomResult == AclResult::deny) return roomResult; //Deny access
+                }
+            }
+        }
+        else roomResult = AclResult::accept;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesWriteSet)
+        {
+            for(auto& categoryId : peer->getCategories())
+            {
+                auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access first in case of "no access".
+                if(categoriesIterator != _categoriesWrite.end())
+                {
+                    categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                    if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+                }
+            }
+        }
+        else categoryResult = AclResult::accept;
+
+        AclResult deviceResult = AclResult::notInList;
+        if(_devicesWriteSet)
+        {
+            auto devicesIterator = _devicesWrite.find(peer->getID()); //Check specific access first in case of "no access".
+            if(devicesIterator != _devicesWrite.end())
+            {
+                deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+            }
+        }
+        else deviceResult = AclResult::accept;
+
+        if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -556,11 +599,12 @@ AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64
                 if(!categoriesIterator->second) return categoryResult; //Deny access
             }
         }
+        else categoryResult = AclResult::accept;
 
         auto methodResult = checkMethodAccess(methodName);
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
-        if(categoryResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+        if(categoryResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -589,11 +633,12 @@ AclResult Acl::checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t r
                 if(!roomIterator->second) return roomResult; //Deny access
             }
         }
+        else roomResult = AclResult::accept;
 
         auto methodResult = checkMethodAccess(methodName);
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
-        if(roomResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+        if(roomResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -622,11 +667,12 @@ AclResult Acl::checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t
                 if(!deviceIterator->second) return deviceResult; //Deny access
             }
         }
+        else deviceResult = AclResult::accept;
 
         auto methodResult = checkMethodAccess(methodName);
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
-        if(deviceResult == AclResult::accept || methodResult == AclResult::accept) return AclResult::accept;
+        if(deviceResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
