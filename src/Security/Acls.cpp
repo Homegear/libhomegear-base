@@ -199,7 +199,7 @@ bool Acls::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
     return false;
 }
 
-bool Acls::checkDeviceWriteAccess(uint64_t peerId)
+bool Acls::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
 {
     try
     {
@@ -207,16 +207,16 @@ bool Acls::checkDeviceWriteAccess(uint64_t peerId)
         bool acceptSet = false;
         for(auto& acl : _acls)
         {
-            auto result = acl->checkDeviceWriteAccess(peerId);
+            auto result = acl->checkDeviceWriteAccess(peer);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to peer ID " + std::to_string(peerId) + " (1).");
+                _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to peer ID " + std::to_string(peerId) + " (2).");
+        if(!acceptSet) _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)

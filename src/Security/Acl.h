@@ -39,6 +39,11 @@
 namespace BaseLib
 {
 
+namespace Systems
+{
+    class Peer;
+}
+
 namespace Security
 {
 
@@ -210,7 +215,7 @@ public:
     void fromVariable(PVariable serializedData);
 
     AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
-    AclResult checkDeviceWriteAccess(uint64_t peerId);
+    AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkMethodAccess(std::string& methodName);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);

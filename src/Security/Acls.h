@@ -15,6 +15,11 @@ namespace BaseLib
 
 class SharedObjects;
 
+namespace Systems
+{
+    class Peer;
+}
+
 namespace Security
 {
 
@@ -50,12 +55,12 @@ public:
     bool checkCategoriesWriteAccess(std::set<uint64_t>& categories);
 
     /**
-     * Checks if the ACLs grant access to a device.
+     * Checks if the ACLs grant access to a device. Also checks the room and categories assigned to the device.
      *
-     * @param peerId The ID of the peer to check.
+     * @param peer The peer to check.
      * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
-    bool checkDeviceWriteAccess(uint64_t peerId);
+    bool checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
 
     /**
      * Checks if the ACLs grant access to a method.
