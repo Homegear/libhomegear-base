@@ -25,7 +25,6 @@ void Acls::clear()
     _acls.clear();
 }
 
-
 bool Acls::fromUser(std::string& userName)
 {
     try
