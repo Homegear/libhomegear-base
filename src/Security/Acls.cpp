@@ -131,6 +131,7 @@ bool Acls::fromGroups(std::vector<uint64_t>& groupIds)
             auto aclData = _bl->db->getAcl(group);
             if(aclData->errorStruct)
             {
+                _out.printError("Error: Could not get ACLs of group " + std::to_string(group) + ": " + aclData->structValue->at("faultString")->stringValue);
                 _acls.clear();
                 return false;
             }
