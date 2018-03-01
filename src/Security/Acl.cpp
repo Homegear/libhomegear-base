@@ -944,5 +944,49 @@ AclResult Acl::checkRoomWriteAccess(uint64_t roomId)
     return AclResult::error;
 }
 
+AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, std::string& variableName)
+{
+    try
+    {
+        if(!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet) return AclResult::notInList;
+
+        auto deviceResult = checkDeviceReadAccess(peer);
+        if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
+
+        AclResult variableResult = AclResult::notInList;
+        if(_variablesReadSet)
+        {
+            /*auto devicesIterator = _devicesWrite.find(peer->getID()); //Check specific access first in case of "no access".
+            if(devicesIterator != _devicesWrite.end())
+            {
+                deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+            }
+
+            if(deviceResult == AclResult::notInList)
+            {
+                devicesIterator = _devicesRead.find(0);
+                if(devicesIterator != _devicesRead.end())
+                {
+                    deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                    if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+                }
+            }*/
+        }
+        else variableResult = AclResult::accept;
+
+        //if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
 }
 }
