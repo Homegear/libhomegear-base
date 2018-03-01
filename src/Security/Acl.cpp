@@ -469,6 +469,34 @@ std::string Acl::toString(int32_t indentation)
     return stream.str();
 }
 
+AclResult Acl::checkCategoriesReadAccess(std::set<uint64_t>& categories)
+{
+    try
+    {
+        if(!_categoriesReadSet) return AclResult::notInList;
+
+        AclResult categoryResult = AclResult::notInList;
+        for(auto& categoryId : categories)
+        {
+            auto categoriesIterator = _categoriesRead.find(categoryId);
+            if(categoriesIterator != _categoriesRead.end())
+            {
+                categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+            }
+        }
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
 AclResult Acl::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
 {
     try
@@ -478,13 +506,126 @@ AclResult Acl::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
         AclResult categoryResult = AclResult::notInList;
         for(auto& categoryId : categories)
         {
-            auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access first in case of "no access".
+            auto categoriesIterator = _categoriesWrite.find(categoryId);
             if(categoriesIterator != _categoriesWrite.end())
             {
                 categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
                 if(categoryResult == AclResult::deny) return categoryResult; //Deny access
             }
         }
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkCategoryReadAccess(uint64_t categoryId)
+{
+    try
+    {
+        if(!_categoriesReadSet) return AclResult::notInList;
+
+        auto categoriesIterator = _categoriesRead.find(categoryId);
+        if(categoriesIterator != _categoriesRead.end()) return categoriesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkCategoryWriteAccess(uint64_t categoryId)
+{
+    try
+    {
+        if(!_categoriesWriteSet) return AclResult::notInList;
+
+        auto categoriesIterator = _categoriesWrite.find(categoryId);
+        if(categoriesIterator != _categoriesWrite.end()) return categoriesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
+{
+    try
+    {
+        if(!peer) return AclResult::error;
+        if(!_roomsReadSet && !_categoriesReadSet && !_devicesReadSet) return AclResult::notInList;
+
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsReadSet)
+        {
+            auto roomId = peer->getRoom();
+            if(roomId != 0)
+            {
+                auto roomsIterator = _roomsRead.find(roomId);
+                if(roomsIterator != _roomsRead.end())
+                {
+                    roomResult = roomsIterator->second ? AclResult::accept : AclResult::deny;
+                    if(roomResult == AclResult::deny) return roomResult; //Deny access
+                }
+            }
+        }
+        else roomResult = AclResult::accept;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesReadSet)
+        {
+            for(auto& categoryId : peer->getCategories())
+            {
+                auto categoriesIterator = _categoriesRead.find(categoryId);
+                if(categoriesIterator != _categoriesRead.end())
+                {
+                    categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                    if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+                }
+            }
+        }
+        else categoryResult = AclResult::accept;
+
+        AclResult deviceResult = AclResult::notInList;
+        if(_devicesReadSet)
+        {
+            auto devicesIterator = _devicesRead.find(peer->getID()); //Check specific access first in case of "no access".
+            if(devicesIterator != _devicesRead.end())
+            {
+                deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+            }
+
+            if(deviceResult == AclResult::notInList)
+            {
+                devicesIterator = _devicesRead.find(0);
+                if(devicesIterator != _devicesRead.end())
+                {
+                    deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                    if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+                }
+            }
+        }
+        else deviceResult = AclResult::accept;
+
+        if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -510,7 +651,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
             auto roomId = peer->getRoom();
             if(roomId != 0)
             {
-                auto roomsIterator = _roomsWrite.find(roomId); //Check specific access first in case of "no access".
+                auto roomsIterator = _roomsWrite.find(roomId);
                 if(roomsIterator != _roomsWrite.end())
                 {
                     roomResult = roomsIterator->second ? AclResult::accept : AclResult::deny;
@@ -525,7 +666,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
         {
             for(auto& categoryId : peer->getCategories())
             {
-                auto categoriesIterator = _categoriesWrite.find(categoryId); //Check specific access first in case of "no access".
+                auto categoriesIterator = _categoriesWrite.find(categoryId);
                 if(categoriesIterator != _categoriesWrite.end())
                 {
                     categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
@@ -543,6 +684,16 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
             {
                 deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
                 if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+            }
+
+            if(deviceResult == AclResult::notInList)
+            {
+                devicesIterator = _devicesRead.find(0);
+                if(devicesIterator != _devicesRead.end())
+                {
+                    deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
+                    if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+                }
             }
         }
         else deviceResult = AclResult::accept;
@@ -583,6 +734,40 @@ AclResult Acl::checkMethodAccess(std::string& methodName)
     return AclResult::error;
 }
 
+AclResult Acl::checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId)
+{
+    try
+    {
+        if(!_methodsSet && !_categoriesReadSet) return AclResult::notInList;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesReadSet)
+        {
+            auto categoriesIterator = _categoriesRead.find(categoryId); //Check specific access first in case of "no access".
+            if(categoriesIterator != _categoriesRead.end())
+            {
+                categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                if(!categoriesIterator->second) return categoryResult; //Deny access
+            }
+        }
+        else categoryResult = AclResult::accept;
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(categoryResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
 AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId)
 {
     try
@@ -605,6 +790,40 @@ AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
         if(categoryResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId)
+{
+    try
+    {
+        if(!_methodsSet && !_roomsReadSet) return AclResult::notInList;
+
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsReadSet)
+        {
+            auto roomIterator = _roomsRead.find(roomId); //Check specific access first in case of "no access".
+            if(roomIterator != _roomsRead.end())
+            {
+                roomResult = roomIterator->second ? AclResult::accept : AclResult::deny;
+                if(!roomIterator->second) return roomResult; //Deny access
+            }
+        }
+        else roomResult = AclResult::accept;
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(roomResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -673,6 +892,26 @@ AclResult Acl::checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t
         if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
 
         if(deviceResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRoomReadAccess(uint64_t roomId)
+{
+    try
+    {
+        if(!_roomsReadSet) return AclResult::notInList;
+
+        auto roomsIterator = _roomsRead.find(roomId); //Check specific access first in case of "no access".
+        if(roomsIterator != _roomsRead.end()) return roomsIterator->second ? AclResult::accept : AclResult::deny;
 
         return AclResult::notInList;
     }

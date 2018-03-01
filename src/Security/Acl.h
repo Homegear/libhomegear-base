@@ -111,6 +111,8 @@ private:
 
     /**
      * Key: Peer ID; value: access/no access
+     *
+     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, bool> _devicesRead;
 
@@ -121,6 +123,8 @@ private:
 
     /**
      * Key: Peer ID; value: access/no access
+     *
+     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, bool> _devicesWrite;
 
@@ -131,6 +135,8 @@ private:
 
     /**
      * Key: Device; key2: channel; key 3: variable name; value: access/no access
+     *
+     * Grant all entry: 0 (all devices) => -2 (all channels) => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
@@ -141,6 +147,8 @@ private:
 
     /**
      * Key: Device; key2: Channel; key 3: variable name; value: access/no access
+     *
+     * Grant all entry: 0 (all devices) => -2 (all channels) => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
@@ -214,12 +222,19 @@ public:
     PVariable toVariable();
     void fromVariable(PVariable serializedData);
 
+    AclResult checkCategoriesReadAccess(std::set<uint64_t>& categories);
     AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
+    AclResult checkCategoryReadAccess(uint64_t category);
+    AclResult checkCategoryWriteAccess(uint64_t category);
+    AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkMethodAccess(std::string& methodName);
+    AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
+    AclResult checkRoomReadAccess(uint64_t roomId);
     AclResult checkRoomWriteAccess(uint64_t roomId);
 
     std::string toString(int32_t indentation = 0);

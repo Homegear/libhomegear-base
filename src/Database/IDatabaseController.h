@@ -33,6 +33,7 @@
 
 #include "DatabaseTypes.h"
 #include "../Variable.h"
+#include "../Sockets/RpcClientInfo.h"
 #include <set>
 
 namespace BaseLib
@@ -82,7 +83,7 @@ public:
 	// {{{ Rooms
 	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations) = 0;
 	virtual BaseLib::PVariable deleteRoom(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable getRooms(std::string languageCode) = 0;
+	virtual BaseLib::PVariable getRooms(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual bool roomExists(uint64_t roomId) = 0;
 	virtual BaseLib::PVariable updateRoom(uint64_t roomId, BaseLib::PVariable translations) = 0;
 	// }}}
@@ -90,7 +91,7 @@ public:
 	// {{{ Categories
 	virtual BaseLib::PVariable createCategory(BaseLib::PVariable translations) = 0;
 	virtual BaseLib::PVariable deleteCategory(uint64_t categoryId) = 0;
-	virtual BaseLib::PVariable getCategories(std::string languageCode) = 0;
+	virtual BaseLib::PVariable getCategories(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual bool categoryExists(uint64_t categoryId) = 0;
 	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations) = 0;
 	// }}}

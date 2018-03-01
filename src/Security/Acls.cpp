@@ -89,6 +89,28 @@ bool Acls::roomsWriteSet()
     return false;
 }
 
+bool Acls::roomsCategoriesDevicesReadSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->roomsReadSet() || acl->categoriesReadSet() || acl->devicesReadSet()) return true;
+    }
+
+    return false;
+}
+
+bool Acls::roomsCategoriesDevicesWriteSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->devicesWriteSet()) return true;
+    }
+
+    return false;
+}
+
 void Acls::clear()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
@@ -164,6 +186,42 @@ bool Acls::fromGroups(std::vector<uint64_t>& groupIds)
     return false;
 }
 
+bool Acls::checkCategoriesReadAccess(std::set<uint64_t>& categories)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkCategoriesReadAccess(categories);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 bool Acls::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
 {
     try
@@ -182,6 +240,114 @@ bool Acls::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
         }
 
         if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkCategoryReadAccess(uint64_t categoryId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkCategoryReadAccess(categoryId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkCategoryWriteAccess(uint64_t categoryId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkCategoryWriteAccess(categoryId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkDeviceReadAccess(peer);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -272,6 +438,42 @@ bool Acls::checkMethodAccess(std::string methodName)
     return false;
 }
 
+bool Acls::checkMethodAndCategoryReadAccess(std::string methodName, uint64_t categoryId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndCategoryReadAccess(methodName, categoryId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 bool Acls::checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t categoryId)
 {
     try
@@ -290,6 +492,42 @@ bool Acls::checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t ca
         }
 
         if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkMethodAndRoomReadAccess(std::string methodName, uint64_t roomId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndRoomReadAccess(methodName, roomId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -362,6 +600,42 @@ bool Acls::checkMethodAndDeviceWriteAccess(std::string methodName, uint64_t peer
         }
 
         if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or peer " + std::to_string(peerId) + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkRoomReadAccess(uint64_t roomId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkRoomReadAccess(roomId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
