@@ -134,9 +134,14 @@ private:
     bool _variablesReadSet = false;
 
     /**
-     * Key: Device; key2: channel; key 3: variable name; value: access/no access
+     * Key1: Device; key2: channel; key 3: variable name; value: access/no access
      *
-     * Grant all entry: 0 (all devices) => -2 (all channels) => "*" => true, can be combined with "no access" entries.
+     * For system variables key1 is "0",  and channel is "-1".
+     *
+     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
@@ -146,9 +151,14 @@ private:
     bool _variablesWriteSet = false;
 
     /**
-     * Key: Device; key2: Channel; key 3: variable name; value: access/no access
+     * Key1: Device; key2: Channel; key 3: variable name; value: access/no access
      *
-     * Grant all entry: 0 (all devices) => -2 (all channels) => "*" => true, can be combined with "no access" entries.
+     * For system variables key1 is "0",  and channel is "-1".
+     *
+     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
@@ -236,6 +246,7 @@ public:
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
     AclResult checkRoomReadAccess(uint64_t roomId);
     AclResult checkRoomWriteAccess(uint64_t roomId);
+    AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, std::string& variableName);
 
     std::string toString(int32_t indentation = 0);
 };
