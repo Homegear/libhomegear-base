@@ -142,6 +142,7 @@ private:
      * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
      * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
      * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
@@ -159,6 +160,7 @@ private:
      * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
      * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
      * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
@@ -228,8 +230,16 @@ public:
     bool devicesWriteSet() { return _devicesWriteSet; }
     bool roomsReadSet() { return _roomsReadSet; }
     bool roomsWriteSet() { return _roomsWriteSet; }
+    bool variablesReadSet() { return _variablesReadSet; }
+    bool variablesWriteSet() { return _variablesWriteSet; }
 
     PVariable toVariable();
+
+    /**
+     * Converts a Variable structure to an ACL. This is not thread safe, so make sure no checks are being executed when calling this method!
+     *
+     * @param serializedData The structure to convert to an ACL.
+     */
     void fromVariable(PVariable serializedData);
 
     AclResult checkCategoriesReadAccess(std::set<uint64_t>& categories);
@@ -246,7 +256,10 @@ public:
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
     AclResult checkRoomReadAccess(uint64_t roomId);
     AclResult checkRoomWriteAccess(uint64_t roomId);
-    AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, std::string& variableName);
+    AclResult checkSystemVariableReadAccess(const std::string& variableName);
+    AclResult checkSystemVariableWriteAccess(const std::string& variableName);
+    AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
+    AclResult checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
 
     std::string toString(int32_t indentation = 0);
 };

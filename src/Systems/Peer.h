@@ -365,7 +365,7 @@ public:
     //RPC methods
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo);
-	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly);
+	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name);
 	virtual std::shared_ptr<std::vector<PVariable>> getDeviceDescriptions(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
     virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel, std::map<std::string, bool> fields);
@@ -374,9 +374,9 @@ public:
     virtual PVariable getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
 	virtual PVariable setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description);
 	virtual PVariable getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool returnID);
-    virtual PVariable getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
-    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, PParameterGroup parameterSet);
-    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+    virtual PVariable getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
+    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, PParameterGroup parameterSet, bool checkAcls);
+    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);

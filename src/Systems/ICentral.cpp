@@ -731,21 +731,21 @@ PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, boo
 		{
 			std::shared_ptr<Peer> peer = getPeer(peerId);
 			if(!peer) return Variable::createError(-2, "Unknown device.");
-			PVariable values = peer->getAllValues(clientInfo, returnWriteOnly);
+			PVariable values = peer->getAllValues(clientInfo, returnWriteOnly, checkAcls);
 			if(!values) return Variable::createError(-32500, "Unknown application error. Values is nullptr.");
 			if(values->errorStruct) return values;
 			array->arrayValue->push_back(values);
 		}
 		else
 		{
-			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
+			//Copy all peers first, because getAllValues takes very long and we don't want to lock _peersMutex too long
 			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
-			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+			for(auto& peer : peers)
 			{
-                if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(*i)) continue;
+                if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-				PVariable values = (*i)->getAllValues(clientInfo, returnWriteOnly);
+				PVariable values = peer->getAllValues(clientInfo, returnWriteOnly, checkAcls);
 				if(!values || values->errorStruct) continue;
 				array->arrayValue->push_back(values);
 			}
@@ -878,7 +878,7 @@ PVariable ICentral::getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::m
 			PVariable array(new Variable(VariableType::tArray));
 
 			std::vector<std::shared_ptr<Peer>> peers;
-			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
+			//Copy all peers first, because getDeviceInfo takes very long and we don't want to lock _peersMutex too long
 			{
 				std::lock_guard<std::mutex> peersGuard(_peersMutex);
 				for(auto& peer : _peersById)
@@ -1193,7 +1193,7 @@ PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNum
 				}
 				else remoteId = remotePeer->getID();
 			}
-			return peer->getParamset(clientInfo, channel, type, remoteId, remoteChannel);
+			return peer->getParamset(clientInfo, channel, type, remoteId, remoteChannel, false);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1211,13 +1211,13 @@ PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNum
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel)
+PVariable ICentral::getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(peerId));
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		return peer->getParamset(clientInfo, channel, type, remoteId, remoteChannel);
+		return peer->getParamset(clientInfo, channel, type, remoteId, remoteChannel, checkAcls);
 	}
 	catch(const std::exception& ex)
     {
@@ -1252,7 +1252,7 @@ PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, std::strin
 				std::shared_ptr<Peer> remotePeer(getPeer(remoteSerialNumber));
 				if(remotePeer) remoteId = remotePeer->getID();
 			}
-			if(peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel);
+			if(peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel, false);
 			return Variable::createError(-2, "Unknown device.");
 		}
 	}
@@ -1271,12 +1271,12 @@ PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, std::strin
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel)
+PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
-		if(peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel);
+		if(peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel, checkAcls);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
@@ -1615,12 +1615,12 @@ PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t i
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields)
+PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls)
 {
-	return listDevices(clientInfo, channels, fields, std::shared_ptr<std::set<std::uint64_t>>());
+	return listDevices(clientInfo, channels, fields, std::shared_ptr<std::set<std::uint64_t>>(), checkAcls);
 }
 
-PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices)
+PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls)
 {
 	try
 	{
@@ -1630,6 +1630,8 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
 
 		for(std::shared_ptr<Peer> peer : peers)
 		{
+			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
 			if(knownDevices && knownDevices->find(peer->getID()) != knownDevices->end()) continue;
 			std::shared_ptr<std::vector<PVariable>> descriptions = peer->getDeviceDescriptions(clientInfo, channels, fields);
 			if(!descriptions) continue;

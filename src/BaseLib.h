@@ -61,6 +61,7 @@
 #include "DeviceDescription/Devices.h"
 #include "DeviceDescription/DeviceTranslations.h"
 #include "ScriptEngine/ScriptInfo.h"
+#include "Security/Acls.h"
 #include "Security/Hash.h"
 #include "Security/Mac.h"
 #include "Security/Gcrypt.h"

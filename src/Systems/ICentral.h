@@ -137,18 +137,18 @@ public:
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, int32_t flags, bool checkAcls);
 	virtual PVariable getName(PRpcClientInfo clientInfo, uint64_t id);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
-	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
+	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
 	virtual PVariable getParamsetId(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
 	virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint64_t peerId, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
 	virtual PVariable getParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
-	virtual PVariable getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel);
+	virtual PVariable getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
 	virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls);
 	virtual PVariable getSniffedDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey);
-	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
-	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices);
+	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls);
+	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls);
 	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo);
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
