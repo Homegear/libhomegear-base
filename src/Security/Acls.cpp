@@ -474,6 +474,42 @@ bool Acls::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
     return false;
 }
 
+bool Acls::checkEventServerMethodAccess(std::string methodName)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkEventServerMethodAccess(methodName);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                _out.printError("Error: Access denied to event server method " + methodName + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet) _out.printError("Error: Access denied to event server method " + methodName + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 bool Acls::checkMethodAccess(std::string methodName)
 {
     try

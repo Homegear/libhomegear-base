@@ -54,6 +54,7 @@ PVariable Acl::toVariable()
          * 3. Rooms
          * 4. Categories
          * 5. Methods
+         * 6. Event Server Methods
          */
 
         PVariable acl = std::make_shared<Variable>(VariableType::tStruct);
@@ -192,6 +193,18 @@ PVariable Acl::toVariable()
             }
 
             acl->structValue->emplace("methods", rootElement);
+        }
+
+        if(_eventServerMethodsSet)
+        {
+            PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+            for(auto& method : _eventServerMethods)
+            {
+                rootElement->structValue->emplace(method.first, std::make_shared<Variable>(method.second));
+            }
+
+            acl->structValue->emplace("eventServerMethods", rootElement);
         }
 
         return acl;
@@ -341,6 +354,15 @@ void Acl::fromVariable(PVariable serializedData)
                     _methods[methodElement.first] = methodElement.second->booleanValue;
                 }
             }
+            else if(rootElement.first == "eventServerMethods")
+            {
+                _eventServerMethodsSet = true;
+                for(auto& methodElement : *rootElement.second->structValue)
+                {
+                    if(methodElement.second->type != VariableType::tBoolean) throw AclException("Method element is not of type bool.");
+                    _eventServerMethods[methodElement.first] = methodElement.second->booleanValue;
+                }
+            }
             else throw AclException("Unknown element in Struct: " + rootElement.first);
         }
     }
@@ -459,6 +481,16 @@ std::string Acl::toString(int32_t indentation)
     {
         stream << prefix << "Executable RPC methods:" << std::endl;
         for(auto& method : _methods)
+        {
+            std::string methodString = method.first == "*" ? "all" : method.first;
+            stream << prefix << "  * " << methodString << ": " << (method.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_eventServerMethodsSet)
+    {
+        stream << prefix << "Executable event server RPC methods:" << std::endl;
+        for(auto& method : _eventServerMethods)
         {
             std::string methodString = method.first == "*" ? "all" : method.first;
             stream << prefix << "  * " << methodString << ": " << (method.second ? "accept" : "deny") << std::endl;
@@ -698,6 +730,29 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
         else deviceResult = AclResult::accept;
 
         if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkEventServerMethodAccess(std::string& methodName)
+{
+    try
+    {
+        if(!_eventServerMethodsSet) return AclResult::notInList;
+
+        auto methodsIterator = _eventServerMethods.find(methodName); //Check specific access first in case of "no access".
+        if(methodsIterator != _eventServerMethods.end()) return methodsIterator->second ? AclResult::accept : AclResult::deny;
+
+        methodsIterator = _eventServerMethods.find("*");
+        if(methodsIterator != _eventServerMethods.end()) return methodsIterator->second ? AclResult::accept : AclResult::deny;
 
         return AclResult::notInList;
     }

@@ -127,6 +127,14 @@ public:
     bool checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
 
     /**
+     * Checks if the ACLs grant access to an event server method.
+     *
+     * @param methodName The name of the method to check.
+     * @return "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the method is not in at least one of the ACLs. "true" if (1) the method is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkEventServerMethodAccess(std::string methodName);
+
+    /**
      * Checks if the ACLs grant access to a method.
      *
      * @param methodName The name of the method to check.

@@ -74,6 +74,7 @@ public:
  * 3. Rooms
  * 4. Categories
  * 5. Methods
+ * 6. Event Server Methods
  *
  * Security needs to be applied here:
  *
@@ -100,6 +101,7 @@ public:
  *
  * RPC::Client
  *  - Don't broadcast events a client has no access to
+ *  - Don't execute methods a client has no access to
  */
 class Acl
 {
@@ -216,6 +218,19 @@ private:
      * Deny all entry: "*" => true
      */
     std::unordered_map<std::string, bool> _methods;
+
+    /**
+     * When set to "true", _eventServerMethods is included in the ACL checks.
+     */
+    bool _eventServerMethodsSet = false;
+
+    /**
+     * Key: Method name; value: access/no access.
+     *
+     * Grant all entry: "*" => true
+     * Deny all entry: "*" => true
+     */
+    std::unordered_map<std::string, bool> _eventServerMethods;
 public:
     Acl();
 
@@ -248,6 +263,7 @@ public:
     AclResult checkCategoryWriteAccess(uint64_t category);
     AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
+    AclResult checkEventServerMethodAccess(std::string& methodName);
     AclResult checkMethodAccess(std::string& methodName);
     AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
