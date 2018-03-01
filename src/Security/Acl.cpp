@@ -28,7 +28,6 @@
  * files in the program, then also delete it here.
 */
 
-#include <error.h>
 #include "Acl.h"
 #include "../BaseLib.h"
 
@@ -944,38 +943,324 @@ AclResult Acl::checkRoomWriteAccess(uint64_t roomId)
     return AclResult::error;
 }
 
-AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, std::string& variableName)
+AclResult Acl::checkSystemVariableReadAccess(const std::string& variableName)
 {
     try
     {
-        if(!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet) return AclResult::notInList;
+        AclResult variableResult = AclResult::notInList;
+        if(_variablesReadSet)
+        {
+            auto variablesIterator = _variablesRead.find(0); //Check specific access first in case of "no access".
+            if(variablesIterator != _variablesRead.end())
+            {
+                auto channelIterator = variablesIterator->second.find(-1); //Check specific access first in case of "no access".
+                if(channelIterator != variablesIterator->second.end())
+                {
+                    auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                    if(variableIterator != channelIterator->second.end())
+                    {
+                        variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                        if(variableResult == AclResult::deny) return variableResult; //Deny access
+                    }
+                    else
+                    {
+                        variableIterator = channelIterator->second.find("*");
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                    }
+                }
+            }
+        }
 
-        auto deviceResult = checkDeviceReadAccess(peer);
-        if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
+        return variableResult;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkSystemVariableWriteAccess(const std::string& variableName)
+{
+    try
+    {
+        AclResult variableResult = AclResult::notInList;
+        if(_variablesWriteSet)
+        {
+            auto variablesIterator = _variablesWrite.find(0); //Check specific access first in case of "no access".
+            if(variablesIterator != _variablesWrite.end())
+            {
+                auto channelIterator = variablesIterator->second.find(-1); //Check specific access first in case of "no access".
+                if(channelIterator != variablesIterator->second.end())
+                {
+                    auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                    if(variableIterator != channelIterator->second.end())
+                    {
+                        variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                        if(variableResult == AclResult::deny) return variableResult; //Deny access
+                    }
+                    else
+                    {
+                        variableIterator = channelIterator->second.find("*");
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                    }
+                }
+            }
+        }
+
+        return variableResult;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName)
+{
+    try
+    {
+        if(!peer) return AclResult::error;
+        if(!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet) return AclResult::notInList;
 
         AclResult variableResult = AclResult::notInList;
         if(_variablesReadSet)
         {
-            /*auto devicesIterator = _devicesWrite.find(peer->getID()); //Check specific access first in case of "no access".
-            if(devicesIterator != _devicesWrite.end())
+            auto variablesIterator = _variablesRead.find(peer->getID()); //Check specific access first in case of "no access".
+            if(variablesIterator != _variablesRead.end())
             {
-                deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
-                if(deviceResult == AclResult::deny) return deviceResult; //Deny access
-            }
-
-            if(deviceResult == AclResult::notInList)
-            {
-                devicesIterator = _devicesRead.find(0);
-                if(devicesIterator != _devicesRead.end())
+                auto channelIterator = variablesIterator->second.find(channel); //Check specific access first in case of "no access".
+                if(channelIterator != variablesIterator->second.end())
                 {
-                    deviceResult = devicesIterator->second ? AclResult::accept : AclResult::deny;
-                    if(deviceResult == AclResult::deny) return deviceResult; //Deny access
+                    auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                    if(variableIterator != channelIterator->second.end())
+                    {
+                        variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                        if(variableResult == AclResult::deny) return variableResult; //Deny access
+                    }
+                    else
+                    {
+                        variableIterator = channelIterator->second.find("*");
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                    }
                 }
-            }*/
+                else if(channel != -2) //Only check "all channels" when variable is no metadata
+                {
+                    channelIterator = variablesIterator->second.find(-3);
+                    if(channelIterator != variablesIterator->second.end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                        else
+                        {
+                            variableIterator = channelIterator->second.find("*");
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                variablesIterator = _variablesRead.find(0);
+                if(variablesIterator != _variablesRead.end())
+                {
+                    auto channelIterator = variablesIterator->second.find(channel); //Check specific access first in case of "no access".
+                    if(channelIterator != variablesIterator->second.end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                        else
+                        {
+                            variableIterator = channelIterator->second.find("*");
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                        }
+                    }
+                    else if(channel != -2) //Only check "all channels" when variable is no metadata
+                    {
+                        channelIterator = variablesIterator->second.find(-3);
+                        if(channelIterator != variablesIterator->second.end())
+                        {
+                            auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                            else
+                            {
+                                variableIterator = channelIterator->second.find("*");
+                                if(variableIterator != channelIterator->second.end())
+                                {
+                                    variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                    if(variableResult == AclResult::deny) return variableResult; //Deny access
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         else variableResult = AclResult::accept;
 
-        //if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        auto deviceResult = checkDeviceReadAccess(peer);
+        if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
+
+        if(variableResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName)
+{
+    try
+    {
+        if(!peer) return AclResult::error;
+        if(!_variablesWriteSet && !_devicesWriteSet && !_roomsWriteSet && !_categoriesWriteSet) return AclResult::notInList;
+
+        AclResult variableResult = AclResult::notInList;
+        if(_variablesWriteSet)
+        {
+            auto variablesIterator = _variablesWrite.find(peer->getID()); //Check specific access first in case of "no access".
+            if(variablesIterator != _variablesWrite.end())
+            {
+                auto channelIterator = variablesIterator->second.find(channel); //Check specific access first in case of "no access".
+                if(channelIterator != variablesIterator->second.end())
+                {
+                    auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                    if(variableIterator != channelIterator->second.end())
+                    {
+                        variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                        if(variableResult == AclResult::deny) return variableResult; //Deny access
+                    }
+                    else
+                    {
+                        variableIterator = channelIterator->second.find("*");
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                    }
+                }
+                else if(channel != -2) //Only check "all channels" when variable is no metadata
+                {
+                    channelIterator = variablesIterator->second.find(-3);
+                    if(channelIterator != variablesIterator->second.end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                        else
+                        {
+                            variableIterator = channelIterator->second.find("*");
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                variablesIterator = _variablesWrite.find(0);
+                if(variablesIterator != _variablesWrite.end())
+                {
+                    auto channelIterator = variablesIterator->second.find(channel); //Check specific access first in case of "no access".
+                    if(channelIterator != variablesIterator->second.end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                            if(variableResult == AclResult::deny) return variableResult; //Deny access
+                        }
+                        else
+                        {
+                            variableIterator = channelIterator->second.find("*");
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                        }
+                    }
+                    else if(channel != -2) //Only check "all channels" when variable is no metadata
+                    {
+                        channelIterator = variablesIterator->second.find(-3);
+                        if(channelIterator != variablesIterator->second.end())
+                        {
+                            auto variableIterator = channelIterator->second.find(variableName); //Check specific access first in case of "no access".
+                            if(variableIterator != channelIterator->second.end())
+                            {
+                                variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                if(variableResult == AclResult::deny) return variableResult; //Deny access
+                            }
+                            else
+                            {
+                                variableIterator = channelIterator->second.find("*");
+                                if(variableIterator != channelIterator->second.end())
+                                {
+                                    variableResult = variableIterator->second ? AclResult::accept : AclResult::deny;
+                                    if(variableResult == AclResult::deny) return variableResult; //Deny access
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else variableResult = AclResult::accept;
+
+        auto deviceResult = checkDeviceWriteAccess(peer);
+        if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
+
+        if(variableResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }

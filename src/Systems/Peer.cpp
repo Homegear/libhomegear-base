@@ -32,6 +32,7 @@
 #include "Peer.h"
 #include "ServiceMessages.h"
 #include "../BaseLib.h"
+#include "../Security/Acls.h"
 
 namespace BaseLib
 {
@@ -1711,13 +1712,16 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
+PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bool checkAcls)
 {
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 		PVariable values(new Variable(VariableType::tStruct));
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
 
 		values->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
 		values->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
@@ -1747,6 +1751,8 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly)
 
 			for(Parameters::iterator j = parameterGroup->parameters.begin(); j != parameterGroup->parameters.end(); ++j)
 			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), i->first, j->first)) continue;
+
 				if(!j->second || j->second->id.empty() || !j->second->visible) continue;
 				if(!j->second->visible && !j->second->service && !j->second->internal  && !j->second->transform)
 				{
@@ -2360,7 +2366,7 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
 					if(flags & 4)
 					{
 						PVariable paramset;
-						if(!(brokenFlags & 2) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
+						if(!(brokenFlags & 2) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel, false);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_PARAMSET", paramset));
@@ -2379,7 +2385,7 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
 					if(flags & 2)
 					{
 						PVariable paramset;
-						if(!(brokenFlags & 1)) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
+						if(!(brokenFlags & 1)) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel, false);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_PARAMSET", paramset));
@@ -2401,7 +2407,7 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
 					if(flags & 4)
 					{
 						PVariable paramset;
-						if(!(brokenFlags & 2) && remotePeer) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel);
+						if(!(brokenFlags & 2) && remotePeer) paramset = getParamset(clientInfo, channel, ParameterGroup::Type::Enum::link, peerID, (*i)->channel, false);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("RECEIVER_PARAMSET", paramset));
@@ -2420,7 +2426,7 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
 					if(flags & 2)
 					{
 						PVariable paramset;
-						if(!(brokenFlags & 1) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel);
+						if(!(brokenFlags & 1) && remotePeer) paramset = remotePeer->getParamset(clientInfo, (*i)->channel, ParameterGroup::Type::Enum::link, _peerID, channel, false);
 						else paramset.reset(new Variable(VariableType::tStruct));
 						if(paramset->errorStruct) paramset.reset(new Variable(VariableType::tStruct));
 						element->structValue->insert(StructElement("SENDER_PARAMSET", paramset));
@@ -2599,7 +2605,7 @@ PVariable Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool re
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
+PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls)
 {
 	try
 	{
@@ -2612,6 +2618,9 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 		PParameterGroup parameterGroup = getParameterSet(channel, type);
 		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
 		PVariable variables(new Variable(VariableType::tStruct));
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
 
 		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
 		{
@@ -2626,6 +2635,8 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 			PVariable element;
 			if(type == ParameterGroup::Type::Enum::variables)
 			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, i->first)) continue;
+
 				if(!i->second->readable && !i->second->transmitted) continue;
 				std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(channel);
 				if(valuesIterator == valuesCentral.end()) continue;
@@ -2694,17 +2705,22 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGroup parameterGroup)
+PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, PParameterGroup parameterGroup, bool checkAcls)
 {
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!clientInfo) clientInfo.reset(new RpcClientInfo());
 
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
+
 		PVariable descriptions(new Variable(VariableType::tStruct));
 		uint32_t index = 0;
 		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
 		{
+			if(parameterGroup->type() == ParameterGroup::Type::variables && checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, i->first)) continue;
+
 			if(!i->second || i->second->id.empty() || !i->second->visible) continue;
 			if(!i->second->visible && !i->second->service && !i->second->internal  && !i->second->transform)
 			{
@@ -2735,7 +2751,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, PParameterGrou
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
+PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls)
 {
 	try
 	{
@@ -2750,7 +2766,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
 			if(!remotePeer) return Variable::createError(-2, "Unknown remote peer.");
 		}
 
-		return Peer::getParamsetDescription(clientInfo, parameterGroup);
+		return Peer::getParamsetDescription(clientInfo, channel, parameterGroup, checkAcls);
 	}
 	catch(const std::exception& ex)
     {
