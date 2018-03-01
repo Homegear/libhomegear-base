@@ -41,6 +41,8 @@ public:
     bool devicesWriteSet();
     bool roomsReadSet();
     bool roomsWriteSet();
+    bool roomsCategoriesDevicesReadSet();
+    bool roomsCategoriesDevicesWriteSet();
 
     void clear();
     bool fromUser(std::string& userName);
@@ -52,7 +54,39 @@ public:
      * @param categories The IDs of the categories to check.
      * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
+    bool checkCategoriesReadAccess(std::set<uint64_t>& categories);
+
+    /**
+     * Checks if the ACLs grant access to one or more categories.
+     *
+     * @param categories The IDs of the categories to check.
+     * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
     bool checkCategoriesWriteAccess(std::set<uint64_t>& categories);
+
+    /**
+     * Checks if the ACLs grant access to a category.
+     *
+     * @param roomId The ID of the room to check.
+     * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkCategoryReadAccess(uint64_t categoryId);
+
+    /**
+     * Checks if the ACLs grant access to a category.
+     *
+     * @param roomId The ID of the room to check.
+     * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkCategoryWriteAccess(uint64_t categoryId);
+
+    /**
+     * Checks if the ACLs grant access to a device. Also checks the room and categories assigned to the device.
+     *
+     * @param peer The peer to check.
+     * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
 
     /**
      * Checks if the ACLs grant access to a device. Also checks the room and categories assigned to the device.
@@ -77,7 +111,25 @@ public:
      * @param categoryId The ID of the category to check.
      * @return "methodName" and "categoryId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
+    bool checkMethodAndCategoryReadAccess(std::string methodName, uint64_t categoryId);
+
+    /**
+     * Checks if the ACLs grant access to a method and category.
+     *
+     * @param methodName The name of the method to check.
+     * @param categoryId The ID of the category to check.
+     * @return "methodName" and "categoryId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
     bool checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t categoryId);
+
+    /**
+     * Checks if the ACLs grant access to a method and room.
+     *
+     * @param methodName The name of the method to check.
+     * @param roomId The ID of the room to check.
+     * @return "methodName" and "roomId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkMethodAndRoomReadAccess(std::string methodName, uint64_t roomId);
 
     /**
      * Checks if the ACLs grant access to a method and room.
@@ -96,6 +148,14 @@ public:
      * @return "methodName" and "peerId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
     bool checkMethodAndDeviceWriteAccess(std::string methodName, uint64_t peerId);
+
+    /**
+     * Checks if the ACLs grant access to a room.
+     *
+     * @param roomId The ID of the room to check.
+     * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkRoomReadAccess(uint64_t roomId);
 
     /**
      * Checks if the ACLs grant access to a room.
