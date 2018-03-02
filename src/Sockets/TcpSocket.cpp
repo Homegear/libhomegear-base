@@ -650,7 +650,11 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 	listenPort = addressInfo.sin_port;
 
 	if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
-	else if(listenAddress == "::") listenAddress = Net::getMyIp6Address();
+	else if(listenAddress == "::")
+	{
+
+		listenAddress = Net::getMyIp6Address();
+	}
 	return socketDescriptor;
 }
 

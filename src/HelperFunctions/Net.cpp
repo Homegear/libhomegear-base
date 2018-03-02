@@ -282,7 +282,7 @@ std::string Net::getMyIp6Address(std::string interfaceName)
 			if(addressFound) break;
 		}
 		freeifaddrs(interfaces);
-		if(!addressFound) throw NetException("No IP address could be found.");
+		if(!addressFound) return getMyIpAddress(interfaceName);
 	}
 	return address;
 }
