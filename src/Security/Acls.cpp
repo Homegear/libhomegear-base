@@ -193,6 +193,7 @@ bool Acls::fromUser(std::string& userName)
     {
         uint64_t userId = _bl->db->getUserId(userName);
         auto groups = _bl->db->getUsersGroups(userId);
+        if(groups.empty()) return false;
         return fromGroups(groups);
     }
     catch(const std::exception& ex)
@@ -215,6 +216,7 @@ bool Acls::fromGroups(std::vector<uint64_t>& groupIds)
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     try
     {
+        if(groupIds.empty()) return false;
         std::string outputPrefix = "Client " + std::to_string(_clientId) + " ACLs (groups ";
         _acls.clear();
         _acls.reserve(groupIds.size());
