@@ -1658,7 +1658,7 @@ PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::m
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo)
+PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo, bool checkAcls)
 {
 	try
 	{
@@ -1666,8 +1666,10 @@ PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo)
 
 		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
-		for(auto peer : peers)
+		for(auto& peer : peers)
 		{
+			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
 			std::string serialNumber = peer->getSerialNumber();
 			if(serialNumber.empty() || serialNumber.at(0) != '*') continue;
 			auto descriptions = peer->getDeviceDescriptions(clientInfo, true, std::map<std::string, bool>());
@@ -1820,7 +1822,7 @@ PVariable ICentral::reportValueUsage(PRpcClientInfo clientInfo, std::string seri
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::rssiInfo(PRpcClientInfo clientInfo)
+PVariable ICentral::rssiInfo(PRpcClientInfo clientInfo, bool checkAcls)
 {
 	try
 	{
@@ -1828,11 +1830,13 @@ PVariable ICentral::rssiInfo(PRpcClientInfo clientInfo)
 
 		std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
-		for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+		for(auto& peer : peers)
 		{
-			PVariable element = (*i)->rssiInfo(clientInfo);
+			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+			PVariable element = peer->rssiInfo(clientInfo);
 			if(!element || element->errorStruct) continue;
-			response->structValue->insert(StructElement((*i)->getSerialNumber(), element));
+			response->structValue->insert(StructElement(peer->getSerialNumber(), element));
 		}
 
 		return response;

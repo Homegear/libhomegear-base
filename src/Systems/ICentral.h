@@ -149,7 +149,7 @@ public:
 	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls);
-	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo);
+	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo, bool checkAcls);
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset);
 	virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset, bool checkAcls);
 	virtual PVariable reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber);
@@ -157,7 +157,7 @@ public:
 	virtual PVariable removeDeviceFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId);
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual PVariable rssiInfo(PRpcClientInfo clientInfo);
+	virtual PVariable rssiInfo(PRpcClientInfo clientInfo, bool checkAcls);
 	virtual PVariable searchDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable searchInterfaces(PRpcClientInfo clientInfo, PVariable metadata) { return Variable::createError(-32601, "Method not implemented for this central."); }
 
