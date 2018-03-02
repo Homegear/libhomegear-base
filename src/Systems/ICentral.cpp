@@ -1694,6 +1694,59 @@ PVariable ICentral::listTeams(BaseLib::PRpcClientInfo clientInfo)
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable ICentral::putParamset(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset)
+{
+	try
+	{
+		auto peer = getPeer(serialNumber);
+		uint64_t remoteId = 0;
+		if(!remoteSerialNumber.empty())
+		{
+			auto remotePeer = getPeer(remoteSerialNumber);
+			if(!remotePeer) return Variable::createError(-3, "Remote peer is unknown.");
+			remoteId = remotePeer->getID();
+		}
+		if(peer) return peer->putParamset(clientInfo, channel, type, remoteId, remoteChannel, paramset, false);
+		return Variable::createError(-2, "Unknown device.");
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::putParamset(BaseLib::PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset, bool checkAcls)
+{
+	try
+	{
+		auto peer = getPeer(peerId);
+		if(peer) return peer->putParamset(clientInfo, channel, type, remoteId, remoteChannel, paramset, checkAcls);
+		return Variable::createError(-2, "Unknown device.");
+	}
+	catch(const std::exception& ex)
+	{
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId)
 {
 	try
