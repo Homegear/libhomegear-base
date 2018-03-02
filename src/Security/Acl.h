@@ -87,21 +87,28 @@ public:
  *  - All methods on clients are called within callRpcMethod()
  *  - Server methods are defined in _rpcMethods and _localRpcMethods
  *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - Has broadcast methods
  *  - Has it's own RPC methods
  *
  * NodeBlueServer:
  *  - Server methods are defined in _rpcMethods and _localRpcMethods
  *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in above maps => IpcServer::callRpcMethod()
+ *  - Has broadcast methods
  *  - Has it's own RPC methods
  *
  * ScriptEngineServer:
  *  - Server methods are defined in _rpcMethods and _localRpcMethods
  *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in above maps => IpcServer::callRpcMethod()
+ *  - Has broadcast methods
  *  - Has it's own RPC methods
  *
  * RPC::Client
- *  - Don't broadcast events a client has no access to
- *  - Don't execute methods a client has no access to
+ *  - Has broadcast methods
+ *
+ * Mqtt
+ *  - Check method access
  */
 class Acl
 {
