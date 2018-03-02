@@ -150,8 +150,8 @@ public:
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls);
 	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo);
-	virtual PVariable putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
-	virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual PVariable putParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset);
+	virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset, bool checkAcls);
 	virtual PVariable reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber);
 	virtual PVariable removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId);
 	virtual PVariable removeDeviceFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId);
