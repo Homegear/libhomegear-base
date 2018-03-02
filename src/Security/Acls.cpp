@@ -269,13 +269,13 @@ bool Acls::checkCategoriesReadAccess(std::set<uint64_t>& categories)
             auto result = acl->checkCategoriesReadAccess(categories);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -305,13 +305,13 @@ bool Acls::checkCategoriesWriteAccess(std::set<uint64_t>& categories)
             auto result = acl->checkCategoriesWriteAccess(categories);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -341,13 +341,13 @@ bool Acls::checkCategoryReadAccess(uint64_t categoryId)
             auto result = acl->checkCategoryReadAccess(categoryId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -377,13 +377,13 @@ bool Acls::checkCategoryWriteAccess(uint64_t categoryId)
             auto result = acl->checkCategoryWriteAccess(categoryId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(!acceptSet) _out.printError("Error: Access denied to categories (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to categories (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to categories (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -414,13 +414,13 @@ bool Acls::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
             auto result = acl->checkDeviceReadAccess(peer);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -451,13 +451,13 @@ bool Acls::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
             auto result = acl->checkDeviceWriteAccess(peer);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to peer ID " + std::to_string(peer->getID()) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to peer ID " + std::to_string(peer->getID()) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -487,13 +487,13 @@ bool Acls::checkEventServerMethodAccess(std::string methodName)
             auto result = acl->checkEventServerMethodAccess(methodName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to event server method " + methodName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to event server method " + methodName + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to event server method " + methodName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Error: Access denied to event server method " + methodName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -523,13 +523,13 @@ bool Acls::checkMethodAccess(std::string methodName)
             auto result = acl->checkMethodAccess(methodName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Error: Access denied to method " + methodName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -559,13 +559,13 @@ bool Acls::checkMethodAndCategoryReadAccess(std::string methodName, uint64_t cat
             auto result = acl->checkMethodAndCategoryReadAccess(methodName, categoryId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -595,13 +595,13 @@ bool Acls::checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t ca
             auto result = acl->checkMethodAndCategoryWriteAccess(methodName, categoryId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -631,13 +631,13 @@ bool Acls::checkMethodAndRoomReadAccess(std::string methodName, uint64_t roomId)
             auto result = acl->checkMethodAndRoomReadAccess(methodName, roomId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -667,13 +667,13 @@ bool Acls::checkMethodAndRoomWriteAccess(std::string methodName, uint64_t roomId
             auto result = acl->checkMethodAndRoomWriteAccess(methodName, roomId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -703,13 +703,13 @@ bool Acls::checkMethodAndDeviceWriteAccess(std::string methodName, uint64_t peer
             auto result = acl->checkMethodAndDeviceWriteAccess(methodName, peerId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to method " + methodName + " or peer " + std::to_string(peerId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or peer " + std::to_string(peerId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to method " + methodName + " or peer " + std::to_string(peerId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or peer " + std::to_string(peerId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -739,13 +739,13 @@ bool Acls::checkRoomReadAccess(uint64_t roomId)
             auto result = acl->checkRoomReadAccess(roomId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to room " + std::to_string(roomId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -775,13 +775,13 @@ bool Acls::checkRoomWriteAccess(uint64_t roomId)
             auto result = acl->checkRoomWriteAccess(roomId);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to room " + std::to_string(roomId) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to room " + std::to_string(roomId) + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to room " + std::to_string(roomId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -811,13 +811,13 @@ bool Acls::checkSystemVariableReadAccess(const std::string& variableName)
             auto result = acl->checkSystemVariableReadAccess(variableName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to system variable " + variableName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -847,13 +847,13 @@ bool Acls::checkSystemVariableWriteAccess(const std::string& variableName)
             auto result = acl->checkSystemVariableWriteAccess(variableName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to system variable " + variableName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -884,13 +884,13 @@ bool Acls::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t 
             auto result = acl->checkVariableReadAccess(peer, channel, variableName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to variable " + variableName + " on channel " + std::to_string(channel) + " of peer " + std::to_string(peer->getID()) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to variable " + variableName + " on channel " + std::to_string(channel) + " of peer " + std::to_string(peer->getID()) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -921,13 +921,13 @@ bool Acls::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t
             auto result = acl->checkVariableWriteAccess(peer, channel, variableName);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                _out.printError("Error: Access denied to variable " + variableName + " on channel " + std::to_string(channel) + " of peer " + std::to_string(peer->getID()) + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to variable " + variableName + " on channel " + std::to_string(channel) + " of peer " + std::to_string(peer->getID()) + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet) _out.printError("Error: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)

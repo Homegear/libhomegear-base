@@ -397,7 +397,7 @@ std::string Acl::toString(int32_t indentation)
 
                 for(auto& variable : channel.second)
                 {
-                    stream << prefix << "      " << variable.first << ": " << variable.second << std::endl;
+                    stream << prefix << "      " << variable.first << ": " << (variable.second ? "accept" : "deny") << std::endl;
                 }
             }
         }
