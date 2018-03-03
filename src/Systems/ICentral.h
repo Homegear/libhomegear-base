@@ -61,8 +61,8 @@ public:
 
 		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values) = 0;
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
-		virtual void onRPCNewDevices(PVariable deviceDescriptions) = 0;
-		virtual void onRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo) = 0;
+		virtual void onRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions) = 0;
+		virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo) = 0;
 		virtual void onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
 		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
@@ -211,8 +211,8 @@ protected:
 
 	virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values);
 	virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-	virtual void raiseRPCNewDevices(PVariable deviceDescriptions);
-	virtual void raiseRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo);
+	virtual void raiseRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions);
+	virtual void raiseRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo);
 	virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
 	virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 	virtual BaseLib::PVariable raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
