@@ -88,14 +88,14 @@ void ICentral::dispose(bool wait)
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
 	}
 
-	void ICentral::raiseRPCNewDevices(PVariable deviceDescriptions)
+	void ICentral::raiseRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
 	{
-		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCNewDevices(deviceDescriptions);
+		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCNewDevices(ids, deviceDescriptions);
 	}
 
-	void ICentral::raiseRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo)
+	void ICentral::raiseRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo)
 	{
-		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCDeleteDevices(deviceAddresses, deviceInfo);
+		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 	}
 
 	void ICentral::raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
@@ -1882,13 +1882,15 @@ PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_
 				channels->arrayValue->push_back(PVariable(new Variable(i->first)));
 			}
 
-			raiseRPCDeleteDevices(deviceAddresses, deviceInfo);
+            auto oldIds = std::vector<uint64_t>{ oldPeerId };
+			raiseRPCDeleteDevices(oldIds, deviceAddresses, deviceInfo);
 		// }}}
 
 		// {{{ Send newDevices event
 			PVariable deviceDescriptions(new Variable(VariableType::tArray));
 			deviceDescriptions->arrayValue = peer->getDeviceDescriptions(nullptr, true, std::map<std::string, bool>());
-			raiseRPCNewDevices(deviceDescriptions);
+            auto newIds = std::vector<uint64_t>{ newPeerId };
+			raiseRPCNewDevices(newIds, deviceDescriptions);
 		// }}}
 
 		return PVariable(new Variable(VariableType::tVoid));

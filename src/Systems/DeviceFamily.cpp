@@ -135,14 +135,14 @@ void DeviceFamily::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::strin
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
 }
 
-void DeviceFamily::raiseRPCNewDevices(PVariable deviceDescriptions)
+void DeviceFamily::raiseRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
 {
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCNewDevices(deviceDescriptions);
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCNewDevices(ids, deviceDescriptions);
 }
 
-void DeviceFamily::raiseRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo)
+void DeviceFamily::raiseRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo)
 {
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCDeleteDevices(deviceAddresses, deviceInfo);
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
 void DeviceFamily::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
@@ -200,14 +200,14 @@ void DeviceFamily::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string a
 	raiseRPCUpdateDevice(id, channel, address, hint);
 }
 
-void DeviceFamily::onRPCNewDevices(PVariable deviceDescriptions)
+void DeviceFamily::onRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
 {
-	raiseRPCNewDevices(deviceDescriptions);
+	raiseRPCNewDevices(ids, deviceDescriptions);
 }
 
-void DeviceFamily::onRPCDeleteDevices(PVariable deviceAddresses, PVariable deviceInfo)
+void DeviceFamily::onRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo)
 {
-	raiseRPCDeleteDevices(deviceAddresses, deviceInfo);
+	raiseRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
 void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
