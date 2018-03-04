@@ -872,7 +872,7 @@ void Peer::saveParameter(uint32_t parameterID, std::vector<uint8_t>& value)
 		Database::DataRow data;
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterID)));
-		_bl->db->savePeerParameterAsynchronous(_peerID, data);
+		_bl->db->savePeerParameterAsynchronous(data);
 	}
 	catch(const std::exception& ex)
     {
@@ -907,7 +907,7 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(0)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(std::string(""))));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
-		_bl->db->savePeerParameterAsynchronous(_peerID, data);
+		_bl->db->savePeerParameterAsynchronous(data);
 	}
 	catch(const std::exception& ex)
     {
@@ -942,7 +942,7 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(remoteChannel)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterName)));
 		data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
-		_bl->db->savePeerParameterAsynchronous(_peerID, data);
+		_bl->db->savePeerParameterAsynchronous(data);
 	}
 	catch(const std::exception& ex)
     {
@@ -1061,7 +1061,7 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 		else
 		{
@@ -1071,7 +1071,7 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1099,7 +1099,7 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 		else
 		{
@@ -1109,7 +1109,7 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(intValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1137,7 +1137,7 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(stringValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 		else
 		{
@@ -1147,7 +1147,7 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(stringValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1175,7 +1175,7 @@ void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 		else
 		{
@@ -1185,7 +1185,7 @@ void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1213,7 +1213,7 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 		{
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_variableDatabaseIDs[index])));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 		else
 		{
@@ -1223,7 +1223,7 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
 			data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
-			_bl->db->savePeerVariableAsynchronous(_peerID, data);
+			_bl->db->savePeerVariableAsynchronous(data);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1375,6 +1375,18 @@ void Peer::loadConfig()
 					_bl->out.printCritical("Critical: No xml-rpc device found for peer " + std::to_string(_peerID) + ".");
 					continue;
 				}
+
+                { // Rooms / Categories
+                    parameterInfo->parameter.setRoom(row->second.at(8)->intValue);
+
+                    std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(9)->textValue, ',');
+                    for(auto categoryString : categoryStrings)
+                    {
+                        if(categoryString.empty()) continue;
+                        uint64_t category = BaseLib::Math::getNumber64(categoryString);
+                        if(category != 0) parameterInfo->parameter.addCategory(category);
+                    }
+                }
 
 				Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
 				if(functionIterator == _rpcDevice->functions.end())

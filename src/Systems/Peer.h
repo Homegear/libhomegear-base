@@ -136,6 +136,15 @@ public:
 	 */
 	bool equals(std::vector<uint8_t>& value) noexcept;
 
+	bool hasCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories.find(id) != _categories.end(); }
+	void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); }
+	void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); }
+    std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
+	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
+
+    uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
+    void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
+
 	/**
 	 * The id of this parameter in the database.
 	 */
@@ -145,13 +154,16 @@ public:
 	 * The RPC parameter as defined in the XML file.
 	 */
 	DeviceDescription::PParameter rpcParameter;
-
 private:
 	std::mutex _logicalDataMutex;
 	BaseLib::PVariable _logicalData;
 	std::mutex _binaryDataMutex;
 	std::vector<uint8_t> _binaryData;
 	std::vector<uint8_t> _partialBinaryData;
+    std::mutex _categoriesMutex;
+	std::set<uint64_t> _categories;
+    std::mutex _roomMutex;
+    uint64_t _room = 0;
 };
 
 class ConfigDataBlock
@@ -297,12 +309,12 @@ public:
 	virtual void setIdString(std::string value) { _idString = value; saveVariable(1005, value); }
 	virtual std::string getTypeString() { return _typeString; }
 	virtual void setTypeString(std::string value) { _typeString = value; saveVariable(1006, value); }
-	virtual uint64_t getRoom() { return _room; }
-	virtual void setRoom(uint64_t value) { _room = value; saveVariable(1007, (int64_t)value); }
-	virtual std::set<uint64_t> getCategories() { return _categories; }
-	virtual bool hasCategory(uint64_t value) { return _categories.find(value) != _categories.end(); }
-	virtual void addCategory(uint64_t value) { _categories.emplace(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
-	virtual void removeCategory(uint64_t value) { _categories.erase(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
+	virtual uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
+	virtual void setRoom(uint64_t value) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = value; saveVariable(1007, (int64_t)value); }
+	virtual std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
+	virtual bool hasCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories.find(id) != _categories.end(); }
+	virtual void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
+	virtual void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
     //End
 
 	virtual std::string getRpcTypeString() { return _rpcTypeString; }
@@ -318,6 +330,13 @@ public:
 	virtual int32_t getNewFirmwareVersion() = 0;
 	virtual std::string getFirmwareVersionString(int32_t firmwareVersion) = 0;
     virtual bool firmwareUpdateAvailable() = 0;
+
+    //virtual void setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId);
+    //virtual uint64_t getVariableRoom(int32_t channel, std::string& variableName);
+    //virtual void addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+    //virtual void removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+    //virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
+    //virtual bool variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
@@ -425,7 +444,9 @@ protected:
 	 */
 	std::string _typeString;
 
+    std::mutex _roomMutex;
 	uint64_t _room = 0;
+    std::mutex _categoriesMutex;
 	std::set<uint64_t> _categories;
 	//End
 

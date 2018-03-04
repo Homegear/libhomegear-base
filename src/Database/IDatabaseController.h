@@ -81,19 +81,23 @@ public:
 	// }}}
 
 	// {{{ Rooms
-	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations) = 0;
+	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteRoom(uint64_t roomId) = 0;
+    virtual BaseLib::PVariable getRoomMetadata(uint64_t roomId) = 0;
 	virtual BaseLib::PVariable getRooms(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual bool roomExists(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable updateRoom(uint64_t roomId, BaseLib::PVariable translations) = 0;
+    virtual BaseLib::PVariable setRoomMetadata(uint64_t roomId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateRoom(uint64_t roomId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
 	// {{{ Categories
-	virtual BaseLib::PVariable createCategory(BaseLib::PVariable translations) = 0;
+	virtual BaseLib::PVariable createCategory(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteCategory(uint64_t categoryId) = 0;
 	virtual BaseLib::PVariable getCategories(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getCategoryMetadata(uint64_t categoryId) = 0;
 	virtual bool categoryExists(uint64_t categoryId) = 0;
-	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations) = 0;
+    virtual BaseLib::PVariable setCategoryMetadata(uint64_t categoryId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
 	// {{{ Node data
@@ -166,8 +170,10 @@ public:
 	//Peer
 	virtual void deletePeer(uint64_t id) = 0;
 	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
-	virtual void savePeerParameterAsynchronous(uint64_t peerID, DataRow& data) = 0;
-	virtual void savePeerVariableAsynchronous(uint64_t peerID, DataRow& data) = 0;
+	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
+	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerVariableAsynchronous(DataRow& data) = 0;
 	virtual std::shared_ptr<DataTable> getPeerParameters(uint64_t peerID) = 0;
 	virtual std::shared_ptr<DataTable> getPeerVariables(uint64_t peerID) = 0;
 	virtual void deletePeerParameter(uint64_t peerID, DataRow& data) = 0;
