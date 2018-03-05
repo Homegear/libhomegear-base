@@ -624,13 +624,13 @@ uint64_t ICentral::getPeerIdFromSerial(std::string& serialNumber)
 }
 
 //RPC methods
-PVariable ICentral::addCategoryToDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId)
+PVariable ICentral::addCategoryToChannel(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t categoryId)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->addCategory(categoryId);
+		peer->addCategory(channel, categoryId);
 
 		return std::make_shared<Variable>();
 	}
@@ -649,13 +649,13 @@ PVariable ICentral::addCategoryToDevice(PRpcClientInfo clientInfo, uint64_t peer
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::addDeviceToRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId)
+PVariable ICentral::addChannelToRoom(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t roomId)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->setRoom(roomId);
+		peer->setRoom(channel, roomId);
 
 		return std::make_shared<Variable>();
 	}
@@ -914,7 +914,7 @@ PVariable ICentral::getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::m
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
+PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
 {
 	try
 	{
@@ -944,7 +944,7 @@ PVariable ICentral::getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t cat
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
 {
 	try
 	{
@@ -1749,13 +1749,13 @@ PVariable ICentral::putParamset(BaseLib::PRpcClientInfo clientInfo, uint64_t pee
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t categoryId)
+PVariable ICentral::removeCategoryFromChannel(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t categoryId)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->removeCategory(categoryId);
+		peer->removeCategory(channel, categoryId);
 
 		return std::make_shared<Variable>();
 	}
@@ -1774,13 +1774,13 @@ PVariable ICentral::removeCategoryFromDevice(PRpcClientInfo clientInfo, uint64_t
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::removeDeviceFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, uint64_t roomId)
+PVariable ICentral::removeChannelFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t roomId)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		if(peer->getRoom() == roomId) peer->setRoom(0);
+		if(peer->getRoom(channel) == roomId) peer->setRoom(channel, 0);
 
 		return std::make_shared<Variable>();
 	}
