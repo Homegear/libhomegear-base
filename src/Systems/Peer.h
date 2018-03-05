@@ -309,12 +309,12 @@ public:
 	virtual void setIdString(std::string value) { _idString = value; saveVariable(1005, value); }
 	virtual std::string getTypeString() { return _typeString; }
 	virtual void setTypeString(std::string value) { _typeString = value; saveVariable(1006, value); }
-	virtual uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
-	virtual void setRoom(uint64_t value) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = value; saveVariable(1007, (int64_t)value); }
-	virtual std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
-	virtual bool hasCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories.find(id) != _categories.end(); }
-	virtual void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
-	virtual void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
+	virtual uint64_t getRoom(int32_t channel);
+	virtual bool setRoom(int32_t channel, uint64_t value);
+	virtual std::set<uint64_t> getCategories(int32_t channel);
+	virtual bool hasCategory(int32_t channel, uint64_t id);
+	virtual bool addCategory(int32_t channel, uint64_t id);
+	virtual bool removeCategory(int32_t channel, uint64_t id);
     //End
 
 	virtual std::string getRpcTypeString() { return _rpcTypeString; }
@@ -331,12 +331,12 @@ public:
 	virtual std::string getFirmwareVersionString(int32_t firmwareVersion) = 0;
     virtual bool firmwareUpdateAvailable() = 0;
 
-    //virtual void setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId);
-    //virtual uint64_t getVariableRoom(int32_t channel, std::string& variableName);
-    //virtual void addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
-    //virtual void removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
-    //virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
-    //virtual bool variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId);
+    virtual bool setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId);
+    virtual uint64_t getVariableRoom(int32_t channel, std::string& variableName);
+    virtual bool addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+    virtual bool removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+    virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
+    virtual bool variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
@@ -445,9 +445,9 @@ protected:
 	std::string _typeString;
 
     std::mutex _roomMutex;
-	uint64_t _room = 0;
+	std::unordered_map<int32_t, uint64_t> _rooms;
     std::mutex _categoriesMutex;
-	std::set<uint64_t> _categories;
+	std::unordered_map<int32_t, std::set<uint64_t>> _categories;
 	//End
 
 	/*

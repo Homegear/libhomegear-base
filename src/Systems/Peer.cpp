@@ -404,6 +404,99 @@ void Peer::setSerialNumber(std::string serialNumber)
 	if(_peerID > 0) save(true, false, false);
 }
 
+uint64_t Peer::getRoom(int32_t channel)
+{
+    std::lock_guard<std::mutex> roomGuard(_roomMutex);
+    auto roomIterator = _rooms.find(channel);
+    if(roomIterator != _rooms.end()) return roomIterator->second;
+    return 0;
+}
+
+bool Peer::setRoom(int32_t channel, uint64_t roomId)
+{
+    auto channelIterator = _rpcDevice->functions.find(channel);
+    if(channelIterator == _rpcDevice->functions.end()) return false;
+
+    std::lock_guard<std::mutex> roomGuard(_roomMutex);
+    _rooms[channel] = roomId;
+
+    std::ostringstream rooms;
+    for(auto roomPair : _rooms)
+    {
+        rooms << std::to_string(roomPair.first) << "," << std::to_string(roomPair.second) << ";";
+    }
+    std::string roomString = rooms.str();
+
+    saveVariable(1007, roomString);
+    return true;
+}
+
+std::set<uint64_t> Peer::getCategories(int32_t channel)
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    auto categoryIterator = _categories.find(channel);
+    if(categoryIterator != _categories.end()) return categoryIterator->second;
+
+    return std::set<uint64_t>();
+}
+
+bool Peer::hasCategory(int32_t channel, uint64_t id)
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    auto categoryIterator = _categories.find(channel);
+    if(categoryIterator == _categories.end()) return false;
+    return categoryIterator->second.find(id) != categoryIterator->second.end();
+}
+
+bool Peer::addCategory(int32_t channel, uint64_t id)
+{
+    auto channelIterator = _rpcDevice->functions.find(channel);
+    if(channelIterator == _rpcDevice->functions.end()) return false;
+
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    _categories[channel].emplace(id);
+
+    std::ostringstream categories;
+    for(auto categoryPair : _categories)
+    {
+        categories << categoryPair.first << "~";
+        for(auto category : categoryPair.second)
+        {
+            categories << std::to_string(category) << ",";
+        }
+        categories << ";";
+    }
+    std::string categoryString = categories.str();
+
+    saveVariable(1008, categoryString);
+    return true;
+}
+
+bool Peer::removeCategory(int32_t channel, uint64_t id)
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    auto channelIterator = _categories.find(channel);
+    if(channelIterator == _categories.end()) return false;
+
+    channelIterator->second.erase(id);
+    if(channelIterator->second.empty()) _categories.erase(channel);
+
+    std::ostringstream categories;
+    for(auto categoryPair : _categories)
+    {
+        categories << categoryPair.first << "~";
+        for(auto category : categoryPair.second)
+        {
+            categories << std::to_string(category) << ",";
+        }
+        categories << ";";
+    }
+    std::string categoryString = categories.str();
+
+    saveVariable(1008, categoryString);
+    return true;
+}
+
 HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
 {
 	try
@@ -994,15 +1087,30 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 				_typeString = row->second.at(4)->textValue;
 				break;
 			case 1007:
-				_room = row->second.at(3)->intValue;
+                std::vector<std::string> roomStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
+                for(auto roomString : roomStrings)
+                {
+                    if(roomString.empty()) continue;
+                    auto roomPair = BaseLib::HelperFunctions::splitFirst(roomString, ',');
+                    int32_t channel = BaseLib::Math::getNumber(roomPair.first);
+                    uint64_t room = BaseLib::Math::getNumber64(roomPair.second);
+                    if(room != 0) _rooms[channel] = room;
+                }
 				break;
 			case 1008:
-				std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ',');
+				std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
 				for(auto categoryString : categoryStrings)
 				{
 					if(categoryString.empty()) continue;
-					uint64_t category = BaseLib::Math::getNumber64(categoryString);
-					if(category != 0) _categories.emplace(category);
+                    auto categoryPair = BaseLib::HelperFunctions::splitFirst(categoryString, '~');
+                    if(categoryPair.first.empty() || categoryPair.second.empty()) continue;
+                    int32_t channel = BaseLib::Math::getNumber(categoryPair.first);
+                    auto categoryStrings2 = BaseLib::HelperFunctions::splitAll(categoryPair.second, ',');
+                    for(auto categoryString2 : categoryStrings2)
+                    {
+                        uint64_t category = BaseLib::Math::getNumber64(categoryString2);
+                        if(category != 0) _categories[channel].emplace(category);
+                    }
 				}
 				break;
 			}
@@ -1566,6 +1674,171 @@ void Peer::initializeTypeString()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
+}
+
+bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+        variableIterator->second.setRoom(roomId);
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(roomId));
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+        _bl->db->savePeerParameterRoomAsynchronous(data);
+
+        return true;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+uint64_t Peer::getVariableRoom(int32_t channel, std::string& variableName)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return 0;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return 0;
+
+        return variableIterator->second.getRoom();
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return 0;
+}
+
+bool Peer::addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.addCategory(categoryId);
+
+        return true;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+    return false;
+}
+
+bool Peer::removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.removeCategory(categoryId);
+
+        return true;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+    return false;
+}
+
+std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& variableName)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+
+        return variableIterator->second.getCategories();
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return std::set<uint64_t>();
+}
+
+bool Peer::variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId)
+{
+	try
+	{
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        return variableIterator->second.hasCategory(categoryId);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return false;
 }
 
 //RPC methods
@@ -3368,6 +3641,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     }
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
+
 //End RPC methods
 }
 }
