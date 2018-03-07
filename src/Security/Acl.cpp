@@ -606,13 +606,12 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
         AclResult roomResult = AclResult::notInList;
         if(_roomsReadSet)
         {
-            auto roomId = peer->getRoom();
-            if(roomId != 0)
+            for(auto& roomsIterator : _roomsRead)
             {
-                auto roomsIterator = _roomsRead.find(roomId);
-                if(roomsIterator != _roomsRead.end())
+                if(roomsIterator.first == 0) continue;
+                if(peer->hasRoomInChannels(roomsIterator.second))
                 {
-                    roomResult = roomsIterator->second ? AclResult::accept : AclResult::deny;
+                    roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
                     if(roomResult == AclResult::deny) return roomResult; //Deny access
                 }
             }
@@ -622,12 +621,12 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
         AclResult categoryResult = AclResult::notInList;
         if(_categoriesReadSet)
         {
-            for(auto& categoryId : peer->getCategories())
+            for(auto& categoriesIterator : _categoriesRead)
             {
-                auto categoriesIterator = _categoriesRead.find(categoryId);
-                if(categoriesIterator != _categoriesRead.end())
+                if(categoriesIterator.first == 0) continue;
+                if(peer->hasCategoryInChannels(categoriesIterator.second))
                 {
-                    categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                    categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
                     if(categoryResult == AclResult::deny) return categoryResult; //Deny access
                 }
             }
@@ -679,13 +678,12 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
         AclResult roomResult = AclResult::notInList;
         if(_roomsWriteSet)
         {
-            auto roomId = peer->getRoom();
-            if(roomId != 0)
+            for(auto& roomsIterator : _roomsWrite)
             {
-                auto roomsIterator = _roomsWrite.find(roomId);
-                if(roomsIterator != _roomsWrite.end())
+                if(roomsIterator.first == 0) continue;
+                if(peer->hasRoomInChannels(roomsIterator.second))
                 {
-                    roomResult = roomsIterator->second ? AclResult::accept : AclResult::deny;
+                    roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
                     if(roomResult == AclResult::deny) return roomResult; //Deny access
                 }
             }
@@ -695,12 +693,12 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
         AclResult categoryResult = AclResult::notInList;
         if(_categoriesWriteSet)
         {
-            for(auto& categoryId : peer->getCategories())
+            for(auto& categoriesIterator : _categoriesWrite)
             {
-                auto categoriesIterator = _categoriesWrite.find(categoryId);
-                if(categoriesIterator != _categoriesWrite.end())
+                if(categoriesIterator.first == 0) continue;
+                if(peer->hasCategoryInChannels(categoriesIterator.second))
                 {
-                    categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
+                    categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
                     if(categoryResult == AclResult::deny) return categoryResult; //Deny access
                 }
             }
@@ -1190,10 +1188,41 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
         }
         else variableResult = AclResult::accept;
 
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsReadSet)
+        {
+            for(auto& roomsIterator : _roomsRead)
+            {
+                if(roomsIterator.first == 0) continue;
+                auto room = peer->getVariableRoom(channel, variableName);
+                if(room == roomsIterator.first)
+                {
+                    roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
+                    if(roomResult == AclResult::deny) return roomResult; //Deny access
+                }
+            }
+        }
+        else roomResult = AclResult::accept;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesReadSet)
+        {
+            for(auto& categoriesIterator : _categoriesRead)
+            {
+                if(categoriesIterator.first == 0) continue;
+                if(peer->variableHasCategory(channel, variableName, categoriesIterator.first))
+                {
+                    categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
+                    if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+                }
+            }
+        }
+        else categoryResult = AclResult::accept;
+
         auto deviceResult = checkDeviceReadAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1312,10 +1341,41 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
         }
         else variableResult = AclResult::accept;
 
+        AclResult roomResult = AclResult::notInList;
+        if(_roomsWriteSet)
+        {
+            for(auto& roomsIterator : _roomsWrite)
+            {
+                if(roomsIterator.first == 0) continue;
+                auto room = peer->getVariableRoom(channel, variableName);
+                if(room == roomsIterator.first)
+                {
+                    roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
+                    if(roomResult == AclResult::deny) return roomResult; //Deny access
+                }
+            }
+        }
+        else roomResult = AclResult::accept;
+
+        AclResult categoryResult = AclResult::notInList;
+        if(_categoriesWriteSet)
+        {
+            for(auto& categoriesIterator : _categoriesWrite)
+            {
+                if(categoriesIterator.first == 0) continue;
+                if(peer->variableHasCategory(channel, variableName, categoriesIterator.first))
+                {
+                    categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
+                    if(categoryResult == AclResult::deny) return categoryResult; //Deny access
+                }
+            }
+        }
+        else categoryResult = AclResult::accept;
+
         auto deviceResult = checkDeviceWriteAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }

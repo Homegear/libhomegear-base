@@ -309,10 +309,15 @@ public:
 	virtual void setIdString(std::string value) { _idString = value; saveVariable(1005, value); }
 	virtual std::string getTypeString() { return _typeString; }
 	virtual void setTypeString(std::string value) { _typeString = value; saveVariable(1006, value); }
+    virtual std::set<int32_t> getChannelsInRoom(uint64_t roomId);
 	virtual uint64_t getRoom(int32_t channel);
+    virtual bool hasRoomInChannels(uint64_t roomId);
 	virtual bool setRoom(int32_t channel, uint64_t value);
+    virtual std::unordered_map<int32_t, std::set<uint64_t>> getCategories();
 	virtual std::set<uint64_t> getCategories(int32_t channel);
+    virtual std::set<int32_t> getChannelsInCategory(uint64_t categoryId);
 	virtual bool hasCategory(int32_t channel, uint64_t id);
+    virtual bool hasCategoryInChannels(uint64_t categoryId);
 	virtual bool addCategory(int32_t channel, uint64_t id);
 	virtual bool removeCategory(int32_t channel, uint64_t id);
     //End
@@ -332,11 +337,13 @@ public:
     virtual bool firmwareUpdateAvailable() = 0;
 
     virtual bool setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId);
-    virtual uint64_t getVariableRoom(int32_t channel, std::string& variableName);
+	virtual void removeRoomFromVariables(uint64_t roomId);
+    virtual uint64_t getVariableRoom(int32_t channel, const std::string& variableName);
     virtual bool addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
     virtual bool removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+	virtual void removeCategoryFromVariables(uint64_t categoryId);
     virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
-    virtual bool variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId);
+    virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);

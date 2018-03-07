@@ -404,12 +404,37 @@ void Peer::setSerialNumber(std::string serialNumber)
 	if(_peerID > 0) save(true, false, false);
 }
 
+std::set<int32_t> Peer::getChannelsInRoom(uint64_t roomId)
+{
+    if(roomId == 0) return std::set<int32_t>();
+
+    std::set<int32_t> result;
+    std::lock_guard<std::mutex> roomGuard(_roomMutex);
+    for(auto& roomIterator : _rooms)
+    {
+        if(roomIterator.second == roomId) result.emplace(roomIterator.first);
+    }
+    return result;
+}
+
 uint64_t Peer::getRoom(int32_t channel)
 {
     std::lock_guard<std::mutex> roomGuard(_roomMutex);
     auto roomIterator = _rooms.find(channel);
     if(roomIterator != _rooms.end()) return roomIterator->second;
     return 0;
+}
+
+bool Peer::hasRoomInChannels(uint64_t roomId)
+{
+    if(roomId == 0) return false;
+
+    std::lock_guard<std::mutex> roomGuard(_roomMutex);
+    for(auto& roomIterator : _rooms)
+    {
+        if(roomIterator.second == roomId) return true;
+    }
+    return false;
 }
 
 bool Peer::setRoom(int32_t channel, uint64_t roomId)
@@ -431,6 +456,12 @@ bool Peer::setRoom(int32_t channel, uint64_t roomId)
     return true;
 }
 
+std::unordered_map<int32_t, std::set<uint64_t>> Peer::getCategories()
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    return _categories;
+}
+
 std::set<uint64_t> Peer::getCategories(int32_t channel)
 {
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
@@ -440,21 +471,49 @@ std::set<uint64_t> Peer::getCategories(int32_t channel)
     return std::set<uint64_t>();
 }
 
-bool Peer::hasCategory(int32_t channel, uint64_t id)
+std::set<int32_t> Peer::getChannelsInCategory(uint64_t categoryId)
 {
+    if(categoryId == 0) return std::set<int32_t>();
+
+    std::set<int32_t> result;
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    for(auto& categoryIterator : _categories)
+    {
+        if(categoryIterator.second.find(categoryId) != categoryIterator.second.end()) result.emplace(categoryId);
+    }
+    return result;
+}
+
+bool Peer::hasCategoryInChannels(uint64_t categoryId)
+{
+    if(categoryId == 0) return false;
+
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    for(auto& categoryIterator : _categories)
+    {
+        if(categoryIterator.second.find(categoryId) != categoryIterator.second.end()) return true;
+    }
+    return false;
+}
+
+bool Peer::hasCategory(int32_t channel, uint64_t categoryId)
+{
+    if(categoryId == 0) return false;
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
     auto categoryIterator = _categories.find(channel);
     if(categoryIterator == _categories.end()) return false;
-    return categoryIterator->second.find(id) != categoryIterator->second.end();
+    return categoryIterator->second.find(categoryId) != categoryIterator->second.end();
 }
 
-bool Peer::addCategory(int32_t channel, uint64_t id)
+bool Peer::addCategory(int32_t channel, uint64_t categoryId)
 {
+    if(categoryId == 0) return false;
+
     auto channelIterator = _rpcDevice->functions.find(channel);
     if(channelIterator == _rpcDevice->functions.end()) return false;
 
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
-    _categories[channel].emplace(id);
+    _categories[channel].emplace(categoryId);
 
     std::ostringstream categories;
     for(auto categoryPair : _categories)
@@ -472,13 +531,15 @@ bool Peer::addCategory(int32_t channel, uint64_t id)
     return true;
 }
 
-bool Peer::removeCategory(int32_t channel, uint64_t id)
+bool Peer::removeCategory(int32_t channel, uint64_t categoryId)
 {
+    if(categoryId == 0) return false;
+
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
     auto channelIterator = _categories.find(channel);
     if(channelIterator == _categories.end()) return false;
 
-    channelIterator->second.erase(id);
+    channelIterator->second.erase(categoryId);
     if(channelIterator->second.empty()) _categories.erase(channel);
 
     std::ostringstream categories;
@@ -1087,32 +1148,36 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 				_typeString = row->second.at(4)->textValue;
 				break;
 			case 1007:
-                std::vector<std::string> roomStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
-                for(auto roomString : roomStrings)
-                {
-                    if(roomString.empty()) continue;
-                    auto roomPair = BaseLib::HelperFunctions::splitFirst(roomString, ',');
-                    int32_t channel = BaseLib::Math::getNumber(roomPair.first);
-                    uint64_t room = BaseLib::Math::getNumber64(roomPair.second);
-                    if(room != 0) _rooms[channel] = room;
-                }
-				break;
-			case 1008:
-				std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
-				for(auto categoryString : categoryStrings)
 				{
-					if(categoryString.empty()) continue;
-                    auto categoryPair = BaseLib::HelperFunctions::splitFirst(categoryString, '~');
-                    if(categoryPair.first.empty() || categoryPair.second.empty()) continue;
-                    int32_t channel = BaseLib::Math::getNumber(categoryPair.first);
-                    auto categoryStrings2 = BaseLib::HelperFunctions::splitAll(categoryPair.second, ',');
-                    for(auto categoryString2 : categoryStrings2)
-                    {
-                        uint64_t category = BaseLib::Math::getNumber64(categoryString2);
-                        if(category != 0) _categories[channel].emplace(category);
-                    }
+					std::vector<std::string> roomStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
+					for(auto roomString : roomStrings)
+					{
+						if(roomString.empty()) continue;
+						auto roomPair = BaseLib::HelperFunctions::splitFirst(roomString, ',');
+						int32_t channel = BaseLib::Math::getNumber(roomPair.first);
+						uint64_t room = BaseLib::Math::getNumber64(roomPair.second);
+						if(room != 0) _rooms[channel] = room;
+					}
+					break;
 				}
-				break;
+			case 1008:
+				{
+					std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
+					for(auto categoryString : categoryStrings)
+					{
+						if(categoryString.empty()) continue;
+						auto categoryPair = BaseLib::HelperFunctions::splitFirst(categoryString, '~');
+						if(categoryPair.first.empty() || categoryPair.second.empty()) continue;
+						int32_t channel = BaseLib::Math::getNumber(categoryPair.first);
+						auto categoryStrings2 = BaseLib::HelperFunctions::splitAll(categoryPair.second, ',');
+						for(auto categoryString2 : categoryStrings2)
+						{
+							uint64_t category = BaseLib::Math::getNumber64(categoryString2);
+							if(category != 0) _categories[channel].emplace(category);
+						}
+					}
+					break;
+				}
 			}
 		}
 		return;
@@ -1705,9 +1770,37 @@ bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t 
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
+	return false;
 }
 
-uint64_t Peer::getVariableRoom(int32_t channel, std::string& variableName)
+void Peer::removeRoomFromVariables(uint64_t roomId)
+{
+    try
+    {
+        for(auto& channelIterator : valuesCentral)
+        {
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(!variableIterator.second.rpcParameter || variableIterator.second.databaseId == 0) continue;
+                if(variableIterator.second.getRoom() == roomId) variableIterator.second.setRoom(0);
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+uint64_t Peer::getVariableRoom(int32_t channel, const std::string& variableName)
 {
 	try
 	{
@@ -1789,6 +1882,33 @@ bool Peer::removeCategoryFromVariable(int32_t channel, std::string& variableName
     return false;
 }
 
+void Peer::removeCategoryFromVariables(uint64_t categoryId)
+{
+    try
+    {
+        for(auto& channelIterator : valuesCentral)
+        {
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(!variableIterator.second.rpcParameter || variableIterator.second.databaseId == 0) continue;
+                variableIterator.second.removeCategory(categoryId);
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& variableName)
 {
 	try
@@ -1815,7 +1935,7 @@ std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& var
 	return std::set<uint64_t>();
 }
 
-bool Peer::variableHasCategory(int32_t channel, std::string& variableName, uint64_t categoryId)
+bool Peer::variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId)
 {
 	try
 	{
@@ -2346,17 +2466,19 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 
 			if(fields.find("WIRELESS") != fields.end()) description->structValue->insert(StructElement("WIRELESS", PVariable(new Variable(wireless()))));
 
-			if(fields.find("ROOM") != fields.end() && _room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(_room));
+            auto room = getRoom(-1);
+			if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
 
-			if(fields.find("CATEGORIES") != fields.end() && !_categories.empty())
+            auto categories = getCategories(-1);
+			if(fields.find("CATEGORIES") != fields.end() && !categories.empty())
 			{
-				PVariable categories = std::make_shared<Variable>(VariableType::tArray);
-				categories->arrayValue->reserve(_categories.size());
-				for(auto category : _categories)
+				PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
+                categoriesResult->arrayValue->reserve(categories.size());
+				for(auto category : categories)
 				{
-					categories->arrayValue->push_back(std::make_shared<Variable>(category));
+                    categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
 				}
-				description->structValue->emplace("CATEGORIES", categories);
+				description->structValue->emplace("CATEGORIES", categoriesResult);
 			}
 		}
 		else
@@ -2462,6 +2584,21 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 			if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(rpcFunction->type))));
 
 			if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", PVariable(new Variable(_rpcDevice->version))));
+
+            auto room = getRoom(channel);
+            if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
+
+            auto categories = getCategories(channel);
+            if(fields.find("CATEGORIES") != fields.end() && !categories.empty())
+            {
+                PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
+                categoriesResult->arrayValue->reserve(categories.size());
+                for(auto category : categories)
+                {
+                    categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
+                }
+                description->structValue->emplace("CATEGORIES", categoriesResult);
+            }
 		}
 		return description;
 	}
