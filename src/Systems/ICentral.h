@@ -118,13 +118,15 @@ public:
 	virtual PVariable deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId, bool checkAcls);
 	virtual PVariable getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly, bool checkAcls);
+	virtual PVariable getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
+	virtual PVariable getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, uint64_t peerId, uint32_t channel, std::string name);
 	virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::map<std::string, bool> fields);
 	virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::map<std::string, bool> fields);
 	virtual PVariable getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields, bool checkAcls);
-	virtual PVariable getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
-	virtual PVariable getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
+	virtual PVariable getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
+	virtual PVariable getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std::string filterValue, bool checkAcls);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t address);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, std::string serialNumber);

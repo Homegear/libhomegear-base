@@ -768,6 +768,80 @@ PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, boo
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
+{
+	try
+	{
+		PVariable result = std::make_shared<Variable>(VariableType::tStruct);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+		for(auto peer : peers)
+		{
+			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+			auto channels = peer->getChannelsInCategory(categoryId);
+			PVariable channelResult = std::make_shared<Variable>(VariableType::tArray);
+			channelResult->arrayValue->reserve(channels.size());
+			for(auto channel : channels)
+			{
+				channelResult->arrayValue->push_back(std::make_shared<Variable>(channel));
+			}
+
+			result->structValue->emplace(std::to_string(peer->getID()), channelResult);
+		}
+		return result;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+{
+	try
+	{
+		PVariable result = std::make_shared<Variable>(VariableType::tStruct);
+		std::vector<std::shared_ptr<Peer>> peers = getPeers();
+		for(auto peer : peers)
+		{
+			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+			auto channels = peer->getChannelsInRoom(roomId);
+			PVariable roomsResult = std::make_shared<Variable>(VariableType::tArray);
+			roomsResult->arrayValue->reserve(channels.size());
+			for(auto channel : channels)
+			{
+				roomsResult->arrayValue->push_back(std::make_shared<Variable>(channel));
+			}
+
+			result->structValue->emplace(std::to_string(peer->getID()), roomsResult);
+		}
+		return result;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name)
 {
 	try
@@ -914,7 +988,7 @@ PVariable ICentral::getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::m
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
+PVariable ICentral::getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
 {
 	try
 	{
@@ -923,9 +997,7 @@ PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t ca
 		result->arrayValue->reserve(peers.size());
 		for(auto peer : peers)
 		{
-			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
-
-			if(peer->hasCategory(categoryId)) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
+			if(peer->hasCategory(-1, categoryId)) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
 		}
 		return result;
 	}
@@ -944,7 +1016,7 @@ PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t ca
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+PVariable ICentral::getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
 {
 	try
 	{
@@ -953,9 +1025,7 @@ PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId
 		result->arrayValue->reserve(peers.size());
 		for(auto peer : peers)
 		{
-			if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
-
-			if(peer->getRoom() == roomId) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
+			if(peer->getRoom(-1) == roomId) result->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
 		}
 		return result;
 	}
