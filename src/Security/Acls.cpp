@@ -159,6 +159,28 @@ bool Acls::variablesWriteSet()
     return false;
 }
 
+bool Acls::variablesRoomsCategoriesReadSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet()) return true;
+    }
+
+    return false;
+}
+
+bool Acls::variablesRoomsCategoriesWriteSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet()) return true;
+    }
+
+    return false;
+}
+
 bool Acls::variablesRoomsCategoriesDevicesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
@@ -800,24 +822,25 @@ bool Acls::checkRoomWriteAccess(uint64_t roomId)
     return false;
 }
 
-bool Acls::checkSystemVariableReadAccess(const std::string& variableName)
+bool Acls::checkSystemVariableReadAccess(Database::PSystemVariable systemVariable)
 {
     try
     {
+        if(!systemVariable) return false;
         std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
         bool acceptSet = false;
         for(auto& acl : _acls)
         {
-            auto result = acl->checkSystemVariableReadAccess(variableName);
+            auto result = acl->checkSystemVariableReadAccess(systemVariable);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + systemVariable->name + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + systemVariable->name + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)
@@ -836,24 +859,25 @@ bool Acls::checkSystemVariableReadAccess(const std::string& variableName)
     return false;
 }
 
-bool Acls::checkSystemVariableWriteAccess(const std::string& variableName)
+bool Acls::checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable)
 {
     try
     {
+        if(!systemVariable) return false;
         std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
         bool acceptSet = false;
         for(auto& acl : _acls)
         {
-            auto result = acl->checkSystemVariableWriteAccess(variableName);
+            auto result = acl->checkSystemVariableWriteAccess(systemVariable);
             if(result == AclResult::error || result == AclResult::deny)
             {
-                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (1).");
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + systemVariable->name + " (1).");
                 return false;
             }
             else if(result == AclResult::accept) acceptSet = true;
         }
 
-        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + variableName + " (2).");
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to system variable " + systemVariable->name + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)

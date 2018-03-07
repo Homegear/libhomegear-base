@@ -73,6 +73,8 @@ public:
     bool variablesWriteSet();
     bool variablesRoomsCategoriesDevicesReadSet();
     bool variablesRoomsCategoriesDevicesWriteSet();
+    bool variablesRoomsCategoriesReadSet();
+    bool variablesRoomsCategoriesWriteSet();
 
     void clear();
     bool fromUser(std::string& userName);
@@ -206,18 +208,18 @@ public:
     /**
      * Checks if the ACLs grant access to a system variable.
      *
-     * @param variableName The variable name to check.
+     * @param systemVariable The system variable to check.
      * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
-    bool checkSystemVariableReadAccess(const std::string& variableName);
+    bool checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
 
     /**
      * Checks if the ACLs grant access to a system variable.
      *
-     * @param variableName The variable name to check.
+     * @param systemVariable The system variable to check.
      * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
      */
-    bool checkSystemVariableWriteAccess(const std::string& variableName);
+    bool checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
 
     /**
      * Checks if the ACLs grant access to a variable.

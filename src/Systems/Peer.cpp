@@ -437,6 +437,16 @@ bool Peer::hasRoomInChannels(uint64_t roomId)
     return false;
 }
 
+bool Peer::roomsSet()
+{
+    std::lock_guard<std::mutex> roomGuard(_roomMutex);
+    for(auto& roomIterator : _rooms)
+    {
+        if(roomIterator.second != 0) return true;
+    }
+    return false;
+}
+
 bool Peer::setRoom(int32_t channel, uint64_t roomId)
 {
     auto channelIterator = _rpcDevice->functions.find(channel);
@@ -482,6 +492,19 @@ std::set<int32_t> Peer::getChannelsInCategory(uint64_t categoryId)
         if(categoryIterator.second.find(categoryId) != categoryIterator.second.end()) result.emplace(categoryId);
     }
     return result;
+}
+
+bool Peer::hasCategories()
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    return !_categories.empty();
+}
+
+bool Peer::hasCategories(int32_t channel)
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    auto categoryIterator = _categories.find(channel);
+    return categoryIterator != _categories.end();
 }
 
 bool Peer::hasCategoryInChannels(uint64_t categoryId)
@@ -1959,6 +1982,32 @@ bool Peer::variableHasCategory(int32_t channel, const std::string& variableName,
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return false;
+}
+
+bool Peer::variableHasCategories(int32_t channel, const std::string& variableName)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        return variableIterator->second.hasCategories();
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
 }
 
 //RPC methods
@@ -3550,6 +3599,92 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t chann
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
+		auto me = central->getPeer(_peerID);
+		if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+		auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		for(auto& channelIterator : valuesCentral)
+		{
+			auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+			variables->arrayValue->reserve(channelIterator.second.size());
+			for(auto& variableIterator : channelIterator.second)
+			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+				if(variableIterator.second.hasCategory(categoryId)) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
+			}
+			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+		}
+
+		return channels;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
+		auto me = central->getPeer(_peerID);
+		if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+		auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		for(auto& channelIterator : valuesCentral)
+		{
+			auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+			variables->arrayValue->reserve(channelIterator.second.size());
+			for(auto& variableIterator : channelIterator.second)
+			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+				if(variableIterator.second.getRoom() == roomId) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
+			}
+			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+		}
+
+		return channels;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
 }
 
 PVariable Peer::reportValueUsage(PRpcClientInfo clientInfo)
