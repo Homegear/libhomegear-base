@@ -33,6 +33,7 @@
 
 #include "../Exception.h"
 #include "../Variable.h"
+#include "../Database/IDatabaseController.h"
 
 #include <set>
 
@@ -190,6 +191,8 @@ private:
 
     /**
      * Key: Room ID; value: access/no access
+     *
+     * ID 0 stands for "no room assigned"
      */
     std::unordered_map<uint64_t, bool> _roomsWrite;
 
@@ -200,6 +203,8 @@ private:
 
     /**
      * Key: Category ID; value: access/no access
+     *
+     * ID 0 stands for "no category assigned"
      */
     std::unordered_map<uint64_t, bool> _categoriesRead;
 
@@ -279,8 +284,8 @@ public:
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
     AclResult checkRoomReadAccess(uint64_t roomId);
     AclResult checkRoomWriteAccess(uint64_t roomId);
-    AclResult checkSystemVariableReadAccess(const std::string& variableName);
-    AclResult checkSystemVariableWriteAccess(const std::string& variableName);
+    AclResult checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
+    AclResult checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
     AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
     AclResult checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
 

@@ -149,6 +149,8 @@ public:
 	virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey);
+	virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
+	virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls);
 	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo, bool checkAcls);

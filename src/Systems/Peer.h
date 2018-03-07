@@ -141,6 +141,7 @@ public:
 	void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); }
     std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
 	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
+	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
     void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
@@ -312,10 +313,13 @@ public:
     virtual std::set<int32_t> getChannelsInRoom(uint64_t roomId);
 	virtual uint64_t getRoom(int32_t channel);
     virtual bool hasRoomInChannels(uint64_t roomId);
+	bool roomsSet();
 	virtual bool setRoom(int32_t channel, uint64_t value);
     virtual std::unordered_map<int32_t, std::set<uint64_t>> getCategories();
 	virtual std::set<uint64_t> getCategories(int32_t channel);
     virtual std::set<int32_t> getChannelsInCategory(uint64_t categoryId);
+	virtual bool hasCategories();
+	virtual bool hasCategories(int32_t channel);
 	virtual bool hasCategory(int32_t channel, uint64_t id);
     virtual bool hasCategoryInChannels(uint64_t categoryId);
 	virtual bool addCategory(int32_t channel, uint64_t id);
@@ -344,6 +348,7 @@ public:
 	virtual void removeCategoryFromVariables(uint64_t categoryId);
     virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
     virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
+	virtual bool variableHasCategories(int32_t channel, const std::string& variableName);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
@@ -407,6 +412,8 @@ public:
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
+    virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
+    virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
     virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing = false) = 0;
     virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
     virtual PVariable rssiInfo(PRpcClientInfo clientInfo);

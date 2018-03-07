@@ -1685,6 +1685,72 @@ PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t i
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable ICentral::getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls)
+{
+    try
+    {
+        PVariable variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        std::vector<std::shared_ptr<Peer>> peers = getPeers();
+
+        for(std::shared_ptr<Peer> peer : peers)
+        {
+            if(checkDeviceAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+            auto result = peer->getVariablesInCategory(clientInfo, categoryId, checkVariableAcls);
+            if(!result->structValue->empty()) variables->structValue->emplace(std::to_string(peer->getID()), result);
+        }
+
+        return variables;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls)
+{
+    try
+    {
+        PVariable variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        std::vector<std::shared_ptr<Peer>> peers = getPeers();
+
+        for(std::shared_ptr<Peer> peer : peers)
+        {
+            if(checkDeviceAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+            auto result = peer->getVariablesInRoom(clientInfo, categoryId, checkVariableAcls);
+            if(!result->structValue->empty()) variables->structValue->emplace(std::to_string(peer->getID()), result);
+        }
+
+        return variables;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls)
 {
 	return listDevices(clientInfo, channels, fields, std::shared_ptr<std::set<std::uint64_t>>(), checkAcls);
