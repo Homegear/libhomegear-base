@@ -786,7 +786,7 @@ PVariable ICentral::getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t ca
 				channelResult->arrayValue->push_back(std::make_shared<Variable>(channel));
 			}
 
-			result->structValue->emplace(std::to_string(peer->getID()), channelResult);
+            if(!channelResult->arrayValue->empty()) result->structValue->emplace(std::to_string(peer->getID()), channelResult);
 		}
 		return result;
 	}
@@ -823,7 +823,7 @@ PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId
 				roomsResult->arrayValue->push_back(std::make_shared<Variable>(channel));
 			}
 
-			result->structValue->emplace(std::to_string(peer->getID()), roomsResult);
+			if(!roomsResult->arrayValue->empty()) result->structValue->emplace(std::to_string(peer->getID()), roomsResult);
 		}
 		return result;
 	}
