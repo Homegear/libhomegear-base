@@ -630,9 +630,8 @@ PVariable ICentral::addCategoryToChannel(PRpcClientInfo clientInfo, uint64_t pee
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->addCategory(channel, categoryId);
 
-		return std::make_shared<Variable>();
+		return std::make_shared<Variable>(peer->addCategory(channel, categoryId));
 	}
 	catch(const std::exception& ex)
     {
@@ -655,9 +654,8 @@ PVariable ICentral::addChannelToRoom(PRpcClientInfo clientInfo, uint64_t peerId,
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->setRoom(channel, roomId);
 
-		return std::make_shared<Variable>();
+		return std::make_shared<Variable>(peer->setRoom(channel, roomId));
 	}
 	catch(const std::exception& ex)
     {
@@ -1891,9 +1889,8 @@ PVariable ICentral::removeCategoryFromChannel(PRpcClientInfo clientInfo, uint64_
 	{
 		std::shared_ptr<Peer> peer = getPeer(peerId);
 		if(!peer) return Variable::createError(-2, "Unknown device.");
-		peer->removeCategory(channel, categoryId);
 
-		return std::make_shared<Variable>();
+		return std::make_shared<Variable>(peer->removeCategory(channel, categoryId));
 	}
 	catch(const std::exception& ex)
     {

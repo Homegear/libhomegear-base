@@ -486,8 +486,6 @@ std::set<uint64_t> Peer::getCategories(int32_t channel)
 
 std::set<int32_t> Peer::getChannelsInCategory(uint64_t categoryId)
 {
-    if(categoryId == 0) return std::set<int32_t>();
-
     std::set<int32_t> result;
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
     for(auto& categoryIterator : _categories)
