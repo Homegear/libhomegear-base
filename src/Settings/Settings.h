@@ -140,6 +140,7 @@ public:
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
+	void setLockFilePath(std::string value) { _lockFilePath = value; }
 	uint32_t lockFilePathPermissions() { return _lockFilePathPermissions; }
 	std::string lockFilePathUser() { return _lockFilePathUser; }
 	std::string lockFilePathGroup() { return _lockFilePathGroup; }
