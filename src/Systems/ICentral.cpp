@@ -689,7 +689,7 @@ PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId, boo
 		}
 		else
 		{
-			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
+			//Copy all peers first, because getAllConfig takes very long and we don't want to lock _peersMutex too long
 			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
 			for(std::vector<std::shared_ptr<Peer>>::iterator i = peers.begin(); i != peers.end(); ++i)
