@@ -611,7 +611,7 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
                 for(auto& roomsIterator : _roomsRead)
                 {
                     if(roomsIterator.first == 0) continue;
-                    if(peer->hasRoomInChannels(roomsIterator.second))
+                    if(peer->hasRoomInChannels(roomsIterator.first))
                     {
                         roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
                         if(roomResult == AclResult::deny) return roomResult; //Deny access
@@ -638,7 +638,7 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
                 for(auto& categoriesIterator : _categoriesRead)
                 {
                     if(categoriesIterator.first == 0) continue;
-                    if(peer->hasCategoryInChannels(categoriesIterator.second))
+                    if(peer->hasCategoryInChannels(categoriesIterator.first))
                     {
                         categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
                         if(categoryResult == AclResult::deny) return categoryResult; //Deny access
@@ -707,7 +707,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
                 for(auto& roomsIterator : _roomsWrite)
                 {
                     if(roomsIterator.first == 0) continue;
-                    if(peer->hasRoomInChannels(roomsIterator.second))
+                    if(peer->hasRoomInChannels(roomsIterator.first))
                     {
                         roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
                         if(roomResult == AclResult::deny) return roomResult; //Deny access
@@ -734,7 +734,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
                 for(auto& categoriesIterator : _categoriesWrite)
                 {
                     if(categoriesIterator.first == 0) continue;
-                    if(peer->hasCategoryInChannels(categoriesIterator.second))
+                    if(peer->hasCategoryInChannels(categoriesIterator.first))
                     {
                         categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
                         if(categoryResult == AclResult::deny) return categoryResult; //Deny access

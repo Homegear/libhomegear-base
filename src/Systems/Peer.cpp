@@ -490,7 +490,7 @@ std::set<int32_t> Peer::getChannelsInCategory(uint64_t categoryId)
     std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
     for(auto& categoryIterator : _categories)
     {
-        if(categoryIterator.second.find(categoryId) != categoryIterator.second.end()) result.emplace(categoryId);
+        if(categoryIterator.second.find(categoryId) != categoryIterator.second.end()) result.emplace(categoryIterator.first);
     }
     return result;
 }
