@@ -227,7 +227,7 @@ private:
      * Key: Method name; value: access/no access.
      *
      * Grant all entry: "*" => true
-     * Deny all entry: "*" => true
+     * Deny all entry: "*" => false
      */
     std::unordered_map<std::string, bool> _methods;
 
@@ -240,7 +240,7 @@ private:
      * Key: Method name; value: access/no access.
      *
      * Grant all entry: "*" => true
-     * Deny all entry: "*" => true
+     * Deny all entry: "*" => false
      */
     std::unordered_map<std::string, bool> _eventServerMethods;
 public:
