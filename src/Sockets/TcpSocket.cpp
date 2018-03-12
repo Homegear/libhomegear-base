@@ -137,6 +137,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_dhParamData = serverInfo.dhParamData;
 	_requireClientCert = serverInfo.requireClientCert;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
+    _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 }
 
@@ -347,14 +348,17 @@ std::string TcpSocket::getIpAddress()
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(BaseLib::Exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(...)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
@@ -371,19 +375,26 @@ std::string TcpSocket::getIpAddress()
 			}
 
 			clientData->socket->proofwrite((char*)packet.data(), packet.size());
-			if(closeConnection) _bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(closeConnection)
+			{
+				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+			}
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(BaseLib::Exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(...)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
