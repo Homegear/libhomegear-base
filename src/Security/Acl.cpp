@@ -679,7 +679,7 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
         }
         else deviceResult = AclResult::accept;
 
-        if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -775,7 +775,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer)
         }
         else deviceResult = AclResult::accept;
 
-        if(roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1120,7 +1120,7 @@ AclResult Acl::checkSystemVariableReadAccess(Database::PSystemVariable systemVar
         }
         else categoryResult = AclResult::accept;
 
-        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1205,7 +1205,7 @@ AclResult Acl::checkSystemVariableWriteAccess(Database::PSystemVariable systemVa
         }
         else categoryResult = AclResult::accept;
 
-        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1356,7 +1356,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
         auto deviceResult = checkDeviceReadAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1507,7 +1507,7 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
         auto deviceResult = checkDeviceWriteAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept && roomResult == AclResult::accept && categoryResult == AclResult::accept && deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
