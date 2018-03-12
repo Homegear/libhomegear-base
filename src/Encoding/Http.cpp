@@ -509,10 +509,12 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	}
 	else headerSize = ((end + 3) - *buffer) + 1;
 
+	if(headerSize < 10) throw HttpException("Header is too small.");
+
 	_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + headerSize);
 
-	char* headerBuffer = &_rawHeader.at(0);
-	end = &_rawHeader.at(0) + _rawHeader.size();
+	char* headerBuffer = _rawHeader.data();
+	end = _rawHeader.data() + _rawHeader.size();
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
@@ -524,7 +526,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	else
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
-		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (1).");
 		_type = Type::Enum::request;
 		_header.method = std::string(headerBuffer, endPos);
 	}
@@ -538,7 +540,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 		if(!newlinePos || newlinePos > end) throw HttpException("Could not parse HTTP header.");
 
 		char* endPos = (char*)HelperFunctions::memrchr(headerBuffer + startPos, ' ', newlinePos - (headerBuffer + startPos));
-		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (2).");
 
 		_header.path = std::string(headerBuffer + startPos, (int32_t)(endPos - headerBuffer - startPos));
 		int32_t pos = _header.path.find('?');
