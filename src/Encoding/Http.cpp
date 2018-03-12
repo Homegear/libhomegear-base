@@ -509,8 +509,6 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	}
 	else headerSize = ((end + 3) - *buffer) + 1;
 
-	if(headerSize < 10) throw HttpException("Header is too small.");
-
 	_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + headerSize);
 
 	char* headerBuffer = _rawHeader.data();
@@ -518,12 +516,12 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
-	if(!strncmp(headerBuffer, "HTTP/1.", 7))
+	if(headerSize >= 7 && !strncmp(headerBuffer, "HTTP/1.", 7))
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
 	}
-	else
+	else if(headerSize >= 10)
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
 		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (1).");
