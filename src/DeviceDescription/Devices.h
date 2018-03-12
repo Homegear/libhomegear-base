@@ -86,6 +86,7 @@ protected:
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
     std::shared_ptr<DeviceDescription::DeviceTranslations> _translations;
+	std::shared_ptr<DeviceDescription::DeviceUi> _uiInfo;
 
 	std::shared_ptr<HomegearDevice> loadHomeMatic(std::string& filepath);
 };
