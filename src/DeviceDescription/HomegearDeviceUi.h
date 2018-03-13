@@ -63,7 +63,7 @@ public:
     virtual ~HomegearDeviceUi();
 
     //{{{ XML entries
-
+    std::string lang;
     //}}}
 
     bool loaded() { return _loaded; }
