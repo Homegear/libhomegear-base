@@ -34,6 +34,7 @@
 #include "DatabaseTypes.h"
 #include "../Variable.h"
 #include "../Sockets/RpcClientInfo.h"
+#include "../Systems/Peer.h"
 #include <set>
 
 namespace BaseLib
@@ -133,7 +134,7 @@ public:
 	//Metadata
 	virtual BaseLib::PVariable setMetadata(uint64_t peerId, std::string& serialNumber, std::string& dataId, BaseLib::PVariable& metadata) = 0;
 	virtual BaseLib::PVariable getMetadata(uint64_t peerId, std::string& dataId) = 0;
-	virtual BaseLib::PVariable getAllMetadata(uint64_t peerId) = 0;
+	virtual BaseLib::PVariable getAllMetadata(PRpcClientInfo clientInfo, std::shared_ptr<Systems::Peer> peer, bool checkAcls) = 0;
 	virtual BaseLib::PVariable deleteMetadata(uint64_t peerId, std::string& serialNumber, std::string& dataId) = 0;
 	//End metadata
 
