@@ -983,7 +983,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(bytesRead == 0)
 	{
 		_readMutex.unlock();
-		throw SocketTimeOutException("Reading from socket timed out.");
+		throw SocketTimeOutException("Reading from socket timed out (1).");
 	}
 	if(bytesRead != 1)
 	{
@@ -1009,7 +1009,11 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(bytesRead <= 0)
 	{
 		_readMutex.unlock();
-		if(bytesRead == -1) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+		if(bytesRead == -1)
+		{
+			if(errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (2).");
+			else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+		}
 		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();

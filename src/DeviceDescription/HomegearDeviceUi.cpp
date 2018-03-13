@@ -113,7 +113,8 @@ void HomegearDeviceUi::parseXML(xml_node<>* node)
         {
             std::string attributeName(attr->name());
             std::string attributeValue(attr->value());
-            if(attributeName == "xmlns") {}
+            if(attributeName == "lang") lang = attributeValue;
+            else if(attributeName == "xmlns") {}
             else _bl->out.printWarning("Warning: Unknown attribute for \"homegearDeviceUi\": " + attributeName);
         }
         for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
