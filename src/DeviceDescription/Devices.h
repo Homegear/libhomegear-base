@@ -40,6 +40,7 @@
 #include "HomegearDevice.h"
 #include "../IEvents.h"
 #include "DeviceTranslations.h"
+#include "DeviceUi.h"
 
 namespace BaseLib
 {
