@@ -28,17 +28,13 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARUIELEMENT_H_
-#define HOMEGEARUIELEMENT_H_
+#ifndef UICONTROL_H_
+#define UICONTROL_H_
 
-#include "UiVariable.h"
-#include "UiControl.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
-
 #include <string>
+#include <map>
 #include <memory>
-#include <unordered_map>
-#include <list>
 
 using namespace rapidxml;
 
@@ -50,50 +46,28 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class HomegearUiElement;
+class UiControl;
 
-/**
- * Helper type for Packet pointers.
- */
-typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
+typedef std::shared_ptr<UiControl> PUiControl;
 
-/**
- * Class defining a physical packet.
- */
-class HomegearUiElement
+class UiControl
 {
 public:
-    enum class Type
-    {
-        undefined,
-        simple,
-        complex
-    };
+    UiControl(BaseLib::SharedObjects* baseLib);
+    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~UiControl() = default;
 
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    virtual ~HomegearUiElement() = default;
+    //Attributes
+    std::string id;
 
     //Elements
-    std::string id;
-    Type type = Type::undefined;
-    std::string control;
-    std::string unit;
-    std::string icon;
-    std::list<std::string> texts;
-    std::list<PUiVariable> variableInputs;
-    std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, std::string> metadata;
-
-    //Complex elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t cols = -1;
-    int32_t rows = -1;
-    std::list<PUiControl> controls;
+    int32_t posX = -1;
+    int32_t posY = -1;
+    int32_t colWidth = 1;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };
+
 }
 }
 

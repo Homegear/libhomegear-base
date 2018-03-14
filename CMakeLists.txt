@@ -56,6 +56,10 @@ set(SOURCE_FILES
         src/DeviceDescription/Scenario.h
         src/DeviceDescription/SupportedDevice.cpp
         src/DeviceDescription/SupportedDevice.h
+        src/DeviceDescription/UiControl.cpp
+        src/DeviceDescription/UiControl.h
+        src/DeviceDescription/UiVariable.cpp
+        src/DeviceDescription/UiVariable.h
         src/Encoding/RapidXml/rapidxml.hpp
         src/Encoding/RapidXml/rapidxml_print.hpp
         src/Encoding/Ansi.cpp
