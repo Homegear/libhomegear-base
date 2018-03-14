@@ -28,7 +28,7 @@
  * files in the program, then also delete it here.
 */
 
-#include "DeviceUi.h"
+#include "UiElements.h"
 #include "../BaseLib.h"
 
 namespace BaseLib
@@ -37,18 +37,18 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-DeviceUi::DeviceUi(BaseLib::SharedObjects* baseLib, int32_t family)
+UiElements::UiElements(BaseLib::SharedObjects* baseLib, int32_t family)
 {
     _bl = baseLib;
     _family = family;
 }
 
-void DeviceUi::clear()
+void UiElements::clear()
 {
     _uiInfo.clear();
 }
 
-std::shared_ptr<HomegearDeviceUi> DeviceUi::load(std::string& filename, std::string& language)
+PHomegearUiElements UiElements::load(std::string& filename, std::string& language)
 {
     try
     {
@@ -58,16 +58,16 @@ std::shared_ptr<HomegearDeviceUi> DeviceUi::load(std::string& filename, std::str
             filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/ui/en-US/" + filename;
             if(!Io::fileExists(filepath))
             {
-                _bl->out.printDebug("Not loading XML RPC device UI info " + filepath + ": UI info not found.");
-                return PHomegearDeviceUi();
+                _bl->out.printDebug("Not loading UI info " + filepath + ": UI info not found.");
+                return PHomegearUiElements();
             }
         }
-        if(filepath.size() < 5) return PHomegearDeviceUi();
+        if(filepath.size() < 5) return PHomegearUiElements();
         std::string extension = filepath.substr(filepath.size() - 4, 4);
         HelperFunctions::toLower(extension);
-        if(extension != ".xml") return PHomegearDeviceUi();
-        if(_bl->debugLevel >= 5) _bl->out.printDebug("Loading XML RPC device UI info " + filepath);
-        auto device = std::make_shared<HomegearDeviceUi>(_bl, filepath);
+        if(extension != ".xml") return PHomegearUiElements();
+        if(_bl->debugLevel >= 5) _bl->out.printDebug("Loading UI info " + filepath);
+        auto device = std::make_shared<HomegearUiElements>(_bl, filepath);
         if(device->loaded()) return device;
     }
     catch(const std::exception& ex)
@@ -82,10 +82,10 @@ std::shared_ptr<HomegearDeviceUi> DeviceUi::load(std::string& filename, std::str
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    return PHomegearDeviceUi();
+    return PHomegearUiElements();
 }
 
-PHomegearDeviceUi DeviceUi::getUiInfo(std::string& filename, std::string& language)
+PHomegearUiElements UiElements::getUiInfo(std::string& filename, std::string& language)
 {
     try
     {
@@ -95,7 +95,7 @@ PHomegearDeviceUi DeviceUi::getUiInfo(std::string& filename, std::string& langua
         if(languageIterator == _uiInfo.end())
         {
             auto ui = load(filename, language);
-            if (!ui) return PHomegearDeviceUi();
+            if (!ui) return PHomegearUiElements();
             _uiInfo[language].emplace(filename, ui);
         }
         else
@@ -104,7 +104,7 @@ PHomegearDeviceUi DeviceUi::getUiInfo(std::string& filename, std::string& langua
             if (uiIterator == languageIterator->second.end())
             {
                 auto ui = load(filename, language);
-                if (!ui) return PHomegearDeviceUi();
+                if (!ui) return PHomegearUiElements();
                 languageIterator->second.emplace(filename, ui);
                 return ui;
             }
@@ -123,7 +123,7 @@ PHomegearDeviceUi DeviceUi::getUiInfo(std::string& filename, std::string& langua
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    return PHomegearDeviceUi();
+    return PHomegearUiElements();
 }
 
 }

@@ -28,15 +28,14 @@
  * files in the program, then also delete it here.
 */
 
-#include "HomegearDeviceUi.h"
+#include "HomegearUiElements.h"
 #include "../BaseLib.h"
-#include "../Encoding/RapidXml/rapidxml_print.hpp"
 
 namespace BaseLib
 {
 namespace DeviceDescription
 {
-HomegearDeviceUi::HomegearDeviceUi(BaseLib::SharedObjects* baseLib, std::string xmlFilename)
+HomegearUiElements::HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename)
 {
     try
     {
@@ -57,11 +56,7 @@ HomegearDeviceUi::HomegearDeviceUi(BaseLib::SharedObjects* baseLib, std::string 
     }
 }
 
-HomegearDeviceUi::~HomegearDeviceUi() {
-
-}
-
-void HomegearDeviceUi::load(std::string xmlFilename)
+void HomegearUiElements::load(std::string xmlFilename)
 {
     xml_document<> doc;
     try
@@ -105,7 +100,7 @@ void HomegearDeviceUi::load(std::string xmlFilename)
     doc.clear();
 }
 
-void HomegearDeviceUi::parseXML(xml_node<>* node)
+void HomegearUiElements::parseXML(xml_node<>* node)
 {
     try
     {
@@ -115,12 +110,12 @@ void HomegearDeviceUi::parseXML(xml_node<>* node)
             std::string attributeValue(attr->value());
             if(attributeName == "lang") lang = attributeValue;
             else if(attributeName == "xmlns") {}
-            else _bl->out.printWarning("Warning: Unknown attribute for \"homegearDeviceUi\": " + attributeName);
+            else _bl->out.printWarning("Warning: Unknown attribute for \"homegearUiElements\": " + attributeName);
         }
         for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
         {
             std::string nodeName(subNode->name());
-            if(nodeName == "supportedDevices")
+            if(nodeName == "homegearUiElement")
             {
                 for(xml_node<>* typeNode = subNode->first_node("device"); typeNode; typeNode = typeNode->next_sibling("device"))
                 {
@@ -129,7 +124,7 @@ void HomegearDeviceUi::parseXML(xml_node<>* node)
                     std::string deviceId(idAttr->value());
                 }
             }
-            else _bl->out.printWarning("Warning: Unknown node name for \"homegearDeviceUi\": " + nodeName);
+            else _bl->out.printWarning("Warning: Unknown node name for \"homegearUiElements\": " + nodeName);
         }
     }
     catch(const std::exception& ex)

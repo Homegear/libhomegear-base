@@ -24,16 +24,18 @@ set(SOURCE_FILES
         src/DeviceDescription/Devices.h
         src/DeviceDescription/DeviceTranslations.cpp
         src/DeviceDescription/DeviceTranslations.h
-        src/DeviceDescription/DeviceUi.cpp
-        src/DeviceDescription/DeviceUi.h
+        src/DeviceDescription/UiElements.cpp
+        src/DeviceDescription/UiElements.h
         src/DeviceDescription/Function.cpp
         src/DeviceDescription/Function.h
         src/DeviceDescription/HomegearDevice.cpp
         src/DeviceDescription/HomegearDevice.h
         src/DeviceDescription/HomegearDeviceTranslation.cpp
         src/DeviceDescription/HomegearDeviceTranslation.h
-        src/DeviceDescription/HomegearDeviceUi.cpp
-        src/DeviceDescription/HomegearDeviceUi.h
+        src/DeviceDescription/HomegearUiElement.cpp
+        src/DeviceDescription/HomegearUiElement.h
+        src/DeviceDescription/HomegearUiElements.cpp
+        src/DeviceDescription/HomegearUiElements.h
         src/DeviceDescription/HttpPayload.cpp
         src/DeviceDescription/HttpPayload.h
         src/DeviceDescription/JsonPayload.cpp
