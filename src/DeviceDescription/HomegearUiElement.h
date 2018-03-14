@@ -28,15 +28,22 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef DEVICEUI_H_
-#define DEVICEUI_H_
+#ifndef HOMEGEARUIELEMENT_H_
+#define HOMEGEARUIELEMENT_H_
 
-#include <vector>
+#include "JsonPayload.h"
+#include "BinaryPayload.h"
+#include "HttpPayload.h"
+#include "Parameter.h"
+#include "DevicePacketResponse.h"
+#include "../Encoding/RapidXml/rapidxml.hpp"
+
+#include <string>
 #include <memory>
-#include <mutex>
+#include <vector>
+#include <map>
 
-#include "HomegearDeviceUi.h"
-#include "ParameterGroup.h"
+using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -46,25 +53,38 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
+class HomegearUiElement;
+
 /**
- * Class to work with translations of device description files of one device family. It is used to load all translations and retrieve the translation of a device.
+ * Helper type for Packet pointers.
  */
-class DeviceUi
+typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
+
+/**
+ * Class defining a physical packet.
+ */
+class HomegearUiElement
 {
 public:
-    DeviceUi(BaseLib::SharedObjects* baseLib, int32_t family);
-    virtual ~DeviceUi() = default;
-    void clear();
+    enum class Type
+    {
+        undefined,
+        simple,
+        complex
+    };
+
+    HomegearUiElement(BaseLib::SharedObjects* baseLib);
+    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~HomegearUiElement() = default;
+
+    //Elements
+    std::string id;
+
+
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
-    int32_t _family = -1;
-    std::mutex _uiInfoMutex;
-    std::unordered_map<std::string, std::unordered_map<std::string, PHomegearDeviceUi>> _uiInfo;
-
-    PHomegearDeviceUi getUiInfo(std::string& filename, std::string& language);
-    PHomegearDeviceUi load(std::string& filename, std::string& language);
 };
+}
+}
 
-}
-}
 #endif

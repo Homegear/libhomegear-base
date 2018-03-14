@@ -28,8 +28,8 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARDEVICEUI_H_
-#define HOMEGEARDEVICEUI_H_
+#ifndef HOMEGEARUIELEMENTS_H_
+#define HOMEGEARUIELEMENTS_H_
 
 #include <string>
 #include <memory>
@@ -46,21 +46,21 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class HomegearDeviceUi;
+class HomegearUiElements;
 
 /**
  * Helper type for HomegearDeviceTranslation pointers.
  */
-typedef std::shared_ptr<HomegearDeviceUi> PHomegearDeviceUi;
+typedef std::shared_ptr<HomegearUiElements> PHomegearUiElements;
 
 /**
  * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
  */
-class HomegearDeviceUi
+class HomegearUiElements
 {
 public:
-    HomegearDeviceUi(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
-    virtual ~HomegearDeviceUi();
+    HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
+    virtual ~HomegearUiElements() = default;
 
     //{{{ XML entries
     std::string lang;
