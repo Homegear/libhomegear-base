@@ -484,7 +484,7 @@ std::string TcpSocket::getIpAddress()
 							collectGarbage();
 							if(_clients.size() > _maxConnections)
 							{
-                                _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached.");
+                                _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString);
 								_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
 								continue;
 							}

@@ -43,94 +43,64 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib)
 
 HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node) : HomegearUiElement(baseLib)
 {
-    /*for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        std::string attributeName(attr->name());
-        std::string attributeValue(attr->value());
-        if(attributeName == "id")
-        {
-            id = attributeValue;
-        }
-        else _bl->out.printWarning("Warning: Unknown attribute for \"packet\": " + attributeName);
-    }
     for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         std::string value(subNode->value());
-        if(nodeName == "direction")
+        if(nodeName == "id") id = value;
+        else if(nodeName == "type")
         {
-            if(value == "toCentral") direction = Direction::Enum::toCentral;
-            else if(value == "fromCentral") direction = Direction::Enum::fromCentral;
-            else _bl->out.printWarning("Warning: Unknown value for packet\\direction: " + value);
+            if(value == "simple") type = Type::simple;
+            else if(value == "complex") type = Type::complex;
+            else _bl->out.printWarning("Warning: Unknown value for homegearUiElement\\type: " + value);
         }
-        else if(nodeName == "length") length = Math::getNumber(value);
-        else if(nodeName == "type") type = Math::getNumber(value);
-        else if(nodeName == "subtype") subtype = Math::getNumber(value);
-        else if(nodeName == "subtypeIndex")
+        else if(nodeName == "control") control = value;
+        else if(nodeName == "unit") unit = value;
+        else if(nodeName == "icon") icon = value;
+        else if(nodeName == "texts")
         {
-            std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(value, ':');
-            if(!splitValue.first.empty()) subtypeIndex = Math::getUnsignedNumber(splitValue.first);
-            if(!splitValue.second.empty()) subtypeSize = Math::getDouble(splitValue.second);
-        }
-        else if(nodeName == "function1") function1 = value;
-        else if(nodeName == "function2") function2 = value;
-        else if(nodeName == "metaString1") metaString1 = value;
-        else if(nodeName == "metaString2") metaString2 = value;
-        else if(nodeName == "responseType") responseType = Math::getNumber(value);
-        else if(nodeName == "responseSubtype") responseSubtype = Math::getNumber(value);
-        else if(nodeName == "responseTypeId") responseTypeId = value;
-        else if(nodeName == "responses")
-        {
-            for(xml_node<>* responsesNode = subNode->first_node(); responsesNode; responsesNode = responsesNode->next_sibling())
+            for(xml_node<>* textsNode = subNode->first_node(); textsNode; textsNode = textsNode->next_sibling())
             {
-                std::string packetsNodeName(responsesNode->name());
-                if(packetsNodeName == "response")
-                {
-                    PDevicePacketResponse response = std::make_shared<DevicePacketResponse>(baseLib, responsesNode);
-                    responses.push_back(response);
-                }
-                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\": " + packetsNodeName);
+                std::string textNodeName(textsNode->name());
+                if(textNodeName == "text") texts.push_back(std::string(textsNode->value()));
+                else _bl->out.printWarning("Warning: Unknown subnode for \"homegearUiElement\\texts\": " + textNodeName);
             }
         }
-        else if(nodeName == "channel") channel = Math::getNumber(value);
-        else if(nodeName == "channelIndex")
+        else if(nodeName == "variableInputs")
         {
-            std::pair<std::string, std::string> splitValue = HelperFunctions::splitLast(value, ':');
-            if(!splitValue.first.empty()) channelIndex = Math::getUnsignedNumber(splitValue.first);
-            if(!splitValue.second.empty()) channelSize = Math::getDouble(splitValue.second);
-        }
-        else if(nodeName == "channelSize") channelSize = Math::getDouble(value);
-        else if(nodeName == "channelIndexOffset") channelIndexOffset = Math::getNumber(value);
-        else if(nodeName == "doubleSend") { if(value == "true") doubleSend = true; }
-        else if(nodeName == "repeat") { if(value == "false") repeat = false; }
-        else if(nodeName == "splitAfter") splitAfter = Math::getNumber(value);
-        else if(nodeName == "maxPackets") maxPackets = Math::getNumber(value);
-        else if(nodeName == "binaryPayload")
-        {
-            for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+            for(xml_node<>* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
             {
-                PBinaryPayload payload(new BinaryPayload(_bl, payloadNode));
-                binaryPayloads.push_back(payload);
+                variableInputs.push_back(std::make_shared<UiVariable>(baseLib, variableNode));
             }
         }
-        else if(nodeName == "jsonPayload")
+        else if(nodeName == "variableOutputs")
         {
-            for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+            for(xml_node<>* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
             {
-                PJsonPayload payload(new JsonPayload(_bl, payloadNode));
-                jsonPayloads.push_back(payload);
+                variableOutputs.push_back(std::make_shared<UiVariable>(baseLib, variableNode));
             }
         }
-        else if(nodeName == "httpPayload")
+        else if(nodeName == "metadata")
         {
-            for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+            for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
             {
-                PHttpPayload payload(new HttpPayload(_bl, payloadNode));
-                httpPayloads.push_back(payload);
+                std::string metadataNodeName(metadataNode->name());
+                metadata.emplace(metadataNodeName, std::string(metadataNode->value()));
             }
         }
-        else _bl->out.printWarning("Warning: Unknown node in \"packet\": " + nodeName);
-    }*/
+        else if(nodeName == "width") width = Math::getNumber(value);
+        else if(nodeName == "height") height = Math::getNumber(value);
+        else if(nodeName == "cols") cols = Math::getNumber(value);
+        else if(nodeName == "rows") rows = Math::getNumber(value);
+        else if(nodeName == "controls")
+        {
+            for(xml_node<>* controlNode = subNode->first_node("control"); controlNode; controlNode = controlNode->next_sibling("control"))
+            {
+                controls.push_back(std::make_shared<UiControl>(baseLib, controlNode));
+            }
+        }
+        else _bl->out.printWarning("Warning: Unknown node in \"homegearUiElement\": " + nodeName);
+    }
 }
 
 }

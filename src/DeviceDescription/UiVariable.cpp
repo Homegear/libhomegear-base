@@ -28,73 +28,32 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARUIELEMENT_H_
-#define HOMEGEARUIELEMENT_H_
-
 #include "UiVariable.h"
-#include "UiControl.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
-
-#include <string>
-#include <memory>
-#include <unordered_map>
-#include <list>
-
-using namespace rapidxml;
+#include "../BaseLib.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace DeviceDescription
 {
 
-class HomegearUiElement;
-
-/**
- * Helper type for Packet pointers.
- */
-typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
-
-/**
- * Class defining a physical packet.
- */
-class HomegearUiElement
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
 {
-public:
-    enum class Type
+    _bl = baseLib;
+}
+
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVariable(baseLib)
+{
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
-        undefined,
-        simple,
-        complex
-    };
-
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    virtual ~HomegearUiElement() = default;
-
-    //Elements
-    std::string id;
-    Type type = Type::undefined;
-    std::string control;
-    std::string unit;
-    std::string icon;
-    std::list<std::string> texts;
-    std::list<PUiVariable> variableInputs;
-    std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, std::string> metadata;
-
-    //Complex elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t cols = -1;
-    int32_t rows = -1;
-    std::list<PUiControl> controls;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-};
-}
+        std::string nodeName(subNode->name());
+        std::string nodeValue(subNode->value());
+        if(name == "familyId") familyId = Math::getNumber(nodeValue);
+        else if(name == "deviceTypeId") deviceTypeId = Math::getNumber(nodeValue);
+        else if(name == "channel") channel = Math::getNumber(nodeValue);
+        else if(name == "name") name = nodeValue;
+        else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
+    }
 }
 
-#endif
+}
+}
