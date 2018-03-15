@@ -28,10 +28,10 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIVARIABLE_H_
-#define UIVARIABLE_H_
+#ifndef UICONTROL_H_
+#define UICONTROL_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
+#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
 #include <memory>
@@ -46,22 +46,28 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiVariable;
+class UiControl;
+class HomegearUiElement;
 
-typedef std::shared_ptr<UiVariable> PUiVariable;
+typedef std::shared_ptr<UiControl> PUiControl;
 
-class UiVariable
+class UiControl
 {
 public:
-    UiVariable(BaseLib::SharedObjects* baseLib);
-    UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    virtual ~UiVariable() = default;
+    UiControl(BaseLib::SharedObjects* baseLib);
+    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~UiControl() = default;
+
+    //Attributes
+    std::string id;
 
     //Elements
-    int32_t familyId = -1;
-    int32_t deviceTypeId = -1;
-    int32_t channel = 1;
-    std::string name;
+    int32_t posX = -1;
+    int32_t posY = -1;
+    int32_t colWidth = 1;
+
+    //Helpers
+    std::shared_ptr<HomegearUiElement> uiElement;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

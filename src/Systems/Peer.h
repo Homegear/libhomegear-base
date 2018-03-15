@@ -302,8 +302,10 @@ public:
 	virtual void setFirmwareVersionString(std::string value) { _firmwareVersionString = value; saveVariable(1003, value); }
 	virtual uint32_t getDeviceType() { return _deviceType; }
 	virtual void setDeviceType(uint32_t value) { _deviceType = value; saveVariable(1002, (int32_t)_deviceType); initializeTypeString(); }
-    virtual std::string getName() { return _name; }
-	virtual void setName(std::string value) { _name = value; saveVariable(1000, _name); }
+    virtual std::string getName() { return getName(-1); }
+	virtual std::string getName(int32_t channel);
+	virtual void setName(std::string value) { setName(-1, value); }
+	virtual void setName(int32_t channel, std::string value);
 	virtual std::string getIp() { return _ip; }
 	virtual void setIp(std::string value) { _ip = value; saveVariable(1004, value); }
 	virtual std::string getIdString() { return _idString; }
@@ -448,7 +450,8 @@ protected:
 	uint32_t _deviceType = 0;
 	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
-	std::string _name;
+	std::mutex _namesMutex;
+	std::unordered_map<int32_t, std::string> _names;
 	std::string _ip;
 	std::string _idString;
 

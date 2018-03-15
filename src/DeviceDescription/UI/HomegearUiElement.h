@@ -28,41 +28,73 @@
  * files in the program, then also delete it here.
 */
 
+#ifndef HOMEGEARUIELEMENT_H_
+#define HOMEGEARUIELEMENT_H_
+
+#include "UiVariable.h"
 #include "UiControl.h"
-#include "../BaseLib.h"
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+
+#include <string>
+#include <memory>
+#include <unordered_map>
+#include <list>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
+
+class SharedObjects;
+
 namespace DeviceDescription
 {
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib)
+class HomegearUiElement;
+
+/**
+ * Helper type for Packet pointers.
+ */
+typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
+
+/**
+ * Class defining a physical packet.
+ */
+class HomegearUiElement
 {
-    _bl = baseLib;
+public:
+    enum class Type
+    {
+        undefined,
+        simple,
+        complex
+    };
+
+    HomegearUiElement(BaseLib::SharedObjects* baseLib);
+    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    virtual ~HomegearUiElement() = default;
+
+    //Elements
+    std::string id;
+    Type type = Type::undefined;
+    std::string control;
+    std::string unit;
+    std::string icon;
+    std::list<std::string> texts;
+    std::list<PUiVariable> variableInputs;
+    std::list<PUiVariable> variableOutputs;
+    std::unordered_map<std::string, std::string> metadata;
+
+    //Complex elements
+    int32_t width = -1;
+    int32_t height = -1;
+    int32_t cols = -1;
+    int32_t rows = -1;
+    std::list<PUiControl> controls;
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
+};
+}
 }
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiControl(baseLib)
-{
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        std::string attributeName(attr->name());
-        std::string attributeValue(attr->value());
-        if(attributeName == "id")
-        {
-            id = attributeValue;
-        }
-        else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
-    }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "posX") posX = Math::getNumber(value);
-        else if(name == "posY") posY = Math::getNumber(value);
-        else if(name == "colWidth") colWidth = Math::getNumber(value);
-        else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
-    }
-}
-
-}
-}
+#endif

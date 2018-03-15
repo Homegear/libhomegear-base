@@ -1209,12 +1209,12 @@ PVariable ICentral::getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getName(PRpcClientInfo clientInfo, uint64_t id)
+PVariable ICentral::getName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
-		if(peer) return PVariable(new Variable(peer->getName()));
+		if(peer) return PVariable(new Variable(peer->getName(channel)));
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
@@ -2105,14 +2105,14 @@ PVariable ICentral::setLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, in
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::setName(PRpcClientInfo clientInfo, uint64_t id, std::string name)
+PVariable ICentral::setName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::string name)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
 		if(peer)
 		{
-			peer->setName(name);
+			peer->setName(channel, name);
 			return PVariable(new Variable(VariableType::tVoid));
 		}
 		return Variable::createError(-2, "Unknown device.");

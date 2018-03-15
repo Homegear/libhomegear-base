@@ -28,13 +28,15 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
+#ifndef HOMEGEARUIELEMENTS_H_
+#define HOMEGEARUIELEMENTS_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
+#include "HomegearUiElement.h"
+
 #include <string>
-#include <map>
 #include <memory>
+#include <unordered_map>
+#include "../../Encoding/RapidXml/rapidxml.hpp"
 
 using namespace rapidxml;
 
@@ -46,28 +48,37 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiControl;
+class HomegearUiElements;
 
-typedef std::shared_ptr<UiControl> PUiControl;
+/**
+ * Helper type for HomegearDeviceTranslation pointers.
+ */
+typedef std::shared_ptr<HomegearUiElements> PHomegearUiElements;
 
-class UiControl
+/**
+ * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
+ */
+class HomegearUiElements
 {
 public:
-    UiControl(BaseLib::SharedObjects* baseLib);
-    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    virtual ~UiControl() = default;
+    HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
+    virtual ~HomegearUiElements() = default;
 
-    //Attributes
-    std::string id;
+    std::unordered_map<std::string, PHomegearUiElement>& getUiElements() { return _uiElements; };
 
-    //Elements
-    int32_t posX = -1;
-    int32_t posY = -1;
-    int32_t colWidth = 1;
+    //{{{ XML entries
+    std::string lang;
+    //}}}
+
+    bool loaded() { return _loaded; }
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
-};
+    bool _loaded = false;
+    std::unordered_map<std::string, PHomegearUiElement> _uiElements;
 
+    void load(std::string xmlFilename);
+    void parseXML(xml_node<>* node);
+};
 }
 }
 

@@ -29,7 +29,7 @@
 */
 
 #include "HomegearUiElements.h"
-#include "../BaseLib.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
@@ -73,13 +73,13 @@ void HomegearUiElements::load(std::string xmlFilename)
             fileStream.close();
             buffer[length] = '\0';
             doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&buffer[0]);
-            if(!doc.first_node("homegearDeviceUi"))
+            if(!doc.first_node("homegearUiElements"))
             {
-                _bl->out.printError("Error: Device translation XML file \"" + xmlFilename + "\" does not start with \"homegearDeviceUi\".");
+                _bl->out.printError("Error: UI XML file \"" + xmlFilename + "\" does not start with \"homegearUiElements\".");
                 doc.clear();
                 return;
             }
-            parseXML(doc.first_node("homegearDeviceUi"));
+            parseXML(doc.first_node("homegearUiElements"));
         }
         else _bl->out.printError("Error reading file " + xmlFilename + ": " + strerror(errno));
 
@@ -117,12 +117,8 @@ void HomegearUiElements::parseXML(xml_node<>* node)
             std::string nodeName(subNode->name());
             if(nodeName == "homegearUiElement")
             {
-                for(xml_node<>* typeNode = subNode->first_node("device"); typeNode; typeNode = typeNode->next_sibling("device"))
-                {
-                    xml_attribute<>* idAttr = typeNode->first_attribute("id");
-                    if(!idAttr) continue;
-                    std::string deviceId(idAttr->value());
-                }
+                auto element = std::make_shared<HomegearUiElement>(_bl, subNode);
+                _uiElements.emplace(element->id, element);
             }
             else _bl->out.printWarning("Warning: Unknown node name for \"homegearUiElements\": " + nodeName);
         }

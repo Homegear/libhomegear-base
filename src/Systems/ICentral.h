@@ -137,7 +137,7 @@ public:
 	virtual PVariable getLinkPeers(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel);
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, int32_t flags);
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, int32_t flags, bool checkAcls);
-	virtual PVariable getName(PRpcClientInfo clientInfo, uint64_t id);
+	virtual PVariable getName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
 	virtual PVariable getParamsetId(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
@@ -178,7 +178,7 @@ public:
 	virtual PVariable setInterface(PRpcClientInfo clientInfo, uint64_t peerId, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable setLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description);
 	virtual PVariable setLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel, std::string name, std::string description);
-	virtual PVariable setName(PRpcClientInfo clientInfo, uint64_t id, std::string name);
+	virtual PVariable setName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::string name);
 	virtual PVariable setTeam(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::string teamSerialNumber, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable setTeam(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t teamId, int32_t teamChannel, bool force = false, bool burst = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, PVariable value, bool wait);

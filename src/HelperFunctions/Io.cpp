@@ -203,6 +203,7 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 	if(path.back() != '/') path += '/';
 	if((directory = opendir(path.c_str())) != 0)
 	{
+		files.reserve(100);
 		while((entry = readdir(directory)) != 0)
 		{
 			std::string name(entry->d_name);
@@ -214,13 +215,18 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 			}
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
 			//Thanks to telkamp (https://github.com/Homegear/Homegear/issues/223)
-			if(S_ISREG(statStruct.st_mode)) files.push_back(name);
+			if(S_ISREG(statStruct.st_mode))
+			{
+				files.push_back(name);
+				if(files.size() == files.capacity()) files.reserve(files.size() + 100);
+			}
 			else if(recursive && S_ISDIR(statStruct.st_mode))
 			{
 				std::vector<std::string> subdirFiles = getFiles(path + name, recursive);
 				for(std::vector<std::string>::iterator i = subdirFiles.begin(); i != subdirFiles.end(); ++i)
 				{
 					files.push_back(name + '/' + *i);
+					if(files.size() == files.capacity()) files.reserve(files.size() + 100);
 				}
 			}
 		}
@@ -238,9 +244,10 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 	struct stat statStruct;
 
 	if(path.back() != '/') path += '/';
-	if((directory = opendir(path.c_str())) != 0)
+	if((directory = opendir(path.c_str())) != nullptr)
 	{
-		while((entry = readdir(directory)) != 0)
+		directories.reserve(100);
+		while((entry = readdir(directory)) != nullptr)
 		{
 			std::string name(entry->d_name);
 			if(name == "." || name == "..") continue;
@@ -254,12 +261,14 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 			if(S_ISDIR(statStruct.st_mode))
 			{
 				directories.push_back(name + '/');
+				if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
 				if(recursive)
 				{
 					std::vector<std::string> subdirs = getDirectories(path + name, recursive);
 					for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
 					{
 						directories.push_back(name + '/' + *i);
+						if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
 					}
 				}
 			}

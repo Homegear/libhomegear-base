@@ -29,7 +29,7 @@
 */
 
 #include "HomegearUiElement.h"
-#include "../BaseLib.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
