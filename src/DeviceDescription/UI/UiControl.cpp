@@ -28,30 +28,40 @@
  * files in the program, then also delete it here.
 */
 
-#include "UiVariable.h"
-#include "../BaseLib.h"
+#include "UiControl.h"
+#include "HomegearUiElement.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
 namespace DeviceDescription
 {
 
-UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
+UiControl::UiControl(BaseLib::SharedObjects* baseLib)
 {
     _bl = baseLib;
 }
 
-UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVariable(baseLib)
+UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiControl(baseLib)
 {
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string attributeName(attr->name());
+        std::string attributeValue(attr->value());
+        if(attributeName == "id")
+        {
+            id = attributeValue;
+        }
+        else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
+    }
     for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
-        std::string nodeName(subNode->name());
-        std::string nodeValue(subNode->value());
-        if(name == "familyId") familyId = Math::getNumber(nodeValue);
-        else if(name == "deviceTypeId") deviceTypeId = Math::getNumber(nodeValue);
-        else if(name == "channel") channel = Math::getNumber(nodeValue);
-        else if(name == "name") name = nodeValue;
-        else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
+        std::string name(subNode->name());
+        std::string value(subNode->value());
+        if(name == "posX") posX = Math::getNumber(value);
+        else if(name == "posY") posY = Math::getNumber(value);
+        else if(name == "colWidth") colWidth = Math::getNumber(value);
+        else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
     }
 }
 

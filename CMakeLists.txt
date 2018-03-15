@@ -14,6 +14,16 @@ set(SOURCE_FILES
         src/DeviceDescription/HomeMatic/HmLogicalParameter.h
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.cpp
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.h
+        src/DeviceDescription/UI/UiElements.cpp
+        src/DeviceDescription/UI/UiElements.h
+        src/DeviceDescription/UI/HomegearUiElement.cpp
+        src/DeviceDescription/UI/HomegearUiElement.h
+        src/DeviceDescription/UI/HomegearUiElements.cpp
+        src/DeviceDescription/UI/HomegearUiElements.h
+        src/DeviceDescription/UI/UiControl.cpp
+        src/DeviceDescription/UI/UiControl.h
+        src/DeviceDescription/UI/UiVariable.cpp
+        src/DeviceDescription/UI/UiVariable.h
         src/DeviceDescription/BinaryPayload.cpp
         src/DeviceDescription/BinaryPayload.h
         src/DeviceDescription/DevicePacket.cpp
@@ -24,18 +34,12 @@ set(SOURCE_FILES
         src/DeviceDescription/Devices.h
         src/DeviceDescription/DeviceTranslations.cpp
         src/DeviceDescription/DeviceTranslations.h
-        src/DeviceDescription/UiElements.cpp
-        src/DeviceDescription/UiElements.h
         src/DeviceDescription/Function.cpp
         src/DeviceDescription/Function.h
         src/DeviceDescription/HomegearDevice.cpp
         src/DeviceDescription/HomegearDevice.h
         src/DeviceDescription/HomegearDeviceTranslation.cpp
         src/DeviceDescription/HomegearDeviceTranslation.h
-        src/DeviceDescription/HomegearUiElement.cpp
-        src/DeviceDescription/HomegearUiElement.h
-        src/DeviceDescription/HomegearUiElements.cpp
-        src/DeviceDescription/HomegearUiElements.h
         src/DeviceDescription/HttpPayload.cpp
         src/DeviceDescription/HttpPayload.h
         src/DeviceDescription/JsonPayload.cpp
@@ -56,10 +60,6 @@ set(SOURCE_FILES
         src/DeviceDescription/Scenario.h
         src/DeviceDescription/SupportedDevice.cpp
         src/DeviceDescription/SupportedDevice.h
-        src/DeviceDescription/UiControl.cpp
-        src/DeviceDescription/UiControl.h
-        src/DeviceDescription/UiVariable.cpp
-        src/DeviceDescription/UiVariable.h
         src/Encoding/RapidXml/rapidxml.hpp
         src/Encoding/RapidXml/rapidxml_print.hpp
         src/Encoding/Ansi.cpp

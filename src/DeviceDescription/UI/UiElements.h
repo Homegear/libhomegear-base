@@ -28,15 +28,15 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARUIELEMENTS_H_
-#define HOMEGEARUIELEMENTS_H_
+#ifndef UIELEMENTS_H_
+#define UIELEMENTS_H_
 
-#include <string>
+#include "HomegearUiElements.h"
+#include "../../Variable.h"
+
+#include <vector>
 #include <memory>
-#include <unordered_map>
-#include "../Encoding/RapidXml/rapidxml.hpp"
-
-using namespace rapidxml;
+#include <mutex>
 
 namespace BaseLib
 {
@@ -46,35 +46,26 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class HomegearUiElements;
-
 /**
- * Helper type for HomegearDeviceTranslation pointers.
+ * Class holding information on how UI elements look like. It is used to load all UI elements.
  */
-typedef std::shared_ptr<HomegearUiElements> PHomegearUiElements;
-
-/**
- * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
- */
-class HomegearUiElements
+class UiElements
 {
 public:
-    HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
-    virtual ~HomegearUiElements() = default;
+    UiElements(BaseLib::SharedObjects* baseLib);
+    virtual ~UiElements() = default;
+    void clear();
 
-    //{{{ XML entries
-    std::string lang;
-    //}}}
-
-    bool loaded() { return _loaded; }
+    PVariable getUiElements(std::string& language);
+    PHomegearUiElement getUiElement(std::string& language, std::string& id);
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
-    bool _loaded = false;
+    std::mutex _uiInfoMutex;
+    std::unordered_map<std::string, std::unordered_map<std::string, PHomegearUiElement>> _uiInfo;
 
-    void load(std::string xmlFilename);
-    void parseXML(xml_node<>* node);
+    void load(std::string& language);
 };
-}
-}
 
+}
+}
 #endif

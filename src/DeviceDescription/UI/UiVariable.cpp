@@ -28,42 +28,32 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIELEMENTS_H_
-#define UIELEMENTS_H_
-
-#include "HomegearUiElements.h"
-
-#include <vector>
-#include <memory>
-#include <mutex>
+#include "UiVariable.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace DeviceDescription
 {
 
-/**
- * Class to work with translations of device description files of one device family. It is used to load all translations and retrieve the translation of a device.
- */
-class UiElements
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
 {
-public:
-    UiElements(BaseLib::SharedObjects* baseLib, int32_t family);
-    virtual ~UiElements() = default;
-    void clear();
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-    int32_t _family = -1;
-    std::mutex _uiInfoMutex;
-    std::unordered_map<std::string, std::unordered_map<std::string, PHomegearUiElements>> _uiInfo;
+    _bl = baseLib;
+}
 
-    PHomegearUiElements getUiInfo(std::string& filename, std::string& language);
-    PHomegearUiElements load(std::string& filename, std::string& language);
-};
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVariable(baseLib)
+{
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string nodeName(subNode->name());
+        std::string nodeValue(subNode->value());
+        if(nodeName == "familyId") familyId = Math::getNumber(nodeValue);
+        else if(nodeName == "deviceTypeId") deviceTypeId = Math::getNumber(nodeValue);
+        else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
+        else if(nodeName == "name") name = nodeValue;
+        else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
+    }
+}
 
 }
 }
-#endif

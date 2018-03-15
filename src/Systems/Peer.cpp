@@ -408,6 +408,35 @@ void Peer::setSerialNumber(std::string serialNumber)
 	if(_peerID > 0) save(true, false, false);
 }
 
+std::string Peer::getName(int32_t channel)
+{
+	std::lock_guard<std::mutex> namesGuard(_namesMutex);
+	auto namesIterator = _names.find(channel);
+	if(namesIterator == _names.end()) return "";
+	return namesIterator->second;
+}
+
+void Peer::setName(int32_t channel, std::string value)
+{
+	if(channel != -1)
+	{
+		auto channelIterator = _rpcDevice->functions.find(channel);
+		if(channelIterator == _rpcDevice->functions.end()) return;
+	}
+
+	std::lock_guard<std::mutex> namesGuard(_namesMutex);
+	_names[channel] = value;
+
+	std::ostringstream names;
+	for(auto namePair : _names)
+	{
+		names << std::to_string(namePair.first) << "," << namePair.second << ";";
+	}
+	std::string namesString = names.str();
+
+	saveVariable(1000, namesString);
+}
+
 std::set<int32_t> Peer::getChannelsInRoom(uint64_t roomId)
 {
     std::set<int32_t> result;
@@ -1152,8 +1181,17 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 			switch(row->second.at(2)->intValue)
 			{
 			case 1000:
-				_name = row->second.at(4)->textValue;
-				break;
+				{
+					std::vector<std::string> nameStrings = BaseLib::HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
+					for(auto nameString : nameStrings)
+					{
+						if(nameString.empty()) continue;
+						auto namePair = BaseLib::HelperFunctions::splitFirst(nameString, ',');
+						int32_t channel = BaseLib::Math::getNumber(namePair.first);
+						_names[channel] = namePair.second;
+					}
+					break;
+				}
 			case 1001:
 				_firmwareVersion = row->second.at(3)->intValue;
 				break;
@@ -1230,7 +1268,6 @@ void Peer::saveVariables()
 	try
 	{
 		if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
-		saveVariable(1000, _name);
 		saveVariable(1001, _firmwareVersion);
 		saveVariable(1002, (int32_t)_deviceType);
 		saveVariable(1003, _firmwareVersionString);
@@ -2054,7 +2091,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 		config->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
 		config->structValue->insert(StructElement("TYPE", PVariable(new Variable(_rpcTypeString))));
 		config->structValue->insert(StructElement("TYPE_ID", PVariable(new Variable(_deviceType))));
-		config->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
+		config->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
 		PVariable channels(new Variable(VariableType::tArray));
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 		{
@@ -2066,6 +2103,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 			}
 			PVariable channel(new Variable(VariableType::tStruct));
 			channel->structValue->insert(StructElement("INDEX", PVariable(new Variable(i->first))));
+			channel->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(i->first)))));
 			channel->structValue->insert(StructElement("TYPE", PVariable(new Variable(i->second->type))));
 
 			PVariable parameters(new Variable(VariableType::tStruct));
@@ -2212,7 +2250,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
 		values->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
 		values->structValue->insert(StructElement("TYPE", PVariable(new Variable(_rpcTypeString))));
 		values->structValue->insert(StructElement("TYPE_ID", PVariable(new Variable(_deviceType))));
-		values->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
+		values->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
 		PVariable channels(new Variable(VariableType::tArray));
 		for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
 		{
@@ -2224,6 +2262,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
 			}
 			PVariable channel(new Variable(VariableType::tStruct));
 			channel->structValue->insert(StructElement("INDEX", PVariable(new Variable(i->first))));
+			channel->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(i->first)))));
 			channel->structValue->insert(StructElement("TYPE", PVariable(new Variable(i->second->type))));
 
 			PVariable parameters(new Variable(VariableType::tStruct));
@@ -2460,7 +2499,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 			if(fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
-			if(fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
+			if(fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
 			if(supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", PVariable(new Variable(supportedDevice->serialPrefix))));
 
             if(supportedDevice)
@@ -2574,6 +2613,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 			if(fields.empty() || fields.find("FAMILYID") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
 			if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
 			if(fields.empty() || fields.find("CHANNEL") != fields.end()) description->structValue->insert(StructElement("CHANNEL", PVariable(new Variable(channel))));
+			if(fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(channel)))));
 			if(fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber + ":" + std::to_string(channel)))));
 
 			if(fields.empty() || fields.find("AES_ACTIVE") != fields.end())
@@ -2743,8 +2783,6 @@ PVariable Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, b
 		PVariable info(new Variable(VariableType::tStruct));
 
 		info->structValue->insert(StructElement("ID", PVariable(new Variable((int32_t)_peerID))));
-
-		if(fields.empty() || fields.find("NAME") != fields.end()) info->structValue->insert(StructElement("NAME", PVariable(new Variable(_name))));
 
 		if(wireless())
 		{
