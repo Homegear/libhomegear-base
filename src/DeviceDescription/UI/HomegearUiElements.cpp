@@ -72,7 +72,7 @@ void HomegearUiElements::load(std::string xmlFilename)
             fileStream.read(&buffer[0], length);
             fileStream.close();
             buffer[length] = '\0';
-            doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&buffer[0]);
+            doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(buffer.data());
             if(!doc.first_node("homegearUiElements"))
             {
                 _bl->out.printError("Error: UI XML file \"" + xmlFilename + "\" does not start with \"homegearUiElements\".");

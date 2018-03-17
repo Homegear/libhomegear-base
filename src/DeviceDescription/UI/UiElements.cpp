@@ -93,7 +93,7 @@ void UiElements::load(std::string& language)
                     auto elementIterator = uiInfo.find(control->id);
                     if(elementIterator != uiInfo.end())
                     {
-                        if(elementIterator->second->type = HomegearUiElement::Type::complex)
+                        if(elementIterator->second->type == HomegearUiElement::Type::complex)
                         {
                             _bl->out.printWarning("Warning: Only elements of type simple can be referenced in complex elements. Element \"" + uiElement.second->id + "\" is referencing complex element \"" + elementIterator->second->id + "\".");
                         }
