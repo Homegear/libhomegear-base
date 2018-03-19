@@ -63,9 +63,12 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSsl = useSsl;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		_certificates.emplace("*", certificateInfo);
+	}
 	_verifyCertificate = verifyCertificate;
 
 	if(_useSsl) initSsl();
@@ -75,9 +78,12 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caData = caData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caData = caData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -86,11 +92,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    certificateInfo->certFile = clientCertFile;
-    certificateInfo->keyFile = clientKeyFile;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty() || !clientCertFile.empty() || !clientKeyFile.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		certificateInfo->certFile = clientCertFile;
+		certificateInfo->keyFile = clientKeyFile;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -99,11 +108,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caData = caData;
-    certificateInfo->certData = clientCertData;
-    certificateInfo->keyData = clientKeyData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caData.empty() || !clientCertData.empty() || !clientKeyData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caData = caData;
+		certificateInfo->certData = clientCertData;
+		certificateInfo->keyData = clientKeyData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -112,14 +124,17 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
     _useSsl = useSsl;
     _verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    certificateInfo->caData = caData;
-    certificateInfo->certFile = clientCertFile;
-    certificateInfo->certData = clientCertData;
-    certificateInfo->keyFile = clientKeyFile;
-    certificateInfo->keyData = clientKeyData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty() || !caData.empty() || !clientCertFile.empty() || !clientCertData.empty() || !clientKeyFile.empty() || !clientKeyData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		certificateInfo->caData = caData;
+		certificateInfo->certFile = clientCertFile;
+		certificateInfo->certData = clientCertData;
+		certificateInfo->keyFile = clientKeyFile;
+		certificateInfo->keyData = clientKeyData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
     if(_useSsl) initSsl();
 }
@@ -738,9 +753,9 @@ void TcpSocket::initSsl()
 
     if(_certificates.empty())
     {
-        if((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer))
+        if(_requireClientCert && _isServer)
         {
-            throw SocketSSLException("No CA certificates specified.");
+            throw SocketSSLException("No CA certificates specified (1).");
         }
 
         if(!_isServer)
@@ -808,7 +823,7 @@ void TcpSocket::initSsl()
             gnutls_certificate_free_credentials(x509Credentials);
             x509Credentials = nullptr;
 			freeCredentials();
-            throw SocketSSLException("No CA certificates specified.");
+            throw SocketSSLException("No CA certificates specified (2).");
         }
 
         if(_isServer)
