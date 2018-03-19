@@ -263,7 +263,7 @@ std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<char>& packet,
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
 			variable->integerValue = (int32_t)variable->integerValue64;
-			if(_setInteger32) variable->type = VariableType::tInteger;
+			if(_setInteger32 && (int64_t)variable->integerValue == variable->integerValue64) variable->type = VariableType::tInteger;
 		}
 		else if(type == VariableType::tFloat)
 		{
@@ -329,7 +329,7 @@ std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<uint8_t>& pack
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(packet, position);
 			variable->integerValue = (int32_t)variable->integerValue64;
-			if(_setInteger32) variable->type = VariableType::tInteger;
+			if(_setInteger32 && (int64_t)variable->integerValue == variable->integerValue64) variable->type = VariableType::tInteger;
 		}
 		else if(type == VariableType::tFloat)
 		{
@@ -394,7 +394,7 @@ void RpcDecoder::decodeParameter(PVariable& variable, uint32_t& position)
 		{
 			variable->integerValue64 = _decoder->decodeInteger64(variable->binaryValue, position);
 			variable->integerValue = (int32_t)variable->integerValue64;
-			if(_setInteger32) variable->type = VariableType::tInteger;
+			if(_setInteger32 && (int64_t)variable->integerValue == variable->integerValue64) variable->type = VariableType::tInteger;
 		}
 		else if(variable->type == VariableType::tFloat)
 		{
