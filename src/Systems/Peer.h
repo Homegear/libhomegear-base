@@ -523,7 +523,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, int32_t index);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

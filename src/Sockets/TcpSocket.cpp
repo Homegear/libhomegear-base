@@ -332,10 +332,7 @@ std::string TcpSocket::getIpAddress()
 			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
 		}
 		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
-		do
-		{
-			result = gnutls_handshake(fileDescriptor->tlsSession);
-		} while (result < 0 && gnutls_error_is_fatal(result) == 0);
+		result = gnutls_handshake(fileDescriptor->tlsSession);
 		if(result < 0)
 		{
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
