@@ -3267,7 +3267,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
 				continue;
 			}
 
-			PVariable description = getVariableDescription(clientInfo, i, channel, index);
+			PVariable description = getVariableDescription(clientInfo, i, channel, parameterGroup->type(), index);
 			if(!description || description->errorStruct) continue;
 
 			index++;
@@ -3414,7 +3414,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, int32_t index)
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index)
 {
 	try
 	{
@@ -3428,11 +3428,6 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 			if(parameterIterator->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 		if(clientInfo->clientType == RpcClientType::ccu2 && !parameterIterator->second->ccu2Visible) return Variable::createError(-5, "Parameter is invisible on the CCU2.");
-
-        std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(channel);
-        if(valuesCentralIterator == valuesCentral.end()) return Variable::createError(-5, "Unknown parameter (2).");
-        std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameterIterator->second->id);
-        if(valueParameterIterator == valuesCentralIterator->second.end()) return Variable::createError(-5, "Unknown parameter (3).");
 
 		PVariable description = std::make_shared<Variable>(VariableType::tStruct);
 
@@ -3618,19 +3613,27 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
 		if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
 
-        auto room = valueParameterIterator->second.getRoom();
-        if(room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
-
-        auto categories = valueParameterIterator->second.getCategories();
-        if(!categories.empty())
+        if(type == ParameterGroup::Type::Enum::variables)
         {
-            PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
-            categoriesResult->arrayValue->reserve(categories.size());
-            for(auto category : categories)
+            std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(channel);
+            if(valuesCentralIterator == valuesCentral.end()) return Variable::createError(-5, "Unknown parameter (2).");
+            std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameterIterator->second->id);
+            if(valueParameterIterator == valuesCentralIterator->second.end()) return Variable::createError(-5, "Unknown parameter (3).");
+
+            auto room = valueParameterIterator->second.getRoom();
+            if(room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
+
+            auto categories = valueParameterIterator->second.getCategories();
+            if(!categories.empty())
             {
-                categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
+                PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
+                categoriesResult->arrayValue->reserve(categories.size());
+                for(auto category : categories)
+                {
+                    categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
+                }
+                description->structValue->emplace("CATEGORIES", categoriesResult);
             }
-            description->structValue->emplace("CATEGORIES", categoriesResult);
         }
 
         std::shared_ptr<ICentral> central = getCentral();
@@ -3671,7 +3674,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t chann
 		Parameters::iterator parameterIterator = parameterGroup->parameters.find(valueKey);
 		if(parameterIterator == parameterGroup->parameters.end()) return Variable::createError(-5, "Unknown parameter.");
 
-		return getVariableDescription(clientInfo, parameterIterator, channel, -1);
+		return getVariableDescription(clientInfo, parameterIterator, channel, ParameterGroup::Type::Enum::variables, -1);
 	}
 	catch(const std::exception& ex)
     {
