@@ -46,6 +46,8 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
 	tcpServerInfo.dhParamFile = serverInfo.dhParamFile;
 	tcpServerInfo.dhParamData = serverInfo.dhParamData;
 	tcpServerInfo.requireClientCert = serverInfo.requireClientCert;
+    tcpServerInfo.newConnectionCallback = std::bind(&HttpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    tcpServerInfo.connectionClosedCallback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1);
 	tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
 
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
