@@ -128,6 +128,7 @@ public:
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
+		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
 		std::string dhParamFile;
 		std::string dhParamData;
@@ -145,12 +146,21 @@ public:
 
 	void send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection = true);
 protected:
+	struct HttpClientInfo
+	{
+		std::shared_ptr<Http> http;
+	};
+
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<TcpSocket> _socket;
-	Http _http;
+
+	std::mutex _httpClientInfoMutex;
+	std::unordered_map<int32_t, HttpClientInfo> _httpClientInfo;
 
 	std::function<void(int32_t clientId, Http& http)> _packetReceivedCallback;
 
+	void newConnection(int32_t clientId, std::string address, uint16_t port);
+	void connectionClosed(int32_t clientId);
 	void packetReceived(int32_t clientId, TcpSocket::TcpPacket packet);
 };
 

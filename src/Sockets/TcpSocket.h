@@ -156,6 +156,7 @@ public:
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
+		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, PCertificateInfo> certificates;
 		std::string dhParamFile;
 		std::string dhParamData;
@@ -409,7 +410,7 @@ protected:
 		gnutls_priority_t _tlsPriorityCache = nullptr;
 
 		std::atomic_bool _stopServer;
-		std::thread _serverThread;
+		std::vector<std::thread> _serverThreads;
 
 		int64_t _lastGarbageCollection = 0;
 
@@ -418,6 +419,7 @@ protected:
 		std::map<int32_t, PTcpClientData> _clients;
 	// }}}
 
+	std::mutex _socketDescriptorMutex;
 	PFileDescriptor _socketDescriptor;
 	bool _useSsl = false;
 	std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials;
@@ -434,6 +436,7 @@ protected:
 
 		void serverThread();
 		void collectGarbage();
+		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
 		void initClientSsl(PFileDescriptor fileDescriptor);
 		void readClient(PTcpClientData clientData);
 	// }}}
