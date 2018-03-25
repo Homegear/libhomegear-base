@@ -134,6 +134,8 @@ public:
 		std::string dhParamData;
 		bool requireClientCert = false;
 
+        std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
+        std::function<void(int32_t clientId)> connectionClosedCallback;
 		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
 	};
 
@@ -157,6 +159,8 @@ protected:
 	std::mutex _httpClientInfoMutex;
 	std::unordered_map<int32_t, HttpClientInfo> _httpClientInfo;
 
+    std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
+    std::function<void(int32_t clientId)> _connectionClosedCallback;
 	std::function<void(int32_t clientId, Http& http)> _packetReceivedCallback;
 
 	void newConnection(int32_t clientId, std::string address, uint16_t port);

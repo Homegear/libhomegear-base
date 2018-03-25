@@ -50,6 +50,8 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
     tcpServerInfo.connectionClosedCallback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1);
 	tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
 
+    _newConnectionCallback.swap(serverInfo.newConnectionCallback);
+    _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
 	_socket = std::make_shared<TcpSocket>(baseLib, tcpServerInfo);
@@ -82,8 +84,12 @@ void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t p
 		HttpClientInfo clientInfo;
 		clientInfo.http = std::make_shared<BaseLib::Http>();
 
-		std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
-		_httpClientInfo[clientId] = std::move(clientInfo);
+        {
+            std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+            _httpClientInfo[clientId] = std::move(clientInfo);
+        }
+
+        if(_newConnectionCallback) _newConnectionCallback(clientId, address, port);
 	}
 	catch(const std::exception& ex)
 	{
@@ -103,6 +109,8 @@ void HttpServer::connectionClosed(int32_t clientId)
 {
 	try
 	{
+        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+
 		std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
 		_httpClientInfo.erase(clientId);
 	}
