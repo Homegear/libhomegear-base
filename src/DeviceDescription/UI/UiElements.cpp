@@ -148,6 +148,85 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
     return PHomegearUiElement();
 }
 
+PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& id, PUiPeerInfo peerInfo)
+{
+    try
+    {
+        auto uiElement = getUiElement(language, id);
+        if(!uiElement) return uiElement;
+
+        auto uiElementCopy = std::make_shared<HomegearUiElement>(_bl);
+        *uiElementCopy = *uiElement;
+
+        if(uiElementCopy->type == HomegearUiElement::Type::simple)
+        {
+            int32_t i = 0;
+            for(auto& variableInput : uiElementCopy->variableInputs)
+            {
+                if(peerInfo->inputPeers.empty() || i >= (int32_t)peerInfo->inputPeers.at(0).size()) break;
+                variableInput->peerId = peerInfo->inputPeers.at(0).at(i);
+                i++;
+            }
+
+            i = 0;
+            for(auto& variableOutput : uiElementCopy->variableOutputs)
+            {
+                if(peerInfo->outputPeers.empty() || i >= (int32_t)peerInfo->outputPeers.at(0).size()) break;
+                variableOutput->peerId = peerInfo->outputPeers.at(0).at(i);
+                i++;
+            }
+        }
+        else if(uiElementCopy->type == HomegearUiElement::Type::complex)
+        {
+            int32_t i = 0;
+            int32_t j = 0;
+            for(auto& control : uiElementCopy->controls)
+            {
+                if(!control->uiElement) continue;
+
+                if(i < (int32_t)peerInfo->inputPeers.size())
+                {
+                    j = 0;
+                    for(auto& variableInput : control->uiElement->variableInputs)
+                    {
+                        if(j >= (int32_t)peerInfo->inputPeers.at(i).size()) break;
+                        variableInput->peerId = peerInfo->inputPeers.at(i).at(j);
+                        j++;
+                    }
+                }
+
+                if(i < (int32_t)peerInfo->outputPeers.size())
+                {
+                    j = 0;
+                    for(auto& variableOutput : control->uiElement->variableOutputs)
+                    {
+                        if(j >= (int32_t)peerInfo->outputPeers.at(i).size()) break;
+                        variableOutput->peerId = peerInfo->outputPeers.at(i).at(j);
+                        j++;
+                    }
+                }
+
+                i++;
+            }
+        }
+
+        return uiElementCopy;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return PHomegearUiElement();
+}
+
 PVariable UiElements::getUiElements(std::string& language)
 {
     try

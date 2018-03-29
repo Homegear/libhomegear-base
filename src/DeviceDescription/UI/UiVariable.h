@@ -55,13 +55,19 @@ class UiVariable
 public:
     UiVariable(BaseLib::SharedObjects* baseLib);
     UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiVariable(UiVariable const& rhs);
     virtual ~UiVariable() = default;
+
+    UiVariable& operator=(const UiVariable& rhs);
 
     //Elements
     int32_t familyId = -1;
     int32_t deviceTypeId = -1;
     int32_t channel = 1;
     std::string name;
+
+    //Helpers
+    uint64_t peerId = 0;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

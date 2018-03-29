@@ -55,5 +55,31 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
     }
 }
 
+UiVariable::UiVariable(UiVariable const& rhs)
+{
+    _bl = rhs._bl;
+
+    familyId = rhs.familyId;
+    deviceTypeId = rhs.deviceTypeId;
+    channel = rhs.channel;
+    name = rhs.name;
+    peerId = rhs.peerId;
+}
+
+UiVariable& UiVariable::operator=(const UiVariable& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    familyId = rhs.familyId;
+    deviceTypeId = rhs.deviceTypeId;
+    channel = rhs.channel;
+    name = rhs.name;
+    peerId = rhs.peerId;
+
+    return *this;
+}
+
 }
 }

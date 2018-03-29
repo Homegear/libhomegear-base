@@ -103,5 +103,91 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
     }
 }
 
+HomegearUiElement::HomegearUiElement(HomegearUiElement const& rhs)
+{
+    _bl = rhs._bl;
+
+    id = rhs.id;
+    type = rhs.type;
+    control = rhs.control;
+    unit = rhs.unit;
+    icon = rhs.icon;
+    texts = rhs.texts;
+    variableInputs.clear();
+    variableOutputs.clear();
+
+    for(auto& variableInput : rhs.variableInputs)
+    {
+        auto uiVariable = std::make_shared<UiVariable>(_bl);
+        *uiVariable = *variableInput;
+        variableInputs.emplace_back(uiVariable);
+    }
+
+    for(auto& variableOutput : rhs.variableOutputs)
+    {
+        auto uiVariable = std::make_shared<UiVariable>(_bl);
+        *uiVariable = *variableOutput;
+        variableOutputs.emplace_back(uiVariable);
+    }
+
+    metadata = rhs.metadata;
+    width = rhs.width;
+    height = rhs.height;
+    cols = rhs.cols;
+    rows = rhs.rows;
+
+    for(auto& control : rhs.controls)
+    {
+        auto uiControl = std::make_shared<UiControl>(_bl);
+        *uiControl = *control;
+        controls.emplace_back(uiControl);
+    }
+}
+
+HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    id = rhs.id;
+    type = rhs.type;
+    control = rhs.control;
+    unit = rhs.unit;
+    icon = rhs.icon;
+    texts = rhs.texts;
+    variableInputs.clear();
+    variableOutputs.clear();
+
+    for(auto& variableInput : rhs.variableInputs)
+    {
+        auto uiVariable = std::make_shared<UiVariable>(_bl);
+        *uiVariable = *variableInput;
+        variableInputs.emplace_back(uiVariable);
+    }
+
+    for(auto& variableOutput : rhs.variableOutputs)
+    {
+        auto uiVariable = std::make_shared<UiVariable>(_bl);
+        *uiVariable = *variableOutput;
+        variableOutputs.emplace_back(uiVariable);
+    }
+
+    metadata = rhs.metadata;
+    width = rhs.width;
+    height = rhs.height;
+    cols = rhs.cols;
+    rows = rhs.rows;
+
+    for(auto& control : rhs.controls)
+    {
+        auto uiControl = std::make_shared<UiControl>(_bl);
+        *uiControl = *control;
+        controls.emplace_back(uiControl);
+    }
+
+    return *this;
+}
+
 }
 }

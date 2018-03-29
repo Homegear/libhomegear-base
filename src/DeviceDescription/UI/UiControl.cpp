@@ -65,5 +65,41 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
     }
 }
 
+UiControl::UiControl(UiControl const& rhs)
+{
+    _bl = rhs._bl;
+
+    id = rhs.id;
+    posX = rhs.posX;
+    posY = rhs.posY;
+    colWidth = rhs.colWidth;
+
+    if(rhs.uiElement)
+    {
+        uiElement = std::make_shared<HomegearUiElement>(_bl);
+        *uiElement = *rhs.uiElement;
+    }
+}
+
+UiControl& UiControl::operator=(const UiControl& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    id = rhs.id;
+    posX = rhs.posX;
+    posY = rhs.posY;
+    colWidth = rhs.colWidth;
+
+    if(rhs.uiElement)
+    {
+        uiElement = std::make_shared<HomegearUiElement>(_bl);
+        *uiElement = *rhs.uiElement;
+    }
+
+    return *this;
+}
+
 }
 }

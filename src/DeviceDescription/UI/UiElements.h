@@ -52,12 +52,29 @@ namespace DeviceDescription
 class UiElements
 {
 public:
+    struct UiPeerInfo
+    {
+        std::vector<std::vector<uint64_t>> inputPeers;
+        std::vector<std::vector<uint64_t>> outputPeers;
+    };
+    typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
+
     UiElements(BaseLib::SharedObjects* baseLib);
     virtual ~UiElements() = default;
     void clear();
 
     PVariable getUiElements(std::string& language);
     PHomegearUiElement getUiElement(std::string& language, std::string& id);
+
+    /**
+     * Returns an UI element and assigns peer IDs to it.
+     *
+     * @param language The language to return (e. g. "en-US")
+     * @param id The ID of the UI element
+     * @param peerInfo The peer IDs to assign
+     * @return Returns the UI element on success.
+     */
+    PHomegearUiElement getUiElement(std::string& language, std::string& id, PUiPeerInfo peerInfo);
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
     std::mutex _uiInfoMutex;
