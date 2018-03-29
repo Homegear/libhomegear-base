@@ -90,6 +90,11 @@ public:
 	virtual BaseLib::PVariable deleteData(std::string& component, std::string& key) = 0;
 	// }}}
 
+	// {{{ UI
+	virtual uint64_t addUiElement(std::string& elementId, BaseLib::PVariable data) = 0;
+    virtual std::shared_ptr<DataTable> getUiElements() = 0;
+	// }}}
+
     // {{{ Stories
     virtual BaseLib::PVariable addRoomToStory(uint64_t storyId, uint64_t roomId) = 0;
     virtual BaseLib::PVariable createStory(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;

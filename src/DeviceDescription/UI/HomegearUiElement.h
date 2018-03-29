@@ -72,7 +72,10 @@ public:
 
     HomegearUiElement(BaseLib::SharedObjects* baseLib);
     HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    HomegearUiElement(HomegearUiElement const& rhs);
     virtual ~HomegearUiElement() = default;
+
+    HomegearUiElement& operator=(const HomegearUiElement& rhs);
 
     //Elements
     std::string id;

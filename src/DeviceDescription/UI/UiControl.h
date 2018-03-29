@@ -56,7 +56,10 @@ class UiControl
 public:
     UiControl(BaseLib::SharedObjects* baseLib);
     UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiControl(UiControl const& rhs);
     virtual ~UiControl() = default;
+
+    UiControl& operator=(const UiControl& rhs);
 
     //Attributes
     std::string id;
