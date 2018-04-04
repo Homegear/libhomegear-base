@@ -47,8 +47,14 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
     {
         std::string nodeName(subNode->name());
         std::string nodeValue(subNode->value());
-        if(nodeName == "familyId") familyId = Math::getNumber(nodeValue);
-        else if(nodeName == "deviceTypeId") deviceTypeId = Math::getNumber(nodeValue);
+        if(nodeName == "familyId")
+        {
+            if(nodeValue != "*") familyId = Math::getNumber(nodeValue);
+        }
+        else if(nodeName == "deviceTypeId")
+        {
+            if(nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
+        }
         else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
         else if(nodeName == "name") name = nodeValue;
         else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);

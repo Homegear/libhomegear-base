@@ -34,6 +34,7 @@
 #include "UiVariable.h"
 #include "UiControl.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
+#include "../../Variable.h"
 
 #include <string>
 #include <memory>
@@ -70,13 +71,6 @@ public:
         complex
     };
 
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    HomegearUiElement(HomegearUiElement const& rhs);
-    virtual ~HomegearUiElement() = default;
-
-    HomegearUiElement& operator=(const HomegearUiElement& rhs);
-
     //Elements
     std::string id;
     Type type = Type::undefined;
@@ -94,6 +88,15 @@ public:
     int32_t cols = -1;
     int32_t rows = -1;
     std::list<PUiControl> controls;
+
+    HomegearUiElement(BaseLib::SharedObjects* baseLib);
+    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    HomegearUiElement(HomegearUiElement const& rhs);
+    virtual ~HomegearUiElement() = default;
+
+    HomegearUiElement& operator=(const HomegearUiElement& rhs);
+
+    PVariable getElementInfo();
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };
