@@ -189,5 +189,87 @@ HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
     return *this;
 }
 
+PVariable HomegearUiElement::getElementInfo()
+{
+    auto uiElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+    uiElement->structValue->emplace("id", std::make_shared<BaseLib::Variable>(id));
+    uiElement->structValue->emplace("type", std::make_shared<BaseLib::Variable>((int32_t)type));
+    uiElement->structValue->emplace("icon", std::make_shared<BaseLib::Variable>(icon));
+    if(type == Type::simple)
+    {
+        uiElement->structValue->emplace("control", std::make_shared<BaseLib::Variable>(control));
+        uiElement->structValue->emplace("unit", std::make_shared<BaseLib::Variable>(unit));
+
+        auto inputs = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+        inputs->arrayValue->reserve(variableInputs.size());
+        for(auto& variableInput : variableInputs)
+        {
+            auto input = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            if(variableInput->familyId != -1) input->structValue->emplace("familyId", std::make_shared<BaseLib::Variable>(variableInput->familyId));
+            if(variableInput->deviceTypeId != -1) input->structValue->emplace("deviceTypeId", std::make_shared<BaseLib::Variable>(variableInput->deviceTypeId));
+            if(variableInput->peerId != 0) input->structValue->emplace("peerId", std::make_shared<BaseLib::Variable>(variableInput->peerId));
+            input->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableInput->channel));
+            input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
+
+            inputs->arrayValue->emplace_back(input);
+        }
+        uiElement->structValue->emplace("variableInputs", inputs);
+
+        auto outputs = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+        outputs->arrayValue->reserve(variableOutputs.size());
+        for(auto& variableOutput : variableOutputs)
+        {
+            auto output = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            if(variableOutput->familyId != -1) output->structValue->emplace("familyId", std::make_shared<BaseLib::Variable>(variableOutput->familyId));
+            if(variableOutput->deviceTypeId != -1) output->structValue->emplace("deviceTypeId", std::make_shared<BaseLib::Variable>(variableOutput->deviceTypeId));
+            if(variableOutput->peerId != 0) output->structValue->emplace("peerId", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
+            output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
+            output->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableOutput->name));
+
+            outputs->arrayValue->emplace_back(output);
+        }
+        uiElement->structValue->emplace("variableOutputs", outputs);
+    }
+    if(type == Type::complex)
+    {
+        uiElement->structValue->emplace("width", std::make_shared<BaseLib::Variable>(width));
+        uiElement->structValue->emplace("height", std::make_shared<BaseLib::Variable>(height));
+        uiElement->structValue->emplace("cols", std::make_shared<BaseLib::Variable>(cols));
+        uiElement->structValue->emplace("rows", std::make_shared<BaseLib::Variable>(rows));
+
+        auto controlElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+        controlElements->arrayValue->reserve(controls.size());
+        for(auto& control : controls)
+        {
+            auto controlElement = control->uiElement->getElementInfo();
+            controlElement->structValue->emplace("posX", std::make_shared<BaseLib::Variable>(control->posX));
+            controlElement->structValue->emplace("posY", std::make_shared<BaseLib::Variable>(control->posY));
+            controlElement->structValue->emplace("colWidth", std::make_shared<BaseLib::Variable>(control->colWidth));
+            controlElements->arrayValue->emplace_back(controlElement);
+        }
+        uiElement->structValue->emplace("controls", controlElements);
+    }
+
+    if(!texts.empty())
+    {
+        auto textsElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+        textsElement->arrayValue->reserve(texts.size());
+        for(auto& text : texts)
+        {
+            textsElement->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(text));
+        }
+        uiElement->structValue->emplace("texts", textsElement);
+    }
+
+    auto metadataElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+    for(auto& entry : metadata)
+    {
+        metadataElement->structValue->emplace(entry.first, std::make_shared<BaseLib::Variable>(entry.second));
+    }
+    uiElement->structValue->emplace("metadata", metadataElement);
+
+    return uiElement;
+}
+
 }
 }
