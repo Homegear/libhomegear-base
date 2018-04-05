@@ -52,10 +52,18 @@ namespace DeviceDescription
 class UiElements
 {
 public:
+    struct UiVariableInfo
+    {
+        uint64_t peerId = 0;
+        int32_t channel = -1;
+        std::string name;
+    };
+    typedef std::shared_ptr<UiVariableInfo> PUiVariableInfo;
+
     struct UiPeerInfo
     {
-        std::vector<std::vector<uint64_t>> inputPeers;
-        std::vector<std::vector<uint64_t>> outputPeers;
+        std::vector<std::vector<PUiVariableInfo>> inputPeers;
+        std::vector<std::vector<PUiVariableInfo>> outputPeers;
     };
     typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
 
