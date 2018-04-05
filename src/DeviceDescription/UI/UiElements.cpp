@@ -164,7 +164,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             for(auto& variableInput : uiElementCopy->variableInputs)
             {
                 if(peerInfo->inputPeers.empty() || i >= (int32_t)peerInfo->inputPeers.at(0).size()) break;
-                variableInput->peerId = peerInfo->inputPeers.at(0).at(i);
+                variableInput->peerId = peerInfo->inputPeers.at(0).at(i)->peerId;
+                if(peerInfo->inputPeers.at(0).at(i)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
+                if(!peerInfo->inputPeers.at(0).at(i)->name.empty()) variableInput->name = peerInfo->inputPeers.at(0).at(i)->name;
                 i++;
             }
 
@@ -172,7 +174,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             for(auto& variableOutput : uiElementCopy->variableOutputs)
             {
                 if(peerInfo->outputPeers.empty() || i >= (int32_t)peerInfo->outputPeers.at(0).size()) break;
-                variableOutput->peerId = peerInfo->outputPeers.at(0).at(i);
+                variableOutput->peerId = peerInfo->outputPeers.at(0).at(i)->peerId;
+                if(peerInfo->outputPeers.at(0).at(i)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
+                if(!peerInfo->outputPeers.at(0).at(i)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(0).at(i)->name;
                 i++;
             }
         }
@@ -190,7 +194,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     for(auto& variableInput : control->uiElement->variableInputs)
                     {
                         if(j >= (int32_t)peerInfo->inputPeers.at(i).size()) break;
-                        variableInput->peerId = peerInfo->inputPeers.at(i).at(j);
+                        variableInput->peerId = peerInfo->inputPeers.at(i).at(j)->peerId;
+                        if(peerInfo->inputPeers.at(i).at(j)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
+                        if(!peerInfo->inputPeers.at(i).at(j)->name.empty()) variableInput->name = peerInfo->inputPeers.at(i).at(j)->name;
                         j++;
                     }
                 }
@@ -201,7 +207,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     for(auto& variableOutput : control->uiElement->variableOutputs)
                     {
                         if(j >= (int32_t)peerInfo->outputPeers.at(i).size()) break;
-                        variableOutput->peerId = peerInfo->outputPeers.at(i).at(j);
+                        variableOutput->peerId = peerInfo->outputPeers.at(i).at(j)->peerId;
+                        if(peerInfo->outputPeers.at(i).at(j)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
+                        if(!peerInfo->outputPeers.at(i).at(j)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(i).at(j)->name;
                         j++;
                     }
                 }
