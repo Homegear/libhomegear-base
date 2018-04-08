@@ -54,6 +54,7 @@ void UiElements::load(std::string& language)
     {
         std::lock_guard<std::mutex> uiInfoGuard(_uiInfoMutex);
         auto& uiInfo = _uiInfo[language];
+        auto& uiInfoEnglish = _uiInfo["en-US"];
 
         Io io;
         auto familyDirectories = io.getDirectories(_bl->settings.deviceDescriptionPath());
@@ -98,6 +99,18 @@ void UiElements::load(std::string& language)
                             _bl->out.printWarning("Warning: Only elements of type simple can be referenced in complex elements. Element \"" + uiElement.second->id + "\" is referencing complex element \"" + elementIterator->second->id + "\".");
                         }
                         else control->uiElement = elementIterator->second;
+                    }
+                    else
+                    {
+                        elementIterator = uiInfoEnglish.find(control->id);
+                        if(elementIterator != uiInfo.end())
+                        {
+                            if(elementIterator->second->type == HomegearUiElement::Type::complex)
+                            {
+                                _bl->out.printWarning("Warning: Only elements of type simple can be referenced in complex elements. Element \"" + uiElement.second->id + "\" is referencing complex element \"" + elementIterator->second->id + "\".");
+                            }
+                            else control->uiElement = elementIterator->second;
+                        }
                     }
                 }
             }
