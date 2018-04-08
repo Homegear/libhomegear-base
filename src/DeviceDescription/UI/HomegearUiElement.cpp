@@ -241,6 +241,7 @@ PVariable HomegearUiElement::getElementInfo()
         controlElements->arrayValue->reserve(controls.size());
         for(auto& control : controls)
         {
+            if(!control->uiElement) continue;
             auto controlElement = control->uiElement->getElementInfo();
             controlElement->structValue->emplace("posX", std::make_shared<BaseLib::Variable>(control->posX));
             controlElement->structValue->emplace("posY", std::make_shared<BaseLib::Variable>(control->posY));
