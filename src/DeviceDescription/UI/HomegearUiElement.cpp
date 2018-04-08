@@ -62,7 +62,12 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
             for(xml_node<>* textsNode = subNode->first_node(); textsNode; textsNode = textsNode->next_sibling())
             {
                 std::string textNodeName(textsNode->name());
-                if(textNodeName == "text") texts.push_back(std::string(textsNode->value()));
+                if(textNodeName == "text")
+                {
+                    xml_attribute<>* id = textsNode->first_attribute("id");
+                    if(!id) continue;
+                    texts.emplace(std::string(id->value()), std::string(textsNode->value()));
+                }
                 else _bl->out.printWarning("Warning: Unknown subnode for \"homegearUiElement\\texts\": " + textNodeName);
             }
         }
@@ -253,11 +258,10 @@ PVariable HomegearUiElement::getElementInfo()
 
     if(!texts.empty())
     {
-        auto textsElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
-        textsElement->arrayValue->reserve(texts.size());
+        auto textsElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
         for(auto& text : texts)
         {
-            textsElement->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(text));
+            textsElement->structValue->emplace(text.first, std::make_shared<BaseLib::Variable>(text.second));
         }
         uiElement->structValue->emplace("texts", textsElement);
     }

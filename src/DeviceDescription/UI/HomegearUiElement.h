@@ -77,7 +77,7 @@ public:
     std::string control;
     std::string unit;
     std::string icon;
-    std::list<std::string> texts;
+    std::unordered_map<std::string, std::string> texts;
     std::list<PUiVariable> variableInputs;
     std::list<PUiVariable> variableOutputs;
     std::unordered_map<std::string, std::string> metadata;
