@@ -276,8 +276,8 @@ public:
 	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>> linksCentral;
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
-	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
-	Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler);
 	virtual ~Peer();
 	virtual void dispose();
 
