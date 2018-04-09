@@ -277,7 +277,7 @@ public:
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
 	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* eventHandler);
-	Peer(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler);
 	virtual ~Peer();
 	virtual void dispose();
 

@@ -190,7 +190,7 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* e
 
 		_bl = baseLib;
 		_parentID = parentId;
-		serviceMessages.reset(new ServiceMessages(baseLib, -1, 0, "", this));
+		serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
 		_lastPacketReceived = HelperFunctions::getTimeSeconds();
 		_rpcDevice.reset();
 		setEventHandler(eventHandler);
@@ -209,7 +209,7 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* e
     }
 }
 
-Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler) : Peer(baseLib, parentId, eventHandler)
+Peer::Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler) : Peer(baseLib, parentId, eventHandler)
 {
 	try
 	{
@@ -218,7 +218,6 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t id, int32
 		_serialNumber = serialNumber;
 		if(serviceMessages)
 		{
-            serviceMessages->setFamilyId(familyId);
 			serviceMessages->setPeerId(id);
 			serviceMessages->setPeerSerial(serialNumber);
 		}
