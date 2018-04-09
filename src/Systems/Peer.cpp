@@ -182,15 +182,15 @@ bool ConfigDataBlock::equals(std::vector<uint8_t>& value) noexcept
 	return value == _binaryData;
 }
 
-Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler)
+Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* eventHandler)
 {
 	try
 	{
         deleting = false;
 
 		_bl = baseLib;
-		_parentID = parentID;
-		serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
+		_parentID = parentId;
+		serviceMessages.reset(new ServiceMessages(baseLib, -1, 0, "", this));
 		_lastPacketReceived = HelperFunctions::getTimeSeconds();
 		_rpcDevice.reset();
 		setEventHandler(eventHandler);
@@ -209,7 +209,7 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* e
     }
 }
 
-Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler) : Peer(baseLib, parentID, eventHandler)
+Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler) : Peer(baseLib, parentId, eventHandler)
 {
 	try
 	{
@@ -218,7 +218,8 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::st
 		_serialNumber = serialNumber;
 		if(serviceMessages)
 		{
-			serviceMessages->setPeerID(id);
+            serviceMessages->setFamilyId(familyId);
+			serviceMessages->setPeerId(id);
 			serviceMessages->setPeerSerial(serialNumber);
 		}
 	}
@@ -395,7 +396,7 @@ void Peer::setID(uint64_t id)
 	if(_peerID == 0)
 	{
 		_peerID = id;
-		if(serviceMessages) serviceMessages->setPeerID(id);
+		if(serviceMessages) serviceMessages->setPeerId(id);
 	}
 	else _bl->out.printError("Cannot reset peer ID");
 }
@@ -3896,7 +3897,7 @@ PVariable Peer::setId(PRpcClientInfo clientInfo, uint64_t newPeerId)
 			if(peer) return Variable::createError(-101, "New peer ID is already in use.");
 			if(!_bl->db->setPeerID(_peerID, newPeerId)) return Variable::createError(-32500, "Error setting id. See log for more details.");
 			_peerID = newPeerId;
-			if(serviceMessages) serviceMessages->setPeerID(newPeerId);
+			if(serviceMessages) serviceMessages->setPeerId(newPeerId);
 			return PVariable(new Variable(VariableType::tVoid));
 		}
 		else return Variable::createError(-32500, "Application error. Central could not be found.");
