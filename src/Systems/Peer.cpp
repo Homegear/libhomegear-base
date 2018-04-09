@@ -1187,8 +1187,12 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
 					{
 						if(nameString.empty()) continue;
 						auto namePair = BaseLib::HelperFunctions::splitFirst(nameString, ',');
-						int32_t channel = BaseLib::Math::getNumber(namePair.first);
-						_names[channel] = namePair.second;
+						if(namePair.second.empty()) _names[-1] = namePair.first;
+						else
+						{
+							int32_t channel = BaseLib::Math::getNumber(namePair.first);
+							_names[channel] = namePair.second;
+						}
 					}
 					break;
 				}
