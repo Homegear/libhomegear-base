@@ -72,10 +72,9 @@ public:
 	};
 	//End event handling
 
-	ServiceMessages(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t peerId, std::string peerSerial, IServiceEventSink* eventHandler);
+	ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerId, std::string peerSerial, IServiceEventSink* eventHandler);
 	virtual ~ServiceMessages();
 
-	virtual void setFamilyId(uint64_t familyId) { _familyId = familyId; }
 	virtual void setPeerId(uint64_t peerId) { _peerId = peerId; }
 	virtual void setPeerSerial(std::string peerSerial) { _peerSerial = peerSerial; }
 
@@ -106,7 +105,6 @@ protected:
 
     BaseLib::SharedObjects* _bl = nullptr;
     std::map<uint32_t, uint32_t> _variableDatabaseIDs;
-	int32_t _familyId = -1;
     uint64_t _peerId = 0;
     std::string _peerSerial;
     bool _disposing = false;

@@ -36,10 +36,9 @@ namespace BaseLib
 namespace Systems
 {
 
-ServiceMessages::ServiceMessages(BaseLib::SharedObjects* baseLib, int32_t familyId, uint64_t peerId, std::string peerSerial, IServiceEventSink* eventHandler)
+ServiceMessages::ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerId, std::string peerSerial, IServiceEventSink* eventHandler)
 {
 	_bl = baseLib;
-    _familyId = familyId;
 	_peerId = peerId;
 	_peerSerial = peerSerial;
 	setEventHandler(eventHandler);
@@ -181,7 +180,7 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value)
 			else
 			{
 				if(_peerId == 0) return;
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1)));
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId)));
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp)));
@@ -237,7 +236,7 @@ void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, u
 			else
 			{
 				if(_peerId == 0) return;
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
+                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1)));
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId)));
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
                 data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp)));
@@ -457,7 +456,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
 			if(returnID)
 			{
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(_familyId));
                 if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("UNREACH"));
@@ -479,7 +477,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(_familyId));
                 if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("STICKY_UNREACH"));
@@ -501,7 +498,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(_familyId));
                 if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("CONFIG_PENDING"));
@@ -523,7 +519,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(_familyId));
                 if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("LOWBAT"));
@@ -550,7 +545,6 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 if(returnID)
                 {
                     auto element = std::make_shared<Variable>(VariableType::tStruct);
-                    if(_familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(_familyId));
                     if(_peerId != 0)
                     {
                         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
