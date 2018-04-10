@@ -683,8 +683,8 @@ int32_t HelperFunctions::exec(std::string command, std::string& output)
     		output.insert(output.end(), buffer, buffer + strlen(buffer));
     	}
     }
-    pclose(pipe);
-    return 0;
+	auto exitStatus = pclose(pipe);
+    return WEXITSTATUS(exitStatus);
 }
 
 void HelperFunctions::checkEndianness()
