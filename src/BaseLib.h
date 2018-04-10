@@ -70,6 +70,7 @@
 #include "Sockets/ServerInfo.h"
 #include "Sockets/RpcClientInfo.h"
 #include "Systems/DeviceFamily.h"
+#include "Systems/GlobalServiceMessages.h"
 #include "Systems/Peer.h"
 #include "Systems/SystemFactory.h"
 #include "Systems/UpdateInfo.h"
@@ -169,6 +170,11 @@ public:
 	 * The thread manager.
 	 */
 	ThreadManager threadManager;
+
+	/**
+	 * Global service messages.
+	 */
+	Systems::GlobalServiceMessages globalServiceMessages;
 
 	/**
 	 * Main constructor.

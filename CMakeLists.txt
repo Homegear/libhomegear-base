@@ -157,6 +157,8 @@ set(SOURCE_FILES
         src/Systems/DeviceFamily.h
         src/Systems/FamilySettings.cpp
         src/Systems/FamilySettings.h
+        src/Systems/GlobalServiceMessages.cpp
+        src/Systems/GlobalServiceMessages.h
         src/Systems/ICentral.cpp
         src/Systems/ICentral.h
         src/Systems/IPhysicalInterface.cpp
