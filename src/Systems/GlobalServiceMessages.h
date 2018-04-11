@@ -52,7 +52,7 @@ public:
     void init(BaseLib::SharedObjects* baseLib);
     void load();
 
-    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string& message, int64_t value = 0);
+    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, int64_t value = 0);
     void unset(int32_t familyId, int32_t messageId);
 
     std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);

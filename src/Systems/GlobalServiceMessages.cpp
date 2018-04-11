@@ -82,7 +82,7 @@ void GlobalServiceMessages::load()
     }
 }
 
-void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string& message, int64_t value)
+void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, int64_t value)
 {
     try
     {
