@@ -33,6 +33,8 @@
 
 #include "../Variable.h"
 #include "../Sockets/RpcClientInfo.h"
+#include "../Encoding/RpcDecoder.h"
+#include "../Encoding/RpcEncoder.h"
 
 #include <mutex>
 
@@ -52,7 +54,7 @@ public:
     void init(BaseLib::SharedObjects* baseLib);
     void load();
 
-    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, int64_t value = 0);
+    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, PVariable data = PVariable(), int64_t value = 0);
     void unset(int32_t familyId, int32_t messageId);
 
     std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
@@ -65,12 +67,16 @@ protected:
         int32_t timestamp = 0;
         std::string message;
         int64_t value = 0;
+        PVariable data;
     };
     typedef std::shared_ptr<ServiceMessage> PServiceMessage;
     typedef int32_t FamilyId;
     typedef int32_t MessageId;
 
     BaseLib::SharedObjects* _bl = nullptr;
+
+    std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
+    std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
 
     std::mutex _serviceMessagesMutex;
     std::unordered_map<FamilyId, std::unordered_map<MessageId, PServiceMessage>> _serviceMessages;
