@@ -225,17 +225,19 @@ public:
 	/**
 	 * Changes the ID of a peer.
 	 *
-	 * @param oldPeerID The old ID of the peer.
-	 * @param newPeerID The new ID of the peer.
+	 * @param oldPeerId The old ID of the peer.
+	 * @param newPeerId The new ID of the peer.
 	 * @return Returns "true" on success or "false" when the new ID is already in use.
 	 */
-	virtual bool setPeerID(uint64_t oldPeerID, uint64_t newPeerID) = 0;
+	virtual bool setPeerID(uint64_t oldPeerId, uint64_t newPeerId) = 0;
 	//End Peer
 
 	//Service messages
-	virtual std::shared_ptr<DataTable> getServiceMessages(uint64_t peerID) = 0;
-	virtual void saveServiceMessageAsynchronous(uint64_t peerID, DataRow& data) = 0;
+	virtual std::shared_ptr<DataTable> getServiceMessages(uint64_t peerId) = 0;
+	virtual void saveServiceMessageAsynchronous(uint64_t peerId, DataRow& data) = 0;
+	virtual void saveGlobalServiceMessageAsynchronous(DataRow& data) = 0;
 	virtual void deleteServiceMessage(uint64_t databaseID) = 0;
+	virtual void deleteGlobalServiceMessage(int32_t familyId, int32_t messageId) = 0;
 	//End service messages
 
 	// {{{ License modules

@@ -162,7 +162,7 @@ void ServiceMessages::load()
     }
 }
 
-void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value)
+void ServiceMessages::save(int32_t timestamp, uint32_t index, bool value)
 {
 	try
 	{
@@ -210,7 +210,7 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value)
     }
 }
 
-void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, uint8_t value)
+void ServiceMessages::save(int32_t timestamp, int32_t channel, std::string id, uint8_t value)
 {
 	try
 	{
@@ -278,7 +278,7 @@ bool ServiceMessages::set(std::string id, bool value)
             {
                 if(value && (_bl->booting || _bl->shuttingDown)) return true;
                 _unreach = value;
-                _unreachTime = HelperFunctions::getTime();
+                _unreachTime = HelperFunctions::getTimeSeconds();
                 save(_unreachTime, 0, value);
             }
 		}
@@ -288,7 +288,7 @@ bool ServiceMessages::set(std::string id, bool value)
             {
                 if(value && (_bl->booting || _bl->shuttingDown)) return true;
                 _stickyUnreach = value;
-                _stickyUnreachTime = HelperFunctions::getTime();
+                _stickyUnreachTime = HelperFunctions::getTimeSeconds();
                 save(_stickyUnreachTime, 1, value);
             }
 		}
@@ -297,7 +297,7 @@ bool ServiceMessages::set(std::string id, bool value)
             if(value != _configPending)
             {
                 _configPending = value;
-                _configPendingTime = HelperFunctions::getTime();
+                _configPendingTime = HelperFunctions::getTimeSeconds();
                 save(_configPendingTime, 2, value);
                 if(_configPending) _configPendingSetTime = _bl->hf.getTime();
             }
@@ -307,7 +307,7 @@ bool ServiceMessages::set(std::string id, bool value)
 			if(value != _lowbat)
 			{
 				_lowbat = value;
-                _lowbatTime = HelperFunctions::getTime();
+                _lowbatTime = HelperFunctions::getTimeSeconds();
 				save(_lowbatTime, 3, value);
 			}
 		}
@@ -331,13 +331,13 @@ bool ServiceMessages::set(std::string id, bool value)
             {
                 ErrorInfo errorInfo;
                 errorInfo.value = value;
-                errorInfo.timestamp = HelperFunctions::getTime();
+                errorInfo.timestamp = HelperFunctions::getTimeSeconds();
                 std::lock_guard<std::mutex> errorsGuard(_errorMutex);
                 _errors[0][id] = std::move(errorInfo);
             }
 
             std::vector<uint8_t> data = {(uint8_t) value};
-            save(HelperFunctions::getTime(), 0, id, value);
+            save(HelperFunctions::getTimeSeconds(), 0, id, value);
             raiseSaveParameter(id, 0, data);
 
             std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
@@ -356,7 +356,7 @@ bool ServiceMessages::set(std::string id, bool value)
                     if(errorIterator != error.second.end())
                     {
                         errorIterator->second.value = 0;
-                        errorIterator->second.timestamp = HelperFunctions::getTime();
+                        errorIterator->second.timestamp = HelperFunctions::getTimeSeconds();
                         std::vector<uint8_t> data = {(uint8_t) value};
                         save(errorIterator->second.timestamp, error.first, id, value);
                         raiseSaveParameter(id, error.first, data);
@@ -421,11 +421,11 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel)
             {
                 ErrorInfo errorInfo;
                 errorInfo.value = value;
-                errorInfo.timestamp = HelperFunctions::getTime();
+                errorInfo.timestamp = HelperFunctions::getTimeSeconds();
                 _errors[channel][id] = std::move(errorInfo);
             }
 		}
-		save(HelperFunctions::getTime(), channel, id, value);
+		save(HelperFunctions::getTimeSeconds(), channel, id, value);
 		//RPC Broadcast is done in peer's packetReceived
 	}
 	catch(const std::exception& ex)
@@ -456,7 +456,8 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
 			if(returnID)
 			{
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
+                element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
+                element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("UNREACH"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
@@ -477,7 +478,8 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
+                element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
+                element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("STICKY_UNREACH"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
@@ -498,7 +500,8 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
+                element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
+                element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("CONFIG_PENDING"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
@@ -519,7 +522,8 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
             if(returnID)
             {
                 auto element = std::make_shared<Variable>(VariableType::tStruct);
-                if(_peerId != 0) element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
+                element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
+                element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
                 element->structValue->emplace("NAME", std::make_shared<Variable>("LOWBAT"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
@@ -545,11 +549,9 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 if(returnID)
                 {
                     auto element = std::make_shared<Variable>(VariableType::tStruct);
-                    if(_peerId != 0)
-                    {
-                        element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
-                        element->structValue->emplace("CHANNEL", std::make_shared<Variable>(error.first));
-                    }
+                    element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
+                    element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
+                    element->structValue->emplace("CHANNEL", std::make_shared<Variable>(error.first));
                     element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(inner.second.timestamp));
                     element->structValue->emplace("NAME", std::make_shared<Variable>(inner.first));
                     element->structValue->emplace("VALUE", std::make_shared<Variable>((uint32_t)inner.second.value));
@@ -690,7 +692,7 @@ void ServiceMessages::setConfigPending(bool value)
 		if(value != _configPending)
 		{
 			_configPending = value;
-            _configPendingTime = BaseLib::HelperFunctions::getTime();
+            _configPendingTime = BaseLib::HelperFunctions::getTimeSeconds();
 			save(_configPendingTime, 2, value);
 			if(_configPending) _configPendingSetTime = BaseLib::HelperFunctions::getTime();
 			std::vector<uint8_t> data = { (uint8_t)value };
@@ -734,7 +736,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue)
 			}
 			_unreachResendCounter = 0;
 			_unreach = value;
-            _unreachTime = HelperFunctions::getTime();
+            _unreachTime = HelperFunctions::getTimeSeconds();
 			save(_unreachTime, 0, value);
 
 			if(value) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is unreachable.");
@@ -747,7 +749,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue)
 			if(value)
 			{
 				_stickyUnreach = value;
-                _stickyUnreachTime = HelperFunctions::getTime();
+                _stickyUnreachTime = HelperFunctions::getTimeSeconds();
 				save(_stickyUnreachTime, 1, value);
 				raiseSaveParameter("STICKY_UNREACH", 0, data);
 

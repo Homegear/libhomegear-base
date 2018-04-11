@@ -32,6 +32,9 @@
 #define GLOBALSERVICEMESSAGES_H_
 
 #include "../Variable.h"
+#include "../Sockets/RpcClientInfo.h"
+
+#include <mutex>
 
 namespace BaseLib
 {
@@ -47,8 +50,30 @@ public:
     virtual ~GlobalServiceMessages();
 
     void init(BaseLib::SharedObjects* baseLib);
+    void load();
+
+    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string& message, int64_t value = 0);
+    void unset(int32_t familyId, int32_t messageId);
+
+    std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
 protected:
+    struct ServiceMessage
+    {
+        uint64_t databaseId = 0;
+        int32_t familyId = 0;
+        int32_t messageId = 0;
+        int32_t timestamp = 0;
+        std::string message;
+        int64_t value = 0;
+    };
+    typedef std::shared_ptr<ServiceMessage> PServiceMessage;
+    typedef int32_t FamilyId;
+    typedef int32_t MessageId;
+
     BaseLib::SharedObjects* _bl = nullptr;
+
+    std::mutex _serviceMessagesMutex;
+    std::unordered_map<FamilyId, std::unordered_map<MessageId, PServiceMessage>> _serviceMessages;
 };
 
 }
