@@ -129,6 +129,14 @@ void Settings::reset()
 	_nodeBlueDataPathUser = "";
 	_nodeBlueDataPathGroup = "";
 	_nodeBlueDebugOutput = false;
+	_adminUiPath = "/var/lib/homegear/admin-ui/";
+	_adminUiPathPermissions = 504;
+	_adminUiPathUser = "";
+	_adminUiPathGroup = "";
+	_uiPath = "/var/lib/homegear/ui/";
+	_uiPathPermissions = 504;
+	_uiPathUser = "";
+	_uiPathGroup = "";
 	_firmwarePath = "/usr/share/homegear/firmware/";
 	_tempPath = "/var/lib/homegear/tmp/";
 	_lockFilePath = "/var/lock/";
@@ -703,6 +711,52 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_nodeBlueDataPathGroup = value;
 					_bl->out.printDebug("Debug: nodeBlueDataPathGroup set to " + _nodeBlueDataPathGroup);
+				}
+				else if(name == "adminuipath")
+				{
+					_adminUiPath = value;
+					if(_adminUiPath.empty()) _adminUiPath = "/var/lib/homegear/admin-ui/";
+					if(_adminUiPath.back() != '/') _adminUiPath.push_back('/');
+					_bl->out.printDebug("Debug: adminUiPath set to " + _adminUiPath);
+				}
+				else if(name == "adminuipathpermissions")
+				{
+					_adminUiPathPermissions = Math::getOctalNumber(value);
+					if(_adminUiPathPermissions == 0) _adminUiPathPermissions = 504;
+					_bl->out.printDebug("Debug: adminUiPathPermissions set to " + _adminUiPathPermissions);
+				}
+				else if(name == "adminuipathuser")
+				{
+					_adminUiPathUser = value;
+					_bl->out.printDebug("Debug: adminUiPathUser set to " + _adminUiPathUser);
+				}
+				else if(name == "adminuipathgroup")
+				{
+					_adminUiPathGroup = value;
+					_bl->out.printDebug("Debug: adminUiPathGroup set to " + _adminUiPathGroup);
+				}
+				else if(name == "uipath")
+				{
+					_uiPath = value;
+					if(_uiPath.empty()) _uiPath = "/var/lib/homegear/ui/";
+					if(_uiPath.back() != '/') _uiPath.push_back('/');
+					_bl->out.printDebug("Debug: uiPath set to " + _uiPath);
+				}
+				else if(name == "uipathpermissions")
+				{
+					_uiPathPermissions = Math::getOctalNumber(value);
+					if(_uiPathPermissions == 0) _uiPathPermissions = 504;
+					_bl->out.printDebug("Debug: uiPathPermissions set to " + _uiPathPermissions);
+				}
+				else if(name == "uipathuser")
+				{
+					_uiPathUser = value;
+					_bl->out.printDebug("Debug: uiPathUser set to " + _uiPathUser);
+				}
+				else if(name == "uipathgroup")
+				{
+					_uiPathGroup = value;
+					_bl->out.printDebug("Debug: uiPathGroup set to " + _uiPathGroup);
 				}
 				else if(name == "firmwarepath")
 				{

@@ -137,6 +137,14 @@ public:
 	std::string nodeBlueDataPathUser() { return _nodeBlueDataPathUser; }
 	std::string nodeBlueDataPathGroup() { return _nodeBlueDataPathGroup; }
 	bool nodeBlueDebugOutput() { return _nodeBlueDebugOutput; }
+	std::string adminUiPath() { return _adminUiPath; }
+	uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
+	std::string adminUiPathUser() { return _adminUiPathUser; }
+	std::string adminUiPathGroup() { return _adminUiPathGroup; }
+	std::string uiPath() { return _uiPath; }
+	uint32_t uiPathPermissions() { return _uiPathPermissions; }
+	std::string uiPathUser() { return _uiPathUser; }
+	std::string uiPathGroup() { return _uiPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -245,6 +253,14 @@ private:
 	std::string _nodeBlueDataPathUser;
 	std::string _nodeBlueDataPathGroup;
 	bool _nodeBlueDebugOutput = false;
+	std::string _adminUiPath;
+	uint32_t _adminUiPathPermissions = 504;
+	std::string _adminUiPathUser;
+	std::string _adminUiPathGroup;
+	std::string _uiPath;
+	uint32_t _uiPathPermissions = 504;
+	std::string _uiPathUser;
+	std::string _uiPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;
