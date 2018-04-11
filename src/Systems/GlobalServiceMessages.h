@@ -55,7 +55,7 @@ public:
     void load();
 
     void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, PVariable data = PVariable(), int64_t value = 0);
-    void unset(int32_t familyId, int32_t messageId);
+    void unset(int32_t familyId, int32_t messageId, std::string message);
 
     std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
 protected:
@@ -72,6 +72,7 @@ protected:
     typedef std::shared_ptr<ServiceMessage> PServiceMessage;
     typedef int32_t FamilyId;
     typedef int32_t MessageId;
+    typedef std::string MessageType;
 
     BaseLib::SharedObjects* _bl = nullptr;
 
@@ -79,7 +80,7 @@ protected:
     std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
 
     std::mutex _serviceMessagesMutex;
-    std::unordered_map<FamilyId, std::unordered_map<MessageId, PServiceMessage>> _serviceMessages;
+    std::unordered_map<FamilyId, std::unordered_map<MessageId, std::unordered_map<MessageType, PServiceMessage>>> _serviceMessages;
 };
 
 }

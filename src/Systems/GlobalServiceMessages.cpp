@@ -68,7 +68,7 @@ void GlobalServiceMessages::load()
             serviceMessage->message = row.second.at(6)->textValue;
             serviceMessage->value = row.second.at(5)->intValue;
             serviceMessage->data = _rpcDecoder->decodeResponse(*row.second.at(7)->binaryValue);
-            _serviceMessages[row.second.at(1)->intValue].emplace(row.second.at(3)->intValue, std::move(serviceMessage));
+            _serviceMessages[row.second.at(1)->intValue][row.second.at(3)->intValue].emplace(row.second.at(6)->textValue, std::move(serviceMessage));
         }
     }
     catch(const std::exception& ex)
@@ -99,13 +99,14 @@ void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, int32_t tim
 
         {
             std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
-            _serviceMessages[familyId][messageId] = std::move(serviceMessage);
+            _serviceMessages[familyId][messageId][message] = std::move(serviceMessage);
         }
 
         std::vector<char> dataBlob;
         if(data) _rpcEncoder->encodeResponse(data, dataBlob);
 
         Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(message));
         data.push_back(std::make_shared<Database::DataColumn>(familyId));
         data.push_back(std::make_shared<Database::DataColumn>(0));
         data.push_back(std::make_shared<Database::DataColumn>(messageId));
@@ -129,7 +130,7 @@ void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, int32_t tim
     }
 }
 
-void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId)
+void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId, std::string message)
 {
     try
     {
@@ -138,15 +139,22 @@ void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId)
             auto familyIterator = _serviceMessages.find(familyId);
             if(familyIterator != _serviceMessages.end())
             {
-                auto messageIterator = familyIterator->second.find(messageId);
-                if(messageIterator != familyIterator->second.end())
+                auto messageIdIterator = familyIterator->second.find(messageId);
+                if(messageIdIterator != familyIterator->second.end())
                 {
-                    familyIterator->second.erase(messageIterator);
-                    if(familyIterator->second.empty()) _serviceMessages.erase(familyId);
+                    auto messageIterator = messageIdIterator->second.find(message);
+                    if(messageIterator != messageIdIterator->second.end())
+                    {
+                        messageIdIterator->second.erase(messageIterator);
 
-                    _bl->db->deleteGlobalServiceMessage(familyId, messageId);
+                        _bl->db->deleteGlobalServiceMessage(familyId, messageId, message);
+                    }
+
+                    if(messageIdIterator->second.empty()) familyIterator->second.erase(messageIdIterator);
                 }
             }
+
+            if(familyIterator->second.empty()) _serviceMessages.erase(familyId);
         }
     }
     catch(const std::exception& ex)
@@ -172,18 +180,21 @@ PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo)
         serviceMessages->arrayValue->reserve(100);
         for(auto& family : _serviceMessages)
         {
-            for(auto& message : family.second)
+            for(auto& messageId : family.second)
             {
-                auto element = std::make_shared<Variable>(VariableType::tStruct);
-                element->structValue->emplace("TYPE", std::make_shared<Variable>(message.second->familyId == -1 ? 0 : 1));
-                if(message.second->familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(message.second->familyId));
-                element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(message.second->timestamp));
-                element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
-                element->structValue->emplace("MESSAGE", std::make_shared<Variable>(message.second->message));
-                element->structValue->emplace("DATA", message.second->data);
-                element->structValue->emplace("VALUE", std::make_shared<Variable>(message.second->value));
-                serviceMessages->arrayValue->push_back(element);
-                if(serviceMessages->arrayValue->size() == serviceMessages->arrayValue->capacity()) serviceMessages->arrayValue->reserve(serviceMessages->arrayValue->size() + 100);
+                for(auto& message : messageId.second)
+                {
+                    auto element = std::make_shared<Variable>(VariableType::tStruct);
+                    element->structValue->emplace("TYPE", std::make_shared<Variable>(message.second->familyId == -1 ? 0 : 1));
+                    if(message.second->familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(message.second->familyId));
+                    element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(message.second->timestamp));
+                    element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
+                    element->structValue->emplace("MESSAGE", std::make_shared<Variable>(message.second->message));
+                    element->structValue->emplace("DATA", message.second->data);
+                    element->structValue->emplace("VALUE", std::make_shared<Variable>(message.second->value));
+                    serviceMessages->arrayValue->push_back(element);
+                    if(serviceMessages->arrayValue->size() == serviceMessages->arrayValue->capacity()) serviceMessages->arrayValue->reserve(serviceMessages->arrayValue->size() + 100);
+                }
             }
         }
         return serviceMessages;
