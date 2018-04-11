@@ -459,7 +459,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
                 element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
-                element->structValue->emplace("NAME", std::make_shared<Variable>("UNREACH"));
+                element->structValue->emplace("MESSAGE", std::make_shared<Variable>("UNREACH"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
                 serviceMessages->arrayValue->push_back(element);
 			}
@@ -481,7 +481,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
                 element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
-                element->structValue->emplace("NAME", std::make_shared<Variable>("STICKY_UNREACH"));
+                element->structValue->emplace("MESSAGE", std::make_shared<Variable>("STICKY_UNREACH"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
                 serviceMessages->arrayValue->push_back(element);
             }
@@ -503,7 +503,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
                 element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
-                element->structValue->emplace("NAME", std::make_shared<Variable>("CONFIG_PENDING"));
+                element->structValue->emplace("MESSAGE", std::make_shared<Variable>("CONFIG_PENDING"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
                 serviceMessages->arrayValue->push_back(element);
             }
@@ -525,7 +525,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                 element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
                 element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                 element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
-                element->structValue->emplace("NAME", std::make_shared<Variable>("LOWBAT"));
+                element->structValue->emplace("MESSAGE", std::make_shared<Variable>("LOWBAT"));
                 element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
                 serviceMessages->arrayValue->push_back(element);
             }
@@ -553,7 +553,7 @@ PVariable ServiceMessages::get(PRpcClientInfo clientInfo, bool returnID)
                     element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
                     element->structValue->emplace("CHANNEL", std::make_shared<Variable>(error.first));
                     element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(inner.second.timestamp));
-                    element->structValue->emplace("NAME", std::make_shared<Variable>(inner.first));
+                    element->structValue->emplace("MESSAGE", std::make_shared<Variable>(inner.first));
                     element->structValue->emplace("VALUE", std::make_shared<Variable>((uint32_t)inner.second.value));
                     serviceMessages->arrayValue->push_back(element);
                 }
