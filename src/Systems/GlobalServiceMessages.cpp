@@ -50,5 +50,146 @@ void GlobalServiceMessages::init(SharedObjects* baseLib)
     _bl = baseLib;
 }
 
+void GlobalServiceMessages::load()
+{
+    try
+    {
+        std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
+        std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getServiceMessages(0);
+        for(auto& row : *rows)
+        {
+            auto serviceMessage = std::make_shared<ServiceMessage>();
+            serviceMessage->databaseId = (uint64_t)row.second.at(0)->intValue;
+            serviceMessage->familyId = row.second.at(1)->intValue;
+            serviceMessage->messageId = row.second.at(3)->intValue;
+            serviceMessage->timestamp = row.second.at(4)->intValue;
+            serviceMessage->message = row.second.at(6)->textValue;
+            serviceMessage->value = row.second.at(5)->intValue;
+            _serviceMessages[row.second.at(1)->intValue].emplace(row.second.at(3)->intValue, std::move(serviceMessage));
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string& message, int64_t value)
+{
+    try
+    {
+        auto serviceMessage = std::make_shared<ServiceMessage>();
+        serviceMessage->familyId = familyId;
+        serviceMessage->messageId = messageId;
+        serviceMessage->timestamp = timestamp;
+        serviceMessage->message = message;
+        serviceMessage->value = value;
+
+        {
+            std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
+            _serviceMessages[familyId][messageId] = std::move(serviceMessage);
+        }
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(familyId));
+        data.push_back(std::make_shared<Database::DataColumn>(0));
+        data.push_back(std::make_shared<Database::DataColumn>(messageId));
+        data.push_back(std::make_shared<Database::DataColumn>(timestamp));
+        data.push_back(std::make_shared<Database::DataColumn>(value));
+        data.push_back(std::make_shared<Database::DataColumn>(message));
+        data.push_back(std::make_shared<Database::DataColumn>());
+        _bl->db->saveGlobalServiceMessageAsynchronous(data);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId)
+{
+    try
+    {
+        {
+            std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
+            auto familyIterator = _serviceMessages.find(familyId);
+            if(familyIterator != _serviceMessages.end())
+            {
+                familyIterator->second.erase(messageId);
+                if(familyIterator->second.empty()) _serviceMessages.erase(familyId);
+            }
+        }
+
+        _bl->db->deleteGlobalServiceMessage(familyId, messageId);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo)
+{
+    try
+    {
+        std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
+        PVariable serviceMessages(new Variable(VariableType::tArray));
+        serviceMessages->arrayValue->reserve(100);
+        for(auto& family : _serviceMessages)
+        {
+            for(auto& message : family.second)
+            {
+                auto element = std::make_shared<Variable>(VariableType::tStruct);
+                element->structValue->emplace("TYPE", std::make_shared<Variable>(message.second->familyId == -1 ? 0 : 1));
+                if(message.second->familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(message.second->familyId));
+                element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(message.second->timestamp));
+                element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
+                element->structValue->emplace("MESSAGE", std::make_shared<Variable>(message.second->message));
+                element->structValue->emplace("VALUE", std::make_shared<Variable>(message.second->value));
+                serviceMessages->arrayValue->push_back(element);
+                if(serviceMessages->arrayValue->size() == serviceMessages->arrayValue->capacity()) serviceMessages->arrayValue->reserve(serviceMessages->arrayValue->size() + 100);
+            }
+        }
+        return serviceMessages;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 }
 }
