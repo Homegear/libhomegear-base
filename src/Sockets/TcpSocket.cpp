@@ -39,6 +39,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 	_stopServer = false;
 	_autoConnect = false;
+	_connecting = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
@@ -47,6 +48,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 	_bl = baseLib;
 	_stopServer = false;
 	_autoConnect = false;
+	_connecting = false;
 	if(socketDescriptor) _socketDescriptor = socketDescriptor;
 	else _socketDescriptor.reset(new FileDescriptor);
 }
@@ -55,6 +57,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_bl = baseLib;
 	_stopServer = false;
+	_connecting = false;
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
 	_port = port;
@@ -142,6 +145,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 {
 	_bl = baseLib;
+	_connecting = false;
 
 	_stopServer = false;
 	_isServer = true;
@@ -951,23 +955,27 @@ void TcpSocket::initSsl()
 
 void TcpSocket::open()
 {
+	_connecting = true;
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
 	else if(!connected())
 	{
 		close();
 		getSocketDescriptor();
 	}
+	_connecting = false;
 }
 
 void TcpSocket::autoConnect()
 {
 	if(!_autoConnect) return;
+	_connecting = true;
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
 	else if(!connected())
 	{
 		close();
 		getSocketDescriptor();
 	}
+	_connecting = false;
 }
 
 void TcpSocket::close()
@@ -1318,7 +1326,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 
 bool TcpSocket::connected()
 {
-	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) return false;
+	if(!_socketDescriptor || _socketDescriptor->descriptor < 0 || _connecting) return false;
 	char buffer[1];
 	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
 	return true;

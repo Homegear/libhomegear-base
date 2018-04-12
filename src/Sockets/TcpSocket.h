@@ -383,6 +383,7 @@ protected:
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
 	int64_t _writeTimeout = 15000000;
+	std::atomic_bool _connecting;
 	bool _autoConnect = true;
 	std::string _ipAddress;
 	std::string _hostname;
