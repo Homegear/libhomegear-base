@@ -378,14 +378,18 @@ Http::~Http()
 PVariable Http::serialize()
 {
 	PVariable data(new Variable(VariableType::tArray));
-	data->arrayValue->push_back(PVariable(new Variable((int32_t)_type)));						// 0
-	data->arrayValue->push_back(PVariable(new Variable(_finished)));							// 1
-	data->arrayValue->push_back(PVariable(new Variable(_headerProcessingStarted)));				// 2
-	data->arrayValue->push_back(PVariable(new Variable(_dataProcessingStarted)));				// 3
-	data->arrayValue->push_back(PVariable(new Variable(_content)));								// 4
-	data->arrayValue->push_back(PVariable(new Variable(_rawHeader)));							// 5
-	data->arrayValue->push_back(PVariable(new Variable(_header.remoteAddress)));				// 6
-	data->arrayValue->push_back(PVariable(new Variable(_header.remotePort)));					// 7
+	data->arrayValue->reserve(11);
+	data->arrayValue->emplace_back(std::make_shared<Variable>((int32_t)_type));						// 0
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_finished));							// 1
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_headerProcessingStarted));			// 2
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_dataProcessingStarted));				// 3
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_content));							// 4
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_rawHeader));							// 5
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_header.remoteAddress));				// 6
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_header.remotePort));					// 7
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectUrl));						// 8
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectQueryString));				// 9
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectStatus));					// 10
 	return data;
 }
 
@@ -400,6 +404,9 @@ void Http::unserialize(PVariable data)
 	_rawHeader.insert(_rawHeader.end(), data->arrayValue->at(5)->binaryValue.begin(), data->arrayValue->at(5)->binaryValue.end());
 	_header.remoteAddress = data->arrayValue->at(6)->stringValue;
 	_header.remotePort = data->arrayValue->at(7)->integerValue;
+	_redirectUrl = data->arrayValue->at(8)->stringValue;
+	_redirectQueryString = data->arrayValue->at(9)->stringValue;
+	_redirectStatus = data->arrayValue->at(10)->integerValue;
 
 	int32_t headerSize = _rawHeader.size();
 	char* pHeader = &(_rawHeader.at(0));
