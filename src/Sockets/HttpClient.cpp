@@ -83,6 +83,33 @@ void HttpClient::get(const std::string& path, std::string& data)
 	sendRequest(getRequest, data);
 }
 
+void HttpClient::get(const std::string& path, Http& http)
+{
+	std::string fixedPath = path;
+	if(fixedPath.empty()) fixedPath = "/";
+	std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n\r\n";
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + getRequest);
+	sendRequest(getRequest, http);
+}
+
+void HttpClient::post(const std::string& path, std::string& dataIn, std::string& dataOut)
+{
+	std::string fixedPath = path;
+	if(fixedPath.empty()) fixedPath = "/";
+	std::string postRequest = "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n\r\n" + dataIn + "\r\n";
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
+	sendRequest(postRequest, dataOut);
+}
+
+void HttpClient::post(const std::string& path, std::string& dataIn, Http& dataOut)
+{
+	std::string fixedPath = path;
+	if(fixedPath.empty()) fixedPath = "/";
+	std::string postRequest = "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n\r\n" + dataIn + "\r\n";
+	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
+	sendRequest(postRequest, dataOut);
+}
+
 void HttpClient::sendRequest(const std::string& request, std::string& response, bool responseIsHeaderOnly)
 {
 	response.clear();
@@ -93,15 +120,6 @@ void HttpClient::sendRequest(const std::string& request, std::string& response, 
 		std::vector<char>& content = http.getContent();
 		response.insert(response.end(), content.begin(), content.begin() + http.getContentSize());
 	}
-}
-
-void HttpClient::get(const std::string& path, Http& http)
-{
-	std::string fixedPath = path;
-	if(fixedPath.empty()) fixedPath = "/";
-	std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n\r\n";
-	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + getRequest);
-	sendRequest(getRequest, http);
 }
 
 void HttpClient::sendRequest(const std::string& request, Http& http, bool responseIsHeaderOnly)
@@ -256,4 +274,5 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
     	throw Exception("Unknown exception.");
     }
 }
+
 }

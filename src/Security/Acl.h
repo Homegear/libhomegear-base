@@ -33,13 +33,28 @@
 
 #include "../Exception.h"
 #include "../Variable.h"
+#include "../Database/IDatabaseController.h"
 
 #include <set>
 
 namespace BaseLib
 {
+
+namespace Systems
+{
+    class Peer;
+}
+
 namespace Security
 {
+
+enum class AclResult
+{
+    error = -3,
+    notInList = -2,
+    deny = -1,
+    accept = 0
+};
 
 /**
  * Exception class for Acl.
@@ -53,13 +68,48 @@ public:
 };
 
 /**
- * This class is used to store ACL rules. The elements are checked in the following order. Unset elements are skipped. If a field is set to "no access", access is denied immediately without checking further rules.
+ * This class is used to store ACL rules. The elements are checked in the following order. Unset elements are skipped. If a field is set to "no access", access is denied immediately without checking further rules. When set to "access", the rule checking continues.
  *
  * 1. Variables
  * 2. Devices
  * 3. Rooms
  * 4. Categories
  * 5. Methods
+ * 6. Event Server Methods
+ *
+ * Security needs to be applied here:
+ *
+ * RpcServer:
+ *  - Most RPC methods are defined in file RPCMethods.cpp
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in map => IpcServer::callRpcMethod()
+ *
+ * IpcServer:
+ *  - All methods on clients are called within callRpcMethod()
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - Has broadcast methods
+ *  - Has it's own RPC methods
+ *
+ * NodeBlueServer:
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in above maps => IpcServer::callRpcMethod()
+ *  - Has broadcast methods
+ *  - Has it's own RPC methods
+ *
+ * ScriptEngineServer:
+ *  - Server methods are defined in _rpcMethods and _localRpcMethods
+ *  - Variable with all methods from RPCMethods.cpp: _rpcMethods
+ *  - If not found in above maps => IpcServer::callRpcMethod()
+ *  - Has broadcast methods
+ *  - Has it's own RPC methods
+ *
+ * RPC::Client
+ *  - Has broadcast methods
+ *
+ * Mqtt
+ *  - Check method access
  */
 class Acl
 {
@@ -72,8 +122,7 @@ private:
     /**
      * Key: Peer ID; value: access/no access
      *
-     * Grant all entry: 0 (all devices) => true
-     * Deny all entry: 0 (all devices) => true
+     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, bool> _devicesRead;
 
@@ -85,8 +134,7 @@ private:
     /**
      * Key: Peer ID; value: access/no access
      *
-     * Grant all entry: 0 (all devices) => true
-     * Deny all entry: 0 (all devices) => true
+     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
      */
     std::unordered_map<uint64_t, bool> _devicesWrite;
 
@@ -96,12 +144,17 @@ private:
     bool _variablesReadSet = false;
 
     /**
-     * Key: Channel; key 2: variable name; value: access/no access
+     * Key1: Device; key2: channel; key 3: variable name; value: access/no access
      *
-     * Grant all entry: -2 (all channels) => "*" => true
-     * Deny all entry: -2 (all channels) => "*" => true
+     * For system variables key1 is "0",  and channel is "-1".
+     *
+     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
      */
-    std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesRead;
+    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
     /**
      * When set to "true", _variablesWrite is included in the ACL checks.
@@ -109,12 +162,17 @@ private:
     bool _variablesWriteSet = false;
 
     /**
-     * Key: Channel; key 2: variable name; value: access/no access
+     * Key1: Device; key2: Channel; key 3: variable name; value: access/no access
      *
-     * Grant all entry: -2 (all channels) => "*" => true
-     * Deny all entry: -2 (all channels) => "*" => true
+     * For system variables key1 is "0",  and channel is "-1".
+     *
+     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
      */
-    std::unordered_map<int32_t, std::unordered_map<std::string, bool>> _variablesWrite;
+    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
     /**
      * When set to "true", _roomsRead is included in the ACL checks.
@@ -123,9 +181,6 @@ private:
 
     /**
      * Key: Room ID; value: access/no access
-     *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
      */
     std::unordered_map<uint64_t, bool> _roomsRead;
 
@@ -137,8 +192,7 @@ private:
     /**
      * Key: Room ID; value: access/no access
      *
-     * Grant all entry: 0 (all rooms) => true
-     * Deny all entry: 0 (all rooms) => true
+     * ID 0 stands for "no room assigned"
      */
     std::unordered_map<uint64_t, bool> _roomsWrite;
 
@@ -150,8 +204,7 @@ private:
     /**
      * Key: Category ID; value: access/no access
      *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
+     * ID 0 stands for "no category assigned"
      */
     std::unordered_map<uint64_t, bool> _categoriesRead;
 
@@ -162,9 +215,6 @@ private:
 
     /**
      * Key: Category ID; value: access/no access
-     *
-     * Grant all entry: 0 (all categories) => true
-     * Deny all entry: 0 (all categories) => true
      */
     std::unordered_map<uint64_t, bool> _categoriesWrite;
 
@@ -177,9 +227,22 @@ private:
      * Key: Method name; value: access/no access.
      *
      * Grant all entry: "*" => true
-     * Deny all entry: "*" => true
+     * Deny all entry: "*" => false
      */
     std::unordered_map<std::string, bool> _methods;
+
+    /**
+     * When set to "true", _eventServerMethods is included in the ACL checks.
+     */
+    bool _eventServerMethodsSet = false;
+
+    /**
+     * Key: Method name; value: access/no access.
+     *
+     * Grant all entry: "*" => true
+     * Deny all entry: "*" => false
+     */
+    std::unordered_map<std::string, bool> _eventServerMethods;
 public:
     Acl();
 
@@ -188,8 +251,45 @@ public:
      */
     virtual ~Acl();
 
+    bool categoriesReadSet() { return _categoriesReadSet; }
+    bool categoriesWriteSet() { return _categoriesWriteSet; }
+    bool devicesReadSet() { return _devicesReadSet; }
+    bool devicesWriteSet() { return _devicesWriteSet; }
+    bool roomsReadSet() { return _roomsReadSet; }
+    bool roomsWriteSet() { return _roomsWriteSet; }
+    bool variablesReadSet() { return _variablesReadSet; }
+    bool variablesWriteSet() { return _variablesWriteSet; }
+
     PVariable toVariable();
+
+    /**
+     * Converts a Variable structure to an ACL. This is not thread safe, so make sure no checks are being executed when calling this method!
+     *
+     * @param serializedData The structure to convert to an ACL.
+     */
     void fromVariable(PVariable serializedData);
+
+    AclResult checkCategoriesReadAccess(std::set<uint64_t>& categories);
+    AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
+    AclResult checkCategoryReadAccess(uint64_t category);
+    AclResult checkCategoryWriteAccess(uint64_t category);
+    AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
+    AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
+    AclResult checkEventServerMethodAccess(std::string& methodName);
+    AclResult checkMethodAccess(std::string& methodName);
+    AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId);
+    AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
+    AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
+    AclResult checkRoomReadAccess(uint64_t roomId);
+    AclResult checkRoomWriteAccess(uint64_t roomId);
+    AclResult checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
+    AclResult checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
+    AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
+    AclResult checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
+
+    std::string toString(int32_t indentation = 0);
 };
 
 typedef std::shared_ptr<Acl> PAcl;

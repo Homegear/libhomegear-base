@@ -41,12 +41,17 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
 	TcpSocket::TcpServerInfo tcpServerInfo;
 	tcpServerInfo.useSsl = serverInfo.useSsl;
 	tcpServerInfo.maxConnections = serverInfo.maxConnections;
+    tcpServerInfo.serverThreads = serverInfo.serverThreads;
 	tcpServerInfo.certificates = serverInfo.certificates;
 	tcpServerInfo.dhParamFile = serverInfo.dhParamFile;
 	tcpServerInfo.dhParamData = serverInfo.dhParamData;
 	tcpServerInfo.requireClientCert = serverInfo.requireClientCert;
+    tcpServerInfo.newConnectionCallback = std::bind(&HttpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    tcpServerInfo.connectionClosedCallback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1);
 	tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
 
+    _newConnectionCallback.swap(serverInfo.newConnectionCallback);
+    _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
 	_socket = std::make_shared<TcpSocket>(baseLib, tcpServerInfo);
@@ -72,15 +77,74 @@ void HttpServer::waitForStop()
 	_socket->waitForServerStopped();
 }
 
-void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
+void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t port)
 {
 	try
 	{
-		_http.process((char*)packet.data(), packet.size());
-		if(_http.isFinished())
+		HttpClientInfo clientInfo;
+		clientInfo.http = std::make_shared<BaseLib::Http>();
+
+        {
+            std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+            _httpClientInfo[clientId] = std::move(clientInfo);
+        }
+
+        if(_newConnectionCallback) _newConnectionCallback(clientId, address, port);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+void HttpServer::connectionClosed(int32_t clientId)
+{
+	try
+	{
+        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+
+		std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+		_httpClientInfo.erase(clientId);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
+{
+	std::shared_ptr<BaseLib::Http> http;
+	try
+	{
 		{
-			if(_packetReceivedCallback) _packetReceivedCallback(clientId, _http);
-			_http.reset();
+			std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+			auto clientIterator = _httpClientInfo.find(clientId);
+			if(clientIterator == _httpClientInfo.end()) return;
+			http = clientIterator->second.http;
+		}
+
+		http->process((char*)packet.data(), packet.size());
+		if(http->isFinished())
+		{
+			if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
+			http->reset();
 		}
 		return;
 	}
@@ -96,7 +160,7 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	_http.reset();
+	http->reset();
 }
 
 void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection)

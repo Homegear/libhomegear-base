@@ -156,11 +156,13 @@ public:
 	{
 		bool useSsl = false;
 		uint32_t maxConnections = 10;
+		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, PCertificateInfo> certificates;
 		std::string dhParamFile;
 		std::string dhParamData;
 		bool requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
+		std::function<void(int32_t clientId)> connectionClosedCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
 
@@ -381,6 +383,7 @@ protected:
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
 	int64_t _writeTimeout = 15000000;
+	std::atomic_bool _connecting;
 	bool _autoConnect = true;
 	std::string _ipAddress;
 	std::string _hostname;
@@ -397,6 +400,7 @@ protected:
 		std::string _dhParamData;
 		bool _requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
+		std::function<void(int32_t clientId)> _connectionClosedCallback;
 		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
 
 		std::string _listenAddress;
@@ -407,7 +411,7 @@ protected:
 		gnutls_priority_t _tlsPriorityCache = nullptr;
 
 		std::atomic_bool _stopServer;
-		std::thread _serverThread;
+		std::vector<std::thread> _serverThreads;
 
 		int64_t _lastGarbageCollection = 0;
 
@@ -416,6 +420,7 @@ protected:
 		std::map<int32_t, PTcpClientData> _clients;
 	// }}}
 
+	std::mutex _socketDescriptorMutex;
 	PFileDescriptor _socketDescriptor;
 	bool _useSsl = false;
 	std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials;
@@ -432,6 +437,7 @@ protected:
 
 		void serverThread();
 		void collectGarbage();
+		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
 		void initClientSsl(PFileDescriptor fileDescriptor);
 		void readClient(PTcpClientData clientData);
 	// }}}

@@ -28,74 +28,79 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef HOMEGEARUIELEMENT_H_
+#define HOMEGEARUIELEMENT_H_
 
+#include "UiVariable.h"
+#include "UiControl.h"
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+#include "../../Variable.h"
+
+#include <string>
 #include <memory>
+#include <unordered_map>
+#include <list>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-namespace Security
-{
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
-}
+class SharedObjects;
 
-enum class RpcClientType
+namespace DeviceDescription
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
 
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
+class HomegearUiElement;
 
-class RpcClientInfo
+/**
+ * Helper type for Packet pointers.
+ */
+typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
+
+/**
+ * Class defining a physical packet.
+ */
+class HomegearUiElement
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
+    enum class Type
+    {
+        undefined,
+        simple,
+        complex
+    };
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
+    //Elements
+    std::string id;
+    Type type = Type::undefined;
+    std::string control;
+    std::string unit;
+    std::string icon;
+    std::unordered_map<std::string, std::string> texts;
+    std::list<PUiVariable> variableInputs;
+    std::list<PUiVariable> variableOutputs;
+    std::unordered_map<std::string, std::string> metadata;
 
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
+    //Complex elements
+    int32_t width = -1;
+    int32_t height = -1;
+    int32_t cols = -1;
+    int32_t rows = -1;
+    std::list<PUiControl> controls;
+
+    HomegearUiElement(BaseLib::SharedObjects* baseLib);
+    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    HomegearUiElement(HomegearUiElement const& rhs);
+    virtual ~HomegearUiElement() = default;
+
+    HomegearUiElement& operator=(const HomegearUiElement& rhs);
+
+    PVariable getElementInfo();
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
 };
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

@@ -28,74 +28,51 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef UIVARIABLE_H_
+#define UIVARIABLE_H_
 
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+#include <string>
+#include <map>
 #include <memory>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-namespace Security
-{
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
-}
+class SharedObjects;
 
-enum class RpcClientType
+namespace DeviceDescription
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
 
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
+class UiVariable;
 
-class RpcClientInfo
+typedef std::shared_ptr<UiVariable> PUiVariable;
+
+class UiVariable
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
+    UiVariable(BaseLib::SharedObjects* baseLib);
+    UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiVariable(UiVariable const& rhs);
+    virtual ~UiVariable() = default;
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
+    UiVariable& operator=(const UiVariable& rhs);
 
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
+    //Elements
+    int32_t familyId = -1;
+    int32_t deviceTypeId = -1;
+    int32_t channel = 1;
+    std::string name;
+
+    //Helpers
+    uint64_t peerId = 0;
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
 };
 
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

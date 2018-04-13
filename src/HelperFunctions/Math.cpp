@@ -235,7 +235,7 @@ bool Math::isNumber(const std::string& s, bool hex)
 	return true;
 }
 
-int32_t Math::getNumber(std::string& s, bool isHex)
+int32_t Math::getNumber(const std::string& s, bool isHex)
 {
 	int32_t xpos = s.find('x');
 	int32_t number = 0;
@@ -244,7 +244,7 @@ int32_t Math::getNumber(std::string& s, bool isHex)
 	return number;
 }
 
-int64_t Math::getNumber64(std::string& s, bool isHex)
+int64_t Math::getNumber64(const std::string& s, bool isHex)
 {
 	int32_t xpos = s.find('x');
 	int64_t number = 0;
@@ -259,7 +259,7 @@ int32_t Math::getNumber(char hexChar)
 	return _hexMap.at(hexChar);
 }
 
-uint32_t Math::getUnsignedNumber(std::string &s, bool isHex)
+uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)
 {
 	int32_t xpos = s.find('x');
 	uint32_t number = 0;
@@ -268,7 +268,7 @@ uint32_t Math::getUnsignedNumber(std::string &s, bool isHex)
 	return number;
 }
 
-int32_t Math::getOctalNumber(std::string& s)
+int32_t Math::getOctalNumber(const std::string& s)
 {
 	int32_t number = 0;
 	try { number = std::stoll(s, 0, 8); } catch(...) {}

@@ -33,12 +33,23 @@
 
 #include "DatabaseTypes.h"
 #include "../Variable.h"
+#include "../Sockets/RpcClientInfo.h"
+#include "../Systems/Peer.h"
 #include <set>
 
 namespace BaseLib
 {
 namespace Database
 {
+
+struct SystemVariable
+{
+	std::string name;
+	uint64_t room = 0;
+	std::set<uint64_t> categories;
+	BaseLib::PVariable value;
+};
+typedef std::shared_ptr<SystemVariable> PSystemVariable;
 
 /**
  * Base class for the database controller.
@@ -79,20 +90,44 @@ public:
 	virtual BaseLib::PVariable deleteData(std::string& component, std::string& key) = 0;
 	// }}}
 
+	// {{{ UI
+	virtual uint64_t addUiElement(std::string& elementId, BaseLib::PVariable data) = 0;
+    virtual std::shared_ptr<DataTable> getUiElements() = 0;
+	virtual void removeUiElement(uint64_t databaseId) = 0;
+	// }}}
+
+    // {{{ Stories
+    virtual BaseLib::PVariable addRoomToStory(uint64_t storyId, uint64_t roomId) = 0;
+    virtual BaseLib::PVariable createStory(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable deleteStory(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable getRoomsInStory(PRpcClientInfo clientInfo, uint64_t storyId, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getStoryMetadata(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable getStories(std::string languageCode) = 0;
+    virtual BaseLib::PVariable removeRoomFromStories(uint64_t roomId) = 0;
+    virtual BaseLib::PVariable removeRoomFromStory(uint64_t storyId, uint64_t roomId) = 0;
+    virtual bool storyExists(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable setStoryMetadata(uint64_t storyId, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable updateStory(uint64_t storyId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    // }}}
+
 	// {{{ Rooms
-	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations) = 0;
+	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteRoom(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable getRooms(std::string languageCode) = 0;
+    virtual BaseLib::PVariable getRoomMetadata(uint64_t roomId) = 0;
+	virtual BaseLib::PVariable getRooms(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual bool roomExists(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable updateRoom(uint64_t roomId, BaseLib::PVariable translations) = 0;
+    virtual BaseLib::PVariable setRoomMetadata(uint64_t roomId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateRoom(uint64_t roomId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
 	// {{{ Categories
-	virtual BaseLib::PVariable createCategory(BaseLib::PVariable translations) = 0;
+	virtual BaseLib::PVariable createCategory(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteCategory(uint64_t categoryId) = 0;
-	virtual BaseLib::PVariable getCategories(std::string languageCode) = 0;
+	virtual BaseLib::PVariable getCategories(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getCategoryMetadata(uint64_t categoryId) = 0;
 	virtual bool categoryExists(uint64_t categoryId) = 0;
-	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations) = 0;
+    virtual BaseLib::PVariable setCategoryMetadata(uint64_t categoryId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
 	// {{{ Node data
@@ -103,28 +138,53 @@ public:
 	// }}}
 
 	//Metadata
-	virtual BaseLib::PVariable setMetadata(uint64_t peerID, std::string& serialNumber, std::string& dataID, BaseLib::PVariable& metadata) = 0;
-	virtual BaseLib::PVariable getMetadata(uint64_t peerID, std::string& dataID) = 0;
-	virtual BaseLib::PVariable getAllMetadata(uint64_t peerID) = 0;
-	virtual BaseLib::PVariable deleteMetadata(uint64_t peerID, std::string& serialNumber, std::string& dataID) = 0;
+	virtual BaseLib::PVariable setMetadata(uint64_t peerId, std::string& serialNumber, std::string& dataId, BaseLib::PVariable& metadata) = 0;
+	virtual BaseLib::PVariable getMetadata(uint64_t peerId, std::string& dataId) = 0;
+	virtual BaseLib::PVariable getAllMetadata(PRpcClientInfo clientInfo, std::shared_ptr<Systems::Peer> peer, bool checkAcls) = 0;
+	virtual BaseLib::PVariable deleteMetadata(uint64_t peerId, std::string& serialNumber, std::string& dataId) = 0;
 	//End metadata
 
 	//System variables
-	virtual BaseLib::PVariable setSystemVariable(std::string& variableID, BaseLib::PVariable& value) = 0;
-	virtual BaseLib::PVariable getSystemVariable(std::string& variableID) = 0;
-	virtual BaseLib::PVariable getAllSystemVariables() = 0;
-	virtual BaseLib::PVariable deleteSystemVariable(std::string& variableID) = 0;
+	virtual BaseLib::PVariable deleteSystemVariable(std::string& variableId) = 0;
+	virtual BaseLib::PVariable getSystemVariable(std::string& variableId) = 0;
+	virtual Database::PSystemVariable getSystemVariableInternal(std::string& variableId) = 0;
+    virtual BaseLib::PVariable getSystemVariableCategories(std::string& variableId) = 0;
+    virtual std::set<uint64_t> getSystemVariableCategoriesInternal(std::string& variableId) = 0;
+    virtual BaseLib::PVariable getSystemVariableRoom(std::string& variableId) = 0;
+	virtual BaseLib::PVariable getSystemVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls) = 0;
+	virtual BaseLib::PVariable getSystemVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls) = 0;
+    virtual uint64_t getSystemVariableRoomInternal(std::string& variableId) = 0;
+	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsAndCategories, bool checkAcls) = 0;
+    virtual void removeCategoryFromSystemVariables(uint64_t categoryId) = 0;
+    virtual void removeRoomFromSystemVariables(uint64_t roomId) = 0;
+	virtual BaseLib::PVariable setSystemVariable(std::string& variableId, BaseLib::PVariable& value) = 0;
+    virtual BaseLib::PVariable setSystemVariableCategories(std::string& variableId, std::set<uint64_t>& categories) = 0;
+    virtual BaseLib::PVariable setSystemVariableRoom(std::string& variableId, uint64_t room) = 0;
+    virtual bool systemVariableHasCategory(std::string& variableId, uint64_t categoryId) = 0;
 	//End system variables
 
 	//Users
+	virtual bool createUser(const std::string& name, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups) = 0;
+	virtual bool deleteUser(uint64_t userId) = 0;
+    virtual std::shared_ptr<DataTable> getPassword(const std::string& name) = 0;
+	virtual uint64_t getUserId(const std::string& name) = 0;
+	virtual BaseLib::PVariable getUserMetadata(uint64_t userId) = 0;
 	virtual std::shared_ptr<DataTable> getUsers() = 0;
-	virtual bool userNameExists(const std::string& name) = 0;
-	virtual uint64_t getUserID(const std::string& name) = 0;
-	virtual bool createUser(const std::string& name, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt) = 0;
-	virtual bool updateUser(uint64_t id, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt) = 0;
-	virtual bool deleteUser(uint64_t id) = 0;
-	virtual std::shared_ptr<DataTable> getPassword(const std::string& name) = 0;
+    virtual std::vector<uint64_t> getUsersGroups(uint64_t userId) = 0;
+	virtual bool updateUser(uint64_t userId, const std::vector<uint8_t>& passwordHash, const std::vector<uint8_t>& salt, const std::vector<uint64_t>& groups) = 0;
+    virtual BaseLib::PVariable setUserMetadata(uint64_t userId, BaseLib::PVariable metadata) = 0;
+    virtual bool userNameExists(const std::string& name) = 0;
 	//End users
+
+    //Groups
+    virtual BaseLib::PVariable createGroup(BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;
+    virtual BaseLib::PVariable deleteGroup(uint64_t groupId) = 0;
+	virtual BaseLib::PVariable getAcl(uint64_t groupId) = 0;
+	virtual BaseLib::PVariable getGroup(uint64_t groupId, std::string languageCode) = 0;
+    virtual BaseLib::PVariable getGroups(std::string languageCode) = 0;
+    virtual bool groupExists(uint64_t groupId) = 0;
+    virtual BaseLib::PVariable updateGroup(uint64_t groupId, BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;
+    //End groups
 
 	//Events
 	virtual std::shared_ptr<DataTable> getEvents() = 0;
@@ -152,8 +212,10 @@ public:
 	//Peer
 	virtual void deletePeer(uint64_t id) = 0;
 	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
-	virtual void savePeerParameterAsynchronous(uint64_t peerID, DataRow& data) = 0;
-	virtual void savePeerVariableAsynchronous(uint64_t peerID, DataRow& data) = 0;
+	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
+	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerVariableAsynchronous(DataRow& data) = 0;
 	virtual std::shared_ptr<DataTable> getPeerParameters(uint64_t peerID) = 0;
 	virtual std::shared_ptr<DataTable> getPeerVariables(uint64_t peerID) = 0;
 	virtual void deletePeerParameter(uint64_t peerID, DataRow& data) = 0;
@@ -163,17 +225,19 @@ public:
 	/**
 	 * Changes the ID of a peer.
 	 *
-	 * @param oldPeerID The old ID of the peer.
-	 * @param newPeerID The new ID of the peer.
+	 * @param oldPeerId The old ID of the peer.
+	 * @param newPeerId The new ID of the peer.
 	 * @return Returns "true" on success or "false" when the new ID is already in use.
 	 */
-	virtual bool setPeerID(uint64_t oldPeerID, uint64_t newPeerID) = 0;
+	virtual bool setPeerID(uint64_t oldPeerId, uint64_t newPeerId) = 0;
 	//End Peer
 
 	//Service messages
-	virtual std::shared_ptr<DataTable> getServiceMessages(uint64_t peerID) = 0;
-	virtual void saveServiceMessageAsynchronous(uint64_t peerID, DataRow& data) = 0;
+	virtual std::shared_ptr<DataTable> getServiceMessages(uint64_t peerId) = 0;
+	virtual void saveServiceMessageAsynchronous(uint64_t peerId, DataRow& data) = 0;
+	virtual void saveGlobalServiceMessageAsynchronous(DataRow& data) = 0;
 	virtual void deleteServiceMessage(uint64_t databaseID) = 0;
+	virtual void deleteGlobalServiceMessage(int32_t familyId, int32_t messageId, std::string& message) = 0;
 	//End service messages
 
 	// {{{ License modules

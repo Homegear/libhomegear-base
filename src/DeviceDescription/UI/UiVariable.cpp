@@ -28,74 +28,64 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
-
-#include <memory>
+#include "UiVariable.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
-
-namespace Security
+namespace DeviceDescription
 {
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
+
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
+{
+    _bl = baseLib;
 }
 
-enum class RpcClientType
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVariable(baseLib)
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
-
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
-
-class RpcClientInfo
-{
-public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
-
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
-
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
-};
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string nodeName(subNode->name());
+        std::string nodeValue(subNode->value());
+        if(nodeName == "familyId")
+        {
+            if(nodeValue != "*") familyId = Math::getNumber(nodeValue);
+        }
+        else if(nodeName == "deviceTypeId")
+        {
+            if(nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
+        }
+        else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
+        else if(nodeName == "name") name = nodeValue;
+        else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
+    }
 }
 
-#endif
+UiVariable::UiVariable(UiVariable const& rhs)
+{
+    _bl = rhs._bl;
+
+    familyId = rhs.familyId;
+    deviceTypeId = rhs.deviceTypeId;
+    channel = rhs.channel;
+    name = rhs.name;
+    peerId = rhs.peerId;
+}
+
+UiVariable& UiVariable::operator=(const UiVariable& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    familyId = rhs.familyId;
+    deviceTypeId = rhs.deviceTypeId;
+    channel = rhs.channel;
+    name = rhs.name;
+    peerId = rhs.peerId;
+
+    return *this;
+}
+
+}
+}

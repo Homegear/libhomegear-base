@@ -39,6 +39,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 	_stopServer = false;
 	_autoConnect = false;
+	_connecting = false;
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
@@ -47,6 +48,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 	_bl = baseLib;
 	_stopServer = false;
 	_autoConnect = false;
+	_connecting = false;
 	if(socketDescriptor) _socketDescriptor = socketDescriptor;
 	else _socketDescriptor.reset(new FileDescriptor);
 }
@@ -55,6 +57,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_bl = baseLib;
 	_stopServer = false;
+	_connecting = false;
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
 	_port = port;
@@ -63,9 +66,12 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate) : TcpSocket(baseLib, hostname, port)
 {
 	_useSsl = useSsl;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		_certificates.emplace("*", certificateInfo);
+	}
 	_verifyCertificate = verifyCertificate;
 
 	if(_useSsl) initSsl();
@@ -75,9 +81,12 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caData = caData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caData = caData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -86,11 +95,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    certificateInfo->certFile = clientCertFile;
-    certificateInfo->keyFile = clientKeyFile;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty() || !clientCertFile.empty() || !clientKeyFile.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		certificateInfo->certFile = clientCertFile;
+		certificateInfo->keyFile = clientKeyFile;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -99,11 +111,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caData = caData;
-    certificateInfo->certData = clientCertData;
-    certificateInfo->keyData = clientKeyData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caData.empty() || !clientCertData.empty() || !clientKeyData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caData = caData;
+		certificateInfo->certData = clientCertData;
+		certificateInfo->keyData = clientKeyData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
 	if(_useSsl) initSsl();
 }
@@ -112,14 +127,17 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 {
     _useSsl = useSsl;
     _verifyCertificate = verifyCertificate;
-    PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
-    certificateInfo->caFile = caFile;
-    certificateInfo->caData = caData;
-    certificateInfo->certFile = clientCertFile;
-    certificateInfo->certData = clientCertData;
-    certificateInfo->keyFile = clientKeyFile;
-    certificateInfo->keyData = clientKeyData;
-    _certificates.emplace("*", certificateInfo);
+	if(!caFile.empty() || !caData.empty() || !clientCertFile.empty() || !clientCertData.empty() || !clientKeyFile.empty() || !clientKeyData.empty())
+	{
+		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
+		certificateInfo->caFile = caFile;
+		certificateInfo->caData = caData;
+		certificateInfo->certFile = clientCertFile;
+		certificateInfo->certData = clientCertData;
+		certificateInfo->keyFile = clientKeyFile;
+		certificateInfo->keyData = clientKeyData;
+		_certificates.emplace("*", certificateInfo);
+	}
 
     if(_useSsl) initSsl();
 }
@@ -127,6 +145,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 {
 	_bl = baseLib;
+	_connecting = false;
 
 	_stopServer = false;
 	_isServer = true;
@@ -137,13 +156,19 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_dhParamData = serverInfo.dhParamData;
 	_requireClientCert = serverInfo.requireClientCert;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
+    _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
+
+    _serverThreads.resize(serverInfo.serverThreads);
 }
 
 TcpSocket::~TcpSocket()
 {
 	_stopServer = true;
-	_bl->threadManager.join(_serverThread);
+    for(auto& serverThread : _serverThreads)
+    {
+        _bl->threadManager.join(serverThread);
+    }
 
 	_bl->fileDescriptorManager.close(_socketDescriptor);
     freeCredentials();
@@ -176,7 +201,10 @@ std::string TcpSocket::getIpAddress()
 		_listenPort = port;
 		bindSocket();
 		listenAddress = _ipAddress;
-		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
+        for(auto& serverThread : _serverThreads)
+        {
+            _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+        }
 	}
 
 	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort)
@@ -191,7 +219,10 @@ std::string TcpSocket::getIpAddress()
 		bindSocket();
 		listenAddress = _ipAddress;
 		listenPort = _boundListenPort;
-		_bl->threadManager.start(_serverThread, true, &TcpSocket::serverThread, this);
+        for(auto& serverThread : _serverThreads)
+        {
+            _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+        }
 	}
 
 	void TcpSocket::stopServer()
@@ -202,7 +233,10 @@ std::string TcpSocket::getIpAddress()
 	void TcpSocket::waitForServerStopped()
 	{
 		_stopServer = true;
-		_bl->threadManager.join(_serverThread);
+        for(auto& serverThread : _serverThreads)
+        {
+            _bl->threadManager.join(serverThread);
+        }
 
 		_bl->fileDescriptorManager.close(_socketDescriptor);
         freeCredentials();
@@ -316,10 +350,7 @@ std::string TcpSocket::getIpAddress()
 			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
 		}
 		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
-		do
-		{
-			result = gnutls_handshake(fileDescriptor->tlsSession);
-		} while (result < 0 && gnutls_error_is_fatal(result) == 0);
+		result = gnutls_handshake(fileDescriptor->tlsSession);
 		if(result < 0)
 		{
 			_bl->fileDescriptorManager.shutdown(fileDescriptor);
@@ -347,14 +378,17 @@ std::string TcpSocket::getIpAddress()
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(BaseLib::Exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(...)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
@@ -371,19 +405,26 @@ std::string TcpSocket::getIpAddress()
 			}
 
 			clientData->socket->proofwrite((char*)packet.data(), packet.size());
-			if(closeConnection) _bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(closeConnection)
+			{
+				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+			}
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(BaseLib::Exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		catch(...)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
@@ -396,17 +437,23 @@ std::string TcpSocket::getIpAddress()
 	void TcpSocket::serverThread()
 	{
 		int32_t result = 0;
+        int32_t socketDescriptor = -1;
+        std::map<int32_t, PTcpClientData> clients;
 		while(!_stopServer)
 		{
 			try
 			{
-				if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
-				{
-					if(_stopServer) break;
-					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-					bindSocket();
-					continue;
-				}
+                {
+                    std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
+                    if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
+                    {
+                        if(_stopServer) break;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+                        bindSocket();
+                        continue;
+                    }
+                    socketDescriptor = _socketDescriptor->descriptor;
+                }
 
 				timeval timeout;
 				timeout.tv_sec = 0;
@@ -417,12 +464,11 @@ std::string TcpSocket::getIpAddress()
 				{
 					auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
 					fileDescriptorGuard.lock();
-					maxfd = _socketDescriptor->descriptor;
-					FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
+					maxfd = socketDescriptor;
+					FD_SET(socketDescriptor, &readFileDescriptor);
 
 					{
-						std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-						for(auto& client : _clients)
+						for(auto& client : clients)
 						{
 							if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
 							FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
@@ -434,7 +480,11 @@ std::string TcpSocket::getIpAddress()
 				result = select(maxfd + 1, &readFileDescriptor, NULL, NULL, &timeout);
 				if(result == 0)
 				{
-					if(HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) collectGarbage();
+					if(HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections)
+                    {
+                        collectGarbage();
+                        collectGarbage(clients);
+                    }
 					continue;
 				}
 				else if(result == -1)
@@ -444,11 +494,11 @@ std::string TcpSocket::getIpAddress()
 					continue;
 				}
 
-				if (FD_ISSET(_socketDescriptor->descriptor, &readFileDescriptor) && !_stopServer)
+				if (FD_ISSET(socketDescriptor, &readFileDescriptor) && !_stopServer)
 				{
 					struct sockaddr_storage clientInfo;
 					socklen_t addressSize = sizeof(addressSize);
-					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(_socketDescriptor->descriptor, (struct sockaddr *) &clientInfo, &addressSize));
+					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *) &clientInfo, &addressSize));
 					if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
 
 					try
@@ -473,6 +523,7 @@ std::string TcpSocket::getIpAddress()
 							collectGarbage();
 							if(_clients.size() > _maxConnections)
 							{
+                                _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString);
 								_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
 								continue;
 							}
@@ -480,16 +531,16 @@ std::string TcpSocket::getIpAddress()
 
 						int32_t currentClientId = 0;
 
+                        if(_stopServer)
+                        {
+                            _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+                            continue;
+                        }
+
+                        if(_useSsl) initClientSsl(clientFileDescriptor);
+
 						{
-							std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-							if(_stopServer)
-							{
-								_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-								continue;
-							}
-
-							if(_useSsl) initClientSsl(clientFileDescriptor);
-
+                            std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 							currentClientId = _currentClientId++;
 
 							PTcpClientData clientData = std::make_shared<TcpClientData>();
@@ -500,6 +551,7 @@ std::string TcpSocket::getIpAddress()
 							clientData->socket->setWriteTimeout(15000000);
 
 							_clients[currentClientId] = clientData;
+                            clients[currentClientId] = clientData;
 						}
 
 						if(_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
@@ -524,8 +576,7 @@ std::string TcpSocket::getIpAddress()
 
 				PTcpClientData clientData;
 				{
-					std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-					for(auto& client : _clients)
+					for(auto& client : clients)
 					{
 						if(client.second->fileDescriptor->descriptor == -1) continue;
 						if(FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor))
@@ -551,6 +602,7 @@ std::string TcpSocket::getIpAddress()
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 			}
 		}
+        std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
 		_bl->fileDescriptorManager.close(_socketDescriptor);
 	}
 
@@ -571,6 +623,21 @@ std::string TcpSocket::getIpAddress()
 			_clients.erase(client);
 		}
 	}
+
+    void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData>& clients)
+    {
+        std::vector<int32_t> clientsToRemove;
+        {
+            for(auto& client : clients)
+            {
+                if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
+            }
+        }
+        for(auto& client : clientsToRemove)
+        {
+            clients.erase(client);
+        }
+    }
 // }}}
 
 PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort)
@@ -650,7 +717,11 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 	listenPort = addressInfo.sin_port;
 
 	if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
-	else if(listenAddress == "::") listenAddress = Net::getMyIp6Address();
+	else if(listenAddress == "::")
+	{
+
+		listenAddress = Net::getMyIp6Address();
+	}
 	return socketDescriptor;
 }
 
@@ -722,9 +793,9 @@ void TcpSocket::initSsl()
 
     if(_certificates.empty())
     {
-        if((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer))
+        if(_requireClientCert && _isServer)
         {
-            throw SocketSSLException("No CA certificates specified.");
+            throw SocketSSLException("No CA certificates specified (1).");
         }
 
         if(!_isServer)
@@ -792,7 +863,7 @@ void TcpSocket::initSsl()
             gnutls_certificate_free_credentials(x509Credentials);
             x509Credentials = nullptr;
 			freeCredentials();
-            throw SocketSSLException("No CA certificates specified.");
+            throw SocketSSLException("No CA certificates specified (2).");
         }
 
         if(_isServer)
@@ -884,23 +955,27 @@ void TcpSocket::initSsl()
 
 void TcpSocket::open()
 {
+	_connecting = true;
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
 	else if(!connected())
 	{
 		close();
 		getSocketDescriptor();
 	}
+	_connecting = false;
 }
 
 void TcpSocket::autoConnect()
 {
 	if(!_autoConnect) return;
+	_connecting = true;
 	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) getSocketDescriptor();
 	else if(!connected())
 	{
 		close();
 		getSocketDescriptor();
 	}
+	_connecting = false;
 }
 
 void TcpSocket::close()
@@ -967,7 +1042,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(bytesRead == 0)
 	{
 		_readMutex.unlock();
-		throw SocketTimeOutException("Reading from socket timed out.");
+		throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
 	}
 	if(bytesRead != 1)
 	{
@@ -993,7 +1068,11 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(bytesRead <= 0)
 	{
 		_readMutex.unlock();
-		if(bytesRead == -1) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+		if(bytesRead == -1)
+		{
+			if(errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
+			else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+		}
 		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();
@@ -1247,7 +1326,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 
 bool TcpSocket::connected()
 {
-	if(!_socketDescriptor || _socketDescriptor->descriptor < 0) return false;
+	if(!_socketDescriptor || _socketDescriptor->descriptor < 0 || _connecting) return false;
 	char buffer[1];
 	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
 	return true;

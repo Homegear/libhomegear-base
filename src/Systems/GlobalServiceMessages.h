@@ -28,74 +28,61 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef GLOBALSERVICEMESSAGES_H_
+#define GLOBALSERVICEMESSAGES_H_
 
-#include <memory>
+#include "../Variable.h"
+#include "../Sockets/RpcClientInfo.h"
+#include "../Encoding/RpcDecoder.h"
+#include "../Encoding/RpcEncoder.h"
+
+#include <mutex>
 
 namespace BaseLib
 {
 
-namespace Security
-{
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
-}
+class SharedObjects;
 
-enum class RpcClientType
+namespace Systems
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
-
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
-
-class RpcClientInfo
+class GlobalServiceMessages
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
+    GlobalServiceMessages();
+    virtual ~GlobalServiceMessages();
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
+    void init(BaseLib::SharedObjects* baseLib);
+    void load();
 
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
+    void set(int32_t familyId, int32_t messageId, int32_t timestamp, std::string message, PVariable data = PVariable(), int64_t value = 0);
+    void unset(int32_t familyId, int32_t messageId, std::string message);
+
+    std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
+protected:
+    struct ServiceMessage
+    {
+        uint64_t databaseId = 0;
+        int32_t familyId = 0;
+        int32_t messageId = 0;
+        int32_t timestamp = 0;
+        std::string message;
+        int64_t value = 0;
+        PVariable data;
+    };
+    typedef std::shared_ptr<ServiceMessage> PServiceMessage;
+    typedef int32_t FamilyId;
+    typedef int32_t MessageId;
+    typedef std::string MessageType;
+
+    BaseLib::SharedObjects* _bl = nullptr;
+
+    std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
+    std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
+
+    std::mutex _serviceMessagesMutex;
+    std::unordered_map<FamilyId, std::unordered_map<MessageId, std::unordered_map<MessageType, PServiceMessage>>> _serviceMessages;
 };
 
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
 }
-
+}
 #endif

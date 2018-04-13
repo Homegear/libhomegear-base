@@ -50,6 +50,7 @@
 #include <grp.h>
 
 #include <gcrypt.h>
+#include <unordered_set>
 
 namespace BaseLib
 {
@@ -323,20 +324,21 @@ public:
 	}
 
 	/**
-	 * Checks if a string is alphanumeric ('_' and '-' are also regarded alphanumeric).
+	 * Checks if a string is alphanumeric
 	 *
 	 * @see isNotAlphaNumeric()
 	 * @see stripNonAlphaNumeric
 	 * @param s The string to check.
+	 * @param additionalCharacters Additional characters to accept.
 	 * @return Returns true if the string is alphanumeric, or contains '_' or '-', otherwise false.
 	 */
-	static bool isAlphaNumeric(std::string& s)
+	static bool isAlphaNumeric(std::string& s, std::unordered_set<char> additionalCharacters = std::unordered_set<char>())
 	{
 		return find_if
 		(
 			s.begin(),
 			s.end(),
-			[](const char c){ return !(isalpha(c) || isdigit(c) || (c == '_') || (c == '-')); }
+			[&](const char c){ return !(isalpha(c) || isdigit(c) || additionalCharacters.find(c) != additionalCharacters.end()); }
 		) == s.end();
 	}
 

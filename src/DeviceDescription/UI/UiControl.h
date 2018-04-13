@@ -28,74 +28,54 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef UICONTROL_H_
+#define UICONTROL_H_
 
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+#include <string>
+#include <map>
 #include <memory>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-namespace Security
-{
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
-}
+class SharedObjects;
 
-enum class RpcClientType
+namespace DeviceDescription
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
 
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
+class UiControl;
+class HomegearUiElement;
 
-class RpcClientInfo
+typedef std::shared_ptr<UiControl> PUiControl;
+
+class UiControl
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
+    UiControl(BaseLib::SharedObjects* baseLib);
+    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiControl(UiControl const& rhs);
+    virtual ~UiControl() = default;
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
+    UiControl& operator=(const UiControl& rhs);
 
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
+    //Attributes
+    std::string id;
+
+    //Elements
+    int32_t posX = -1;
+    int32_t posY = -1;
+    int32_t colWidth = 1;
+
+    //Helpers
+    std::shared_ptr<HomegearUiElement> uiElement;
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
 };
 
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

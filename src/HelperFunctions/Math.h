@@ -212,7 +212,7 @@ public:
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the integer or "0" on error.
 	 */
-	static int32_t getNumber(std::string& s, bool isHex = false);
+	static int32_t getNumber(const std::string& s, bool isHex = false);
 
 	/**
 	 * Converts a string (decimal or hexadecimal) to an 64-bit integer.
@@ -225,7 +225,7 @@ public:
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the integer or "0" on error.
 	 */
-	static int64_t getNumber64(std::string& s, bool isHex = false);
+	static int64_t getNumber64(const std::string& s, bool isHex = false);
 
 	/**
 	 * Converts a octal string to an integer.
@@ -237,7 +237,7 @@ public:
 	 * @param s The string to convert.
 	 * @return Returns the integer or "0" on error.
 	 */
-	static int32_t getOctalNumber(std::string& s);
+	static int32_t getOctalNumber(const std::string& s);
 
 	/**
 	 * Converts a hexadecimal character to an integer.
@@ -262,7 +262,7 @@ public:
 	 * @param isHex Set this parameter to "true", if the string is hexadecimal (default false). If the string is prefixed with "0x", it is automatically detected as hexadecimal.
 	 * @return Returns the unsigned integer or "0" on error.
 	 */
-	static uint32_t getUnsignedNumber(std::string &s, bool isHex = false);
+	static uint32_t getUnsignedNumber(const std::string &s, bool isHex = false);
 
 	/*
 	 * Converts a float value to it's IEEE 754 binary32 representation.
