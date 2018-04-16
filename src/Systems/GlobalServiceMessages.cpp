@@ -148,13 +148,13 @@ void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId, std::stri
                         messageIdIterator->second.erase(messageIterator);
 
                         _bl->db->deleteGlobalServiceMessage(familyId, messageId, message);
+
+                        if(messageIdIterator->second.empty()) familyIterator->second.erase(messageIdIterator);
                     }
-
-                    if(messageIdIterator->second.empty()) familyIterator->second.erase(messageIdIterator);
                 }
-            }
 
-            if(familyIterator->second.empty()) _serviceMessages.erase(familyId);
+                if(familyIterator->second.empty()) _serviceMessages.erase(familyId);
+            }
         }
     }
     catch(const std::exception& ex)
