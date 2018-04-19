@@ -51,7 +51,19 @@ public:
 class SocketTimeOutException : public SocketOperationException
 {
 public:
+	enum class SocketTimeOutType
+	{
+		undefined,
+		selectTimeout,
+		readTimeout
+	};
+
 	SocketTimeOutException(std::string message) : SocketOperationException(message) {}
+	SocketTimeOutException(std::string message, SocketTimeOutType type) : SocketOperationException(message), _type(type) {}
+
+	SocketTimeOutType getType() { return _type; }
+private:
+	SocketTimeOutType _type = SocketTimeOutType::undefined;
 };
 
 class SocketClosedException : public SocketOperationException

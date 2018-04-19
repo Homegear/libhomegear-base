@@ -47,12 +47,10 @@ void Output::setErrorCallback(std::function<void(int32_t, std::string)>* errorCa
 
 Output::Output()
 {
-	_bl = nullptr;
 }
 
 Output::~Output()
 {
-
 }
 
 void Output::init(SharedObjects* baseLib)

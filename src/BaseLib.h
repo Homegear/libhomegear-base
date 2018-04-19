@@ -61,6 +61,7 @@
 #include "DeviceDescription/Devices.h"
 #include "DeviceDescription/DeviceTranslations.h"
 #include "ScriptEngine/ScriptInfo.h"
+#include "Security/Acls.h"
 #include "Security/Hash.h"
 #include "Security/Mac.h"
 #include "Security/Gcrypt.h"
@@ -69,6 +70,7 @@
 #include "Sockets/ServerInfo.h"
 #include "Sockets/RpcClientInfo.h"
 #include "Systems/DeviceFamily.h"
+#include "Systems/GlobalServiceMessages.h"
 #include "Systems/Peer.h"
 #include "Systems/SystemFactory.h"
 #include "Systems/UpdateInfo.h"
@@ -168,6 +170,11 @@ public:
 	 * The thread manager.
 	 */
 	ThreadManager threadManager;
+
+	/**
+	 * Global service messages.
+	 */
+	Systems::GlobalServiceMessages globalServiceMessages;
 
 	/**
 	 * Main constructor.

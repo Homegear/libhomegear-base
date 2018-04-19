@@ -447,7 +447,7 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 			pos++;
 			return;
 		}
-		else if((unsigned)c < 0x20) throw JsonDecoderException("Invalid character in string.");
+		else if((unsigned)c < 0x20) throw JsonDecoderException("Invalid character in string: " + std::to_string((int32_t)c) + ". String so far: " + s);
 		else s.push_back(json[pos]);
 		pos++;
 	}

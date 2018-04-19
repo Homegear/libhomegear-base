@@ -136,6 +136,16 @@ public:
 	 */
 	bool equals(std::vector<uint8_t>& value) noexcept;
 
+	bool hasCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories.find(id) != _categories.end(); }
+	void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); }
+	void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); }
+    std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
+	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
+	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
+
+    uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
+    void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
+
 	/**
 	 * The id of this parameter in the database.
 	 */
@@ -145,13 +155,16 @@ public:
 	 * The RPC parameter as defined in the XML file.
 	 */
 	DeviceDescription::PParameter rpcParameter;
-
 private:
 	std::mutex _logicalDataMutex;
 	BaseLib::PVariable _logicalData;
 	std::mutex _binaryDataMutex;
 	std::vector<uint8_t> _binaryData;
 	std::vector<uint8_t> _partialBinaryData;
+    std::mutex _categoriesMutex;
+	std::set<uint64_t> _categories;
+    std::mutex _roomMutex;
+    uint64_t _room = 0;
 };
 
 class ConfigDataBlock
@@ -263,8 +276,8 @@ public:
 	std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>>> linksCentral;
 	std::shared_ptr<ServiceMessages> serviceMessages;
 
-	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentID, IPeerEventSink* eventHandler);
-	Peer(BaseLib::SharedObjects* baseLib, int32_t id, int32_t address, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* eventHandler);
+	Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler);
 	virtual ~Peer();
 	virtual void dispose();
 
@@ -289,20 +302,30 @@ public:
 	virtual void setFirmwareVersionString(std::string value) { _firmwareVersionString = value; saveVariable(1003, value); }
 	virtual uint32_t getDeviceType() { return _deviceType; }
 	virtual void setDeviceType(uint32_t value) { _deviceType = value; saveVariable(1002, (int32_t)_deviceType); initializeTypeString(); }
-    virtual std::string getName() { return _name; }
-	virtual void setName(std::string value) { _name = value; saveVariable(1000, _name); }
+    virtual std::string getName() { return getName(-1); }
+	virtual std::string getName(int32_t channel);
+	virtual void setName(std::string value) { setName(-1, value); }
+	virtual void setName(int32_t channel, std::string value);
 	virtual std::string getIp() { return _ip; }
 	virtual void setIp(std::string value) { _ip = value; saveVariable(1004, value); }
 	virtual std::string getIdString() { return _idString; }
 	virtual void setIdString(std::string value) { _idString = value; saveVariable(1005, value); }
 	virtual std::string getTypeString() { return _typeString; }
 	virtual void setTypeString(std::string value) { _typeString = value; saveVariable(1006, value); }
-	virtual uint64_t getRoom() { return _room; }
-	virtual void setRoom(uint64_t value) { _room = value; saveVariable(1007, (int64_t)value); }
-	virtual std::set<uint64_t> getCategories() { return _categories; }
-	virtual bool hasCategory(uint64_t value) { return _categories.find(value) != _categories.end(); }
-	virtual void addCategory(uint64_t value) { _categories.emplace(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
-	virtual void removeCategory(uint64_t value) { _categories.erase(value); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } std::string categoryString = categories.str(); saveVariable(1008, categoryString); }
+    virtual std::set<int32_t> getChannelsInRoom(uint64_t roomId);
+	virtual uint64_t getRoom(int32_t channel);
+    virtual bool hasRoomInChannels(uint64_t roomId);
+	bool roomsSet();
+	virtual bool setRoom(int32_t channel, uint64_t value);
+    virtual std::unordered_map<int32_t, std::set<uint64_t>> getCategories();
+	virtual std::set<uint64_t> getCategories(int32_t channel);
+    virtual std::set<int32_t> getChannelsInCategory(uint64_t categoryId);
+	virtual bool hasCategories();
+	virtual bool hasCategories(int32_t channel);
+	virtual bool hasCategory(int32_t channel, uint64_t id);
+    virtual bool hasCategoryInChannels(uint64_t categoryId);
+	virtual bool addCategory(int32_t channel, uint64_t id);
+	virtual bool removeCategory(int32_t channel, uint64_t id);
     //End
 
 	virtual std::string getRpcTypeString() { return _rpcTypeString; }
@@ -318,6 +341,16 @@ public:
 	virtual int32_t getNewFirmwareVersion() = 0;
 	virtual std::string getFirmwareVersionString(int32_t firmwareVersion) = 0;
     virtual bool firmwareUpdateAvailable() = 0;
+
+    virtual bool setVariableRoom(int32_t channel, std::string& variableName, uint64_t roomId);
+	virtual void removeRoomFromVariables(uint64_t roomId);
+    virtual uint64_t getVariableRoom(int32_t channel, const std::string& variableName);
+    virtual bool addCategoryToVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+    virtual bool removeCategoryFromVariable(int32_t channel, std::string& variableName, uint64_t categoryId);
+	virtual void removeCategoryFromVariables(uint64_t categoryId);
+    virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
+    virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
+	virtual bool variableHasCategories(int32_t channel, const std::string& variableName);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
@@ -365,7 +398,7 @@ public:
     //RPC methods
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo);
-	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly);
+	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name);
 	virtual std::shared_ptr<std::vector<PVariable>> getDeviceDescriptions(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields);
     virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel, std::map<std::string, bool> fields);
@@ -374,14 +407,16 @@ public:
     virtual PVariable getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
 	virtual PVariable setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel, std::string name, std::string description);
 	virtual PVariable getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool returnID);
-    virtual PVariable getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
-    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, PParameterGroup parameterSet);
-    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+    virtual PVariable getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
+    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, PParameterGroup parameterSet, bool checkAcls);
+    virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
-    virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing = false) = 0;
+    virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
+    virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
+    virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing = false) = 0;
     virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
     virtual PVariable rssiInfo(PRpcClientInfo clientInfo);
 
@@ -415,7 +450,8 @@ protected:
 	uint32_t _deviceType = 0;
 	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
-	std::string _name;
+	std::mutex _namesMutex;
+	std::unordered_map<int32_t, std::string> _names;
 	std::string _ip;
 	std::string _idString;
 
@@ -425,8 +461,10 @@ protected:
 	 */
 	std::string _typeString;
 
-	uint64_t _room = 0;
-	std::set<uint64_t> _categories;
+    std::mutex _roomMutex;
+	std::unordered_map<int32_t, uint64_t> _rooms;
+    std::mutex _categoriesMutex;
+	std::unordered_map<int32_t, std::set<uint64_t>> _categories;
 	//End
 
 	/*
@@ -485,7 +523,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t index = -1);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

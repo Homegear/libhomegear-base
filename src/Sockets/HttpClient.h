@@ -166,6 +166,24 @@ public:
 	 * @param[out] data The data returned.
 	 */
 	void get(const std::string& path, Http& data);
+
+	/*
+	 * Sends an HTTP POST request and returns the response.
+	 *
+	 * @param[in] url The path to post to.
+	 * @param[in] dataIn The POST data.
+	 * @param[out] dataOut The data returned.
+	 */
+	void post(const std::string& path, std::string& dataIn, std::string& dataOut);
+
+	/*
+	 * Sends an HTTP POST request and returns the response.
+	 *
+	 * @param[in] url The path to post to.
+	 * @param[in] dataIn The POST data.
+	 * @param[out] dataOut The data returned.
+	 */
+	void post(const std::string& path, std::string& dataIn, Http& dataOut);
 protected:
 	/**
 	 * The common base library object.

@@ -28,74 +28,58 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef RPCCLIENTINFO_H_
-#define RPCCLIENTINFO_H_
+#ifndef HOMEGEARUIELEMENTS_H_
+#define HOMEGEARUIELEMENTS_H_
 
+#include "HomegearUiElement.h"
+
+#include <string>
 #include <memory>
+#include <unordered_map>
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
 
-namespace Security
-{
-    class Acls;
-    typedef std::shared_ptr<Acls> PAcls;
-}
+class SharedObjects;
 
-enum class RpcClientType
+namespace DeviceDescription
 {
-	generic,
-	ipsymcon,
-	ccu2,
-	homematicconfigurator
-};
 
-enum class RpcType
-{
-	unknown,
-	xml,
-	binary,
-	json,
-	websocket,
-	mqtt,
-	rest
-};
+class HomegearUiElements;
 
-class RpcClientInfo
+/**
+ * Helper type for HomegearDeviceTranslation pointers.
+ */
+typedef std::shared_ptr<HomegearUiElements> PHomegearUiElements;
+
+/**
+ * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
+ */
+class HomegearUiElements
 {
 public:
-	int32_t id = -1;
-	bool closed = false;
-	bool addon = false;
-	bool flowsServer = false;
-	bool scriptEngineServer = false;
-    bool ipcServer = false;
-    bool mqttClient = false;
-    bool familyModule = false;
-	std::string webSocketClientId;
-	std::string address;
-	int32_t port = 0;
-	std::string initUrl;
-	std::string initInterfaceId;
-	std::string language = "en-US";
-	std::string user;
-	Security::PAcls acls;
+    HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
+    virtual ~HomegearUiElements() = default;
 
-	RpcType rpcType = RpcType::unknown;
-	RpcClientType clientType = RpcClientType::generic;
-	bool initKeepAlive = false;
-	bool initBinaryMode = false;
-	bool initNewFormat = false;
-	bool initSubscribePeers = false;
-	bool initJsonMode = false;
-	bool initSendNewDevices = true;
+    std::unordered_map<std::string, PHomegearUiElement>& getUiElements() { return _uiElements; };
 
-	RpcClientInfo() = default;
-	virtual ~RpcClientInfo() = default;
+    //{{{ XML entries
+    std::string lang;
+    //}}}
+
+    bool loaded() { return _loaded; }
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
+    bool _loaded = false;
+    std::unordered_map<std::string, PHomegearUiElement> _uiElements;
+
+    void load(std::string xmlFilename);
+    void parseXML(xml_node<>* node);
 };
-
-typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
-
+}
 }
 
 #endif

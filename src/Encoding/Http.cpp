@@ -378,14 +378,18 @@ Http::~Http()
 PVariable Http::serialize()
 {
 	PVariable data(new Variable(VariableType::tArray));
-	data->arrayValue->push_back(PVariable(new Variable((int32_t)_type)));						// 0
-	data->arrayValue->push_back(PVariable(new Variable(_finished)));							// 1
-	data->arrayValue->push_back(PVariable(new Variable(_headerProcessingStarted)));				// 2
-	data->arrayValue->push_back(PVariable(new Variable(_dataProcessingStarted)));				// 3
-	data->arrayValue->push_back(PVariable(new Variable(_content)));								// 4
-	data->arrayValue->push_back(PVariable(new Variable(_rawHeader)));							// 5
-	data->arrayValue->push_back(PVariable(new Variable(_header.remoteAddress)));				// 6
-	data->arrayValue->push_back(PVariable(new Variable(_header.remotePort)));					// 7
+	data->arrayValue->reserve(11);
+	data->arrayValue->emplace_back(std::make_shared<Variable>((int32_t)_type));						// 0
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_finished));							// 1
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_headerProcessingStarted));			// 2
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_dataProcessingStarted));				// 3
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_content));							// 4
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_rawHeader));							// 5
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_header.remoteAddress));				// 6
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_header.remotePort));					// 7
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectUrl));						// 8
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectQueryString));				// 9
+	data->arrayValue->emplace_back(std::make_shared<Variable>(_redirectStatus));					// 10
 	return data;
 }
 
@@ -400,6 +404,9 @@ void Http::unserialize(PVariable data)
 	_rawHeader.insert(_rawHeader.end(), data->arrayValue->at(5)->binaryValue.begin(), data->arrayValue->at(5)->binaryValue.end());
 	_header.remoteAddress = data->arrayValue->at(6)->stringValue;
 	_header.remotePort = data->arrayValue->at(7)->integerValue;
+	_redirectUrl = data->arrayValue->at(8)->stringValue;
+	_redirectQueryString = data->arrayValue->at(9)->stringValue;
+	_redirectStatus = data->arrayValue->at(10)->integerValue;
 
 	int32_t headerSize = _rawHeader.size();
 	char* pHeader = &(_rawHeader.at(0));
@@ -511,20 +518,20 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 
 	_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + headerSize);
 
-	char* headerBuffer = &_rawHeader.at(0);
-	end = &_rawHeader.at(0) + _rawHeader.size();
+	char* headerBuffer = _rawHeader.data();
+	end = _rawHeader.data() + _rawHeader.size();
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
-	if(!strncmp(headerBuffer, "HTTP/", 5))
+	if(headerSize >= 5 && !strncmp(headerBuffer, "HTTP/", 5))
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
 	}
-	else
+	else if(headerSize >= 10)
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
-		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (1).");
 		_type = Type::Enum::request;
 		_header.method = std::string(headerBuffer, endPos);
 	}
@@ -538,7 +545,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 		if(!newlinePos || newlinePos > end) throw HttpException("Could not parse HTTP header.");
 
 		char* endPos = (char*)HelperFunctions::memrchr(headerBuffer + startPos, ' ', newlinePos - (headerBuffer + startPos));
-		if(!endPos) throw HttpException("Your client sent a request that this server could not understand.");
+		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (2).");
 
 		_header.path = std::string(headerBuffer + startPos, (int32_t)(endPos - headerBuffer - startPos));
 		int32_t pos = _header.path.find('?');

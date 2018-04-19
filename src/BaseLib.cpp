@@ -46,6 +46,7 @@ SharedObjects::SharedObjects(bool testMaxThreadCount)
 	io.init(this);
 	settings.init(this);
 	out.init(this);
+	globalServiceMessages.init(this);
 }
 
 SharedObjects::~SharedObjects()
