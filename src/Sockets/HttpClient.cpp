@@ -106,6 +106,7 @@ void HttpClient::get(const std::string& path, Http& http)
 
 void HttpClient::sendRequest(const std::string& request, Http& http, bool responseIsHeaderOnly)
 {
+	_rawContent.clear();
 	if(request.empty()) throw HttpClientException("Request is empty.");
 
 	_socketMutex.lock();
@@ -200,6 +201,13 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
 			}
+
+			if(_keepRawContent)
+			{
+				if(_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
+				_rawContent.insert(_rawContent.end(), buffer, buffer + receivedBytes);
+			}
+
 			//We are using string functions to process the buffer. So just to make sure,
 			//they don't do something in the memory after buffer, we add '\0'
 			buffer[bufferPos + receivedBytes] = '\0';
