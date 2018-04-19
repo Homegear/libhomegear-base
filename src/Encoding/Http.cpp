@@ -516,7 +516,7 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
-	if(!strncmp(headerBuffer, "HTTP/1.", 7))
+	if(!strncmp(headerBuffer, "HTTP/", 5))
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
@@ -561,7 +561,8 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 		_header.path = decodeURL(_header.path);
 		HelperFunctions::stringReplace(_header.path, "../", "");
 
-		if(!strncmp(endPos + 1, "HTTP/1.1", 8)) _header.protocol = Http::Protocol::http11;
+		if(!strncmp(endPos + 1, "HTTP/2.0", 8)) _header.protocol = Http::Protocol::http20;
+		else if(!strncmp(endPos + 1, "HTTP/1.1", 8)) _header.protocol = Http::Protocol::http11;
 		else if(!strncmp(endPos + 1, "HTTP/1.0", 8)) _header.protocol = Http::Protocol::http10;
 		else throw HttpException("Your client is using a HTTP protocol version that this server cannot understand.");
 	}
@@ -619,6 +620,20 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 		_header.contentTypeFull = _header.contentType;
 		_header.contentType = HelperFunctions::splitFirst(_header.contentType, ';').first;
 		HelperFunctions::toLower(_header.contentType);
+	}
+	else if(!strnaicmp(name, "content-encoding", nameSize))
+	{
+		std::string s(value, valueSize);
+		s = s.substr(0, s.find(';'));
+		int32_t pos = 0;
+		while ((pos = s.find(',')) != (signed)std::string::npos || !s.empty())
+		{
+			std::string ce = (pos == (signed)std::string::npos) ? s : s.substr(0, pos);
+			HelperFunctions::trim(BaseLib::HelperFunctions::toLower(ce));
+			if(ce == "gzip") _header.contentEncoding = (ContentEncoding::Enum)(_header.contentEncoding | ContentEncoding::Enum::gzip);
+			else throw HttpException("Unknown value for HTTP header \"Content-Encoding\": " + std::string(value, valueSize));
+			if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
+		}
 	}
 	else if(!strnaicmp(name, "transfer-encoding", nameSize) || !strnaicmp(name, "te", nameSize))
 	{
@@ -689,6 +704,7 @@ void Http::reset()
 	_content.clear();
 	_rawHeader.clear();
 	_chunk.clear();
+	_chunkNewLineMissing = false;
 	_type = Type::Enum::none;
 	_finished = false;
 	_dataProcessingStarted = false;
@@ -723,6 +739,24 @@ int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
 		if(_content.size() + bufferLength > 104857600) throw HttpException("Data is larger than 100 MiB.");
 		if(_chunkSize == -1)
 		{
+			if(_chunkNewLineMissing)
+			{
+				if(*buffer == '\r' && bufferLength > 0)
+				{
+					buffer++;
+					bufferLength--;
+				}
+				if(*buffer == '\n' && bufferLength > 0)
+				{
+					buffer++;
+					bufferLength--;
+				}
+				if(bufferLength == 0)
+				{
+					setFinished();
+					break;
+				}
+			}
 			readChunkSize(&buffer, bufferLength);
 			if(_chunkSize == -1) break;
 		}
@@ -746,8 +780,8 @@ int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
 			bufferLength -= _crlf ? sizeToInsert + 2 : sizeToInsert + 1;
 			if(bufferLength < 0)
 			{
-				sizeToInsert += bufferLength;
-				bufferLength = 0;
+				_chunkNewLineMissing = true;
+				break;
 			}
 			buffer = _crlf ? buffer + sizeToInsert + 2 : buffer + sizeToInsert + 1;
 		}
@@ -769,7 +803,7 @@ void Http::readChunkSize(char** buffer, int32_t& bufferLength)
 		newlinePos = strchr(*buffer, '\n');
 		if(_partialChunkSize.empty() && newlinePos == *buffer) newlinePos = strchr(*buffer + 1, '\n'); //\n is first character
 		if(_partialChunkSize.empty() && newlinePos == *buffer + 1 && **buffer == '\r') newlinePos = strchr(*buffer + 2, '\n'); //\r is first character
-		if(!newlinePos || newlinePos >= *buffer + bufferLength) throw BaseLib::Exception("Could not parse chunk size.");
+		if(!newlinePos || newlinePos >= *buffer + bufferLength) throw BaseLib::Exception("Could not parse chunk size (1).");
 		std::string chunkSize = _partialChunkSize + std::string(*buffer, newlinePos - *buffer);
 		HelperFunctions::trim(_partialChunkSize);
 		if(!Math::isNumber(chunkSize, true)) throw BaseLib::Exception("Chunk size is no number.");
@@ -790,7 +824,7 @@ void Http::readChunkSize(char** buffer, int32_t& bufferLength)
 		if(!semicolonPos || semicolonPos >= *buffer + bufferLength)
 		{
 			_partialChunkSize = std::string(*buffer, bufferLength);
-			if(_partialChunkSize.size() > 8) throw HttpException("Could not parse chunk size.");
+			if(_partialChunkSize.size() > 8) throw HttpException("Could not parse chunk size (2).");
 		}
 		else
 		{
