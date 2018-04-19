@@ -72,15 +72,15 @@ public:
 	};
 	//End event handling
 
-	ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerID, std::string peerSerial, IServiceEventSink* eventHandler);
+	ServiceMessages(BaseLib::SharedObjects* baseLib, uint64_t peerId, std::string peerSerial, IServiceEventSink* eventHandler);
 	virtual ~ServiceMessages();
 
-	virtual void setPeerID(uint64_t peerID) { _peerID = peerID; }
+	virtual void setPeerId(uint64_t peerId) { _peerId = peerId; }
 	virtual void setPeerSerial(std::string peerSerial) { _peerSerial = peerSerial; }
 
 	virtual void load();
-	virtual void save(uint32_t index, bool value);
-	virtual void save(int32_t channel, std::string id, uint8_t value);
+	virtual void save(int32_t timestamp, uint32_t index, bool value);
+	virtual void save(int32_t timestamp, int32_t channel, std::string id, uint8_t value);
 	virtual bool set(std::string id, bool value);
 	virtual void set(std::string id, uint8_t value, uint32_t channel);
 	virtual std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, bool returnID);
@@ -97,20 +97,30 @@ public:
 
     virtual bool getLowbat() { return _lowbat; }
 protected:
+    struct ErrorInfo
+    {
+        int64_t timestamp = 0;
+        uint8_t value = 0;
+    };
+
     BaseLib::SharedObjects* _bl = nullptr;
     std::map<uint32_t, uint32_t> _variableDatabaseIDs;
-    uint64_t _peerID = 0;
+    uint64_t _peerId = 0;
     std::string _peerSerial;
     bool _disposing = false;
     bool _configPending = false;
+    int32_t _configPendingTime = 0;
     int64_t _configPendingSetTime = 0;
     int32_t _unreachResendCounter = 0;
     bool _unreach = false;
+    int32_t _unreachTime = 0;
 	bool _stickyUnreach = false;
+    int32_t _stickyUnreachTime = 0;
 	bool _lowbat = false;
+    int32_t _lowbatTime = 0;
 
 	std::mutex _errorMutex;
-	std::map<uint32_t, std::map<std::string, uint8_t>> _errors;
+	std::map<uint32_t, std::map<std::string, ErrorInfo>> _errors;
 
 	//Event handling
 	virtual void raiseConfigPending(bool configPending);

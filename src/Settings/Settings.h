@@ -65,7 +65,7 @@ public:
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
-	bool enableFlows() { return _enableFlows; }
+	bool enableNodeBlue() { return _enableNodeBlue; }
 	bool setDevicePermissions() { return _setDevicePermissions; }
 	std::string workingDirectory() { return _workingDirectory; }
 	std::string socketPath() { return _socketPath; }
@@ -94,12 +94,12 @@ public:
 	int32_t scriptEngineMaxScriptsPerProcess() { return _scriptEngineMaxScriptsPerProcess; }
     int32_t scriptEngineWatchdogTimeout() { return _scriptEngineWatchdogTimeout; }
 	bool scriptEngineManualClientStart() { return _scriptEngineManualClientStart; }
-	uint32_t flowsProcessingThreadCountServer() { return _flowsProcessingThreadCountServer; }
-	uint32_t flowsProcessingThreadCountNodes() { return _flowsProcessingThreadCountNodes; }
-	uint32_t flowsServerMaxConnections() { return _flowsServerMaxConnections; }
+	uint32_t nodeBlueProcessingThreadCountServer() { return _nodeBlueProcessingThreadCountServer; }
+	uint32_t nodeBlueProcessingThreadCountNodes() { return _nodeBlueProcessingThreadCountNodes; }
+	uint32_t nodeBlueServerMaxConnections() { return _nodeBlueServerMaxConnections; }
 	int32_t maxNodeThreadsPerProcess() { return _maxNodeThreadsPerProcess; }
-    int32_t flowsWatchdogTimeout() { return _flowsWatchdogTimeout; }
-	bool flowsManualClientStart() { return _flowsManualClientStart; }
+    int32_t nodeBlueWatchdogTimeout() { return _nodeBlueWatchdogTimeout; }
+	bool nodeBlueManualClientStart() { return _nodeBlueManualClientStart; }
 	uint32_t ipcThreadCount() { return _ipcThreadCount; }
 	uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
 	uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -128,18 +128,27 @@ public:
 	uint32_t scriptPathPermissions() { return _scriptPathPermissions; }
 	std::string scriptPathUser() { return _scriptPathUser; }
 	std::string scriptPathGroup() { return _scriptPathGroup; }
-	std::string flowsPath() { return _flowsPath; }
-	uint32_t flowsPathPermissions() { return _flowsPathPermissions; }
-	std::string flowsPathUser() { return _flowsPathUser; }
-	std::string flowsPathGroup() { return _flowsPathGroup; }
-	std::string flowsDataPath() { return _flowsDataPath; }
-	uint32_t flowsDataPathPermissions() { return _flowsDataPathPermissions; }
-	std::string flowsDataPathUser() { return _flowsDataPathUser; }
-	std::string flowsDataPathGroup() { return _flowsDataPathGroup; }
+	std::string nodeBluePath() { return _nodeBluePath; }
+	uint32_t nodeBluePathPermissions() { return _nodeBluePathPermissions; }
+	std::string nodeBluePathUser() { return _nodeBluePathUser; }
+	std::string nodeBluePathGroup() { return _nodeBluePathGroup; }
+	std::string nodeBlueDataPath() { return _nodeBlueDataPath; }
+	uint32_t nodeBlueDataPathPermissions() { return _nodeBlueDataPathPermissions; }
+	std::string nodeBlueDataPathUser() { return _nodeBlueDataPathUser; }
+	std::string nodeBlueDataPathGroup() { return _nodeBlueDataPathGroup; }
 	bool nodeBlueDebugOutput() { return _nodeBlueDebugOutput; }
+	std::string adminUiPath() { return _adminUiPath; }
+	uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
+	std::string adminUiPathUser() { return _adminUiPathUser; }
+	std::string adminUiPathGroup() { return _adminUiPathGroup; }
+	std::string uiPath() { return _uiPath; }
+	uint32_t uiPathPermissions() { return _uiPathPermissions; }
+	std::string uiPathUser() { return _uiPathUser; }
+	std::string uiPathGroup() { return _uiPathGroup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
+	void setLockFilePath(std::string value) { _lockFilePath = value; }
 	uint32_t lockFilePathPermissions() { return _lockFilePathPermissions; }
 	std::string lockFilePathUser() { return _lockFilePathUser; }
 	std::string lockFilePathGroup() { return _lockFilePathGroup; }
@@ -173,7 +182,7 @@ private:
 	bool _enableMonitoring = true;
 	bool _devLog = false;
 	bool _enableCoreDumps = true;
-	bool _enableFlows = true;
+	bool _enableNodeBlue = true;
 	bool _setDevicePermissions = true;
 	std::string _workingDirectory;
 	std::string _socketPath;
@@ -201,12 +210,12 @@ private:
 	int32_t _scriptEngineMaxScriptsPerProcess = -1;
     int32_t _scriptEngineWatchdogTimeout = -1;
 	bool _scriptEngineManualClientStart = false;
-	uint32_t _flowsProcessingThreadCountServer = 10;
-	uint32_t _flowsProcessingThreadCountNodes = 10;
-	uint32_t _flowsServerMaxConnections = 20;
+	uint32_t _nodeBlueProcessingThreadCountServer = 10;
+	uint32_t _nodeBlueProcessingThreadCountNodes = 10;
+	uint32_t _nodeBlueServerMaxConnections = 20;
 	int32_t _maxNodeThreadsPerProcess = 80;
-	int32_t _flowsWatchdogTimeout = -1;
-	bool _flowsManualClientStart = false;
+	int32_t _nodeBlueWatchdogTimeout = -1;
+	bool _nodeBlueManualClientStart = false;
 	uint32_t _ipcThreadCount = 10;
 	uint32_t _ipcServerMaxConnections = 20;
 	uint32_t _cliServerMaxConnections = 50;
@@ -235,15 +244,23 @@ private:
 	uint32_t _scriptPathPermissions = 360;
 	std::string _scriptPathUser;
 	std::string _scriptPathGroup;
-	std::string _flowsPath;
-	uint32_t _flowsPathPermissions = 504;
-	std::string _flowsPathUser;
-	std::string _flowsPathGroup;
-	std::string _flowsDataPath;
-	uint32_t _flowsDataPathPermissions = 504;
-	std::string _flowsDataPathUser;
-	std::string _flowsDataPathGroup;
+	std::string _nodeBluePath;
+	uint32_t _nodeBluePathPermissions = 504;
+	std::string _nodeBluePathUser;
+	std::string _nodeBluePathGroup;
+	std::string _nodeBlueDataPath;
+	uint32_t _nodeBlueDataPathPermissions = 504;
+	std::string _nodeBlueDataPathUser;
+	std::string _nodeBlueDataPathGroup;
 	bool _nodeBlueDebugOutput = false;
+	std::string _adminUiPath;
+	uint32_t _adminUiPathPermissions = 504;
+	std::string _adminUiPathUser;
+	std::string _adminUiPathGroup;
+	std::string _uiPath;
+	uint32_t _uiPathPermissions = 504;
+	std::string _uiPathUser;
+	std::string _uiPathGroup;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;

@@ -122,6 +122,13 @@ public:
 	Type::Enum getType() { return _type; }
 	bool headerIsFinished() { return _header.parsed; }
 	bool isFinished() { return _finished; }
+	std::string getRedirectUrl() { return _redirectUrl; }
+	void setRedirectUrl(std::string value) { _redirectUrl = value; }
+	std::string getRedirectQueryString() { return _redirectQueryString; }
+	void setRedirectQueryString(std::string value) { _redirectQueryString = value; }
+	int32_t getRedirectStatus() { return _redirectStatus; }
+	void setRedirectStatus(int32_t value) { _redirectStatus = value; }
+
 
 	/**
 	 * This method sets _finished and terminates _content with a null character. Use it, when the header does not contain "Content-Length".
@@ -179,6 +186,9 @@ private:
 	size_t _contentStreamPos = 0;
 	std::map <std::string, std::string> _extMimeTypeMap;
 	std::map <int32_t, std::string> _statusCodeMap;
+	std::string _redirectUrl;
+	std::string _redirectQueryString;
+	int32_t _redirectStatus = -1;
 
 	int32_t processHeader(char** buffer, int32_t& bufferLength);
 	void processHeaderField(char* name, uint32_t nameSize, char* value, uint32_t valueSize);

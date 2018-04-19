@@ -2541,6 +2541,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					else if(propertyName == "needsTime") { if(propertyValue == "true") needsTime = true; }
 					else if(propertyName == "hasBattery") { if(propertyValue == "true") hasBattery = true; }
 					else if(propertyName == "addressSize") addressSize = Math::getUnsignedNumber(propertyValue);
+					else if(propertyName == "pairingMethod") pairingMethod = propertyValue;
 					else _bl->out.printWarning("Warning: Unknown device property: " + propertyName);
 				}
 				if(receiveModes == ReceiveModes::Enum::none) receiveModes = ReceiveModes::Enum::always;

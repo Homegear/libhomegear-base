@@ -39,6 +39,7 @@
 #include <mutex>
 #include <random>
 #include <vector>
+#include <regex>
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -49,6 +50,7 @@
 #include <grp.h>
 
 #include <gcrypt.h>
+#include <unordered_set>
 
 namespace BaseLib
 {
@@ -266,6 +268,17 @@ public:
 	}
 
 	/**
+	 * Replaces substrings within a string using regex.
+	 *
+	 * @param[in,out] haystack The string to search the substring in.
+	 * @param regex The regex to search.
+	 * @param replace The substring to replace "search" with.
+	 * @param ignoreCase Set to true, to ignore the case.
+	 * @return Returns a reference to the modified string.
+	 */
+	static std::string& regexReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
+
+	/**
 	 * Splits a string at the first occurrence of a delimiter.
 	 *
 	 * @see splitAll()
@@ -311,20 +324,21 @@ public:
 	}
 
 	/**
-	 * Checks if a string is alphanumeric ('_' and '-' are also regarded alphanumeric).
+	 * Checks if a string is alphanumeric
 	 *
 	 * @see isNotAlphaNumeric()
 	 * @see stripNonAlphaNumeric
 	 * @param s The string to check.
+	 * @param additionalCharacters Additional characters to accept.
 	 * @return Returns true if the string is alphanumeric, or contains '_' or '-', otherwise false.
 	 */
-	static bool isAlphaNumeric(std::string& s)
+	static bool isAlphaNumeric(std::string& s, std::unordered_set<char> additionalCharacters = std::unordered_set<char>())
 	{
 		return find_if
 		(
 			s.begin(),
 			s.end(),
-			[](const char c){ return !(isalpha(c) || isdigit(c) || (c == '_') || (c == '-')); }
+			[&](const char c){ return !(isalpha(c) || isdigit(c) || additionalCharacters.find(c) != additionalCharacters.end()); }
 		) == s.end();
 	}
 

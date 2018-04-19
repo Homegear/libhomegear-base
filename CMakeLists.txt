@@ -14,6 +14,16 @@ set(SOURCE_FILES
         src/DeviceDescription/HomeMatic/HmLogicalParameter.h
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.cpp
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.h
+        src/DeviceDescription/UI/UiElements.cpp
+        src/DeviceDescription/UI/UiElements.h
+        src/DeviceDescription/UI/HomegearUiElement.cpp
+        src/DeviceDescription/UI/HomegearUiElement.h
+        src/DeviceDescription/UI/HomegearUiElements.cpp
+        src/DeviceDescription/UI/HomegearUiElements.h
+        src/DeviceDescription/UI/UiControl.cpp
+        src/DeviceDescription/UI/UiControl.h
+        src/DeviceDescription/UI/UiVariable.cpp
+        src/DeviceDescription/UI/UiVariable.h
         src/DeviceDescription/BinaryPayload.cpp
         src/DeviceDescription/BinaryPayload.h
         src/DeviceDescription/DevicePacket.cpp
@@ -114,6 +124,8 @@ set(SOURCE_FILES
         src/Output/Output.cpp
         src/Output/Output.h
         src/ScriptEngine/ScriptInfo.h
+        src/Security/Acl.cpp
+        src/Security/Acl.h
         src/Security/Gcrypt.cpp
         src/Security/Gcrypt.h
         src/Security/Hash.cpp
@@ -145,6 +157,8 @@ set(SOURCE_FILES
         src/Systems/DeviceFamily.h
         src/Systems/FamilySettings.cpp
         src/Systems/FamilySettings.h
+        src/Systems/GlobalServiceMessages.cpp
+        src/Systems/GlobalServiceMessages.h
         src/Systems/ICentral.cpp
         src/Systems/ICentral.h
         src/Systems/IPhysicalInterface.cpp
@@ -175,6 +189,6 @@ set(SOURCE_FILES
         src/StateGuard.h
         src/Variable.cpp
         src/Variable.h
-        config.h)
+        config.h src/Security/Acls.cpp src/Security/Acls.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})
