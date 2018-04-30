@@ -54,6 +54,14 @@ public:
 class SerialReaderWriter : public IEventsEx
 {
 public:
+	enum class CharacterSize : tcflag_t
+	{
+		Five = CS5,
+		Six = CS6,
+		Seven = CS7,
+		Eight = CS8
+	};
+
 	// {{{ Event handling
 	class ISerialReaderWriterEventSink : public IEventSinkBase
 	{
@@ -88,8 +96,10 @@ public:
      * @param evenParity Enable parity checking using an even parity bit.
      * @param oddParity Enable parity checking using an odd parity bit. "evenParity" and "oddParity" are mutually exclusive.
      * @param events Enable events. This starts a thread which calls "lineReceived()" in a derived class for each received packet.
+     * @param characterSize Set the character Size.
+     * @param twoStopBits Enable two stop bits instead of one.
      */
-	void openDevice(bool parity, bool oddParity, bool events = true);
+	void openDevice(bool parity, bool oddParity, bool events = true, CharacterSize characterSize = CharacterSize::Eight, bool twoStopBits = false);
 
     /**
      * Closes the serial device.
@@ -155,7 +165,7 @@ protected:
 	std::thread _openDeviceThread;
 
 	void createLockFile();
-	void readThread(bool parity, bool oddParity);
+	void readThread(bool parity, bool oddParity, CharacterSize characterSize, bool twoStopBits);
 };
 
 }
