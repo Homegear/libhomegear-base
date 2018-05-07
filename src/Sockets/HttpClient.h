@@ -118,6 +118,18 @@ public:
 	void disconnect() { if(_socket) _socket->close(); }
 
 	/**
+	 * Enables storage of raw content. The raw content can be retrieved with getRawContent().
+	 * @param value Set to true to enable.
+	 */
+	void enableRawContent(bool value) { _keepRawContent = value; }
+
+	/**
+	 * Returns the raw content. Only available when enableRawContent() was set to true.
+	 * @return The raw respones as received from the HTTP server.
+	 */
+	std::vector<char>& getRawContent() { return _rawContent; }
+
+	/**
 	 * Returns the IP address of the HTTP server.
 	 * @return The IP address.
 	 */
@@ -204,6 +216,16 @@ protected:
 	 * Stores the information if the socket connection should be kept open after each request.
 	 */
 	bool _keepAlive = true;
+
+	/**
+	 * When true, the raw content is stored
+	 */
+	bool _keepRawContent = false;
+
+	/**
+	 * Stores the raw response
+	 */
+	std::vector<char> _rawContent;
 };
 
 }

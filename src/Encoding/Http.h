@@ -64,6 +64,10 @@ public:
 	{
 		enum Enum { none, request, response };
 	};
+	struct ContentEncoding
+	{
+		enum Enum { none = 0, gzip = 8 };
+	};
 	struct TransferEncoding
 	{
 		enum Enum { none = 0, chunked = 1, compress = 2, deflate = 4, gzip = 8, identity = 16 };
@@ -74,7 +78,7 @@ public:
 	};
 	struct Protocol
 	{
-		enum Enum { none, http10, http11 };
+		enum Enum { none, http10, http11, http20 };
 	};
 	struct Header
 	{
@@ -89,6 +93,7 @@ public:
 		std::string host;
 		std::string contentType;
 		std::string contentTypeFull;
+		ContentEncoding::Enum contentEncoding = ContentEncoding::Enum::none;
 		TransferEncoding::Enum transferEncoding = TransferEncoding::Enum::none;
 		Connection::Enum connection = Connection::Enum::none;
 		std::string authorization;
@@ -172,6 +177,7 @@ private:
 	Type::Enum _type = Type::Enum::none;
 	std::vector<char> _content;
 	std::vector<char> _chunk;
+	bool _chunkNewLineMissing = false;
 	bool _finished = false;
 	int32_t _chunkSize = -1;
 	int32_t _endChunkSizeBytes = -1;
