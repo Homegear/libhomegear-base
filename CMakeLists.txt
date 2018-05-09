@@ -22,6 +22,8 @@ set(SOURCE_FILES
         src/DeviceDescription/UI/HomegearUiElements.h
         src/DeviceDescription/UI/UiControl.cpp
         src/DeviceDescription/UI/UiControl.h
+        src/DeviceDescription/UI/UiIcon.cpp
+        src/DeviceDescription/UI/UiIcon.h
         src/DeviceDescription/UI/UiVariable.cpp
         src/DeviceDescription/UI/UiVariable.h
         src/DeviceDescription/BinaryPayload.cpp
