@@ -313,9 +313,9 @@ bool ServiceMessages::set(std::string id, bool value)
 		}
 		else //false == 0, a little dirty, but it works
 		{
-			std::lock_guard<std::mutex> errorGuard(_errorMutex);
             if(!value)
             {
+				std::lock_guard<std::mutex> errorGuard(_errorMutex);
                 auto channelIterator = _errors.find(0);
                 if(channelIterator != _errors.end())
                 {
@@ -430,17 +430,14 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel)
 	}
 	catch(const std::exception& ex)
     {
-		_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_errorMutex.unlock();
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
