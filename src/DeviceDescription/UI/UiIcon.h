@@ -28,19 +28,13 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARUIELEMENT_H_
-#define HOMEGEARUIELEMENT_H_
+#ifndef UIICON_H_
+#define UIICON_H_
 
-#include "UiVariable.h"
-#include "UiControl.h"
-#include "UiIcon.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
-#include "../../Variable.h"
-
 #include <string>
+#include <map>
 #include <memory>
-#include <unordered_map>
-#include <list>
 
 using namespace rapidxml;
 
@@ -52,55 +46,28 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class HomegearUiElement;
+class UiIcon;
 
-/**
- * Helper type for Packet pointers.
- */
-typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
+typedef std::shared_ptr<UiIcon> PUiIcon;
 
-/**
- * Class defining a physical packet.
- */
-class HomegearUiElement
+class UiIcon
 {
 public:
-    enum class Type
-    {
-        undefined,
-        simple,
-        complex
-    };
+    UiIcon(BaseLib::SharedObjects* baseLib);
+    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiIcon(UiIcon const& rhs);
+    virtual ~UiIcon() = default;
+
+    UiIcon& operator=(const UiIcon& rhs);
 
     //Elements
-    std::string id;
-    Type type = Type::undefined;
-    std::string control;
-    std::string unit;
-    std::list<PUiIcon> icons;
-    std::unordered_map<std::string, std::string> texts;
-    std::list<PUiVariable> variableInputs;
-    std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, std::string> metadata;
-
-    //Complex elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t cols = -1;
-    int32_t rows = -1;
-    std::list<PUiControl> controls;
-
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    HomegearUiElement(HomegearUiElement const& rhs);
-    virtual ~HomegearUiElement() = default;
-
-    HomegearUiElement& operator=(const HomegearUiElement& rhs);
-
-    PVariable getElementInfo();
+    std::string name;
+    std::string conditionOperator;
+    std::string conditionValue;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };
+
 }
 }
 

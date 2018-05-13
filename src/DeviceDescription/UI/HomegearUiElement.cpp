@@ -56,7 +56,13 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         }
         else if(nodeName == "control") control = value;
         else if(nodeName == "unit") unit = value;
-        else if(nodeName == "icon") icon = value;
+        else if(nodeName == "icons")
+        {
+            for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
+            {
+                icons.push_back(std::make_shared<UiIcon>(baseLib, iconNode));
+            }
+        }
         else if(nodeName == "texts")
         {
             for(xml_node<>* textsNode = subNode->first_node(); textsNode; textsNode = textsNode->next_sibling())
@@ -116,7 +122,14 @@ HomegearUiElement::HomegearUiElement(HomegearUiElement const& rhs)
     type = rhs.type;
     control = rhs.control;
     unit = rhs.unit;
-    icon = rhs.icon;
+
+    for(auto& icon : rhs.icons)
+    {
+        auto uiIcon = std::make_shared<UiIcon>(_bl);
+        *uiIcon = *icon;
+        icons.emplace_back(uiIcon);
+    }
+
     texts = rhs.texts;
     variableInputs.clear();
     variableOutputs.clear();
@@ -159,7 +172,14 @@ HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
     type = rhs.type;
     control = rhs.control;
     unit = rhs.unit;
-    icon = rhs.icon;
+
+    for(auto& icon : rhs.icons)
+    {
+        auto uiIcon = std::make_shared<UiIcon>(_bl);
+        *uiIcon = *icon;
+        icons.emplace_back(uiIcon);
+    }
+
     texts = rhs.texts;
     variableInputs.clear();
     variableOutputs.clear();
@@ -199,7 +219,19 @@ PVariable HomegearUiElement::getElementInfo()
     auto uiElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
     uiElement->structValue->emplace("id", std::make_shared<BaseLib::Variable>(id));
     uiElement->structValue->emplace("type", std::make_shared<BaseLib::Variable>((int32_t)type));
-    uiElement->structValue->emplace("icon", std::make_shared<BaseLib::Variable>(icon));
+
+    auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+    iconElements->arrayValue->reserve(icons.size());
+    for(auto& icon : icons)
+    {
+        auto iconElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+        iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon->name));
+        if(!icon->conditionOperator.empty()) iconElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(icon->conditionOperator));
+        if(!icon->conditionValue.empty()) iconElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(icon->conditionValue));
+        iconElements->arrayValue->emplace_back(iconElement);
+    }
+    uiElement->structValue->emplace("icons", iconElements);
+
     if(type == Type::simple)
     {
         uiElement->structValue->emplace("control", std::make_shared<BaseLib::Variable>(control));

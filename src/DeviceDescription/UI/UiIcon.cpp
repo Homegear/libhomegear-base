@@ -28,80 +28,57 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef HOMEGEARUIELEMENT_H_
-#define HOMEGEARUIELEMENT_H_
-
-#include "UiVariable.h"
-#include "UiControl.h"
 #include "UiIcon.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
-#include "../../Variable.h"
-
-#include <string>
-#include <memory>
-#include <unordered_map>
-#include <list>
-
-using namespace rapidxml;
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace DeviceDescription
 {
 
-class HomegearUiElement;
-
-/**
- * Helper type for Packet pointers.
- */
-typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
-
-/**
- * Class defining a physical packet.
- */
-class HomegearUiElement
+UiIcon::UiIcon(BaseLib::SharedObjects* baseLib)
 {
-public:
-    enum class Type
+    _bl = baseLib;
+}
+
+UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiIcon(baseLib)
+{
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
-        undefined,
-        simple,
-        complex
-    };
-
-    //Elements
-    std::string id;
-    Type type = Type::undefined;
-    std::string control;
-    std::string unit;
-    std::list<PUiIcon> icons;
-    std::unordered_map<std::string, std::string> texts;
-    std::list<PUiVariable> variableInputs;
-    std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, std::string> metadata;
-
-    //Complex elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t cols = -1;
-    int32_t rows = -1;
-    std::list<PUiControl> controls;
-
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    HomegearUiElement(HomegearUiElement const& rhs);
-    virtual ~HomegearUiElement() = default;
-
-    HomegearUiElement& operator=(const HomegearUiElement& rhs);
-
-    PVariable getElementInfo();
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-};
-}
+        _bl->out.printWarning("Warning: Unknown attribute for \"icon\": " + std::string(attr->name()));
+    }
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string name(subNode->name());
+        std::string value(subNode->value());
+        if(name == "icon") name = value;
+        else if(name == "conditionOperator") conditionOperator = value;
+        else if(name == "conditionValue") conditionValue = value;
+        else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
+    }
 }
 
-#endif
+UiIcon::UiIcon(UiIcon const& rhs)
+{
+    _bl = rhs._bl;
+
+    name = rhs.name;
+    conditionOperator = rhs.conditionOperator;
+    conditionValue = rhs.conditionValue;
+}
+
+UiIcon& UiIcon::operator=(const UiIcon& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    name = rhs.name;
+    conditionOperator = rhs.conditionOperator;
+    conditionValue = rhs.conditionValue;
+
+    return *this;
+}
+
+}
+}
