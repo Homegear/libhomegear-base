@@ -280,6 +280,42 @@ bool Acls::fromGroups(std::vector<uint64_t>& groupIds)
     return false;
 }
 
+bool Acls::checkServiceAccess(std::string serviceName)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkServiceAccess(serviceName);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to service " + serviceName + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Error: Access denied to service " + serviceName + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 bool Acls::checkCategoriesReadAccess(std::set<uint64_t>& categories)
 {
     try
