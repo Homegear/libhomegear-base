@@ -248,7 +248,7 @@ void Acl::fromVariable(PVariable serializedData)
                 for(auto& serviceElement : *rootElement.second->structValue)
                 {
                     if(serviceElement.second->type != VariableType::tBoolean) throw AclException("Service element is not of type bool.");
-                    _methods[serviceElement.first] = serviceElement.second->booleanValue;
+                    _services[serviceElement.first] = serviceElement.second->booleanValue;
                 }
             }
             else if(rootElement.first == "variablesRead")
