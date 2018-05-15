@@ -49,15 +49,28 @@ PVariable Acl::toVariable()
     try
     {
         /*
-         * 1. Variables
-         * 2. Devices
-         * 3. Rooms
-         * 4. Categories
-         * 5. Methods
-         * 6. Event Server Methods
+         * 1. Services
+         * 2. Variables
+         * 3. Devices
+         * 4. Rooms
+         * 5. Categories
+         * 6. Methods
+         * 7. Event Server Methods
          */
 
         PVariable acl = std::make_shared<Variable>(VariableType::tStruct);
+
+        if(_servicesSet)
+        {
+            PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+            for(auto& service : _services)
+            {
+                rootElement->structValue->emplace(service.first, std::make_shared<Variable>(service.second));
+            }
+
+            acl->structValue->emplace("services", rootElement);
+        }
 
         if(_variablesReadSet)
         {
@@ -229,7 +242,16 @@ void Acl::fromVariable(PVariable serializedData)
 
         for(auto& rootElement : *serializedData->structValue)
         {
-            if(rootElement.first == "variablesRead")
+            if(rootElement.first == "services")
+            {
+                _servicesSet = true;
+                for(auto& serviceElement : *rootElement.second->structValue)
+                {
+                    if(serviceElement.second->type != VariableType::tBoolean) throw AclException("Service element is not of type bool.");
+                    _methods[serviceElement.first] = serviceElement.second->booleanValue;
+                }
+            }
+            else if(rootElement.first == "variablesRead")
             {
                 _variablesReadSet = true;
                 for(auto& deviceElement : *rootElement.second->structValue)
@@ -385,6 +407,17 @@ std::string Acl::toString(int32_t indentation)
     prefix.resize(indentation, ' ');
 
     std::ostringstream stream;
+
+    if(_servicesSet)
+    {
+        stream << prefix << "Allowed services:" << std::endl;
+        for(auto& service : _services)
+        {
+            std::string serviceString = service.first == "*" ? "all" : service.first;
+            stream << prefix << "  * " << serviceString << ": " << (service.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
     if(_variablesReadSet)
     {
         stream << prefix << "Readable variables:" << std::endl;
@@ -498,6 +531,29 @@ std::string Acl::toString(int32_t indentation)
     }
 
     return stream.str();
+}
+
+AclResult Acl::checkServiceAccess(std::string& serviceName)
+{
+    try
+    {
+        if(!_servicesSet) return AclResult::notInList;
+
+        auto servicesIterator = _services.find(serviceName); //Check specific access first in case of "no access".
+        if(servicesIterator != _services.end()) return servicesIterator->second ? AclResult::accept : AclResult::deny;
+
+        servicesIterator = _services.find("*");
+        if(servicesIterator != _services.end()) return servicesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
 }
 
 AclResult Acl::checkCategoriesReadAccess(std::set<uint64_t>& categories)

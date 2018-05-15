@@ -94,6 +94,7 @@ public:
 	 *
 	 * @param filename The path to the file to read.
 	 * @return Returns the content of the file as a string.
+	 * @throws Throws Exception on errors.
 	 */
 	static std::string getFileContent(std::string filename);
 
@@ -149,7 +150,7 @@ public:
 	static void writeFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length);
 
 	/**
-	 * Writes binary data to a file. If the file already exists the data will be appended.
+	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
 	 *
 	 * @param filename The path to the file to write.
 	 * @param content The content to write to the file.
@@ -157,7 +158,7 @@ public:
 	static void appendToFile(std::string& filename, std::string& content);
 
 	/**
-	 * Writes binary data to a file. If the file already exists the data will be appended.
+	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
 	 *
 	 * @param filename The path to the file to write.
 	 * @param content The content to write to the file.
@@ -166,7 +167,7 @@ public:
 	static void appendToFile(std::string& filename, std::vector<char>& content, uint32_t length);
 
 	/**
-	 * Writes binary data to a file. If the file already exists the data will be appended.
+	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
 	 *
 	 * @param filename The path to the file to write.
 	 * @param content The content to write to the file.

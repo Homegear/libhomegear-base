@@ -243,6 +243,19 @@ private:
      * Deny all entry: "*" => false
      */
     std::unordered_map<std::string, bool> _eventServerMethods;
+
+    /**
+     * When set to "true", _services is included in the ACL checks.
+     */
+    bool _servicesSet = false;
+
+    /**
+     * Key: Service name; value: access/no access.
+     *
+     * Grant all entry: "*" => true
+     * Deny all entry: "*" => false
+     */
+    std::unordered_map<std::string, bool> _services;
 public:
     Acl();
 
@@ -269,6 +282,7 @@ public:
      */
     void fromVariable(PVariable serializedData);
 
+    AclResult checkServiceAccess(std::string& serviceName);
     AclResult checkCategoriesReadAccess(std::set<uint64_t>& categories);
     AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
     AclResult checkCategoryReadAccess(uint64_t category);
