@@ -285,6 +285,13 @@ public:
 	void setUseSSL(bool useSsl) { close(); _useSsl = useSsl; if(_useSsl) initSsl(); }
 	void setCertificates(std::unordered_map<std::string, PCertificateInfo>& certificates) { close(); _certificates = certificates; }
 	void setVerifyCertificate(bool verifyCertificate) { close(); _verifyCertificate = verifyCertificate; }
+	void setVerifyHostname(bool verifyHostname) { close(); _verifyHostname = verifyHostname; }
+
+    /**
+     * Only relevant for TLS connections. Sets the hostname the certificate's common name is verified against.
+     * @param hostname The compare the certificate's common name to.
+     */
+    void setVerificationHostname(std::string hostname) { close(); _verificationHostname = hostname; }
 	std::unordered_map<std::string, gnutls_certificate_credentials_t>& getCredentials() { return _x509Credentials; }
 
 	bool connected();
@@ -387,11 +394,13 @@ protected:
 	bool _autoConnect = true;
 	std::string _ipAddress;
 	std::string _hostname;
+    std::string _verificationHostname;
 	std::string _port;
 	std::mutex _readMutex;
 	std::mutex _writeMutex;
     std::unordered_map<std::string, PCertificateInfo> _certificates;
 	bool _verifyCertificate = true;
+	bool _verifyHostname = true;
 
 	// {{{ For server only
 		bool _isServer = false;
