@@ -80,6 +80,7 @@ public:
 	std::string certFile;
 	std::string keyFile;
 	bool verifyCertificate = true;
+	bool useIdForHostnameVerification = false;
 	bool oneWay = false;
 	bool fastSending = false;
 	bool sendFix = false;
