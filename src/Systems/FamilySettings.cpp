@@ -659,22 +659,22 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 		else if(name == "host")
 		{
 			settings->host = value;
-			_bl->out.printDebug("Debug: Host set to " + settings->host);
+			_bl->out.printDebug("Debug: host set to " + settings->host);
 		}
 		else if(name == "port")
 		{
 			settings->port = value;
-			_bl->out.printDebug("Debug: Port set to " + settings->port);
+			_bl->out.printDebug("Debug: port set to " + settings->port);
 		}
 		else if(name == "port2")
 		{
 			settings->port2 = value;
-			_bl->out.printDebug("Debug: Port2 set to " + settings->port2);
+			_bl->out.printDebug("Debug: port2 set to " + settings->port2);
 		}
 		else if(name == "port3")
 		{
 			settings->port3 = value;
-			_bl->out.printDebug("Debug: Port3 set to " + settings->port3);
+			_bl->out.printDebug("Debug: port3 set to " + settings->port3);
 		}
 		else if(name == "listenip")
 		{
@@ -689,7 +689,7 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 		else if(name == "portkeepalive")
 		{
 			settings->portKeepAlive = value;
-			_bl->out.printDebug("Debug: PortKeepAlive set to " + settings->portKeepAlive);
+			_bl->out.printDebug("Debug: portKeepAlive set to " + settings->portKeepAlive);
 		}
 		else if(name == "address")
 		{
@@ -720,47 +720,53 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 		else if(name == "lankey")
 		{
 			settings->lanKey = value;
-			_bl->out.printDebug("Debug: LANKey set to " + settings->lanKey);
+			_bl->out.printDebug("Debug: lanKey set to " + settings->lanKey);
 		}
 		else if(name == "ssl")
 		{
 			BaseLib::HelperFunctions::toLower(value);
 			if(value == "true") settings->ssl = true;
-			_bl->out.printDebug("Debug: SSL set to " + std::to_string(settings->ssl));
+			_bl->out.printDebug("Debug: ssl set to " + std::to_string(settings->ssl));
 		}
 		else if(name == "cafile")
 		{
 			settings->caFile = value;
-			_bl->out.printDebug("Debug: CAFile set to " + settings->caFile);
+			_bl->out.printDebug("Debug: caFile set to " + settings->caFile);
 		}
 		else if(name == "certfile")
 		{
 			settings->certFile = value;
-			_bl->out.printDebug("Debug: CertFile set to " + settings->certFile);
+			_bl->out.printDebug("Debug: certFile set to " + settings->certFile);
 		}
 		else if(name == "keyfile")
 		{
 			settings->keyFile = value;
-			_bl->out.printDebug("Debug: KeyFile set to " + settings->keyFile);
+			_bl->out.printDebug("Debug: keyFile set to " + settings->keyFile);
 		}
 		else if(name == "verifycertificate")
 		{
 			BaseLib::HelperFunctions::toLower(value);
 			if(value == "false") settings->verifyCertificate = false;
-			_bl->out.printDebug("Debug: VerifyCertificate set to " + std::to_string(settings->verifyCertificate));
+			_bl->out.printDebug("Debug: verifyCertificate set to " + std::to_string(settings->verifyCertificate));
+		}
+		else if(name == "useidforhostnameverification")
+		{
+			BaseLib::HelperFunctions::toLower(value);
+			settings->useIdForHostnameVerification = (value == "true");
+			_bl->out.printDebug("Debug: useIdForHostnameVerification set to " + std::to_string(settings->useIdForHostnameVerification));
 		}
 		else if(name == "listenthreadpriority")
 		{
 			settings->listenThreadPriority = BaseLib::Math::getNumber(value);
 			if(settings->listenThreadPriority > 99) settings->listenThreadPriority = 99;
 			if(settings->listenThreadPriority < 0) settings->listenThreadPriority = 0;
-			_bl->out.printDebug("Debug: ListenThreadPriority set to " + std::to_string(settings->listenThreadPriority));
+			_bl->out.printDebug("Debug: listenThreadPriority set to " + std::to_string(settings->listenThreadPriority));
 		}
 		else if(name == "listenthreadpolicy")
 		{
 			settings->listenThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
 			settings->listenThreadPriority = ThreadManager::parseThreadPriority(settings->listenThreadPriority, settings->listenThreadPolicy);
-			_bl->out.printDebug("Debug: ListenThreadPolicy set to " + std::to_string(settings->listenThreadPolicy));
+			_bl->out.printDebug("Debug: listenThreadPolicy set to " + std::to_string(settings->listenThreadPolicy));
 		}
 		else if(name == "ttsprogram")
 		{
@@ -955,22 +961,22 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		else if(name == "host")
 		{
 			settings->host = value->stringValue;
-			_bl->out.printDebug("Debug: Host set to " + settings->host);
+			_bl->out.printDebug("Debug: host set to " + settings->host);
 		}
 		else if(name == "port")
 		{
 			settings->port = value->stringValue;
-			_bl->out.printDebug("Debug: Port set to " + settings->port);
+			_bl->out.printDebug("Debug: port set to " + settings->port);
 		}
 		else if(name == "port2")
 		{
 			settings->port2 = value->stringValue;
-			_bl->out.printDebug("Debug: Port2 set to " + settings->port2);
+			_bl->out.printDebug("Debug: port2 set to " + settings->port2);
 		}
 		else if(name == "port3")
 		{
 			settings->port3 = value->stringValue;
-			_bl->out.printDebug("Debug: Port3 set to " + settings->port3);
+			_bl->out.printDebug("Debug: port3 set to " + settings->port3);
 		}
 		else if(name == "listenip")
 		{
@@ -985,7 +991,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		else if(name == "portkeepalive")
 		{
 			settings->portKeepAlive = value->stringValue;
-			_bl->out.printDebug("Debug: PortKeepAlive set to " + settings->portKeepAlive);
+			_bl->out.printDebug("Debug: portKeepAlive set to " + settings->portKeepAlive);
 		}
 		else if(name == "address")
 		{
@@ -995,35 +1001,40 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 		else if(name == "lankey")
 		{
 			settings->lanKey = value->stringValue;
-			_bl->out.printDebug("Debug: LANKey set to " + settings->lanKey);
+			_bl->out.printDebug("Debug: lanKey set to " + settings->lanKey);
 		}
 		else if(name == "ssl")
 		{
 			settings->ssl = value->integerValue;
-			_bl->out.printDebug("Debug: SSL set to " + std::to_string(settings->ssl));
+			_bl->out.printDebug("Debug: ssl set to " + std::to_string(settings->ssl));
 		}
 		else if(name == "cafile")
 		{
 			settings->caFile = value->stringValue;
-			_bl->out.printDebug("Debug: CAFile set to " + settings->caFile);
+			_bl->out.printDebug("Debug: caFile set to " + settings->caFile);
 		}
 		else if(name == "verifycertificate")
 		{
 			settings->verifyCertificate = value->integerValue;
-			_bl->out.printDebug("Debug: VerifyCertificate set to " + std::to_string(settings->verifyCertificate));
+			_bl->out.printDebug("Debug: verifyCertificate set to " + std::to_string(settings->verifyCertificate));
+		}
+		else if(name == "useidforhostnameverification")
+		{
+			settings->useIdForHostnameVerification = value->integerValue;
+			_bl->out.printDebug("Debug: useIdForHostnameVerification set to " + std::to_string(settings->verifyCertificate));
 		}
 		else if(name == "listenthreadpriority")
 		{
 			settings->listenThreadPriority = value->integerValue;
 			if(settings->listenThreadPriority > 99) settings->listenThreadPriority = 99;
 			if(settings->listenThreadPriority < 0) settings->listenThreadPriority = 0;
-			_bl->out.printDebug("Debug: ListenThreadPriority set to " + std::to_string(settings->listenThreadPriority));
+			_bl->out.printDebug("Debug: listenThreadPriority set to " + std::to_string(settings->listenThreadPriority));
 		}
 		else if(name == "listenthreadpolicy")
 		{
 			settings->listenThreadPolicy = ThreadManager::getThreadPolicyFromString(value->stringValue);
 			settings->listenThreadPriority = ThreadManager::parseThreadPriority(settings->listenThreadPriority, settings->listenThreadPolicy);
-			_bl->out.printDebug("Debug: ListenThreadPolicy set to " + std::to_string(settings->listenThreadPolicy));
+			_bl->out.printDebug("Debug: listenThreadPolicy set to " + std::to_string(settings->listenThreadPolicy));
 		}
 		else if(name == "ttsprogram")
 		{
