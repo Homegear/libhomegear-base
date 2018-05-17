@@ -493,6 +493,7 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 					if(node)
 					{
 						infoStruct.reset(new Variable(node));
+						currentInfo.second.setInfo(infoStruct);
 					}
 				}
 			}
