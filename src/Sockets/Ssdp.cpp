@@ -392,7 +392,7 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::map<std::
 	try
 	{
 		Http::Header& header = http.getHeader();
-		if(header.responseCode != 200 || header.fields.at("st") != stHeader) return;
+		if(header.responseCode != 200 || (header.fields.at("st") != stHeader && stHeader != "ssdp:all")) return;
 
 		std::string location = header.fields.at("location");
 		if(location.size() < 7) return;
@@ -427,7 +427,7 @@ void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::ma
         Http::Header& header = http.getHeader();
         if(header.method != "NOTIFY") return;
         auto headerIterator = header.fields.find("nt");
-        if(headerIterator == header.fields.end() || headerIterator->second != stHeader) return;
+        if(headerIterator == header.fields.end() || (headerIterator->second != stHeader && stHeader != "ssdp:all")) return;
 
         std::string location = header.fields.at("location");
         if(location.size() < 7) return;
