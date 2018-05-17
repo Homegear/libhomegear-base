@@ -473,6 +473,10 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 			if(port <= 0 || port > 65535) return;
 			std::string path = posPath == location.size() ? "/" : location.substr(posPath);
 
+			currentInfo.second.setIp(ip);
+			currentInfo.second.setPort(port);
+			currentInfo.second.setPath(path);
+
 			HttpClient client(_bl, ip, port, false);
 			std::string xml;
 			client.get(path, xml);
@@ -491,16 +495,9 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 						infoStruct.reset(new Variable(node));
 					}
 				}
-                devices.push_back(SsdpInfo(ip, port, path, infoStruct));
 			}
-            else
-            {
-                currentInfo.second.setIp(ip);
-                currentInfo.second.setPort(port);
-                currentInfo.second.setPath(path);
-                devices.push_back(currentInfo.second);
-            }
 
+			devices.push_back(currentInfo.second);
 		}
 	}
 	catch(const std::exception& ex)

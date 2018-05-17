@@ -55,6 +55,7 @@ public:
 	virtual ~SsdpInfo();
 	std::string ip() { return _ip; }
 	void setIp(std::string value) { _ip = value; }
+	int32_t port() { return _port; }
 	void setPort(int32_t value) { _port = value; }
 	void setPath(std::string value) { _path = value; }
 	std::string location() { return _location; }
