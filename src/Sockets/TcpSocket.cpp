@@ -1018,6 +1018,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		{
 			if(gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
 			_readMutex.unlock();
+			if(bytesRead > bufferSize) bytesRead = bufferSize;
 			return bytesRead;
 		}
 	}
@@ -1077,6 +1078,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();
+	if(bytesRead > bufferSize) bytesRead = bufferSize;
 	return bytesRead;
 }
 
