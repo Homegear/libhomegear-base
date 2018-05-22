@@ -55,6 +55,15 @@ public:
 	template<typename Data> static bool sha1(const Data& in, Data& out);
 
 	/**
+	 * Calculates the SHA256 of the passed binary data.
+	 *
+	 * @param[in] in The data to calculate the SHA256 for.
+	 * @param[out] out A vector to store the calculated SHA256 in.
+	 * @return Returns "true" on success and "false" on error.
+	 */
+	template<typename Data> static bool sha256(const Data& in, Data& out);
+
+	/**
 	 * Calculates the MD5 of the passed binary data.
 	 *
 	 * @param[in] in The data to calculate the MD5 for.

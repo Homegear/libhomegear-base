@@ -71,7 +71,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 		throw BinaryRpcException("Packet does not start with \"Bin\".");
 	}
 	_type = (_data[3] & 1) ? Type::response : Type::request;
-	if(_data[3] & 0x40)
+	if(_data[3] == 0x40 ||_data[3] == 0x41)
 	{
 		_hasHeader = true;
 		_bl->hf.memcpyBigEndian((char*)&_headerSize, _data.data() + 4, 4);

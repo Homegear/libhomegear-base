@@ -81,6 +81,14 @@ public:
     bool fromGroups(std::vector<uint64_t>& groupIds);
 
     /**
+     * Checks if the ACLs grant access to a service.
+     *
+     * @param serviceName The name of the service to check.
+     * @return "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the service is not in at least one of the ACLs. "true" if (1) the service is not part of all ACLs or (2) if access is granted in at least one ACL.
+     */
+    bool checkServiceAccess(std::string serviceName);
+
+    /**
      * Checks if the ACLs grant access to one or more categories.
      *
      * @param categories The IDs of the categories to check.

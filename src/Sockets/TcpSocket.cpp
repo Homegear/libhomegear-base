@@ -60,6 +60,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	_connecting = false;
 	_socketDescriptor.reset(new FileDescriptor);
 	_hostname = hostname;
+    _verificationHostname = hostname;
 	_port = port;
 }
 
@@ -1017,6 +1018,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		{
 			if(gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
 			_readMutex.unlock();
+			if(bytesRead > bufferSize) bytesRead = bufferSize;
 			return bytesRead;
 		}
 	}
@@ -1076,6 +1078,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
 	_readMutex.unlock();
+	if(bytesRead > bufferSize) bytesRead = bufferSize;
 	return bytesRead;
 }
 
@@ -1461,12 +1464,12 @@ void TcpSocket::getSsl()
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketSSLException("Could not import server certificate: " + std::string(gnutls_strerror(result)));
 		}
-		if((result = gnutls_x509_crt_check_hostname(serverCert, _hostname.c_str())) == 0)
-		{
-			gnutls_x509_crt_deinit(serverCert);
-			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-			throw SocketSSLException("Server's hostname does not match the server certificate.");
-		}
+        if(_verifyHostname && (result = gnutls_x509_crt_check_hostname(serverCert, _verificationHostname.c_str())) == 0)
+        {
+            gnutls_x509_crt_deinit(serverCert);
+            _bl->fileDescriptorManager.shutdown(_socketDescriptor);
+            throw SocketSSLException("Server's hostname does not match the server certificate.");
+        }
 		gnutls_x509_crt_deinit(serverCert);
 	}
 	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
