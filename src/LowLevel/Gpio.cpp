@@ -39,9 +39,10 @@ namespace BaseLib
 namespace LowLevel
 {
 
-Gpio::Gpio(BaseLib::SharedObjects* baseLib)
+Gpio::Gpio(BaseLib::SharedObjects* baseLib, std::string gpioPath)
 {
 	_bl = baseLib;
+	_gpioPath = gpioPath;
 }
 
 Gpio::~Gpio()
@@ -101,7 +102,7 @@ void Gpio::getPath(uint32_t index)
 		}
 		DIR* directory;
 		struct dirent* entry;
-		std::string gpioDir(_bl->settings.gpioPath());
+		std::string gpioDir(_gpioPath);
 		if((directory = opendir(gpioDir.c_str())) != 0)
 		{
 			while((entry = readdir(directory)) != 0)
@@ -150,7 +151,7 @@ void Gpio::getPath(uint32_t index)
 			}
 			closedir(directory);
 		}
-		else throw(Exception("Could not open directory \"" + _bl->settings.gpioPath() + "\"."));
+		else throw(Exception("Could not open directory \"" + _gpioPath + "\"."));
 	}
 	catch(const std::exception& ex)
     {
@@ -418,7 +419,7 @@ void Gpio::exportGpio(uint32_t index)
 		if(!_gpioInfo[index].path.empty())
 		{
 			_bl->out.printDebug("Debug: Unexporting GPIO with index " + std::to_string(index) + " and number " + std::to_string(index) + ".");
-			path = _bl->settings.gpioPath() + "unexport";
+			path = _gpioPath + "unexport";
 			fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
 			if (fileDescriptor->descriptor == -1) throw(Exception("Could not unexport GPIO with index " + std::to_string(index) + ". Failed to write to unexport file: " + std::string(strerror(errno))));
 			if(write(fileDescriptor->descriptor, temp.c_str(), temp.size()) == -1)
@@ -430,7 +431,7 @@ void Gpio::exportGpio(uint32_t index)
 		}
 
 		_bl->out.printDebug("Debug: Exporting GPIO with index " + std::to_string(index) + " and number " + std::to_string(index) + ".");
-		path = _bl->settings.gpioPath() + "export";
+		path = _gpioPath + "export";
 		fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
 		if (fileDescriptor->descriptor == -1) throw(Exception("Error: Could not export GPIO with index " + std::to_string(index) + ". Failed to write to export file: " + std::string(strerror(errno))));
 		if(write(fileDescriptor->descriptor, temp.c_str(), temp.size()) == -1)
@@ -453,11 +454,10 @@ void Gpio::exportGpio(uint32_t index)
     }
 }
 
-void Gpio::setup(int32_t userId, int32_t groupId, bool setPermissions)
+void Gpio::setup(int32_t userId, int32_t groupId, bool setPermissions, std::vector<uint32_t>& exportGpios)
 {
 	try
 	{
-		std::vector<uint32_t> exportGpios = _bl->settings.exportGpios();
 		for(std::vector<uint32_t>::iterator i = exportGpios.begin(); i != exportGpios.end(); ++i)
 		{
 			exportGpio(*i);
