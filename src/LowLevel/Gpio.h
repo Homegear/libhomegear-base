@@ -34,6 +34,7 @@
 #include <map>
 #include <mutex>
 #include <memory>
+#include <vector>
 
 namespace BaseLib
 {
@@ -66,7 +67,7 @@ public:
 			};
 	};
 
-	Gpio(BaseLib::SharedObjects* baseLib);
+	Gpio(BaseLib::SharedObjects* baseLib, std::string gpioPath);
 	virtual ~Gpio();
 
 	virtual void openDevice(uint32_t index, bool readOnly);
@@ -90,7 +91,7 @@ public:
 	virtual void setDirection(uint32_t index, GpioDirection::Enum direction);
 	virtual void setEdge(uint32_t index, GpioEdge::Enum edge);
 	virtual bool isOpen(uint32_t index);
-	virtual void setup(int32_t userId, int32_t groupId, bool setPermissions);
+	virtual void setup(int32_t userId, int32_t groupId, bool setPermissions, std::vector<uint32_t>& exportGpios);
 	virtual std::shared_ptr<FileDescriptor> getFileDescriptor(uint32_t index);
 protected:
 	class GpioInfo
@@ -101,6 +102,7 @@ protected:
 	};
 
 	BaseLib::SharedObjects* _bl = nullptr;
+	std::string _gpioPath;
 	std::mutex _gpioMutex;
 	std::map<uint32_t, GpioInfo> _gpioInfo;
 };
