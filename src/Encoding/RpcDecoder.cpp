@@ -52,7 +52,7 @@ std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<char>& packet)
 	std::shared_ptr<RpcHeader> header = std::make_shared<RpcHeader>();
 	try
 	{
-		if(!(packet.size() < 12 || (packet.at(3) & 0x40))) return header;
+		if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) return header;
 		uint32_t position = 4;
 		uint32_t headerSize = 0;
 		headerSize = _decoder->decodeInteger(packet, position);
@@ -86,7 +86,7 @@ std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<uint8_t>& packet
 	std::shared_ptr<RpcHeader> header = std::make_shared<RpcHeader>();
 	try
 	{
-		if(!(packet.size() < 12 || (packet.at(3) & 0x40))) return header;
+		if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) return header;
 		uint32_t position = 4;
 		uint32_t headerSize = 0;
 		headerSize = _decoder->decodeInteger(packet, position);
@@ -121,7 +121,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeReques
 	{
 		uint32_t position = 4;
 		uint32_t headerSize = 0;
-		if(packet.at(3) & 0x40) headerSize = _decoder->decodeInteger(packet, position) + 4;
+		if(packet.at(3) == 0x40 || packet.at(3) == 0x41) headerSize = _decoder->decodeInteger(packet, position) + 4;
 		position = 8 + headerSize;
 		methodName = _decoder->decodeString(packet, position);
 		uint32_t parameterCount = _decoder->decodeInteger(packet, position);
@@ -158,7 +158,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeReques
 	{
 		uint32_t position = 4;
 		uint32_t headerSize = 0;
-		if(packet.at(3) & 0x40) headerSize = _decoder->decodeInteger(packet, position) + 4;
+		if(packet.at(3) == 0x40 || packet.at(3) == 0x41) headerSize = _decoder->decodeInteger(packet, position) + 4;
 		position = 8 + headerSize;
 		methodName = _decoder->decodeString(packet, position);
 		uint32_t parameterCount = _decoder->decodeInteger(packet, position);
