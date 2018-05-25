@@ -518,8 +518,6 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 				}
 			}
 
-            _bl->out.printInfo("Moin2 " + location);
-
 			devices.push_back(currentInfo.second);
 		}
 	}
