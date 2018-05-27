@@ -71,7 +71,7 @@ class RpcClientInfo
 {
 public:
 	int32_t id = -1;
-    bool fullDuplex = false;
+    bool sendEventsToRpcServer = false;
 	bool closed = false;
 	bool addon = false;
 	bool flowsServer = false;
