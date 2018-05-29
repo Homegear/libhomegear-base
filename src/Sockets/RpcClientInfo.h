@@ -31,10 +31,16 @@
 #ifndef RPCCLIENTINFO_H_
 #define RPCCLIENTINFO_H_
 
+#include "../Variable.h"
 #include <memory>
+#include <condition_variable>
+#include <atomic>
 
 namespace BaseLib
 {
+
+class FileDescriptor;
+class TcpSocket;
 
 namespace Security
 {
@@ -65,6 +71,7 @@ class RpcClientInfo
 {
 public:
 	int32_t id = -1;
+    bool sendEventsToRpcServer = false;
 	bool closed = false;
 	bool addon = false;
 	bool flowsServer = false;
@@ -89,6 +96,17 @@ public:
 	bool initSubscribePeers = false;
 	bool initJsonMode = false;
 	bool initSendNewDevices = true;
+
+    std::shared_ptr<FileDescriptor> socketDescriptor;
+    std::shared_ptr<TcpSocket> socket;
+
+	//{{{ Invoke variables
+	std::mutex invokeMutex;
+	std::mutex requestMutex;
+	std::condition_variable requestConditionVariable;
+	PVariable rpcResponse;
+	std::atomic_bool waitForResponse;
+	//}}}
 
 	RpcClientInfo() = default;
 	virtual ~RpcClientInfo() = default;

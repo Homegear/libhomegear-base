@@ -102,7 +102,7 @@ public:
 	// }}}
 
 
-	std::function<void(PScriptInfo& scriptInfo, std::string& output)> scriptOutputCallback;
+	std::function<void(PScriptInfo& scriptInfo, std::string& output, bool error)> scriptOutputCallback;
 	std::function<void(PScriptInfo& scriptInfo, PVariable& headers)> scriptHeadersCallback;
 
 	// {{{ Script finished notification. Can be combined.

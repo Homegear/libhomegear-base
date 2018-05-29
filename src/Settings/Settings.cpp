@@ -79,6 +79,7 @@ void Settings::reset()
 	_databaseBackupPath = "";
 	_databaseMaxBackups = 10;
 	_logfilePath = "/var/log/homegear/";
+	_waitForCorrectTime = true;
 	_prioritizeThreads = true;
 	_secureMemorySize = 65536;
 	_workerThreadWindow = 3000;
@@ -409,6 +410,11 @@ void Settings::load(std::string filename, std::string executablePath)
 					if(_logfilePath.empty()) _logfilePath = "/var/log/homegear/";
 					if(_logfilePath.back() != '/') _logfilePath.push_back('/');
 					_bl->out.printDebug("Debug: logfilePath set to " + _logfilePath);
+				}
+				else if(name == "waitforcorrecttime")
+				{
+					_waitForCorrectTime = (HelperFunctions::toLower(value) == "true");
+					_bl->out.printDebug("Debug: waitForCorrectTime set to " + std::to_string(_waitForCorrectTime));
 				}
 				else if(name == "prioritizethreads")
 				{

@@ -179,7 +179,7 @@ void Ssdp::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDesc
 
 	if(timeout < 1000) timeout = 1000;
 
-	std::string broadcastPacket("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: " + std::to_string(timeout / 1000) + "\r\nST: " + stHeader + "\r\nContent-Length: 0\r\n\r\n");
+	std::string broadcastPacket("M-SEARCH * HTTP/1.1\r\nHOST: " + _address + ":" + std::to_string(_bl->settings.ssdpPort()) + "\r\nMAN: \"ssdp:discover\"\r\nMX: " + std::to_string(timeout / 1000) + "\r\nST: " + stHeader + "\r\nContent-Length: 0\r\n\r\n");
 
 	if(sendto(serverSocketDescriptor->descriptor, &broadcastPacket.at(0), broadcastPacket.size(), 0, (struct sockaddr*)&addessInfo, sizeof(addessInfo)) == -1)
 	{
@@ -222,8 +222,8 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 			{
 				if(!serverSocketDescriptor || serverSocketDescriptor->descriptor == -1) break;
 
-				socketTimeout.tv_sec = timeout / 1000;
-				socketTimeout.tv_usec = 500000;
+				socketTimeout.tv_sec = 1;
+				socketTimeout.tv_usec = 0;
 				FD_ZERO(&readFileDescriptor);
 				auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
 				fileDescriptorGuard.lock();
@@ -238,7 +238,11 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				FD_SET(serverSocketDescriptor->descriptor, &readFileDescriptor);
 				fileDescriptorGuard.unlock();
 				bytesReceived = select(nfds, &readFileDescriptor, NULL, NULL, &socketTimeout);
-				if(bytesReceived == 0) continue;
+				if(bytesReceived == 0)
+				{
+					http.reset();
+					continue;
+				}
 				if(bytesReceived != 1)
 				{
 					_bl->out.printError("Error: Socket closed (2).");
@@ -247,7 +251,11 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				}
 
 				bytesReceived = recvfrom(serverSocketDescriptor->descriptor, buffer, 1024, 0, (struct sockaddr *)&si_other, &slen);
-				if(bytesReceived == 0) continue;
+				if(bytesReceived == 0)
+				{
+					http.reset();
+					continue;
+				}
                 else if(bytesReceived == -1)
                 {
                     _bl->out.printError("Error: Socket closed (3).");
@@ -255,9 +263,12 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
                     continue;
                 }
 				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer, bytesReceived));
-				http.reset();
 				http.process(buffer, bytesReceived, false);
-				if(http.headerIsFinished()) processPacket(http, stHeader, info);
+				if(http.headerIsFinished())
+				{
+					processPacket(http, stHeader, info);
+					http.reset();
+				}
 			}
 			catch(const std::exception& ex)
 			{
@@ -463,11 +474,12 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 		for(auto& currentInfo : info)
         {
 			std::string location = currentInfo.second.location();
-			std::string::size_type posPort = location.find(':', 7);
-			if(posPort == std::string::npos) return;
+            std::string::size_type posSlash = location.find('/');
+			std::string::size_type posPort = location.find_last_of(':');
+			if(posSlash == std::string::npos || posSlash >= posPort || posPort == std::string::npos) return;
 			std::string::size_type posPath = location.find('/', posPort);
 			if(posPath == std::string::npos) posPath = location.size();
-			std::string ip = location.substr(7, posPort - 7);
+			std::string ip = location.substr(posSlash + 2, posPort - posSlash - 2);
 			std::string portString = location.substr(posPort + 1, posPath - posPort - 1);
 			int32_t port = Math::getNumber(portString, false);
 			if(port <= 0 || port > 65535) return;
@@ -478,8 +490,16 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 			currentInfo.second.setPath(path);
 
 			HttpClient client(_bl, ip, port, false);
+            client.setTimeout(1000);
 			std::string xml;
-			client.get(path, xml);
+            try
+            {
+                client.get(path, xml);
+            }
+            catch(Exception& ex)
+            {
+                _bl->out.printDebug("Debug: Could not get additional SSDP information from " + location);
+            }
 
 			PVariable infoStruct;
 			if(!xml.empty())
