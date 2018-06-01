@@ -28,57 +28,47 @@
  * files in the program, then also delete it here.
 */
 
-#include "UiIcon.h"
-#include "../../BaseLib.h"
+#ifndef UICOLOR_H_
+#define UICOLOR_H_
+
+#include "../../Encoding/RapidXml/rapidxml.hpp"
+#include <string>
+#include <map>
+#include <memory>
+
+using namespace rapidxml;
 
 namespace BaseLib
 {
+
+class SharedObjects;
+
 namespace DeviceDescription
 {
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib)
+class UiColor;
+
+typedef std::shared_ptr<UiColor> PUiColor;
+
+class UiColor
 {
-    _bl = baseLib;
-}
+public:
+    UiColor(BaseLib::SharedObjects* baseLib);
+    UiColor(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiColor(UiColor const& rhs);
+    virtual ~UiColor() = default;
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiIcon(baseLib)
-{
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        _bl->out.printWarning("Warning: Unknown attribute for \"icon\": " + std::string(attr->name()));
-    }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "name") name = value;
-        else if(name == "conditionOperator") conditionOperator = value;
-        else if(name == "conditionValue") conditionValue = value;
-        else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
-    }
-}
+    UiColor& operator=(const UiColor& rhs);
 
-UiIcon::UiIcon(UiIcon const& rhs)
-{
-    _bl = rhs._bl;
-
-    name = rhs.name;
-    conditionOperator = rhs.conditionOperator;
-    conditionValue = rhs.conditionValue;
-}
-
-UiIcon& UiIcon::operator=(const UiIcon& rhs)
-{
-    if(&rhs == this) return *this;
-
-    _bl = rhs._bl;
-
-    name = rhs.name;
-    conditionOperator = rhs.conditionOperator;
-    conditionValue = rhs.conditionValue;
-
-    return *this;
-}
+    //Elements
+    std::string name;
+    std::string conditionOperator;
+    std::string conditionValue;
+protected:
+    BaseLib::SharedObjects* _bl = nullptr;
+};
 
 }
 }
+
+#endif

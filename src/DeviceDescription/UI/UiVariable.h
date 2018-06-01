@@ -31,9 +31,11 @@
 #ifndef UIVARIABLE_H_
 #define UIVARIABLE_H_
 
+#include "UiColor.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
+#include <list>
 #include <memory>
 
 using namespace rapidxml;
@@ -65,6 +67,8 @@ public:
     int32_t deviceTypeId = -1;
     int32_t channel = 1;
     std::string name;
+    std::list<PUiColor> iconColors;
+    std::list<PUiColor> textColors;
 
     //Helpers
     uint64_t peerId = 0;
