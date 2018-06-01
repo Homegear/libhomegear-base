@@ -220,17 +220,19 @@ PVariable HomegearUiElement::getElementInfo()
     uiElement->structValue->emplace("id", std::make_shared<BaseLib::Variable>(id));
     uiElement->structValue->emplace("type", std::make_shared<BaseLib::Variable>((int32_t)type));
 
-    auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
-    iconElements->arrayValue->reserve(icons.size());
-    for(auto& icon : icons)
     {
-        auto iconElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-        iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon->name));
-        if(!icon->conditionOperator.empty()) iconElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(icon->conditionOperator));
-        if(!icon->conditionValue.empty()) iconElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(icon->conditionValue));
-        iconElements->arrayValue->emplace_back(iconElement);
+        auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+        iconElements->arrayValue->reserve(icons.size());
+        for(auto& icon : icons)
+        {
+            auto iconElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon->name));
+            if(!icon->conditionOperator.empty()) iconElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(icon->conditionOperator));
+            if(!icon->conditionValue.empty()) iconElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(icon->conditionValue));
+            iconElements->arrayValue->emplace_back(iconElement);
+        }
+        uiElement->structValue->emplace("icons", iconElements);
     }
-    uiElement->structValue->emplace("icons", iconElements);
 
     if(type == Type::simple)
     {
@@ -248,6 +250,34 @@ PVariable HomegearUiElement::getElementInfo()
             input->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableInput->channel));
             input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
 
+            {
+                auto iconColorElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                iconColorElements->arrayValue->reserve(variableInput->iconColors.size());
+                for(auto& color : variableInput->iconColors)
+                {
+                    auto colorElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+                    colorElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(color->name));
+                    if(!color->conditionOperator.empty()) colorElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(color->conditionOperator));
+                    if(!color->conditionValue.empty()) colorElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(color->conditionValue));
+                    iconColorElements->arrayValue->emplace_back(colorElement);
+                }
+                uiElement->structValue->emplace("iconColors", iconColorElements);
+            }
+
+            {
+                auto textColorElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                textColorElements->arrayValue->reserve(variableInput->textColors.size());
+                for(auto& color : variableInput->textColors)
+                {
+                    auto colorElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+                    colorElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(color->name));
+                    if(!color->conditionOperator.empty()) colorElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(color->conditionOperator));
+                    if(!color->conditionValue.empty()) colorElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(color->conditionValue));
+                    textColorElements->arrayValue->emplace_back(colorElement);
+                }
+                uiElement->structValue->emplace("textColors", textColorElements);
+            }
+
             inputs->arrayValue->emplace_back(input);
         }
         uiElement->structValue->emplace("variableInputs", inputs);
@@ -262,6 +292,34 @@ PVariable HomegearUiElement::getElementInfo()
             if(variableOutput->peerId != 0) output->structValue->emplace("peerId", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
             output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
             output->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableOutput->name));
+
+            {
+                auto iconColorElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                iconColorElements->arrayValue->reserve(variableOutput->iconColors.size());
+                for(auto& color : variableOutput->iconColors)
+                {
+                    auto colorElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+                    colorElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(color->name));
+                    if(!color->conditionOperator.empty()) colorElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(color->conditionOperator));
+                    if(!color->conditionValue.empty()) colorElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(color->conditionValue));
+                    iconColorElements->arrayValue->emplace_back(colorElement);
+                }
+                uiElement->structValue->emplace("iconColors", iconColorElements);
+            }
+
+            {
+                auto textColorElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                textColorElements->arrayValue->reserve(variableOutput->textColors.size());
+                for(auto& color : variableOutput->textColors)
+                {
+                    auto colorElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+                    colorElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(color->name));
+                    if(!color->conditionOperator.empty()) colorElement->structValue->emplace("conditionOperator", std::make_shared<BaseLib::Variable>(color->conditionOperator));
+                    if(!color->conditionValue.empty()) colorElement->structValue->emplace("conditionValue", std::make_shared<BaseLib::Variable>(color->conditionValue));
+                    textColorElements->arrayValue->emplace_back(colorElement);
+                }
+                uiElement->structValue->emplace("textColors", textColorElements);
+            }
 
             outputs->arrayValue->emplace_back(output);
         }
