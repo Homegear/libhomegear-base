@@ -51,11 +51,6 @@ public:
 
 	std::string runAsUser() { return _runAsUser; }
 	std::string runAsGroup() { return _runAsGroup; }
-	std::string caPath() { return _caPath; }
-	std::string certPath() { return _certPath; }
-	std::string keyPath() { return _keyPath;  }
-	bool loadDHParamsFromFile() { return _loadDHParamsFromFile; }
-	std::string dhParamPath() { return _dhParamPath;  }
 	int32_t debugLevel() { return _debugLevel; }
 	bool memoryDebugging() { return _memoryDebugging; }
 	bool enableUPnP() { return _enableUPnP; }
@@ -169,11 +164,6 @@ private:
 
 	std::string _runAsUser;
 	std::string _runAsGroup;
-	std::string _caPath;
-	std::string _certPath;
-	std::string _keyPath;
-	bool _loadDHParamsFromFile = true;
-	std::string _dhParamPath;
 	int32_t _debugLevel = 3;
 	bool _memoryDebugging = false;
 	bool _enableUPnP = true;

@@ -111,7 +111,6 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 	}
 	int32_t sizeToInsert = (8 + _dataSize) - _data.size();
 	_data.insert(_data.end(), buffer, buffer + sizeToInsert);
-	buffer += sizeToInsert;
 	bufferLength -= sizeToInsert;
 	_finished = true;
 	return initialBufferLength - bufferLength;

@@ -68,9 +68,12 @@ public:
 		std::string interface;
 		int32_t port = -1;
 		bool ssl = true;
+		std::string caPath;
+		std::string certPath;
+		std::string keyPath;
+		std::string dhParamPath;
 		AuthType authType = AuthType::cert;
 		std::vector<std::string> validUsers;
-		int32_t diffieHellmanKeySize = 1024;
 		std::string contentPath;
 		uint32_t contentPathPermissions = 360;
 		std::string contentPathUser;
