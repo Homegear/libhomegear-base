@@ -47,10 +47,6 @@ void Settings::reset()
 {
 	_runAsUser = "";
 	_runAsGroup = "";
-	_caPath = "/etc/homegear/homegearca.crt";
-	_certPath = "/etc/homegear/homegear.crt";
-	_keyPath = "/etc/homegear/homegear.key";
-	_dhParamPath = "/etc/homegear/dh2048.pem";
 	_debugLevel = 3;
 	_memoryDebugging = false;
 	_enableUPnP = true;
@@ -215,36 +211,6 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_runAsGroup = value;
 					_bl->out.printDebug("Debug: runAsGroup set to " + _runAsGroup);
-				}
-				else if(name == "capath")
-				{
-					_caPath = value;
-					if(_caPath.empty()) _caPath = "/etc/homegear/homegearca.crt";
-					_bl->out.printDebug("Debug: caPath set to " + _caPath);
-				}
-				else if(name == "certpath")
-				{
-					_certPath = value;
-					if(_certPath.empty()) _certPath = "/etc/homegear/homegear.crt";
-					_bl->out.printDebug("Debug: certPath set to " + _certPath);
-				}
-				else if(name == "keypath")
-				{
-					_keyPath = value;
-					if(_keyPath.empty()) _keyPath = "/etc/homegear/homegear.key";
-					_bl->out.printDebug("Debug: keyPath set to " + _keyPath);
-				}
-				else if(name == "loaddhparamsfromfile")
-				{
-					if(HelperFunctions::toLower(value) == "true") _loadDHParamsFromFile = true;
-					else if(HelperFunctions::toLower(value) == "false") _loadDHParamsFromFile = false;
-					_bl->out.printDebug("Debug: loadDHParamsFromFile set to " + std::to_string(_loadDHParamsFromFile));
-				}
-				else if(name == "dhparampath")
-				{
-					_dhParamPath = value;
-					if(_dhParamPath.empty()) _dhParamPath = "/etc/homegear/dh2048.pem";
-					_bl->out.printDebug("Debug: dhParamPath set to " + _dhParamPath);
 				}
 				else if(name == "debuglevel")
 				{
