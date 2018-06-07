@@ -1013,6 +1013,16 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 			settings->caFile = value->stringValue;
 			_bl->out.printDebug("Debug: caFile set to " + settings->caFile);
 		}
+		else if(name == "certfile")
+		{
+			settings->certFile = value->stringValue;
+			_bl->out.printDebug("Debug: certFile set to " + settings->certFile);
+		}
+		else if(name == "keyfile")
+		{
+			settings->keyFile = value->stringValue;
+			_bl->out.printDebug("Debug: keyFile set to " + settings->keyFile);
+		}
 		else if(name == "verifycertificate")
 		{
 			settings->verifyCertificate = value->integerValue;

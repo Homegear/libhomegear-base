@@ -802,6 +802,24 @@ void Settings::load(std::string filename, std::string executablePath)
 						_bl->out.printDebug("Debug: Added " + std::to_string(gpio) + " to exportGpios.");
 					}
 				}
+                //{{{ Deprecated settings
+                    else if(name == "capath")
+                    {
+                        _bl->out.printWarning("Warning: The setting caPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+                    }
+                    else if(name == "certpath")
+                    {
+                        _bl->out.printWarning("Warning: The setting certPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+                    }
+                    else if(name == "keypath")
+                    {
+                        _bl->out.printWarning("Warning: The setting keyPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+                    }
+                    else if(name == "dhparampath")
+                    {
+                        _bl->out.printWarning("Warning: The setting dhParamPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+                    }
+                //}}}
 				else
 				{
 					_bl->out.printWarning("Warning: Setting not found: " + std::string(input));
