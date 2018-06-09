@@ -20,6 +20,8 @@ set(SOURCE_FILES
         src/DeviceDescription/UI/HomegearUiElement.h
         src/DeviceDescription/UI/HomegearUiElements.cpp
         src/DeviceDescription/UI/HomegearUiElements.h
+        src/DeviceDescription/UI/UiColor.cpp
+        src/DeviceDescription/UI/UiColor.h
         src/DeviceDescription/UI/UiControl.cpp
         src/DeviceDescription/UI/UiControl.h
         src/DeviceDescription/UI/UiIcon.cpp

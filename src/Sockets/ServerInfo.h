@@ -38,6 +38,7 @@
 #include <map>
 #include <cstring>
 #include <vector>
+#include <unordered_set>
 
 namespace BaseLib
 {
@@ -55,7 +56,7 @@ public:
 	class Info
 	{
 	public:
-		enum AuthType { none, basic, cert, session };
+		enum AuthType { none = 0, basic = 1, cert = 2, session = 4 };
 
 		Info()
 		{
@@ -68,9 +69,12 @@ public:
 		std::string interface;
 		int32_t port = -1;
 		bool ssl = true;
+		std::string caPath;
+		std::string certPath;
+		std::string keyPath;
+		std::string dhParamPath;
 		AuthType authType = AuthType::cert;
-		std::vector<std::string> validUsers;
-		int32_t diffieHellmanKeySize = 1024;
+		std::unordered_set<uint64_t> validGroups;
 		std::string contentPath;
 		uint32_t contentPathPermissions = 360;
 		std::string contentPathUser;

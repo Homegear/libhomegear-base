@@ -28,7 +28,7 @@
  * files in the program, then also delete it here.
 */
 
-#include "UiIcon.h"
+#include "UiColor.h"
 #include "../../BaseLib.h"
 
 namespace BaseLib
@@ -36,16 +36,16 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib)
+UiColor::UiColor(BaseLib::SharedObjects* baseLib)
 {
     _bl = baseLib;
 }
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiIcon(baseLib)
+UiColor::UiColor(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiColor(baseLib)
 {
     for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
-        _bl->out.printWarning("Warning: Unknown attribute for \"icon\": " + std::string(attr->name()));
+        _bl->out.printWarning("Warning: Unknown attribute for \"color\": " + std::string(attr->name()));
     }
     for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
@@ -54,11 +54,11 @@ UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiIcon(baseL
         if(name == "name") name = value;
         else if(name == "conditionOperator") conditionOperator = value;
         else if(name == "conditionValue") conditionValue = value;
-        else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
+        else _bl->out.printWarning("Warning: Unknown node in \"color\": " + name);
     }
 }
 
-UiIcon::UiIcon(UiIcon const& rhs)
+UiColor::UiColor(UiColor const& rhs)
 {
     _bl = rhs._bl;
 
@@ -67,7 +67,7 @@ UiIcon::UiIcon(UiIcon const& rhs)
     conditionValue = rhs.conditionValue;
 }
 
-UiIcon& UiIcon::operator=(const UiIcon& rhs)
+UiColor& UiColor::operator=(const UiColor& rhs)
 {
     if(&rhs == this) return *this;
 

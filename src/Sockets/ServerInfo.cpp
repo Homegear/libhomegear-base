@@ -39,28 +39,32 @@ PVariable ServerInfo::Info::serialize()
 {
 	if(serializedInfo) return serializedInfo;
 
-	serializedInfo.reset(new Variable(VariableType::tArray));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(index)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(name)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(interface)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(port)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(ssl)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable((int32_t)authType)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(validUsers.size())));
-	for(std::vector<std::string>::iterator i = validUsers.begin(); i != validUsers.end(); ++i)
+	serializedInfo = std::make_shared<Variable>(VariableType::tArray);
+    serializedInfo->arrayValue->reserve(20 + validGroups.size());
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(index)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(name)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(interface)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(port)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(ssl)));
+	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(caPath));
+	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(certPath));
+	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(keyPath));
+	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(dhParamPath));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable((int32_t)authType)));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(validGroups.size()));
+	for(auto group : validGroups)
 	{
-		serializedInfo->arrayValue->push_back(PVariable(new Variable(*i)));
+		serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(group));
 	}
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(diffieHellmanKeySize)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(contentPath)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(webServer)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(webSocket)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable((int32_t)websocketAuthType)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(xmlrpcServer)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(jsonrpcServer)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(restServer)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(redirectTo)));
-	serializedInfo->arrayValue->push_back(PVariable(new Variable(address)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(contentPath)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(webServer)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(webSocket)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable((int32_t)websocketAuthType)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(xmlrpcServer)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(jsonrpcServer)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(restServer)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(redirectTo)));
+	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(address)));
 
 	// Module settings are not serialized
 
@@ -76,13 +80,16 @@ void ServerInfo::Info::unserialize(PVariable data)
 	interface = data->arrayValue->at(pos)->stringValue; pos++;
 	port = data->arrayValue->at(pos)->integerValue; pos++;
 	ssl = data->arrayValue->at(pos)->booleanValue; pos++;
+	caPath = data->arrayValue->at(pos)->stringValue; pos++;
+	certPath = data->arrayValue->at(pos)->stringValue; pos++;
+	keyPath = data->arrayValue->at(pos)->stringValue; pos++;
+	dhParamPath = data->arrayValue->at(pos)->stringValue; pos++;
 	authType = (AuthType)data->arrayValue->at(pos)->integerValue; pos++;
 	int32_t validUsersSize = data->arrayValue->at(pos)->integerValue; pos++;
 	for(int32_t i = 0; i < validUsersSize; i++)
 	{
-		validUsers.push_back(data->arrayValue->at(pos)->stringValue); pos++;
+		validGroups.emplace((uint64_t)data->arrayValue->at(pos)->integerValue64); pos++;
 	}
-	diffieHellmanKeySize = data->arrayValue->at(pos)->integerValue; pos++;
 	contentPath = data->arrayValue->at(pos)->stringValue; pos++;
 	webServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	webSocket = data->arrayValue->at(pos)->booleanValue; pos++;
@@ -193,30 +200,50 @@ void ServerInfo::load(std::string filename)
 					info->ssl = value == "true";;
 					_bl->out.printDebug("Debug: ssl of server " + info->name + " set to " + std::to_string(info->ssl));
 				}
+				else if(name == "capath")
+				{
+					info->caPath = value;
+					_bl->out.printDebug("Debug: caPath of server " + info->name + " set to " + info->caPath);
+				}
+				else if(name == "certpath")
+				{
+					info->certPath = value;
+					_bl->out.printDebug("Debug: certPath of server " + info->name + " set to " + info->certPath);
+				}
+				else if(name == "keypath")
+				{
+					info->keyPath = value;
+					_bl->out.printDebug("Debug: keyPath of server " + info->name + " set to " + info->keyPath);
+				}
+				else if(name == "dhparampath")
+				{
+					info->dhParamPath = value;
+					_bl->out.printDebug("Debug: dhParamPath of server " + info->name + " set to " + info->dhParamPath);
+				}
 				else if(name == "authtype")
 				{
+                    info->authType = Info::AuthType::none;
 					HelperFunctions::toLower(value);
-					if(value == "none") info->authType = Info::AuthType::none;
-					else if(value == "basic") info->authType = Info::AuthType::basic;
-					else if(value == "cert") info->authType = Info::AuthType::cert;
+                    auto fields = HelperFunctions::splitAll(value, ',');
+                    for(auto& field : fields)
+                    {
+                        HelperFunctions::trim(field);
+                        if(field == "none") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::none);
+                        else if(field == "basic") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::basic);
+                        else if(field == "cert") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::cert);
+                    }
 					_bl->out.printDebug("Debug: authType of server " + info->name + " set to " + std::to_string(info->authType));
 				}
-				else if(name == "validusers")
+				else if(name == "validgroups")
 				{
 					std::stringstream stream(value);
 					std::string element;
 					while(std::getline(stream, element, ','))
 					{
 						HelperFunctions::toLower(HelperFunctions::trim(element));
-						info->validUsers.push_back(element);
+						uint64_t group = BaseLib::Math::getNumber64(element);
+						if(group > 0) info->validGroups.emplace(group);
 					}
-				}
-				else if(name == "diffiehellmankeysize")
-				{
-					info->diffieHellmanKeySize = Math::getNumber(value);
-					if(info->diffieHellmanKeySize < 128) info->diffieHellmanKeySize = 128;
-					if(info->diffieHellmanKeySize < 1024) _bl->out.printWarning("Diffie-Hellman key size of server " + info->name + " is smaller than 1024 bit.");
-					_bl->out.printDebug("Debug: diffieHellmanKeySize of server " + info->name + " set to " + std::to_string(info->diffieHellmanKeySize));
 				}
 				else if(name == "contentpath")
 				{

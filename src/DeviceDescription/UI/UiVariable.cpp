@@ -57,6 +57,20 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         }
         else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
         else if(nodeName == "name") name = nodeValue;
+        else if(nodeName == "iconColors")
+        {
+            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
+            {
+                iconColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
+            }
+        }
+        else if(nodeName == "textColors")
+        {
+            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
+            {
+                textColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
+            }
+        }
         else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
     }
 }
@@ -70,6 +84,20 @@ UiVariable::UiVariable(UiVariable const& rhs)
     channel = rhs.channel;
     name = rhs.name;
     peerId = rhs.peerId;
+
+    for(auto& rhsColor : rhs.iconColors)
+    {
+        auto color = std::make_shared<UiColor>(_bl);
+        *color = *rhsColor;
+        iconColors.emplace_back(color);
+    }
+
+    for(auto& rhsColor : rhs.textColors)
+    {
+        auto color = std::make_shared<UiColor>(_bl);
+        *color = *rhsColor;
+        textColors.emplace_back(color);
+    }
 }
 
 UiVariable& UiVariable::operator=(const UiVariable& rhs)
@@ -83,6 +111,20 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     channel = rhs.channel;
     name = rhs.name;
     peerId = rhs.peerId;
+
+    for(auto& rhsColor : rhs.iconColors)
+    {
+        auto color = std::make_shared<UiColor>(_bl);
+        *color = *rhsColor;
+        iconColors.emplace_back(color);
+    }
+
+    for(auto& rhsColor : rhs.textColors)
+    {
+        auto color = std::make_shared<UiColor>(_bl);
+        *color = *rhsColor;
+        textColors.emplace_back(color);
+    }
 
     return *this;
 }
