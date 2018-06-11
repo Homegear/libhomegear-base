@@ -302,10 +302,10 @@ std::string TcpSocket::getIpAddress()
         {
             if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentials.begin()->second)) != GNUTLS_E_SUCCESS)
             {
-                return result;
+                return GNUTLS_E_CERTIFICATE_ERROR;
             }
         }
-		else return GNUTLS_E_INTERNAL_ERROR;
+        else return GNUTLS_E_CERTIFICATE_ERROR;
 
         return GNUTLS_E_SUCCESS;
     }
