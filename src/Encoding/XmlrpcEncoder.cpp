@@ -60,7 +60,7 @@ void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::l
 			encodeVariable(&doc, paramNode, *i);
 		}
 
-		std::string temp("<?xml version=\"1.0\"?>\n");
+		std::string temp("<?xml version=\"1.0\"?>\r\n");
 		encodedData.insert(encodedData.end(), temp.begin(), temp.end());
 		print(std::back_inserter(encodedData), doc, 1);
 		doc.clear();
@@ -98,7 +98,7 @@ void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::v
 			paramsNode->append_node(paramNode);
 			encodeVariable(&doc, paramNode, *i);
 		}
-		std::string temp("<?xml version=\"1.0\"?>\n");
+		std::string temp("<?xml version=\"1.0\"?>\r\n");
 		encodedData.insert(encodedData.end(), temp.begin(), temp.end());
 		print(std::back_inserter(encodedData), doc, 1);
 		doc.clear();
