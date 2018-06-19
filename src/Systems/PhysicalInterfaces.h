@@ -60,8 +60,8 @@ public:
 
 	uint32_t count();
 	void clear();
-	void stopListening();
-	void startListening();
+	virtual void stopListening();
+	virtual void startListening();
 	bool lifetick();
 	bool isOpen();
 	void setup(int32_t userID, int32_t groupID, bool setPermissions);
