@@ -213,6 +213,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
 			}
+
 			if(bufferPos + receivedBytes > bufferMax)
 			{
 				if(!_keepAlive) _socket->close();
