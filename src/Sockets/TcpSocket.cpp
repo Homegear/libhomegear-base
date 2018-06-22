@@ -298,13 +298,14 @@ std::string TcpSocket::getIpAddress()
                 }
             }
         }
-        else
+        else if(credentials.size() == 1)
         {
             if((result = gnutls_credentials_set(tlsSession, GNUTLS_CRD_CERTIFICATE, credentials.begin()->second)) != GNUTLS_E_SUCCESS)
             {
-                return result;
+                return GNUTLS_E_CERTIFICATE_ERROR;
             }
         }
+        else return GNUTLS_E_CERTIFICATE_ERROR;
 
         return GNUTLS_E_SUCCESS;
     }
@@ -1406,10 +1407,13 @@ void TcpSocket::getSsl()
     }
 
 	gnutls_transport_set_ptr(_socketDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)_socketDescriptor->descriptor);
-	if((result = gnutls_server_name_set(_socketDescriptor->tlsSession, GNUTLS_NAME_DNS, _hostname.c_str(), _hostname.length())) != GNUTLS_E_SUCCESS)
+	if(!_hostname.empty())
 	{
-		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
-		throw SocketSSLException("Could not set server's hostname: " + std::string(gnutls_strerror(result)));
+		if((result = gnutls_server_name_set(_socketDescriptor->tlsSession, GNUTLS_NAME_DNS, _hostname.c_str(), _hostname.length())) != GNUTLS_E_SUCCESS)
+		{
+			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
+			throw SocketSSLException("Could not set server's hostname: " + std::string(gnutls_strerror(result)));
+		}
 	}
 	do
 	{

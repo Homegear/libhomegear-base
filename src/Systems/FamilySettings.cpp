@@ -802,8 +802,13 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         else if(name == "serialnumber")
         {
             settings->serialNumber = value;
-            _bl->out.printDebug("Debug: serialNumber set to " + settings->mode);
+            _bl->out.printDebug("Debug: serialNumber set to " + settings->serialNumber);
         }
+		else if(name == "uuid")
+		{
+			settings->uuid = value;
+			_bl->out.printDebug("Debug: uuid set to " + settings->uuid);
+		}
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);
@@ -1080,8 +1085,13 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         else if(name == "serialnumber")
         {
             settings->serialNumber = value->stringValue;
-            _bl->out.printDebug("Debug: serialNumber set to " + settings->mode);
+            _bl->out.printDebug("Debug: serialNumber set to " + settings->serialNumber);
         }
+		else if(name == "uuid")
+		{
+			settings->uuid = value->stringValue;
+			_bl->out.printDebug("Debug: uuid set to " + settings->uuid);
+		}
 		else
 		{
 			_bl->out.printWarning("Warning: Unknown physical interface setting: " + name);

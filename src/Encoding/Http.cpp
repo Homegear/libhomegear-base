@@ -758,11 +758,6 @@ int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
 					buffer++;
 					bufferLength--;
 				}
-				if(bufferLength == 0)
-				{
-					setFinished();
-					break;
-				}
 			}
 			readChunkSize(&buffer, bufferLength);
 			if(_chunkSize == -1) break;

@@ -2133,6 +2133,8 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 				if(j->second->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 
+                if(getAllConfigHook2(clientInfo, j->second, i->first, parameters)) continue;
+
 				PVariable element(new Variable(VariableType::tStruct));
 				PVariable value;
 				if(j->second->readable)

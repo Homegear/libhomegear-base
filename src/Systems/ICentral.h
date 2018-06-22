@@ -117,7 +117,7 @@ public:
 	virtual PVariable deleteDevice(PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId, bool checkAcls);
-	virtual PVariable getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly, bool checkAcls);
+	virtual PVariable getAllValues(PRpcClientInfo clientInfo, BaseLib::PArray peerIds, bool returnWriteOnly, bool checkAcls);
 	virtual PVariable getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
 	virtual PVariable getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name);
@@ -151,6 +151,7 @@ public:
 	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey);
 	virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
 	virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
+	virtual PVariable invokeFamilyMethod(PRpcClientInfo clientInfo, std::string& methodName, PArray parameters)  { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, bool checkAcls);
 	virtual PVariable listDevices(PRpcClientInfo clientInfo, bool channels, std::map<std::string, bool> fields, std::shared_ptr<std::set<uint64_t>> knownDevices, bool checkAcls);
 	virtual PVariable listTeams(BaseLib::PRpcClientInfo clientInfo, bool checkAcls);

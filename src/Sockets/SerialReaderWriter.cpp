@@ -277,7 +277,7 @@ int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 	return -1;
 }
 
-int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
+int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout, char splitChar)
 {
 	data.clear();
 	int32_t i;
@@ -321,7 +321,7 @@ int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout)
 			//Something is wrong
 			_bl->fileDescriptorManager.close(_fileDescriptor);
 		}
-		if(localBuffer[0] == '\n') return 0;
+		if(localBuffer[0] == splitChar) return 0;
 	}
 	return -1;
 }
