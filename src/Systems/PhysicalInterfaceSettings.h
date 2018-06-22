@@ -99,6 +99,7 @@ public:
 	std::string additionalCommands;
 	std::string mode;
     std::string serialNumber;
+	std::string uuid;
 };
 
 typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;

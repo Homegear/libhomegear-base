@@ -719,26 +719,36 @@ PVariable ICentral::getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId, boo
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, uint64_t peerId, bool returnWriteOnly, bool checkAcls)
+PVariable ICentral::getAllValues(PRpcClientInfo clientInfo, BaseLib::PArray peerIds, bool returnWriteOnly, bool checkAcls)
 {
 	try
 	{
 		PVariable array(new Variable(VariableType::tArray));
 
-		if(peerId > 0)
+		if(!peerIds->empty())
 		{
-			std::shared_ptr<Peer> peer = getPeer(peerId);
-			if(!peer) return Variable::createError(-2, "Unknown device.");
-			PVariable values = peer->getAllValues(clientInfo, returnWriteOnly, checkAcls);
-			if(!values) return Variable::createError(-32500, "Unknown application error. Values is nullptr.");
-			if(values->errorStruct) return values;
-			array->arrayValue->push_back(values);
+            array->arrayValue->reserve(peerIds->size());
+
+            for(auto& peerId : *peerIds)
+            {
+                std::shared_ptr<Peer> peer = getPeer((uint64_t)peerId->integerValue64);
+                if(!peer)
+                {
+                    if(peerIds->size() == 1) return Variable::createError(-2, "Unknown device.");
+                    else continue;
+                }
+                PVariable values = peer->getAllValues(clientInfo, returnWriteOnly, checkAcls);
+                if(!values) return Variable::createError(-32500, "Unknown application error. Values is nullptr.");
+                if(values->errorStruct) return values;
+                array->arrayValue->push_back(values);
+            }
 		}
 		else
 		{
 			//Copy all peers first, because getAllValues takes very long and we don't want to lock _peersMutex too long
 			std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
+            array->arrayValue->reserve(peers.size());
 			for(auto& peer : peers)
 			{
                 if(checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
