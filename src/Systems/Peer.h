@@ -257,9 +257,9 @@ public:
 		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers) = 0;
 		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers) = 0;
 
-		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values) = 0;
+		virtual void onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values) = 0;
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
-		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values) = 0;
+		virtual void onEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
 		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
 	};
@@ -484,9 +484,9 @@ protected:
 		virtual void raiseAddWebserverEventHandler(Rpc::IWebserverEventSink* eventHandler);
 		virtual void raiseRemoveWebserverEventHandler();
 
-		virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values);
+		virtual void raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values);
 		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values);
+		virtual void raiseEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values);
 		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 		virtual BaseLib::PVariable raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
 	// }}}
@@ -494,8 +494,8 @@ protected:
 	//ServiceMessages event handling
 	virtual void onConfigPending(bool configPending);
 
-	virtual void onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values);
-	virtual void onRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values);
+	virtual void onEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values);
+	virtual void onRPCEvent(std::string& source, uint64_t peerId, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values);
 	virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t>& data);
 	virtual std::shared_ptr<Database::DataTable> onGetServiceMessages();
 	virtual void onSaveServiceMessage(Database::DataRow& data);
