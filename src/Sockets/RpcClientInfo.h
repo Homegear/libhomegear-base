@@ -97,6 +97,11 @@ public:
 	bool initJsonMode = false;
 	bool initSendNewDevices = true;
 
+    /**
+     * Set by Miscellaneous peers
+     */
+    uint64_t peerId = 0;
+
     std::shared_ptr<FileDescriptor> socketDescriptor;
     std::shared_ptr<TcpSocket> socket;
 
@@ -109,7 +114,10 @@ public:
 	//}}}
 
 	RpcClientInfo() = default;
+    RpcClientInfo(RpcClientInfo const& rhs);
 	virtual ~RpcClientInfo() = default;
+
+    RpcClientInfo& operator=(const RpcClientInfo& rhs);
 };
 
 typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;

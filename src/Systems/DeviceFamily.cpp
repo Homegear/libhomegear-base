@@ -125,9 +125,9 @@ void DeviceFamily::raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHand
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRemoveWebserverEventHandler(eventHandlers);
 }
 
-void DeviceFamily::raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
+void DeviceFamily::raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
 {
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCEvent(id, channel, deviceAddress, valueKeys, values);
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 }
 
 void DeviceFamily::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
@@ -145,9 +145,9 @@ void DeviceFamily::raiseRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable d
 	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
-void DeviceFamily::raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
+void DeviceFamily::raiseEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
 {
-	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onEvent(peerID, channel, variables, values);
+	if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onEvent(source, peerID, channel, variables, values);
 }
 
 void DeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
@@ -190,9 +190,9 @@ void DeviceFamily::onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler
 	raiseRemoveWebserverEventHandler(eventHandlers);
 }
 
-void DeviceFamily::onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
+void DeviceFamily::onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
 {
-	raiseRPCEvent(id, channel, deviceAddress, valueKeys, values);
+	raiseRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 }
 
 void DeviceFamily::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
@@ -210,9 +210,9 @@ void DeviceFamily::onRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable devi
 	raiseRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
-void DeviceFamily::onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
+void DeviceFamily::onEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
 {
-	raiseEvent(peerID, channel, variables, values);
+	raiseEvent(source, peerID, channel, variables, values);
 }
 
 void DeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
