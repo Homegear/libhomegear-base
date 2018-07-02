@@ -56,14 +56,14 @@ void ServiceMessages::raiseConfigPending(bool configPending)
 	if(_eventHandler) ((IServiceEventSink*)_eventHandler)->onConfigPending(configPending);
 }
 
-void ServiceMessages::raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values)
+void ServiceMessages::raiseEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values)
 {
-	if(_eventHandler) ((IServiceEventSink*)_eventHandler)->onEvent(peerId, channel, variables, values);
+	if(_eventHandler) ((IServiceEventSink*)_eventHandler)->onEvent(source, peerId, channel, variables, values);
 }
 
-void ServiceMessages::raiseRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
+void ServiceMessages::raiseRPCEvent(std::string& source, uint64_t peerId, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
 {
-	if(_eventHandler) ((IServiceEventSink*)_eventHandler)->onRPCEvent(peerId, channel, deviceAddress, valueKeys, values);
+	if(_eventHandler) ((IServiceEventSink*)_eventHandler)->onRPCEvent(source, peerId, channel, deviceAddress, valueKeys, values);
 }
 
 void ServiceMessages::raiseSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t>& data)
@@ -343,8 +343,10 @@ bool ServiceMessages::set(std::string id, bool value)
             std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
             std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
             rpcValues->push_back(PVariable(new Variable((int32_t) 0)));
-            raiseEvent(_peerId, 0, valueKeys, rpcValues);
-            raiseRPCEvent(_peerId, 0, _peerSerial + ":" + std::to_string(0), valueKeys, rpcValues);
+			std::string eventSource = "device-" + std::to_string(_peerId);
+			std::string address =  _peerSerial + ":" + std::to_string(0);
+            raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+            raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 
             if(!value) //Set for all other channels
             {
@@ -364,8 +366,10 @@ bool ServiceMessages::set(std::string id, bool value)
                         std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
                         std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
                         rpcValues->push_back(PVariable(new Variable((int32_t) 0)));
-                        raiseEvent(_peerId, 0, valueKeys, rpcValues);
-                        raiseRPCEvent(_peerId, 0, _peerSerial + ":" + std::to_string(error.first), valueKeys, rpcValues);
+						std::string eventSource = "device-" + std::to_string(_peerId);
+						std::string address =  _peerSerial + ":" + std::to_string(error.first);
+                        raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+                        raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
                     }
                 }
             }
@@ -379,8 +383,10 @@ bool ServiceMessages::set(std::string id, bool value)
 		std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
 		rpcValues->push_back(PVariable(new Variable(value)));
 
-		raiseEvent(_peerId, 0, valueKeys, rpcValues);
-		raiseRPCEvent(_peerId, 0, _peerSerial + ":0", valueKeys, rpcValues);
+		std::string eventSource = "device-" + std::to_string(_peerId);
+		std::string address =  _peerSerial + ":" + std::to_string(0);
+		raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+		raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 	}
 	catch(const std::exception& ex)
     {
@@ -606,8 +612,10 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, uint32_t lastPacketRec
 				rpcValues->push_back(PVariable(new Variable(true)));
 				rpcValues->push_back(PVariable(new Variable(true)));
 
-				raiseEvent(_peerId, 0, valueKeys, rpcValues);
-				raiseRPCEvent(_peerId, 0, _peerSerial + ":0", valueKeys, rpcValues);
+				std::string eventSource = "device-" + std::to_string(_peerId);
+				std::string address =  _peerSerial + ":" + std::to_string(0);
+				raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+				raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 			}
 		}
 		else if(_unreach) endUnreach();
@@ -644,8 +652,10 @@ void ServiceMessages::endUnreach()
 			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
 			rpcValues->push_back(PVariable(new Variable(false)));
 
-			raiseEvent(_peerId, 0, valueKeys, rpcValues);
-			raiseRPCEvent(_peerId, 0, _peerSerial + ":0", valueKeys, rpcValues);
+			std::string eventSource = "device-" + std::to_string(_peerId);
+			std::string address =  _peerSerial + ":" + std::to_string(0);
+			raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+			raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 		}
 	}
 	catch(const std::exception& ex)
@@ -699,8 +709,10 @@ void ServiceMessages::setConfigPending(bool value)
 			std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
 			rpcValues->push_back(PVariable(new Variable(value)));
 
-			raiseEvent(_peerId, 0, valueKeys, rpcValues);
-			raiseRPCEvent(_peerId, 0, _peerSerial + ":0", valueKeys, rpcValues);
+			std::string eventSource = "device-" + std::to_string(_peerId);
+			std::string address =  _peerSerial + ":" + std::to_string(0);
+			raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+			raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 			raiseConfigPending(value);
 		}
 	}
@@ -754,8 +766,10 @@ void ServiceMessages::setUnreach(bool value, bool requeue)
 				rpcValues->push_back(PVariable(new Variable(true)));
 			}
 
-			raiseEvent(_peerId, 0, valueKeys, rpcValues);
-			raiseRPCEvent(_peerId, 0, _peerSerial + ":0", valueKeys, rpcValues);
+			std::string eventSource = "device-" + std::to_string(_peerId);
+			std::string address =  _peerSerial + ":" + std::to_string(0);
+			raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
+			raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
 		}
 	}
 	catch(const std::exception& ex)

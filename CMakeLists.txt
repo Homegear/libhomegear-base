@@ -145,6 +145,7 @@ set(SOURCE_FILES
         src/Sockets/IWebserverEventSink.h
         src/Sockets/Modbus.cpp
         src/Sockets/Modbus.h
+        src/Sockets/RpcClientInfo.cpp
         src/Sockets/RpcClientInfo.h
         src/Sockets/SerialReaderWriter.cpp
         src/Sockets/SerialReaderWriter.h
