@@ -53,7 +53,8 @@ enum class RpcClientType
 	generic,
 	ipsymcon,
 	ccu2,
-	homematicconfigurator
+	homematicconfigurator,
+	homeassistant
 };
 
 enum class RpcType
