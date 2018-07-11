@@ -62,8 +62,8 @@ public:
 	public:
 		virtual void onConfigPending(bool configPending) = 0;
 
-		virtual void onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
-		virtual void onRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
+		virtual void onEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values) = 0;
+		virtual void onRPCEvent(std::string& source, uint64_t peerId, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values) = 0;
 		virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t>& data) = 0;
 		virtual std::shared_ptr<Database::DataTable> onGetServiceMessages() = 0;
 		virtual void onSaveServiceMessage(Database::DataRow& data) = 0;
@@ -125,8 +125,8 @@ protected:
 	//Event handling
 	virtual void raiseConfigPending(bool configPending);
 
-	virtual void raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> values);
-	virtual void raiseRPCEvent(uint64_t peerId, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+	virtual void raiseEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>>& values);
+	virtual void raiseRPCEvent(std::string& source, uint64_t peerId, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
 	virtual void raiseSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t>& data);
 	virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages();
 	virtual void raiseSaveServiceMessage(Database::DataRow& data);
