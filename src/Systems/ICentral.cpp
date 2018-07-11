@@ -78,9 +78,9 @@ void ICentral::dispose(bool wait)
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRemoveWebserverEventHandler(eventHandlers);
 	}
 
-	void ICentral::raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
+	void ICentral::raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
 	{
-		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCEvent(id, channel, deviceAddress, valueKeys, values);
+		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 	}
 
 	void ICentral::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
@@ -98,9 +98,9 @@ void ICentral::dispose(bool wait)
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 	}
 
-	void ICentral::raiseEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
+	void ICentral::raiseEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
 	{
-		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onEvent(peerId, channel, variables, values);
+		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onEvent(source, peerId, channel, variables, values);
 	}
 
 	void ICentral::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
@@ -132,9 +132,9 @@ void ICentral::dispose(bool wait)
 		raiseRemoveWebserverEventHandler(eventHandlers);
 	}
 
-	void ICentral::onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<PVariable>> values)
+	void ICentral::onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
 	{
-		raiseRPCEvent(id, channel, deviceAddress, valueKeys, values);
+		raiseRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 	}
 
 	void ICentral::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
@@ -142,9 +142,9 @@ void ICentral::dispose(bool wait)
 		raiseRPCUpdateDevice(id, channel, address, hint);
 	}
 
-	void ICentral::onEvent(uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<PVariable>> values)
+	void ICentral::onEvent(std::string& source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
 	{
-		raiseEvent(peerId, channel, variables, values);
+		raiseEvent(source, peerId, channel, variables, values);
 	}
 
 	void ICentral::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)

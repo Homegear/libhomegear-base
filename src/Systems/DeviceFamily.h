@@ -63,11 +63,11 @@ public:
 		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers) = 0;
 		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers) = 0;
 
-		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
+		virtual void onRPCEvent(std::string source, uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
 		virtual void onRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions) = 0;
 		virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo) = 0;
-		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
+		virtual void onEvent(std::string source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
 		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
 		virtual int32_t onCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey) = 0;
@@ -134,11 +134,11 @@ protected:
 		virtual void raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
 		virtual void raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
 
-		virtual void raiseRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
 		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void raiseRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions);
 		virtual void raiseRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-		virtual void raiseEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void raiseEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
 		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 		virtual BaseLib::PVariable raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
 		virtual int32_t raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey);
@@ -154,11 +154,11 @@ protected:
 		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
 		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
 
-		virtual void onRPCEvent(uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
 		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
 		virtual void onRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions);
 		virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-		virtual void onEvent(uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values);
+		virtual void onEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
 		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
 		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
 		virtual uint64_t onGetRoomIdByName(std::string& name);
