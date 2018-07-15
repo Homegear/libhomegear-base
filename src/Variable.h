@@ -63,8 +63,6 @@ enum class VariableType
 	tVariant = 0x1111,
 };
 
-class Variable;
-
 typedef std::shared_ptr<Variable> PVariable;
 typedef std::shared_ptr<PVariable> PPVariable;
 typedef std::pair<std::string, PVariable> StructElement;
