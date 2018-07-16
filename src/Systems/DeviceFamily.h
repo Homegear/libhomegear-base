@@ -102,7 +102,6 @@ public:
 	virtual std::shared_ptr<ICentral> getCentral();
 	virtual std::string getName();
 	virtual std::string handleCliCommand(std::string& command);
-	virtual bool peerSelected();
 	virtual bool hasPhysicalInterface();
 	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces();
 
