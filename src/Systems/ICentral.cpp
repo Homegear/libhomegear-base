@@ -61,7 +61,6 @@ ICentral::~ICentral()
 void ICentral::dispose(bool wait)
 {
 	_disposing = true;
-	_currentPeer.reset();
 	_peers.clear();
 	_peersBySerial.clear();
 	_peersById.clear();
@@ -265,11 +264,6 @@ std::shared_ptr<Peer> ICentral::getPeer(std::string serialNumber)
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<Peer>();
-}
-
-bool ICentral::peerSelected()
-{
-	 return (bool)_currentPeer;
 }
 
 bool ICentral::peerExists(int32_t address)
