@@ -39,7 +39,6 @@ int32_t DeviceFamily::getFamily(){ return _family; }
 std::shared_ptr<DeviceDescription::Devices> DeviceFamily::getRpcDevices() { return _rpcDevices; }
 std::shared_ptr<ICentral> DeviceFamily::getCentral() { return _central; }
 std::string DeviceFamily::getName() { return _name; }
-bool DeviceFamily::peerSelected() { if(!_central) return false; return _central->peerSelected(); }
 bool DeviceFamily::hasPhysicalInterface() { return true; }
 std::shared_ptr<PhysicalInterfaces> DeviceFamily::physicalInterfaces() { return _physicalInterfaces; }
 
