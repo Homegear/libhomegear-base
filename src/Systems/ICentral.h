@@ -99,7 +99,6 @@ public:
 	std::shared_ptr<Peer> getPeer(int32_t address);
     std::shared_ptr<Peer> getPeer(uint64_t id);
     std::shared_ptr<Peer> getPeer(std::string serialNumber);
-	virtual bool peerSelected();
 
 	virtual bool peerExists(int32_t address);
 	virtual bool peerExists(std::string serialNumber);
@@ -198,7 +197,6 @@ protected:
     std::atomic_bool _disposing;
 
 	std::shared_ptr<DeviceDescription::DeviceTranslations> _translations;
-	std::shared_ptr<Peer> _currentPeer;
     std::unordered_map<int32_t, std::shared_ptr<Peer>> _peers;
     std::unordered_map<std::string, std::shared_ptr<Peer>> _peersBySerial;
     std::map<uint64_t, std::shared_ptr<Peer>> _peersById;

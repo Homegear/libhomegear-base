@@ -161,8 +161,8 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 		ssize_t receivedBytes;
 
 		int32_t bufferPos = 0;
-		int32_t bufferMax = 4096;
-		char buffer[bufferMax + 1];
+		const int32_t bufferMax = 4096;
+		std::array<char, bufferMax + 1> buffer;
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
 
@@ -191,10 +191,10 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
 					bufferPos = 0;
 				}
-				receivedBytes = _socket->proofread(buffer + bufferPos, bufferMax - bufferPos);
+				receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
 
 				//Some clients send only one byte in the first packet
-				if(receivedBytes == 1 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer + bufferPos + 1, bufferMax - bufferPos - 1);
+				if(receivedBytes < 13 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer.data() + bufferPos + 1, bufferMax - bufferPos - 1);
 			}
 			catch(const BaseLib::SocketTimeOutException& ex)
 			{
@@ -224,14 +224,14 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			if(_keepRawContent)
 			{
 				if(_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
-				_rawContent.insert(_rawContent.end(), buffer, buffer + receivedBytes);
+				_rawContent.insert(_rawContent.end(), buffer.begin(), buffer.begin() + receivedBytes);
 			}
 
 			//We are using string functions to process the buffer. So just to make sure,
 			//they don't do something in the memory after buffer, we add '\0'
-			buffer[bufferPos + receivedBytes] = '\0';
+			buffer.at(bufferPos + receivedBytes) = '\0';
 
-			if(!http.headerIsFinished() && (!strncmp(buffer, "401", 3) || !strncmp(&buffer[9], "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
+			if(!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
 			{
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
@@ -241,8 +241,8 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 
 			try
 			{
-				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Received packet from HTTP server \"" + _hostname + "\": " + std::string(buffer, receivedBytes));
-				http.process(buffer, receivedBytes);
+				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Received packet from HTTP server \"" + _hostname + "\": " + std::string(buffer.begin(), buffer.begin() + receivedBytes));
+				http.process(buffer.data(), receivedBytes);
 				if(http.headerIsFinished() && responseIsHeaderOnly)
 				{
 					http.setFinished();
