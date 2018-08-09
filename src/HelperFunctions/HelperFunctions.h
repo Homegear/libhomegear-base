@@ -583,7 +583,7 @@ public:
 	 *
 	 * @param command The command to execute (passed to sh with "-c").
 	 * @param[out] output The program output.
-	 * @return Returns 0 on success, otherwise -1.
+	 * @return Returns the programs exit code.
 	 */
 	static int32_t exec(std::string command, std::string& output);
 
