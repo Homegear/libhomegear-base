@@ -28,47 +28,61 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICOLOR_H_
-#define UICOLOR_H_
-
-#include "../../Encoding/RapidXml/rapidxml.hpp"
-#include <string>
-#include <map>
-#include <memory>
-
-using namespace rapidxml;
+#include "UiText.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace DeviceDescription
 {
 
-class UiColor;
-
-typedef std::shared_ptr<UiColor> PUiColor;
-
-class UiColor
+UiText::UiText(BaseLib::SharedObjects* baseLib)
 {
-public:
-    UiColor(BaseLib::SharedObjects* baseLib);
-    UiColor(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiColor(UiColor const& rhs);
-    virtual ~UiColor() = default;
+    _bl = baseLib;
+}
 
-    UiColor& operator=(const UiColor& rhs);
+UiText::UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiText(baseLib)
+{
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string name(attr->name());
+        std::string value(attr->value());
+        if(name == "id") id = value;
+        else _bl->out.printWarning("Warning: Unknown attribute for \"text\": " + std::string(attr->name()));
+    }
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string name(subNode->name());
+        std::string value(subNode->value());
+        if(name == "content") content = value;
+        else if(name == "color") color = value;
+        else _bl->out.printWarning("Warning: Unknown node in \"text\": " + name);
+    }
+}
 
-    //Elements
-    std::string name;
-    std::string conditionOperator;
-    std::string conditionValue;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-};
+UiText::UiText(UiText const& rhs)
+{
+    _bl = rhs._bl;
+
+    id = rhs.id;
+
+    content = rhs.content;
+    color = rhs.color;
+}
+
+UiText& UiText::operator=(const UiText& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    id = rhs.id;
+
+    content = rhs.content;
+    color = rhs.color;
+
+    return *this;
+}
 
 }
 }
-
-#endif

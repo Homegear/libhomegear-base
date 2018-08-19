@@ -62,8 +62,7 @@ public:
 
     //Elements
     std::string name;
-    std::string conditionOperator;
-    std::string conditionValue;
+    std::string color;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

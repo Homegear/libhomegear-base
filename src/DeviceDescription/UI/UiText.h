@@ -28,14 +28,12 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIVARIABLE_H_
-#define UIVARIABLE_H_
+#ifndef UITEXT_H_
+#define UITEXT_H_
 
-#include "UiCondition.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
-#include <list>
 #include <memory>
 
 using namespace rapidxml;
@@ -48,31 +46,26 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiVariable;
+class UiText;
 
-typedef std::shared_ptr<UiVariable> PUiVariable;
+typedef std::shared_ptr<UiText> PUiText;
 
-class UiVariable
+class UiText
 {
 public:
-    UiVariable(BaseLib::SharedObjects* baseLib);
-    UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiVariable(UiVariable const& rhs);
-    virtual ~UiVariable() = default;
+    UiText(BaseLib::SharedObjects* baseLib);
+    UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiText(UiText const& rhs);
+    virtual ~UiText() = default;
 
-    UiVariable& operator=(const UiVariable& rhs);
+    UiText& operator=(const UiText& rhs);
+
+    //Attributes
+    std::string id;
 
     //Elements
-    int32_t familyId = -1;
-    int32_t deviceTypeId = -1;
-    int32_t channel = -1;
-    std::string name;
-    bool visualize = true;
-    std::string unit;
-    std::list<PUiCondition> conditions;
-
-    //Helpers
-    uint64_t peerId = 0;
+    std::string content;
+    std::string color;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

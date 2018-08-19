@@ -28,14 +28,15 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIVARIABLE_H_
-#define UIVARIABLE_H_
+#ifndef UICONDITION_H_
+#define UICONDITION_H_
 
-#include "UiCondition.h"
+#include "UiIcon.h"
+#include "UiText.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
-#include <map>
 #include <list>
+#include <unordered_map>
 #include <memory>
 
 using namespace rapidxml;
@@ -48,31 +49,27 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiVariable;
+class UiCondition;
 
-typedef std::shared_ptr<UiVariable> PUiVariable;
+typedef std::shared_ptr<UiCondition> PUiCondition;
 
-class UiVariable
+class UiCondition
 {
 public:
-    UiVariable(BaseLib::SharedObjects* baseLib);
-    UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiVariable(UiVariable const& rhs);
-    virtual ~UiVariable() = default;
+    UiCondition(BaseLib::SharedObjects* baseLib);
+    UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiCondition(UiCondition const& rhs);
+    virtual ~UiCondition() = default;
 
-    UiVariable& operator=(const UiVariable& rhs);
+    UiCondition& operator=(const UiCondition& rhs);
+
+    //Attributes
+    std::string conditionOperator;
+    std::string conditionValue;
 
     //Elements
-    int32_t familyId = -1;
-    int32_t deviceTypeId = -1;
-    int32_t channel = -1;
-    std::string name;
-    bool visualize = true;
-    std::string unit;
-    std::list<PUiCondition> conditions;
-
-    //Helpers
-    uint64_t peerId = 0;
+    std::list<PUiIcon> icons;
+    std::unordered_map<std::string, PUiText> texts;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

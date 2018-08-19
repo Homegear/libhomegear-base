@@ -51,9 +51,8 @@ UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiIcon(baseL
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
-        if(name == "name") name = value;
-        else if(name == "conditionOperator") conditionOperator = value;
-        else if(name == "conditionValue") conditionValue = value;
+        if(name == "name") this->name = value;
+        else if(name == "color") color = value;
         else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
     }
 }
@@ -63,8 +62,7 @@ UiIcon::UiIcon(UiIcon const& rhs)
     _bl = rhs._bl;
 
     name = rhs.name;
-    conditionOperator = rhs.conditionOperator;
-    conditionValue = rhs.conditionValue;
+    color = rhs.color;
 }
 
 UiIcon& UiIcon::operator=(const UiIcon& rhs)
@@ -74,8 +72,7 @@ UiIcon& UiIcon::operator=(const UiIcon& rhs)
     _bl = rhs._bl;
 
     name = rhs.name;
-    conditionOperator = rhs.conditionOperator;
-    conditionValue = rhs.conditionValue;
+    color = rhs.color;
 
     return *this;
 }

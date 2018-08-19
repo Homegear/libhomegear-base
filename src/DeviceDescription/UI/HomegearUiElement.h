@@ -34,6 +34,7 @@
 #include "UiVariable.h"
 #include "UiControl.h"
 #include "UiIcon.h"
+#include "UiText.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../Variable.h"
 
@@ -76,9 +77,8 @@ public:
     std::string id;
     Type type = Type::undefined;
     std::string control;
-    std::string unit;
     std::list<PUiIcon> icons;
-    std::unordered_map<std::string, std::string> texts;
+    std::unordered_map<std::string, PUiText> texts;
     std::list<PUiVariable> variableInputs;
     std::list<PUiVariable> variableOutputs;
     std::unordered_map<std::string, std::string> metadata;

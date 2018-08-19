@@ -55,20 +55,21 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         {
             if(nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
         }
-        else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
-        else if(nodeName == "name") name = nodeValue;
-        else if(nodeName == "iconColors")
+        else if(nodeName == "channel")
         {
-            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
-            {
-                iconColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
-            }
+            if(nodeValue != "*") channel = Math::getNumber(nodeValue);
         }
-        else if(nodeName == "textColors")
+        else if(nodeName == "name")
         {
-            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
+            if(nodeValue != "*") name = nodeValue;
+        }
+        else if(nodeName == "visualize") visualize = (nodeValue == "true");
+        else if(nodeName == "unit") unit = nodeValue;
+        else if(nodeName == "conditions")
+        {
+            for(xml_node<>* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
             {
-                textColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
+                conditions.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
@@ -83,20 +84,15 @@ UiVariable::UiVariable(UiVariable const& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    visualize = rhs.visualize;
+    unit = rhs.unit;
     peerId = rhs.peerId;
 
-    for(auto& rhsColor : rhs.iconColors)
+    for(auto& rhsCondition : rhs.conditions)
     {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        iconColors.emplace_back(color);
-    }
-
-    for(auto& rhsColor : rhs.textColors)
-    {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        textColors.emplace_back(color);
+        auto condition = std::make_shared<UiCondition>(_bl);
+        *condition = *rhsCondition;
+        conditions.emplace_back(condition);
     }
 }
 
@@ -110,20 +106,15 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    visualize = rhs.visualize;
+    unit = rhs.unit;
     peerId = rhs.peerId;
 
-    for(auto& rhsColor : rhs.iconColors)
+    for(auto& rhsCondition : rhs.conditions)
     {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        iconColors.emplace_back(color);
-    }
-
-    for(auto& rhsColor : rhs.textColors)
-    {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        textColors.emplace_back(color);
+        auto condition = std::make_shared<UiCondition>(_bl);
+        *condition = *rhsCondition;
+        conditions.emplace_back(condition);
     }
 
     return *this;
