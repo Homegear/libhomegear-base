@@ -32,6 +32,7 @@
 #define UIVARIABLE_H_
 
 #include "UiCondition.h"
+#include "../../Variable.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
@@ -69,6 +70,10 @@ public:
     std::string name;
     bool visualize = true;
     std::string unit;
+    PVariable minimumValue;
+    PVariable maximumValue;
+    PVariable minimumValueScaled;
+    PVariable maximumValueScaled;
     std::list<PUiCondition> conditions;
 
     //Helpers

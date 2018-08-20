@@ -65,6 +65,26 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         }
         else if(nodeName == "visualize") visualize = (nodeValue == "true");
         else if(nodeName == "unit") unit = nodeValue;
+        else if(nodeName == "minimumValue")
+        {
+            if(nodeValue.find('.') != std::string::npos) minimumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else minimumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "maximumValue")
+        {
+            if(nodeValue.find('.') != std::string::npos) maximumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else maximumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "minimumValueScaled")
+        {
+            if(nodeValue.find('.') != std::string::npos) minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "maximumValueScaled")
+        {
+            if(nodeValue.find('.') != std::string::npos) maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
         else if(nodeName == "conditions")
         {
             for(xml_node<>* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
@@ -86,6 +106,26 @@ UiVariable::UiVariable(UiVariable const& rhs)
     name = rhs.name;
     visualize = rhs.visualize;
     unit = rhs.unit;
+    if(rhs.minimumValue)
+    {
+        minimumValue = std::make_shared<Variable>();
+        *minimumValue = *rhs.minimumValue;
+    }
+    if(rhs.maximumValue)
+    {
+        maximumValue = std::make_shared<Variable>();
+        *maximumValue = *rhs.maximumValue;
+    }
+    if(rhs.minimumValueScaled)
+    {
+        minimumValueScaled = std::make_shared<Variable>();
+        *minimumValueScaled = *rhs.minimumValueScaled;
+    }
+    if(rhs.maximumValueScaled)
+    {
+        maximumValueScaled = std::make_shared<Variable>();
+        *maximumValueScaled = *rhs.maximumValueScaled;
+    }
     peerId = rhs.peerId;
 
     for(auto& rhsCondition : rhs.conditions)
@@ -108,6 +148,26 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     name = rhs.name;
     visualize = rhs.visualize;
     unit = rhs.unit;
+    if(rhs.minimumValue)
+    {
+        minimumValue = std::make_shared<Variable>();
+        *minimumValue = *rhs.minimumValue;
+    }
+    if(rhs.maximumValue)
+    {
+        maximumValue = std::make_shared<Variable>();
+        *maximumValue = *rhs.maximumValue;
+    }
+    if(rhs.minimumValueScaled)
+    {
+        minimumValueScaled = std::make_shared<Variable>();
+        *minimumValueScaled = *rhs.minimumValueScaled;
+    }
+    if(rhs.maximumValueScaled)
+    {
+        maximumValueScaled = std::make_shared<Variable>();
+        *maximumValueScaled = *rhs.maximumValueScaled;
+    }
     peerId = rhs.peerId;
 
     for(auto& rhsCondition : rhs.conditions)

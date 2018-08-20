@@ -180,6 +180,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                 variableInput->peerId = peerInfo->inputPeers.at(0).at(i)->peerId;
                 if(peerInfo->inputPeers.at(0).at(i)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
                 if(!peerInfo->inputPeers.at(0).at(i)->name.empty()) variableInput->name = peerInfo->inputPeers.at(0).at(i)->name;
+                if(peerInfo->inputPeers.at(0).at(i)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(0).at(i)->minimumValue;
+                if(peerInfo->inputPeers.at(0).at(i)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(0).at(i)->maximumValue;
+                if(peerInfo->inputPeers.at(0).at(i)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(0).at(i)->minimumValueScaled;
+                if(peerInfo->inputPeers.at(0).at(i)->maximumValueScaled) variableInput->maximumValueScaled = peerInfo->inputPeers.at(0).at(i)->maximumValueScaled;
                 i++;
             }
 
@@ -190,6 +194,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                 variableOutput->peerId = peerInfo->outputPeers.at(0).at(i)->peerId;
                 if(peerInfo->outputPeers.at(0).at(i)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
                 if(!peerInfo->outputPeers.at(0).at(i)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(0).at(i)->name;
+                if(peerInfo->outputPeers.at(0).at(i)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(0).at(i)->minimumValue;
+                if(peerInfo->outputPeers.at(0).at(i)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(0).at(i)->maximumValue;
+                if(peerInfo->outputPeers.at(0).at(i)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(0).at(i)->minimumValueScaled;
+                if(peerInfo->outputPeers.at(0).at(i)->maximumValueScaled) variableOutput->maximumValueScaled = peerInfo->outputPeers.at(0).at(i)->maximumValueScaled;
                 i++;
             }
         }
@@ -210,6 +218,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                         variableInput->peerId = peerInfo->inputPeers.at(i).at(j)->peerId;
                         if(peerInfo->inputPeers.at(i).at(j)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
                         if(!peerInfo->inputPeers.at(i).at(j)->name.empty()) variableInput->name = peerInfo->inputPeers.at(i).at(j)->name;
+                        if(peerInfo->inputPeers.at(i).at(j)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(i).at(j)->minimumValue;
+                        if(peerInfo->inputPeers.at(i).at(j)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(i).at(j)->maximumValue;
+                        if(peerInfo->inputPeers.at(i).at(j)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(i).at(j)->minimumValueScaled;
+                        if(peerInfo->inputPeers.at(i).at(j)->maximumValueScaled) variableInput->maximumValueScaled = peerInfo->inputPeers.at(i).at(j)->maximumValueScaled;
                         j++;
                     }
                 }
@@ -223,6 +235,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                         variableOutput->peerId = peerInfo->outputPeers.at(i).at(j)->peerId;
                         if(peerInfo->outputPeers.at(i).at(j)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
                         if(!peerInfo->outputPeers.at(i).at(j)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(i).at(j)->name;
+                        if(peerInfo->outputPeers.at(i).at(j)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(i).at(j)->minimumValue;
+                        if(peerInfo->outputPeers.at(i).at(j)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(i).at(j)->maximumValue;
+                        if(peerInfo->outputPeers.at(i).at(j)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(i).at(j)->minimumValueScaled;
+                        if(peerInfo->outputPeers.at(i).at(j)->maximumValueScaled) variableOutput->maximumValueScaled = peerInfo->outputPeers.at(i).at(j)->maximumValueScaled;
                         j++;
                     }
                 }

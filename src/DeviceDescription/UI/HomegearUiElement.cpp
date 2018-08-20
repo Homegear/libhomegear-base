@@ -253,6 +253,10 @@ PVariable HomegearUiElement::getElementInfo()
             input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
             input->structValue->emplace("visualize", std::make_shared<BaseLib::Variable>(variableInput->visualize));
             if(!variableInput->unit.empty()) input->structValue->emplace("unit", std::make_shared<BaseLib::Variable>(variableInput->unit));
+            if(variableInput->minimumValue) input->structValue->emplace("minimumValue", variableInput->minimumValue);
+            if(variableInput->maximumValue) input->structValue->emplace("maximumValue", variableInput->maximumValue);
+            if(variableInput->minimumValueScaled) input->structValue->emplace("minimumValueScaled", variableInput->minimumValueScaled);
+            if(variableInput->maximumValueScaled) input->structValue->emplace("maximumValueScaled", variableInput->maximumValueScaled);
 
             {
                 auto conditionElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
@@ -311,12 +315,14 @@ PVariable HomegearUiElement::getElementInfo()
             if(variableOutput->peerId != 0) output->structValue->emplace("peerId", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
             if(variableOutput->channel != -1) output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
             output->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableOutput->name));
+            if(variableOutput->minimumValue) output->structValue->emplace("minimumValue", variableOutput->minimumValue);
+            if(variableOutput->maximumValue) output->structValue->emplace("maximumValue", variableOutput->maximumValue);
 
             outputs->arrayValue->emplace_back(output);
         }
         uiElement->structValue->emplace("variableOutputs", outputs);
     }
-    if(type == Type::complex)
+    else if(type == Type::complex)
     {
         uiElement->structValue->emplace("width", std::make_shared<BaseLib::Variable>(width));
         uiElement->structValue->emplace("height", std::make_shared<BaseLib::Variable>(height));
