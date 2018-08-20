@@ -60,6 +60,9 @@ public:
 
     UiIcon& operator=(const UiIcon& rhs);
 
+    //Attributes
+    std::string id;
+
     //Elements
     std::string name;
     std::string color;

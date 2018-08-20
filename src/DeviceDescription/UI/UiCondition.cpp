@@ -59,7 +59,8 @@ UiCondition::UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Ui
         {
             for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
             {
-                icons.emplace_back(std::make_shared<UiIcon>(baseLib, iconNode));
+                auto icon = std::make_shared<UiIcon>(baseLib, iconNode);
+                if(!icon->id.empty()) icons.emplace(icon->id, std::move(icon));
             }
         }
         else if(name == "texts")
@@ -84,8 +85,8 @@ UiCondition::UiCondition(UiCondition const& rhs)
     for(auto& icon : rhs.icons)
     {
         auto uiIcon = std::make_shared<UiIcon>(_bl);
-        *uiIcon = *icon;
-        icons.emplace_back(uiIcon);
+        *uiIcon = *(icon.second);
+        icons.emplace(uiIcon->id, std::move(uiIcon));
     }
 
     for(auto& text : rhs.texts)
@@ -108,8 +109,8 @@ UiCondition& UiCondition::operator=(const UiCondition& rhs)
     for(auto& icon : rhs.icons)
     {
         auto uiIcon = std::make_shared<UiIcon>(_bl);
-        *uiIcon = *icon;
-        icons.emplace_back(uiIcon);
+        *uiIcon = *(icon.second);
+        icons.emplace(uiIcon->id, std::move(uiIcon));
     }
 
     for(auto& text : rhs.texts)

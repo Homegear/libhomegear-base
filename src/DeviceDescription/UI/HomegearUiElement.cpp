@@ -59,7 +59,8 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         {
             for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
             {
-                icons.emplace_back(std::make_shared<UiIcon>(baseLib, iconNode));
+                auto icon = std::make_shared<UiIcon>(baseLib, iconNode);
+                if(!icon->id.empty()) icons.emplace(icon->id, std::move(icon));
             }
         }
         else if(nodeName == "texts")
@@ -118,8 +119,8 @@ HomegearUiElement::HomegearUiElement(HomegearUiElement const& rhs)
     for(auto& icon : rhs.icons)
     {
         auto uiIcon = std::make_shared<UiIcon>(_bl);
-        *uiIcon = *icon;
-        icons.emplace_back(uiIcon);
+        *uiIcon = *(icon.second);
+        icons.emplace(uiIcon->id, std::move(uiIcon));
     }
 
     for(auto& text : rhs.texts)
@@ -173,8 +174,8 @@ HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
     for(auto& icon : rhs.icons)
     {
         auto uiIcon = std::make_shared<UiIcon>(_bl);
-        *uiIcon = *icon;
-        icons.emplace_back(uiIcon);
+        *uiIcon = *(icon.second);
+        icons.emplace(uiIcon->id, std::move(uiIcon));
     }
 
     for(auto& text : rhs.texts)
@@ -225,14 +226,15 @@ PVariable HomegearUiElement::getElementInfo()
 
     if(!icons.empty())
     {
-        auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
-        iconElements->arrayValue->reserve(icons.size());
+        auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
         for(auto& icon : icons)
         {
             auto iconElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-            iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon->name));
-            if(!icon->color.empty()) iconElement->structValue->emplace("color", std::make_shared<BaseLib::Variable>(icon->color));
-            iconElements->arrayValue->emplace_back(iconElement);
+
+            iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon.second->name));
+            if(!icon.second->color.empty()) iconElement->structValue->emplace("color", std::make_shared<BaseLib::Variable>(icon.second->color));
+
+            iconElements->structValue->emplace(icon.first, iconElement);
         }
         uiElement->structValue->emplace("icons", iconElements);
     }
@@ -269,14 +271,15 @@ PVariable HomegearUiElement::getElementInfo()
 
                     if(!condition->icons.empty())
                     {
-                        auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
-                        iconElements->arrayValue->reserve(condition->icons.size());
+                        auto iconElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
                         for(auto& icon : condition->icons)
                         {
                             auto iconElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-                            iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon->name));
-                            if(!icon->color.empty()) iconElement->structValue->emplace("color", std::make_shared<BaseLib::Variable>(icon->color));
-                            iconElements->arrayValue->emplace_back(iconElement);
+
+                            iconElement->structValue->emplace("name", std::make_shared<BaseLib::Variable>(icon.second->name));
+                            if(!icon.second->color.empty()) iconElement->structValue->emplace("color", std::make_shared<BaseLib::Variable>(icon.second->color));
+
+                            iconElements->structValue->emplace(icon.first, iconElement);
                         }
                         conditionElement->structValue->emplace("icons", iconElements);
                     }

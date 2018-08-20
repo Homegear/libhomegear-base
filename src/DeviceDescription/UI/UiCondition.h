@@ -68,7 +68,7 @@ public:
     std::string conditionValue;
 
     //Elements
-    std::list<PUiIcon> icons;
+    std::unordered_map<std::string, PUiIcon> icons;
     std::unordered_map<std::string, PUiText> texts;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;

@@ -77,7 +77,7 @@ public:
     std::string id;
     Type type = Type::undefined;
     std::string control;
-    std::list<PUiIcon> icons;
+    std::unordered_map<std::string, PUiIcon> icons;
     std::unordered_map<std::string, PUiText> texts;
     std::list<PUiVariable> variableInputs;
     std::list<PUiVariable> variableOutputs;
