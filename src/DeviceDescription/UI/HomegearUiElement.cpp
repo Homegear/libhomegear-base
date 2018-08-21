@@ -341,7 +341,7 @@ PVariable HomegearUiElement::getElementInfo()
             auto gridElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             gridElement->structValue->emplace("width", std::make_shared<BaseLib::Variable>(grid->width));
             gridElement->structValue->emplace("height", std::make_shared<BaseLib::Variable>(grid->height));
-            gridElement->structValue->emplace("cols", std::make_shared<BaseLib::Variable>(grid->columns));
+            gridElement->structValue->emplace("columns", std::make_shared<BaseLib::Variable>(grid->columns));
             gridElement->structValue->emplace("rows", std::make_shared<BaseLib::Variable>(grid->rows));
             uiElement->structValue->emplace("grid", gridElement);
         }
@@ -356,8 +356,8 @@ PVariable HomegearUiElement::getElementInfo()
             auto cellElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             cellElement->structValue->emplace("x", std::make_shared<BaseLib::Variable>(control->x));
             cellElement->structValue->emplace("y", std::make_shared<BaseLib::Variable>(control->y));
-            cellElement->structValue->emplace("colSpan", std::make_shared<BaseLib::Variable>(control->colSpan));
-            cellElement->structValue->emplace("rowSpan", std::make_shared<BaseLib::Variable>(control->rowSpan));
+            cellElement->structValue->emplace("columns", std::make_shared<BaseLib::Variable>(control->columns));
+            cellElement->structValue->emplace("rows", std::make_shared<BaseLib::Variable>(control->rows));
 
             controlElement->structValue->emplace("cell", cellElement);
 

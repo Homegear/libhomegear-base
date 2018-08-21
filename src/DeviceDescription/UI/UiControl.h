@@ -67,8 +67,8 @@ public:
     //Elements
     int32_t x = -1;
     int32_t y = -1;
-    int32_t colSpan = 1;
-    int32_t rowSpan = 1;
+    int32_t columns = 1;
+    int32_t rows = 1;
 
     //Helpers
     std::shared_ptr<HomegearUiElement> uiElement;
