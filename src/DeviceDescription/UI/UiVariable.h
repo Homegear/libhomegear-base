@@ -68,13 +68,17 @@ public:
     int32_t deviceTypeId = -1;
     int32_t channel = -1;
     std::string name;
-    bool visualize = true;
+
+    //Properties
+    bool visualizeInOverview = true;
     std::string unit;
     PVariable minimumValue;
     PVariable maximumValue;
     PVariable minimumValueScaled;
     PVariable maximumValueScaled;
-    std::list<PUiCondition> conditions;
+
+    //Rendering
+    std::list<PUiCondition> rendering;
 
     //Helpers
     uint64_t peerId = 0;

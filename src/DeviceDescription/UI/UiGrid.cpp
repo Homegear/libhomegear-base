@@ -28,55 +28,60 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
-
-#include "../../Encoding/RapidXml/rapidxml.hpp"
-#include <string>
-#include <map>
-#include <memory>
-
-using namespace rapidxml;
+#include "UiGrid.h"
+#include "../../BaseLib.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace DeviceDescription
 {
 
-class UiControl;
-class HomegearUiElement;
-
-typedef std::shared_ptr<UiControl> PUiControl;
-
-class UiControl
+UiGrid::UiGrid(BaseLib::SharedObjects* baseLib)
 {
-public:
-    UiControl(BaseLib::SharedObjects* baseLib);
-    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiControl(UiControl const& rhs);
-    virtual ~UiControl() = default;
+    _bl = baseLib;
+}
 
-    UiControl& operator=(const UiControl& rhs);
+UiGrid::UiGrid(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiGrid(baseLib)
+{
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        _bl->out.printWarning("Warning: Unknown attribute for \"condition\": " + std::string(attr->name()));
+    }
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string name(subNode->name());
+        std::string value(subNode->value());
+        if(name == "width") width = Math::getNumber(value);
+        else if(name == "height") height = Math::getNumber(value);
+        else if(name == "columns") columns = Math::getNumber(value);
+        else if(name == "rows") rows = Math::getNumber(value);
+        else _bl->out.printWarning("Warning: Unknown node in \"condition\": " + name);
+    }
+}
 
-    //Attributes
-    std::string id;
+UiGrid::UiGrid(UiGrid const& rhs)
+{
+    _bl = rhs._bl;
 
-    //Elements
-    int32_t x = -1;
-    int32_t y = -1;
-    int32_t colSpan = 1;
-    int32_t rowSpan = 1;
+    width = rhs.width;
+    height = rhs.height;
+    columns = rhs.columns;
+    rows = rhs.rows;
+}
 
-    //Helpers
-    std::shared_ptr<HomegearUiElement> uiElement;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-};
+UiGrid& UiGrid::operator=(const UiGrid& rhs)
+{
+    if(&rhs == this) return *this;
+
+    _bl = rhs._bl;
+
+    width = rhs.width;
+    height = rhs.height;
+    columns = rhs.columns;
+    rows = rhs.rows;
+
+    return *this;
+}
 
 }
 }
-
-#endif

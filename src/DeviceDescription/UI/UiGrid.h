@@ -28,12 +28,16 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
+#ifndef UIGRID_H_
+#define UIGRID_H_
 
+#include "UiIcon.h"
+#include "UiText.h"
+#include "UiControl.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
-#include <map>
+#include <list>
+#include <unordered_map>
 #include <memory>
 
 using namespace rapidxml;
@@ -46,32 +50,25 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiControl;
-class HomegearUiElement;
+class UiGrid;
 
-typedef std::shared_ptr<UiControl> PUiControl;
+typedef std::shared_ptr<UiGrid> PUiGrid;
 
-class UiControl
+class UiGrid
 {
 public:
-    UiControl(BaseLib::SharedObjects* baseLib);
-    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiControl(UiControl const& rhs);
-    virtual ~UiControl() = default;
+    UiGrid(BaseLib::SharedObjects* baseLib);
+    UiGrid(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiGrid(UiGrid const& rhs);
+    virtual ~UiGrid() = default;
 
-    UiControl& operator=(const UiControl& rhs);
-
-    //Attributes
-    std::string id;
+    UiGrid& operator=(const UiGrid& rhs);
 
     //Elements
-    int32_t x = -1;
-    int32_t y = -1;
-    int32_t colSpan = 1;
-    int32_t rowSpan = 1;
-
-    //Helpers
-    std::shared_ptr<HomegearUiElement> uiElement;
+    int32_t width = -1;
+    int32_t height = -1;
+    int32_t columns = -1;
+    int32_t rows = -1;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

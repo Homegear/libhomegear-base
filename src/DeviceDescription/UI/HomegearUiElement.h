@@ -32,9 +32,9 @@
 #define HOMEGEARUIELEMENT_H_
 
 #include "UiVariable.h"
-#include "UiControl.h"
 #include "UiIcon.h"
 #include "UiText.h"
+#include "UiGrid.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../Variable.h"
 
@@ -82,12 +82,7 @@ public:
     std::list<PUiVariable> variableInputs;
     std::list<PUiVariable> variableOutputs;
     std::unordered_map<std::string, std::string> metadata;
-
-    //Complex elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t cols = -1;
-    int32_t rows = -1;
+    PUiGrid grid;
     std::list<PUiControl> controls;
 
     HomegearUiElement(BaseLib::SharedObjects* baseLib);

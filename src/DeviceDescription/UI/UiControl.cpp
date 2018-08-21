@@ -58,9 +58,10 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
-        if(name == "posX") posX = Math::getNumber(value);
-        else if(name == "posY") posY = Math::getNumber(value);
-        else if(name == "colWidth") colWidth = Math::getNumber(value);
+        if(name == "x") x = Math::getNumber(value);
+        else if(name == "y") y = Math::getNumber(value);
+        else if(name == "colSpan") colSpan = Math::getNumber(value);
+        else if(name == "rowSpan") rowSpan = Math::getNumber(value);
         else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
     }
 }
@@ -70,9 +71,10 @@ UiControl::UiControl(UiControl const& rhs)
     _bl = rhs._bl;
 
     id = rhs.id;
-    posX = rhs.posX;
-    posY = rhs.posY;
-    colWidth = rhs.colWidth;
+    x = rhs.x;
+    y = rhs.y;
+    colSpan = rhs.colSpan;
+    rowSpan = rhs.rowSpan;
 
     if(rhs.uiElement)
     {
@@ -88,9 +90,10 @@ UiControl& UiControl::operator=(const UiControl& rhs)
     _bl = rhs._bl;
 
     id = rhs.id;
-    posX = rhs.posX;
-    posY = rhs.posY;
-    colWidth = rhs.colWidth;
+    x = rhs.x;
+    y = rhs.y;
+    colSpan = rhs.colSpan;
+    rowSpan = rhs.rowSpan;
 
     if(rhs.uiElement)
     {

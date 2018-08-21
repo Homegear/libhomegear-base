@@ -63,7 +63,7 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         {
             if(nodeValue != "*") name = nodeValue;
         }
-        else if(nodeName == "visualize") visualize = (nodeValue == "true");
+        else if(nodeName == "visualizeInOverview") visualizeInOverview = (nodeValue == "true");
         else if(nodeName == "unit") unit = nodeValue;
         else if(nodeName == "minimumValue")
         {
@@ -85,11 +85,11 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
             if(nodeValue.find('.') != std::string::npos) maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
             else maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
         }
-        else if(nodeName == "conditions")
+        else if(nodeName == "rendering")
         {
             for(xml_node<>* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
             {
-                conditions.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
+                rendering.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
@@ -104,7 +104,7 @@ UiVariable::UiVariable(UiVariable const& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
-    visualize = rhs.visualize;
+    visualizeInOverview = rhs.visualizeInOverview;
     unit = rhs.unit;
     if(rhs.minimumValue)
     {
@@ -128,11 +128,11 @@ UiVariable::UiVariable(UiVariable const& rhs)
     }
     peerId = rhs.peerId;
 
-    for(auto& rhsCondition : rhs.conditions)
+    for(auto& rhsCondition : rhs.rendering)
     {
         auto condition = std::make_shared<UiCondition>(_bl);
         *condition = *rhsCondition;
-        conditions.emplace_back(condition);
+        rendering.emplace_back(condition);
     }
 }
 
@@ -146,7 +146,7 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
-    visualize = rhs.visualize;
+    visualizeInOverview = rhs.visualizeInOverview;
     unit = rhs.unit;
     if(rhs.minimumValue)
     {
@@ -170,11 +170,11 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     }
     peerId = rhs.peerId;
 
-    for(auto& rhsCondition : rhs.conditions)
+    for(auto& rhsCondition : rhs.rendering)
     {
         auto condition = std::make_shared<UiCondition>(_bl);
         *condition = *rhsCondition;
-        conditions.emplace_back(condition);
+        rendering.emplace_back(condition);
     }
 
     return *this;
