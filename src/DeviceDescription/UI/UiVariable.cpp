@@ -47,7 +47,7 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
     {
         std::string nodeName(subNode->name());
         std::string nodeValue(subNode->value());
-        if(nodeName == "familyId")
+        if(nodeName == "family")
         {
             if(nodeValue != "*") familyId = Math::getNumber(nodeValue);
         }
