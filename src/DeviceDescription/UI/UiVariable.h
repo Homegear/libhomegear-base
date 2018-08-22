@@ -31,7 +31,8 @@
 #ifndef UIVARIABLE_H_
 #define UIVARIABLE_H_
 
-#include "UiColor.h"
+#include "UiCondition.h"
+#include "../../Variable.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
@@ -65,10 +66,19 @@ public:
     //Elements
     int32_t familyId = -1;
     int32_t deviceTypeId = -1;
-    int32_t channel = 1;
+    int32_t channel = -1;
     std::string name;
-    std::list<PUiColor> iconColors;
-    std::list<PUiColor> textColors;
+
+    //Properties
+    bool visualizeInOverview = true;
+    std::string unit;
+    PVariable minimumValue;
+    PVariable maximumValue;
+    PVariable minimumValueScaled;
+    PVariable maximumValueScaled;
+
+    //Rendering
+    std::list<PUiCondition> rendering;
 
     //Helpers
     uint64_t peerId = 0;

@@ -28,12 +28,16 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICOLOR_H_
-#define UICOLOR_H_
+#ifndef UIGRID_H_
+#define UIGRID_H_
 
+#include "UiIcon.h"
+#include "UiText.h"
+#include "UiControl.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
-#include <map>
+#include <list>
+#include <unordered_map>
 #include <memory>
 
 using namespace rapidxml;
@@ -46,24 +50,25 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiColor;
+class UiGrid;
 
-typedef std::shared_ptr<UiColor> PUiColor;
+typedef std::shared_ptr<UiGrid> PUiGrid;
 
-class UiColor
+class UiGrid
 {
 public:
-    UiColor(BaseLib::SharedObjects* baseLib);
-    UiColor(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiColor(UiColor const& rhs);
-    virtual ~UiColor() = default;
+    UiGrid(BaseLib::SharedObjects* baseLib);
+    UiGrid(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiGrid(UiGrid const& rhs);
+    virtual ~UiGrid() = default;
 
-    UiColor& operator=(const UiColor& rhs);
+    UiGrid& operator=(const UiGrid& rhs);
 
     //Elements
-    std::string name;
-    std::string conditionOperator;
-    std::string conditionValue;
+    int32_t width = -1;
+    int32_t height = -1;
+    int32_t columns = -1;
+    int32_t rows = -1;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };

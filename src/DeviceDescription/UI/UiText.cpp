@@ -28,8 +28,7 @@
  * files in the program, then also delete it here.
 */
 
-#include "UiControl.h"
-#include "HomegearUiElement.h"
+#include "UiText.h"
 #include "../../BaseLib.h"
 
 namespace BaseLib
@@ -37,69 +36,50 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib)
+UiText::UiText(BaseLib::SharedObjects* baseLib)
 {
     _bl = baseLib;
 }
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiControl(baseLib)
+UiText::UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiText(baseLib)
 {
     for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
-        std::string attributeName(attr->name());
-        std::string attributeValue(attr->value());
-        if(attributeName == "id")
-        {
-            id = attributeValue;
-        }
-        else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
+        std::string name(attr->name());
+        std::string value(attr->value());
+        if(name == "id") id = value;
+        else _bl->out.printWarning("Warning: Unknown attribute for \"text\": " + std::string(attr->name()));
     }
     for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
-        if(name == "x") x = Math::getNumber(value);
-        else if(name == "y") y = Math::getNumber(value);
-        else if(name == "columns") columns = Math::getNumber(value);
-        else if(name == "rows") rows = Math::getNumber(value);
-        else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
+        if(name == "content") content = value;
+        else if(name == "color") color = value;
+        else _bl->out.printWarning("Warning: Unknown node in \"text\": " + name);
     }
 }
 
-UiControl::UiControl(UiControl const& rhs)
+UiText::UiText(UiText const& rhs)
 {
     _bl = rhs._bl;
 
     id = rhs.id;
-    x = rhs.x;
-    y = rhs.y;
-    columns = rhs.columns;
-    rows = rhs.rows;
 
-    if(rhs.uiElement)
-    {
-        uiElement = std::make_shared<HomegearUiElement>(_bl);
-        *uiElement = *rhs.uiElement;
-    }
+    content = rhs.content;
+    color = rhs.color;
 }
 
-UiControl& UiControl::operator=(const UiControl& rhs)
+UiText& UiText::operator=(const UiText& rhs)
 {
     if(&rhs == this) return *this;
 
     _bl = rhs._bl;
 
     id = rhs.id;
-    x = rhs.x;
-    y = rhs.y;
-    columns = rhs.columns;
-    rows = rhs.rows;
 
-    if(rhs.uiElement)
-    {
-        uiElement = std::make_shared<HomegearUiElement>(_bl);
-        *uiElement = *rhs.uiElement;
-    }
+    content = rhs.content;
+    color = rhs.color;
 
     return *this;
 }

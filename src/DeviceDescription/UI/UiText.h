@@ -28,8 +28,8 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIICON_H_
-#define UIICON_H_
+#ifndef UITEXT_H_
+#define UITEXT_H_
 
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
@@ -46,25 +46,25 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiIcon;
+class UiText;
 
-typedef std::shared_ptr<UiIcon> PUiIcon;
+typedef std::shared_ptr<UiText> PUiText;
 
-class UiIcon
+class UiText
 {
 public:
-    UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiIcon(UiIcon const& rhs);
-    virtual ~UiIcon() = default;
+    UiText(BaseLib::SharedObjects* baseLib);
+    UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiText(UiText const& rhs);
+    virtual ~UiText() = default;
 
-    UiIcon& operator=(const UiIcon& rhs);
+    UiText& operator=(const UiText& rhs);
 
     //Attributes
     std::string id;
 
     //Elements
-    std::string name;
+    std::string content;
     std::string color;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;

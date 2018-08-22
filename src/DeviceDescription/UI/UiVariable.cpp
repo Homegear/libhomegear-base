@@ -55,20 +55,41 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         {
             if(nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
         }
-        else if(nodeName == "channel") channel = Math::getNumber(nodeValue);
-        else if(nodeName == "name") name = nodeValue;
-        else if(nodeName == "iconColors")
+        else if(nodeName == "channel")
         {
-            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
-            {
-                iconColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
-            }
+            if(nodeValue != "*") channel = Math::getNumber(nodeValue);
         }
-        else if(nodeName == "textColors")
+        else if(nodeName == "name")
         {
-            for(xml_node<>* colorNode = subNode->first_node("color"); colorNode; colorNode = colorNode->next_sibling("color"))
+            if(nodeValue != "*") name = nodeValue;
+        }
+        else if(nodeName == "visualizeInOverview") visualizeInOverview = (nodeValue == "true");
+        else if(nodeName == "unit") unit = nodeValue;
+        else if(nodeName == "minimumValue")
+        {
+            if(nodeValue.find('.') != std::string::npos) minimumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else minimumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "maximumValue")
+        {
+            if(nodeValue.find('.') != std::string::npos) maximumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else maximumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "minimumValueScaled")
+        {
+            if(nodeValue.find('.') != std::string::npos) minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "maximumValueScaled")
+        {
+            if(nodeValue.find('.') != std::string::npos) maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+            else maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+        }
+        else if(nodeName == "rendering")
+        {
+            for(xml_node<>* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
             {
-                textColors.push_back(std::make_shared<UiColor>(baseLib, colorNode));
+                rendering.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
@@ -83,20 +104,35 @@ UiVariable::UiVariable(UiVariable const& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    visualizeInOverview = rhs.visualizeInOverview;
+    unit = rhs.unit;
+    if(rhs.minimumValue)
+    {
+        minimumValue = std::make_shared<Variable>();
+        *minimumValue = *rhs.minimumValue;
+    }
+    if(rhs.maximumValue)
+    {
+        maximumValue = std::make_shared<Variable>();
+        *maximumValue = *rhs.maximumValue;
+    }
+    if(rhs.minimumValueScaled)
+    {
+        minimumValueScaled = std::make_shared<Variable>();
+        *minimumValueScaled = *rhs.minimumValueScaled;
+    }
+    if(rhs.maximumValueScaled)
+    {
+        maximumValueScaled = std::make_shared<Variable>();
+        *maximumValueScaled = *rhs.maximumValueScaled;
+    }
     peerId = rhs.peerId;
 
-    for(auto& rhsColor : rhs.iconColors)
+    for(auto& rhsCondition : rhs.rendering)
     {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        iconColors.emplace_back(color);
-    }
-
-    for(auto& rhsColor : rhs.textColors)
-    {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        textColors.emplace_back(color);
+        auto condition = std::make_shared<UiCondition>(_bl);
+        *condition = *rhsCondition;
+        rendering.emplace_back(condition);
     }
 }
 
@@ -110,20 +146,35 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    visualizeInOverview = rhs.visualizeInOverview;
+    unit = rhs.unit;
+    if(rhs.minimumValue)
+    {
+        minimumValue = std::make_shared<Variable>();
+        *minimumValue = *rhs.minimumValue;
+    }
+    if(rhs.maximumValue)
+    {
+        maximumValue = std::make_shared<Variable>();
+        *maximumValue = *rhs.maximumValue;
+    }
+    if(rhs.minimumValueScaled)
+    {
+        minimumValueScaled = std::make_shared<Variable>();
+        *minimumValueScaled = *rhs.minimumValueScaled;
+    }
+    if(rhs.maximumValueScaled)
+    {
+        maximumValueScaled = std::make_shared<Variable>();
+        *maximumValueScaled = *rhs.maximumValueScaled;
+    }
     peerId = rhs.peerId;
 
-    for(auto& rhsColor : rhs.iconColors)
+    for(auto& rhsCondition : rhs.rendering)
     {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        iconColors.emplace_back(color);
-    }
-
-    for(auto& rhsColor : rhs.textColors)
-    {
-        auto color = std::make_shared<UiColor>(_bl);
-        *color = *rhsColor;
-        textColors.emplace_back(color);
+        auto condition = std::make_shared<UiCondition>(_bl);
+        *condition = *rhsCondition;
+        rendering.emplace_back(condition);
     }
 
     return *this;
