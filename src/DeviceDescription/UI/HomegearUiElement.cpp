@@ -154,7 +154,11 @@ HomegearUiElement::HomegearUiElement(HomegearUiElement const& rhs)
         controls.emplace_back(uiControl);
     }
 
-    if(rhs.grid) *grid = *rhs.grid;
+    if(rhs.grid)
+    {
+        grid = std::make_shared<UiGrid>(_bl);
+        *grid = *rhs.grid;
+    }
 
     metadata = rhs.metadata;
 }
@@ -207,7 +211,11 @@ HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
         controls.emplace_back(uiControl);
     }
 
-    if(rhs.grid) *grid = *rhs.grid;
+    if(rhs.grid)
+    {
+        grid = std::make_shared<UiGrid>(_bl);
+        *grid = *rhs.grid;
+    }
 
     metadata = rhs.metadata;
 
