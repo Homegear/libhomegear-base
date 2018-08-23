@@ -672,18 +672,24 @@ int32_t HelperFunctions::exec(std::string command, std::string& output)
 {
 	FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) return -1;
-    char buffer[128];
-    int32_t bytesRead = 0;
+    std::array<char, 128> buffer;
     output.reserve(1024);
-    while(!feof(pipe))
+    try
     {
-    	if(fgets(buffer, 128, pipe) != 0)
-    	{
-    		if(output.size() + bytesRead > output.capacity()) output.reserve(output.capacity() + 1024);
-    		output.insert(output.end(), buffer, buffer + strlen(buffer));
-    	}
+        while(!feof(pipe))
+        {
+            if(fgets(buffer.data(), 128, pipe) != nullptr)
+            {
+                if(output.size() + buffer.size() > output.capacity()) output.reserve(output.capacity() + 1024);
+                output.insert(output.end(), buffer.begin(), buffer.begin() + strnlen(buffer.data(), buffer.size()));
+            }
+        }
+    }
+    catch(...)
+    {
     }
 	auto exitStatus = pclose(pipe);
+	if(errno == ECHILD) return 0; //Currently this method always return 0, because we use a custom sigchld handler.
     return WEXITSTATUS(exitStatus);
 }
 
