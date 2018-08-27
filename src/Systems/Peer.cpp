@@ -3626,6 +3626,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
 		}
 
 		description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameterIterator->second->unit))));
+		if(parameterIterator->second->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(parameterIterator->second->mandatory));
 		if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
 		if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
 
