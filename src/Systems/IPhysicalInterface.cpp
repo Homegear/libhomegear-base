@@ -563,7 +563,7 @@ bool IPhysicalInterface::gpioDefined(uint32_t index)
 {
 	try
 	{
-		if(_settings->gpio.find(index) == _settings->gpio.end() || _settings->gpio.at(index).number <= 0) return false;
+		if(_settings->gpio.find(index) == _settings->gpio.end() || _settings->gpio.at(index).number < 0) return false;
 	}
 	catch(const std::exception& ex)
     {

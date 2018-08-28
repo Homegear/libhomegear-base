@@ -104,6 +104,7 @@ public:
 	bool isSigned = false;
 	std::string control;
 	std::string unit;
+	bool mandatory = false;
 	std::string formFieldType;
 	int32_t formPosition = -1;
 	std::string metadata;

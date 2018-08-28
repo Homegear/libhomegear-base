@@ -98,6 +98,7 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 				else if(propertyName == "signed") { isSignedSet = true; isSigned = propertyValue == "true"; }
 				else if(propertyName == "control") control = propertyValue;
 				else if(propertyName == "unit") unit = propertyValue;
+				else if(propertyName == "mandatory") mandatory = (propertyValue == "true");
 				else if(propertyName == "formFieldType") formFieldType = propertyValue;
 				else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
 				else if(propertyName == "metadata") metadata = propertyValue;

@@ -124,6 +124,13 @@ void ServerInfo::load(std::string filename)
 {
 	try
 	{
+		std::unordered_map<int32_t, PFileDescriptor> socketInfo;
+
+		for(auto& server : _servers)
+		{
+			if(server.second->socketDescriptor && server.second->socketDescriptor->descriptor != -1) socketInfo.emplace(server.second->port, server.second->socketDescriptor);
+		}
+
 		reset();
 		int32_t index = 0;
 		char input[1024];
@@ -155,6 +162,10 @@ void ServerInfo::load(std::string filename)
 						if(info->port > 0)
 						{
 							info->index = index;
+
+							auto socketDescriptorIterator = socketInfo.find(info->port);
+							if(socketDescriptorIterator != socketInfo.end()) info->socketDescriptor = socketDescriptorIterator->second;
+
 							_servers[index++] = info;
 						}
 						info.reset(new Info());
@@ -320,6 +331,10 @@ void ServerInfo::load(std::string filename)
 		if(info->port > 0)
 		{
 			info->index = index;
+
+			auto socketDescriptorIterator = socketInfo.find(info->port);
+			if(socketDescriptorIterator != socketInfo.end()) info->socketDescriptor = socketDescriptorIterator->second;
+
 			_servers[index] = info;
 		}
 
