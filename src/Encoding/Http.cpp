@@ -248,7 +248,6 @@ void Http::constructHeader(uint32_t contentLength, std::string contentType, int3
 
 	header.reserve(1024);
 	header.append("HTTP/1.1 " + std::to_string(code) + " " + codeDescription + "\r\n");
-	header.append("Connection: close\r\n");
 	if(!contentType.empty()) header.append("Content-Type: " + contentType + "\r\n");
 	header.append(additionalHeader);
 	header.append("Content-Length: ").append(std::to_string(contentLength)).append("\r\n\r\n");

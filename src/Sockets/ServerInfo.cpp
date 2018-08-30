@@ -314,8 +314,13 @@ void ServerInfo::load(std::string filename)
 					if(value == "none") info->websocketAuthType = Info::AuthType::none;
 					else if(value == "basic") info->websocketAuthType = Info::AuthType::basic;
 					else if(value == "session") info->websocketAuthType = Info::AuthType::session;
-					_bl->out.printDebug("Debug: websocketauthtype of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
+					_bl->out.printDebug("Debug: webSocketAuthType of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
 				}
+                else if(name == "cacheassets")
+                {
+                    info->cacheAssets = Math::getNumber(value);
+                    _bl->out.printDebug("Debug: cacheAssets of server " + info->name + " set to " + std::to_string(info->cacheAssets));
+                }
 				else if(name == "redirectto")
 				{
 					info->redirectTo = value;
