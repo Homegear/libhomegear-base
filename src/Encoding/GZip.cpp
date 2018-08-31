@@ -111,4 +111,15 @@ template<typename DataOut, typename DataIn> DataOut GZip::uncompress(const DataI
     return uncompressedData;
 }
 
+#ifndef DOXYGEN_SKIP
+template std::vector<char> GZip::compress(const std::vector<char>& data, int32_t compressionLevel);
+template std::string GZip::compress(const std::string& data, int32_t compressionLevel);
+template std::vector<char> GZip::compress(const std::string& data, int32_t compressionLevel);
+template std::string GZip::compress(const std::vector<char>& data, int32_t compressionLevel);
+template std::vector<char> GZip::uncompress(const std::vector<char>& data);
+template std::string GZip::uncompress(const std::string& data);
+template std::vector<char> GZip::uncompress(const std::string& data);
+template std::string GZip::uncompress(const std::vector<char>& data);
+#endif
+
 }
