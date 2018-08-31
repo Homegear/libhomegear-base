@@ -51,9 +51,9 @@ class GZip
 public:
     virtual ~GZip() = default;
 
-    static std::vector<char> compress(const std::vector<char>& data, int32_t compressionLevel);
+    template<typename DataOut, typename DataIn> static DataOut compress(const DataIn& data, int32_t compressionLevel);
 
-    static std::vector<char> uncompress(const std::vector<char>& data);
+    template<typename DataOut, typename DataIn> static DataOut uncompress(const DataIn& data);
 private:
     GZip() = default;
 };

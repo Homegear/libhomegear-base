@@ -35,7 +35,7 @@
 namespace BaseLib
 {
 
-std::vector<char> GZip::compress(const std::vector<char>& data, int32_t compressionLevel)
+template<typename DataOut, typename DataIn> DataOut GZip::compress(const DataIn& data, int32_t compressionLevel)
 {
     z_stream zStream{};
     zStream.zalloc = Z_NULL;
@@ -49,7 +49,7 @@ std::vector<char> GZip::compress(const std::vector<char>& data, int32_t compress
     zStream.next_in = (unsigned char*)data.data();
     zStream.avail_in = (unsigned int)data.size();
 
-    std::vector<char> compressedData;
+    DataOut compressedData;
     compressedData.reserve(data.size());
     std::array<uint8_t, 16384> compressedChunk{};
 
@@ -70,7 +70,7 @@ std::vector<char> GZip::compress(const std::vector<char>& data, int32_t compress
     return compressedData;
 }
 
-std::vector<char> GZip::uncompress(const std::vector<char>& data)
+template<typename DataOut, typename DataIn> DataOut GZip::uncompress(const DataIn& data)
 {
     z_stream zStream{};
     zStream.zalloc = Z_NULL;
@@ -86,7 +86,7 @@ std::vector<char> GZip::uncompress(const std::vector<char>& data)
     zStream.avail_in = data.size();
     zStream.next_in = (unsigned char*)data.data();
 
-    std::vector<char> uncompressedData;
+    DataOut uncompressedData;
     uncompressedData.reserve(data.size() * 2);
     std::array<uint8_t, 16384> uncompressedChunk{};
     int result = 0;

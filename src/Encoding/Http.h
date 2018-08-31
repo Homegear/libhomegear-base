@@ -64,6 +64,10 @@ public:
 	{
 		enum Enum { none, request, response };
 	};
+    struct AcceptEncoding
+    {
+        enum Enum { none = 0, deflate = 4, gzip = 8, br = 32 };
+    };
 	struct ContentEncoding
 	{
 		enum Enum { none = 0, gzip = 8 };
@@ -93,6 +97,7 @@ public:
 		std::string host;
 		std::string contentType;
 		std::string contentTypeFull;
+        AcceptEncoding::Enum acceptEncoding = AcceptEncoding::Enum::none;
 		ContentEncoding::Enum contentEncoding = ContentEncoding::Enum::none;
 		TransferEncoding::Enum transferEncoding = TransferEncoding::Enum::none;
 		Connection::Enum connection = Connection::Enum::none;
