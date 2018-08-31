@@ -80,6 +80,8 @@ set(SOURCE_FILES
         src/Encoding/BinaryRpc.h
         src/Encoding/BitReaderWriter.cpp
         src/Encoding/BitReaderWriter.h
+        src/Encoding/GZip.cpp
+        src/Encoding/GZip.h
         src/Encoding/Html.cpp
         src/Encoding/Html.h
         src/Encoding/Http.cpp
