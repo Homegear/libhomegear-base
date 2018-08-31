@@ -63,6 +63,7 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(xmlrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(jsonrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(restServer)));
+    serializedInfo->arrayValue->emplace_back(PVariable(new Variable(cacheAssets)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(redirectTo)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(address)));
 
@@ -97,6 +98,7 @@ void ServerInfo::Info::unserialize(PVariable data)
 	xmlrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	jsonrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	restServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    cacheAssets = data->arrayValue->at(pos)->integerValue; pos++;
 	redirectTo = data->arrayValue->at(pos)->stringValue; pos++;
 	address = data->arrayValue->at(pos)->stringValue;
 }
