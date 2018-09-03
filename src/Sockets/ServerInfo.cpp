@@ -63,6 +63,7 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(xmlrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(jsonrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(restServer)));
+    serializedInfo->arrayValue->emplace_back(PVariable(new Variable(cacheAssets)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(redirectTo)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(address)));
 
@@ -97,6 +98,7 @@ void ServerInfo::Info::unserialize(PVariable data)
 	xmlrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	jsonrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	restServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    cacheAssets = data->arrayValue->at(pos)->integerValue; pos++;
 	redirectTo = data->arrayValue->at(pos)->stringValue; pos++;
 	address = data->arrayValue->at(pos)->stringValue;
 }
@@ -124,6 +126,13 @@ void ServerInfo::load(std::string filename)
 {
 	try
 	{
+		std::unordered_map<int32_t, PFileDescriptor> socketInfo;
+
+		for(auto& server : _servers)
+		{
+			if(server.second->socketDescriptor && server.second->socketDescriptor->descriptor != -1) socketInfo.emplace(server.second->port, server.second->socketDescriptor);
+		}
+
 		reset();
 		int32_t index = 0;
 		char input[1024];
@@ -155,6 +164,10 @@ void ServerInfo::load(std::string filename)
 						if(info->port > 0)
 						{
 							info->index = index;
+
+							auto socketDescriptorIterator = socketInfo.find(info->port);
+							if(socketDescriptorIterator != socketInfo.end()) info->socketDescriptor = socketDescriptorIterator->second;
+
 							_servers[index++] = info;
 						}
 						info.reset(new Info());
@@ -303,8 +316,13 @@ void ServerInfo::load(std::string filename)
 					if(value == "none") info->websocketAuthType = Info::AuthType::none;
 					else if(value == "basic") info->websocketAuthType = Info::AuthType::basic;
 					else if(value == "session") info->websocketAuthType = Info::AuthType::session;
-					_bl->out.printDebug("Debug: websocketauthtype of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
+					_bl->out.printDebug("Debug: webSocketAuthType of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
 				}
+                else if(name == "cacheassets")
+                {
+                    info->cacheAssets = Math::getNumber(value);
+                    _bl->out.printDebug("Debug: cacheAssets of server " + info->name + " set to " + std::to_string(info->cacheAssets));
+                }
 				else if(name == "redirectto")
 				{
 					info->redirectTo = value;
@@ -320,6 +338,10 @@ void ServerInfo::load(std::string filename)
 		if(info->port > 0)
 		{
 			info->index = index;
+
+			auto socketDescriptorIterator = socketInfo.find(info->port);
+			if(socketDescriptorIterator != socketInfo.end()) info->socketDescriptor = socketDescriptorIterator->second;
+
 			_servers[index] = info;
 		}
 

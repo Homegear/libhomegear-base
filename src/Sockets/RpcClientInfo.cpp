@@ -30,6 +30,11 @@
 
 #include "RpcClientInfo.h"
 
+BaseLib::RpcClientInfo::RpcClientInfo()
+{
+    lastReceivedPacket.store(0);
+}
+
 BaseLib::RpcClientInfo::RpcClientInfo(const BaseLib::RpcClientInfo& rhs)
 {
     id = rhs.id;
