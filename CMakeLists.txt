@@ -142,6 +142,8 @@ set(SOURCE_FILES
         src/Security/Hash.h
         src/Security/Mac.cpp
         src/Security/Mac.h
+        src/Security/Sign.cpp
+        src/Security/Sign.h
         src/Settings/Settings.cpp
         src/Settings/Settings.h
         src/Sockets/HttpClient.cpp

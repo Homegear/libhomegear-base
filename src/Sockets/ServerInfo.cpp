@@ -50,6 +50,10 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(certPath));
 	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(keyPath));
 	serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(dhParamPath));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(oauthCertPath));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(oauthKeyPath));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(oauthTokenLifetime));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(oauthRefreshTokenLifetime));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable((int32_t)authType)));
     serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(validGroups.size()));
 	for(auto group : validGroups)
@@ -85,6 +89,10 @@ void ServerInfo::Info::unserialize(PVariable data)
 	certPath = data->arrayValue->at(pos)->stringValue; pos++;
 	keyPath = data->arrayValue->at(pos)->stringValue; pos++;
 	dhParamPath = data->arrayValue->at(pos)->stringValue; pos++;
+    oauthCertPath = data->arrayValue->at(pos)->stringValue; pos++;
+    oauthKeyPath = data->arrayValue->at(pos)->stringValue; pos++;
+    oauthTokenLifetime = data->arrayValue->at(pos)->integerValue; pos++;
+    oauthRefreshTokenLifetime = data->arrayValue->at(pos)->integerValue; pos++;
 	authType = (AuthType)data->arrayValue->at(pos)->integerValue; pos++;
 	int32_t validUsersSize = data->arrayValue->at(pos)->integerValue; pos++;
 	for(int32_t i = 0; i < validUsersSize; i++)
@@ -233,6 +241,28 @@ void ServerInfo::load(std::string filename)
 					info->dhParamPath = value;
 					_bl->out.printDebug("Debug: dhParamPath of server " + info->name + " set to " + info->dhParamPath);
 				}
+                else if(name == "oauthcertpath")
+                {
+                    info->oauthCertPath = value;
+                    _bl->out.printDebug("Debug: oauthCertPath of server " + info->name + " set to " + info->oauthCertPath);
+                }
+                else if(name == "oauthkeypath")
+                {
+                    info->oauthKeyPath = value;
+                    _bl->out.printDebug("Debug: oauthKeyPath of server " + info->name + " set to " + info->oauthKeyPath);
+                }
+                else if(name == "oauthtokenlifetime")
+                {
+                    info->oauthTokenLifetime = Math::getNumber(value);
+                    if(info->oauthTokenLifetime < 0) info->oauthTokenLifetime = 3600;
+                    _bl->out.printDebug("Debug: oauthTokenLifetime of server " + info->name + " set to " + std::to_string(info->oauthTokenLifetime));
+                }
+                else if(name == "oauthrefreshtokenlifetime")
+                {
+                    info->oauthRefreshTokenLifetime = Math::getNumber(value);
+                    if(info->oauthRefreshTokenLifetime < 0) info->oauthRefreshTokenLifetime = 5184000;
+                    _bl->out.printDebug("Debug: oauthRefreshTokenLifetime of server " + info->name + " set to " + std::to_string(info->oauthRefreshTokenLifetime));
+                }
 				else if(name == "authtype")
 				{
                     info->authType = Info::AuthType::none;
@@ -244,6 +274,7 @@ void ServerInfo::load(std::string filename)
                         if(field == "none") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::none);
                         else if(field == "basic") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::basic);
                         else if(field == "cert") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::cert);
+                        else if(field == "oauth2local") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::oauth2Local);
                     }
 					_bl->out.printDebug("Debug: authType of server " + info->name + " set to " + std::to_string(info->authType));
 				}

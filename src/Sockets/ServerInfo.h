@@ -56,7 +56,7 @@ public:
 	class Info
 	{
 	public:
-		enum AuthType { none = 0, basic = 1, cert = 2, session = 4 };
+		enum AuthType { none = 0, basic = 1, cert = 2, session = 4, oauth2Local = 8 };
 
 		Info()
 		{
@@ -73,6 +73,10 @@ public:
 		std::string certPath;
 		std::string keyPath;
 		std::string dhParamPath;
+        std::string oauthCertPath;
+        std::string oauthKeyPath;
+		int32_t oauthTokenLifetime = 3600;
+        int32_t oauthRefreshTokenLifetime = 5184000;
 		AuthType authType = AuthType::cert;
 		std::unordered_set<uint64_t> validGroups;
 		std::string contentPath;
