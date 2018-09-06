@@ -145,6 +145,10 @@ void Settings::reset()
 	_clientAddressesToReplace.clear();
 	_gpioPath = "/sys/class/gpio/";
 	_exportGpios.clear();
+	_oauthCertPath = "";
+	_oauthKeyPath = "";
+	_oauthTokenLifetime = 3600;
+	_oauthRefreshTokenLifetime = 5184000;
 }
 
 bool Settings::changed()
@@ -802,6 +806,30 @@ void Settings::load(std::string filename, std::string executablePath)
 						_bl->out.printDebug("Debug: Added " + std::to_string(gpio) + " to exportGpios.");
 					}
 				}
+				// {{{ OAuth
+					else if(name == "oauthcertpath")
+					{
+						_oauthCertPath = value;
+						_bl->out.printDebug("Debug: oauthCertPath set to " + _oauthCertPath);
+					}
+					else if(name == "oauthkeypath")
+					{
+						_oauthKeyPath = value;
+						_bl->out.printDebug("Debug: oauthKeyPath set to " + _oauthKeyPath);
+					}
+					else if(name == "oauthtokenlifetime")
+					{
+						_oauthTokenLifetime = Math::getNumber(value);
+						if(_oauthTokenLifetime < 0) _oauthTokenLifetime = 3600;
+						_bl->out.printDebug("Debug: oauthTokenLifetime set to " + std::to_string(_oauthTokenLifetime));
+					}
+					else if(name == "oauthrefreshtokenlifetime")
+					{
+						_oauthRefreshTokenLifetime = Math::getNumber(value);
+						if(_oauthRefreshTokenLifetime < 0) _oauthRefreshTokenLifetime = 5184000;
+						_bl->out.printDebug("Debug: oauthRefreshTokenLifetime set to " + std::to_string(_oauthRefreshTokenLifetime));
+					}
+				// }}}
                 //{{{ Deprecated settings
                     else if(name == "capath")
                     {
