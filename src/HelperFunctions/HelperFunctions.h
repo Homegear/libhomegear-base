@@ -575,8 +575,23 @@ public:
 	 *
 	 * @param path The program to start.
 	 * @param arguments The arguments to pass.
+	 * @throws Exception
+	 * @return Returns the PID on success and "-1" on error.
 	 */
-	pid_t system(std::string path, std::vector<std::string> arguments);
+    static pid_t system(std::string path, std::vector<std::string> arguments);
+
+	/**
+	 * Starts a program with redirected pipe and returns the process id.
+	 *
+	 * @param path The program to start.
+	 * @param arguments The arguments to pass.
+	 * @param[out] stdIn Will be filled with the input file descriptor. Close it when the process finishes.
+	 * @param[out] stdOut Will be filled with the output file descriptor. Close it when the process finishes.
+	 * @param[out] stdErr Will be filled with the error file descriptor. Close it when the process finishes.
+	 * @throws Exception
+	 * @return Returns the PID on success and "-1" on error.
+	 */
+	static pid_t systemp(std::string path, std::vector<std::string> arguments, int& stdIn, int& stdOut, int& stdErr);
 
 	/**
 	 * Starts a program and returns the output.
