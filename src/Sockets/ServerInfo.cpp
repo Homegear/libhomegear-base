@@ -244,6 +244,7 @@ void ServerInfo::load(std::string filename)
                         if(field == "none") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::none);
                         else if(field == "basic") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::basic);
                         else if(field == "cert") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::cert);
+                        else if(field == "oauth2local") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::oauth2Local);
                     }
 					_bl->out.printDebug("Debug: authType of server " + info->name + " set to " + std::to_string(info->authType));
 				}
