@@ -153,6 +153,10 @@ public:
 	std::map<std::string, std::string>& clientAddressesToReplace() { return _clientAddressesToReplace; }
 	std::string gpioPath() { return _gpioPath; }
 	std::vector<uint32_t> exportGpios() { return _exportGpios; }
+    std::string oauthCertPath() { return _oauthCertPath; };
+    std::string oauthKeyPath() { return _oauthKeyPath; };
+    int32_t oauthTokenLifetime() { return _oauthTokenLifetime; };
+    int32_t oauthRefreshTokenLifetime() { return _oauthRefreshTokenLifetime; };
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::string _executablePath;
@@ -264,6 +268,13 @@ private:
 	std::map<std::string, std::string> _clientAddressesToReplace;
 	std::string _gpioPath;
 	std::vector<uint32_t> _exportGpios;
+
+    // {{{ OAuth
+        std::string _oauthCertPath;
+        std::string _oauthKeyPath;
+        int32_t _oauthTokenLifetime = 3600;
+        int32_t _oauthRefreshTokenLifetime = 5184000;
+    // }}}
 
 	void reset();
 };

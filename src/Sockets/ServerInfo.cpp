@@ -63,6 +63,7 @@ PVariable ServerInfo::Info::serialize()
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(xmlrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(jsonrpcServer)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(restServer)));
+    serializedInfo->arrayValue->emplace_back(PVariable(new Variable(cacheAssets)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(redirectTo)));
 	serializedInfo->arrayValue->emplace_back(PVariable(new Variable(address)));
 
@@ -97,6 +98,7 @@ void ServerInfo::Info::unserialize(PVariable data)
 	xmlrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	jsonrpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
 	restServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    cacheAssets = data->arrayValue->at(pos)->integerValue; pos++;
 	redirectTo = data->arrayValue->at(pos)->stringValue; pos++;
 	address = data->arrayValue->at(pos)->stringValue;
 }
@@ -242,6 +244,7 @@ void ServerInfo::load(std::string filename)
                         if(field == "none") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::none);
                         else if(field == "basic") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::basic);
                         else if(field == "cert") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::cert);
+                        else if(field == "oauth2local") info->authType = (Info::AuthType)((int32_t)info->authType | Info::AuthType::oauth2Local);
                     }
 					_bl->out.printDebug("Debug: authType of server " + info->name + " set to " + std::to_string(info->authType));
 				}
@@ -314,8 +317,13 @@ void ServerInfo::load(std::string filename)
 					if(value == "none") info->websocketAuthType = Info::AuthType::none;
 					else if(value == "basic") info->websocketAuthType = Info::AuthType::basic;
 					else if(value == "session") info->websocketAuthType = Info::AuthType::session;
-					_bl->out.printDebug("Debug: websocketauthtype of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
+					_bl->out.printDebug("Debug: webSocketAuthType of server " + info->name + " set to " + std::to_string(info->websocketAuthType));
 				}
+                else if(name == "cacheassets")
+                {
+                    info->cacheAssets = Math::getNumber(value);
+                    _bl->out.printDebug("Debug: cacheAssets of server " + info->name + " set to " + std::to_string(info->cacheAssets));
+                }
 				else if(name == "redirectto")
 				{
 					info->redirectTo = value;

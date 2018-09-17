@@ -248,7 +248,6 @@ void Http::constructHeader(uint32_t contentLength, std::string contentType, int3
 
 	header.reserve(1024);
 	header.append("HTTP/1.1 " + std::to_string(code) + " " + codeDescription + "\r\n");
-	header.append("Connection: close\r\n");
 	if(!contentType.empty()) header.append("Content-Type: " + contentType + "\r\n");
 	header.append(additionalHeader);
 	header.append("Content-Length: ").append(std::to_string(contentLength)).append("\r\n\r\n");
@@ -606,7 +605,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 		value++;
 		valueSize--;
 	}
-	if(!strnaicmp(name, "content-length", nameSize))
+	if(nameSize == 14 && !strnaicmp(name, "content-length", nameSize))
 	{
 		//Ignore Content-Length when Transfer-Encoding is present. See: http://greenbytes.de/tech/webdav/rfc2616.html#rfc.section.4.4
 		if(_header.transferEncoding == TransferEncoding::Enum::none)
@@ -615,20 +614,35 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			_header.contentLength = strtol(value, NULL, 10);
 		}
 	}
-	else if(!strnaicmp(name, "host", nameSize))
+	else if(nameSize == 4 && !strnaicmp(name, "host", nameSize))
 	{
 		_header.host = std::string(value, valueSize);
 		HelperFunctions::toLower(_header.host);
 		HelperFunctions::stringReplace(_header.host, "../", "");
 	}
-	else if(!strnaicmp(name, "content-type", nameSize))
+	else if(nameSize == 12 && !strnaicmp(name, "content-type", nameSize))
 	{
 		_header.contentType = std::string(value, valueSize);
 		_header.contentTypeFull = _header.contentType;
 		_header.contentType = HelperFunctions::splitFirst(_header.contentType, ';').first;
 		HelperFunctions::toLower(_header.contentType);
 	}
-	else if(!strnaicmp(name, "content-encoding", nameSize))
+    else if(nameSize == 15 && !strnaicmp(name, "accept-encoding", nameSize))
+    {
+        std::string s(value, valueSize);
+        s = s.substr(0, s.find(';'));
+        int32_t pos = 0;
+        while ((pos = s.find(',')) != (signed)std::string::npos || !s.empty())
+        {
+            std::string ae = (pos == (signed)std::string::npos) ? s : s.substr(0, pos);
+            HelperFunctions::trim(BaseLib::HelperFunctions::toLower(ae));
+            if(ae == "br") _header.acceptEncoding = (AcceptEncoding::Enum)(_header.acceptEncoding | AcceptEncoding::Enum::br);
+            else if(ae == "gzip") _header.acceptEncoding = (AcceptEncoding::Enum)(_header.acceptEncoding | AcceptEncoding::Enum::gzip);
+            else if(ae == "deflate") _header.acceptEncoding = (AcceptEncoding::Enum)(_header.acceptEncoding | AcceptEncoding::Enum::deflate);
+            if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
+        }
+    }
+	else if(nameSize == 16 && !strnaicmp(name, "content-encoding", nameSize))
 	{
 		std::string s(value, valueSize);
 		s = s.substr(0, s.find(';'));
@@ -642,7 +656,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
-	else if(!strnaicmp(name, "transfer-encoding", nameSize) || !strnaicmp(name, "te", nameSize))
+	else if((nameSize == 17 && !strnaicmp(name, "transfer-encoding", nameSize)) || (nameSize == 2 && !strnaicmp(name, "te", nameSize)))
 	{
 		if(_header.contentLength > 0) _header.contentLength = 0; //Ignore Content-Length when Transfer-Encoding is present. See: http://greenbytes.de/tech/webdav/rfc2616.html#rfc.section.4.4
 		std::string s(value, valueSize);
@@ -661,7 +675,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 		    if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
-	else if(!strnaicmp(name, "connection", nameSize))
+	else if(nameSize == 10 && !strnaicmp(name, "connection", nameSize))
 	{
 		std::string s(value, valueSize);
 		s = s.substr(0, s.find(';'));
@@ -678,7 +692,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			if(pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
 		}
 	}
-	else if(!strnaicmp(name, "cookie", nameSize))
+	else if(nameSize == 6 && !strnaicmp(name, "cookie", nameSize))
 	{
 		_header.cookie = std::string(value, valueSize);
 		std::vector<std::string> cookies = HelperFunctions::splitAll(_header.cookie, ';');
@@ -688,7 +702,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 			_header.cookies.emplace(HelperFunctions::trim(data.first), HelperFunctions::trim(data.second));
 		}
 	}
-	else if(!strnaicmp(name, "authorization", nameSize)) _header.authorization = std::string(value, valueSize);
+	else if(nameSize == 13 && !strnaicmp(name, "authorization", nameSize)) _header.authorization = std::string(value, valueSize);
 	std::string lowercaseName(name, nameSize);
 	HelperFunctions::toLower(lowercaseName);
 	_header.fields[lowercaseName] = std::string(value, valueSize);

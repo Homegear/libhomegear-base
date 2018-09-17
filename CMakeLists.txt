@@ -80,6 +80,8 @@ set(SOURCE_FILES
         src/Encoding/BinaryRpc.h
         src/Encoding/BitReaderWriter.cpp
         src/Encoding/BitReaderWriter.h
+        src/Encoding/GZip.cpp
+        src/Encoding/GZip.h
         src/Encoding/Html.cpp
         src/Encoding/Html.h
         src/Encoding/Http.cpp
@@ -140,6 +142,8 @@ set(SOURCE_FILES
         src/Security/Hash.h
         src/Security/Mac.cpp
         src/Security/Mac.h
+        src/Security/Sign.cpp
+        src/Security/Sign.h
         src/Settings/Settings.cpp
         src/Settings/Settings.h
         src/Sockets/HttpClient.cpp
