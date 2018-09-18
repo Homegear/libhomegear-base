@@ -14,18 +14,22 @@ set(SOURCE_FILES
         src/DeviceDescription/HomeMatic/HmLogicalParameter.h
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.cpp
         src/DeviceDescription/HomeMatic/HmPhysicalParameter.h
+        src/DeviceDescription/UI/UiCondition.cpp
+        src/DeviceDescription/UI/UiCondition.h
         src/DeviceDescription/UI/UiElements.cpp
         src/DeviceDescription/UI/UiElements.h
         src/DeviceDescription/UI/HomegearUiElement.cpp
         src/DeviceDescription/UI/HomegearUiElement.h
         src/DeviceDescription/UI/HomegearUiElements.cpp
         src/DeviceDescription/UI/HomegearUiElements.h
-        src/DeviceDescription/UI/UiColor.cpp
-        src/DeviceDescription/UI/UiColor.h
         src/DeviceDescription/UI/UiControl.cpp
         src/DeviceDescription/UI/UiControl.h
+        src/DeviceDescription/UI/UiGrid.cpp
+        src/DeviceDescription/UI/UiGrid.h
         src/DeviceDescription/UI/UiIcon.cpp
         src/DeviceDescription/UI/UiIcon.h
+        src/DeviceDescription/UI/UiText.cpp
+        src/DeviceDescription/UI/UiText.h
         src/DeviceDescription/UI/UiVariable.cpp
         src/DeviceDescription/UI/UiVariable.h
         src/DeviceDescription/BinaryPayload.cpp
@@ -76,6 +80,8 @@ set(SOURCE_FILES
         src/Encoding/BinaryRpc.h
         src/Encoding/BitReaderWriter.cpp
         src/Encoding/BitReaderWriter.h
+        src/Encoding/GZip.cpp
+        src/Encoding/GZip.h
         src/Encoding/Html.cpp
         src/Encoding/Html.h
         src/Encoding/Http.cpp
@@ -136,6 +142,8 @@ set(SOURCE_FILES
         src/Security/Hash.h
         src/Security/Mac.cpp
         src/Security/Mac.h
+        src/Security/Sign.cpp
+        src/Security/Sign.h
         src/Settings/Settings.cpp
         src/Settings/Settings.h
         src/Sockets/HttpClient.cpp

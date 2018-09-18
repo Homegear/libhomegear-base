@@ -65,7 +65,8 @@ enum class RpcType
 	json,
 	websocket,
 	mqtt,
-	rest
+	rest,
+    webserver
 };
 
 class RpcClientInfo
@@ -106,6 +107,8 @@ public:
     std::shared_ptr<FileDescriptor> socketDescriptor;
     std::shared_ptr<TcpSocket> socket;
 
+	std::atomic<int64_t> lastReceivedPacket;
+
 	//{{{ Invoke variables
 	std::mutex invokeMutex;
 	std::mutex requestMutex;
@@ -114,7 +117,7 @@ public:
 	std::atomic_bool waitForResponse;
 	//}}}
 
-	RpcClientInfo() = default;
+	RpcClientInfo();
     RpcClientInfo(RpcClientInfo const& rhs);
 	virtual ~RpcClientInfo() = default;
 

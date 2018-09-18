@@ -28,49 +28,36 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIICON_H_
-#define UIICON_H_
+#ifndef HOMEGEARBASE_GZIP_H_
+#define HOMEGEARBASE_GZIP_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
-#include <string>
-#include <map>
-#include <memory>
+#include "../Exception.h"
 
-using namespace rapidxml;
+#include <zlib.h>
+
+#include <vector>
 
 namespace BaseLib
 {
 
-class SharedObjects;
-
-namespace DeviceDescription
-{
-
-class UiIcon;
-
-typedef std::shared_ptr<UiIcon> PUiIcon;
-
-class UiIcon
+class GZipException : public BaseLib::Exception
 {
 public:
-    UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiIcon(UiIcon const& rhs);
-    virtual ~UiIcon() = default;
-
-    UiIcon& operator=(const UiIcon& rhs);
-
-    //Attributes
-    std::string id;
-
-    //Elements
-    std::string name;
-    std::string color;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+    GZipException(std::string message) : Exception(message) {}
 };
 
-}
+class GZip
+{
+public:
+    virtual ~GZip() = default;
+
+    template<typename DataOut, typename DataIn> static DataOut compress(const DataIn& data, int32_t compressionLevel);
+
+    template<typename DataOut, typename DataIn> static DataOut uncompress(const DataIn& data);
+private:
+    GZip() = default;
+};
+
 }
 
 #endif

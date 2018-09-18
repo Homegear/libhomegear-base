@@ -640,7 +640,7 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
         struct rlimit limits;
     	if(getrlimit(RLIMIT_NOFILE, &limits) == -1)
     	{
-    		_bl->out.printError("Error: Couldn't read rlimits.");
+    		throw Exception("Error: Couldn't read rlimits.");
     		_exit(1);
     	}
         // Close all non standard descriptors - safety
@@ -658,7 +658,7 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
         argv[arguments.size() + 1] = nullptr;
         if(execv(command.c_str(), argv) == -1)
         {
-        	_bl->out.printError("Error: Could not start program: " + std::string(strerror(errno)));
+            throw Exception("Error: Could not start program: " + std::string(strerror(errno)));
         }
         _exit(1);
     }
@@ -668,22 +668,123 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
     return pid;
 }
 
+pid_t HelperFunctions::systemp(std::string command, std::vector<std::string> arguments, int& stdIn, int& stdOut, int& stdErr)
+{
+	pid_t pid;
+
+    stdIn = -1;
+    stdOut = -1;
+    stdErr = -1;
+
+	if(command.empty() || command.back() == '/') return -1;
+
+	int pipeIn[2];
+	int pipeOut[2];
+	int pipeErr[2];
+
+	if(pipe(pipeIn) == -1) throw Exception("Error: Couln't create pipe for STDIN.");
+
+	if(pipe(pipeOut) == -1)
+	{
+		close(pipeIn[0]);
+		close(pipeIn[1]);
+        throw Exception("Error: Couln't create pipe for STDOUT.");
+	}
+
+	if(pipe(pipeErr) == -1)
+	{
+		close(pipeIn[0]);
+		close(pipeIn[1]);
+		close(pipeOut[0]);
+		close(pipeOut[1]);
+        throw Exception("Error: Couln't create pipe for STDERR.");
+	}
+
+	pid = fork();
+
+	if(pid == -1)
+	{
+		close(pipeIn[0]);
+		close(pipeIn[1]);
+		close(pipeOut[0]);
+		close(pipeOut[1]);
+		close(pipeErr[0]);
+		close(pipeErr[1]);
+
+		return pid;
+	}
+	else if(pid == 0)
+	{
+		//Child process
+
+		if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
+
+		if(dup2(pipeOut[1], STDOUT_FILENO) == -1) _exit(1);
+
+		if(dup2(pipeErr[1], STDERR_FILENO) == -1) _exit(1);
+
+		//Close pipes for child
+		close(pipeIn[0]);
+		close(pipeIn[1]);
+		close(pipeOut[0]);
+		close(pipeOut[1]);
+		close(pipeErr[0]);
+		close(pipeErr[1]);
+
+		struct rlimit limits;
+		if(getrlimit(RLIMIT_NOFILE, &limits) == -1) _exit(1);
+
+		// Close all non standard descriptors - safety
+		for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
+
+		setsid();
+		std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+		if(programName.empty()) _exit(1);
+		char* argv[arguments.size() + 2];
+		argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
+		for(uint32_t i = 0; i < arguments.size(); i++)
+		{
+			argv[i + 1] = &arguments[i][0];
+		}
+		argv[arguments.size() + 1] = nullptr;
+		if(execv(command.c_str(), argv) == -1) _exit(1);
+	}
+
+	//Parent process
+	close(pipeIn[0]);
+	close(pipeOut[1]);
+	close(pipeErr[1]);
+
+	stdIn = pipeIn[1];
+	stdOut = pipeOut[0];
+	stdErr = pipeErr[0];
+
+	return pid;
+}
+
+
 int32_t HelperFunctions::exec(std::string command, std::string& output)
 {
 	FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) return -1;
-    char buffer[128];
-    int32_t bytesRead = 0;
+    std::array<char, 128> buffer;
     output.reserve(1024);
-    while(!feof(pipe))
+    try
     {
-    	if(fgets(buffer, 128, pipe) != 0)
-    	{
-    		if(output.size() + bytesRead > output.capacity()) output.reserve(output.capacity() + 1024);
-    		output.insert(output.end(), buffer, buffer + strlen(buffer));
-    	}
+        while(!feof(pipe))
+        {
+            if(fgets(buffer.data(), 128, pipe) != nullptr)
+            {
+                if(output.size() + buffer.size() > output.capacity()) output.reserve(output.capacity() + 1024);
+                output.insert(output.end(), buffer.begin(), buffer.begin() + strnlen(buffer.data(), buffer.size()));
+            }
+        }
+    }
+    catch(...)
+    {
     }
 	auto exitStatus = pclose(pipe);
+	if(errno == ECHILD) return 0; //Currently this method always return 0, because we use a custom sigchld handler.
     return WEXITSTATUS(exitStatus);
 }
 

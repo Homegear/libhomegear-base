@@ -65,9 +65,10 @@ public:
     std::string id;
 
     //Elements
-    int32_t posX = -1;
-    int32_t posY = -1;
-    int32_t colWidth = 1;
+    int32_t x = -1;
+    int32_t y = -1;
+    int32_t columns = 1;
+    int32_t rows = 1;
 
     //Helpers
     std::shared_ptr<HomegearUiElement> uiElement;

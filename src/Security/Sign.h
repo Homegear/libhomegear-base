@@ -28,49 +28,70 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIICON_H_
-#define UIICON_H_
+#ifndef BASELIB_SECURITY_SIGN_H_
+#define BASELIB_SECURITY_SIGN_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
-#include <string>
-#include <map>
+#include "../Exception.h"
+#include <gnutls/gnutls.h>
+#include <gnutls/abstract.h>
+
 #include <memory>
-
-using namespace rapidxml;
+#include <vector>
+#include <cstdint>
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
-namespace DeviceDescription
+namespace Security
 {
 
-class UiIcon;
-
-typedef std::shared_ptr<UiIcon> PUiIcon;
-
-class UiIcon
+/**
+ * Exception class for GnuTls.
+ *
+ * @see GnuTls
+ */
+class SignException : public Exception
 {
 public:
-    UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiIcon(UiIcon const& rhs);
-    virtual ~UiIcon() = default;
-
-    UiIcon& operator=(const UiIcon& rhs);
-
-    //Attributes
-    std::string id;
-
-    //Elements
-    std::string name;
-    std::string color;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+    SignException(std::string message) : Exception(message) {}
 };
 
-}
-}
+class Sign
+{
+private:
+    gnutls_privkey_t _privateKey = nullptr;
+    gnutls_pubkey_t _publicKey = nullptr;
+public:
+    /**
+     * Initializes the GNUTLS key objects.
+     *
+     * @param privateKey The PEM encoded X509 private key.
+     * @param publicKey The PEM encoced X509 public key.
+     */
+    Sign(const std::string& privateKey, const std::string& publicKey);
+    ~Sign();
 
+    /**
+     * Signs the given data using the private key.
+     *
+     * @param data The data to sign.
+     * @throw SignException
+     * @return Returns the signature.
+     */
+    std::vector<char> sign(const std::vector<char>& data);
+
+    /**
+     * Verifies the signature of the given data using the public key.
+     *
+     * @param data The data to verify.
+     * @param signature The signature of the data generated using the private key.
+     * @throw SignException
+     * @return Returns "true" if the signature is valid and "false" otherwise.
+     */
+    bool verify(const std::vector<char>& data, const std::vector<char>& signature);
+};
+
+typedef std::shared_ptr<Sign> PSign;
+
+}
+}
 #endif

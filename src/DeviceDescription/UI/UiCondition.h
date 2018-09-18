@@ -28,12 +28,15 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UIICON_H_
-#define UIICON_H_
+#ifndef UICONDITION_H_
+#define UICONDITION_H_
 
+#include "UiIcon.h"
+#include "UiText.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
-#include <map>
+#include <list>
+#include <unordered_map>
 #include <memory>
 
 using namespace rapidxml;
@@ -46,26 +49,27 @@ class SharedObjects;
 namespace DeviceDescription
 {
 
-class UiIcon;
+class UiCondition;
 
-typedef std::shared_ptr<UiIcon> PUiIcon;
+typedef std::shared_ptr<UiCondition> PUiCondition;
 
-class UiIcon
+class UiCondition
 {
 public:
-    UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-    UiIcon(UiIcon const& rhs);
-    virtual ~UiIcon() = default;
+    UiCondition(BaseLib::SharedObjects* baseLib);
+    UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiCondition(UiCondition const& rhs);
+    virtual ~UiCondition() = default;
 
-    UiIcon& operator=(const UiIcon& rhs);
+    UiCondition& operator=(const UiCondition& rhs);
 
     //Attributes
-    std::string id;
+    std::string conditionOperator;
+    std::string conditionValue;
 
     //Elements
-    std::string name;
-    std::string color;
+    std::unordered_map<std::string, PUiIcon> icons;
+    std::unordered_map<std::string, PUiText> texts;
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
 };
