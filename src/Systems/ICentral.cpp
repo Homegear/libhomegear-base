@@ -44,6 +44,8 @@ ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, ICentr
 	setEventHandler(eventHandler);
 	_initialized = false;
 	_disposing = false;
+    _pairing = false;
+    _timeLeftInPairingMode = 0;
 	_translations = std::make_shared<DeviceTranslations>(baseLib, deviceFamily);
 }
 
