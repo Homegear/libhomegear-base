@@ -89,6 +89,31 @@ void ICentral::dispose(bool wait)
 
 	void ICentral::raiseRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
 	{
+        // {{{ Default implementation for getPairingState
+        {
+            std::lock_guard<std::mutex> newPeersGuard(_newPeersMutex);
+            std::list<int64_t> entriesToRemove;
+            for(auto& entry : _newPeersDefault)
+            {
+                if(entry.first < BaseLib::HelperFunctions::getTimeSeconds() - 60) entriesToRemove.emplace_back(entry.first);
+            }
+
+            for(auto entry : entriesToRemove)
+            {
+                _newPeersDefault.erase(entry);
+            }
+
+            auto time = BaseLib::HelperFunctions::getTimeSeconds();
+            for(auto id : ids)
+            {
+                auto pairingState = std::make_shared<PairingState>();
+                pairingState->peerId = id;
+                pairingState->state = "success";
+                _newPeersDefault[time].emplace_back(std::move(pairingState));
+            }
+        }
+        // }}}
+
 		if(_eventHandler) ((ICentralEventSink*)_eventHandler)->onRPCNewDevices(ids, deviceDescriptions);
 	}
 
@@ -1234,6 +1259,46 @@ PVariable ICentral::getName(PRpcClientInfo clientInfo, uint64_t id, int32_t chan
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getPairingState(PRpcClientInfo clientInfo)
+{
+	try
+	{
+        auto states = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        states->structValue->emplace("pairingModeEnabled", std::make_shared<BaseLib::Variable>(_pairing));
+        states->structValue->emplace("pairingModeEndTime", std::make_shared<BaseLib::Variable>(BaseLib::HelperFunctions::getTimeSeconds() + _timeLeftInPairingMode));
+
+        {
+            std::lock_guard<std::mutex> newPeersGuard(_newPeersMutex);
+            for(auto& element : _newPeersDefault)
+            {
+                for(auto& peer : element.second)
+                {
+                    auto peerState = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+                    peerState->structValue->emplace("state", std::make_shared<BaseLib::Variable>(peer->state));
+                    peerState->structValue->emplace("message", std::make_shared<BaseLib::Variable>(peer->message));
+                    states->structValue->emplace(std::to_string(peer->peerId), std::move(peerState));
+                }
+            }
+        }
+
+        return states;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
 }
 
 PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel)

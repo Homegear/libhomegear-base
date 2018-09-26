@@ -51,6 +51,15 @@ namespace Systems
 class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysicalInterfaceEventSink, public IEvents
 {
 public:
+    struct PairingState
+    {
+        uint64_t peerId = 0;
+        std::string state;
+        std::string message;
+    };
+
+    typedef std::shared_ptr<PairingState> PPairingState;
+
 	//Event handling
 	class ICentralEventSink : public IEventSinkBase
 	{
@@ -137,6 +146,7 @@ public:
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, int32_t flags);
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, int32_t flags, bool checkAcls);
 	virtual PVariable getName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel);
+	virtual PVariable getPairingState(PRpcClientInfo clientInfo);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
 	virtual PVariable getParamsetId(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
@@ -202,6 +212,11 @@ protected:
     std::map<uint64_t, std::shared_ptr<Peer>> _peersById;
     std::mutex _peersMutex;
 
+    std::atomic_bool _pairing;
+    uint32_t _timeLeftInPairingMode = 0;
+    std::mutex _newPeersMutex;
+    std::map<int64_t, std::list<PPairingState>> _newPeers;
+
 	//Event handling
     std::map<std::string, PEventHandler> _physicalInterfaceEventhandlers;
 
@@ -247,6 +262,11 @@ protected:
 	virtual void saveVariable(uint32_t index, int64_t intValue);
 	virtual void saveVariable(uint32_t index, std::string& stringValue);
 	virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
+private:
+    /*
+     * Used for default implementation of getPairingState.
+     */
+    std::map<int64_t, std::list<PPairingState>> _newPeersDefault;
 };
 
 }
