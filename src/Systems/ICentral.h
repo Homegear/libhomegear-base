@@ -55,7 +55,8 @@ public:
     {
         uint64_t peerId = 0;
         std::string state;
-        std::string message;
+        std::string messageId;
+        std::list<std::string> variables;
     };
     typedef std::shared_ptr<PairingState> PPairingState;
 
