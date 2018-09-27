@@ -110,28 +110,28 @@ void ServiceMessages::load()
 					_unreach = (bool)row->second.at(5)->intValue;
 					break;*/
 				case 1:
-					_stickyUnreach = (bool)row->second.at(5)->intValue;
-                    _stickyUnreachTime = row->second.at(4)->intValue;
+					_stickyUnreach = (bool)row->second.at(6)->intValue;
+                    _stickyUnreachTime = row->second.at(5)->intValue;
 					break;
 				case 2:
-					_configPending = (bool)row->second.at(5)->intValue;
-                    _configPendingTime = row->second.at(4)->intValue;
+					_configPending = (bool)row->second.at(6)->intValue;
+                    _configPendingTime = row->second.at(5)->intValue;
 					break;
 				case 3:
-					_lowbat = (bool)row->second.at(5)->intValue;
-                    _lowbatTime = row->second.at(4)->intValue;
+					_lowbat = (bool)row->second.at(6)->intValue;
+                    _lowbatTime = row->second.at(5)->intValue;
 					break;
 				}
 			}
 			else
 			{
-				int32_t channel = row->second.at(5)->intValue;
-				std::string id = row->second.at(6)->textValue;
-				std::shared_ptr<std::vector<char>> value = row->second.at(7)->binaryValue;
+				int32_t channel = row->second.at(6)->intValue;
+				std::string id = row->second.at(7)->textValue;
+				std::shared_ptr<std::vector<char>> value = row->second.at(9)->binaryValue;
 				if(channel < 0 || id.empty() || value->empty()) continue;
                 ErrorInfo errorInfo;
                 errorInfo.value = (uint8_t)value->at(0);
-                errorInfo.timestamp = row->second.at(4)->intValue;
+                errorInfo.timestamp = row->second.at(5)->intValue;
 				std::lock_guard<std::mutex> errorsGuard(_errorMutex);
 				_errors[channel][id] = std::move(errorInfo);
 			}
@@ -180,13 +180,15 @@ void ServiceMessages::save(int32_t timestamp, uint32_t index, bool value)
 			else
 			{
 				if(_peerId == 0) return;
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)value)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1))); //familyID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId))); //peerID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index))); //messageID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(std::string()))); //messageSubID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp))); //timestamp
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)value))); //integerValue
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn())); //message
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn())); //variables
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn())); //binaryData
 				raiseSaveServiceMessage(data);
 			}
 		}
@@ -236,13 +238,15 @@ void ServiceMessages::save(int32_t timestamp, int32_t channel, std::string id, u
 			else
 			{
 				if(_peerId == 0) return;
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index)));
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(channel)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(id)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue)));
+                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(-1))); //familyID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerId))); //peerID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(index))); //messageID
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(std::string()))); //messageSubID
+                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(timestamp))); //timestamp
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(channel))); //integerValue
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(id))); //message
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn())); //variables
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(binaryValue))); //binaryData
 				raiseSaveServiceMessage(data);
 			}
 		}
