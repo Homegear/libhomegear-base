@@ -1303,8 +1303,15 @@ PVariable ICentral::getPairingState(PRpcClientInfo clientInfo)
                 {
                     auto peerState = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
                     peerState->structValue->emplace("state", std::make_shared<BaseLib::Variable>(peer->state));
-                    peerState->structValue->emplace("message", std::make_shared<BaseLib::Variable>(peer->message));
-                    newPeers->structValue->emplace(std::to_string(peer->peerId), std::move(peerState));
+                    peerState->structValue->emplace("messageId", std::make_shared<BaseLib::Variable>(peer->messageId));
+                    auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                    variables->arrayValue->reserve(peer->variables.size());
+                    for(auto& variable : peer->variables)
+                    {
+                        variables->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(variable));
+                    }
+                    peerState->structValue->emplace("variables", variables);
+                    states->structValue->emplace(std::to_string(peer->peerId), std::move(peerState));
                 }
             }
         }
