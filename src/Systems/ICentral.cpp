@@ -44,6 +44,8 @@ ICentral::ICentral(int32_t deviceFamily, BaseLib::SharedObjects* baseLib, ICentr
 	setEventHandler(eventHandler);
 	_initialized = false;
 	_disposing = false;
+    _pairing = false;
+    _timeLeftInPairingMode = 0;
 	_translations = std::make_shared<DeviceTranslations>(baseLib, deviceFamily);
 }
 
@@ -1069,6 +1071,27 @@ PVariable ICentral::getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId,
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable ICentral::getInstallMode(PRpcClientInfo clientInfo)
+{
+	try
+	{
+		return PVariable(new Variable(_timeLeftInPairingMode));
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
 }
 
 PVariable ICentral::getLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel)
