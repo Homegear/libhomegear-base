@@ -1293,6 +1293,8 @@ PVariable ICentral::getPairingState(PRpcClientInfo clientInfo)
         states->structValue->emplace("pairingModeEnabled", std::make_shared<BaseLib::Variable>(_pairing));
         states->structValue->emplace("pairingModeEndTime", std::make_shared<BaseLib::Variable>(BaseLib::HelperFunctions::getTimeSeconds() + _timeLeftInPairingMode));
 
+        auto newPeers = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
         {
             std::lock_guard<std::mutex> newPeersGuard(_newPeersMutex);
             for(auto& element : _newPeersDefault)
@@ -1302,10 +1304,12 @@ PVariable ICentral::getPairingState(PRpcClientInfo clientInfo)
                     auto peerState = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
                     peerState->structValue->emplace("state", std::make_shared<BaseLib::Variable>(peer->state));
                     peerState->structValue->emplace("message", std::make_shared<BaseLib::Variable>(peer->message));
-                    states->structValue->emplace(std::to_string(peer->peerId), std::move(peerState));
+                    newPeers->structValue->emplace(std::to_string(peer->peerId), std::move(peerState));
                 }
             }
         }
+
+        states->structValue->emplace("newPeers", newPeers);
 
         return states;
 	}
