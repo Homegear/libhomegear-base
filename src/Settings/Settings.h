@@ -68,6 +68,10 @@ public:
 	uint32_t dataPathPermissions() { return _dataPathPermissions; }
 	std::string dataPathUser() { return _dataPathUser; }
 	std::string dataPathGroup() { return _dataPathGroup; }
+	std::string writeableDataPath() { return _writeableDataPath; }
+	uint32_t writeableDataPathPermissions() { return _writeableDataPathPermissions; }
+	std::string writeableDataPathUser() { return _writeableDataPathUser; }
+	std::string writeableDataPathGroup() { return _writeableDataPathGroup; }
 	std::string familyDataPath() { return _familyDataPath; }
 	uint32_t familyDataPathPermissions() { return _familyDataPathPermissions; }
 	std::string familyDataPathUser() { return _familyDataPathUser; }
