@@ -185,6 +185,10 @@ private:
 	uint32_t _dataPathPermissions = 504;
 	std::string _dataPathUser;
 	std::string _dataPathGroup;
+	std::string _writeableDataPath;
+	uint32_t _writeableDataPathPermissions = 504;
+	std::string _writeableDataPathUser;
+	std::string _writeableDataPathGroup;
 	std::string _familyDataPath;
 	uint32_t _familyDataPathPermissions = 504;
 	std::string _familyDataPathUser;
