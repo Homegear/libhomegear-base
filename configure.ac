@@ -55,7 +55,7 @@ case $host_os in
 		CPPFLAGS="$CPPFLAGS -DBSDSYSTEM -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1 -D_WITH_DPRINTF"
 		;;
 	*)
-		AC_MSG_ERROR([Your platform is not currently supported])
+		AC_MSG_ERROR([Your platform is currently not supported])
 	        ;;
 esac
 
