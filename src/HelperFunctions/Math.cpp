@@ -223,10 +223,6 @@ Math::Math()
 	_hexMap['f'] = 0xF;
 }
 
-Math::~Math()
-{
-}
-
 bool Math::isNumber(const std::string& s, bool hex)
 {
 	if(!hex) hex = ((signed)s.find('x') > -1);
@@ -237,18 +233,18 @@ bool Math::isNumber(const std::string& s, bool hex)
 
 int32_t Math::getNumber(const std::string& s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+    ssize_t xpos = s.find('x');
 	int32_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
-	else try { number = std::stoll(s, 0, 16); } catch(...) {}
+	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stol(s, 0, 10); } catch(...) {}
+	else try { number = (int32_t)std::stol(s, 0, 16); } catch(...) {}
 	return number;
 }
 
 int64_t Math::getNumber64(const std::string& s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+    ssize_t xpos = s.find('x');
 	int64_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
+	if(xpos == std::string::npos && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
 	else try { number = std::stoll(s, 0, 16); } catch(...) {}
 	return number;
 }
@@ -261,9 +257,18 @@ int32_t Math::getNumber(char hexChar)
 
 uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+    ssize_t xpos = s.find('x');
 	uint32_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoull(s, 0, 10); } catch(...) {}
+	if(xpos == std::string::npos && !isHex) try { number = (uint32_t)std::stoul(s, 0, 10); } catch(...) {}
+	else try { number = (uint32_t)std::stoul(s, 0, 16); } catch(...) {}
+	return number;
+}
+
+uint64_t Math::getUnsignedNumber64(const std::string &s, bool isHex)
+{
+	ssize_t xpos = s.find('x');
+	uint64_t number = 0;
+	if(xpos == std::string::npos && !isHex) try { number = std::stoull(s, 0, 10); } catch(...) {}
 	else try { number = std::stoull(s, 0, 16); } catch(...) {}
 	return number;
 }
