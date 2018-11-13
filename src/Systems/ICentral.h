@@ -231,7 +231,7 @@ protected:
     std::mutex _peersMutex;
 
     std::atomic_bool _pairing;
-    uint32_t _timeLeftInPairingMode = 0;
+    std::atomic_int _timeLeftInPairingMode;
     std::mutex _newPeersMutex;
     std::map<int64_t, std::list<PPairingState>> _newPeers;
     std::list<PPairingMessage> _pairingMessages;
