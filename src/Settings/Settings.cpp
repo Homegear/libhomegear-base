@@ -297,6 +297,7 @@ void Settings::load(std::string filename, std::string executablePath)
 					_dataPath = value;
 					if(_dataPath.empty()) _dataPath = _executablePath;
 					if(_dataPath.back() != '/') _dataPath.push_back('/');
+					if(_writeableDataPath == _executablePath) _writeableDataPath = _dataPath;
 					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
 				}
 				else if(name == "databasepath" && _dataPath.empty() && !value.empty())
