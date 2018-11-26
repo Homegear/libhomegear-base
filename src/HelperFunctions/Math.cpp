@@ -225,7 +225,7 @@ Math::Math()
 
 bool Math::isNumber(const std::string& s, bool hex)
 {
-	if(!hex) hex = ((signed)s.find('x') > -1);
+	if(!hex) hex = (s.find('x') != std::string::npos);
 	if(!hex) try { std::stoll(s, 0, 10); } catch(...) { return false; }
 	else try { std::stoll(s, 0, 16); } catch(...) { return false; }
 	return true;
@@ -233,7 +233,7 @@ bool Math::isNumber(const std::string& s, bool hex)
 
 int32_t Math::getNumber(const std::string& s, bool isHex)
 {
-    ssize_t xpos = s.find('x');
+    auto xpos = s.find('x');
 	int32_t number = 0;
 	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stol(s, 0, 10); } catch(...) {}
 	else try { number = (int32_t)std::stol(s, 0, 16); } catch(...) {}
@@ -242,7 +242,7 @@ int32_t Math::getNumber(const std::string& s, bool isHex)
 
 int64_t Math::getNumber64(const std::string& s, bool isHex)
 {
-    ssize_t xpos = s.find('x');
+	auto xpos = s.find('x');
 	int64_t number = 0;
 	if(xpos == std::string::npos && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
 	else try { number = std::stoll(s, 0, 16); } catch(...) {}
@@ -257,7 +257,7 @@ int32_t Math::getNumber(char hexChar)
 
 uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)
 {
-    ssize_t xpos = s.find('x');
+	auto xpos = s.find('x');
 	uint32_t number = 0;
 	if(xpos == std::string::npos && !isHex) try { number = (uint32_t)std::stoul(s, 0, 10); } catch(...) {}
 	else try { number = (uint32_t)std::stoul(s, 0, 16); } catch(...) {}
@@ -266,7 +266,7 @@ uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)
 
 uint64_t Math::getUnsignedNumber64(const std::string &s, bool isHex)
 {
-	ssize_t xpos = s.find('x');
+	auto xpos = s.find('x');
 	uint64_t number = 0;
 	if(xpos == std::string::npos && !isHex) try { number = std::stoull(s, 0, 10); } catch(...) {}
 	else try { number = std::stoull(s, 0, 16); } catch(...) {}
@@ -404,7 +404,7 @@ std::string Math::toString(double number)
 	std::stringstream out;
     out << number;
     std::string string = out.str();
-    std::string::size_type pos = string.find('.');
+    auto pos = string.find('.');
     if(pos == std::string::npos) return string;
     int32_t decimalPlaces = string.size() - pos - 1;
     if(decimalPlaces > 3 && string[string.size() - 2] == string.back() && string[string.size() - 3] == string.back())
