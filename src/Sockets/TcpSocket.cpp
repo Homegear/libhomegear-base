@@ -1357,19 +1357,18 @@ void TcpSocket::getSocketDescriptor()
 		_writeMutex.unlock();
 		_readMutex.unlock();
 	}
-	catch(const std::exception& ex)
-    {
-		_writeMutex.unlock();
-    	_readMutex.unlock();
-		throw(ex);
-    }
 	catch(Exception& ex)
 	{
 		_writeMutex.unlock();
 		_readMutex.unlock();
-		throw(ex);
+		throw;
 	}
-
+	catch(const std::exception& ex)
+	{
+		_writeMutex.unlock();
+		_readMutex.unlock();
+		throw;
+	}
 }
 
 void TcpSocket::getSsl()
