@@ -173,7 +173,7 @@ TcpSocket::~TcpSocket()
 
 	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
 	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
-	std::lock(_readMutex, _writeMutex);
+	std::lock(readGuard, writeGuard);
 	_bl->fileDescriptorManager.close(_socketDescriptor);
     freeCredentials();
 	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
@@ -987,7 +987,7 @@ void TcpSocket::close()
 {
 	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
 	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
-	std::lock(_readMutex, _writeMutex);
+	std::lock(readGuard, writeGuard);
 	_bl->fileDescriptorManager.close(_socketDescriptor);
 }
 
@@ -1313,7 +1313,7 @@ void TcpSocket::getSocketDescriptor()
 {
 	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
 	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
-	std::lock(_readMutex, _writeMutex);
+	std::lock(readGuard, writeGuard);
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Calling getFileDescriptor...");
 	_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 
