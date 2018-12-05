@@ -140,11 +140,15 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 			http = clientIterator->second.http;
 		}
 
-		http->process((char*)packet.data(), packet.size());
-		if(http->isFinished())
+		uint32_t processedBytes = 0;
+		while(processedBytes < packet.size())
 		{
-			if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
-			http->reset();
+			processedBytes = http->process((char*)(packet.data() + processedBytes), packet.size() - processedBytes);
+			if(http->isFinished())
+			{
+				if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
+				http->reset();
+			}
 		}
 		return;
 	}
