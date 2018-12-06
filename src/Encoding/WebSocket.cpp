@@ -59,6 +59,7 @@ uint32_t WebSocket::process(char* buffer, int32_t bufferLength)
 	if(!_header.parsed)
 	{
 		processedBytes += processHeader(&buffer, bufferLength);
+		if(!_header.parsed) return processedBytes;
 	}
 	if(_header.length == 0 || _header.rsv1 || _header.rsv2 || _header.rsv3 || (_header.opcode != Header::Opcode::continuation && _header.opcode != Header::Opcode::text  && _header.opcode != Header::Opcode::binary && _header.opcode != Header::Opcode::ping && _header.opcode != Header::Opcode::pong))
 	{
@@ -74,44 +75,71 @@ uint32_t WebSocket::process(char* buffer, int32_t bufferLength)
 
 uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 {
-	if(bufferLength < 2) throw WebSocketException("Not enough data to process header");
+	int32_t bytesInserted = 0;
+	if(_rawHeader.empty()) _rawHeader.reserve(14); //14 is maximum header size (2 + max number of length bytes + mask)
+	if(_rawHeader.size() + bufferLength < 2)
+	{
+		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bufferLength);
+		return bufferLength;
+	}
+	else if(_rawHeader.size() < 2)
+	{
+		bytesInserted += 2 - _rawHeader.size();
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bytesInserted);
+		if(bufferLength == bytesInserted) return bytesInserted;
+		*buffer += bytesInserted;
+		bufferLength -= bytesInserted;
+	}
+
 	uint32_t lengthBytes = 0;
-	_header.fin = (*buffer)[0] & 0x80;
-	_header.rsv1 = (*buffer)[0] & 0x40;
-	_header.rsv2 = (*buffer)[0] & 0x20;
-	_header.rsv3 = (*buffer)[0] & 0x10;
-	_header.opcode = (Header::Opcode::Enum)((*buffer)[0] & 0x0F);
-	_header.hasMask = (*buffer)[1] & 0x80;
-	(*buffer)[1] &= 0x7F;
-	if((*buffer)[1] == 126) lengthBytes = 2;
-	else if((*buffer)[1] == 127) lengthBytes = 8;
+	_header.fin = _rawHeader.at(0) & 0x80;
+	_header.rsv1 = _rawHeader.at(0) & 0x40;
+	_header.rsv2 = _rawHeader.at(0) & 0x20;
+	_header.rsv3 = _rawHeader.at(0) & 0x10;
+	_header.opcode = (Header::Opcode::Enum)(_rawHeader.at(0) & 0x0F);
+	_header.hasMask = _rawHeader.at(1) & 0x80;
+	if((_rawHeader.at(1) & 0x7F) == 126) lengthBytes = 2;
+	else if((_rawHeader.at(1) & 0x7F) == 127) lengthBytes = 8;
 	else
 	{
 		lengthBytes = 0;
-		_header.length = (uint8_t)(*buffer)[1];
+		_header.length = (uint8_t)_rawHeader.at(1);
 	}
 	uint32_t headerSize = 2 + lengthBytes + (_header.hasMask ? 4 : 0);
-	if((unsigned)bufferLength < headerSize) throw WebSocketException("Not enough data to process header");
+	if(_rawHeader.size() + bufferLength < headerSize)
+	{
+		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bufferLength);
+		return bufferLength;
+	}
+	else
+	{
+		bytesInserted += headerSize - _rawHeader.size();
+		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bytesInserted);
+	}
+
 	if(lengthBytes == 2)
 	{
-		_header.length = (((uint32_t)(uint8_t)(*buffer)[2]) << 8) + (uint8_t)(*buffer)[3];
+		_header.length = (((uint32_t)(uint8_t)_rawHeader.at(2)) << 8) + (uint8_t)_rawHeader.at(3);
 	}
 	else if(lengthBytes == 8)
 	{
-		_header.length = (((uint64_t)(uint8_t)(*buffer)[2]) << 56) + (((uint64_t)(uint8_t)(*buffer)[3]) << 48) + (((uint64_t)(uint8_t)(*buffer)[4]) << 40) + (((uint64_t)(uint8_t)(*buffer)[5]) << 32) + (((uint64_t)(uint8_t)(*buffer)[6]) << 24) + (((uint64_t)(uint8_t)(*buffer)[7]) << 16) + (((uint64_t)(uint8_t)(*buffer)[8]) << 8) + (uint8_t)(*buffer)[9];
+		_header.length = (((uint64_t)(uint8_t)_rawHeader.at(2)) << 56) + (((uint64_t)(uint8_t)_rawHeader.at(3)) << 48) + (((uint64_t)(uint8_t)_rawHeader.at(4)) << 40) + (((uint64_t)(uint8_t)_rawHeader.at(5)) << 32) + (((uint64_t)(uint8_t)_rawHeader.at(6)) << 24) + (((uint64_t)(uint8_t)_rawHeader.at(7)) << 16) + (((uint64_t)(uint8_t)_rawHeader.at(8)) << 8) + (uint8_t)_rawHeader.at(9);
 	}
 	if(_header.hasMask)
 	{
 		_header.maskingKey.reserve(4);
-		_header.maskingKey.push_back((*buffer)[2 + lengthBytes]);
-		_header.maskingKey.push_back((*buffer)[2 + lengthBytes + 1]);
-		_header.maskingKey.push_back((*buffer)[2 + lengthBytes + 2]);
-		_header.maskingKey.push_back((*buffer)[2 + lengthBytes + 3]);
+		_header.maskingKey.push_back(_rawHeader.at(2 + lengthBytes));
+		_header.maskingKey.push_back(_rawHeader.at(2 + lengthBytes + 1));
+		_header.maskingKey.push_back(_rawHeader.at(2 + lengthBytes + 2));
+		_header.maskingKey.push_back(_rawHeader.at(2 + lengthBytes + 3));
 	}
+	_header.parsed = true;
+
+	if(bufferLength == bytesInserted) return bytesInserted;
+
 	*buffer += headerSize;
 	bufferLength -= headerSize;
-	_header.parsed = true;
-	return headerSize;
+	return bytesInserted;
 }
 
 uint32_t WebSocket::processContent(char* buffer, int32_t bufferLength)

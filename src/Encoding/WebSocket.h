@@ -116,6 +116,7 @@ private:
 	uint32_t _oldContentSize = 0;
 	bool _finished = false;
 	bool _dataProcessingStarted = false;
+	std::vector<char> _rawHeader;
 
 	uint32_t processHeader(char** buffer, int32_t& bufferLength);
 	uint32_t processContent(char* buffer, int32_t bufferLength);
