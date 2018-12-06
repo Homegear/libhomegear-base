@@ -79,7 +79,7 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 	if(_rawHeader.empty()) _rawHeader.reserve(14); //14 is maximum header size (2 + max number of length bytes + mask)
 	if(_rawHeader.size() + bufferLength < 2)
 	{
-		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bufferLength);
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bufferLength);
 		return bufferLength;
 	}
 	else if(_rawHeader.size() < 2)
@@ -108,13 +108,13 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 	uint32_t headerSize = 2 + lengthBytes + (_header.hasMask ? 4 : 0);
 	if(_rawHeader.size() + bufferLength < headerSize)
 	{
-		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bufferLength);
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bufferLength);
 		return bufferLength;
 	}
 	else
 	{
 		bytesInserted += headerSize - _rawHeader.size();
-		_rawHeader.insert(_rawHeader.end(), *buffer, *buffer + bytesInserted);
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bytesInserted);
 	}
 
 	if(lengthBytes == 2)
