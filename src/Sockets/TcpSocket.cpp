@@ -250,22 +250,12 @@ std::string TcpSocket::getIpAddress()
 		_dhParams = nullptr;
 	}
 
-	int verifyClientCert(gnutls_session_t tlsSession)
-	{
-		//Called during handshake just after the certificate message has been received.
-
-		uint32_t status = (uint32_t)-1;
-		if(gnutls_certificate_verify_peers3(tlsSession, 0, &status) != GNUTLS_E_SUCCESS) return GNUTLS_E_INTERNAL_ERROR; //Terminate handshake
-		if(status > 0) return GNUTLS_E_INTERNAL_ERROR;
-		return GNUTLS_E_SUCCESS;
-	}
-
     int postClientHello(gnutls_session_t tlsSession)
     {
-        TcpSocket* tcpSocket = (TcpSocket*)gnutls_session_get_ptr(tlsSession);
-        if(!tcpSocket) return GNUTLS_E_INTERNAL_ERROR;
+		TcpSocket::TcpClientData* clientData = (TcpSocket::TcpClientData*)gnutls_session_get_ptr(tlsSession);
+        if(!clientData) return GNUTLS_E_INTERNAL_ERROR;
 
-        auto& credentials = tcpSocket->getCredentials();
+        auto& credentials = clientData->socket->getCredentials();
 
         int32_t result = 0;
         if(credentials.size() > 1)
@@ -313,53 +303,91 @@ std::string TcpSocket::getIpAddress()
         return GNUTLS_E_SUCCESS;
     }
 
-	void TcpSocket::initClientSsl(PFileDescriptor fileDescriptor)
+	void TcpSocket::initClientSsl(PTcpClientData& clientData)
 	{
 		if(!_tlsPriorityCache)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
 		}
 		if(_x509Credentials.empty())
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Credentials is empty.");
 		}
 		int32_t result = 0;
-		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_init(&clientData->fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
 		{
-			fileDescriptor->tlsSession = nullptr;
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			clientData->fileDescriptor->tlsSession = nullptr;
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
 		}
-		if(!fileDescriptor->tlsSession)
+		if(!clientData->fileDescriptor->tlsSession)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Client TLS session is nullptr.");
 		}
 
-        gnutls_session_set_ptr(fileDescriptor->tlsSession, this);
+        gnutls_session_set_ptr(clientData->fileDescriptor->tlsSession, clientData.get());
 
-		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_priority_set(clientData->fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
 		}
 
-        gnutls_handshake_set_post_client_hello_function(fileDescriptor->tlsSession, &postClientHello);
+        gnutls_handshake_set_post_client_hello_function(clientData->fileDescriptor->tlsSession, &postClientHello);
 
-		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, _requireClientCert ? GNUTLS_CERT_REQUIRE : GNUTLS_CERT_IGNORE);
-		if(!fileDescriptor || fileDescriptor->descriptor == -1)
+		gnutls_certificate_server_set_request(clientData->fileDescriptor->tlsSession, _requireClientCert ? GNUTLS_CERT_REQUIRE : GNUTLS_CERT_REQUEST);
+		if(!clientData->fileDescriptor || clientData->fileDescriptor->descriptor == -1)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
 		}
-		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
-		result = gnutls_handshake(fileDescriptor->tlsSession);
+		gnutls_transport_set_ptr(clientData->fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)clientData->fileDescriptor->descriptor);
+		result = gnutls_handshake(clientData->fileDescriptor->tlsSession);
 		if(result < 0)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
+		}
+
+		{ //Check client certificate
+			const gnutls_datum_t* derClientCertificates = gnutls_certificate_get_peers(clientData->fileDescriptor->tlsSession, nullptr);
+			if(!derClientCertificates)
+			{
+				if(_requireClientCert)
+				{
+					_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+					throw SocketSSLException("Client certificate verification has failed: Error retrieving client certificate.");
+				}
+			}
+			else
+			{
+				gnutls_x509_crt_t clientCertificates;
+				unsigned int certMax = 1;
+				if(gnutls_x509_crt_list_import(&clientCertificates, &certMax, derClientCertificates, GNUTLS_X509_FMT_DER, 0) < 1)
+				{
+					if(_requireClientCert)
+					{
+						_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+						throw SocketSSLException("Client certificate verification has failed: Error importing client certificate.");
+					}
+				}
+				else
+				{
+					gnutls_datum_t distinguishedName;
+					if(gnutls_x509_crt_get_dn2(clientCertificates, &distinguishedName) != GNUTLS_E_SUCCESS)
+					{
+						if(_requireClientCert)
+						{
+							_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+							throw SocketSSLException("Client certificate verification has failed: Error getting client certificate's distinguished name.");
+						}
+					}
+					else clientData->clientCertDn = std::string((char*)distinguishedName.data, distinguishedName.size);
+				}
+			}
 		}
 	}
 
@@ -437,6 +465,14 @@ std::string TcpSocket::getIpAddress()
     {
         std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
         return _clients.size();
+    }
+
+    std::string TcpSocket::getClientCertDn(int32_t clientId)
+    {
+        std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+        auto clientIterator = _clients.find(clientId);
+        if(clientIterator != _clients.end()) return clientIterator->second->clientCertDn;
+        return "";
     }
 
 	void TcpSocket::serverThread()
@@ -542,22 +578,23 @@ std::string TcpSocket::getIpAddress()
                             continue;
                         }
 
-                        if(_useSsl) initClientSsl(clientFileDescriptor);
+						PTcpClientData clientData = std::make_shared<TcpClientData>();
+						clientData->id = currentClientId;
+						clientData->fileDescriptor = clientFileDescriptor;
+						clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
+						clientData->socket->setReadTimeout(100000);
+						clientData->socket->setWriteTimeout(15000000);
+
+                        if(_useSsl) initClientSsl(clientData);
 
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 							currentClientId = _currentClientId++;
 
-							PTcpClientData clientData = std::make_shared<TcpClientData>();
-							clientData->id = currentClientId;
-							clientData->fileDescriptor = clientFileDescriptor;
-							clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
-							clientData->socket->setReadTimeout(100000);
-							clientData->socket->setWriteTimeout(15000000);
-
 							_clients[currentClientId] = clientData;
-                            clients[currentClientId] = clientData;
 						}
+
+						clients[currentClientId] = clientData;
 
 						if(_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
 					}
@@ -907,8 +944,6 @@ void TcpSocket::initSsl()
             }
 
             if(_dhParams) gnutls_certificate_set_dh_params(x509Credentials, _dhParams);
-
-            if(_requireClientCert) gnutls_certificate_set_verify_function(x509Credentials, &verifyClientCert);
         }
         else
         {

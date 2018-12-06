@@ -141,6 +141,21 @@ class TcpSocket
 public:
 	typedef std::vector<uint8_t> TcpPacket;
 
+	struct TcpClientData
+	{
+		int32_t id = 0;
+		PFileDescriptor fileDescriptor;
+		std::vector<uint8_t> buffer;
+		std::shared_ptr<TcpSocket> socket;
+        std::string clientCertDn;
+
+		TcpClientData()
+		{
+			buffer.resize(1024);
+		}
+	};
+	typedef std::shared_ptr<TcpClientData> PTcpClientData;
+
     struct CertificateInfo
     {
         std::string certFile;
@@ -276,6 +291,7 @@ public:
 
 	std::string getIpAddress();
 	int32_t getPort() { return _boundListenPort; }
+	bool getRequireClientCert() { return _requireClientCert; }
 	void setConnectionRetries(int32_t retries) { _connectionRetries = retries; }
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
@@ -370,22 +386,17 @@ public:
          * @return The number of connected clients.
          */
         int32_t clientCount();
+
+        /**
+         * Returns the distinguished name of the client certificate. This method only returns a non empty string if
+         * the client certificate is valid.
+         *
+         * @param clientId The ID of the client to get the distinguished name for.
+         * @return Returns the DN when the client certificate verification was successful.
+         */
+        std::string getClientCertDn(int32_t clientId);
 	// }}}
 protected:
-	struct TcpClientData
-	{
-		int32_t id = 0;
-		PFileDescriptor fileDescriptor;
-		std::vector<uint8_t> buffer;
-		std::shared_ptr<TcpSocket> socket;
-
-		TcpClientData()
-		{
-			buffer.resize(1024);
-		}
-	};
-	typedef std::shared_ptr<TcpClientData> PTcpClientData;
-
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
@@ -447,7 +458,7 @@ protected:
 		void serverThread();
 		void collectGarbage();
 		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
-		void initClientSsl(PFileDescriptor fileDescriptor);
+		void initClientSsl(PTcpClientData& clientData);
 		void readClient(PTcpClientData clientData);
 	// }}}
 };
