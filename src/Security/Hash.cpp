@@ -46,7 +46,6 @@ template<typename Data> bool Hash::sha1(const Data& in, Data& out)
 	gcry_md_hash_buffer(GCRY_MD_SHA1, out.data(), in.data(), in.size());
 	return true;
 }
-
 template bool Hash::sha1<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
 template bool Hash::sha1<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
 
@@ -57,7 +56,6 @@ template<typename Data> bool Hash::sha256(const Data& in, Data& out)
 	gcry_md_hash_buffer(GCRY_MD_SHA256, out.data(), in.data(), in.size());
 	return true;
 }
-
 template bool Hash::sha256<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
 template bool Hash::sha256<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
 
@@ -68,9 +66,18 @@ template<typename Data> bool Hash::md5(const Data& in, Data& out)
 	gcry_md_hash_buffer(GCRY_MD_MD5, out.data(), in.data(), in.size());
 	return true;
 }
-
 template bool Hash::md5<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
 template bool Hash::md5<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
+template<typename Data> bool Hash::whirlpool(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_WHIRLPOOL));
+	gcry_md_hash_buffer(GCRY_MD_WHIRLPOOL, out.data(), in.data(), in.size());
+	return true;
+}
+template bool Hash::whirlpool<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::whirlpool<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
 
 }
 }
