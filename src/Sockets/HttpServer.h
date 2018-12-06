@@ -147,6 +147,7 @@ public:
 	void waitForStop();
 
 	void send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection = true);
+	void send(int32_t clientId, std::vector<char> packet, bool closeConnection = true);
 protected:
 	struct HttpClientInfo
 	{

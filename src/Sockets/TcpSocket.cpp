@@ -461,6 +461,42 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
+	void TcpSocket::sendToClient(int32_t clientId, std::vector<char> packet, bool closeConnection)
+	{
+		PTcpClientData clientData;
+		try
+		{
+			{
+				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+				auto clientIterator = _clients.find(clientId);
+				if(clientIterator == _clients.end()) return;
+				clientData = clientIterator->second;
+			}
+
+			clientData->socket->proofwrite((char*)packet.data(), packet.size());
+			if(closeConnection)
+			{
+				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+			}
+		}
+		catch(const std::exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+		catch(BaseLib::Exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+		catch(...)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+	}
+
     int32_t TcpSocket::clientCount()
     {
         std::lock_guard<std::mutex> clientsGuard(_clientsMutex);

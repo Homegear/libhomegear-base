@@ -172,4 +172,9 @@ void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeC
 	_socket->sendToClient(clientId, packet, closeConnection);
 }
 
+void HttpServer::send(int32_t clientId, std::vector<char> packet, bool closeConnection)
+{
+    _socket->sendToClient(clientId, packet, closeConnection);
+}
+
 }
