@@ -615,7 +615,6 @@ std::string TcpSocket::getIpAddress()
                         }
 
 						PTcpClientData clientData = std::make_shared<TcpClientData>();
-						clientData->id = currentClientId;
 						clientData->fileDescriptor = clientFileDescriptor;
 						clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
 						clientData->socket->setReadTimeout(100000);
@@ -626,7 +625,7 @@ std::string TcpSocket::getIpAddress()
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 							currentClientId = _currentClientId++;
-
+							clientData->id = currentClientId;
 							_clients[currentClientId] = clientData;
 						}
 
