@@ -47,6 +47,7 @@ void WebSocket::reset()
 {
 	_header = Header();
 	_content.clear();
+	_rawHeader.clear();
 	_finished = false;
 	_dataProcessingStarted = false;
 	_oldContentSize = 0;
@@ -75,6 +76,7 @@ uint32_t WebSocket::process(char* buffer, int32_t bufferLength)
 
 uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 {
+    int32_t headBytesInserted = 0;
 	int32_t bytesInserted = 0;
 	if(_rawHeader.empty()) _rawHeader.reserve(14); //14 is maximum header size (2 + max number of length bytes + mask)
 	if(_rawHeader.size() + bufferLength < 2)
@@ -84,11 +86,11 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 	}
 	else if(_rawHeader.size() < 2)
 	{
-		bytesInserted += 2 - _rawHeader.size();
-		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bytesInserted);
-		if(bufferLength == bytesInserted) return bytesInserted;
-		*buffer += bytesInserted;
-		bufferLength -= bytesInserted;
+        headBytesInserted = 2 - _rawHeader.size();
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + headBytesInserted);
+		if(bufferLength == headBytesInserted) return headBytesInserted;
+		*buffer += headBytesInserted;
+		bufferLength -= headBytesInserted;
 	}
 
 	uint32_t lengthBytes = 0;
@@ -98,23 +100,25 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 	_header.rsv3 = _rawHeader.at(0) & 0x10;
 	_header.opcode = (Header::Opcode::Enum)(_rawHeader.at(0) & 0x0F);
 	_header.hasMask = _rawHeader.at(1) & 0x80;
-	if((_rawHeader.at(1) & 0x7F) == 126) lengthBytes = 2;
-	else if((_rawHeader.at(1) & 0x7F) == 127) lengthBytes = 8;
+	uint8_t sizeByte = _rawHeader.at(1) & 0x7F;
+	if(sizeByte == 126) lengthBytes = 2;
+	else if(sizeByte == 127) lengthBytes = 8;
 	else
 	{
 		lengthBytes = 0;
-		_header.length = (uint8_t)_rawHeader.at(1);
+		_header.length = sizeByte;
 	}
 	uint32_t headerSize = 2 + lengthBytes + (_header.hasMask ? 4 : 0);
 	if(_rawHeader.size() + bufferLength < headerSize)
 	{
 		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bufferLength);
-		return bufferLength;
+		bytesInserted += bufferLength;
+		return headBytesInserted + bytesInserted;
 	}
 	else
 	{
-		bytesInserted += headerSize - _rawHeader.size();
-		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + bytesInserted);
+        bytesInserted += headerSize - _rawHeader.size();
+		_rawHeader.insert(_rawHeader.end(), *buffer, (*buffer) + (headerSize - _rawHeader.size()));
 	}
 
 	if(lengthBytes == 2)
@@ -134,12 +138,13 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 		_header.maskingKey.push_back(_rawHeader.at(2 + lengthBytes + 3));
 	}
 	_header.parsed = true;
+    _rawHeader.clear();
 
-	if(bufferLength == bytesInserted) return bytesInserted;
+	if(bufferLength == bytesInserted) return headBytesInserted + bytesInserted;
 
-	*buffer += headerSize;
-	bufferLength -= headerSize;
-	return bytesInserted;
+	*buffer += bytesInserted;
+	bufferLength -= bytesInserted;
+	return headBytesInserted + bytesInserted;
 }
 
 uint32_t WebSocket::processContent(char* buffer, int32_t bufferLength)
