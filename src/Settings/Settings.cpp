@@ -68,7 +68,7 @@ void Settings::reset()
 	_writeableDataPathPermissions = 504;
 	_writeableDataPathUser = "";
 	_writeableDataPathGroup = "";
-	_familyDataPath = _executablePath + "families";
+	_familyDataPath = _executablePath + "families/";
 	_familyDataPathPermissions = 504;
 	_familyDataPathUser = "";
 	_familyDataPathGroup = "";
