@@ -191,6 +191,7 @@ std::string TcpSocket::getIpAddress()
 // {{{ Server
 	void TcpSocket::bindServerSocket(std::string address, std::string port, std::string& listenAddress)
 	{
+        if(_useSsl) initSsl();
 		_listenAddress = address;
 		_listenPort = port;
 		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
@@ -204,8 +205,6 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::startPreboundServer(std::string& listenAddress)
 	{
-		if(_useSsl) initSsl();
-
 		_stopServer = false;
 		listenAddress = _ipAddress;
 		for(auto& serverThread : _serverThreads)
