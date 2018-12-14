@@ -191,10 +191,13 @@ std::string TcpSocket::getIpAddress()
 // {{{ Server
 	void TcpSocket::bindServerSocket(std::string address, std::string port, std::string& listenAddress)
 	{
+		waitForServerStopped();
+
         if(_useSsl) initSsl();
+
 		_listenAddress = address;
 		_listenPort = port;
-		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+		bindSocket();
 		listenAddress = _ipAddress;
 	}
 
@@ -271,10 +274,10 @@ std::string TcpSocket::getIpAddress()
 
     int postClientHello(gnutls_session_t tlsSession)
     {
-		TcpSocket::TcpClientData* clientData = (TcpSocket::TcpClientData*)gnutls_session_get_ptr(tlsSession);
-        if(!clientData) return GNUTLS_E_INTERNAL_ERROR;
+		TcpSocket* tcpSocket = (TcpSocket*)gnutls_session_get_ptr(tlsSession);
+        if(!tcpSocket) return GNUTLS_E_INTERNAL_ERROR;
 
-        auto& credentials = clientData->socket->getCredentials();
+        auto& credentials = tcpSocket->getCredentials();
 
         int32_t result = 0;
         if(credentials.size() > 1)
@@ -347,7 +350,7 @@ std::string TcpSocket::getIpAddress()
 			throw SocketSSLException("Error: Client TLS session is nullptr.");
 		}
 
-        gnutls_session_set_ptr(clientData->fileDescriptor->tlsSession, clientData.get());
+        gnutls_session_set_ptr(clientData->fileDescriptor->tlsSession, this);
 
 		if((result = gnutls_priority_set(clientData->fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
 		{

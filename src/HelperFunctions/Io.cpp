@@ -50,20 +50,20 @@ Io::~Io()
 
 }
 
-bool Io::fileExists(std::string filename)
+bool Io::fileExists(const std::string& filename)
 {
 	std::ifstream in(filename.c_str());
 	return in.rdstate() != std::ios_base::failbit;
 }
 
-bool Io::directoryExists(std::string path)
+bool Io::directoryExists(const std::string& path)
 {
 	struct stat s;
 	if(stat(path.c_str(), &s) == 0 && (s.st_mode & S_IFDIR)) return true;
 	return false;
 }
 
-int32_t Io::isDirectory(std::string path, bool& result)
+int32_t Io::isDirectory(const std::string& path, bool& result)
 {
 	struct stat s;
 	result = false;
@@ -75,7 +75,7 @@ int32_t Io::isDirectory(std::string path, bool& result)
 	return -1;
 }
 
-bool Io::createDirectory(std::string path, mode_t mode)
+bool Io::createDirectory(const std::string& path, mode_t mode)
 {
 	int32_t result = mkdir(path.c_str(), mode);
 	if(result != 0) return result;
@@ -89,7 +89,7 @@ int32_t Io::getFileLastModifiedTime(const std::string& filename)
 	return attributes.st_mtim.tv_sec;
 }
 
-std::string Io::getFileContent(std::string filename)
+std::string Io::getFileContent(const std::string& filename)
 {
 	std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
 	if(in)
@@ -105,7 +105,7 @@ std::string Io::getFileContent(std::string filename)
 	throw Exception(strerror(errno));
 }
 
-std::vector<char> Io::getBinaryFileContent(std::string filename, uint32_t maxBytes)
+std::vector<char> Io::getBinaryFileContent(const std::string& filename, uint32_t maxBytes)
 {
 	std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
 	if(in)
@@ -123,7 +123,7 @@ std::vector<char> Io::getBinaryFileContent(std::string filename, uint32_t maxByt
 	throw Exception(strerror(errno));
 }
 
-std::vector<uint8_t> Io::getUBinaryFileContent(std::string filename)
+std::vector<uint8_t> Io::getUBinaryFileContent(const std::string& filename)
 {
 	std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
 	if(in)
@@ -139,7 +139,7 @@ std::vector<uint8_t> Io::getUBinaryFileContent(std::string filename)
 	throw Exception(strerror(errno));
 }
 
-void Io::writeFile(std::string& filename, std::string& content)
+void Io::writeFile(const std::string& filename, const std::string& content)
 {
 	std::ofstream file;
 	file.open(filename);
@@ -148,7 +148,7 @@ void Io::writeFile(std::string& filename, std::string& content)
 	file.close();
 }
 
-void Io::writeFile(std::string& filename, std::vector<char>& content, uint32_t length)
+void Io::writeFile(const std::string& filename, const std::vector<char>& content, uint32_t length)
 {
 	std::ofstream file;
 	file.open(filename);
@@ -157,7 +157,7 @@ void Io::writeFile(std::string& filename, std::vector<char>& content, uint32_t l
 	file.close();
 }
 
-void Io::writeFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length)
+void Io::writeFile(const std::string& filename, const std::vector<uint8_t>& content, uint32_t length)
 {
 	std::ofstream file;
 	file.open(filename);
@@ -166,7 +166,7 @@ void Io::writeFile(std::string& filename, std::vector<uint8_t>& content, uint32_
 	file.close();
 }
 
-void Io::appendToFile(std::string& filename, std::string& content)
+void Io::appendToFile(const std::string& filename, const std::string& content)
 {
 	std::ofstream file;
 	file.open(filename, std::ios_base::app);
@@ -175,7 +175,7 @@ void Io::appendToFile(std::string& filename, std::string& content)
 	file.close();
 }
 
-void Io::appendToFile(std::string& filename, std::vector<char>& content, uint32_t length)
+void Io::appendToFile(const std::string& filename, const std::vector<char>& content, uint32_t length)
 {
 	std::ofstream file;
 	file.open(filename, std::ios_base::app);
@@ -184,7 +184,7 @@ void Io::appendToFile(std::string& filename, std::vector<char>& content, uint32_
 	file.close();
 }
 
-void Io::appendToFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length)
+void Io::appendToFile(const std::string& filename, const std::vector<uint8_t>& content, uint32_t length)
 {
 	std::ofstream file;
 	file.open(filename, std::ios_base::app);
@@ -193,24 +193,25 @@ void Io::appendToFile(std::string& filename, std::vector<uint8_t>& content, uint
 	file.close();
 }
 
-std::vector<std::string> Io::getFiles(std::string path, bool recursive)
+std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 {
 	std::vector<std::string> files;
 	DIR* directory;
 	struct dirent* entry;
 	struct stat statStruct;
 
-	if(path.back() != '/') path += '/';
-	if((directory = opendir(path.c_str())) != 0)
+	std::string fixedPath = path;
+	if(fixedPath.back() != '/') fixedPath += '/';
+	if((directory = opendir(fixedPath.c_str())) != 0)
 	{
 		files.reserve(100);
 		while((entry = readdir(directory)) != 0)
 		{
 			std::string name(entry->d_name);
 			if(name == "." || name == "..") continue;
-			if(stat((path + name).c_str(), &statStruct) == -1)
+			if(stat((fixedPath + name).c_str(), &statStruct) == -1)
 			{
-				_bl->out.printWarning("Warning: Could not stat file \"" + path + name + "\": " + std::string(strerror(errno)));
+				_bl->out.printWarning("Warning: Could not stat file \"" + fixedPath + name + "\": " + std::string(strerror(errno)));
 				continue;
 			}
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
@@ -222,7 +223,7 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 			}
 			else if(recursive && S_ISDIR(statStruct.st_mode))
 			{
-				std::vector<std::string> subdirFiles = getFiles(path + name, recursive);
+				std::vector<std::string> subdirFiles = getFiles(fixedPath + name, recursive);
 				for(std::vector<std::string>::iterator i = subdirFiles.begin(); i != subdirFiles.end(); ++i)
 				{
 					files.push_back(name + '/' + *i);
@@ -232,28 +233,29 @@ std::vector<std::string> Io::getFiles(std::string path, bool recursive)
 		}
 		closedir(directory);
 	}
-	else throw(Exception("Could not open directory \"" + path + "\""));
+	else throw(Exception("Could not open directory \"" + fixedPath + "\""));
 	return files;
 }
 
-std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
+std::vector<std::string> Io::getDirectories(const std::string& path, bool recursive)
 {
 	std::vector<std::string> directories;
 	DIR* directory;
 	struct dirent* entry;
 	struct stat statStruct;
 
-	if(path.back() != '/') path += '/';
-	if((directory = opendir(path.c_str())) != nullptr)
+	std::string fixedPath = path;
+	if(fixedPath.back() != '/') fixedPath += '/';
+	if((directory = opendir(fixedPath.c_str())) != nullptr)
 	{
 		directories.reserve(100);
 		while((entry = readdir(directory)) != nullptr)
 		{
 			std::string name(entry->d_name);
 			if(name == "." || name == "..") continue;
-			if(stat((path + name).c_str(), &statStruct) == -1)
+			if(stat((fixedPath + name).c_str(), &statStruct) == -1)
 			{
-				_bl->out.printWarning("Warning: Could not stat file \"" + path + name + "\": " + std::string(strerror(errno)));
+				_bl->out.printWarning("Warning: Could not stat file \"" + fixedPath + name + "\": " + std::string(strerror(errno)));
 				continue;
 			}
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
@@ -264,7 +266,7 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 				if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
 				if(recursive)
 				{
-					std::vector<std::string> subdirs = getDirectories(path + name, recursive);
+					std::vector<std::string> subdirs = getDirectories(fixedPath + name, recursive);
 					for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
 					{
 						directories.push_back(name + '/' + *i);
@@ -275,11 +277,11 @@ std::vector<std::string> Io::getDirectories(std::string path, bool recursive)
 		}
 		closedir(directory);
 	}
-	else throw(Exception("Could not open directory \"" + path + "\""));
+	else throw(Exception("Could not open directory \"" + fixedPath + "\""));
 	return directories;
 }
 
-bool Io::copyFile(std::string source, std::string dest)
+bool Io::copyFile(const std::string& source, const std::string& dest)
 {
 	try
 	{
@@ -339,19 +341,19 @@ bool Io::copyFile(std::string source, std::string dest)
     return false;
 }
 
-bool Io::moveFile(std::string source, std::string dest)
+bool Io::moveFile(const std::string& source, const std::string& dest)
 {
 	if(rename(source.c_str(), dest.c_str()) == 0) return true;
     return false;
 }
 
-bool Io::deleteFile(std::string file)
+bool Io::deleteFile(const std::string& file)
 {
 	if(remove(file.c_str()) == 0) return true;
 	return false;
 }
 
-std::string Io::sha512(std::string file)
+std::string Io::sha512(const std::string& file)
 {
 	try
 	{
