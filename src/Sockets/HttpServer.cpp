@@ -62,6 +62,16 @@ HttpServer::~HttpServer()
 	stop();
 }
 
+void HttpServer::bind(std::string address, std::string port, std::string& listenAddress)
+{
+	_socket->bindServerSocket(address, port, listenAddress);
+}
+
+void HttpServer::startPrebound(std::string& listenAddress)
+{
+	_socket->startPreboundServer(listenAddress);
+}
+
 void HttpServer::start(std::string address, std::string port, std::string& listenAddress)
 {
 	_socket->startServer(address, port, listenAddress);

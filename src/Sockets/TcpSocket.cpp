@@ -189,9 +189,29 @@ std::string TcpSocket::getIpAddress()
 
 
 // {{{ Server
+	void TcpSocket::bindServerSocket(std::string address, std::string port, std::string& listenAddress)
+	{
+		_listenAddress = address;
+		_listenPort = port;
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+		listenAddress = _ipAddress;
+	}
+
 	void TcpSocket::bindSocket()
 	{
 		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+	}
+
+	void TcpSocket::startPreboundServer(std::string& listenAddress)
+	{
+		if(_useSsl) initSsl();
+
+		_stopServer = false;
+		listenAddress = _ipAddress;
+		for(auto& serverThread : _serverThreads)
+		{
+			_bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+		}
 	}
 
 	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)

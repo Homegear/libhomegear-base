@@ -345,6 +345,30 @@ public:
 
 	// {{{ Servers only
 		/**
+		 * Binds a socket to an IP address and a port. This splits up the start process to be able to listen on ports
+		 * lower than 1024 and do a privilege drop. Call startPreboundServer() to start listening. Don't call
+		 * startServer() when using pre-binding as this recreates the socket.
+		 *
+		 * @see startPreboundServer
+		 *
+		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
+		 * @param port The port number to bind the server to.
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 */
+		void bindServerSocket(std::string address, std::string port, std::string& listenAddress);
+
+		/**
+		 * Starts listening on the already bound socket (created with bindServerSocket()). This splits up the start process to
+		 * be able to listen on ports lower than 1024 and do a privilege drop. Don't call startServer() when using
+		 * pre-binding as this recreates the socket.
+		 *
+		 * @see bindServerSocket
+		 *
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 */
+		void startPreboundServer(std::string& listenAddress);
+
+		/**
 		 * Starts listening.
 		 *
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
