@@ -189,7 +189,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			}
 			firstLoop = false;
 
-			std::cout << "Moin a4" << std::endl;
 			try
 			{
 				if(bufferPos > bufferMax - 1)
@@ -198,12 +197,9 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
 				}
 				receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
-				std::cout << "Moin a5" << std::endl;
 
 				//Some clients send only one byte in the first packet
 				if(receivedBytes < 13 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer.data() + bufferPos + 1, bufferMax - bufferPos - 1);
-
-				std::cout << "Moin a6" << std::endl;
 			}
 			catch(BaseLib::SocketTimeOutException& ex)
 			{
@@ -231,6 +227,8 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
 			}
 
+			std::cout << "Moin a8" << std::endl;
+
 			if(_keepRawContent)
 			{
 				if(_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
@@ -241,13 +239,18 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			//they don't do something in the memory after buffer, we add '\0'
 			buffer.at(bufferPos + receivedBytes) = '\0';
 
+			std::cout << "Moin a9" << std::endl;
+
 			if(!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
 			{
 				_socketMutex.unlock();
+				std::cout << "Moin a9b" << std::endl;
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
 			}
 			receivedBytes = bufferPos + receivedBytes;
 			bufferPos = 0;
+
+			std::cout << "Moin a10" << std::endl;
 
 			try
 			{
@@ -272,10 +275,13 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
 			}
 
+			std::cout << "Moin a11 " << std::to_string((int)http.isFinished()) << std::endl;
+
 			if(http.isFinished()) break;
 		}
 		if(!_keepAlive) _socket->close();
 		_socketMutex.unlock();
+		std::cout << "Moin a12" << std::endl;
 	}
     catch(const std::exception& ex)
     {
