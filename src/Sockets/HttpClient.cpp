@@ -218,7 +218,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
 			}
-			std::cout << "Moin a7" << std::endl;
 
 			if(bufferPos + receivedBytes > bufferMax)
 			{
@@ -226,8 +225,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
 			}
-
-			std::cout << "Moin a8" << std::endl;
 
 			if(_keepRawContent)
 			{
@@ -239,18 +236,13 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			//they don't do something in the memory after buffer, we add '\0'
 			buffer.at(bufferPos + receivedBytes) = '\0';
 
-			std::cout << "Moin a9" << std::endl;
-
 			if(!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
 			{
 				_socketMutex.unlock();
-				std::cout << "Moin a9b" << std::endl;
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
 			}
 			receivedBytes = bufferPos + receivedBytes;
 			bufferPos = 0;
-
-			std::cout << "Moin a10" << std::endl;
 
 			try
 			{
@@ -275,13 +267,10 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
 			}
 
-			std::cout << "Moin a11 " << std::to_string((int)http.isFinished()) << std::endl;
-
 			if(http.isFinished()) break;
 		}
 		if(!_keepAlive) _socket->close();
 		_socketMutex.unlock();
-		std::cout << "Moin a12" << std::endl;
 	}
     catch(const std::exception& ex)
     {
