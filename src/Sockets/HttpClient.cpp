@@ -132,7 +132,9 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 	{
 		try
 		{
+			std::cout << "Moin0" << std::endl;
 			if(!_socket->connected()) _socket->open();
+			std::cout << "Moin1" << std::endl;
 		}
         catch(BaseLib::SocketTimeOutException& ex)
         {
@@ -147,8 +149,10 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 
 		try
 		{
+			std::cout << "Moin2" << std::endl;
 			if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Sending packet to HTTP server \"" + _hostname + "\": " + request);
 			_socket->proofwrite(request);
+			std::cout << "Moin3" << std::endl;
 		}
 		catch(BaseLib::SocketDataLimitException& ex)
 		{
@@ -189,6 +193,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			}
 			firstLoop = false;
 
+			std::cout << "Moin4" << std::endl;
 			try
 			{
 				if(bufferPos > bufferMax - 1)
@@ -197,6 +202,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
 				}
 				receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
+				std::cout << "Moin5" << std::endl;
 
 				//Some clients send only one byte in the first packet
 				if(receivedBytes < 13 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer.data() + bufferPos + 1, bufferMax - bufferPos - 1);
