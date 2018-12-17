@@ -1233,10 +1233,24 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), data.size() - totalBytesWritten) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, MSG_NOSIGNAL);
+		int32_t bytesToSend = data.size() - totalBytesWritten;
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			writeGuard.unlock();
 			close();
 			writeGuard.lock();
@@ -1302,10 +1316,24 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten) : send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, MSG_NOSIGNAL);
+		int32_t bytesToSend = bytesToWrite - totalBytesWritten;
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			writeGuard.unlock();
 			close();
 			writeGuard.lock();
@@ -1372,10 +1400,23 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		}
 
 		int32_t bytesToSend = data.size() - totalBytesWritten;
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
 			writeGuard.unlock();
 			close();
 			writeGuard.lock();
