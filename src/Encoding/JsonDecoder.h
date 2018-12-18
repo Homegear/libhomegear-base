@@ -57,6 +57,8 @@ public:
 	std::shared_ptr<Variable> decode(const std::string& json, uint32_t& bytesRead);
 	std::shared_ptr<Variable> decode(const std::vector<char>& json);
 	std::shared_ptr<Variable> decode(const std::vector<char>& json, uint32_t& bytesRead);
+
+	std::string decodeString(const std::string& s);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 

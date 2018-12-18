@@ -380,6 +380,54 @@ void JsonDecoder::decodeArray(const std::vector<char>& json, uint32_t& pos, std:
 	}
 }
 
+std::string JsonDecoder::decodeString(const std::string& s)
+{
+	std::string result;
+	result.reserve(s.size());
+	for(int32_t i = 0; i < s.size(); i++)
+	{
+		char c = s[i];
+		if(c == '\\')
+		{
+			i++;
+			if(!posValid(s, i)) return result;
+			c = s[i];
+			switch(c)
+			{
+				case 'b':
+					result.push_back('\b');
+					break;
+				case 'f':
+					result.push_back('\f');
+					break;
+				case 'n':
+					result.push_back('\n');
+					break;
+				case 'r':
+					result.push_back('\r');
+					break;
+				case 't':
+					result.push_back('\t');
+					break;
+				case 'u':
+				{
+					i += 4;
+					if(!posValid(s, i)) return result;
+					std::string hex1(s.data() + (i - 3), 2);
+					std::string hex2(s.data() + (i - 1), 2);
+					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex1, true));
+					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex2, true));
+				}
+					break;
+				default:
+					result.push_back(s[i]);
+			}
+		}
+		else if((unsigned) c < 0x20) throw JsonDecoderException("Invalid character in string: " + std::to_string((int32_t) c) + ". String so far: " + s);
+		else result.push_back(s[i]);
+	}
+}
+
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
 	value->type = VariableType::tString;
