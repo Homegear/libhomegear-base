@@ -416,7 +416,7 @@ std::string JsonDecoder::decodeString(const std::string& s)
 					std::string hex1(s.data() + (i - 3), 2);
 					std::string hex2(s.data() + (i - 1), 2);
                     char char1 = (char)(uint8_t)BaseLib::Math::getNumber(hex1, true);
-                    if(char1 != 0) s.push_back(char1);
+                    if(char1 != 0) result.push_back(char1);
 					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex2, true));
 				}
 					break;
