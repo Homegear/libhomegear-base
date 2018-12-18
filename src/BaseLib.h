@@ -33,7 +33,6 @@
 
 #include "Database/IDatabaseController.h"
 #include "Encoding/Ansi.h"
-#include "Encoding/Windows1252.h"
 #include "Encoding/XmlrpcDecoder.h"
 #include "Encoding/XmlrpcEncoder.h"
 #include "Encoding/RpcDecoder.h"

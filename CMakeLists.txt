@@ -100,8 +100,6 @@ set(SOURCE_FILES
         src/Encoding/RpcMethod.h
         src/Encoding/WebSocket.cpp
         src/Encoding/WebSocket.h
-        src/Encoding/Windows1252.cpp
-        src/Encoding/Windows1252.h
         src/Encoding/XmlrpcDecoder.cpp
         src/Encoding/XmlrpcDecoder.h
         src/Encoding/XmlrpcEncoder.cpp
