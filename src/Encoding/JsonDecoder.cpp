@@ -415,7 +415,7 @@ std::string JsonDecoder::decodeString(const std::string& s)
 					if(!posValid(s, i)) return result;
 					std::string hex1(s.data() + (i - 3), 2);
 					std::string hex2(s.data() + (i - 1), 2);
-					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex1, true));
+					if(hex1[0] != 0 && hex1[1] != 0) result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex1, true));
 					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex2, true));
 				}
 					break;
@@ -426,6 +426,7 @@ std::string JsonDecoder::decodeString(const std::string& s)
 		else if((unsigned) c < 0x20) throw JsonDecoderException("Invalid character in string: " + std::to_string((int32_t) c) + ". String so far: " + s);
 		else result.push_back(s[i]);
 	}
+	return result;
 }
 
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
@@ -482,7 +483,7 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
-					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+                    if(hex1[0] != 0 && hex1[1] != 0) s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
 					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
 				}
 				break;
@@ -542,7 +543,7 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
-					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
+                    if(hex1[0] != 0 && hex1[1] != 0) s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex1, true));
 					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
 				}
 				break;
