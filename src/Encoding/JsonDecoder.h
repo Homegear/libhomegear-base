@@ -33,6 +33,9 @@
 
 #include "../Exception.h"
 #include "../Variable.h"
+#if __GNUC__ > 3
+#include <codecvt>
+#endif
 
 namespace BaseLib
 {

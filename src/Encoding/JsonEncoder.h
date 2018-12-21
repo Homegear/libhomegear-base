@@ -35,6 +35,9 @@
 #include "../Variable.h"
 
 #include <list>
+#if __GNUC__ > 3
+#include <codecvt>
+#endif
 
 namespace BaseLib
 {

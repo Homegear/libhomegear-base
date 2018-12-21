@@ -28,7 +28,6 @@
  * files in the program, then also delete it here.
 */
 
-#include <codecvt>
 #include "JsonEncoder.h"
 #include "../BaseLib.h"
 
@@ -411,6 +410,8 @@ void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::ve
 	s.insert(s.end(), value.begin(), value.end());
 }
 
+#if __GNUC__ > 3
+
 std::string JsonEncoder::encodeString(const std::string& s)
 {
 	std::string result;
@@ -581,6 +582,137 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 	}
 	s.push_back('"');
 }
+
+#else
+
+std::string JsonEncoder::encodeString(const std::string& s)
+{
+	std::string result;
+	result.reserve(s.size() * 2);
+
+	if(result.size() + s.size() + 128 > result.capacity())
+	{
+		auto factor = s.size() / 1024;
+		auto neededSize = result.size() + (factor * 1024) + 1024;
+		if(neededSize > result.capacity()) result.reserve(neededSize);
+	}
+
+	//Source: https://github.com/miloyip/rapidjson/blob/master/include/rapidjson/writer.h
+	static const char hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	static const char escape[256] =
+			{
+					//0 1 2 3 4 5 6 7 8 9 A B C D E F
+					'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'b', 't', 'n', 'u', 'f', 'r', 'u', 'u', // 00-0F
+					'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', // 10-1F
+					0, 0, '"', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-2F
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-4F
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,'\\', 0, 0, 0, // 50-5F
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60-7F
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 80-9F
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A0-BF
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // C0-DF
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
+			};
+	for(const uint8_t& c : s)
+	{
+		if(escape[c])
+		{
+			result.push_back('\\');
+			result.push_back(escape[c]);
+			if (escape[c] == 'u')
+			{
+				result.push_back('0');
+				result.push_back('0');
+				result.push_back(hexDigits[c >> 4]);
+				result.push_back(hexDigits[c & 0xF]);
+			}
+		}
+		else result.push_back(c);
+	}
+	return result;
+}
+
+void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
+{
+	//Source: https://github.com/miloyip/rapidjson/blob/master/include/rapidjson/writer.h
+	static const char hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	static const char escape[256] =
+	{
+		//0 1 2 3 4 5 6 7 8 9 A B C D E F
+		'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'b', 't', 'n', 'u', 'f', 'r', 'u', 'u', // 00-0F
+		'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', // 10-1F
+		0, 0, '"', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-2F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-4F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,'\\', 0, 0, 0, // 50-5F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60-7F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 80-9F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A0-BF
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // C0-DF
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
+	};
+	s << "\"";
+	for(std::string::iterator i = variable->stringValue.begin(); i != variable->stringValue.end(); ++i)
+	{
+		if(escape[(uint8_t)*i])
+		{
+			s << '\\' << escape[(uint8_t)*i];
+			if (escape[(uint8_t)*i] == 'u')
+			{
+				s << '0' << '0' << hexDigits[((uint8_t)*i) >> 4] << hexDigits[((uint8_t)*i) & 0xF];
+			}
+		}
+		else s << *i;
+	}
+	s << "\"";
+}
+
+void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
+{
+	if(s.size() + variable->stringValue.size() + 128 > s.capacity())
+
+	{
+		int32_t factor = variable->stringValue.size() / 1024;
+		uint32_t neededSize = s.size() + (factor * 1024) + 1024;
+		if(neededSize > s.capacity()) s.reserve(neededSize);
+	}
+
+	//Source: https://github.com/miloyip/rapidjson/blob/master/include/rapidjson/writer.h
+	static const char hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	static const char escape[256] =
+	{
+		//0 1 2 3 4 5 6 7 8 9 A B C D E F
+		'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'b', 't', 'n', 'u', 'f', 'r', 'u', 'u', // 00-0F
+		'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', // 10-1F
+		0, 0, '"', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-2F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30-4F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,'\\', 0, 0, 0, // 50-5F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60-7F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 80-9F
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A0-BF
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // C0-DF
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  // E0-FF
+	};
+	s.push_back('"');
+	for(const uint8_t& c : variable->stringValue)
+	{
+		if(escape[c])
+		{
+			s.push_back('\\');
+			s.push_back(escape[c]);
+			if (escape[c] == 'u')
+			{
+				s.push_back('0');
+				s.push_back('0');
+				s.push_back(hexDigits[c >> 4]);
+				s.push_back(hexDigits[c & 0xF]);
+			}
+		}
+		else s.push_back(c);
+	}
+	s.push_back('"');
+}
+
+#endif
 
 void JsonEncoder::encodeVoid(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
 {
