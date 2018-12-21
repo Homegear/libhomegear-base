@@ -28,6 +28,7 @@
  * files in the program, then also delete it here.
 */
 
+#include <codecvt>
 #include "JsonDecoder.h"
 #include "../HelperFunctions/Math.h"
 #include "../BaseLib.h"
@@ -382,51 +383,53 @@ void JsonDecoder::decodeArray(const std::vector<char>& json, uint32_t& pos, std:
 
 std::string JsonDecoder::decodeString(const std::string& s)
 {
-	std::string result;
-	result.reserve(s.size());
-	for(int32_t i = 0; i < s.size(); i++)
+    std::u16string utf16;
+    utf16.reserve(s.size());
+	for(int32_t i = 0; i < (signed)s.size(); i++)
 	{
 		char c = s[i];
 		if(c == '\\')
 		{
 			i++;
-			if(!posValid(s, i)) return result;
+			if(!posValid(s, i)) break;
 			c = s[i];
 			switch(c)
 			{
 				case 'b':
-					result.push_back('\b');
+                    utf16.push_back('\b');
 					break;
 				case 'f':
-					result.push_back('\f');
+                    utf16.push_back('\f');
 					break;
 				case 'n':
-					result.push_back('\n');
+                    utf16.push_back('\n');
 					break;
 				case 'r':
-					result.push_back('\r');
+                    utf16.push_back('\r');
 					break;
 				case 't':
-					result.push_back('\t');
+                    utf16.push_back('\t');
 					break;
 				case 'u':
 				{
 					i += 4;
-					if(!posValid(s, i)) return result;
+					if(!posValid(s, i)) break;
 					std::string hex1(s.data() + (i - 3), 2);
 					std::string hex2(s.data() + (i - 1), 2);
-                    char char1 = (char)(uint8_t)BaseLib::Math::getNumber(hex1, true);
-                    if(char1 != 0) result.push_back(char1);
-					result.push_back((char) (uint8_t) BaseLib::Math::getNumber(hex2, true));
+                    char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
+                    utf16.push_back(c16);
 				}
 					break;
 				default:
-					result.push_back(s[i]);
+                    utf16.push_back((char16_t)(uint8_t)s[i]);
 			}
 		}
-		else if((unsigned) c < 0x20) throw JsonDecoderException("Invalid character in string: " + std::to_string((int32_t) c) + ". String so far: " + s);
-		else result.push_back(s[i]);
+		else utf16.push_back((char16_t)(uint8_t)s[i]);
 	}
+
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+    std::string result = converter.to_bytes(utf16);
+
 	return result;
 }
 
@@ -447,6 +450,8 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::string& s)
 {
 	s.clear();
+    std::u16string utf16;
+    utf16.reserve(json.size());
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	if(json[pos] == '"')
 	{
@@ -464,19 +469,19 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 			switch(c)
 			{
 			case 'b':
-				s.push_back('\b');
+                utf16.push_back('\b');
 				break;
 			case 'f':
-				s.push_back('\f');
+                utf16.push_back('\f');
 				break;
 			case 'n':
-				s.push_back('\n');
+                utf16.push_back('\n');
 				break;
 			case 'r':
-				s.push_back('\r');
+                utf16.push_back('\r');
 				break;
 			case 't':
-				s.push_back('\t');
+                utf16.push_back('\t');
 				break;
 			case 'u':
 				{
@@ -484,22 +489,24 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
-                    char char1 = (char)(uint8_t)BaseLib::Math::getNumber(hex1, true);
-                    if(char1 != 0) s.push_back(char1);
-					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+                    char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
+                    utf16.push_back(c16);
 				}
 				break;
 			default:
-				s.push_back(json[pos]);
+                utf16.push_back((char16_t)(uint8_t)json[pos]);
 			}
 		}
 		else if(c == '"')
 		{
 			pos++;
+
+			std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+            s = converter.to_bytes(utf16);
+
 			return;
 		}
-		else if((unsigned)c < 0x20) throw JsonDecoderException("Invalid character in string: " + std::to_string((int32_t)c) + ". String so far: " + s);
-		else s.push_back(json[pos]);
+		else utf16.push_back((char16_t)(uint8_t)json[pos]);
 		pos++;
 	}
 	throw JsonDecoderException("No closing '\"' found.");
@@ -508,6 +515,8 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std::string& s)
 {
 	s.clear();
+	std::u16string utf16;
+	utf16.reserve(json.size());
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	if(json[pos] == '"')
 	{
@@ -525,19 +534,19 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 			switch(c)
 			{
 			case 'b':
-				s.push_back('\b');
+                utf16.push_back('\b');
 				break;
 			case 'f':
-				s.push_back('\f');
+                utf16.push_back('\f');
 				break;
 			case 'n':
-				s.push_back('\n');
+                utf16.push_back('\n');
 				break;
 			case 'r':
-				s.push_back('\r');
+                utf16.push_back('\r');
 				break;
 			case 't':
-				s.push_back('\t');
+                utf16.push_back('\t');
 				break;
 			case 'u':
 				{
@@ -545,22 +554,24 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
-					char char1 = (char)(uint8_t)BaseLib::Math::getNumber(hex1, true);
-                    if(char1 != 0) s.push_back(char1);
-					s.push_back((char)(uint8_t)BaseLib::Math::getNumber(hex2, true));
+                    char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
+					utf16.push_back(c16);
 				}
 				break;
 			default:
-				s.push_back(json[pos]);
+				utf16.push_back((char16_t)(uint8_t)json[pos]);
 			}
 		}
 		else if(c == '"')
 		{
 			pos++;
+
+            std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+            s = converter.to_bytes(utf16);
+
 			return;
 		}
-		else if((unsigned)c < 0x20) throw JsonDecoderException("Invalid character in string.");
-		else s.push_back(json[pos]);
+		else utf16.push_back((char16_t)(uint8_t)json[pos]);
 		pos++;
 	}
 	throw JsonDecoderException("No closing '\"' found.");
