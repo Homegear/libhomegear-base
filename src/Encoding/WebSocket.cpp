@@ -140,7 +140,11 @@ uint32_t WebSocket::processHeader(char** buffer, int32_t& bufferLength)
 	_header.parsed = true;
     _rawHeader.clear();
 
-	if(bufferLength == bytesInserted) return headBytesInserted + bytesInserted;
+	if(bufferLength == bytesInserted)
+    {
+        bufferLength = 0;
+        return headBytesInserted + bytesInserted;
+    }
 
 	*buffer += bytesInserted;
 	bufferLength -= bytesInserted;
@@ -153,26 +157,23 @@ uint32_t WebSocket::processContent(char* buffer, int32_t bufferLength)
 	if(currentContentSize + bufferLength > 10485760) throw WebSocketException("Data is larger than 10MiB.");
 	if(currentContentSize + bufferLength > _header.length) bufferLength -= (currentContentSize + bufferLength) - _header.length;
 	_content.insert(_content.end(), buffer, buffer + bufferLength);
-	if(currentContentSize + bufferLength == _header.length)
-	{
-		if(_header.fin)
-		{
-			applyMask();
-			_finished = true;
-		}
-		else
-		{
-			_oldContentSize = _content.size();
-			_header.parsed = false;
-		}
-	}
+    if(_content.size() - _oldContentSize == _header.length)
+    {
+        applyMask();
+        if(_header.fin) _finished = true;
+        else
+        {
+            _header.parsed = false;
+            _oldContentSize = _content.size();
+        }
+    }
 	return bufferLength;
 }
 
 void WebSocket::applyMask()
 {
 	if(!_header.hasMask) return;
-	for(uint32_t i = 0; i < _content.size(); i++)
+	for(uint32_t i = _oldContentSize; i < _content.size(); i++)
 	{
 		_content.operator [](i) ^= _header.maskingKey[i % 4];
 	}
