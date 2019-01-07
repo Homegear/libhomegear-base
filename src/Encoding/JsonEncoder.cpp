@@ -508,6 +508,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
                 s << '\\' << escape[(uint8_t)*i];
 				s << '0' << '0' << hexDigits[((uint8_t)*i) >> 4] << hexDigits[((uint8_t)*i) & 0xF];
 			}
+			else s << '\\' << escape[(uint8_t)*i];
 		}
 		else
         {
