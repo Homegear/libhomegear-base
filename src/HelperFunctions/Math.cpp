@@ -235,7 +235,8 @@ int32_t Math::getNumber(const std::string& s, bool isHex)
 {
     auto xpos = s.find('x');
 	int32_t number = 0;
-	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stol(s, 0, 10); } catch(...) {}
+	//Don't change to std::stol, because otherwise numbers larger than 0x7FFFFFFF can't be parsed.
+	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stoll(s, 0, 10); } catch(...) {}
 	else try { number = (int32_t)std::stol(s, 0, 16); } catch(...) {}
 	return number;
 }
