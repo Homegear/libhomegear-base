@@ -398,8 +398,9 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 
 std::string JsonDecoder::decodeString(const std::string& s)
 {
-	std::u16string utf16;
-	utf16.reserve(s.size());
+    std::string utf8; //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+	utf8.reserve(s.size());
 	for(int32_t i = 0; i < (signed)s.size(); i++)
 	{
 		char c = s[i];
@@ -411,19 +412,19 @@ std::string JsonDecoder::decodeString(const std::string& s)
 			switch(c)
 			{
 				case 'b':
-					utf16.push_back('\b');
+					utf8.push_back('\b');
 					break;
 				case 'f':
-					utf16.push_back('\f');
+					utf8.push_back('\f');
 					break;
 				case 'n':
-					utf16.push_back('\n');
+					utf8.push_back('\n');
 					break;
 				case 'r':
-					utf16.push_back('\r');
+					utf8.push_back('\r');
 					break;
 				case 't':
-					utf16.push_back('\t');
+					utf8.push_back('\t');
 					break;
 				case 'u':
 				{
@@ -432,27 +433,46 @@ std::string JsonDecoder::decodeString(const std::string& s)
 					std::string hex1(s.data() + (i - 3), 2);
 					std::string hex2(s.data() + (i - 1), 2);
 					char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-					utf16.push_back(c16);
-				}
+                    if(c16 != 0)
+                    {
+                        if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
+                        {
+                            std::u16string utf16;
+                            utf16.reserve(2);
+                            utf16.push_back(c16);
+                            i += 6;
+                            if(!posValid(s, i)) break;
+                            if(s.at(i - 5) != '\\' || s.at(i - 4) != 'u') throw JsonDecoderException("Invalid UTF-16 in JSON.");
+                            std::string hex3(s.data() + (i - 3), 2);
+                            std::string hex4(s.data() + (i - 1), 2);
+                            c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex3, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex4, true));
+                            utf16.push_back(c16);
+                            auto utf8Char = converter.to_bytes(utf16);
+                            if(!utf8Char.empty()) utf8.insert(utf8.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                        else
+                        {
+                            auto utf8Char = converter.to_bytes(c16);
+                            if(!utf8Char.empty()) utf8.insert(utf8.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                    }
 					break;
+				}
 				default:
-					utf16.push_back((char16_t)(uint8_t)s[i]);
+					utf8.push_back(s[i]);
 			}
 		}
-		else utf16.push_back((char16_t)(uint8_t)s[i]);
+		else utf8.push_back(s[i]);
 	}
 
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-	std::string result = converter.to_bytes(utf16);
-
-	return result;
+	return utf8;
 }
 
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::string& s)
 {
-	s.clear();
-    std::u16string utf16;
-    utf16.reserve(json.size());
+	s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+	s.reserve(json.size());
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	if(json[pos] == '"')
 	{
@@ -470,19 +490,19 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 			switch(c)
 			{
 			case 'b':
-                utf16.push_back('\b');
+				s.push_back('\b');
 				break;
 			case 'f':
-                utf16.push_back('\f');
+				s.push_back('\f');
 				break;
 			case 'n':
-                utf16.push_back('\n');
+				s.push_back('\n');
 				break;
 			case 'r':
-                utf16.push_back('\r');
+				s.push_back('\r');
 				break;
 			case 't':
-                utf16.push_back('\t');
+				s.push_back('\t');
 				break;
 			case 'u':
 				{
@@ -491,23 +511,41 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-                    utf16.push_back(c16);
+                    if(c16 != 0)
+                    {
+                        if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
+                        {
+                            std::u16string utf16;
+                            utf16.reserve(2);
+                            utf16.push_back(c16);
+                            pos += 6;
+                            if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+                            if(json.at(pos - 5) != '\\' || json.at(pos - 4) != 'u') throw JsonDecoderException("Invalid UTF-16 in JSON.");
+                            std::string hex3(json.data() + (pos - 3), 2);
+                            std::string hex4(json.data() + (pos - 1), 2);
+                            c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex3, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex4, true));
+                            utf16.push_back(c16);
+                            auto utf8Char = converter.to_bytes(utf16);
+                            if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                        else
+                        {
+                            auto utf8Char = converter.to_bytes(c16);
+                            if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                    }
 				}
 				break;
 			default:
-                utf16.push_back((char16_t)(uint8_t)json[pos]);
+				s.push_back(json[pos]);
 			}
 		}
 		else if(c == '"')
 		{
 			pos++;
-
-			std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-            s = converter.to_bytes(utf16);
-
 			return;
 		}
-		else utf16.push_back((char16_t)(uint8_t)json[pos]);
+		else s.push_back(json[pos]);
 		pos++;
 	}
 	throw JsonDecoderException("No closing '\"' found.");
@@ -515,9 +553,9 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 
 void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std::string& s)
 {
-	s.clear();
-	std::u16string utf16;
-	utf16.reserve(json.size());
+	s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+	s.reserve(json.size());
 	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
 	if(json[pos] == '"')
 	{
@@ -535,19 +573,19 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 			switch(c)
 			{
 			case 'b':
-                utf16.push_back('\b');
+				s.push_back('\b');
 				break;
 			case 'f':
-                utf16.push_back('\f');
+				s.push_back('\f');
 				break;
 			case 'n':
-                utf16.push_back('\n');
+				s.push_back('\n');
 				break;
 			case 'r':
-                utf16.push_back('\r');
+				s.push_back('\r');
 				break;
 			case 't':
-                utf16.push_back('\t');
+				s.push_back('\t');
 				break;
 			case 'u':
 				{
@@ -556,23 +594,41 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-					utf16.push_back(c16);
+                    if(c16 != 0)
+                    {
+                        if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
+                        {
+                            std::u16string utf16;
+                            utf16.reserve(2);
+                            utf16.push_back(c16);
+                            pos += 6;
+                            if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+                            if(json.at(pos - 5) != '\\' || json.at(pos - 4) != 'u') throw JsonDecoderException("Invalid UTF-16 in JSON.");
+                            std::string hex3(json.data() + (pos - 3), 2);
+                            std::string hex4(json.data() + (pos - 1), 2);
+                            c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex3, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex4, true));
+                            utf16.push_back(c16);
+                            auto utf8Char = converter.to_bytes(utf16);
+                            if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                        else
+                        {
+                            auto utf8Char = converter.to_bytes(c16);
+                            if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
+                        }
+                    }
 				}
 				break;
 			default:
-				utf16.push_back((char16_t)(uint8_t)json[pos]);
+				s.push_back(json[pos]);
 			}
 		}
 		else if(c == '"')
 		{
 			pos++;
-
-            std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-            s = converter.to_bytes(utf16);
-
 			return;
 		}
-		else utf16.push_back((char16_t)(uint8_t)json[pos]);
+		else s.push_back(json[pos]);
 		pos++;
 	}
 	throw JsonDecoderException("No closing '\"' found.");
