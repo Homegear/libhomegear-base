@@ -31,6 +31,10 @@
 #ifndef SPI_H_
 #define SPI_H_
 
+#include "../../config.h"
+
+#ifdef SPISUPPORT
+
 #include "../Exception.h"
 
 #include <type_traits>
@@ -166,4 +170,5 @@ protected:
 
 }
 }
+#endif
 #endif
