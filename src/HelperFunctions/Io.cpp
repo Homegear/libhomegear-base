@@ -75,7 +75,7 @@ int32_t Io::isDirectory(const std::string& path, bool& result)
 	return -1;
 }
 
-bool Io::createDirectory(const std::string& path, mode_t mode)
+bool Io::createDirectory(const std::string& path, uint32_t /* Don't change to mode_t as that doesn't work on BSD systems */ mode)
 {
 	int32_t result = mkdir(path.c_str(), mode);
 	if(result != 0) return result;

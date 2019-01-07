@@ -87,7 +87,7 @@ public:
 	 * @param mode The creation mode.
 	 * @return Returns 0 on success or -1 on error.
 	 */
-	static bool createDirectory(const std::string& path, mode_t mode);
+	static bool createDirectory(const std::string& path, uint32_t mode);
 
 	/**
 	 * Reads a file and returns the content as a string.
