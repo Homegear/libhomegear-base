@@ -433,7 +433,7 @@ std::string JsonDecoder::decodeString(const std::string& s)
 					std::string hex1(s.data() + (i - 3), 2);
 					std::string hex2(s.data() + (i - 1), 2);
 					char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-                    if(c16 != 0)
+                    if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
                         if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
                         {
@@ -511,7 +511,7 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-                    if(c16 != 0)
+                    if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
                         if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
                         {
@@ -594,7 +594,7 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 					std::string hex1(json.data() + (pos - 3), 2);
 					std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
-                    if(c16 != 0)
+                    if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
                         if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
                         {
