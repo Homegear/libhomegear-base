@@ -241,7 +241,7 @@ public:
 	virtual void saveServiceMessageAsynchronous(uint64_t peerId, DataRow& data) = 0;
 	virtual void saveGlobalServiceMessageAsynchronous(DataRow& data) = 0;
 	virtual void deleteServiceMessage(uint64_t databaseID) = 0;
-	virtual void deleteGlobalServiceMessage(int32_t familyId, int32_t messageId, std::string& message) = 0;
+	virtual void deleteGlobalServiceMessage(int32_t familyId, int32_t messageId, std::string& messageSubId, std::string& message) = 0;
 	//End service messages
 
 	// {{{ License modules

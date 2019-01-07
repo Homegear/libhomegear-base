@@ -171,6 +171,9 @@ TcpSocket::~TcpSocket()
         _bl->threadManager.join(serverThread);
     }
 
+	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
+	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
+	std::lock(readGuard, writeGuard);
 	_bl->fileDescriptorManager.close(_socketDescriptor);
     freeCredentials();
 	if(_tlsPriorityCache) gnutls_priority_deinit(_tlsPriorityCache);
@@ -186,9 +189,31 @@ std::string TcpSocket::getIpAddress()
 
 
 // {{{ Server
+	void TcpSocket::bindServerSocket(std::string address, std::string port, std::string& listenAddress)
+	{
+		waitForServerStopped();
+
+        if(_useSsl) initSsl();
+
+		_listenAddress = address;
+		_listenPort = port;
+		bindSocket();
+		listenAddress = _ipAddress;
+	}
+
 	void TcpSocket::bindSocket()
 	{
 		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+	}
+
+	void TcpSocket::startPreboundServer(std::string& listenAddress)
+	{
+		_stopServer = false;
+		listenAddress = _ipAddress;
+		for(auto& serverThread : _serverThreads)
+		{
+			_bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+		}
 	}
 
 	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
@@ -247,19 +272,9 @@ std::string TcpSocket::getIpAddress()
 		_dhParams = nullptr;
 	}
 
-	int verifyClientCert(gnutls_session_t tlsSession)
-	{
-		//Called during handshake just after the certificate message has been received.
-
-		uint32_t status = (uint32_t)-1;
-		if(gnutls_certificate_verify_peers3(tlsSession, 0, &status) != GNUTLS_E_SUCCESS) return GNUTLS_E_INTERNAL_ERROR; //Terminate handshake
-		if(status > 0) return GNUTLS_E_INTERNAL_ERROR;
-		return GNUTLS_E_SUCCESS;
-	}
-
     int postClientHello(gnutls_session_t tlsSession)
     {
-        TcpSocket* tcpSocket = (TcpSocket*)gnutls_session_get_ptr(tlsSession);
+		TcpSocket* tcpSocket = (TcpSocket*)gnutls_session_get_ptr(tlsSession);
         if(!tcpSocket) return GNUTLS_E_INTERNAL_ERROR;
 
         auto& credentials = tcpSocket->getCredentials();
@@ -310,53 +325,91 @@ std::string TcpSocket::getIpAddress()
         return GNUTLS_E_SUCCESS;
     }
 
-	void TcpSocket::initClientSsl(PFileDescriptor fileDescriptor)
+	void TcpSocket::initClientSsl(PTcpClientData& clientData)
 	{
 		if(!_tlsPriorityCache)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initiate TLS connection. _tlsPriorityCache is nullptr.");
 		}
 		if(_x509Credentials.empty())
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initiate TLS connection. _x509Credentials is empty.");
 		}
 		int32_t result = 0;
-		if((result = gnutls_init(&fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_init(&clientData->fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS)
 		{
-			fileDescriptor->tlsSession = nullptr;
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			clientData->fileDescriptor->tlsSession = nullptr;
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
 		}
-		if(!fileDescriptor->tlsSession)
+		if(!clientData->fileDescriptor->tlsSession)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Client TLS session is nullptr.");
 		}
 
-        gnutls_session_set_ptr(fileDescriptor->tlsSession, this);
+        gnutls_session_set_ptr(clientData->fileDescriptor->tlsSession, this);
 
-		if((result = gnutls_priority_set(fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
+		if((result = gnutls_priority_set(clientData->fileDescriptor->tlsSession, _tlsPriorityCache)) != GNUTLS_E_SUCCESS)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error: Could not set cipher priority on TLS session: " + std::string(gnutls_strerror(result)));
 		}
 
-        gnutls_handshake_set_post_client_hello_function(fileDescriptor->tlsSession, &postClientHello);
+        gnutls_handshake_set_post_client_hello_function(clientData->fileDescriptor->tlsSession, &postClientHello);
 
-		gnutls_certificate_server_set_request(fileDescriptor->tlsSession, _requireClientCert ? GNUTLS_CERT_REQUIRE : GNUTLS_CERT_IGNORE);
-		if(!fileDescriptor || fileDescriptor->descriptor == -1)
+		gnutls_certificate_server_set_request(clientData->fileDescriptor->tlsSession, _requireClientCert ? GNUTLS_CERT_REQUIRE : GNUTLS_CERT_REQUEST);
+		if(!clientData->fileDescriptor || clientData->fileDescriptor->descriptor == -1)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
 		}
-		gnutls_transport_set_ptr(fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)fileDescriptor->descriptor);
-		result = gnutls_handshake(fileDescriptor->tlsSession);
+		gnutls_transport_set_ptr(clientData->fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)clientData->fileDescriptor->descriptor);
+		result = gnutls_handshake(clientData->fileDescriptor->tlsSession);
 		if(result < 0)
 		{
-			_bl->fileDescriptorManager.shutdown(fileDescriptor);
+			_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
 			throw SocketSSLException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
+		}
+
+		{ //Check client certificate
+			const gnutls_datum_t* derClientCertificates = gnutls_certificate_get_peers(clientData->fileDescriptor->tlsSession, nullptr);
+			if(!derClientCertificates)
+			{
+				if(_requireClientCert)
+				{
+					_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+					throw SocketSSLException("Client certificate verification has failed: Error retrieving client certificate.");
+				}
+			}
+			else
+			{
+				gnutls_x509_crt_t clientCertificates;
+				unsigned int certMax = 1;
+				if(gnutls_x509_crt_list_import(&clientCertificates, &certMax, derClientCertificates, GNUTLS_X509_FMT_DER, 0) < 1)
+				{
+					if(_requireClientCert)
+					{
+						_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+						throw SocketSSLException("Client certificate verification has failed: Error importing client certificate.");
+					}
+				}
+				else
+				{
+					gnutls_datum_t distinguishedName;
+					if(gnutls_x509_crt_get_dn2(clientCertificates, &distinguishedName) != GNUTLS_E_SUCCESS)
+					{
+						if(_requireClientCert)
+						{
+							_bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+							throw SocketSSLException("Client certificate verification has failed: Error getting client certificate's distinguished name.");
+						}
+					}
+					else clientData->clientCertDn = std::string((char*)distinguishedName.data, distinguishedName.size);
+				}
+			}
 		}
 	}
 
@@ -430,10 +483,54 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
+	void TcpSocket::sendToClient(int32_t clientId, std::vector<char> packet, bool closeConnection)
+	{
+		PTcpClientData clientData;
+		try
+		{
+			{
+				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+				auto clientIterator = _clients.find(clientId);
+				if(clientIterator == _clients.end()) return;
+				clientData = clientIterator->second;
+			}
+
+			clientData->socket->proofwrite((char*)packet.data(), packet.size());
+			if(closeConnection)
+			{
+				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+			}
+		}
+		catch(const std::exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+		catch(BaseLib::Exception& ex)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+		catch(...)
+		{
+			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
+			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+		}
+	}
+
     int32_t TcpSocket::clientCount()
     {
         std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
         return _clients.size();
+    }
+
+    std::string TcpSocket::getClientCertDn(int32_t clientId)
+    {
+        std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+        auto clientIterator = _clients.find(clientId);
+        if(clientIterator != _clients.end()) return clientIterator->second->clientCertDn;
+        return "";
     }
 
 	void TcpSocket::serverThread()
@@ -539,22 +636,22 @@ std::string TcpSocket::getIpAddress()
                             continue;
                         }
 
-                        if(_useSsl) initClientSsl(clientFileDescriptor);
+						PTcpClientData clientData = std::make_shared<TcpClientData>();
+						clientData->fileDescriptor = clientFileDescriptor;
+						clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
+						clientData->socket->setReadTimeout(100000);
+						clientData->socket->setWriteTimeout(15000000);
+
+                        if(_useSsl) initClientSsl(clientData);
 
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 							currentClientId = _currentClientId++;
-
-							PTcpClientData clientData = std::make_shared<TcpClientData>();
 							clientData->id = currentClientId;
-							clientData->fileDescriptor = clientFileDescriptor;
-							clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
-							clientData->socket->setReadTimeout(100000);
-							clientData->socket->setWriteTimeout(15000000);
-
 							_clients[currentClientId] = clientData;
-                            clients[currentClientId] = clientData;
 						}
+
+						clients[currentClientId] = clientData;
 
 						if(_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
 					}
@@ -904,8 +1001,6 @@ void TcpSocket::initSsl()
             }
 
             if(_dhParams) gnutls_certificate_set_dh_params(x509Credentials, _dhParams);
-
-            if(_requireClientCert) gnutls_certificate_set_verify_function(x509Credentials, &verifyClientCert);
         }
         else
         {
@@ -982,11 +1077,10 @@ void TcpSocket::autoConnect()
 
 void TcpSocket::close()
 {
-	_readMutex.lock();
-	_writeMutex.lock();
+	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
+	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
+	std::lock(readGuard, writeGuard);
 	_bl->fileDescriptorManager.close(_socketDescriptor);
-	_writeMutex.unlock();
-	_readMutex.unlock();
 }
 
 int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize)
@@ -1000,12 +1094,12 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	moreData = false;
 
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-	_readMutex.lock();
+	std::unique_lock<std::mutex> readGuard(_readMutex);
 	if(_autoConnect && !connected())
 	{
-		_readMutex.unlock();
+		readGuard.unlock();
 		autoConnect();
-		_readMutex.lock();
+		readGuard.lock();
 	}
 
 	int32_t bytesRead = 0;
@@ -1018,7 +1112,6 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		if(bytesRead > 0)
 		{
 			if(gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
-			_readMutex.unlock();
 			if(bytesRead > bufferSize) bytesRead = bufferSize;
 			return bytesRead;
 		}
@@ -1036,7 +1129,6 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(nfds <= 0)
 	{
 		fileDescriptorGuard.unlock();
-		_readMutex.unlock();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
@@ -1044,12 +1136,10 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
 	if(bytesRead == 0)
 	{
-		_readMutex.unlock();
 		throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
 	}
 	if(bytesRead != 1)
 	{
-		_readMutex.unlock();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
 	}
 	if(_socketDescriptor->tlsSession)
@@ -1070,7 +1160,6 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	}
 	if(bytesRead <= 0)
 	{
-		_readMutex.unlock();
 		if(bytesRead == -1)
 		{
 			if(errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
@@ -1078,20 +1167,20 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		}
 		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
 	}
-	_readMutex.unlock();
 	if(bytesRead > bufferSize) bytesRead = bufferSize;
 	return bytesRead;
 }
 
 int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>> data)
 {
-	_writeMutex.lock();
-	if(!connected())
 	{
-		_writeMutex.unlock();
-		autoConnect();
+		std::unique_lock<std::mutex> writeGuard(_writeMutex);
+		if(!connected())
+		{
+			writeGuard.unlock();
+			autoConnect();
+		}
 	}
-	else _writeMutex.unlock();
 	if(!data || data->empty()) return 0;
 	return proofwrite(*data);
 }
@@ -1099,21 +1188,19 @@ int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>> data)
 int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-	_writeMutex.lock();
+	std::unique_lock<std::mutex> writeGuard(_writeMutex);
 	if(!connected())
 	{
-		_writeMutex.unlock();
+		writeGuard.unlock();
 		autoConnect();
-		_writeMutex.lock();
+		writeGuard.lock();
 	}
 	if(data.empty())
 	{
-		_writeMutex.unlock();
 		return 0;
 	}
 	if(data.size() > 104857600)
 	{
-		_writeMutex.unlock();
 		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
@@ -1132,7 +1219,6 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1140,57 +1226,64 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
 		if(readyFds == 0)
 		{
-			_writeMutex.unlock();
 			throw SocketTimeOutException("Writing to socket timed out.");
 		}
 		if(readyFds != 1)
 		{
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), data.size() - totalBytesWritten) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, MSG_NOSIGNAL);
+		int32_t bytesToSend = data.size() - totalBytesWritten;
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
-			_writeMutex.unlock();
+			writeGuard.unlock();
 			close();
-			_writeMutex.lock();
+			writeGuard.lock();
 			if(_socketDescriptor->tlsSession)
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(gnutls_strerror(bytesWritten));
 			}
 			else
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(strerror(errno));
 			}
 		}
 		totalBytesWritten += bytesWritten;
 	}
-	_writeMutex.unlock();
 	return totalBytesWritten;
 }
 
 int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-	_writeMutex.lock();
+	std::unique_lock<std::mutex> writeGuard(_writeMutex);
 	if(!connected())
 	{
-		_writeMutex.unlock();
+		writeGuard.unlock();
 		autoConnect();
-		_writeMutex.lock();
+		writeGuard.lock();
 	}
 	if(bytesToWrite <= 0)
 	{
-		_writeMutex.unlock();
 		return 0;
 	}
 	if(bytesToWrite > 104857600)
 	{
-		_writeMutex.unlock();
 		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
@@ -1209,7 +1302,6 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1217,57 +1309,64 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
 		if(readyFds == 0)
 		{
-			_writeMutex.unlock();
 			throw SocketTimeOutException("Writing to socket timed out.");
 		}
 		if(readyFds != 1)
 		{
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten) : send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToWrite - totalBytesWritten, MSG_NOSIGNAL);
+		int32_t bytesToSend = bytesToWrite - totalBytesWritten;
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, buffer + totalBytesWritten, bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, buffer + totalBytesWritten, bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
-			_writeMutex.unlock();
+			writeGuard.unlock();
 			close();
-			_writeMutex.lock();
+			writeGuard.lock();
 			if(_socketDescriptor->tlsSession)
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(gnutls_strerror(bytesWritten));
 			}
 			else
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(strerror(errno));
 			}
 		}
 		totalBytesWritten += bytesWritten;
 	}
-	_writeMutex.unlock();
 	return totalBytesWritten;
 }
 
 int32_t TcpSocket::proofwrite(const std::string& data)
 {
 	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-	_writeMutex.lock();
+	std::unique_lock<std::mutex> writeGuard(_writeMutex);
 	if(!connected())
 	{
-		_writeMutex.unlock();
+		writeGuard.unlock();
 		autoConnect();
-		_writeMutex.lock();
+		writeGuard.lock();
 	}
 	if(data.empty())
 	{
-		_writeMutex.unlock();
 		return 0;
 	}
 	if(data.size() > 104857600)
 	{
-		_writeMutex.unlock();
 		throw SocketDataLimitException("Data size is larger than 100 MiB.");
 	}
 
@@ -1286,7 +1385,6 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (6).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1294,37 +1392,45 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
 		if(readyFds == 0)
 		{
-			_writeMutex.unlock();
 			throw SocketTimeOutException("Writing to socket timed out.");
 		}
 		if(readyFds != 1)
 		{
-			_writeMutex.unlock();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
 		}
 
 		int32_t bytesToSend = data.size() - totalBytesWritten;
-		int32_t bytesWritten = _socketDescriptor->tlsSession ? gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend) : send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+		int32_t bytesWritten = 0;
+		if(_socketDescriptor->tlsSession)
+		{
+			do
+			{
+				bytesWritten = gnutls_record_send(_socketDescriptor->tlsSession, &data.at(totalBytesWritten), bytesToSend);
+			} while(bytesWritten == GNUTLS_E_INTERRUPTED || bytesWritten == GNUTLS_E_AGAIN);
+		}
+		else
+		{
+			do
+			{
+				bytesWritten = send(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, MSG_NOSIGNAL);
+			} while(bytesWritten == -1 && (errno == EAGAIN || errno == EINTR));
+		}
 		if(bytesWritten <= 0)
 		{
-			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
-			_writeMutex.unlock();
+			writeGuard.unlock();
 			close();
-			_writeMutex.lock();
+			writeGuard.lock();
 			if(_socketDescriptor->tlsSession)
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(gnutls_strerror(bytesWritten));
 			}
 			else
 			{
-				_writeMutex.unlock();
 				throw SocketOperationException(strerror(errno));
 			}
 		}
 		totalBytesWritten += bytesWritten;
 	}
-	_writeMutex.unlock();
 	return totalBytesWritten;
 }
 
@@ -1338,8 +1444,9 @@ bool TcpSocket::connected()
 
 void TcpSocket::getSocketDescriptor()
 {
-	_readMutex.lock();
-	_writeMutex.lock();
+	std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
+	std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
+	std::lock(readGuard, writeGuard);
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Calling getFileDescriptor...");
 	_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 
@@ -1348,28 +1455,19 @@ void TcpSocket::getSocketDescriptor()
 		getConnection();
 		if(!_socketDescriptor || _socketDescriptor->descriptor < 0)
 		{
-			_readMutex.unlock();
-			_writeMutex.unlock();
 			throw SocketOperationException("Could not connect to server.");
 		}
 
 		if(_useSsl) getSsl();
-		_writeMutex.unlock();
-		_readMutex.unlock();
 	}
-	catch(const std::exception& ex)
-    {
-		_writeMutex.unlock();
-    	_readMutex.unlock();
-		throw(ex);
-    }
 	catch(Exception& ex)
 	{
-		_writeMutex.unlock();
-		_readMutex.unlock();
-		throw(ex);
+		throw;
 	}
-
+	catch(const std::exception& ex)
+	{
+		throw;
+	}
 }
 
 void TcpSocket::getSsl()

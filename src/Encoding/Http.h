@@ -169,7 +169,7 @@ public:
 	std::string getStatusText(int32_t code);
 	std::set<std::shared_ptr<FormData>> decodeMultipartFormdata();
 	std::set<std::shared_ptr<FormData>> decodeMultipartMixed(std::string& boundary, char* buffer, size_t bufferSize, char** pos);
-	static void constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header);
+	static void constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, const std::vector<std::string>& additionalHeaders, std::string& header);
 	PVariable serialize();
 	void unserialize(PVariable data);
 private:

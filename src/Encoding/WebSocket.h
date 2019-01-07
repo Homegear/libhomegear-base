@@ -88,8 +88,10 @@ public:
 	 *
 	 * @param buffer The buffer to parse
 	 * @param bufferLength The size of the buffer
+	 *
+	 * @return Returns the number of actually processed bytes
 	 */
-	void process(char* buffer, int32_t bufferLength);
+	uint32_t process(char* buffer, int32_t bufferLength);
 
 	bool dataProcessingStarted() { return _dataProcessingStarted; }
 
@@ -114,9 +116,10 @@ private:
 	uint32_t _oldContentSize = 0;
 	bool _finished = false;
 	bool _dataProcessingStarted = false;
+	std::vector<char> _rawHeader;
 
-	void processHeader(char** buffer, int32_t& bufferLength);
-	void processContent(char* buffer, int32_t bufferLength);
+	uint32_t processHeader(char** buffer, int32_t& bufferLength);
+	uint32_t processContent(char* buffer, int32_t bufferLength);
 	void applyMask();
 
 };

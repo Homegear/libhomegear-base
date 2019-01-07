@@ -223,13 +223,9 @@ Math::Math()
 	_hexMap['f'] = 0xF;
 }
 
-Math::~Math()
-{
-}
-
 bool Math::isNumber(const std::string& s, bool hex)
 {
-	if(!hex) hex = ((signed)s.find('x') > -1);
+	if(!hex) hex = (s.find('x') != std::string::npos);
 	if(!hex) try { std::stoll(s, 0, 10); } catch(...) { return false; }
 	else try { std::stoll(s, 0, 16); } catch(...) { return false; }
 	return true;
@@ -237,18 +233,19 @@ bool Math::isNumber(const std::string& s, bool hex)
 
 int32_t Math::getNumber(const std::string& s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+    auto xpos = s.find('x');
 	int32_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
-	else try { number = std::stoll(s, 0, 16); } catch(...) {}
+	//Don't change to std::stol, because otherwise numbers larger than 0x7FFFFFFF can't be parsed.
+	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stoll(s, 0, 10); } catch(...) {}
+	else try { number = (int32_t)std::stol(s, 0, 16); } catch(...) {}
 	return number;
 }
 
 int64_t Math::getNumber64(const std::string& s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+	auto xpos = s.find('x');
 	int64_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
+	if(xpos == std::string::npos && !isHex) try { number = std::stoll(s, 0, 10); } catch(...) {}
 	else try { number = std::stoll(s, 0, 16); } catch(...) {}
 	return number;
 }
@@ -261,9 +258,18 @@ int32_t Math::getNumber(char hexChar)
 
 uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)
 {
-	int32_t xpos = s.find('x');
+	auto xpos = s.find('x');
 	uint32_t number = 0;
-	if(xpos == -1 && !isHex) try { number = std::stoull(s, 0, 10); } catch(...) {}
+	if(xpos == std::string::npos && !isHex) try { number = (uint32_t)std::stoul(s, 0, 10); } catch(...) {}
+	else try { number = (uint32_t)std::stoul(s, 0, 16); } catch(...) {}
+	return number;
+}
+
+uint64_t Math::getUnsignedNumber64(const std::string &s, bool isHex)
+{
+	auto xpos = s.find('x');
+	uint64_t number = 0;
+	if(xpos == std::string::npos && !isHex) try { number = std::stoull(s, 0, 10); } catch(...) {}
 	else try { number = std::stoull(s, 0, 16); } catch(...) {}
 	return number;
 }
@@ -399,7 +405,7 @@ std::string Math::toString(double number)
 	std::stringstream out;
     out << number;
     std::string string = out.str();
-    std::string::size_type pos = string.find('.');
+    auto pos = string.find('.');
     if(pos == std::string::npos) return string;
     int32_t decimalPlaces = string.size() - pos - 1;
     if(decimalPlaces > 3 && string[string.size() - 2] == string.back() && string[string.size() - 3] == string.back())

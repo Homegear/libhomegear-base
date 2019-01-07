@@ -62,6 +62,16 @@ HttpServer::~HttpServer()
 	stop();
 }
 
+void HttpServer::bind(std::string address, std::string port, std::string& listenAddress)
+{
+	_socket->bindServerSocket(address, port, listenAddress);
+}
+
+void HttpServer::startPrebound(std::string& listenAddress)
+{
+	_socket->startPreboundServer(listenAddress);
+}
+
 void HttpServer::start(std::string address, std::string port, std::string& listenAddress)
 {
 	_socket->startServer(address, port, listenAddress);
@@ -140,11 +150,15 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 			http = clientIterator->second.http;
 		}
 
-		http->process((char*)packet.data(), packet.size());
-		if(http->isFinished())
+		uint32_t processedBytes = 0;
+		while(processedBytes < packet.size())
 		{
-			if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
-			http->reset();
+			processedBytes = http->process((char*)(packet.data() + processedBytes), packet.size() - processedBytes);
+			if(http->isFinished())
+			{
+				if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
+				http->reset();
+			}
 		}
 		return;
 	}
@@ -166,6 +180,11 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection)
 {
 	_socket->sendToClient(clientId, packet, closeConnection);
+}
+
+void HttpServer::send(int32_t clientId, std::vector<char> packet, bool closeConnection)
+{
+    _socket->sendToClient(clientId, packet, closeConnection);
 }
 
 }

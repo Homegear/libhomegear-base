@@ -64,7 +64,11 @@ void Settings::reset()
 	_dataPathPermissions = 504;
 	_dataPathUser = "";
 	_dataPathGroup = "";
-	_familyDataPath = _executablePath + "families";
+	_writeableDataPath = _dataPath;
+	_writeableDataPathPermissions = 504;
+	_writeableDataPathUser = "";
+	_writeableDataPathGroup = "";
+	_familyDataPath = _executablePath + "families/";
 	_familyDataPathPermissions = 504;
 	_familyDataPathUser = "";
 	_familyDataPathGroup = "";
@@ -293,6 +297,7 @@ void Settings::load(std::string filename, std::string executablePath)
 					_dataPath = value;
 					if(_dataPath.empty()) _dataPath = _executablePath;
 					if(_dataPath.back() != '/') _dataPath.push_back('/');
+					if(_writeableDataPath == _executablePath) _writeableDataPath = _dataPath;
 					_bl->out.printDebug("Debug: dataPath set to " + _dataPath);
 				}
 				else if(name == "databasepath" && _dataPath.empty() && !value.empty())
@@ -317,6 +322,29 @@ void Settings::load(std::string filename, std::string executablePath)
 				{
 					_dataPathGroup = value;
 					_bl->out.printDebug("Debug: dataPathGroup set to " + _dataPathGroup);
+				}
+				else if(name == "writeabledatapath")
+				{
+					_writeableDataPath = value;
+					if(_writeableDataPath.empty()) _writeableDataPath = _dataPath.empty() ? _executablePath : _dataPath;
+					if(_writeableDataPath.back() != '/') _writeableDataPath.push_back('/');
+					_bl->out.printDebug("Debug: writeableDataPath set to " + _writeableDataPath);
+				}
+				else if(name == "writeabledatapathpermissions")
+				{
+					_writeableDataPathPermissions = Math::getOctalNumber(value);
+					if(_writeableDataPathPermissions == 0) _writeableDataPathPermissions = 504;
+					_bl->out.printDebug("Debug: writeableDataPathPermissions set to " + _writeableDataPathPermissions);
+				}
+				else if(name == "writeabledatapathuser")
+				{
+					_writeableDataPathUser = value;
+					_bl->out.printDebug("Debug: writeableDataPathUser set to " + _writeableDataPathUser);
+				}
+				else if(name == "writeabledatapathgroup")
+				{
+					_writeableDataPathGroup = value;
+					_bl->out.printDebug("Debug: writeableDataPathGroup set to " + _writeableDataPathGroup);
 				}
 				else if(name == "familydatapath")
 				{
