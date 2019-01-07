@@ -308,6 +308,55 @@ void JsonEncoder::encodeArray(const std::shared_ptr<Variable>& variable, std::ve
 	s.push_back(']');
 }
 
+#if __GNUC__ > 3
+
+void JsonEncoder::encodeStruct(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
+{
+    s << '{';
+    if(!variable->structValue->empty())
+    {
+        s << '"';
+        s << variable->structValue->begin()->first;
+        s << "\":";
+        encodeValue(variable->structValue->begin()->second, s);
+        for(std::map<std::string, std::shared_ptr<Variable>>::iterator i = ++variable->structValue->begin(); i != variable->structValue->end(); ++i)
+        {
+            s << ',';
+            s << '"';
+            s << encodeString(i->first);
+            s << "\":";
+            encodeValue(i->second, s);
+        }
+    }
+    s << '}';
+}
+
+void JsonEncoder::encodeStruct(const std::shared_ptr<Variable>& variable, std::vector<char>& s)
+{
+    s.push_back('{');
+    if(!variable->structValue->empty())
+    {
+        s.push_back('"');
+        s.insert(s.end(), variable->structValue->begin()->first.begin(), variable->structValue->begin()->first.end());
+        s.push_back('"');
+        s.push_back(':');
+        encodeValue(variable->structValue->begin()->second, s);
+        for(std::map<std::string, std::shared_ptr<Variable>>::iterator i = ++variable->structValue->begin(); i != variable->structValue->end(); ++i)
+        {
+            s.push_back(',');
+            s.push_back('"');
+            std::string key = encodeString(i->first);
+            s.insert(s.end(), key.begin(), key.end());
+            s.push_back('"');
+            s.push_back(':');
+            encodeValue(i->second, s);
+        }
+    }
+    s.push_back('}');
+}
+
+#else
+
 void JsonEncoder::encodeStruct(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
 {
 	s << '{';
@@ -351,6 +400,8 @@ void JsonEncoder::encodeStruct(const std::shared_ptr<Variable>& variable, std::v
 	}
 	s.push_back('}');
 }
+
+#endif
 
 void JsonEncoder::encodeBoolean(const std::shared_ptr<Variable>& variable, std::ostringstream& s)
 {
