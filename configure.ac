@@ -64,8 +64,8 @@ esac
 
 AC_ARG_WITH([spi], [AS_HELP_STRING([--without-spi], [Compile without SPI support (disables all SPI interfaces)])], [with_spi=no], [])
 AS_IF([test "x$with_spi" != "xno"], [
-        AC_DEFINE(SPISUPPORT, [], [Enables compilation of all SPI interfaces and SPI support])
-        ])
+    CPPFLAGS="$CPPFLAGS -DSPISUPPORT"
+    ])
 
 AC_ARG_WITH([ccu2], [AS_HELP_STRING([--with-ccu2], [Compile for CCU2])], [with_ccu2=yes], [])
 AS_IF([test "x$with_ccu2" = "xyes"], [
