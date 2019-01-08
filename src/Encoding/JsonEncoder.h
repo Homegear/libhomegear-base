@@ -35,7 +35,7 @@
 #include "../Variable.h"
 
 #include <list>
-#if __GNUC__ > 3
+#if __GNUC__ > 4
 #include <codecvt>
 #endif
 
