@@ -29,6 +29,9 @@
 */
 
 #include "Spi.h"
+
+#ifdef SPISUPPORT
+
 #include "../BaseLib.h"
 
 namespace BaseLib
@@ -120,3 +123,5 @@ void Spi::readwrite(std::vector<uint8_t>& data)
 
 }
 }
+
+#endif

@@ -35,6 +35,9 @@
 #include "../Variable.h"
 
 #include <list>
+#if __GNUC__ > 3
+#include <codecvt>
+#endif
 
 namespace BaseLib
 {
@@ -55,6 +58,8 @@ public:
 	void encodeRequest(std::string& methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<char>& encodedData);
 	void encodeResponse(const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
 	void encodeMQTTResponse(const std::string methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
+
+	std::string encodeString(const std::string& s);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _requestId = 1;

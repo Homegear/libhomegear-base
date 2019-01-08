@@ -42,6 +42,7 @@ namespace BaseLib
  * Exception class for the HTTP client.
  *
  * @see HttpClient
+ * @see HttpClientTimeOutException
  */
 class HttpClientException : public Exception
 {
@@ -52,6 +53,18 @@ public:
 	HttpClientException(std::string message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
 
 	int32_t responseCode() { return _responseCode; }
+};
+
+/**
+ * Exception class for timeouts of the HTTP client.
+ *
+ * @see HttpClient
+ * @see HTTPClientException
+ */
+class HttpClientTimeOutException : public HttpClientException
+{
+public:
+	HttpClientTimeOutException(std::string message) : HttpClientException(message) {}
 };
 
 /**

@@ -51,6 +51,33 @@ namespace Systems
 class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysicalInterfaceEventSink, public IEvents
 {
 public:
+    struct PairingState
+    {
+        uint64_t peerId = 0;
+        std::string state;
+        std::string messageId;
+        std::list<std::string> variables;
+    };
+    typedef std::shared_ptr<PairingState> PPairingState;
+
+    struct PairingMessage
+    {
+        std::string messageId;
+        std::list<std::string> variables;
+
+        PairingMessage(std::string messageId)
+        {
+            this->messageId = messageId;
+        }
+
+        PairingMessage(std::string messageId, std::list<std::string> variables)
+        {
+            this->messageId = messageId;
+            this->variables = variables;
+        }
+    };
+    typedef std::shared_ptr<PairingMessage> PPairingMessage;
+
 	//Event handling
 	class ICentralEventSink : public IEventSinkBase
 	{
@@ -129,7 +156,7 @@ public:
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std::string filterValue, bool checkAcls);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t address);
 	virtual PVariable getPeerId(PRpcClientInfo clientInfo, std::string serialNumber);
-	virtual PVariable getInstallMode(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual PVariable getInstallMode(PRpcClientInfo clientInfo);
 	virtual PVariable getLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel);
 	virtual PVariable getLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel);
 	virtual PVariable getLinkPeers(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel);
@@ -137,6 +164,7 @@ public:
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, int32_t flags);
 	virtual PVariable getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, int32_t flags, bool checkAcls);
 	virtual PVariable getName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel);
+	virtual PVariable getPairingState(PRpcClientInfo clientInfo);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
 	virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
 	virtual PVariable getParamsetId(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
@@ -202,6 +230,12 @@ protected:
     std::map<uint64_t, std::shared_ptr<Peer>> _peersById;
     std::mutex _peersMutex;
 
+    std::atomic_bool _pairing;
+    std::atomic_int _timeLeftInPairingMode;
+    std::mutex _newPeersMutex;
+    std::map<int64_t, std::list<PPairingState>> _newPeers;
+    std::list<PPairingMessage> _pairingMessages;
+
 	//Event handling
     std::map<std::string, PEventHandler> _physicalInterfaceEventhandlers;
 
@@ -247,6 +281,11 @@ protected:
 	virtual void saveVariable(uint32_t index, int64_t intValue);
 	virtual void saveVariable(uint32_t index, std::string& stringValue);
 	virtual void saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue);
+private:
+    /*
+     * Used for default implementation of getPairingState.
+     */
+    std::map<int64_t, std::list<PPairingState>> _newPeersDefault;
 };
 
 }

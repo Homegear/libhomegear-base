@@ -141,6 +141,21 @@ class TcpSocket
 public:
 	typedef std::vector<uint8_t> TcpPacket;
 
+	struct TcpClientData
+	{
+		int32_t id = 0;
+		PFileDescriptor fileDescriptor;
+		std::vector<uint8_t> buffer;
+		std::shared_ptr<TcpSocket> socket;
+        std::string clientCertDn;
+
+		TcpClientData()
+		{
+			buffer.resize(1024);
+		}
+	};
+	typedef std::shared_ptr<TcpClientData> PTcpClientData;
+
     struct CertificateInfo
     {
         std::string certFile;
@@ -276,6 +291,7 @@ public:
 
 	std::string getIpAddress();
 	int32_t getPort() { return _boundListenPort; }
+	bool getRequireClientCert() { return _requireClientCert; }
 	void setConnectionRetries(int32_t retries) { _connectionRetries = retries; }
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
 	void setWriteTimeout(int64_t timeout) { _writeTimeout = timeout; }
@@ -329,6 +345,30 @@ public:
 
 	// {{{ Servers only
 		/**
+		 * Binds a socket to an IP address and a port. This splits up the start process to be able to listen on ports
+		 * lower than 1024 and do a privilege drop. Call startPreboundServer() to start listening. Don't call
+		 * startServer() when using pre-binding as this recreates the socket.
+		 *
+		 * @see startPreboundServer
+		 *
+		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
+		 * @param port The port number to bind the server to.
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 */
+		void bindServerSocket(std::string address, std::string port, std::string& listenAddress);
+
+		/**
+		 * Starts listening on the already bound socket (created with bindServerSocket()). This splits up the start process to
+		 * be able to listen on ports lower than 1024 and do a privilege drop. Don't call startServer() when using
+		 * pre-binding as this recreates the socket.
+		 *
+		 * @see bindServerSocket
+		 *
+		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 */
+		void startPreboundServer(std::string& listenAddress);
+
+		/**
 		 * Starts listening.
 		 *
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
@@ -366,26 +406,30 @@ public:
 		void sendToClient(int32_t clientId, TcpPacket packet, bool closeConnection = false);
 
         /**
+         * Sends a response to a TCP client connected to the server.
+         *
+         * @param clientId The ID of the client as passed to TcpSocket::TcpServerServer::packetReceivedCallback.
+         * @param packet The data to send.
+         * @param closeConnection Close the connection after sending the packet.
+         */
+        void sendToClient(int32_t clientId, std::vector<char> packet, bool closeConnection = false);
+
+        /**
          * Returns the number of clients connected to the TCP server
          * @return The number of connected clients.
          */
         int32_t clientCount();
+
+        /**
+         * Returns the distinguished name of the client certificate. This method only returns a non empty string if
+         * the client certificate is valid.
+         *
+         * @param clientId The ID of the client to get the distinguished name for.
+         * @return Returns the DN when the client certificate verification was successful.
+         */
+        std::string getClientCertDn(int32_t clientId);
 	// }}}
 protected:
-	struct TcpClientData
-	{
-		int32_t id = 0;
-		PFileDescriptor fileDescriptor;
-		std::vector<uint8_t> buffer;
-		std::shared_ptr<TcpSocket> socket;
-
-		TcpClientData()
-		{
-			buffer.resize(1024);
-		}
-	};
-	typedef std::shared_ptr<TcpClientData> PTcpClientData;
-
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _connectionRetries = 3;
 	int64_t _readTimeout = 15000000;
@@ -447,7 +491,7 @@ protected:
 		void serverThread();
 		void collectGarbage();
 		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
-		void initClientSsl(PFileDescriptor fileDescriptor);
+		void initClientSsl(PTcpClientData& clientData);
 		void readClient(PTcpClientData clientData);
 	// }}}
 };

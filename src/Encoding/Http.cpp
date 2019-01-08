@@ -231,19 +231,19 @@ std::set<std::shared_ptr<Http::FormData>> Http::decodeMultipartMixed(std::string
 	return formData;
 }
 
-void Http::constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders, std::string& header)
+void Http::constructHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, const std::vector<std::string>& additionalHeaders, std::string& header)
 {
 	std::string additionalHeader;
 	additionalHeader.reserve(1024);
-	for(std::vector<std::string>::iterator i = additionalHeaders.begin(); i != additionalHeaders.end(); ++i)
+	for(auto& entry : additionalHeaders)
 	{
-		BaseLib::HelperFunctions::trim(*i);
-		if((*i).find("Location: ") == 0)
+		if(entry.find("Location: ") == 0)
 		{
 			code = 301;
 			codeDescription = "Moved Permanently";
 		}
-		if(!(*i).empty()) additionalHeader.append(*i + "\r\n");
+		if(additionalHeader.size() + entry.size() > additionalHeader.capacity()) additionalHeader.reserve(additionalHeader.size() + entry.size() + 1024);
+		if(!entry.empty()) additionalHeader.append(entry + "\r\n");
 	}
 
 	header.reserve(1024);

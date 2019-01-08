@@ -71,6 +71,15 @@ public:
 	 * @return Returns "true" on success and "false" on error.
 	 */
 	template<typename Data> static bool md5(const Data& in, Data& out);
+
+	/**
+	 * Calculates the WHIRLPOOL hash of the passed binary data.
+	 *
+	 * @param[in] in The data to calculate the hash for.
+	 * @param[out] out A vector to store the calculated hash in.
+	 * @return Returns "true" on success and "false" on error.
+	 */
+	template<typename Data> static bool whirlpool(const Data& in, Data& out);
 protected:
 	/**
 	 * Constructor. It is protected, because the class only contains static methods.

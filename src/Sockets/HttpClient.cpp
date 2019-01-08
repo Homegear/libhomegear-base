@@ -134,7 +134,12 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 		{
 			if(!_socket->connected()) _socket->open();
 		}
-		catch(const BaseLib::SocketOperationException& ex)
+        catch(BaseLib::SocketTimeOutException& ex)
+        {
+            _socketMutex.unlock();
+            throw HttpClientTimeOutException(ex.what());
+        }
+		catch(BaseLib::SocketOperationException& ex)
 		{
 			_socketMutex.unlock();
 			throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
@@ -151,7 +156,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			_socketMutex.unlock();
 			throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
 		}
-		catch(const BaseLib::SocketOperationException& ex)
+		catch(BaseLib::SocketOperationException& ex)
 		{
 			if(!_keepAlive) _socket->close();
 			_socketMutex.unlock();
@@ -188,26 +193,26 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 			{
 				if(bufferPos > bufferMax - 1)
 				{
-					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
 					bufferPos = 0;
+					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
 				}
 				receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
 
 				//Some clients send only one byte in the first packet
 				if(receivedBytes < 13 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer.data() + bufferPos + 1, bufferMax - bufferPos - 1);
 			}
-			catch(const BaseLib::SocketTimeOutException& ex)
+			catch(BaseLib::SocketTimeOutException& ex)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();
 				throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
 			}
-			catch(const BaseLib::SocketClosedException& ex)
+			catch(BaseLib::SocketClosedException& ex)
 			{
 				http.setFinished();
 				break;
 			}
-			catch(const BaseLib::SocketOperationException& ex)
+			catch(BaseLib::SocketOperationException& ex)
 			{
 				if(!_keepAlive) _socket->close();
 				_socketMutex.unlock();

@@ -69,7 +69,7 @@ public:
 	 * @param path The path to the directory.
 	 * @return Returns true when the directory exists, or false if the directory couldn't be accessed.
 	 */
-	static bool directoryExists(std::string path);
+	static bool directoryExists(const std::string& path);
 
 	/**
 	 * Checks if a path is a directory.
@@ -78,7 +78,7 @@ public:
 	 * @param[out] result True when the path is a directory otherwise false
 	 * @return Returns 0 on success or -1 on error.
 	 */
-	static int32_t isDirectory(std::string path, bool& result);
+	static int32_t isDirectory(const std::string& path, bool& result);
 
 	/**
 	 * Creates a new directory. Make sure, the directory doesn't exist.
@@ -87,7 +87,7 @@ public:
 	 * @param mode The creation mode.
 	 * @return Returns 0 on success or -1 on error.
 	 */
-	static bool createDirectory(std::string path, mode_t mode);
+	static bool createDirectory(const std::string& path, uint32_t mode);
 
 	/**
 	 * Reads a file and returns the content as a string.
@@ -96,7 +96,7 @@ public:
 	 * @return Returns the content of the file as a string.
 	 * @throws Throws Exception on errors.
 	 */
-	static std::string getFileContent(std::string filename);
+	static std::string getFileContent(const std::string& filename);
 
 	/**
 	 * Reads a file and returns the content as a signed binary array.
@@ -105,7 +105,7 @@ public:
 	 * @param maxBytes Maximum number of bytes to read.
 	 * @return Returns the content of the file as a char array.
 	 */
-	static std::vector<char> getBinaryFileContent(std::string filename, uint32_t maxBytes = 0);
+	static std::vector<char> getBinaryFileContent(const std::string& filename, uint32_t maxBytes = 0);
 
 	/**
 	 * Reads a file and returns the content as an unsigned binary array.
@@ -113,7 +113,7 @@ public:
 	 * @param filename The path to the file to read.
 	 * @return Returns the content of the file as an unsigned char array.
 	 */
-	static std::vector<uint8_t> getUBinaryFileContent(std::string filename);
+	static std::vector<uint8_t> getUBinaryFileContent(const std::string& filename);
 
 	/**
 	 * Checks if a file exists.
@@ -121,7 +121,7 @@ public:
 	 * @param filename The path to the file.
 	 * @return Returns true when the file exists, or false if the file couldn't be accessed.
 	 */
-	static bool fileExists(std::string filename);
+	static bool fileExists(const std::string& filename);
 
 	/**
 	 * Writes a string to a file. If the file already exists it will be overwritten.
@@ -129,7 +129,7 @@ public:
 	 * @param filename The path to the file to write.
 	 * @param content The content to write to the file.
 	 */
-	static void writeFile(std::string& filename, std::string& content);
+	static void writeFile(const std::string& filename, const std::string& content);
 
 	/**
 	 * Writes binary data to a file. If the file already exists it will be overwritten.
@@ -138,7 +138,7 @@ public:
 	 * @param content The content to write to the file.
 	 * @param length The number of bytes to write.
 	 */
-	static void writeFile(std::string& filename, std::vector<char>& content, uint32_t length);
+	static void writeFile(const std::string& filename, const std::vector<char>& content, uint32_t length);
 
 	/**
 	 * Writes binary data to a file. If the file already exists it will be overwritten.
@@ -147,7 +147,7 @@ public:
 	 * @param content The content to write to the file.
 	 * @param length The number of bytes to write.
 	 */
-	static void writeFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length);
+	static void writeFile(const std::string& filename, const std::vector<uint8_t>& content, uint32_t length);
 
 	/**
 	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
@@ -155,16 +155,7 @@ public:
 	 * @param filename The path to the file to write.
 	 * @param content The content to write to the file.
 	 */
-	static void appendToFile(std::string& filename, std::string& content);
-
-	/**
-	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
-	 *
-	 * @param filename The path to the file to write.
-	 * @param content The content to write to the file.
-	 * @param length The number of bytes to write.
-	 */
-	static void appendToFile(std::string& filename, std::vector<char>& content, uint32_t length);
+	static void appendToFile(const std::string& filename, const std::string& content);
 
 	/**
 	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
@@ -173,7 +164,16 @@ public:
 	 * @param content The content to write to the file.
 	 * @param length The number of bytes to write.
 	 */
-	static void appendToFile(std::string& filename, std::vector<uint8_t>& content, uint32_t length);
+	static void appendToFile(const std::string& filename, const std::vector<char>& content, uint32_t length);
+
+	/**
+	 * Writes binary data to a file. If the file doesn't exist, it will be created. If the file already exists the data will be appended.
+	 *
+	 * @param filename The path to the file to write.
+	 * @param content The content to write to the file.
+	 * @param length The number of bytes to write.
+	 */
+	static void appendToFile(const std::string& filename, const std::vector<uint8_t>& content, uint32_t length);
 
 	/**
 	 * Returns an array of all files within a path. The files are not prefixed with "path".
@@ -182,7 +182,7 @@ public:
 	 * @param recursive Also return files of subdirectories. The files are prefixed with the subdirectory.
 	 * @return Returns an array of all file names within path.
 	 */
-	std::vector<std::string> getFiles(std::string path, bool recursive = false);
+	std::vector<std::string> getFiles(const std::string& path, bool recursive = false);
 
 	/**
 	 * Returns an array of all directories within a path. The directories are not prefixed with "path".
@@ -191,7 +191,7 @@ public:
 	 * @param recursive Also return directories within subdirectories. The directories are prefixed with the subdirectory.
 	 * @return Returns an array of all directory names within path.
 	 */
-	std::vector<std::string> getDirectories(std::string path, bool recursive = false);
+	std::vector<std::string> getDirectories(const std::string& path, bool recursive = false);
 
 	/**
 	 * Gets the last modified time of a file.
@@ -208,7 +208,7 @@ public:
 	 * @param dest The destination path to copy the file to.
 	 * @return Returns true on success.
 	 */
-	bool copyFile(std::string source, std::string dest);
+	bool copyFile(const std::string& source, const std::string& dest);
 
 	/**
 	 * Moves a file.
@@ -217,7 +217,7 @@ public:
 	 * @param dest The destination path to move the file to.
 	 * @return Returns true on success.
 	 */
-	static bool moveFile(std::string source, std::string dest);
+	static bool moveFile(const std::string& source, const std::string& dest);
 
 	/**
 	 * Deletes a file.
@@ -225,7 +225,7 @@ public:
 	 * @param file The file to delete.
 	 * @return Returns true on success.
 	 */
-	static bool deleteFile(std::string file);
+	static bool deleteFile(const std::string& file);
 
 	/**
 	 * Calculates the SHA-2 SHA-512 of a given file.
@@ -233,7 +233,7 @@ public:
 	 * @param file The file to calculate the SHA-512 for.
 	 * @return Returns the SHA-512 or an empty string on errors.
 	 */
-	std::string sha512(std::string file);
+	std::string sha512(const std::string& file);
 private:
 	/**
 	 * Pointer to the common base library object.
