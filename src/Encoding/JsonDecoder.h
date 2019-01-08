@@ -33,7 +33,7 @@
 
 #include "../Exception.h"
 #include "../Variable.h"
-#if __GNUC__ > 3
+#if __GNUC__ > 4
 #include <codecvt>
 #endif
 

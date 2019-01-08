@@ -411,7 +411,7 @@ void JsonEncoder::encodeFloat(const std::shared_ptr<Variable>& variable, std::ve
 	s.insert(s.end(), value.begin(), value.end());
 }
 
-#if __GNUC__ > 3
+#if __GNUC__ > 4
 
 std::string JsonEncoder::encodeString(const std::string& s)
 {
