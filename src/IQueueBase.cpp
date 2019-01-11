@@ -39,9 +39,6 @@ IQueueBase::IQueueBase(SharedObjects* baseLib, uint32_t queueCount)
 	_bl = baseLib;
 	if(queueCount < 1000000) _queueCount = queueCount;
 	_stopProcessingThread.reset(new std::atomic_bool[queueCount]);
-
-	_lastQueueFullError = 0;
-	_droppedEntries = 0;
 }
 
 void IQueueBase::printQueueFullError(BaseLib::Output& out, std::string message)

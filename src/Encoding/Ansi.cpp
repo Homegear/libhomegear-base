@@ -139,17 +139,17 @@ namespace BaseLib
 			if(ansiString[i] == 0) break;
 			if((uint8_t)ansiString[i] < 128)
 			{
-				buffer[pos] = ansiString[i];
+				buffer.at(pos) = ansiString[i];
 				pos++;
 			}
 			else
 			{
 				std::vector<uint8_t>& utf8Char = _utf8Lookup[(uint8_t)ansiString[i] - 128];
-				if(!utf8Char.empty()) memcpy(&buffer[pos], &utf8Char[0], utf8Char.size());
+				if(!utf8Char.empty()) memcpy(buffer.data() + pos, utf8Char.data(), utf8Char.size());
 				pos += utf8Char.size();
 			}
 		}
-		buffer[pos] = 0;
+		buffer.at(pos) = 0;
 		return std::string(buffer.data(), pos);
 	}
 
@@ -162,18 +162,18 @@ namespace BaseLib
 		{
 			if((uint8_t)ansiString[i] < 128)
 			{
-				buffer[pos] = ansiString[i];
+				buffer.at(pos) = ansiString[i];
 				pos++;
 			}
 			else
 			{
 				std::vector<uint8_t>& utf8Char = _utf8Lookup[(uint8_t)ansiString[i] - 128];
-				if(!utf8Char.empty()) memcpy(&buffer[pos], &utf8Char[0], utf8Char.size());
+				if(!utf8Char.empty()) memcpy(buffer.data() + pos, &utf8Char[0], utf8Char.size());
 				pos += utf8Char.size();
 			}
 		}
-		buffer[pos] = 0;
-		return std::string(&buffer[0], pos);
+		buffer.at(pos) = 0;
+		return std::string(buffer.data(), pos);
 	}
 
 	std::string Ansi::toAnsi(const std::string& utf8String)
@@ -188,13 +188,13 @@ namespace BaseLib
 			uint8_t c = (uint8_t)utf8String.at(i);
 			if(c == 0)
 			{
-				buffer[pos] = 0;
+				buffer.at(pos) = 0;
 				if(pos == 0) return "";
-				else return std::string(&buffer[0], pos);
+				else return std::string(buffer.data(), pos);
 			}
 			else if(c < 128)
 			{
-				buffer[pos] = utf8String.at(i);
+				buffer.at(pos) = utf8String.at(i);
 				pos++;
 			}
 			else
@@ -205,9 +205,9 @@ namespace BaseLib
 				else return ""; //Invalid
 				if(i + characterSize > utf8String.size())
 				{
-					buffer[pos] = 0;
+					buffer.at(pos) = 0;
 					if(pos == 0) return "";
-					else return std::string(&buffer[0], pos);
+					else return std::string(buffer.data(), pos);
 				}
 				currentUtfCharacter = 0;
 				for(int32_t j = characterSize - 1; j >= 0; j--)
@@ -216,20 +216,20 @@ namespace BaseLib
 				}
 				i += characterSize - 1;
 				auto lookupIterator = _ansiLookup.find(currentUtfCharacter);
-				if(lookupIterator == _ansiLookup.end()) buffer[pos] = '?';
-				else buffer[pos] = (char)lookupIterator->second;
+				if(lookupIterator == _ansiLookup.end()) buffer.at(pos) = '?';
+				else buffer.at(pos) = (char)lookupIterator->second;
 				pos++;
 			}
 		}
-		buffer[pos] = 0;
-		return std::string(&buffer[0], pos);
+		buffer.at(pos) = 0;
+		return std::string(buffer.data(), pos);
 	}
 
 	std::string Ansi::toAnsi(const char* utf8String, uint32_t length)
 	{
 		if(!_utf8ToAnsi || length == 0) return "";
 		uint32_t currentUtfCharacter = 0;
-		std::vector<char> buffer(length);
+		std::vector<char> buffer(length + 1);
 		uint32_t characterSize = 0;
 		uint32_t pos = 0;
 		for(uint32_t i = 0; i < length; ++i)
@@ -237,13 +237,13 @@ namespace BaseLib
 			uint8_t c = (uint8_t)utf8String[i];
 			if(c == 0)
 			{
-				buffer[pos] = 0;
+				buffer.at(pos) = 0;
 				if(pos == 0) return "";
-				else return std::string(&buffer[0], pos);
+				else return std::string(buffer.data(), pos);
 			}
 			else if(c < 128)
 			{
-				buffer[pos] = utf8String[i];
+				buffer.at(pos) = utf8String[i];
 				pos++;
 			}
 			else
@@ -254,9 +254,9 @@ namespace BaseLib
 				else return ""; //Invalid
 				if(i + characterSize > length)
 				{
-					buffer[pos] = 0;
+					buffer.at(pos) = 0;
 					if(pos == 0) return "";
-					else return std::string(&buffer[0], pos);
+					else return std::string(buffer.data(), pos);
 				}
 				currentUtfCharacter = 0;
 				for(int32_t j = characterSize - 1; j >= 0; j--)
@@ -265,12 +265,12 @@ namespace BaseLib
 				}
 				i += characterSize - 1;
 				std::map<uint32_t, uint8_t>::iterator lookupIterator = _ansiLookup.find(currentUtfCharacter);
-				if(lookupIterator == _ansiLookup.end()) buffer[pos] = '?';
-				else buffer[pos] = (char)lookupIterator->second;
+				if(lookupIterator == _ansiLookup.end()) buffer.at(pos) = '?';
+				else buffer.at(pos) = (char)lookupIterator->second;
 				pos++;
 			}
 		}
-		buffer[pos] = 0;
-		return std::string(&buffer[0], pos);
+		buffer.at(pos) = 0;
+		return std::string(buffer.data(), pos);
 	}
 }
