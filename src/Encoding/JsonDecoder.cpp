@@ -39,359 +39,359 @@ namespace Rpc
 
 JsonDecoder::JsonDecoder(BaseLib::SharedObjects* baseLib)
 {
-	_bl = baseLib;
+    _bl = baseLib;
 }
 
 std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json)
 {
-	uint32_t pos = 0;
-	std::shared_ptr<Variable> variable(new Variable());
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) return variable;
+    uint32_t pos = 0;
+    std::shared_ptr<Variable> variable(new Variable());
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) return variable;
 
-	while(pos < json.length())
-	{
-		switch(json[pos])
-		{
-		case '{':
-			decodeObject(json, pos, variable);
-			return variable;
-		case '[':
-			decodeArray(json, pos, variable);
-			return variable;
-		default:
-			throw JsonDecoderException("JSON does not start with '{' or '['.");
-		}
-	}
+    while(pos < json.length())
+    {
+        switch(json[pos])
+        {
+            case '{':
+                decodeObject(json, pos, variable);
+                return variable;
+            case '[':
+                decodeArray(json, pos, variable);
+                return variable;
+            default:
+                throw JsonDecoderException("JSON does not start with '{' or '['.");
+        }
+    }
 
-	return variable;
+    return variable;
 }
 
 std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json, uint32_t& bytesRead)
 {
-	bytesRead = 0;
-	std::shared_ptr<Variable> variable(new Variable());
-	skipWhitespace(json, bytesRead);
-	if(!posValid(json, bytesRead)) return variable;
+    bytesRead = 0;
+    std::shared_ptr<Variable> variable(new Variable());
+    skipWhitespace(json, bytesRead);
+    if(!posValid(json, bytesRead)) return variable;
 
-	while(bytesRead < json.length())
-	{
-		switch(json[bytesRead])
-		{
-		case '{':
-			decodeObject(json, bytesRead, variable);
-			return variable;
-		case '[':
-			decodeArray(json, bytesRead, variable);
-			return variable;
-		default:
-			throw JsonDecoderException("JSON does not start with '{' or '['.");
-		}
-	}
+    while(bytesRead < json.length())
+    {
+        switch(json[bytesRead])
+        {
+            case '{':
+                decodeObject(json, bytesRead, variable);
+                return variable;
+            case '[':
+                decodeArray(json, bytesRead, variable);
+                return variable;
+            default:
+                throw JsonDecoderException("JSON does not start with '{' or '['.");
+        }
+    }
 
-	return variable;
+    return variable;
 }
 
 std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json)
 {
-	uint32_t pos = 0;
-	std::shared_ptr<Variable> variable(new Variable());
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) return variable;
+    uint32_t pos = 0;
+    std::shared_ptr<Variable> variable(new Variable());
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) return variable;
 
-	while(pos < json.size())
-	{
-		switch(json[pos])
-		{
-		case '{':
-			decodeObject(json, pos, variable);
-			return variable;
-		case '[':
-			decodeArray(json, pos, variable);
-			return variable;
-		default:
-			throw JsonDecoderException("JSON does not start with '{' or '['.");
-		}
-	}
+    while(pos < json.size())
+    {
+        switch(json[pos])
+        {
+            case '{':
+                decodeObject(json, pos, variable);
+                return variable;
+            case '[':
+                decodeArray(json, pos, variable);
+                return variable;
+            default:
+                throw JsonDecoderException("JSON does not start with '{' or '['.");
+        }
+    }
 
-	return variable;
+    return variable;
 }
 
 std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json, uint32_t& bytesRead)
 {
-	bytesRead = 0;
-	std::shared_ptr<Variable> variable(new Variable());
-	skipWhitespace(json, bytesRead);
-	if(!posValid(json, bytesRead)) return variable;
+    bytesRead = 0;
+    std::shared_ptr<Variable> variable(new Variable());
+    skipWhitespace(json, bytesRead);
+    if(!posValid(json, bytesRead)) return variable;
 
-	while(bytesRead < json.size())
-	{
-		switch(json[bytesRead])
-		{
-		case '{':
-			decodeObject(json, bytesRead, variable);
-			return variable;
-		case '[':
-			decodeArray(json, bytesRead, variable);
-			return variable;
-		default:
-			throw JsonDecoderException("JSON does not start with '{' or '['.");
-		}
-	}
+    while(bytesRead < json.size())
+    {
+        switch(json[bytesRead])
+        {
+            case '{':
+                decodeObject(json, bytesRead, variable);
+                return variable;
+            case '[':
+                decodeArray(json, bytesRead, variable);
+                return variable;
+            default:
+                throw JsonDecoderException("JSON does not start with '{' or '['.");
+        }
+    }
 
-	return variable;
+    return variable;
 }
 
 bool JsonDecoder::posValid(const std::string& json, uint32_t pos)
 {
-	return pos < json.length();
+    return pos < json.length();
 }
 
 bool JsonDecoder::posValid(const std::vector<char>& json, uint32_t pos)
 {
-	return pos < json.size();
+    return pos < json.size();
 }
 
 void JsonDecoder::skipWhitespace(const std::string& json, uint32_t& pos)
 {
-	while(pos < json.length() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t'))
-	{
-		pos++;
-	}
+    while(pos < json.length() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t'))
+    {
+        pos++;
+    }
 }
 
 void JsonDecoder::skipWhitespace(const std::vector<char>& json, uint32_t& pos)
 {
-	while(pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t'))
-	{
-		pos++;
-	}
+    while(pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t'))
+    {
+        pos++;
+    }
 }
 
 void JsonDecoder::decodeObject(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& variable)
 {
-	variable->type = VariableType::tStruct;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == '{')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-	}
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-	if(json[pos] == '}')
-	{
-		pos++;
-		return; //Empty object
-	}
+    variable->type = VariableType::tStruct;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == '{')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+    }
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+    if(json[pos] == '}')
+    {
+        pos++;
+        return; //Empty object
+    }
 
-	while(pos < json.length())
-	{
-		if(json[pos] != '"') throw JsonDecoderException("Object element has no name.");
-		std::string name;
-		decodeString(json, pos, name);
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		if(json[pos] != ':')
-		{
-			variable->structValue->insert(StructElement(name, std::shared_ptr<Variable>(new Variable(VariableType::tVoid))));
-			if(json[pos] == ',')
-			{
-				pos++;
-				skipWhitespace(json, pos);
-				if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-				continue;
-			}
-			if(json[pos] == '}')
-			{
-				pos++;
-				return;
-			}
-			throw JsonDecoderException("Invalid data after object name.");
-		}
-		pos++;
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
-		decodeValue(json, pos,element);
-		variable->structValue->insert(StructElement(name, element));
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		if(json[pos] == ',')
-		{
-			pos++;
-			skipWhitespace(json, pos);
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-			continue;
-		}
-		if(json[pos] == '}')
-		{
-			pos++;
-			return;
-		}
-		throw JsonDecoderException("No closing '}' found.");
-	}
+    while(pos < json.length())
+    {
+        if(json[pos] != '"') throw JsonDecoderException("Object element has no name.");
+        std::string name;
+        decodeString(json, pos, name);
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        if(json[pos] != ':')
+        {
+            variable->structValue->insert(StructElement(name, std::shared_ptr<Variable>(new Variable(VariableType::tVoid))));
+            if(json[pos] == ',')
+            {
+                pos++;
+                skipWhitespace(json, pos);
+                if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+                continue;
+            }
+            if(json[pos] == '}')
+            {
+                pos++;
+                return;
+            }
+            throw JsonDecoderException("Invalid data after object name.");
+        }
+        pos++;
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
+        decodeValue(json, pos,element);
+        variable->structValue->insert(StructElement(name, element));
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        if(json[pos] == ',')
+        {
+            pos++;
+            skipWhitespace(json, pos);
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+            continue;
+        }
+        if(json[pos] == '}')
+        {
+            pos++;
+            return;
+        }
+        throw JsonDecoderException("No closing '}' found.");
+    }
 }
 
 void JsonDecoder::decodeObject(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& variable)
 {
-	variable->type = VariableType::tStruct;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == '{')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-	}
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-	if(json[pos] == '}')
-	{
-		pos++;
-		return; //Empty object
-	}
+    variable->type = VariableType::tStruct;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == '{')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+    }
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+    if(json[pos] == '}')
+    {
+        pos++;
+        return; //Empty object
+    }
 
-	while(pos < json.size())
-	{
-		if(json[pos] != '"') throw JsonDecoderException("Object element has no name.");
-		std::string name;
-		decodeString(json, pos, name);
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		if(json[pos] != ':')
-		{
-			variable->structValue->insert(StructElement(name, std::shared_ptr<Variable>(new Variable(VariableType::tVoid))));
-			if(json[pos] == ',')
-			{
-				pos++;
-				skipWhitespace(json, pos);
-				if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-				continue;
-			}
-			if(json[pos] == '}')
-			{
-				pos++;
-				return;
-			}
-			throw JsonDecoderException("Invalid data after object name.");
-		}
-		pos++;
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
-		decodeValue(json, pos,element);
-		variable->structValue->insert(StructElement(name, element));
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-		if(json[pos] == ',')
-		{
-			pos++;
-			skipWhitespace(json, pos);
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
-			continue;
-		}
-		if(json[pos] == '}')
-		{
-			pos++;
-			return;
-		}
-		throw JsonDecoderException("No closing '}' found.");
-	}
+    while(pos < json.size())
+    {
+        if(json[pos] != '"') throw JsonDecoderException("Object element has no name.");
+        std::string name;
+        decodeString(json, pos, name);
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        if(json[pos] != ':')
+        {
+            variable->structValue->insert(StructElement(name, std::shared_ptr<Variable>(new Variable(VariableType::tVoid))));
+            if(json[pos] == ',')
+            {
+                pos++;
+                skipWhitespace(json, pos);
+                if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+                continue;
+            }
+            if(json[pos] == '}')
+            {
+                pos++;
+                return;
+            }
+            throw JsonDecoderException("Invalid data after object name.");
+        }
+        pos++;
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
+        decodeValue(json, pos,element);
+        variable->structValue->insert(StructElement(name, element));
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+        if(json[pos] == ',')
+        {
+            pos++;
+            skipWhitespace(json, pos);
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
+            continue;
+        }
+        if(json[pos] == '}')
+        {
+            pos++;
+            return;
+        }
+        throw JsonDecoderException("No closing '}' found.");
+    }
 }
 
 void JsonDecoder::decodeArray(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& variable)
 {
-	variable->type = VariableType::tArray;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == '[')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-	}
+    variable->type = VariableType::tArray;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == '[')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+    }
 
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-	if(json[pos] == ']')
-	{
-		pos++;
-		return; //Empty array
-	}
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+    if(json[pos] == ']')
+    {
+        pos++;
+        return; //Empty array
+    }
 
-	while(pos < json.length())
-	{
-		std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
-		decodeValue(json, pos, element);
-		variable->arrayValue->push_back(element);
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-		if(json[pos] == ',')
-		{
-			pos++;
-			skipWhitespace(json, pos);
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-			continue;
-		}
-		if(json[pos] == ']')
-		{
-			pos++;
-			return;
-		}
-		throw JsonDecoderException("No closing ']' found.");
-	}
+    while(pos < json.length())
+    {
+        std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
+        decodeValue(json, pos, element);
+        variable->arrayValue->push_back(element);
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+        if(json[pos] == ',')
+        {
+            pos++;
+            skipWhitespace(json, pos);
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+            continue;
+        }
+        if(json[pos] == ']')
+        {
+            pos++;
+            return;
+        }
+        throw JsonDecoderException("No closing ']' found.");
+    }
 }
 
 void JsonDecoder::decodeArray(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& variable)
 {
-	variable->type = VariableType::tArray;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == '[')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-	}
+    variable->type = VariableType::tArray;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == '[')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+    }
 
-	skipWhitespace(json, pos);
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-	if(json[pos] == ']')
-	{
-		pos++;
-		return; //Empty array
-	}
+    skipWhitespace(json, pos);
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+    if(json[pos] == ']')
+    {
+        pos++;
+        return; //Empty array
+    }
 
-	while(pos < json.size())
-	{
-		std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
-		decodeValue(json, pos, element);
-		variable->arrayValue->push_back(element);
-		skipWhitespace(json, pos);
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-		if(json[pos] == ',')
-		{
-			pos++;
-			skipWhitespace(json, pos);
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
-			continue;
-		}
-		if(json[pos] == ']')
-		{
-			pos++;
-			return;
-		}
-		throw JsonDecoderException("No closing ']' found.");
-	}
+    while(pos < json.size())
+    {
+        std::shared_ptr<Variable> element(new Variable(VariableType::tVoid));
+        decodeValue(json, pos, element);
+        variable->arrayValue->push_back(element);
+        skipWhitespace(json, pos);
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+        if(json[pos] == ',')
+        {
+            pos++;
+            skipWhitespace(json, pos);
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
+            continue;
+        }
+        if(json[pos] == ']')
+        {
+            pos++;
+            return;
+        }
+        throw JsonDecoderException("No closing ']' found.");
+    }
 }
 
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tString;
-	std::string s;
-	decodeString(json, pos, value->stringValue);
+    value->type = VariableType::tString;
+    std::string s;
+    decodeString(json, pos, value->stringValue);
 }
 
 void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tString;
-	std::string s;
-	decodeString(json, pos, value->stringValue);
+    value->type = VariableType::tString;
+    std::string s;
+    decodeString(json, pos, value->stringValue);
 }
 
 #if __GNUC__ > 4
@@ -399,40 +399,40 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 std::string JsonDecoder::decodeString(const std::string& s)
 {
     std::string utf8; //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-	utf8.reserve(s.size());
-	for(int32_t i = 0; i < (signed)s.size(); i++)
-	{
-		char c = s[i];
-		if(c == '\\')
-		{
-			i++;
-			if(!posValid(s, i)) break;
-			c = s[i];
-			switch(c)
-			{
-				case 'b':
-					utf8.push_back('\b');
-					break;
-				case 'f':
-					utf8.push_back('\f');
-					break;
-				case 'n':
-					utf8.push_back('\n');
-					break;
-				case 'r':
-					utf8.push_back('\r');
-					break;
-				case 't':
-					utf8.push_back('\t');
-					break;
-				case 'u':
-				{
-					i += 4;
-					if(!posValid(s, i)) break;
-					std::string hex1(s.data() + (i - 3), 2);
-					std::string hex2(s.data() + (i - 1), 2);
-					char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
+    utf8.reserve(s.size());
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+    for(int32_t i = 0; i < (signed)s.size(); i++)
+    {
+        char c = s[i];
+        if(c == '\\')
+        {
+            i++;
+            if(!posValid(s, i)) break;
+            c = s[i];
+            switch(c)
+            {
+                case 'b':
+                    utf8.push_back('\b');
+                    break;
+                case 'f':
+                    utf8.push_back('\f');
+                    break;
+                case 'n':
+                    utf8.push_back('\n');
+                    break;
+                case 'r':
+                    utf8.push_back('\r');
+                    break;
+                case 't':
+                    utf8.push_back('\t');
+                    break;
+                case 'u':
+                {
+                    i += 4;
+                    if(!posValid(s, i)) break;
+                    std::string hex1(s.data() + (i - 3), 2);
+                    std::string hex2(s.data() + (i - 1), 2);
+                    char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
                     if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
                         if((uint16_t)c16 >= 0xD800 && (uint16_t)c16 <= 0xDBFF) //High surrogate => a second character follows
@@ -456,60 +456,61 @@ std::string JsonDecoder::decodeString(const std::string& s)
                             if(!utf8Char.empty()) utf8.insert(utf8.end(), utf8Char.begin(), utf8Char.end());
                         }
                     }
-					break;
-				}
-				default:
-					utf8.push_back(s[i]);
-			}
-		}
-		else utf8.push_back(s[i]);
-	}
+                    break;
+                }
+                default:
+                    utf8.push_back(s[i]);
+            }
+        }
+        else utf8.push_back(s[i]);
+    }
 
-	return utf8;
+    utf8.shrink_to_fit();
+    return utf8;
 }
 
 void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::string& s)
 {
-	s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-	s.reserve(json.size());
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	if(json[pos] == '"')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	}
-	while(pos < json.length())
-	{
-		char c = json[pos];
-		if(c == '\\')
-		{
-			pos++;
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			c = json[pos];
-			switch(c)
-			{
-			case 'b':
-				s.push_back('\b');
-				break;
-			case 'f':
-				s.push_back('\f');
-				break;
-			case 'n':
-				s.push_back('\n');
-				break;
-			case 'r':
-				s.push_back('\r');
-				break;
-			case 't':
-				s.push_back('\t');
-				break;
-			case 'u':
-				{
-					pos += 4;
-					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-					std::string hex1(json.data() + (pos - 3), 2);
-					std::string hex2(json.data() + (pos - 1), 2);
+    s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+    s.reserve(1024);
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    if(json[pos] == '"')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    }
+    while(pos < json.length())
+    {
+        char c = json[pos];
+        if(c == '\\')
+        {
+            pos++;
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+            c = json[pos];
+            switch(c)
+            {
+                case 'b':
+                    s.push_back('\b');
+                    break;
+                case 'f':
+                    s.push_back('\f');
+                    break;
+                case 'n':
+                    s.push_back('\n');
+                    break;
+                case 'r':
+                    s.push_back('\r');
+                    break;
+                case 't':
+                    s.push_back('\t');
+                    break;
+                case 'u':
+                {
+                    pos += 4;
+                    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+                    std::string hex1(json.data() + (pos - 3), 2);
+                    std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
                     if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
@@ -534,65 +535,67 @@ void JsonDecoder::decodeString(const std::string& json, uint32_t& pos, std::stri
                             if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
                         }
                     }
-				}
-				break;
-			default:
-				s.push_back(json[pos]);
-			}
-		}
-		else if(c == '"')
-		{
-			pos++;
-			return;
-		}
-		else s.push_back(json[pos]);
-		pos++;
-	}
-	throw JsonDecoderException("No closing '\"' found.");
+                }
+                    break;
+                default:
+                    s.push_back(json[pos]);
+            }
+        }
+        else if(c == '"')
+        {
+            pos++;
+            s.shrink_to_fit();
+            return;
+        }
+        else s.push_back(json[pos]);
+        pos++;
+        if(s.size() + 4 > s.capacity()) s.reserve(s.capacity() + 1024);
+    }
+    throw JsonDecoderException("No closing '\"' found.");
 }
 
 void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std::string& s)
 {
-	s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
-	s.reserve(json.size());
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	if(json[pos] == '"')
-	{
-		pos++;
-		if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	}
-	while(pos < json.size())
-	{
-		char c = json[pos];
-		if(c == '\\')
-		{
-			pos++;
-			if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-			c = json[pos];
-			switch(c)
-			{
-			case 'b':
-				s.push_back('\b');
-				break;
-			case 'f':
-				s.push_back('\f');
-				break;
-			case 'n':
-				s.push_back('\n');
-				break;
-			case 'r':
-				s.push_back('\r');
-				break;
-			case 't':
-				s.push_back('\t');
-				break;
-			case 'u':
-				{
-					pos += 4;
-					if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-					std::string hex1(json.data() + (pos - 3), 2);
-					std::string hex2(json.data() + (pos - 1), 2);
+    s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+    s.reserve(1024);
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    if(json[pos] == '"')
+    {
+        pos++;
+        if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    }
+    while(pos < json.size())
+    {
+        char c = json[pos];
+        if(c == '\\')
+        {
+            pos++;
+            if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+            c = json[pos];
+            switch(c)
+            {
+                case 'b':
+                    s.push_back('\b');
+                    break;
+                case 'f':
+                    s.push_back('\f');
+                    break;
+                case 'n':
+                    s.push_back('\n');
+                    break;
+                case 'r':
+                    s.push_back('\r');
+                    break;
+                case 't':
+                    s.push_back('\t');
+                    break;
+                case 'u':
+                {
+                    pos += 4;
+                    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+                    std::string hex1(json.data() + (pos - 3), 2);
+                    std::string hex2(json.data() + (pos - 1), 2);
                     char16_t c16 = ((char16_t)(uint16_t)(BaseLib::Math::getNumber(hex1, true) << 8)) | ((char16_t)(uint16_t)BaseLib::Math::getNumber(hex2, true));
                     if(c16 != 0 && ((uint16_t)c16 < 0xDC00 || (uint16_t)c16 > 0xDFFF)) //Ignore low surrogates as first character
                     {
@@ -617,21 +620,23 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
                             if(!utf8Char.empty()) s.insert(s.end(), utf8Char.begin(), utf8Char.end());
                         }
                     }
-				}
-				break;
-			default:
-				s.push_back(json[pos]);
-			}
-		}
-		else if(c == '"')
-		{
-			pos++;
-			return;
-		}
-		else s.push_back(json[pos]);
-		pos++;
-	}
-	throw JsonDecoderException("No closing '\"' found.");
+                }
+                    break;
+                default:
+                    s.push_back(json[pos]);
+            }
+        }
+        else if(c == '"')
+        {
+            pos++;
+            s.shrink_to_fit();
+            return;
+        }
+        else s.push_back(json[pos]);
+        pos++;
+        if(s.size() + 4 > s.capacity()) s.reserve(s.capacity() + 1024);
+    }
+    throw JsonDecoderException("No closing '\"' found.");
 }
 
 #else
@@ -640,7 +645,7 @@ std::string JsonDecoder::decodeString(const std::string& s)
 {
 	std::string result;
 	result.reserve(s.size());
-	for(int32_t i = 0; i < s.size(); i++)
+	for(int32_t i = 0; i < (int32_t)s.size(); i++)
 	{
 		char c = s[i];
 		if(c == '\\')
@@ -810,366 +815,366 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 
 void JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	switch (json[pos]) {
-		case 'n':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
-			decodeNull(json, pos, value);
-			break;
-		case 't':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
-			decodeBoolean(json, pos, value);
-			break;
-		case 'f':
-			if(_bl->debugLevel >= 65) _bl->out.printDebug("Decoding JSON boolean.");
-			decodeBoolean(json, pos, value);
-			break;
-		case '"':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
-			decodeString(json, pos, value);
-			break;
-		case '{':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
-			decodeObject(json, pos, value);
-			break;
-		case '[':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
-			decodeArray(json, pos, value);
-			break;
-		default:
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
-			decodeNumber(json, pos, value);
-			break;
-	}
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    switch (json[pos]) {
+        case 'n':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
+            decodeNull(json, pos, value);
+            break;
+        case 't':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
+            decodeBoolean(json, pos, value);
+            break;
+        case 'f':
+            if(_bl->debugLevel >= 65) _bl->out.printDebug("Decoding JSON boolean.");
+            decodeBoolean(json, pos, value);
+            break;
+        case '"':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
+            decodeString(json, pos, value);
+            break;
+        case '{':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
+            decodeObject(json, pos, value);
+            break;
+        case '[':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
+            decodeArray(json, pos, value);
+            break;
+        default:
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
+            decodeNumber(json, pos, value);
+            break;
+    }
 }
 
 void JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
-	switch (json[pos]) {
-		case 'n':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
-			decodeNull(json, pos, value);
-			break;
-		case 't':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
-			decodeBoolean(json, pos, value);
-			break;
-		case 'f':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
-			decodeBoolean(json, pos, value);
-			break;
-		case '"':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
-			decodeString(json, pos, value);
-			break;
-		case '{':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
-			decodeObject(json, pos, value);
-			break;
-		case '[':
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
-			decodeArray(json, pos, value);
-			break;
-		default:
-			if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
-			decodeNumber(json, pos, value);
-			break;
-	}
+    if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
+    switch (json[pos]) {
+        case 'n':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
+            decodeNull(json, pos, value);
+            break;
+        case 't':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
+            decodeBoolean(json, pos, value);
+            break;
+        case 'f':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
+            decodeBoolean(json, pos, value);
+            break;
+        case '"':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
+            decodeString(json, pos, value);
+            break;
+        case '{':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
+            decodeObject(json, pos, value);
+            break;
+        case '[':
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
+            decodeArray(json, pos, value);
+            break;
+        default:
+            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
+            decodeNumber(json, pos, value);
+            break;
+    }
 }
 
 void JsonDecoder::decodeBoolean(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tBoolean;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == 't')
-	{
-		value->booleanValue = true;
-		pos += 4;
-	}
-	else
-	{
-		value->booleanValue = false;
-		pos += 5;
-	}
+    value->type = VariableType::tBoolean;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == 't')
+    {
+        value->booleanValue = true;
+        pos += 4;
+    }
+    else
+    {
+        value->booleanValue = false;
+        pos += 5;
+    }
 }
 
 void JsonDecoder::decodeBoolean(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tBoolean;
-	if(!posValid(json, pos)) return;
-	if(json[pos] == 't')
-	{
-		value->booleanValue = true;
-		pos += 4;
-	}
-	else
-	{
-		value->booleanValue = false;
-		pos += 5;
-	}
+    value->type = VariableType::tBoolean;
+    if(!posValid(json, pos)) return;
+    if(json[pos] == 't')
+    {
+        value->booleanValue = true;
+        pos += 4;
+    }
+    else
+    {
+        value->booleanValue = false;
+        pos += 5;
+    }
 }
 
 void JsonDecoder::decodeNull(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tVoid;
-	pos += 4;
+    value->type = VariableType::tVoid;
+    pos += 4;
 }
 
 void JsonDecoder::decodeNull(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tVoid;
-	pos += 4;
+    value->type = VariableType::tVoid;
+    pos += 4;
 }
 
 void JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tInteger;
-	if(!posValid(json, pos)) return;
-	bool minus = false;
-	if(json[pos] == '-')
-	{
-		minus = true;
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
-	else if(json[pos] == '+')
-	{
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
+    value->type = VariableType::tInteger;
+    if(!posValid(json, pos)) return;
+    bool minus = false;
+    if(json[pos] == '-')
+    {
+        minus = true;
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
+    else if(json[pos] == '+')
+    {
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
 
-	bool isDouble = false;
-	int64_t number = 0;
-	if(json[pos] == '0')
-	{
-		number = 0;
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
-	else if(json[pos] >= '1' && json[pos] <= '9')
-	{
-		while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			if (number >= 214748364)
-			{
-				value->type = VariableType::tFloat;
-				isDouble = true;
-				value->floatValue = number;
-				break;
-			}
-			number = number * 10 + (json[pos] - '0');
-			pos++;
-		}
-	}
-	else throw JsonDecoderException("Tried to decode invalid number.");
+    bool isDouble = false;
+    int64_t number = 0;
+    if(json[pos] == '0')
+    {
+        number = 0;
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
+    else if(json[pos] >= '1' && json[pos] <= '9')
+    {
+        while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            if (number >= 214748364)
+            {
+                value->type = VariableType::tFloat;
+                isDouble = true;
+                value->floatValue = number;
+                break;
+            }
+            number = number * 10 + (json[pos] - '0');
+            pos++;
+        }
+    }
+    else throw JsonDecoderException("Tried to decode invalid number.");
 
-	if(isDouble)
-	{
-		while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			value->floatValue = value->floatValue * 10 + (json[pos] - '0');
-			pos++;
-		}
-	}
+    if(isDouble)
+    {
+        while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            pos++;
+        }
+    }
 
-	if(!posValid(json, pos)) return;
-	int32_t exponent = 0;
-	if(json[pos] == '.')
-	{
-		if(!isDouble)
-		{
-			value->type = VariableType::tFloat;
-			isDouble = true;
-			value->floatValue = number;
-		}
-		pos++;
-		while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			value->floatValue = value->floatValue * 10 + (json[pos] - '0');
-			pos++;
-			exponent--;
-		}
-	}
+    if(!posValid(json, pos)) return;
+    int32_t exponent = 0;
+    if(json[pos] == '.')
+    {
+        if(!isDouble)
+        {
+            value->type = VariableType::tFloat;
+            isDouble = true;
+            value->floatValue = number;
+        }
+        pos++;
+        while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            pos++;
+            exponent--;
+        }
+    }
 
-	if(!posValid(json, pos)) return;
-	int32_t exponent2 = 0;
-	if(json[pos] == 'e' || json[pos] == 'E')
-	{
-		pos++;
-		if(!posValid(json, pos)) return;
+    if(!posValid(json, pos)) return;
+    int32_t exponent2 = 0;
+    if(json[pos] == 'e' || json[pos] == 'E')
+    {
+        pos++;
+        if(!posValid(json, pos)) return;
 
-		bool negative = false;
-		if(json[pos] == '-')
-		{
-			negative = true;
-			pos++;
-			if(!posValid(json, pos)) return;
-		}
-		else if(json[pos] == '+')
-		{
-			pos++;
-			if(!posValid(json, pos)) return;
-		}
-		if (json[pos] >= '0' && json[pos] <= '9')
-		{
-			exponent2 = json[pos] - '0';
-			pos++;
-			if(!posValid(json, pos)) return;
-			while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
-			{
-				exponent2 = exponent2 * 10 + (json[pos] - '0');
-			}
-		}
-		if(negative) exponent2 *= -1;
-	}
+        bool negative = false;
+        if(json[pos] == '-')
+        {
+            negative = true;
+            pos++;
+            if(!posValid(json, pos)) return;
+        }
+        else if(json[pos] == '+')
+        {
+            pos++;
+            if(!posValid(json, pos)) return;
+        }
+        if (json[pos] >= '0' && json[pos] <= '9')
+        {
+            exponent2 = json[pos] - '0';
+            pos++;
+            if(!posValid(json, pos)) return;
+            while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+            {
+                exponent2 = exponent2 * 10 + (json[pos] - '0');
+            }
+        }
+        if(negative) exponent2 *= -1;
+    }
 
-	if(isDouble)
-	{
-		exponent += exponent2;
-		if(exponent < -308) exponent = -308;
-		else if(exponent > 308) exponent = 308;
-		value->floatValue = (exponent >= 0) ? value->floatValue * Math::Pow10(exponent) : value->floatValue / Math::Pow10(-exponent);
-		if(minus) value->floatValue *= -1;
-		value->integerValue64 = std::llround(value->floatValue);
-		value->integerValue = std::lround(value->floatValue);
-	}
-	else
-	{
-		if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
-		{
-			value->type = VariableType::tInteger64;
-		}
+    if(isDouble)
+    {
+        exponent += exponent2;
+        if(exponent < -308) exponent = -308;
+        else if(exponent > 308) exponent = 308;
+        value->floatValue = (exponent >= 0) ? value->floatValue * Math::Pow10(exponent) : value->floatValue / Math::Pow10(-exponent);
+        if(minus) value->floatValue *= -1;
+        value->integerValue64 = std::llround(value->floatValue);
+        value->integerValue = std::lround(value->floatValue);
+    }
+    else
+    {
+        if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
+        {
+            value->type = VariableType::tInteger64;
+        }
 
-		value->integerValue64 = minus ? -((int64_t)number) : number;
-		value->integerValue = value->integerValue64;
-		value->floatValue = value->integerValue64;
-	}
+        value->integerValue64 = minus ? -((int64_t)number) : number;
+        value->integerValue = value->integerValue64;
+        value->floatValue = value->integerValue64;
+    }
 }
 
 void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-	value->type = VariableType::tInteger;
-	if(!posValid(json, pos)) return;
-	bool minus = false;
-	if(json[pos] == '-')
-	{
-		minus = true;
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
-	else if(json[pos] == '+')
-	{
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
+    value->type = VariableType::tInteger;
+    if(!posValid(json, pos)) return;
+    bool minus = false;
+    if(json[pos] == '-')
+    {
+        minus = true;
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
+    else if(json[pos] == '+')
+    {
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
 
-	bool isDouble = false;
-	uint64_t number = 0;
-	if(json[pos] == '0')
-	{
-		number = 0;
-		pos++;
-		if(!posValid(json, pos)) return;
-	}
-	else if(json[pos] >= '1' && json[pos] <= '9')
-	{
-		while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			if (number >= 214748364)
-			{
-				value->type = VariableType::tFloat;
-				isDouble = true;
-				value->floatValue = number;
-				break;
-			}
-			number = number * 10 + (json[pos] - '0');
-			pos++;
-		}
-	}
-	else throw JsonDecoderException("Tried to decode invalid number.");
+    bool isDouble = false;
+    uint64_t number = 0;
+    if(json[pos] == '0')
+    {
+        number = 0;
+        pos++;
+        if(!posValid(json, pos)) return;
+    }
+    else if(json[pos] >= '1' && json[pos] <= '9')
+    {
+        while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            if (number >= 214748364)
+            {
+                value->type = VariableType::tFloat;
+                isDouble = true;
+                value->floatValue = number;
+                break;
+            }
+            number = number * 10 + (json[pos] - '0');
+            pos++;
+        }
+    }
+    else throw JsonDecoderException("Tried to decode invalid number.");
 
-	if(isDouble)
-	{
-		while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			value->floatValue = value->floatValue * 10 + (json[pos] - '0');
-			pos++;
-		}
-	}
+    if(isDouble)
+    {
+        while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            pos++;
+        }
+    }
 
-	if(!posValid(json, pos)) return;
-	int32_t exponent = 0;
-	if(json[pos] == '.')
-	{
-		if(!isDouble)
-		{
-			value->type = VariableType::tFloat;
-			isDouble = true;
-			value->floatValue = number;
-		}
-		pos++;
-		while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
-		{
-			value->floatValue = value->floatValue * 10 + (json[pos] - '0');
-			pos++;
-			exponent--;
-		}
-	}
+    if(!posValid(json, pos)) return;
+    int32_t exponent = 0;
+    if(json[pos] == '.')
+    {
+        if(!isDouble)
+        {
+            value->type = VariableType::tFloat;
+            isDouble = true;
+            value->floatValue = number;
+        }
+        pos++;
+        while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+        {
+            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            pos++;
+            exponent--;
+        }
+    }
 
-	if(!posValid(json, pos)) return;
-	int32_t exponent2 = 0;
-	if(json[pos] == 'e' || json[pos] == 'E')
-	{
-		pos++;
-		if(!posValid(json, pos)) return;
+    if(!posValid(json, pos)) return;
+    int32_t exponent2 = 0;
+    if(json[pos] == 'e' || json[pos] == 'E')
+    {
+        pos++;
+        if(!posValid(json, pos)) return;
 
-		bool negative = false;
-		if(json[pos] == '-')
-		{
-			negative = true;
-			pos++;
-			if(!posValid(json, pos)) return;
-		}
-		else if(json[pos] == '+')
-		{
-			pos++;
-			if(!posValid(json, pos)) return;
-		}
-		if (json[pos] >= '0' && json[pos] <= '9')
-		{
-			exponent2 = json[pos] - '0';
-			pos++;
-			if(!posValid(json, pos)) return;
-			while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
-			{
-				exponent2 = exponent2 * 10 + (json[pos] - '0');
-			}
-		}
-		if(negative) exponent2 *= -1;
-	}
+        bool negative = false;
+        if(json[pos] == '-')
+        {
+            negative = true;
+            pos++;
+            if(!posValid(json, pos)) return;
+        }
+        else if(json[pos] == '+')
+        {
+            pos++;
+            if(!posValid(json, pos)) return;
+        }
+        if (json[pos] >= '0' && json[pos] <= '9')
+        {
+            exponent2 = json[pos] - '0';
+            pos++;
+            if(!posValid(json, pos)) return;
+            while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+            {
+                exponent2 = exponent2 * 10 + (json[pos] - '0');
+            }
+        }
+        if(negative) exponent2 *= -1;
+    }
 
-	if(isDouble)
-	{
-		exponent += exponent2;
-		if(exponent < -308) exponent = -308;
-		else if(exponent > 308) exponent = 308;
-		value->floatValue = (exponent >= 0) ? value->floatValue * Math::Pow10(exponent) : value->floatValue / Math::Pow10(-exponent);
-		if(minus) value->floatValue *= -1;
-		value->integerValue64 = std::llround(value->floatValue);
-		value->integerValue = std::lround(value->floatValue);
-	}
-	else
-	{
-		if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
-		{
-			value->type = VariableType::tInteger64;
-		}
+    if(isDouble)
+    {
+        exponent += exponent2;
+        if(exponent < -308) exponent = -308;
+        else if(exponent > 308) exponent = 308;
+        value->floatValue = (exponent >= 0) ? value->floatValue * Math::Pow10(exponent) : value->floatValue / Math::Pow10(-exponent);
+        if(minus) value->floatValue *= -1;
+        value->integerValue64 = std::llround(value->floatValue);
+        value->integerValue = std::lround(value->floatValue);
+    }
+    else
+    {
+        if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
+        {
+            value->type = VariableType::tInteger64;
+        }
 
-		value->integerValue64 = minus ? -((int64_t)number) : number;
-		value->integerValue = value->integerValue64;
-		value->floatValue = value->integerValue64;
-	}
+        value->integerValue64 = minus ? -((int64_t)number) : number;
+        value->integerValue = value->integerValue64;
+        value->floatValue = value->integerValue64;
+    }
 }
 
 }
