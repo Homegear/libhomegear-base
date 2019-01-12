@@ -174,6 +174,8 @@ set(SOURCE_FILES
         src/Systems/GlobalServiceMessages.h
         src/Systems/ICentral.cpp
         src/Systems/ICentral.h
+        src/Systems/IDeviceFamily.cpp
+        src/Systems/IDeviceFamily.h
         src/Systems/IPhysicalInterface.cpp
         src/Systems/IPhysicalInterface.h
         src/Systems/Packet.cpp
