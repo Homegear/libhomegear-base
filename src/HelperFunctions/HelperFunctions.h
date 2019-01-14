@@ -134,6 +134,14 @@ public:
 	static std::string getTimeString(std::string format, int64_t time = 0);
 
 	/**
+	 * Calculates a UUID including a time stamp in microseconds.
+	 *
+	 * @param time The time in microseconds to calculate the UUID for or "0" to use the current time.
+	 * @return Returns a time UUID.
+	 */
+	static std::string getTimeUuid(int64_t time = 0);
+
+	/**
 	 * Left trims a string.
 	 *
 	 * @see rtrim()
@@ -500,6 +508,33 @@ public:
 	 * @return Returns the hex string of the integer.
 	 */
 	static std::string getHexString(int32_t number, int32_t width = -1);
+
+    /**
+     * Converts an integer to a hex string.
+     *
+     * @param number The integer to convert.
+     * @param width The minimal width of the hex string (default -1). If the hex string is smaller, it is prefixed with zeros.
+     * @return Returns the hex string of the integer.
+     */
+    static std::string getHexString(uint32_t number, int32_t width = -1);
+
+	/**
+	 * Converts an integer to a hex string.
+	 *
+	 * @param number The integer to convert.
+	 * @param width The minimal width of the hex string (default -1). If the hex string is smaller, it is prefixed with zeros.
+	 * @return Returns the hex string of the integer.
+	 */
+	static std::string getHexString(int64_t number, int32_t width = -1);
+
+    /**
+     * Converts an integer to a hex string.
+     *
+     * @param number The integer to convert.
+     * @param width The minimal width of the hex string (default -1). If the hex string is smaller, it is prefixed with zeros.
+     * @return Returns the hex string of the integer.
+     */
+    static std::string getHexString(uint64_t number, int32_t width = -1);
 
 	/**
 	 * Converts a nibble to a hex character.
