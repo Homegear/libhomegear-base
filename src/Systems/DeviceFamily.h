@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 Sathya Laufer
+/* Copyright 2013-2019 Homegear GmbH
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -31,76 +31,27 @@
 #ifndef DEVICEFAMILY_H_
 #define DEVICEFAMILY_H_
 
-#include "FamilySettings.h"
-#include "../Database/DatabaseTypes.h"
-#include "ICentral.h"
-#include "PhysicalInterfaceSettings.h"
-#include "IPhysicalInterface.h"
-#include "../Variable.h"
-#include "../DeviceDescription/Devices.h"
-
-#include <iostream>
-#include <string>
-#include <memory>
-
-#include "PhysicalInterfaces.h"
+#include "IDeviceFamily.h"
 
 namespace BaseLib
 {
-
-class SharedObjects;
-
 namespace Systems
 {
-class DeviceFamily : public ICentral::ICentralEventSink, public DeviceDescription::Devices::IDevicesEventSink, public IEvents
+
+class DeviceFamily : public IDeviceFamily
 {
 public:
-	//Event handling
-	class IFamilyEventSink : public IEventSinkBase
-	{
-	public:
-		//Hooks
-		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers) = 0;
-		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers) = 0;
-
-		virtual void onRPCEvent(std::string source, uint64_t id, int32_t channel, std::string deviceAddress, std::shared_ptr<std::vector<std::string>> valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
-		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
-		virtual void onRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions) = 0;
-		virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo) = 0;
-		virtual void onEvent(std::string source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
-		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
-		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
-		virtual int32_t onCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey) = 0;
-		virtual uint64_t onGetRoomIdByName(std::string& name) = 0;
-
-		//Device description
-		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output) = 0;
-	};
-	//End event handling
-
 	DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
-	virtual ~DeviceFamily();
 
-	virtual bool enabled();
 	virtual bool init();
 	virtual void dispose();
 
 	virtual bool lifetick();
-	virtual void lock();
-	virtual void unlock();
-	virtual bool locked();
 
-	virtual int32_t getFamily();
-	virtual FamilySettings::PFamilySetting getFamilySetting(std::string& name);
-	virtual void setFamilySetting(std::string& name, std::string& value);
-	virtual void setFamilySetting(std::string& name, int32_t value);
-	virtual void setFamilySetting(std::string& name, std::vector<char>& value);
-	virtual void deleteFamilySettingFromDatabase(std::string& name);
 	virtual std::shared_ptr<DeviceDescription::Devices> getRpcDevices();
 	virtual void load();
 	virtual void save(bool full);
 	virtual std::shared_ptr<ICentral> getCentral();
-	virtual std::string getName();
 	virtual std::string handleCliCommand(std::string& command);
 	virtual bool hasPhysicalInterface();
 	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces();
@@ -121,51 +72,8 @@ public:
     virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields);
     // }}}
 protected:
-	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<ICentral> _central;
-	std::shared_ptr<FamilySettings> _settings;
 	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
-	std::atomic_bool _locked;
-	bool _disposed = false;
-
-	// {{{ Event handling
-		//Hooks
-		virtual void raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
-		virtual void raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
-
-		virtual void raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
-		virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-		virtual void raiseRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions);
-		virtual void raiseRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-		virtual void raiseEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
-		virtual void raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
-		virtual BaseLib::PVariable raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
-		virtual int32_t raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey);
-		virtual uint64_t raiseGetRoomIdByName(std::string& name);
-
-		// {{{ Device description event handling
-			virtual void raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
-		// }}}
-	// }}}
-
-	// {{{ Device event handling
-		//Hooks
-		virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers);
-		virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers);
-
-		virtual void onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
-		virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-		virtual void onRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions);
-		virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo);
-		virtual void onEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>>& values);
-		virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait);
-		virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters);
-		virtual uint64_t onGetRoomIdByName(std::string& name);
-	// }}}
-
-	// {{{ Device description event handling
-		virtual void onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output);
-	// }}}
 
 	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
 
@@ -174,10 +82,6 @@ protected:
 private:
 	DeviceFamily(const DeviceFamily&) = delete;
 	DeviceFamily& operator=(const DeviceFamily&) = delete;
-
-	IFamilyEventSink* _eventHandler;
-	int32_t _family = -1;
-	std::string _name;
 };
 
 }

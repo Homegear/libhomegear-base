@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 Sathya Laufer
+/* Copyright 2013-2019 Homegear GmbH
  *
  * libhomegear-base is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License as
@@ -237,7 +237,7 @@ int32_t Math::getNumber(const std::string& s, bool isHex)
 	int32_t number = 0;
 	//Don't change to std::stol, because otherwise numbers larger than 0x7FFFFFFF can't be parsed.
 	if(xpos == std::string::npos && !isHex) try { number = (int32_t)std::stoll(s, 0, 10); } catch(...) {}
-	else try { number = (int32_t)std::stol(s, 0, 16); } catch(...) {}
+	else try { number = (int32_t)std::stoll(s, 0, 16); } catch(...) {}
 	return number;
 }
 
