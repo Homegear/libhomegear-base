@@ -51,7 +51,7 @@ IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* event
     HelperFunctions::toLower(filename);
     filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
     _settings.reset(new FamilySettings(bl, id));
-    _bl->out.printInfo(filename);
+    _bl->out.printInfo("Info: Loading settings from " + filename);
     _settings->load(filename);
 }
 
