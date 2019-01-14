@@ -157,6 +157,21 @@ std::string HelperFunctions::getTimeString(std::string format, int64_t time)
 	return timeStream.str();
 }
 
+std::string HelperFunctions::getTimeUuid(int64_t time)
+{
+	std::string uuid;
+	uuid.reserve(54);
+	uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
+	uuid.push_back('-');
+	uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8));
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4));
+    return uuid;
+}
+
 std::string HelperFunctions::stripNonAlphaNumeric(const std::string& s)
 {
 	std::string strippedString;
@@ -512,6 +527,33 @@ std::string HelperFunctions::getHexString(int32_t number, int32_t width)
 	if(width > -1) stringstream << std::setw(width);
 	stringstream << std::uppercase << number << std::dec;
 	return stringstream.str();
+}
+
+std::string HelperFunctions::getHexString(uint32_t number, int32_t width)
+{
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0');
+    if(width > -1) stringstream << std::setw(width);
+    stringstream << std::uppercase << number << std::dec;
+    return stringstream.str();
+}
+
+std::string HelperFunctions::getHexString(int64_t number, int32_t width)
+{
+	std::ostringstream stringstream;
+	stringstream << std::hex << std::setfill('0');
+	if(width > -1) stringstream << std::setw(width);
+	stringstream << std::uppercase << number << std::dec;
+	return stringstream.str();
+}
+
+std::string HelperFunctions::getHexString(uint64_t number, int32_t width)
+{
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0');
+    if(width > -1) stringstream << std::setw(width);
+    stringstream << std::uppercase << number << std::dec;
+    return stringstream.str();
 }
 
 std::vector<char> HelperFunctions::getBinary(std::string hexString)
