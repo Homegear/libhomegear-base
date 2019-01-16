@@ -85,6 +85,7 @@ public:
 		bool xmlrpcServer = true;
 		bool jsonrpcServer = true;
 		bool restServer = true;
+		bool familyServer = false;
         int32_t cacheAssets = 2592000;
 		std::string redirectTo;
 
