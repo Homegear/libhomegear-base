@@ -305,6 +305,12 @@ void ServerInfo::load(std::string filename)
 					info->webServer = value == "true";;
 					_bl->out.printDebug("Debug: webServer of server " + info->name + " set to " + std::to_string(info->webServer));
 				}
+				else if(name == "familyserver")
+				{
+					HelperFunctions::toLower(value);
+					info->familyServer = value == "true";
+					_bl->out.printDebug("Debug: familyServer of server " + info->name + " set to " + std::to_string(info->familyServer));
+				}
 				else if(name == "websocket")
 				{
 					HelperFunctions::toLower(value);
