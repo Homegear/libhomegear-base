@@ -47,6 +47,7 @@ Devices::Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandle
 
 void Devices::clear()
 {
+	std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 	_devices.clear();
 }
 
@@ -75,6 +76,7 @@ void Devices::load(std::string& xmlPath)
 {
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		_devices.clear();
 		std::string deviceDir(xmlPath);
 		if(deviceDir.back() != '/') deviceDir.push_back('/');
@@ -1238,6 +1240,7 @@ uint32_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
 {
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
@@ -1265,6 +1268,7 @@ std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firm
 {
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
@@ -1313,6 +1317,7 @@ std::unordered_map<std::string, uint32_t> Devices::getIdTypeNumberMap()
 	std::unordered_map<std::string, uint32_t> idTypeMap;
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
@@ -1341,6 +1346,7 @@ std::unordered_set<uint32_t> Devices::getKnownTypeNumbers()
 	std::unordered_set<uint32_t> typeNumbers;
 	try
 	{
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
@@ -1714,7 +1720,7 @@ PVariable Devices::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels
 	try
 	{
 		PVariable descriptions(new Variable(VariableType::tArray));
-
+		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
 		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
 		{
 			for(SupportedDevices::iterator k = (*i)->supportedDevices.begin(); k != (*i)->supportedDevices.end(); ++k)
