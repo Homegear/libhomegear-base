@@ -83,6 +83,7 @@ public:
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	int32_t _family = -1;
+	std::mutex _devicesMutex;
 	std::vector<std::shared_ptr<HomegearDevice>> _devices;
 	std::vector<std::shared_ptr<HomegearDevice>> _dynamicDevices;
     std::shared_ptr<DeviceDescription::DeviceTranslations> _translations;
