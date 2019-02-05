@@ -556,88 +556,151 @@ std::string HelperFunctions::getHexString(uint64_t number, int32_t width)
     return stringstream.str();
 }
 
-std::vector<char> HelperFunctions::getBinary(std::string hexString)
+std::vector<char> HelperFunctions::getBinary(const std::string& hexString)
 {
     std::vector<char> binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0) hexString = hexString.substr(1);
-	binary.reserve(hexString.size() / 2);
-    for (std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+	if(hexString.size() % 2 != 0)
     {
-        uint8_t byte = 0;
-        if(isxdigit(*i)) byte = _asciiToBinaryTable[std::toupper(*i) - '0'] << 4;
-        else continue;
-        if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
-        else continue;
-        binary.push_back(byte);
+        std::string hexStringCopy = hexString.substr(1);
+        binary.reserve(hexStringCopy.size() / 2);
+        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
+    }
+    else
+    {
+        binary.reserve(hexString.size() / 2);
+        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
     }
     return binary;
 }
 
-std::string HelperFunctions::getBinaryString(std::string hexString)
+std::string HelperFunctions::getBinaryString(const std::string& hexString)
 {
     std::string binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0) hexString = hexString.substr(1);
-	binary.reserve(hexString.size() / 2);
-    for (std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+	if(hexString.size() % 2 != 0)
     {
-        uint8_t byte = 0;
-        if(isxdigit(*i)) byte = _asciiToBinaryTable[std::toupper(*i) - '0'] << 4;
-        else continue;
-        if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
-        else continue;
-        binary.push_back(byte);
+        std::string hexStringCopy = hexString.substr(1);
+        binary.reserve(hexStringCopy.size() / 2);
+        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
+    }
+    else
+    {
+        binary.reserve(hexString.size() / 2);
+        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) _asciiToBinaryTable[std::toupper(*i) - '0'] << 4;
+            else continue;
+            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
     }
     return binary;
 }
 
-std::vector<uint8_t> HelperFunctions::getUBinary(std::string hexString)
+std::vector<uint8_t> HelperFunctions::getUBinary(const std::string& hexString)
 {
     std::vector<uint8_t> binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0) hexString = hexString.substr(1);
-    binary.reserve(hexString.size() / 2);
-    for (std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+	if(hexString.size() % 2 != 0)
     {
-        uint8_t byte = 0;
-        if(isxdigit(*i)) byte = (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
-        else continue;
-        if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
-        else continue;
-        binary.push_back(byte);
+        std::string hexStringCopy = hexString.substr(1);
+        binary.reserve(hexStringCopy.size() / 2);
+        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
+    }
+    else
+    {
+        binary.reserve(hexString.size() / 2);
+        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
     }
     return binary;
 }
 
-std::vector<uint8_t>& HelperFunctions::getUBinary(std::string hexString, uint32_t size, std::vector<uint8_t>& binary)
+std::vector<uint8_t>& HelperFunctions::getUBinary(const std::string& hexString, uint32_t size, std::vector<uint8_t>& binary)
 {
     if(hexString.empty()) return binary;
-	if(size > hexString.size()) size = hexString.size();
-	if(size % 2 != 0) size -= 1;
-	if(size < 1) return binary;
-	binary.reserve(size / 2);
-    for (uint32_t i = 0; i < size; i += 2)
+	if(size > hexString.size()) size = (uint32_t)hexString.size();
+	if(size % 2 != 0)
     {
-        uint8_t byte = 0;
-        if(isxdigit(hexString[i])) byte = (_asciiToBinaryTable[std::toupper(hexString[i]) - '0'] << 4);
-        else continue;
-        if(isxdigit(hexString[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexString[i + 1]) - '0'];
-        else continue;
-        binary.push_back(byte);
+        std::string hexStringCopy = hexString.substr(1);
+        binary.reserve(size / 2);
+        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
+    }
+    else
+    {
+        binary.reserve(size / 2);
+        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        {
+            uint8_t byte = 0;
+            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            else continue;
+            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            else continue;
+            binary.push_back(byte);
+        }
     }
     return binary;
 }
 
-std::vector<uint8_t> HelperFunctions::getUBinary(std::vector<uint8_t>& hexData)
+std::vector<uint8_t> HelperFunctions::getUBinary(const std::vector<uint8_t>& hexData)
 {
     std::vector<uint8_t> binary;
     if(hexData.empty()) return binary;
     binary.reserve(hexData.size() / 2);
-    for (std::vector<uint8_t>::const_iterator i = hexData.begin(); i != hexData.end(); i += 2)
+    uint8_t byte = 0;
+    for (auto i = hexData.begin(); i != hexData.end(); i += 2)
     {
-        uint8_t byte = 0;
-        if(isxdigit(*i)) byte = (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+        if(isxdigit(*i)) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
         else continue;
         if(i + 1 != hexData.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
         else continue;

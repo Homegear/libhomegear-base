@@ -55,7 +55,8 @@ void WebSocket::reset()
 
 uint32_t WebSocket::process(char* buffer, int32_t bufferLength)
 {
-    if(bufferLength <= 0 || _finished) return 0;
+    if(bufferLength <= 0) return 0;
+    if(_finished) reset();
     uint32_t processedBytes = 0;
     if(!_header.parsed)
     {

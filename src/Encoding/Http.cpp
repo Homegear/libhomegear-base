@@ -414,7 +414,8 @@ void Http::unserialize(PVariable data)
 
 int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXml, bool checkForChunkedJson)
 {
-	if(bufferLength <= 0 || _finished) return 0;
+	if(bufferLength <= 0) return 0;
+	if(_finished) reset();
 	_headerProcessingStarted = true;
 	int32_t processedBytes = 0;
 	if(!_header.parsed) processedBytes = processHeader(&buffer, bufferLength);
@@ -742,14 +743,24 @@ void Http::setFinished()
 int32_t Http::processContent(char* buffer, int32_t bufferLength)
 {
 	if(_content.size() + bufferLength > 104857600) throw HttpException("Data is larger than 100 MiB.");
+	int32_t processedBytes = bufferLength;
 	if(_header.contentLength == 0) _content.insert(_content.end(), buffer, buffer + bufferLength);
 	else
 	{
-		if(_content.size() + bufferLength > _header.contentLength) bufferLength -= (_content.size() + bufferLength) - _header.contentLength;
-		_content.insert(_content.end(), buffer, buffer + bufferLength);
+		if(_content.size() + bufferLength > _header.contentLength) processedBytes -= (_content.size() + bufferLength) - _header.contentLength;
+		_content.insert(_content.end(), buffer, buffer + processedBytes);
 		if(_content.size() == _header.contentLength) setFinished();
 	}
-	return bufferLength;
+	if(processedBytes < bufferLength)
+	{
+		buffer += processedBytes;
+		while(processedBytes < bufferLength && (*buffer == '\r' || *buffer == '\n' || *buffer == '\0'))
+		{
+			buffer++;
+			processedBytes++;
+		}
+	}
+	return processedBytes;
 }
 
 int32_t Http::processChunkedContent(char* buffer, int32_t bufferLength)
