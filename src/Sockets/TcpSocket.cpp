@@ -447,7 +447,7 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, TcpPacket packet, bool closeConnection)
+	void TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -483,7 +483,7 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, std::vector<char> packet, bool closeConnection)
+	void TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try

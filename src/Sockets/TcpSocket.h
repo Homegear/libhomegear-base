@@ -96,14 +96,14 @@ class SharedObjects;
  *
  *     void newConnection(int32_t clientId, std::string address, uint16_t port)
  *     {
- *     	std::cout << "New connection from " << address << " on port " << port << std::endl;
+ *     	std::cout << "New connection from " << address << " on port " << port << ". Client ID: " << clientId << std::endl;
  *     }
  *
- *     void packetReceived(int32_t clientId, BaseLib::TcpSocket::TcpPacket packet)
+ *     void packetReceived(int32_t clientId, BaseLib::TcpSocket::TcpPacket& packet)
  *     {
  *     	std::string data((char*)packet.data(), packet.size());
  *     	BaseLib::HelperFunctions::trim(data);
- *     	std::cout << "Packet received: " << data << std::endl;
+ *     	std::cout << "Packet received from client " << clientId << ": " << data << std::endl;
  *     	std::vector<uint8_t> response;
  *     	response.push_back('R');
  *     	response.push_back(':');
@@ -112,19 +112,34 @@ class SharedObjects;
  *     	_tcpServer->sendToClient(clientId, response);
  *     }
  *
+ *     void connectionClosed(int32_t clientId)
+ *     {
+ *      std::cout << "Connection to client " << clientId << " closed." << std::endl;
+ *     }
+ *
  *     int main()
  *     {
  *     	_bl.reset(new BaseLib::SharedObjects(false));
  *
  *     	BaseLib::TcpSocket::TcpServerInfo serverInfo;
  *     	serverInfo.newConnectionCallback = std::bind(&newConnection, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+ *     	//For class methods add `this` as first parameter:
+ *     	//serverInfo.newConnectionCallback = std::bind(&MyClass::newConnection, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
  *     	serverInfo.packetReceivedCallback = std::bind(&packetReceived, std::placeholders::_1, std::placeholders::_2);
+ *     	serverInfo.connectionClosedCallback = std::bind(&connectionClosed, std::placeholders::_1);
  *
  *     	_tcpServer = std::make_shared<BaseLib::TcpSocket>(_bl.get(), serverInfo);
  *
  *     	std::string listenAddress;
  *     	_tcpServer->startServer("::", "8082", listenAddress);
  *     	std::cout << "Started listening on " + listenAddress << std::endl;
+ *
+ *     	//Alternatively you can call `bindServerSocket()` as root first, then drop privileges and start the server:
+ *     	//_tcpServer->bindServerSocket("::", "8082", listenAddress);
+ *     	//...
+ *     	//Drop privileges
+ *     	//...
+ *     	//_tcpServer->startPreboundServer(listenAddress);
  *
  *     	for(int32_t i = 0; i < 300; i++) //Run for 300 seconds
  *     	{
@@ -403,7 +418,7 @@ public:
 		 * @param packet The data to send.
 		 * @param closeConnection Close the connection after sending the packet.
 		 */
-		void sendToClient(int32_t clientId, TcpPacket packet, bool closeConnection = false);
+		void sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection = false);
 
         /**
          * Sends a response to a TCP client connected to the server.
@@ -412,7 +427,7 @@ public:
          * @param packet The data to send.
          * @param closeConnection Close the connection after sending the packet.
          */
-        void sendToClient(int32_t clientId, std::vector<char> packet, bool closeConnection = false);
+        void sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
 
         /**
          * Returns the number of clients connected to the TCP server

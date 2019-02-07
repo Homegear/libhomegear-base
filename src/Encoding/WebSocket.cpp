@@ -47,7 +47,9 @@ void WebSocket::reset()
 {
     _header = Header();
     _content.clear();
+    _content.shrink_to_fit();
     _rawHeader.clear();
+    _rawHeader.shrink_to_fit();
     _finished = false;
     _dataProcessingStarted = false;
     _oldContentSize = 0;
