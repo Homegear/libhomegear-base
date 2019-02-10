@@ -483,6 +483,9 @@ protected:
 
 		int64_t _lastGarbageCollection = 0;
 
+		/**
+		 * Stores the current client ID. The client ID is incremented by one for every client, so it is unique for a long time.
+		 */
 		int32_t _currentClientId = 0;
 		std::mutex _clientsMutex;
 		std::map<int32_t, PTcpClientData> _clients;
