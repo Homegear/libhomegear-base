@@ -41,49 +41,49 @@ HelperFunctions::HelperFunctions()
 
 void HelperFunctions::init(SharedObjects* baseLib)
 {
-	_bl = baseLib;
-	checkEndianness();
+    _bl = baseLib;
+    checkEndianness();
 
-	_asciiToBinaryTable[0] = 0;
-	_asciiToBinaryTable[1] = 1;
-	_asciiToBinaryTable[2] = 2;
-	_asciiToBinaryTable[3] = 3;
-	_asciiToBinaryTable[4] = 4;
-	_asciiToBinaryTable[5] = 5;
-	_asciiToBinaryTable[6] = 6;
-	_asciiToBinaryTable[7] = 7;
-	_asciiToBinaryTable[8] = 8;
-	_asciiToBinaryTable[9] = 9;
-	_asciiToBinaryTable[10] = 0;
-	_asciiToBinaryTable[11] = 0;
-	_asciiToBinaryTable[12] = 0;
-	_asciiToBinaryTable[13] = 0;
-	_asciiToBinaryTable[14] = 0;
-	_asciiToBinaryTable[15] = 0;
-	_asciiToBinaryTable[16] = 0;
-	_asciiToBinaryTable[17] = 10;
-	_asciiToBinaryTable[18] = 11;
-	_asciiToBinaryTable[19] = 12;
-	_asciiToBinaryTable[20] = 13;
-	_asciiToBinaryTable[21] = 14;
-	_asciiToBinaryTable[22] = 15;
+    _asciiToBinaryTable[0] = 0;
+    _asciiToBinaryTable[1] = 1;
+    _asciiToBinaryTable[2] = 2;
+    _asciiToBinaryTable[3] = 3;
+    _asciiToBinaryTable[4] = 4;
+    _asciiToBinaryTable[5] = 5;
+    _asciiToBinaryTable[6] = 6;
+    _asciiToBinaryTable[7] = 7;
+    _asciiToBinaryTable[8] = 8;
+    _asciiToBinaryTable[9] = 9;
+    _asciiToBinaryTable[10] = 0;
+    _asciiToBinaryTable[11] = 0;
+    _asciiToBinaryTable[12] = 0;
+    _asciiToBinaryTable[13] = 0;
+    _asciiToBinaryTable[14] = 0;
+    _asciiToBinaryTable[15] = 0;
+    _asciiToBinaryTable[16] = 0;
+    _asciiToBinaryTable[17] = 10;
+    _asciiToBinaryTable[18] = 11;
+    _asciiToBinaryTable[19] = 12;
+    _asciiToBinaryTable[20] = 13;
+    _asciiToBinaryTable[21] = 14;
+    _asciiToBinaryTable[22] = 15;
 
-	_binaryToASCIITable[0] = 0x30;
-	_binaryToASCIITable[1] = 0x31;
-	_binaryToASCIITable[2] = 0x32;
-	_binaryToASCIITable[3] = 0x33;
-	_binaryToASCIITable[4] = 0x34;
-	_binaryToASCIITable[5] = 0x35;
-	_binaryToASCIITable[6] = 0x36;
-	_binaryToASCIITable[7] = 0x37;
-	_binaryToASCIITable[8] = 0x38;
-	_binaryToASCIITable[9] = 0x39;
-	_binaryToASCIITable[0xA] = 0x41;
-	_binaryToASCIITable[0xB] = 0x42;
-	_binaryToASCIITable[0xC] = 0x43;
-	_binaryToASCIITable[0xD] = 0x44;
-	_binaryToASCIITable[0xE] = 0x45;
-	_binaryToASCIITable[0xF] = 0x46;
+    _binaryToASCIITable[0] = 0x30;
+    _binaryToASCIITable[1] = 0x31;
+    _binaryToASCIITable[2] = 0x32;
+    _binaryToASCIITable[3] = 0x33;
+    _binaryToASCIITable[4] = 0x34;
+    _binaryToASCIITable[5] = 0x35;
+    _binaryToASCIITable[6] = 0x36;
+    _binaryToASCIITable[7] = 0x37;
+    _binaryToASCIITable[8] = 0x38;
+    _binaryToASCIITable[9] = 0x39;
+    _binaryToASCIITable[0xA] = 0x41;
+    _binaryToASCIITable[0xB] = 0x42;
+    _binaryToASCIITable[0xC] = 0x43;
+    _binaryToASCIITable[0xD] = 0x44;
+    _binaryToASCIITable[0xE] = 0x45;
+    _binaryToASCIITable[0xF] = 0x46;
 }
 
 HelperFunctions::~HelperFunctions()
@@ -93,77 +93,77 @@ HelperFunctions::~HelperFunctions()
 
 int64_t HelperFunctions::getTime()
 {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 int64_t HelperFunctions::getTimeMicroseconds()
 {
-	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 int32_t HelperFunctions::getTimeSeconds()
 {
-	int32_t time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
-	if(time < 0) time = 0;
-	return time;
+    int32_t time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
+    if(time < 0) time = 0;
+    return time;
 }
 
 std::string HelperFunctions::getTimeString(int64_t time)
 {
-	const char timeFormat[] = "%x %X";
-	std::time_t t;
-	int32_t milliseconds;
-	if(time > 0)
-	{
-		t = std::time_t(time / 1000);
-		milliseconds = time % 1000;
-	}
-	else
-	{
-		const auto timePoint = std::chrono::system_clock::now();
-		t = std::chrono::system_clock::to_time_t(timePoint);
-		milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
-	}
-	char timeString[50];
-	std::tm localTime;
-	localtime_r(&t, &localTime);
-	strftime(&timeString[0], 50, &timeFormat[0], &localTime);
-	std::ostringstream timeStream;
-	timeStream << timeString << "." << std::setw(3) << std::setfill('0') << milliseconds;
-	return timeStream.str();
+    const char timeFormat[] = "%x %X";
+    std::time_t t;
+    int32_t milliseconds;
+    if(time > 0)
+    {
+        t = std::time_t(time / 1000);
+        milliseconds = time % 1000;
+    }
+    else
+    {
+        const auto timePoint = std::chrono::system_clock::now();
+        t = std::chrono::system_clock::to_time_t(timePoint);
+        milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
+    }
+    char timeString[50];
+    std::tm localTime;
+    localtime_r(&t, &localTime);
+    strftime(&timeString[0], 50, &timeFormat[0], &localTime);
+    std::ostringstream timeStream;
+    timeStream << timeString << "." << std::setw(3) << std::setfill('0') << milliseconds;
+    return timeStream.str();
 }
 
 std::string HelperFunctions::getTimeString(std::string format, int64_t time)
 {
-	std::time_t t;
-	int32_t milliseconds;
-	if(time > 0)
-	{
-		t = std::time_t(time / 1000);
-		milliseconds = time % 1000;
-	}
-	else
-	{
-		const auto timePoint = std::chrono::system_clock::now();
-		t = std::chrono::system_clock::to_time_t(timePoint);
-		milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
-	}
-	char timeString[50];
-	std::tm localTime;
-	localtime_r(&t, &localTime);
-	strftime(&timeString[0], 50, format.c_str(), &localTime);
-	std::ostringstream timeStream;
-	timeStream << timeString << "." << std::setw(3) << std::setfill('0') << milliseconds;
-	return timeStream.str();
+    std::time_t t;
+    int32_t milliseconds;
+    if(time > 0)
+    {
+        t = std::time_t(time / 1000);
+        milliseconds = time % 1000;
+    }
+    else
+    {
+        const auto timePoint = std::chrono::system_clock::now();
+        t = std::chrono::system_clock::to_time_t(timePoint);
+        milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
+    }
+    char timeString[50];
+    std::tm localTime;
+    localtime_r(&t, &localTime);
+    strftime(&timeString[0], 50, format.c_str(), &localTime);
+    std::ostringstream timeStream;
+    timeStream << timeString << "." << std::setw(3) << std::setfill('0') << milliseconds;
+    return timeStream.str();
 }
 
 std::string HelperFunctions::getTimeUuid(int64_t time)
 {
-	std::string uuid;
-	uuid.reserve(54);
-	uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
-	uuid.push_back('-');
-	uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
+    std::string uuid;
+    uuid.reserve(54);
+    uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
+    uuid.push_back('-');
+    uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
@@ -174,359 +174,359 @@ std::string HelperFunctions::getTimeUuid(int64_t time)
 
 std::string HelperFunctions::stripNonAlphaNumeric(const std::string& s)
 {
-	std::string strippedString;
-	strippedString.reserve(s.size());
-	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
-	{
-		if(isalpha(*i) || isdigit(*i) || (*i == '_') || (*i == '-')) strippedString.push_back(*i);
-	}
-	return strippedString;
+    std::string strippedString;
+    strippedString.reserve(s.size());
+    for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+    {
+        if(isalpha(*i) || isdigit(*i) || (*i == '_') || (*i == '-')) strippedString.push_back(*i);
+    }
+    return strippedString;
 }
 
 std::string HelperFunctions::stripNonPrintable(const std::string& s)
 {
-	std::string strippedString;
-	strippedString.reserve(s.size());
-	for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
-	{
-		if(std::isprint(*i)) strippedString.push_back(*i);
-	}
-	return strippedString;
+    std::string strippedString;
+    strippedString.reserve(s.size());
+    for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+    {
+        if(std::isprint(*i)) strippedString.push_back(*i);
+    }
+    return strippedString;
 }
 
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 {
-	std::random_device rd;
-	std::default_random_engine generator(rd());
-	std::uniform_int_distribution<int32_t> distribution(min, max);
-	return distribution(generator);
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_int_distribution<int32_t> distribution(min, max);
+    return distribution(generator);
 }
 
 std::vector<uint8_t> HelperFunctions::getRandomBytes(uint32_t size)
 {
-	std::random_device rd;
-	std::mt19937 generator(rd());
-	std::uniform_int_distribution<uint8_t> distribution(0, 255);
-	std::vector<uint8_t> bytes;
-	bytes.reserve(size);
-	for(uint32_t i = 0; i < size; i++)
-	{
-		bytes.push_back(distribution(generator));
-	}
-	return bytes;
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<uint8_t> distribution(0, 255);
+    std::vector<uint8_t> bytes;
+    bytes.reserve(size);
+    for(uint32_t i = 0; i < size; i++)
+    {
+        bytes.push_back(distribution(generator));
+    }
+    return bytes;
 }
 
 void HelperFunctions::memcpyBigEndian(char* to, const char* from, const uint32_t& length)
 {
-	try
-	{
-		if(_isBigEndian) memcpy(to, from, length);
-		else
-		{
-			uint32_t last = length - 1;
-			for(uint32_t i = 0; i < length; i++)
-			{
-				to[i] = from[last - i];
-			}
-		}
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(_isBigEndian) memcpy(to, from, length);
+        else
+        {
+            uint32_t last = length - 1;
+            for(uint32_t i = 0; i < length; i++)
+            {
+                to[i] = from[last - i];
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length)
 {
-	try
-	{
-		memcpyBigEndian((char*)to, (char*)from, length);
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        memcpyBigEndian((char*)to, (char*)from, length);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 void HelperFunctions::memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& from)
 {
-	try
-	{
-		to = 0; //Necessary if length is < 4
-		if(from.empty()) return;
-		uint32_t length = from.size();
-		if(length > 4) length = 4;
-		if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (4 - length), &from.at(0), length);
-		else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        to = 0; //Necessary if length is < 4
+        if(from.empty()) return;
+        uint32_t length = from.size();
+        if(length > 4) length = 4;
+        if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (4 - length), &from.at(0), length);
+        else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& from)
 {
-	try
-	{
-		if(!to.empty()) to.clear();
-		int32_t length = 4;
-		if(from < 0) length = 4;
-		else if(from < 256) length = 1;
-		else if(from < 65536) length = 2;
-		else if(from < 16777216) length = 3;
-		to.resize(length, 0);
-		if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (4 - length), length);
-		else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(!to.empty()) to.clear();
+        int32_t length = 4;
+        if(from < 0) length = 4;
+        else if(from < 256) length = 1;
+        else if(from < 65536) length = 2;
+        else if(from < 16777216) length = 3;
+        to.resize(length, 0);
+        if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (4 - length), length);
+        else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from)
 {
-	try
-	{
-		to = 0; //Necessary if length is < 8
-		if(from.empty()) return;
-		uint32_t length = from.size();
-		if(length > 8) length = 8;
-		if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (8 - length), &from.at(0), length);
-		else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        to = 0; //Necessary if length is < 8
+        if(from.empty()) return;
+        uint32_t length = from.size();
+        if(length > 8) length = 8;
+        if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (8 - length), &from.at(0), length);
+        else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from)
 {
-	try
-	{
-		if(!to.empty()) to.clear();
-		int32_t length = 8;
-		if(from < 0) length = 8;
-		else if(from <= 0xFF) length = 1;
-		else if(from <= 0xFFFF) length = 2;
-		else if(from <= 0xFFFFFF) length = 3;
-		else if(from <= 0xFFFFFFFFll) length = 4;
-		else if(from <= 0xFFFFFFFFFFll) length = 5;
-		else if(from <= 0xFFFFFFFFFFFFll) length = 6;
-		else if(from <= 0xFFFFFFFFFFFFFFll) length = 7;
-		to.resize(length, 0);
-		if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (8 - length), length);
-		else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(!to.empty()) to.clear();
+        int32_t length = 8;
+        if(from < 0) length = 8;
+        else if(from <= 0xFF) length = 1;
+        else if(from <= 0xFFFF) length = 2;
+        else if(from <= 0xFFFFFF) length = 3;
+        else if(from <= 0xFFFFFFFFll) length = 4;
+        else if(from <= 0xFFFFFFFFFFll) length = 5;
+        else if(from <= 0xFFFFFFFFFFFFll) length = 6;
+        else if(from <= 0xFFFFFFFFFFFFFFll) length = 7;
+        to.resize(length, 0);
+        if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (8 - length), length);
+        else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
 std::string& HelperFunctions::regexReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
 {
-	std::regex regex(search, std::regex::icase);
+    std::regex regex(search, std::regex::icase);
 
-	std::string result = std::regex_replace(haystack, regex, replace);
-	haystack = result;
+    std::string result = std::regex_replace(haystack, regex, replace);
+    haystack = result;
 
-	return haystack;
+    return haystack;
 }
 
 std::pair<std::string, std::string> HelperFunctions::splitFirst(std::string string, char delimiter)
 {
-	int32_t pos = string.find_first_of(delimiter);
-	if(pos == -1) return std::pair<std::string, std::string>(string, "");
-	if((unsigned)pos + 1 >= string.size()) return std::pair<std::string, std::string>(string.substr(0, pos), "");
-	return std::pair<std::string, std::string>(string.substr(0, pos), string.substr(pos + 1));
+    int32_t pos = string.find_first_of(delimiter);
+    if(pos == -1) return std::pair<std::string, std::string>(string, "");
+    if((unsigned)pos + 1 >= string.size()) return std::pair<std::string, std::string>(string.substr(0, pos), "");
+    return std::pair<std::string, std::string>(string.substr(0, pos), string.substr(pos + 1));
 }
 
 std::pair<std::string, std::string> HelperFunctions::splitLast(std::string string, char delimiter)
 {
-	int32_t pos = string.find_last_of(delimiter);
-	if(pos == -1) return std::pair<std::string, std::string>(string, "");
-	if((unsigned)pos + 1 >= string.size()) return std::pair<std::string, std::string>(string.substr(0, pos), "");
-	return std::pair<std::string, std::string>(string.substr(0, pos), string.substr(pos + 1));
+    int32_t pos = string.find_last_of(delimiter);
+    if(pos == -1) return std::pair<std::string, std::string>(string, "");
+    if((unsigned)pos + 1 >= string.size()) return std::pair<std::string, std::string>(string.substr(0, pos), "");
+    return std::pair<std::string, std::string>(string.substr(0, pos), string.substr(pos + 1));
 }
 
 std::vector<std::string> HelperFunctions::splitAll(std::string string, char delimiter)
 {
-	std::vector<std::string> elements;
-	std::stringstream stringStream(string);
-	std::string element;
-	while (std::getline(stringStream, element, delimiter))
-	{
-		elements.push_back(element);
-	}
-	if(string.back() == delimiter) elements.push_back(std::string());
-	return elements;
+    std::vector<std::string> elements;
+    std::stringstream stringStream(string);
+    std::string element;
+    while (std::getline(stringStream, element, delimiter))
+    {
+        elements.push_back(element);
+    }
+    if(string.back() == delimiter) elements.push_back(std::string());
+    return elements;
 }
 
 std::vector<uint8_t> HelperFunctions::hexToBin(const std::string& data)
 {
-	std::vector<uint8_t> bin;
-	bin.reserve(data.size() / 2);
-	for(uint32_t i = 0; i < data.size(); i+=2)
-	{
-		try	{ bin.push_back(std::stoi(data.substr(i, 2), 0, 16)); } catch(...) {}
-	}
-	return bin;
+    std::vector<uint8_t> bin;
+    bin.reserve(data.size() / 2);
+    for(uint32_t i = 0; i < data.size(); i+=2)
+    {
+        try	{ bin.push_back(std::stoi(data.substr(i, 2), 0, 16)); } catch(...) {}
+    }
+    return bin;
 }
 
 char HelperFunctions::getHexChar(int32_t nibble)
 {
-	try
-	{
-		if(nibble < 0 || nibble > 15) return 0;
-		return _binaryToASCIITable[nibble];
-	}
-	catch(const std::exception& ex)
+    try
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(nibble < 0 || nibble > 15) return 0;
+        return _binaryToASCIITable[nibble];
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(const Exception& ex)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return 0;
 }
 
 std::string HelperFunctions::getHexString(const uint8_t* buffer, uint32_t size)
 {
-	if(!buffer) return "";
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(const uint8_t* i = buffer; i < buffer + size; ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)(*i);
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    if(!buffer) return "";
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(const uint8_t* i = buffer; i < buffer + size; ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)(*i);
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(const char* buffer, uint32_t size)
 {
-	if(!buffer) return "";
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(const char* i = buffer; i < buffer + size; ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    if(!buffer) return "";
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(const char* i = buffer; i < buffer + size; ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(const std::vector<uint8_t>& data)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(std::vector<uint8_t>::const_iterator i = data.begin(); i != data.end(); ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)(*i);
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(std::vector<uint8_t>::const_iterator i = data.begin(); i != data.end(); ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)(*i);
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(const std::vector<char>& data)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(std::vector<char>::const_iterator i = data.begin(); i != data.end(); ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(std::vector<char>::const_iterator i = data.begin(); i != data.end(); ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(const std::vector<uint16_t>& data)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(std::vector<uint16_t>::const_iterator i = data.begin(); i != data.end(); ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)((*i) >> 8) << std::setw(2) << (int32_t)((*i) & 0xFF);
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(std::vector<uint16_t>::const_iterator i = data.begin(); i != data.end(); ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)((*i) >> 8) << std::setw(2) << (int32_t)((*i) & 0xFF);
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(const std::string& data)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0') << std::uppercase;
-	for(std::string::const_iterator i = data.begin(); i != data.end(); ++i)
-	{
-		stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-	}
-	stringstream << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0') << std::uppercase;
+    for(std::string::const_iterator i = data.begin(); i != data.end(); ++i)
+    {
+        stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+    }
+    stringstream << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(int32_t number, int32_t width)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0');
-	if(width > -1) stringstream << std::setw(width);
-	stringstream << std::uppercase << number << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0');
+    if(width > -1) stringstream << std::setw(width);
+    stringstream << std::uppercase << number << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(uint32_t number, int32_t width)
@@ -540,11 +540,11 @@ std::string HelperFunctions::getHexString(uint32_t number, int32_t width)
 
 std::string HelperFunctions::getHexString(int64_t number, int32_t width)
 {
-	std::ostringstream stringstream;
-	stringstream << std::hex << std::setfill('0');
-	if(width > -1) stringstream << std::setw(width);
-	stringstream << std::uppercase << number << std::dec;
-	return stringstream.str();
+    std::ostringstream stringstream;
+    stringstream << std::hex << std::setfill('0');
+    if(width > -1) stringstream << std::setw(width);
+    stringstream << std::uppercase << number << std::dec;
+    return stringstream.str();
 }
 
 std::string HelperFunctions::getHexString(uint64_t number, int32_t width)
@@ -560,16 +560,16 @@ std::vector<char> HelperFunctions::getBinary(const std::string& hexString)
 {
     std::vector<char> binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0)
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
-        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexStringCopy.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i])) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(hexStringCopy[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexStringCopy[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -577,12 +577,12 @@ std::vector<char> HelperFunctions::getBinary(const std::string& hexString)
     else
     {
         binary.reserve(hexString.size() / 2);
-        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexString.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexString.size() && isxdigit(hexString[i])) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(hexString[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexString.size() && isxdigit(hexString[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexString[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -594,16 +594,16 @@ std::string HelperFunctions::getBinaryString(const std::string& hexString)
 {
     std::string binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0)
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
-        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexStringCopy.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i])) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(hexStringCopy[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexStringCopy[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -611,12 +611,12 @@ std::string HelperFunctions::getBinaryString(const std::string& hexString)
     else
     {
         binary.reserve(hexString.size() / 2);
-        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexString.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) _asciiToBinaryTable[std::toupper(*i) - '0'] << 4;
+            if(i < (signed)hexString.size() && isxdigit(hexString[i])) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(hexString[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexString.size() && isxdigit(hexString[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexString[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -628,16 +628,16 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::string& hexString)
 {
     std::vector<uint8_t> binary;
     if(hexString.empty()) return binary;
-	if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0)
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
-        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexStringCopy.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i])) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(hexStringCopy[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexStringCopy[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -645,12 +645,12 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::string& hexString)
     else
     {
         binary.reserve(hexString.size() / 2);
-        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        for(int32_t i = 0; i < (signed)hexString.size(); i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexString.size() && isxdigit(hexString[i])) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(hexString[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexString.size() && isxdigit(hexString[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexString[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -661,17 +661,17 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::string& hexString)
 std::vector<uint8_t>& HelperFunctions::getUBinary(const std::string& hexString, uint32_t size, std::vector<uint8_t>& binary)
 {
     if(hexString.empty()) return binary;
-	if(size > hexString.size()) size = (uint32_t)hexString.size();
-	if(size % 2 != 0)
+    if(size > hexString.size()) size = (uint32_t)hexString.size();
+    if(size % 2 != 0)
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(size / 2);
-        for(std::string::const_iterator i = hexStringCopy.begin(); i != hexStringCopy.end(); i += 2)
+        for(int32_t i = 0; i < (signed)size; i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i])) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(hexStringCopy[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexStringCopy.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexStringCopy.size() && isxdigit(hexStringCopy[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexStringCopy[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -679,12 +679,12 @@ std::vector<uint8_t>& HelperFunctions::getUBinary(const std::string& hexString, 
     else
     {
         binary.reserve(size / 2);
-        for(std::string::const_iterator i = hexString.begin(); i != hexString.end(); i += 2)
+        for(int32_t i = 0; i < (signed)size; i += 2)
         {
             uint8_t byte = 0;
-            if(isxdigit(*i)) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+            if(i < (signed)hexString.size() && isxdigit(hexString[i])) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(hexString[i]) - '0'] << 4);
             else continue;
-            if(i + 1 != hexString.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+            if(i + 1 < (signed)hexString.size() && isxdigit(hexString[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexString[i + 1]) - '0'];
             else continue;
             binary.push_back(byte);
         }
@@ -698,11 +698,12 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::vector<uint8_t>& hex
     if(hexData.empty()) return binary;
     binary.reserve(hexData.size() / 2);
     uint8_t byte = 0;
-    for (auto i = hexData.begin(); i != hexData.end(); i += 2)
+    for(int32_t i = 0; i < (signed)hexData.size(); i += 2)
     {
-        if(isxdigit(*i)) byte = (uint8_t)(_asciiToBinaryTable[std::toupper(*i) - '0'] << 4);
+        byte = 0;
+        if(i < (signed)hexData.size() && isxdigit(hexData[i])) byte = (uint8_t) (_asciiToBinaryTable[std::toupper(hexData[i]) - '0'] << 4);
         else continue;
-        if(i + 1 != hexData.end() && isxdigit(*(i + 1))) byte += _asciiToBinaryTable[std::toupper(*(i + 1)) - '0'];
+        if(i + 1 < (signed)hexData.size() && isxdigit(hexData[i + 1])) byte += _asciiToBinaryTable[std::toupper(hexData[i + 1]) - '0'];
         else continue;
         binary.push_back(byte);
     }
@@ -711,38 +712,38 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::vector<uint8_t>& hex
 
 uid_t HelperFunctions::userId(std::string username)
 {
-	if(username.empty()) return -1;
-	struct passwd pwd;
-	struct passwd* pwdResult;
-	int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if(bufferSize < 0) bufferSize = 16384;
-	std::vector<char> buffer(bufferSize);
-	int32_t result = getpwnam_r(username.c_str(), &pwd, &buffer.at(0), buffer.size(), &pwdResult);
-	if(!pwdResult)
-	{
-		if(result == 0) _bl->out.printError("User name " + username + " not found.");
-		else _bl->out.printError("Error getting UID for user name " + username + ": " + std::string(strerror(result)));
-		return -1;
-	}
-	return pwd.pw_uid;
+    if(username.empty()) return -1;
+    struct passwd pwd;
+    struct passwd* pwdResult;
+    int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if(bufferSize < 0) bufferSize = 16384;
+    std::vector<char> buffer(bufferSize);
+    int32_t result = getpwnam_r(username.c_str(), &pwd, &buffer.at(0), buffer.size(), &pwdResult);
+    if(!pwdResult)
+    {
+        if(result == 0) _bl->out.printError("User name " + username + " not found.");
+        else _bl->out.printError("Error getting UID for user name " + username + ": " + std::string(strerror(result)));
+        return -1;
+    }
+    return pwd.pw_uid;
 }
 
 gid_t HelperFunctions::groupId(std::string groupname)
 {
-	if(groupname.empty()) return -1;
-	struct group grp;
-	struct group* grpResult;
-	int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if(bufferSize < 0) bufferSize = 16384;
-	std::vector<char> buffer(bufferSize);
-	int32_t result = getgrnam_r(groupname.c_str(), &grp, &buffer.at(0), buffer.size(), &grpResult);
-	if(!grpResult)
-	{
-		if(result == 0) _bl->out.printError("User name " + groupname + " not found.");
-		else _bl->out.printError("Error getting GID for group name " + groupname + ": " + std::string(strerror(result)));
-		return -1;
-	}
-	return grp.gr_gid;
+    if(groupname.empty()) return -1;
+    struct group grp;
+    struct group* grpResult;
+    int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if(bufferSize < 0) bufferSize = 16384;
+    std::vector<char> buffer(bufferSize);
+    int32_t result = getgrnam_r(groupname.c_str(), &grp, &buffer.at(0), buffer.size(), &grpResult);
+    if(!grpResult)
+    {
+        if(result == 0) _bl->out.printError("User name " + groupname + " not found.");
+        else _bl->out.printError("Error getting GID for group name " + groupname + ": " + std::string(strerror(result)));
+        return -1;
+    }
+    return grp.gr_gid;
 }
 
 pid_t HelperFunctions::system(std::string command, std::vector<std::string> arguments)
@@ -756,13 +757,13 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
     if(pid == -1) return pid;
     else if(pid == 0)
     {
-    	//Child process
+        //Child process
         struct rlimit limits;
-    	if(getrlimit(RLIMIT_NOFILE, &limits) == -1)
-    	{
-    		throw Exception("Error: Couldn't read rlimits.");
-    		_exit(1);
-    	}
+        if(getrlimit(RLIMIT_NOFILE, &limits) == -1)
+        {
+            throw Exception("Error: Couldn't read rlimits.");
+            _exit(1);
+        }
         // Close all non standard descriptors - safety
         for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
 
@@ -773,7 +774,7 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
         argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
         for(uint32_t i = 0; i < arguments.size(); i++)
         {
-        	argv[i + 1] = &arguments[i][0];
+            argv[i + 1] = &arguments[i][0];
         }
         argv[arguments.size() + 1] = nullptr;
         if(execv(command.c_str(), argv) == -1)
@@ -790,102 +791,102 @@ pid_t HelperFunctions::system(std::string command, std::vector<std::string> argu
 
 pid_t HelperFunctions::systemp(std::string command, std::vector<std::string> arguments, int& stdIn, int& stdOut, int& stdErr)
 {
-	pid_t pid;
+    pid_t pid;
 
     stdIn = -1;
     stdOut = -1;
     stdErr = -1;
 
-	if(command.empty() || command.back() == '/') return -1;
+    if(command.empty() || command.back() == '/') return -1;
 
-	int pipeIn[2];
-	int pipeOut[2];
-	int pipeErr[2];
+    int pipeIn[2];
+    int pipeOut[2];
+    int pipeErr[2];
 
-	if(pipe(pipeIn) == -1) throw Exception("Error: Couln't create pipe for STDIN.");
+    if(pipe(pipeIn) == -1) throw Exception("Error: Couln't create pipe for STDIN.");
 
-	if(pipe(pipeOut) == -1)
-	{
-		close(pipeIn[0]);
-		close(pipeIn[1]);
+    if(pipe(pipeOut) == -1)
+    {
+        close(pipeIn[0]);
+        close(pipeIn[1]);
         throw Exception("Error: Couln't create pipe for STDOUT.");
-	}
+    }
 
-	if(pipe(pipeErr) == -1)
-	{
-		close(pipeIn[0]);
-		close(pipeIn[1]);
-		close(pipeOut[0]);
-		close(pipeOut[1]);
+    if(pipe(pipeErr) == -1)
+    {
+        close(pipeIn[0]);
+        close(pipeIn[1]);
+        close(pipeOut[0]);
+        close(pipeOut[1]);
         throw Exception("Error: Couln't create pipe for STDERR.");
-	}
+    }
 
-	pid = fork();
+    pid = fork();
 
-	if(pid == -1)
-	{
-		close(pipeIn[0]);
-		close(pipeIn[1]);
-		close(pipeOut[0]);
-		close(pipeOut[1]);
-		close(pipeErr[0]);
-		close(pipeErr[1]);
+    if(pid == -1)
+    {
+        close(pipeIn[0]);
+        close(pipeIn[1]);
+        close(pipeOut[0]);
+        close(pipeOut[1]);
+        close(pipeErr[0]);
+        close(pipeErr[1]);
 
-		return pid;
-	}
-	else if(pid == 0)
-	{
-		//Child process
+        return pid;
+    }
+    else if(pid == 0)
+    {
+        //Child process
 
-		if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
+        if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
 
-		if(dup2(pipeOut[1], STDOUT_FILENO) == -1) _exit(1);
+        if(dup2(pipeOut[1], STDOUT_FILENO) == -1) _exit(1);
 
-		if(dup2(pipeErr[1], STDERR_FILENO) == -1) _exit(1);
+        if(dup2(pipeErr[1], STDERR_FILENO) == -1) _exit(1);
 
-		//Close pipes for child
-		close(pipeIn[0]);
-		close(pipeIn[1]);
-		close(pipeOut[0]);
-		close(pipeOut[1]);
-		close(pipeErr[0]);
-		close(pipeErr[1]);
+        //Close pipes for child
+        close(pipeIn[0]);
+        close(pipeIn[1]);
+        close(pipeOut[0]);
+        close(pipeOut[1]);
+        close(pipeErr[0]);
+        close(pipeErr[1]);
 
-		struct rlimit limits;
-		if(getrlimit(RLIMIT_NOFILE, &limits) == -1) _exit(1);
+        struct rlimit limits;
+        if(getrlimit(RLIMIT_NOFILE, &limits) == -1) _exit(1);
 
-		// Close all non standard descriptors - safety
-		for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
+        // Close all non standard descriptors - safety
+        for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
 
-		setsid();
-		std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
-		if(programName.empty()) _exit(1);
-		char* argv[arguments.size() + 2];
-		argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
-		for(uint32_t i = 0; i < arguments.size(); i++)
-		{
-			argv[i + 1] = &arguments[i][0];
-		}
-		argv[arguments.size() + 1] = nullptr;
-		if(execv(command.c_str(), argv) == -1) _exit(1);
-	}
+        setsid();
+        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+        if(programName.empty()) _exit(1);
+        char* argv[arguments.size() + 2];
+        argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
+        for(uint32_t i = 0; i < arguments.size(); i++)
+        {
+            argv[i + 1] = &arguments[i][0];
+        }
+        argv[arguments.size() + 1] = nullptr;
+        if(execv(command.c_str(), argv) == -1) _exit(1);
+    }
 
-	//Parent process
-	close(pipeIn[0]);
-	close(pipeOut[1]);
-	close(pipeErr[1]);
+    //Parent process
+    close(pipeIn[0]);
+    close(pipeOut[1]);
+    close(pipeErr[1]);
 
-	stdIn = pipeIn[1];
-	stdOut = pipeOut[0];
-	stdErr = pipeErr[0];
+    stdIn = pipeIn[1];
+    stdOut = pipeOut[0];
+    stdErr = pipeErr[0];
 
-	return pid;
+    return pid;
 }
 
 
 int32_t HelperFunctions::exec(std::string command, std::string& output)
 {
-	FILE* pipe = popen(command.c_str(), "r");
+    FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) return -1;
     std::array<char, 128> buffer;
     output.reserve(1024);
@@ -903,85 +904,85 @@ int32_t HelperFunctions::exec(std::string command, std::string& output)
     catch(...)
     {
     }
-	auto exitStatus = pclose(pipe);
-	if(errno == ECHILD) return 0; //Currently this method always return 0, because we use a custom sigchld handler.
+    auto exitStatus = pclose(pipe);
+    if(errno == ECHILD) return 0; //Currently this method always return 0, because we use a custom sigchld handler.
     return WEXITSTATUS(exitStatus);
 }
 
 void HelperFunctions::checkEndianness()
 {
-	union {
-		uint32_t i;
-		char c[4];
-	} bint = {0x01020304};
+    union {
+        uint32_t i;
+        char c[4];
+    } bint = {0x01020304};
 
-	_isBigEndian = bint.c[0] == 1;
+    _isBigEndian = bint.c[0] == 1;
 }
 
 std::string HelperFunctions::getGNUTLSCertVerificationError(uint32_t errorCode)
 {
-	if(errorCode & GNUTLS_CERT_REVOKED) return "Certificate is revoked by its authority.";
-	else if(errorCode & GNUTLS_CERT_SIGNER_NOT_FOUND) return "The certificate’s issuer is not known.";
-	else if(errorCode & GNUTLS_CERT_SIGNER_NOT_CA) return "The certificate’s signer was not a CA.";
-	else if(errorCode & GNUTLS_CERT_INSECURE_ALGORITHM) return "The certificate was signed using an insecure algorithm such as MD2 or MD5. These algorithms have been broken and should not be trusted.";
-	else if(errorCode & GNUTLS_CERT_NOT_ACTIVATED) return "The certificate is not yet activated. ";
-	else if(errorCode & GNUTLS_CERT_EXPIRED) return "The certificate has expired. ";
-	//TODO: Add missing errors, when GNUTLS 3 is in Debian stable
-	return "Unknown error code.";
+    if(errorCode & GNUTLS_CERT_REVOKED) return "Certificate is revoked by its authority.";
+    else if(errorCode & GNUTLS_CERT_SIGNER_NOT_FOUND) return "The certificate’s issuer is not known.";
+    else if(errorCode & GNUTLS_CERT_SIGNER_NOT_CA) return "The certificate’s signer was not a CA.";
+    else if(errorCode & GNUTLS_CERT_INSECURE_ALGORITHM) return "The certificate was signed using an insecure algorithm such as MD2 or MD5. These algorithms have been broken and should not be trusted.";
+    else if(errorCode & GNUTLS_CERT_NOT_ACTIVATED) return "The certificate is not yet activated. ";
+    else if(errorCode & GNUTLS_CERT_EXPIRED) return "The certificate has expired. ";
+    //TODO: Add missing errors, when GNUTLS 3 is in Debian stable
+    return "Unknown error code.";
 }
 
 bool HelperFunctions::isShortCliCommand(const std::string& command)
 {
-	int32_t spaceIndex = command.find(' ');
-	if(spaceIndex < 0 && command.size() < 4) return true;
-	else if(spaceIndex > 0 && spaceIndex < 4) return true;
-	return false;
+    int32_t spaceIndex = command.find(' ');
+    if(spaceIndex < 0 && command.size() < 4) return true;
+    else if(spaceIndex > 0 && spaceIndex < 4) return true;
+    return false;
 }
 
 bool HelperFunctions::checkCliCommand(const std::string& command, const std::string& longCommand, const std::string& shortCommand1, const std::string& shortCommand2, uint32_t minArgumentCount, std::vector<std::string>& arguments, bool& showHelp)
 {
-	showHelp = false;
+    showHelp = false;
 
-	bool isLongCommand = (command.size() == longCommand.size() || (command.size() > longCommand.size() && command.at(longCommand.size()) == ' ')) && command.compare(0, longCommand.size(), longCommand) == 0;
-	bool isShortCommand1 = (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
-	bool isShortCommand2 = !shortCommand2.empty() && (command.size() == shortCommand2.size() || (command.size() > shortCommand2.size() && command.at(shortCommand2.size()) == ' ')) && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
-	if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
+    bool isLongCommand = (command.size() == longCommand.size() || (command.size() > longCommand.size() && command.at(longCommand.size()) == ' ')) && command.compare(0, longCommand.size(), longCommand) == 0;
+    bool isShortCommand1 = (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
+    bool isShortCommand2 = !shortCommand2.empty() && (command.size() == shortCommand2.size() || (command.size() > shortCommand2.size() && command.at(shortCommand2.size()) == ' ')) && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
+    if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
 
-	std::stringstream stream(command);
-	std::string element;
-	int32_t offset = isLongCommand ? std::count(longCommand.begin(), longCommand.end(), ' ') : 0;
-	int32_t index = 0;
-	arguments.reserve(10);
-	while(std::getline(stream, element, ' '))
-	{
-		if(index < 1 + offset)
-		{
-			index++;
-			continue;
-		}
-		if(element == "help")
-		{
-			showHelp = true;
-			return true;
-		}
-		arguments.push_back(element);
-	}
-	if(arguments.size() < minArgumentCount) showHelp = true;
-	return true;
+    std::stringstream stream(command);
+    std::string element;
+    int32_t offset = isLongCommand ? std::count(longCommand.begin(), longCommand.end(), ' ') : 0;
+    int32_t index = 0;
+    arguments.reserve(10);
+    while(std::getline(stream, element, ' '))
+    {
+        if(index < 1 + offset)
+        {
+            index++;
+            continue;
+        }
+        if(element == "help")
+        {
+            showHelp = true;
+            return true;
+        }
+        arguments.push_back(element);
+    }
+    if(arguments.size() < minArgumentCount) showHelp = true;
+    return true;
 }
 
 void* HelperFunctions::memrchr(const void* s, int c, size_t n)
 {
-	const unsigned char *cp;
+    const unsigned char *cp;
 
     if(n != 0)
     {
-		cp = (unsigned char *)s + n;
-		do
-		{
-			if (*(--cp) == (unsigned char)c)
-			return((void *)cp);
-		} while (--n != 0);
+        cp = (unsigned char *)s + n;
+        do
+        {
+            if (*(--cp) == (unsigned char)c)
+                return((void *)cp);
+        } while (--n != 0);
     }
     return((void *)0);
 }
