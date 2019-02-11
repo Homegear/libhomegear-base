@@ -138,7 +138,7 @@ void HttpServer::connectionClosed(int32_t clientId)
 	}
 }
 
-void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
+void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket& packet)
 {
 	std::shared_ptr<BaseLib::Http> http;
 	try
@@ -177,12 +177,12 @@ void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket packet)
 	http->reset();
 }
 
-void HttpServer::send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection)
+void HttpServer::send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection)
 {
 	_socket->sendToClient(clientId, packet, closeConnection);
 }
 
-void HttpServer::send(int32_t clientId, std::vector<char> packet, bool closeConnection)
+void HttpServer::send(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
 {
     _socket->sendToClient(clientId, packet, closeConnection);
 }

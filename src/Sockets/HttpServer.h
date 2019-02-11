@@ -168,8 +168,8 @@ public:
 	void stop();
 	void waitForStop();
 
-	void send(int32_t clientId, TcpSocket::TcpPacket packet, bool closeConnection = true);
-	void send(int32_t clientId, std::vector<char> packet, bool closeConnection = true);
+	void send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection = true);
+	void send(int32_t clientId, const std::vector<char>& packet, bool closeConnection = true);
 protected:
 	struct HttpClientInfo
 	{
@@ -188,7 +188,7 @@ protected:
 
 	void newConnection(int32_t clientId, std::string address, uint16_t port);
 	void connectionClosed(int32_t clientId);
-	void packetReceived(int32_t clientId, TcpSocket::TcpPacket packet);
+	void packetReceived(int32_t clientId, TcpSocket::TcpPacket& packet);
 };
 
 }
