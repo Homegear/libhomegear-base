@@ -33,4 +33,4 @@ done
 rm -f contributors*
 
 revision=$(($revision1 + $revision2))
-echo 0.7.35-$revision
+echo 0.7.36-$revision
