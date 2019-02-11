@@ -166,7 +166,7 @@ void ThreadManager::setThreadPriority(pthread_t thread, int32_t priority, int32_
 		{
 			if(error == EPERM)
 			{
-				_bl->out.printError("Could not set thread priority. The executing user does not have enough privileges. Please run \"ulimit -r 100\" before executing Homegear.");
+				_bl->out.printInfo("Info: Could not set thread priority. The executing user does not have enough privileges. Please run \"ulimit -r 100\" before executing Homegear.");
 			}
 			else if(error == ESRCH) _bl->out.printError("Could not set thread priority. Thread could not be found.");
 			else if(error == EINVAL) _bl->out.printError("Could not set thread priority: policy is not a recognized policy, or param does not make sense for the policy.");
