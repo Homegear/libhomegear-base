@@ -33,7 +33,7 @@
 
 namespace BaseLib
 {
-Variable::Variable(xml_node<>* node) : Variable()
+Variable::Variable(const xml_node<>* node) : Variable()
 {
 	type = VariableType::tStruct;
 	parseXmlNode(node, structValue);
@@ -80,13 +80,13 @@ Variable::~Variable()
 {
 }
 
-void Variable::parseXmlNode(xml_node<>* node, PStruct& xmlStruct)
+void Variable::parseXmlNode(const xml_node<>* node, PStruct& xmlStruct)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(const xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		xmlStruct->insert(std::pair<std::string, PVariable>(std::string(attr->name()), std::make_shared<Variable>(std::string(attr->value()))));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(const xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		if(subNode->first_node())
 		{
