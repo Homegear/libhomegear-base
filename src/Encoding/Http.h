@@ -133,6 +133,10 @@ public:
 	void setRedirectQueryString(std::string value) { _redirectQueryString = value; }
 	int32_t getRedirectStatus() { return _redirectStatus; }
 	void setRedirectStatus(int32_t value) { _redirectStatus = value; }
+	size_t getMaxHeaderSize() { return _maxHeaderSize; }
+	void setMaxHeaderSize(size_t value) { _maxHeaderSize = value; }
+	size_t getMaxContentSize() { return _maxContentSize; }
+	void setMaxContentSize(size_t value) { _maxContentSize = value; }
 
 
 	/**
@@ -194,6 +198,8 @@ private:
 	std::string _redirectUrl;
 	std::string _redirectQueryString;
 	int32_t _redirectStatus = -1;
+	size_t _maxHeaderSize = 102400;
+	size_t _maxContentSize = 104857600;
 
 	int32_t processHeader(char** buffer, int32_t& bufferLength);
 	void processHeaderField(char* name, uint32_t nameSize, char* value, uint32_t valueSize);

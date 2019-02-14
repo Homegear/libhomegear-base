@@ -3935,7 +3935,6 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
-		if(channel == 0 && serviceMessages->set(valueKey, value->booleanValue)) return PVariable(new Variable(VariableType::tVoid));
 		auto channelIterator = valuesCentral.find(channel);
 		if(channelIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 		auto parameterIterator = channelIterator->second.find(valueKey);
@@ -4004,7 +4003,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 				value->stringValue.clear();
 			}
 		}
-		return PVariable(new Variable(VariableType::tVoid));
+		return std::make_shared<BaseLib::Variable>();
 	}
 	catch(const std::exception& ex)
     {

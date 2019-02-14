@@ -61,6 +61,10 @@ public:
 	BinaryRpc(BaseLib::SharedObjects* bl);
 	virtual ~BinaryRpc();
 
+	size_t getMaxHeaderSize() { return _maxHeaderSize; }
+	void setMaxHeaderSize(size_t value) { _maxHeaderSize = value; }
+	size_t getMaxContentSize() { return _maxContentSize; }
+	void setMaxContentSize(size_t value) { _maxContentSize = value; }
 	Type getType() { return _type; }
 	bool hasHeader() { return _hasHeader; }
 	bool processingStarted() { return _processingStarted; }
@@ -79,6 +83,8 @@ public:
 	int32_t process(char* buffer, int32_t bufferLength);
 private:
 	SharedObjects* _bl = nullptr;
+	size_t _maxHeaderSize = 102400;
+	size_t _maxContentSize = 104857600;
 	bool _hasHeader = false;
 	bool _processingStarted = false;
 	bool _finished = false;
