@@ -67,7 +67,9 @@ public:
 	void setMaxContentSize(size_t value) { _maxContentSize = value; }
 	Type getType() { return _type; }
 	bool hasHeader() { return _hasHeader; }
-	bool processingStarted() { return _processingStarted; }
+	bool processingStarted() { return _headerProcessingStarted || _dataProcessingStarted; }
+	bool headerProcessingStarted() { return _headerProcessingStarted; }
+	bool dataProcessingStarted() { return _dataProcessingStarted; }
 	bool isFinished() { return _finished; }
 	std::vector<char>& getData() { return _data; }
 
@@ -86,7 +88,8 @@ private:
 	size_t _maxHeaderSize = 102400;
 	size_t _maxContentSize = 104857600;
 	bool _hasHeader = false;
-	bool _processingStarted = false;
+	bool _headerProcessingStarted = false;
+	bool _dataProcessingStarted = false;
 	bool _finished = false;
 	Type _type = Type::unknown;
 	uint32_t _headerSize = 0;

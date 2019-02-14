@@ -521,9 +521,13 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::closeClientConnection(int32_t clientId)
 	{
-		std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-		auto clientIterator = _clients.find(clientId);
-		if(clientIterator != _clients.end()) clientIterator->second->socket->close();
+        {
+            std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+            auto clientIterator = _clients.find(clientId);
+            if(clientIterator != _clients.end()) clientIterator->second->socket->close();
+        }
+
+        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
 	}
 
     int32_t TcpSocket::clientCount()
