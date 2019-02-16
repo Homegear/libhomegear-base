@@ -1660,7 +1660,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 30;
-		//Don't use SOL_TCP, as this constant doesn't exists in BSD
+		//Don't use SOL_TCP, as this constant doesn't exists in BSD. Also don't use getprotobyname() as this returns a nullptr on some systems.
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
