@@ -33,6 +33,165 @@
 
 namespace BaseLib
 {
+
+Variable::Variable()
+{
+	type = VariableType::tVoid;
+	arrayValue = std::make_shared<Array>();
+	structValue = std::make_shared<Struct>();
+}
+
+Variable::Variable(Variable const& rhs)
+{
+	errorStruct = rhs.errorStruct;
+	type = rhs.type;
+	stringValue = rhs.stringValue;
+	integerValue = rhs.integerValue;
+	integerValue64 = rhs.integerValue64;
+	floatValue = rhs.floatValue;
+	booleanValue = rhs.booleanValue;
+	binaryValue = rhs.binaryValue;
+	for(Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i)
+	{
+		PVariable lhs = std::make_shared<Variable>();
+		*lhs = *(*i);
+		arrayValue->push_back(lhs);
+	}
+	for(Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i)
+	{
+		PVariable lhs = std::make_shared<Variable>();
+		*lhs = *(i->second);
+		structValue->insert(std::pair<std::string, PVariable>(i->first, lhs));
+	}
+}
+
+Variable::Variable(VariableType variableType) : Variable()
+{
+	type = variableType;
+	if(type == VariableType::tVariant) type = VariableType::tVoid;
+}
+
+Variable::Variable(uint8_t integer) : Variable()
+{
+	type = VariableType::tInteger;
+	integerValue = (int32_t)integer;
+	integerValue64 = (int64_t)integer;
+	floatValue = (double)integer;
+	booleanValue = (bool)integer;
+}
+
+Variable::Variable(int32_t integer) : Variable()
+{
+	type = VariableType::tInteger;
+	integerValue = (int32_t)integer;
+	integerValue64 = (int64_t)integer;
+	floatValue = (double)integer;
+	booleanValue = (bool)integer;
+}
+
+Variable::Variable(uint32_t integer): Variable()
+{
+	type = VariableType::tInteger;
+	integerValue = (int32_t)integer;
+	integerValue64 = (int64_t)integer;
+	floatValue = (double)integer;
+	booleanValue = (bool)integer;
+}
+
+Variable::Variable(int64_t integer) : Variable()
+{
+	type = VariableType::tInteger64;
+	integerValue = (int32_t)integer;
+	integerValue64 = (int64_t)integer;
+	floatValue = (double)integer;
+	booleanValue = (bool)integer;
+}
+
+Variable::Variable(uint64_t integer) : Variable()
+{
+	type = VariableType::tInteger64;
+	integerValue = (int32_t)integer;
+	integerValue64 = (int64_t)integer;
+	floatValue = (double)integer;
+	booleanValue = (bool)integer;
+}
+
+Variable::Variable(const std::string& string) : Variable()
+{
+	type = VariableType::tString;
+	stringValue = string;
+	integerValue64 = Math::getNumber64(stringValue);
+	integerValue = (int32_t)integerValue64;
+	booleanValue = !stringValue.empty() && stringValue != "0" && stringValue != "false" && stringValue != "f";
+}
+
+Variable::Variable(const char* string) : Variable(std::string(string))
+{
+}
+
+Variable::Variable(bool boolean) : Variable()
+{
+	type = VariableType::tBoolean;
+	booleanValue = boolean;
+	integerValue = booleanValue;
+	integerValue64 = booleanValue;
+}
+
+Variable::Variable(double floatVal) : Variable()
+{
+	type = VariableType::tFloat;
+	floatValue = floatVal;
+	integerValue = (int32_t)std::lround(floatVal);
+	integerValue64 = std::llround(floatVal);
+	booleanValue = (bool)floatVal;
+}
+
+Variable::Variable(const PArray& arrayVal) : Variable()
+{
+	type = VariableType::tArray;
+	arrayValue = arrayVal;
+}
+
+Variable::Variable(const std::vector<std::string>& arrayVal) : Variable()
+{
+	type = VariableType::tArray;
+	arrayValue->reserve(arrayVal.size());
+	for(auto& element : arrayVal)
+	{
+		arrayValue->push_back(std::make_shared<Variable>(element));
+	}
+}
+
+Variable::Variable(const PStruct& structVal) : Variable()
+{
+	type = VariableType::tStruct;
+	structValue = structVal;
+}
+
+Variable::Variable(const std::vector<uint8_t>& binaryVal) : Variable()
+{
+	type = VariableType::tBinary;
+	binaryValue = binaryVal;
+}
+
+Variable::Variable(const uint8_t* binaryVal, size_t binaryValSize) : Variable()
+{
+	type = VariableType::tBinary;
+	binaryValue = std::vector<uint8_t>(binaryVal, binaryVal + binaryValSize);
+}
+
+Variable::Variable(const std::vector<char>& binaryVal) : Variable()
+{
+	type = VariableType::tBinary; binaryValue.clear();
+	binaryValue.insert(binaryValue.end(), binaryVal.begin(), binaryVal.end());
+}
+
+Variable::Variable(const char* binaryVal, size_t binaryValSize) : Variable()
+{
+	type = VariableType::tBinary;
+	binaryValue = std::vector<uint8_t>(binaryVal, binaryVal + binaryValSize);
+}
+
 Variable::Variable(const xml_node<>* node) : Variable()
 {
 	type = VariableType::tStruct;
@@ -106,30 +265,6 @@ std::shared_ptr<Variable> Variable::createError(int32_t faultCode, std::string f
 	error->structValue->insert(StructElement("faultCode", std::make_shared<Variable>(faultCode)));
 	error->structValue->insert(StructElement("faultString", std::make_shared<Variable>(faultString)));
 	return error;
-}
-
-Variable::Variable(Variable const& rhs)
-{
-	errorStruct = rhs.errorStruct;
-	type = rhs.type;
-	stringValue = rhs.stringValue;
-	integerValue = rhs.integerValue;
-	integerValue64 = rhs.integerValue64;
-	floatValue = rhs.floatValue;
-	booleanValue = rhs.booleanValue;
-	binaryValue = rhs.binaryValue;
-	for(Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i)
-	{
-		PVariable lhs = std::make_shared<Variable>();
-		*lhs = *(*i);
-		arrayValue->push_back(lhs);
-	}
-	for(Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i)
-	{
-		PVariable lhs = std::make_shared<Variable>();
-		*lhs = *(i->second);
-		structValue->insert(std::pair<std::string, PVariable>(i->first, lhs));
-	}
 }
 
 Variable& Variable::operator=(const Variable& rhs)
@@ -290,7 +425,7 @@ Variable::operator Variable::bool_type() const
 			result = !arrayValue->empty();
 			break;
 		case VariableType::tBase64:
-			result = !stringValue.empty() && stringValue != "0";
+			result = !stringValue.empty();
 			break;
 		case VariableType::tBinary:
 			result = !binaryValue.empty();
@@ -307,7 +442,7 @@ Variable::operator Variable::bool_type() const
 			result = (bool)integerValue64;
 			break;
 		case VariableType::tString:
-			result = !stringValue.empty() && stringValue != "0";
+			result = !stringValue.empty() && stringValue != "0" && stringValue != "false" && stringValue != "f";
 			break;
 		case VariableType::tStruct:
 			result = !structValue->empty();

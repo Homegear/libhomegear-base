@@ -102,26 +102,27 @@ public:
 	PStruct structValue;
 	std::vector<uint8_t> binaryValue;
 
-	Variable() { type = VariableType::tVoid; arrayValue = std::make_shared<Array>(); structValue = std::make_shared<Struct>(); }
-	Variable(Variable const& rhs);
-	explicit Variable(VariableType variableType) : Variable() { type = variableType; if(type == VariableType::tVariant) type = VariableType::tVoid; }
+    Variable();
+    Variable(Variable const& rhs);
+    explicit Variable(VariableType variableType);
+    explicit Variable(uint8_t integer);
+    explicit Variable(int32_t integer);
+    explicit Variable(uint32_t integer);
+    explicit Variable(int64_t integer);
+    explicit Variable(uint64_t integer);
+    explicit Variable(const std::string& string);
+    explicit Variable(const char* string);
+    explicit Variable(bool boolean);
+    explicit Variable(double floatVal);
+    explicit Variable(const PArray& arrayVal);
+    explicit Variable(const std::vector<std::string>& arrayVal);
+    explicit Variable(const PStruct& structVal);
+    explicit Variable(const std::vector<uint8_t>& binaryVal);
+    explicit Variable(const uint8_t* binaryVal, size_t binaryValSize);
+    explicit Variable(const std::vector<char>& binaryVal);
+    explicit Variable(const char* binaryVal, size_t binaryValSize);
+
 	explicit Variable(DeviceDescription::ILogical::Type::Enum variableType);
-	explicit Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; floatValue = (double)integer; }
-	explicit Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; floatValue = (double)integer; }
-	explicit Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; floatValue = (double)integer; }
-	explicit Variable(int64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; floatValue = (double)integer; }
-	explicit Variable(uint64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; floatValue = (double)integer; }
-	explicit Variable(const std::string& string) : Variable() { type = VariableType::tString; stringValue = string; }
-	explicit Variable(const char* string) : Variable() { type = VariableType::tString; stringValue = std::string(string); }
-	explicit Variable(bool boolean) : Variable() { type = VariableType::tBoolean; booleanValue = boolean; }
-	explicit Variable(double floatVal) : Variable() { type = VariableType::tFloat; floatValue = floatVal; integerValue = (int32_t)std::lround(floatVal); integerValue64 = std::llround(floatVal); }
-	explicit Variable(const PArray& arrayVal) : Variable() { type = VariableType::tArray; arrayValue = arrayVal; }
-	explicit Variable(const std::vector<std::string>& arrayVal) : Variable() { type = VariableType::tArray; arrayValue->reserve(arrayVal.size()); for(auto& element : arrayVal) arrayValue->push_back(std::make_shared<Variable>(element)); }
-	explicit Variable(const PStruct& structVal) : Variable() { type = VariableType::tStruct; structValue = structVal; }
-	explicit Variable(const std::vector<uint8_t>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue = binaryVal; }
-	explicit Variable(const uint8_t* binaryVal, size_t binaryValSize) : Variable() { type = VariableType::tBinary; binaryValue = std::vector<uint8_t>(binaryVal, binaryVal + binaryValSize); }
-	explicit Variable(const std::vector<char>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue.clear(); binaryValue.insert(binaryValue.end(), binaryVal.begin(), binaryVal.end()); }
-	explicit Variable(const char* binaryVal, size_t binaryValSize) : Variable() { type = VariableType::tBinary; binaryValue = std::vector<uint8_t>(binaryVal, binaryVal + binaryValSize); }
 	explicit Variable(const xml_node<>* node);
 	virtual ~Variable();
 	static PVariable createError(int32_t faultCode, std::string faultString);
