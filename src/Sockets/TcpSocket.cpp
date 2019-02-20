@@ -519,6 +519,17 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
+	void TcpSocket::closeClientConnection(int32_t clientId)
+	{
+        {
+            std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+            auto clientIterator = _clients.find(clientId);
+            if(clientIterator != _clients.end()) clientIterator->second->socket->close();
+        }
+
+        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+	}
+
     int32_t TcpSocket::clientCount()
     {
         std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
@@ -1649,22 +1660,22 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 30;
-		//Don't use SOL_TCP, as this constant doesn't exists in BSD
-		if(setsockopt(_socketDescriptor->descriptor, getprotobyname("TCP")->p_proto, TCP_KEEPIDLE, (void*)&optValue, sizeof(int32_t)) == -1)
+		//Don't use SOL_TCP, as this constant doesn't exists in BSD. Also don't use getprotobyname() as this returns a nullptr on some systems.
+		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 4;
-		if(setsockopt(_socketDescriptor->descriptor, getprotobyname("TCP")->p_proto, TCP_KEEPCNT, (void*)&optValue, sizeof(int32_t)) == -1)
+		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPCNT, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 15;
-		if(setsockopt(_socketDescriptor->descriptor, getprotobyname("TCP")->p_proto, TCP_KEEPINTVL, (void*)&optValue, sizeof(int32_t)) == -1)
+		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPINTVL, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
 			_bl->fileDescriptorManager.shutdown(_socketDescriptor);

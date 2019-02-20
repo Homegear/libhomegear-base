@@ -430,6 +430,13 @@ public:
         void sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
 
         /**
+         * Closes the connection to a connected client.
+         *
+         * @param clientId The ID of the client to close as passed to TcpSocket::TcpServerServer::packetReceivedCallback.
+         */
+        void closeClientConnection(int32_t clientId);
+
+        /**
          * Returns the number of clients connected to the TCP server
          * @return The number of connected clients.
          */

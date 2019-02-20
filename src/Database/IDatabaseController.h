@@ -47,6 +47,7 @@ struct SystemVariable
 	std::string name;
 	uint64_t room = 0;
 	std::set<uint64_t> categories;
+	int32_t flags = 0;
 	BaseLib::PVariable value;
 };
 typedef std::shared_ptr<SystemVariable> PSystemVariable;
@@ -68,7 +69,7 @@ public:
 	virtual void init() = 0;
 
 	//General
-	virtual void open(std::string databasePath, std::string databaseFilename, bool databaseSynchronous, bool databaseMemoryJournal, bool databaseWALJournal, std::string backupPath = "", std::string backupFilename = "") = 0;
+	virtual void open(std::string databasePath, std::string databaseFilename, bool databaseSynchronous, bool databaseMemoryJournal, bool databaseWALJournal, std::string backupPath, std::string backupFilename) = 0;
 	virtual void hotBackup() = 0;
 	virtual bool isOpen() = 0;
 	virtual void initializeDatabase() = 0;
@@ -146,7 +147,7 @@ public:
 
 	//System variables
 	virtual BaseLib::PVariable deleteSystemVariable(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getSystemVariable(std::string& variableId) = 0;
+	virtual BaseLib::PVariable getSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, bool checkAcls) = 0;
 	virtual Database::PSystemVariable getSystemVariableInternal(std::string& variableId) = 0;
     virtual BaseLib::PVariable getSystemVariableCategories(std::string& variableId) = 0;
     virtual std::set<uint64_t> getSystemVariableCategoriesInternal(std::string& variableId) = 0;
@@ -154,10 +155,10 @@ public:
 	virtual BaseLib::PVariable getSystemVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls) = 0;
 	virtual BaseLib::PVariable getSystemVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls) = 0;
     virtual uint64_t getSystemVariableRoomInternal(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsAndCategories, bool checkAcls) = 0;
+	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsCategoriesFlags, bool checkAcls) = 0;
     virtual void removeCategoryFromSystemVariables(uint64_t categoryId) = 0;
     virtual void removeRoomFromSystemVariables(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable setSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, BaseLib::PVariable& value) = 0;
+	virtual BaseLib::PVariable setSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, BaseLib::PVariable& value, int32_t flags, bool checkAcls) = 0;
     virtual BaseLib::PVariable setSystemVariableCategories(std::string& variableId, std::set<uint64_t>& categories) = 0;
     virtual BaseLib::PVariable setSystemVariableRoom(std::string& variableId, uint64_t room) = 0;
     virtual bool systemVariableHasCategory(std::string& variableId, uint64_t categoryId) = 0;
