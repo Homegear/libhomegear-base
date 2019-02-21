@@ -230,6 +230,7 @@ public:
 	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
 	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerParameterRolesAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerVariableAsynchronous(DataRow& data) = 0;
 	virtual std::shared_ptr<DataTable> getPeerParameters(uint64_t peerID) = 0;
 	virtual std::shared_ptr<DataTable> getPeerVariables(uint64_t peerID) = 0;
