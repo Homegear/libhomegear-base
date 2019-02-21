@@ -436,61 +436,70 @@ std::string JsonEncoder::encodeString(const std::string& s)
         for(int32_t i = 0; i < (signed)s.size(); i++)
         {
             uint8_t b1 = (uint8_t)s.at(i);
-            if(b1 & 0x80) //> 1 byte or invalid
-            {
-                std::string utf8String;
-                bool invalid = false;
-                if((b1 & 0xE0) == 0xC0) //Two bytes
-                {
-                    i++;
-                    if(i == (signed)s.size()) invalid = true;
+			if(b1 & 0x80) //> 1 byte or invalid
+			{
+				std::string utf8String;
+				bool invalid = false;
+				if((b1 & 0xE0) == 0xC0) //Two bytes
+				{
+					if(i + 1 == (signed)s.size())invalid = true;
 					else
 					{
-						auto b2 = (uint8_t)s.at(i);
-						if((b2 & 0xC0) == 0x80) utf8String = std::string{ (char)b1, (char)b2 };
+						auto b2 = (uint8_t)s.at(i + 1);
+						if((b2 & 0xC0) == 0x80)
+						{
+							i++;
+							utf8String = std::string{(char) b1, (char) b2};
+						}
 						else invalid = true;
 					}
-                }
-                else if((b1 & 0xF0) == 0xE0) //Three bytes
-                {
-                    i+=2;
-                    if(i == (signed)s.size()) invalid = true;
+				}
+				else if((b1 & 0xF0) == 0xE0) //Three bytes
+				{
+					if(i + 2 == (signed)s.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) s.at(i - 1);
-						auto b3 = (uint8_t) s.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						auto b2 = (uint8_t) s.at(i + 1);
+						auto b3 = (uint8_t) s.at(i + 2);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80)
+						{
+							i += 2;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						}
 						else invalid = true;
 					}
-                }
-                else if((b1 & 0xF8) == 0xF0) //Four bytes
-                {
-                    i+=3;
-                    if(i == (signed)s.size()) invalid = true;
+				}
+				else if((b1 & 0xF8) == 0xF0) //Four bytes
+				{
+					if(i + 3 == (signed)s.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) s.at(i - 2);
-						auto b3 = (uint8_t) s.at(i - 1);
-						auto b4 = (uint8_t) s.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						auto b2 = (uint8_t) s.at(i + 1);
+						auto b3 = (uint8_t) s.at(i + 2);
+						auto b4 = (uint8_t) s.at(i + 3);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80)
+						{
+							i += 3;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						}
 						else invalid = true;
 					}
-                }
-                else invalid = true;
-                if(invalid) //Assume ANSI
-                {
-                    Ansi ansi(true, false);
-                    utf8String = ansi.toUtf8(std::string((char*)&b1, 1));
-                }
-                if(!utf8String.empty())
+				}
+				else invalid = true;
+				if(invalid) //Assume ANSI
+				{
+					Ansi ansi(true, false);
+					utf8String = ansi.toUtf8(std::string((char*)&b1, 1));
+				}
+				if(!utf8String.empty())
 				{
 					utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(utf8String));
 				}
-            }
-            else
-            {
-                utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char)b1));
-            }
+			}
+			else
+			{
+				utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char)b1));
+			}
         }
     }
 
@@ -576,37 +585,46 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 				bool invalid = false;
 				if((b1 & 0xE0) == 0xC0) //Two bytes
 				{
-					i++;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 1 == (signed)variable->stringValue.size())invalid = true;
 					else
 					{
-						auto b2 = (uint8_t)variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80) utf8String = std::string{ (char)b1, (char)b2 };
+						auto b2 = (uint8_t)variable->stringValue.at(i + 1);
+						if((b2 & 0xC0) == 0x80)
+						{
+							i++;
+							utf8String = std::string{(char) b1, (char) b2};
+						}
 						else invalid = true;
 					}
 				}
 				else if((b1 & 0xF0) == 0xE0) //Three bytes
 				{
-					i+=2;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 2 == (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) variable->stringValue.at(i - 1);
-						auto b3 = (uint8_t) variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+						auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80)
+						{
+							i += 2;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						}
 						else invalid = true;
 					}
 				}
 				else if((b1 & 0xF8) == 0xF0) //Four bytes
 				{
-					i+=3;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 3 == (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) variable->stringValue.at(i - 2);
-						auto b3 = (uint8_t) variable->stringValue.at(i - 1);
-						auto b4 = (uint8_t) variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+						auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+						auto b4 = (uint8_t) variable->stringValue.at(i + 3);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80)
+						{
+							i += 3;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						}
 						else invalid = true;
 					}
 				}
@@ -700,37 +718,46 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 				bool invalid = false;
 				if((b1 & 0xE0) == 0xC0) //Two bytes
 				{
-					i++;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 1 == (signed)variable->stringValue.size())invalid = true;
 					else
 					{
-						auto b2 = (uint8_t)variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80) utf8String = std::string{ (char)b1, (char)b2 };
+						auto b2 = (uint8_t)variable->stringValue.at(i + 1);
+						if((b2 & 0xC0) == 0x80)
+						{
+							i++;
+							utf8String = std::string{(char) b1, (char) b2};
+						}
 						else invalid = true;
 					}
 				}
 				else if((b1 & 0xF0) == 0xE0) //Three bytes
 				{
-					i+=2;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 2 == (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) variable->stringValue.at(i - 1);
-						auto b3 = (uint8_t) variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+						auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80)
+						{
+							i += 2;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3};
+						}
 						else invalid = true;
 					}
 				}
 				else if((b1 & 0xF8) == 0xF0) //Four bytes
 				{
-					i+=3;
-					if(i == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 3 == (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
-						auto b2 = (uint8_t) variable->stringValue.at(i - 2);
-						auto b3 = (uint8_t) variable->stringValue.at(i - 1);
-						auto b4 = (uint8_t) variable->stringValue.at(i);
-						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+						auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+						auto b4 = (uint8_t) variable->stringValue.at(i + 3);
+						if((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80)
+						{
+							i += 3;
+							utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
+						}
 						else invalid = true;
 					}
 				}
