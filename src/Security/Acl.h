@@ -322,6 +322,8 @@ public:
     AclResult checkMethodAccess(std::string& methodName);
     AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndRoleReadAccess(std::string& methodName, uint64_t roleId);
+    AclResult checkMethodAndRoleWriteAccess(std::string& methodName, uint64_t roleId);
     AclResult checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);

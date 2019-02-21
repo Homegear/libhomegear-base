@@ -1119,6 +1119,74 @@ AclResult Acl::checkMethodAndCategoryWriteAccess(std::string& methodName, uint64
     return AclResult::error;
 }
 
+AclResult Acl::checkMethodAndRoleReadAccess(std::string& methodName, uint64_t roleId)
+{
+    try
+    {
+        if(!_methodsSet && !_rolesReadSet) return AclResult::notInList;
+
+        AclResult roleResult = AclResult::notInList;
+        if(_rolesReadSet)
+        {
+            auto rolesIterator = _rolesRead.find(roleId); //Check specific access first in case of "no access".
+            if(rolesIterator != _rolesRead.end())
+            {
+                roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
+                if(!rolesIterator->second) return roleResult; //Deny access
+            }
+        }
+        else roleResult = AclResult::accept;
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(roleResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndRoleWriteAccess(std::string& methodName, uint64_t roleId)
+{
+    try
+    {
+        if(!_methodsSet && !_rolesWriteSet) return AclResult::notInList;
+
+        AclResult roleResult = AclResult::notInList;
+        if(_rolesWriteSet)
+        {
+            auto rolesIterator = _rolesWrite.find(roleId); //Check specific access first in case of "no access".
+            if(rolesIterator != _rolesWrite.end())
+            {
+                roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
+                if(!rolesIterator->second) return roleResult; //Deny access
+            }
+        }
+        else roleResult = AclResult::accept;
+
+        auto methodResult = checkMethodAccess(methodName);
+        if(methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+        if(roleResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
 AclResult Acl::checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId)
 {
     try
@@ -1575,11 +1643,11 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
         {
             for(auto& rolesIterator : _rolesRead)
             {
-                /*if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
+                if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
                 {
                     roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
                     if(roleResult == AclResult::deny) return roleResult; //Deny access
-                }*/
+                }
             }
         }
         else roleResult = AclResult::accept;
@@ -1740,11 +1808,11 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
         {
             for(auto& rolesIterator : _rolesWrite)
             {
-                /*if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
+                if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
                 {
                     roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
                     if(roleResult == AclResult::deny) return roleResult; //Deny access
-                }*/
+                }
             }
         }
         else roleResult = AclResult::accept;

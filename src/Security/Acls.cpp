@@ -71,6 +71,28 @@ bool Acls::categoriesWriteSet()
     return false;
 }
 
+bool Acls::rolesReadSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->rolesReadSet()) return true;
+    }
+
+    return false;
+}
+
+bool Acls::rolesWriteSet()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    for(auto& acl : _acls)
+    {
+        if(acl->rolesWriteSet()) return true;
+    }
+
+    return false;
+}
+
 bool Acls::devicesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
@@ -115,23 +137,23 @@ bool Acls::roomsWriteSet()
     return false;
 }
 
-bool Acls::roomsCategoriesDevicesReadSet()
+bool Acls::roomsCategoriesRolesDevicesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->roomsReadSet() || acl->categoriesReadSet() || acl->devicesReadSet()) return true;
+        if(acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
     }
 
     return false;
 }
 
-bool Acls::roomsCategoriesDevicesWriteSet()
+bool Acls::roomsCategoriesRolesDevicesWriteSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->devicesWriteSet()) return true;
+        if(acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
     }
 
     return false;
@@ -159,45 +181,45 @@ bool Acls::variablesWriteSet()
     return false;
 }
 
-bool Acls::variablesRoomsCategoriesReadSet()
+bool Acls::variablesRoomsCategoriesRolesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet()) return true;
+        if(acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet()) return true;
     }
 
     return false;
 }
 
-bool Acls::variablesRoomsCategoriesWriteSet()
+bool Acls::variablesRoomsCategoriesRolesWriteSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet()) return true;
+        if(acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet()) return true;
     }
 
     return false;
 }
 
-bool Acls::variablesRoomsCategoriesDevicesReadSet()
+bool Acls::variablesRoomsCategoriesRolesDevicesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->devicesReadSet()) return true;
+        if(acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
     }
 
     return false;
 }
 
-bool Acls::variablesRoomsCategoriesDevicesWriteSet()
+bool Acls::variablesRoomsCategoriesRolesDevicesWriteSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
     for(auto& acl : _acls)
     {
-        if(acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->devicesWriteSet()) return true;
+        if(acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
     }
 
     return false;
@@ -460,6 +482,150 @@ bool Acls::checkCategoryWriteAccess(uint64_t categoryId)
     return false;
 }
 
+bool Acls::checkRolesReadAccess(std::set<uint64_t>& roles)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkRolesReadAccess(roles);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to roles (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to roles (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkRolesWriteAccess(std::set<uint64_t>& roles)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkRolesWriteAccess(roles);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to roles (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to roles (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkRoleReadAccess(uint64_t roleId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkRoleReadAccess(roleId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to role (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to role (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkRoleWriteAccess(uint64_t roleId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkRoleWriteAccess(roleId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to role (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to role (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
 bool Acls::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer)
 {
     try
@@ -660,6 +826,78 @@ bool Acls::checkMethodAndCategoryWriteAccess(std::string methodName, uint64_t ca
         }
 
         if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or category " + std::to_string(categoryId) + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkMethodAndRoleReadAccess(std::string methodName, uint64_t roleId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndRoleReadAccess(methodName, roleId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or role " + std::to_string(roleId) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or role " + std::to_string(roleId) + " (2).");
+        return acceptSet;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+
+    return false;
+}
+
+bool Acls::checkMethodAndRoleWriteAccess(std::string methodName, uint64_t roleId)
+{
+    try
+    {
+        std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+        bool acceptSet = false;
+        for(auto& acl : _acls)
+        {
+            auto result = acl->checkMethodAndRoleWriteAccess(methodName, roleId);
+            if(result == AclResult::error || result == AclResult::deny)
+            {
+                if(_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or role " + std::to_string(roleId) + " (1).");
+                return false;
+            }
+            else if(result == AclResult::accept) acceptSet = true;
+        }
+
+        if(!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or role " + std::to_string(roleId) + " (2).");
         return acceptSet;
     }
     catch(const std::exception& ex)

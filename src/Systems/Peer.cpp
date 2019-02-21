@@ -48,6 +48,7 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
 	_logicalData = rhs._logicalData;
     _room = rhs._room;
     _categories = rhs._categories;
+    _roles = rhs._roles;
 }
 
 RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
@@ -60,6 +61,7 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
 	_logicalData = rhs._logicalData;
     _room = rhs._room;
     _categories = rhs._categories;
+    _roles = rhs._roles;
 	return *this;
 }
 
@@ -1630,7 +1632,7 @@ void Peer::loadConfig()
 					continue;
 				}
 
-                { // Rooms / Categories
+                { // Rooms / categories / roles
                     parameterInfo->parameter.setRoom((uint64_t)row->second.at(8)->intValue);
 
                     std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(9)->textValue, ',');
@@ -1640,6 +1642,14 @@ void Peer::loadConfig()
                         uint64_t category = (uint64_t)BaseLib::Math::getNumber64(categoryString);
                         if(category != 0) parameterInfo->parameter.addCategory(category);
                     }
+
+					std::vector<std::string> roleStrings = BaseLib::HelperFunctions::splitAll(row->second.at(10)->textValue, ',');
+					for(auto roleString : roleStrings)
+					{
+						if(roleString.empty()) continue;
+						uint64_t role = (uint64_t)BaseLib::Math::getNumber64(roleString);
+						if(role != 0) parameterInfo->parameter.addRole(role);
+					}
                 }
 
 				Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
@@ -2089,6 +2099,182 @@ bool Peer::variableHasCategories(int32_t channel, const std::string& variableNam
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
+}
+
+bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.addRole(roleId);
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+        _bl->db->savePeerParameterRolesAsynchronous(data);
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
+bool Peer::removeRoleFromVariable(int32_t channel, std::string& variableName, uint64_t roleId)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.removeRole(roleId);
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+        _bl->db->savePeerParameterRolesAsynchronous(data);
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
+void Peer::removeRoleFromVariables(uint64_t roleId)
+{
+    try
+    {
+        for(auto& channelIterator : valuesCentral)
+        {
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(!variableIterator.second.rpcParameter || variableIterator.second.databaseId == 0) continue;
+                variableIterator.second.removeRole(roleId);
+
+                Database::DataRow data;
+                data.push_back(std::make_shared<Database::DataColumn>(variableIterator.second.getRoleString()));
+                data.push_back(std::make_shared<Database::DataColumn>(variableIterator.second.databaseId));
+                _bl->db->savePeerParameterRolesAsynchronous(data);
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+std::set<uint64_t> Peer::getVariableRoles(int32_t channel, std::string& variableName)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+
+        return variableIterator->second.getRoles();
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return std::set<uint64_t>();
+}
+
+bool Peer::variableHasRole(int32_t channel, const std::string& variableName, uint64_t roleId)
+{
+	try
+	{
+		auto channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return false;
+		auto variableIterator = channelIterator->second.find(variableName);
+		if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+		return variableIterator->second.hasRole(roleId);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return false;
+}
+
+bool Peer::variableHasRoles(int32_t channel, const std::string& variableName)
+{
+	try
+	{
+		auto channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return false;
+		auto variableIterator = channelIterator->second.find(variableName);
+		if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+		return variableIterator->second.hasRoles();
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return false;
 }
 
 //RPC methods
@@ -3651,6 +3837,18 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
                 }
                 description->structValue->emplace("CATEGORIES", categoriesResult);
             }
+
+            auto roles = valueParameterIterator->second.getRoles();
+            if(!roles.empty())
+            {
+                PVariable rolesResult = std::make_shared<Variable>(VariableType::tArray);
+                rolesResult->arrayValue->reserve(roles.size());
+                for(auto role : roles)
+                {
+                    rolesResult->arrayValue->push_back(std::make_shared<Variable>(role));
+                }
+                description->structValue->emplace("ROLES", rolesResult);
+            }
         }
 
         std::shared_ptr<ICentral> central = getCentral();
@@ -3730,6 +3928,49 @@ PVariable Peer::getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categ
 			{
 				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
 				if(variableIterator.second.hasCategory(categoryId)) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
+			}
+			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+		}
+
+		return channels;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
+		auto me = central->getPeer(_peerID);
+		if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+		auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		for(auto& channelIterator : valuesCentral)
+		{
+			auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+			variables->arrayValue->reserve(channelIterator.second.size());
+			for(auto& variableIterator : channelIterator.second)
+			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+				if(variableIterator.second.hasRole(roleId)) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
 			}
 			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
 		}
