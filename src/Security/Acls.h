@@ -63,6 +63,8 @@ public:
 
     bool categoriesReadSet();
     bool categoriesWriteSet();
+    bool rolesReadSet();
+    bool rolesWriteSet();
     bool devicesReadSet();
     bool devicesWriteSet();
     bool roomsReadSet();

@@ -420,7 +420,7 @@ std::string JsonEncoder::encodeString(const std::string& s)
     {
         utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(s);
     }
-    catch(std::exception&)
+    catch(const std::exception&)
     {
         //Fallback: Try converting byte by byte
         utf16.clear();
@@ -537,7 +537,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
     {
         utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(variable->stringValue);
     }
-    catch(std::exception&)
+    catch(const std::exception&)
     {
         //Fallback: Try converting byte by byte
         utf16.clear();

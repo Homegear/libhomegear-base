@@ -131,6 +131,16 @@ public:
 	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
+	// {{{ Roles
+	virtual BaseLib::PVariable createRole(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable deleteRole(uint64_t roleId) = 0;
+	virtual BaseLib::PVariable getRoles(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
+	virtual BaseLib::PVariable getRoleMetadata(uint64_t roleId) = 0;
+	virtual bool roleExists(uint64_t roleId) = 0;
+	virtual BaseLib::PVariable setRoleMetadata(uint64_t roleId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateRole(uint64_t roleId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+	// }}}
+
 	// {{{ Node data
 	virtual BaseLib::PVariable setNodeData(std::string& node, std::string& key, BaseLib::PVariable& value) = 0;
 	virtual BaseLib::PVariable getNodeData(std::string& node, std::string& key, bool requestFromTrustedServer = false) = 0;

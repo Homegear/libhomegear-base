@@ -54,8 +54,9 @@ PVariable Acl::toVariable()
          * 3. Devices
          * 4. Rooms
          * 5. Categories
-         * 6. Methods
-         * 7. Event Server Methods
+         * 6. Roles
+         * 7. Methods
+         * 8. Event Server Methods
          */
 
         PVariable acl = std::make_shared<Variable>(VariableType::tStruct);
@@ -194,6 +195,30 @@ PVariable Acl::toVariable()
             }
 
             acl->structValue->emplace("categoriesWrite", rootElement);
+        }
+
+        if(_rolesReadSet)
+        {
+            PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+            for(auto& role : _rolesRead)
+            {
+                rootElement->structValue->emplace(std::to_string(role.first), std::make_shared<Variable>(role.second));
+            }
+
+            acl->structValue->emplace("rolesRead", rootElement);
+        }
+
+        if(_rolesWriteSet)
+        {
+            PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+            for(auto& role : _rolesWrite)
+            {
+                rootElement->structValue->emplace(std::to_string(role.first), std::make_shared<Variable>(role.second));
+            }
+
+            acl->structValue->emplace("rolesWrite", rootElement);
         }
 
         if(_methodsSet)
@@ -367,6 +392,28 @@ void Acl::fromVariable(PVariable serializedData)
                     _categoriesWrite[Math::getNumber64(idString, false)] = categoryElement.second->booleanValue;
                 }
             }
+            else if(rootElement.first == "rolesRead")
+            {
+                _rolesReadSet = true;
+                for(auto& roleElement : *rootElement.second->structValue)
+                {
+                    if(roleElement.second->type != VariableType::tBoolean) throw AclException("Role element is not of type bool.");
+                    std::string idString = roleElement.first;
+                    if(!Math::isNumber(idString, false)) throw AclException("Role ID is not a valid number.");
+                    _rolesRead[Math::getNumber64(idString, false)] = roleElement.second->booleanValue;
+                }
+            }
+            else if(rootElement.first == "rolesWrite")
+            {
+                _rolesWriteSet = true;
+                for(auto& roleElement : *rootElement.second->structValue)
+                {
+                    if(roleElement.second->type != VariableType::tBoolean) throw AclException("Role element is not of type bool.");
+                    std::string idString = roleElement.first;
+                    if(!Math::isNumber(idString, false)) throw AclException("Role ID is not a valid number.");
+                    _rolesWrite[Math::getNumber64(idString, false)] = roleElement.second->booleanValue;
+                }
+            }
             else if(rootElement.first == "methods")
             {
                 _methodsSet = true;
@@ -510,6 +557,24 @@ std::string Acl::toString(int32_t indentation)
         }
     }
 
+    if(_rolesReadSet)
+    {
+        stream << prefix << "Readable role IDs:" << std::endl;
+        for(auto& role : _rolesRead)
+        {
+            stream << prefix << "  * " << role.first << ": " << (role.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
+    if(_rolesWriteSet)
+    {
+        stream << prefix << "Writeable role IDs:" << std::endl;
+        for(auto& role : _rolesWrite)
+        {
+            stream << prefix << "  * " << role.first << ": " << (role.second ? "accept" : "deny") << std::endl;
+        }
+    }
+
     if(_methodsSet)
     {
         stream << prefix << "Executable RPC methods:" << std::endl;
@@ -640,6 +705,102 @@ AclResult Acl::checkCategoryWriteAccess(uint64_t categoryId)
 
         auto categoriesIterator = _categoriesWrite.find(categoryId);
         if(categoriesIterator != _categoriesWrite.end()) return categoriesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRolesReadAccess(std::set<uint64_t>& roles)
+{
+    try
+    {
+        if(!_rolesReadSet) return AclResult::notInList;
+
+        AclResult roleResult = AclResult::notInList;
+        for(auto& roleId : roles)
+        {
+            auto rolesIterator = _rolesRead.find(roleId);
+            if(rolesIterator != _rolesRead.end())
+            {
+                roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
+                if(roleResult == AclResult::deny) return roleResult; //Deny access
+            }
+        }
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRolesWriteAccess(std::set<uint64_t>& roles)
+{
+    try
+    {
+        if(!_rolesWriteSet) return AclResult::notInList;
+
+        AclResult roleResult = AclResult::notInList;
+        for(auto& roleId : roles)
+        {
+            auto rolesIterator = _rolesWrite.find(roleId);
+            if(rolesIterator != _rolesWrite.end())
+            {
+                roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
+                if(roleResult == AclResult::deny) return roleResult; //Deny access
+            }
+        }
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRoleReadAccess(uint64_t roleId)
+{
+    try
+    {
+        if(!_rolesReadSet) return AclResult::notInList;
+
+        auto rolesIterator = _rolesRead.find(roleId);
+        if(rolesIterator != _rolesRead.end()) return rolesIterator->second ? AclResult::accept : AclResult::deny;
+
+        return AclResult::notInList;
+    }
+    catch(const std::exception& ex)
+    {
+    }
+    catch(...)
+    {
+    }
+    return AclResult::error;
+}
+
+AclResult Acl::checkRoleWriteAccess(uint64_t roleId)
+{
+    try
+    {
+        if(!_rolesWriteSet) return AclResult::notInList;
+
+        auto rolesIterator = _rolesWrite.find(roleId);
+        if(rolesIterator != _rolesWrite.end()) return rolesIterator->second ? AclResult::accept : AclResult::deny;
 
         return AclResult::notInList;
     }
@@ -1279,7 +1440,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
     try
     {
         if(!peer) return AclResult::error;
-        if(!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet) return AclResult::notInList;
+        if(!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet && !_rolesReadSet) return AclResult::notInList;
 
         AclResult variableResult = AclResult::notInList;
         if(_variablesReadSet)
@@ -1409,10 +1570,24 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
         }
         else categoryResult = AclResult::accept;
 
+        AclResult roleResult = AclResult::notInList;
+        if(_rolesReadSet)
+        {
+            for(auto& rolesIterator : _rolesRead)
+            {
+                /*if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
+                {
+                    roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
+                    if(roleResult == AclResult::deny) return roleResult; //Deny access
+                }*/
+            }
+        }
+        else roleResult = AclResult::accept;
+
         auto deviceResult = checkDeviceReadAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
@@ -1430,7 +1605,7 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
     try
     {
         if(!peer) return AclResult::error;
-        if(!_variablesWriteSet && !_devicesWriteSet && !_roomsWriteSet && !_categoriesWriteSet) return AclResult::notInList;
+        if(!_variablesWriteSet && !_devicesWriteSet && !_roomsWriteSet && !_categoriesWriteSet && !_rolesWriteSet) return AclResult::notInList;
 
         AclResult variableResult = AclResult::notInList;
         if(_variablesWriteSet)
@@ -1560,10 +1735,24 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
         }
         else categoryResult = AclResult::accept;
 
+        AclResult roleResult = AclResult::notInList;
+        if(_rolesWriteSet)
+        {
+            for(auto& rolesIterator : _rolesWrite)
+            {
+                /*if((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first))
+                {
+                    roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
+                    if(roleResult == AclResult::deny) return roleResult; //Deny access
+                }*/
+            }
+        }
+        else roleResult = AclResult::accept;
+
         auto deviceResult = checkDeviceWriteAccess(peer);
         if(deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+        if(variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
         return AclResult::notInList;
     }
