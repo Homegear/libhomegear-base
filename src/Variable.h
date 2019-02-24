@@ -41,6 +41,7 @@
 #include <iostream>
 #include <map>
 #include <list>
+#include <cmath>
 
 using namespace rapidxml;
 
@@ -88,7 +89,7 @@ private:
 	/**
 	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
 	 */
-	void parseXmlNode(xml_node<>* node, PStruct& xmlStruct);
+	void parseXmlNode(const xml_node<>* node, PStruct& xmlStruct);
 public:
 	bool errorStruct = false;
 	VariableType type;
@@ -101,25 +102,28 @@ public:
 	PStruct structValue;
 	std::vector<uint8_t> binaryValue;
 
-	Variable() { type = VariableType::tVoid; arrayValue = PArray(new Array()); structValue = PStruct(new Struct()); }
-	Variable(Variable const& rhs);
-	Variable(VariableType variableType) : Variable() { type = variableType; if(type == VariableType::tVariant) type = VariableType::tVoid; }
-	Variable(DeviceDescription::ILogical::Type::Enum variableType);
-	Variable(uint8_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
-	Variable(int32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
-	Variable(uint32_t integer) : Variable() { type = VariableType::tInteger; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
-	Variable(int64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
-	Variable(uint64_t integer) : Variable() { type = VariableType::tInteger64; integerValue = (int32_t)integer; integerValue64 = (int64_t)integer; }
-	Variable(std::string string) : Variable() { type = VariableType::tString; stringValue = string; }
-	Variable(const char* string) : Variable() { type = VariableType::tString; stringValue = std::string(string); }
-	Variable(bool boolean) : Variable() { type = VariableType::tBoolean; booleanValue = boolean; }
-	Variable(double floatVal) : Variable() { type = VariableType::tFloat; floatValue = floatVal; }
-	Variable(PArray arrayVal) : Variable() { type = VariableType::tArray; arrayValue = arrayVal; }
-	Variable(std::vector<std::string>& arrayVal) : Variable() { type = VariableType::tArray; arrayValue->reserve(arrayVal.size()); for(std::vector<std::string>::iterator i = arrayVal.begin(); i != arrayVal.end(); ++i) arrayValue->push_back(PVariable(new Variable(*i))); }
-	Variable(PStruct structVal) : Variable() { type = VariableType::tStruct; structValue = structVal; }
-	Variable(std::vector<uint8_t>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue = binaryVal; }
-	Variable(std::vector<char>& binaryVal) : Variable() { type = VariableType::tBinary; binaryValue.clear(); binaryValue.insert(binaryValue.end(), binaryVal.begin(), binaryVal.end()); }
-	Variable(xml_node<>* node);
+    Variable();
+    Variable(Variable const& rhs);
+    explicit Variable(VariableType variableType);
+    explicit Variable(uint8_t integer);
+    explicit Variable(int32_t integer);
+    explicit Variable(uint32_t integer);
+    explicit Variable(int64_t integer);
+    explicit Variable(uint64_t integer);
+    explicit Variable(const std::string& string);
+    explicit Variable(const char* string);
+    explicit Variable(bool boolean);
+    explicit Variable(double floatVal);
+    explicit Variable(const PArray& arrayVal);
+    explicit Variable(const std::vector<std::string>& arrayVal);
+    explicit Variable(const PStruct& structVal);
+    explicit Variable(const std::vector<uint8_t>& binaryVal);
+    explicit Variable(const uint8_t* binaryVal, size_t binaryValSize);
+    explicit Variable(const std::vector<char>& binaryVal);
+    explicit Variable(const char* binaryVal, size_t binaryValSize);
+
+	explicit Variable(DeviceDescription::ILogical::Type::Enum variableType);
+	explicit Variable(const xml_node<>* node);
 	virtual ~Variable();
 	static PVariable createError(int32_t faultCode, std::string faultString);
 	std::string print(bool stdout = false, bool stderr = false, bool oneLine = false);
