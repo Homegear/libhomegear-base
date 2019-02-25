@@ -36,6 +36,7 @@
 #include "Physical.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
+#include <set>
 
 using namespace rapidxml;
 using namespace BaseLib::DeviceDescription::ParameterCast;
@@ -53,6 +54,8 @@ class ParameterGroup;
 
 typedef std::shared_ptr<Parameter> PParameter;
 typedef std::map<std::string, PParameter> Parameters;
+typedef std::string ParameterRole;
+typedef std::set<uint64_t> ParameterRoles;
 
 class Parameter
 {
@@ -111,6 +114,7 @@ public:
 	bool resetAfterRestart = false;
 	bool ccu2Visible = true;
 	Casts casts;
+	ParameterRoles roles;
 
 	//Elements
 	std::shared_ptr<ILogical> logical;

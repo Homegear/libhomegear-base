@@ -140,6 +140,24 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
 					}
 				}
+				else if(propertyName == "roles")
+				{
+					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+					{
+						_bl->out.printWarning("Warning: Unknown attribute for \"roles\": " + std::string(attr->name()));
+					}
+					for(xml_node<>* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
+					{
+						std::string roleName(roleNode->name());
+						std::string roleValue(roleNode->value());
+						if(roleName == "role")
+						{
+						    auto roleId = Math::getUnsignedNumber64(roleValue);
+							if(!roleId != 0) roles.emplace(roleId);
+						}
+						else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
+					}
+				}
 				else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
 			}
 		}

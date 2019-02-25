@@ -83,7 +83,6 @@
 #include "Sockets/Modbus.h"
 #include "Sockets/TcpSocket.h"
 #include "Sockets/UdpSocket.h"
-#include "StateGuard.h"
 
 namespace BaseLib
 {
