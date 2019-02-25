@@ -82,9 +82,9 @@ private:
 	typedef void (Variable::*bool_type)() const;
 
 	void this_type_does_not_support_comparisons() const {}
-	std::string print(PVariable variable, std::string indent, bool oneLine);
-	std::string printStruct(PStruct rpcStruct, std::string indent, bool oneLine);
-	std::string printArray(PArray rpcArray, std::string indent, bool oneLine);
+	std::string print(PVariable variable, std::string indent, bool ignoreIndentOnFirstLine, bool oneLine);
+	std::string printStruct(PStruct rpcStruct, std::string indent, bool ignoreIndentOnFirstLine, bool oneLine);
+	std::string printArray(PArray rpcArray, std::string indent, bool ignoreIndentOnFirstLine, bool oneLine);
 
 	/**
 	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
