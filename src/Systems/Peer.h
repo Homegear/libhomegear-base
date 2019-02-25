@@ -412,6 +412,7 @@ public:
 
     //RPC methods
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
+    virtual PVariable forceConfigUpdate(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this peer."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo);
 	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name);

@@ -201,7 +201,6 @@ set(SOURCE_FILES
         src/IQueueBase.h
         src/ITimedQueue.cpp
         src/ITimedQueue.h
-        src/StateGuard.h
         src/Variable.cpp
         src/Variable.h
         config.h src/Security/Acls.cpp src/Security/Acls.h)
