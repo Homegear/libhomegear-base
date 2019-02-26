@@ -1792,6 +1792,18 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 					}
 				}
 			}
+
+			if(!parameter->roles.empty())
+			{
+				node = doc->allocate_node(node_element, "roles");
+				propertiesNode->append_node(node);
+				for(auto& role : parameter->roles)
+				{
+					tempString = std::to_string(role);
+					xml_node<>* roleNode = doc->allocate_node(node_element, "role", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+					node->append_node(roleNode);
+				}
+			}
 		// }}}
 
 		// {{{ Logical

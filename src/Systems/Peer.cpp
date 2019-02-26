@@ -48,6 +48,7 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
 	_logicalData = rhs._logicalData;
     _room = rhs._room;
     _categories = rhs._categories;
+    _roles = rhs._roles;
 }
 
 RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
@@ -60,6 +61,7 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
 	_logicalData = rhs._logicalData;
     _room = rhs._room;
     _categories = rhs._categories;
+    _roles = rhs._roles;
 	return *this;
 }
 
@@ -961,19 +963,26 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
 	try
 	{
 		if(!masterSet || masterSet->parameters.empty()) return;
-		std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+		auto channelIterator = configCentral.find(channel);
 		if(channelIterator == configCentral.end()) channelIterator = configCentral.emplace(channel, std::unordered_map<std::string, RpcConfigurationParameter>()).first;
-		for(Parameters::iterator j = masterSet->parameters.begin(); j != masterSet->parameters.end(); ++j)
+		for(auto& parameter : masterSet->parameters)
 		{
-			if(!j->second) continue;
-			if(!j->second->id.empty() && channelIterator->second.find(j->second->id) == channelIterator->second.end())
+			if(!parameter.second) continue;
+			if(!parameter.second->id.empty() && channelIterator->second.find(parameter.second->id) == channelIterator->second.end())
 			{
-				RpcConfigurationParameter parameter;
-				parameter.rpcParameter = j->second;
-				setDefaultValue(parameter);
-				channelIterator->second.emplace(j->second->id, parameter);
-				std::vector<uint8_t> data = parameter.getBinaryData();
-				saveParameter(0, ParameterGroup::Type::config, channel, j->second->id, data);
+				RpcConfigurationParameter parameterStruct;
+                parameterStruct.rpcParameter = parameter.second;
+				setDefaultValue(parameterStruct);
+
+                //Add roles
+                for(auto& role : parameter.second->roles)
+                {
+                    parameterStruct.addRole(role);
+                }
+
+                std::vector<uint8_t> data = parameterStruct.getBinaryData();
+				channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
+				saveParameter(0, ParameterGroup::Type::config, channel, parameter.second->id, data);
 			}
 		}
 	}
@@ -1001,17 +1010,24 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
         {
             channelIterator = valuesCentral.emplace(channel, std::unordered_map<std::string, RpcConfigurationParameter>()).first;
         }
-		for(Parameters::iterator j = valueSet->parameters.begin(); j != valueSet->parameters.end(); ++j)
+		for(auto& parameter : valueSet->parameters)
 		{
-			if(!j->second) continue;
-			if(!j->second->id.empty() && channelIterator->second.find(j->second->id) == channelIterator->second.end())
+			if(!parameter.second) continue;
+			if(!parameter.second->id.empty() && channelIterator->second.find(parameter.second->id) == channelIterator->second.end())
 			{
-				RpcConfigurationParameter parameter;
-				parameter.rpcParameter = j->second;
-				setDefaultValue(parameter);
-                channelIterator->second.emplace(j->second->id, parameter);
-				std::vector<uint8_t> data = parameter.getBinaryData();
-				saveParameter(0, ParameterGroup::Type::variables, channel, j->second->id, data);
+				RpcConfigurationParameter parameterStruct;
+                parameterStruct.rpcParameter = parameter.second;
+				setDefaultValue(parameterStruct);
+
+                //Add roles
+                for(auto& role : parameter.second->roles)
+                {
+                    parameterStruct.addRole(role);
+                }
+
+				std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
+				saveParameter(0, ParameterGroup::Type::variables, channel, parameter.second->id, data);
 			}
 		}
 	}
@@ -1630,7 +1646,7 @@ void Peer::loadConfig()
 					continue;
 				}
 
-                { // Rooms / Categories
+                { // Rooms / categories / roles
                     parameterInfo->parameter.setRoom((uint64_t)row->second.at(8)->intValue);
 
                     std::vector<std::string> categoryStrings = BaseLib::HelperFunctions::splitAll(row->second.at(9)->textValue, ',');
@@ -1640,12 +1656,20 @@ void Peer::loadConfig()
                         uint64_t category = (uint64_t)BaseLib::Math::getNumber64(categoryString);
                         if(category != 0) parameterInfo->parameter.addCategory(category);
                     }
+
+					std::vector<std::string> roleStrings = BaseLib::HelperFunctions::splitAll(row->second.at(10)->textValue, ',');
+					for(auto roleString : roleStrings)
+					{
+						if(roleString.empty()) continue;
+						uint64_t role = (uint64_t)BaseLib::Math::getNumber64(roleString);
+						if(role != 0) parameterInfo->parameter.addRole(role);
+					}
                 }
 
 				Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
 				if(functionIterator == _rpcDevice->functions.end())
 				{
-					_bl->out.printError("Error: Added central config parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
+					_bl->out.printError("Error: Added peer parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
 					data.clear();
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
 					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int64_t)parameterInfo->parameterGroupType)));
@@ -1673,109 +1697,118 @@ void Peer::loadConfig()
 			}
 		}
 
-		for(std::vector<std::shared_ptr<ParameterInfo>>::iterator i = parameters.begin(); i != parameters.end(); ++i)
+		for(auto& parameter : parameters)
 		{
-			if(parameterGroupSelector && (*i)->function->parameterGroupSelector && !(*i)->function->alternativeFunctions.empty())
+			if(parameterGroupSelector && parameter->function->parameterGroupSelector && !parameter->function->alternativeFunctions.empty())
 			{
 				std::vector<uint8_t> parameterData = parameterGroupSelector->parameter.getBinaryData();
 				int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->integerValue;
 				if(index == 0)
 				{
-					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+					if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
 					{
-						Parameters::iterator parameterIterator = (*i)->function->configParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
+						if(parameterIterator != parameter->function->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+					else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
 					{
-						Parameters::iterator parameterIterator = (*i)->function->variables->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
+						if(parameterIterator != parameter->function->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+					else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
 					{
-						Parameters::iterator parameterIterator = (*i)->function->linkParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
+						if(parameterIterator != parameter->function->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
 				}
 				else
 				{
 					index--;
-					PFunction alternativeFunction = (*i)->function->alternativeFunctions.at(index);
+					PFunction alternativeFunction = parameter->function->alternativeFunctions.at(index);
 
-					if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+					if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
 					{
-						Parameters::iterator parameterIterator = alternativeFunction->configParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != alternativeFunction->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = alternativeFunction->configParameters->parameters.find(parameter->parameterName);
+						if(parameterIterator != alternativeFunction->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+					else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
 					{
-						Parameters::iterator parameterIterator = alternativeFunction->variables->parameters.find((*i)->parameterName);
-						if(parameterIterator != alternativeFunction->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = alternativeFunction->variables->parameters.find(parameter->parameterName);
+						if(parameterIterator != alternativeFunction->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
-					else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+					else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
 					{
-						Parameters::iterator parameterIterator = alternativeFunction->linkParameters->parameters.find((*i)->parameterName);
-						if(parameterIterator != alternativeFunction->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+						Parameters::iterator parameterIterator = alternativeFunction->linkParameters->parameters.find(parameter->parameterName);
+						if(parameterIterator != alternativeFunction->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 					}
 				}
 			}
 			else
 			{
-				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+				if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
 				{
-					Parameters::iterator parameterIterator = (*i)->function->configParameters->parameters.find((*i)->parameterName);
-					if(parameterIterator != (*i)->function->configParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					Parameters::iterator parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
+					if(parameterIterator != parameter->function->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 				}
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
 				{
-					Parameters::iterator parameterIterator = (*i)->function->variables->parameters.find((*i)->parameterName);
-					if(parameterIterator != (*i)->function->variables->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					Parameters::iterator parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
+					if(parameterIterator != parameter->function->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 				}
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
 				{
-					Parameters::iterator parameterIterator = (*i)->function->linkParameters->parameters.find((*i)->parameterName);
-					if(parameterIterator != (*i)->function->linkParameters->parameters.end()) (*i)->parameter.rpcParameter = parameterIterator->second;
+					Parameters::iterator parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
+					if(parameterIterator != parameter->function->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
 				}
 			}
 
-			if(!(*i)->parameter.rpcParameter)
+			if(!parameter->parameter.rpcParameter)
 			{
-				if(!parameterGroupSelector || !(*i)->function->parameterGroupSelector || (*i)->function->alternativeFunctions.empty()) _bl->out.printWarning("Warning: Deleting parameter " + (*i)->parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string((*i)->channel) + " Parameter set type: " + std::to_string((uint32_t)((*i)->parameterGroupType)));
+				if(!parameterGroupSelector || !parameter->function->parameterGroupSelector || parameter->function->alternativeFunctions.empty()) _bl->out.printWarning("Warning: Deleting parameter " + parameter->parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameter->channel) + " Parameter set type: " + std::to_string((uint32_t)(parameter->parameterGroupType)));
 				Database::DataRow data;
 				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)((*i)->parameterGroupType))));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->channel)));
-				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->parameterName)));
-				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config)
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)(parameter->parameterGroupType))));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->channel)));
+				data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->parameterName)));
+				if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
 				{
-					configCentral[(*i)->channel].erase((*i)->parameterName);
+					configCentral[parameter->channel].erase(parameter->parameterName);
 				}
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
 				{
-					valuesCentral[(*i)->channel].erase((*i)->parameterName);
+					valuesCentral[parameter->channel].erase(parameter->parameterName);
 				}
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link)
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
 				{
-					linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].erase((*i)->parameterName);
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->remoteAddress)));
-					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((*i)->remoteChannel)));
+					linksCentral[parameter->channel][parameter->remoteAddress][parameter->remoteChannel].erase(parameter->parameterName);
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->remoteAddress)));
+					data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->remoteChannel)));
 				}
 				_bl->db->deletePeerParameter(_peerID, data);
 			}
 			else
 			{
-				if((*i)->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[(*i)->channel].emplace((*i)->parameterName, (*i)->parameter);
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::variables)
+				if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config) configCentral[parameter->channel].emplace(parameter->parameterName, parameter->parameter);
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
 				{
-					if((*i)->parameter.rpcParameter->resetAfterRestart)
+					if(parameter->parameter.rpcParameter->resetAfterRestart)
 					{
 						std::vector<uint8_t> parameterData;
-						(*i)->parameter.rpcParameter->convertToPacket((*i)->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
-						(*i)->parameter.setBinaryData(parameterData);
+                        parameter->parameter.rpcParameter->convertToPacket(parameter->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+                        parameter->parameter.setBinaryData(parameterData);
 					}
-					valuesCentral[(*i)->channel][(*i)->parameterName] = (*i)->parameter;
+                    valuesCentral[parameter->channel][parameter->parameterName] = parameter->parameter;
 				}
-				else if((*i)->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[(*i)->channel][(*i)->remoteAddress][(*i)->remoteChannel].emplace((*i)->parameterName, (*i)->parameter);
+				else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[parameter->channel][parameter->remoteAddress][parameter->remoteChannel].emplace(parameter->parameterName, parameter->parameter);
+
+				//Add roles from XML
+				if(!parameter->parameter.hasRoles() && !parameter->parameter.rpcParameter->roles.empty())
+                {
+				    for(auto& role : parameter->parameter.rpcParameter->roles)
+                    {
+				        parameter->parameter.addRole(role);
+                    }
+                }
 			}
 		}
 	}
@@ -2089,6 +2122,182 @@ bool Peer::variableHasCategories(int32_t channel, const std::string& variableNam
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
+}
+
+bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.addRole(roleId);
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+        _bl->db->savePeerParameterRolesAsynchronous(data);
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
+bool Peer::removeRoleFromVariable(int32_t channel, std::string& variableName, uint64_t roleId)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return false;
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+        variableIterator->second.removeRole(roleId);
+
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
+        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+        _bl->db->savePeerParameterRolesAsynchronous(data);
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
+void Peer::removeRoleFromVariables(uint64_t roleId)
+{
+    try
+    {
+        for(auto& channelIterator : valuesCentral)
+        {
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(!variableIterator.second.rpcParameter || variableIterator.second.databaseId == 0) continue;
+                variableIterator.second.removeRole(roleId);
+
+                Database::DataRow data;
+                data.push_back(std::make_shared<Database::DataColumn>(variableIterator.second.getRoleString()));
+                data.push_back(std::make_shared<Database::DataColumn>(variableIterator.second.databaseId));
+                _bl->db->savePeerParameterRolesAsynchronous(data);
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+std::set<uint64_t> Peer::getVariableRoles(int32_t channel, std::string& variableName)
+{
+    try
+    {
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        auto variableIterator = channelIterator->second.find(variableName);
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+
+        return variableIterator->second.getRoles();
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(const Exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return std::set<uint64_t>();
+}
+
+bool Peer::variableHasRole(int32_t channel, const std::string& variableName, uint64_t roleId)
+{
+	try
+	{
+		auto channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return false;
+		auto variableIterator = channelIterator->second.find(variableName);
+		if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+		return variableIterator->second.hasRole(roleId);
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return false;
+}
+
+bool Peer::variableHasRoles(int32_t channel, const std::string& variableName)
+{
+	try
+	{
+		auto channelIterator = valuesCentral.find(channel);
+		if(channelIterator == valuesCentral.end()) return false;
+		auto variableIterator = channelIterator->second.find(variableName);
+		if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+
+		return variableIterator->second.hasRoles();
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(const Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return false;
 }
 
 //RPC methods
@@ -3651,6 +3860,18 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
                 }
                 description->structValue->emplace("CATEGORIES", categoriesResult);
             }
+
+            auto roles = valueParameterIterator->second.getRoles();
+            if(!roles.empty())
+            {
+                PVariable rolesResult = std::make_shared<Variable>(VariableType::tArray);
+                rolesResult->arrayValue->reserve(roles.size());
+                for(auto role : roles)
+                {
+                    rolesResult->arrayValue->push_back(std::make_shared<Variable>(role));
+                }
+                description->structValue->emplace("ROLES", rolesResult);
+            }
         }
 
         std::shared_ptr<ICentral> central = getCentral();
@@ -3730,6 +3951,49 @@ PVariable Peer::getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categ
 			{
 				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
 				if(variableIterator.second.hasCategory(categoryId)) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
+			}
+			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+		}
+
+		return channels;
+	}
+	catch(const std::exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls)
+{
+	try
+	{
+		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+		if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
+		auto me = central->getPeer(_peerID);
+		if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+		auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		for(auto& channelIterator : valuesCentral)
+		{
+			auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+			variables->arrayValue->reserve(channelIterator.second.size());
+			for(auto& variableIterator : channelIterator.second)
+			{
+				if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+				if(variableIterator.second.hasRole(roleId)) variables->arrayValue->push_back(std::make_shared<BaseLib::Variable>(variableIterator.first));
 			}
 			if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
 		}

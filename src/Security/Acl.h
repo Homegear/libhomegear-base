@@ -74,8 +74,9 @@ public:
  * 2. Devices
  * 3. Rooms
  * 4. Categories
- * 5. Methods
- * 6. Event Server Methods
+ * 5. Roles
+ * 6. Methods
+ * 7. Event Server Methods
  *
  * Security needs to be applied here:
  *
@@ -219,6 +220,28 @@ private:
     std::unordered_map<uint64_t, bool> _categoriesWrite;
 
     /**
+     * When set to "true", _rolesRead is included in the ACL checks.
+     */
+    bool _rolesReadSet = false;
+
+    /**
+     * Key: Role ID; value: access/no access
+     *
+     * ID 0 stands for "no role assigned"
+     */
+    std::unordered_map<uint64_t, bool> _rolesRead;
+
+    /**
+     * When set to "true", _rolesWrite is included in the ACL checks.
+     */
+    bool _rolesWriteSet = false;
+
+    /**
+     * Key: Role ID; value: access/no access
+     */
+    std::unordered_map<uint64_t, bool> _rolesWrite;
+
+    /**
      * When set to "true", _methods is included in the ACL checks.
      */
     bool _methodsSet = false;
@@ -266,6 +289,8 @@ public:
 
     bool categoriesReadSet() { return _categoriesReadSet; }
     bool categoriesWriteSet() { return _categoriesWriteSet; }
+    bool rolesReadSet() { return _rolesReadSet; }
+    bool rolesWriteSet() { return _rolesWriteSet; }
     bool devicesReadSet() { return _devicesReadSet; }
     bool devicesWriteSet() { return _devicesWriteSet; }
     bool roomsReadSet() { return _roomsReadSet; }
@@ -287,12 +312,18 @@ public:
     AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
     AclResult checkCategoryReadAccess(uint64_t category);
     AclResult checkCategoryWriteAccess(uint64_t category);
+    AclResult checkRolesReadAccess(std::set<uint64_t>& roles);
+    AclResult checkRolesWriteAccess(std::set<uint64_t>& roles);
+    AclResult checkRoleReadAccess(uint64_t role);
+    AclResult checkRoleWriteAccess(uint64_t role);
     AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
     AclResult checkEventServerMethodAccess(std::string& methodName);
     AclResult checkMethodAccess(std::string& methodName);
     AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
     AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
+    AclResult checkMethodAndRoleReadAccess(std::string& methodName, uint64_t roleId);
+    AclResult checkMethodAndRoleWriteAccess(std::string& methodName, uint64_t roleId);
     AclResult checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
     AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);

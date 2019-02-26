@@ -143,6 +143,13 @@ public:
 	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
+	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
+	void addRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id); }
+	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
+	std::set<uint64_t> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
+	std::string getRoleString() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); std::ostringstream roles; for(auto role : _roles) { roles << std::to_string(role) << ","; } return roles.str(); }
+	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
+
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
     void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
 
@@ -163,6 +170,8 @@ private:
 	std::vector<uint8_t> _partialBinaryData;
     std::mutex _categoriesMutex;
 	std::set<uint64_t> _categories;
+	std::mutex _rolesMutex;
+	std::set<uint64_t> _roles;
     std::mutex _roomMutex;
     uint64_t _room = 0;
 };
@@ -351,6 +360,12 @@ public:
     virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
     virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
 	virtual bool variableHasCategories(int32_t channel, const std::string& variableName);
+	virtual bool addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId);
+	virtual bool removeRoleFromVariable(int32_t channel, std::string& variableName, uint64_t roleId);
+	virtual void removeRoleFromVariables(uint64_t roleId);
+	virtual std::set<uint64_t> getVariableRoles(int32_t channel, std::string& variableName);
+	virtual bool variableHasRole(int32_t channel, const std::string& variableName, uint64_t roleId);
+	virtual bool variableHasRoles(int32_t channel, const std::string& variableName);
 
 	virtual bool load(ICentral* central) { return false; }
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
@@ -397,6 +412,7 @@ public:
 
     //RPC methods
 	virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, int32_t channel, uint64_t remoteID, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented by this device family."); }
+    virtual PVariable forceConfigUpdate(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this peer."); }
 	virtual PVariable getAllConfig(PRpcClientInfo clientInfo);
 	virtual PVariable getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bool checkAcls);
 	virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, std::string name);
@@ -415,6 +431,7 @@ public:
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
     virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
+	virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls);
     virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
     virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing = false) = 0;
     virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
