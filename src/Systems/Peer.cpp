@@ -2132,6 +2132,7 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
         if(channelIterator == valuesCentral.end()) return false;
         auto variableIterator = channelIterator->second.find(variableName);
         if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+		if(variableIterator->second.hasRole(roleId)) return false;
 
         variableIterator->second.addRole(roleId);
 
@@ -2139,6 +2140,112 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
         data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
         data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
         _bl->db->savePeerParameterRolesAsynchronous(data);
+
+        //{{{ Add variables from metadata
+			/*auto roleMetadata = _bl->db->getRoleMetadata(roleId);
+			auto addVariablesIterator = roleMetadata->structValue->find("addVariables");
+			if(addVariablesIterator != roleMetadata->structValue->end())
+			{
+				for(auto& variableToAdd : *addVariablesIterator->second->arrayValue)
+				{
+					auto idIterator = variableToAdd->structValue->find("id");
+					auto typeIterator = variableToAdd->structValue->find("type");
+					if(idIterator == variableToAdd->structValue->end() || idIterator->second->stringValue.empty() || typeIterator == variableToAdd->structValue->end()) continue;
+
+					auto defaultValueIterator = variableToAdd->structValue->find("default");
+					PVariable defaultValue;
+					if(defaultValueIterator != variableToAdd->structValue->end()) defaultValue = defaultValueIterator->second;
+					auto minValueIterator = variableToAdd->structValue->find("min");
+					PVariable minValue;
+					if(minValueIterator != variableToAdd->structValue->end()) minValue = minValueIterator->second;
+					auto maxValueIterator = variableToAdd->structValue->find("max");
+					PVariable maxValue;
+					if(maxValueIterator != variableToAdd->structValue->end()) maxValue = maxValueIterator->second;
+
+					RpcConfigurationParameter parameterStruct;
+
+					auto parameter = std::make_shared<Parameter>(_bl, variableIterator->second.rpcParameter->parent());
+					parameter->id = variableIterator->first + "." + idIterator->second->stringValue;
+					parameter->readable = true;
+					parameter->writeable = true;
+					parameter->physical = std::make_shared<PhysicalNone>(_bl);
+					parameter->physical->operationType = IPhysical::OperationType::Enum::store;
+
+					if(typeIterator->second->stringValue == "ACTION")
+					{
+						parameter->logical = std::make_shared<LogicalAction>(_bl);
+					}
+					else if(typeIterator->second->stringValue == "BOOL")
+					{
+						auto logicalBoolean = std::make_shared<LogicalBoolean>(_bl);
+						parameter->logical = logicalBoolean;
+						if(defaultValue)
+						{
+							logicalBoolean->defaultValueExists = true;
+							logicalBoolean->defaultValue = defaultValue->booleanValue;
+						}
+					}
+					else if(typeIterator->second->stringValue == "INTEGER")
+					{
+						auto logicalInteger = std::make_shared<LogicalInteger>(_bl);
+						parameter->logical = logicalInteger;
+						if(defaultValue)
+						{
+							logicalInteger->defaultValueExists = true;
+							logicalInteger->defaultValue = defaultValue->integerValue;
+						}
+						if(minValue) logicalInteger->minimumValue = minValue->integerValue;
+						if(maxValue) logicalInteger->maximumValue = maxValue->integerValue;
+					}
+					else if(typeIterator->second->stringValue == "INTEGER64")
+					{
+						auto logicalInteger = std::make_shared<LogicalInteger64>(_bl);
+						parameter->logical = logicalInteger;
+						if(defaultValue)
+						{
+							logicalInteger->defaultValueExists = true;
+							logicalInteger->defaultValue = defaultValue->integerValue64;
+						}
+						if(minValue) logicalInteger->minimumValue = minValue->integerValue64;
+						if(maxValue) logicalInteger->maximumValue = maxValue->integerValue64;
+					}
+					else if(typeIterator->second->stringValue == "FLOAT")
+					{
+						auto logicalDecimal = std::make_shared<LogicalDecimal>(_bl);
+						parameter->logical = logicalDecimal;
+						if(defaultValue)
+						{
+							logicalDecimal->defaultValueExists = true;
+							logicalDecimal->defaultValue = defaultValue->floatValue;
+						}
+						if(minValue) logicalDecimal->minimumValue = minValue->floatValue;
+						if(maxValue) logicalDecimal->maximumValue = maxValue->floatValue;
+					}
+					else if(typeIterator->second->stringValue == "STRING")
+					{
+						auto logicalString = std::make_shared<LogicalString>(_bl);
+						parameter->logical = logicalString;
+						if(defaultValue)
+						{
+							logicalString->defaultValueExists = true;
+							logicalString->defaultValue = defaultValue->stringValue;
+						}
+					}
+					else
+					{
+						_bl->out.printWarning("Warning: Unsupported variable type in addRoleToVariable: " + typeIterator->second->stringValue);
+						continue;
+					}
+
+					parameterStruct.rpcParameter = parameter;
+					setDefaultValue(parameterStruct);
+
+					std::vector<uint8_t> data = parameterStruct.getBinaryData();
+					channelIterator->second.emplace(parameter->id, std::move(parameterStruct));
+					saveParameter(0, ParameterGroup::Type::variables, channel, parameter->id, data);
+				}
+			}*/
+		//}}}
 
         return true;
     }
@@ -3388,7 +3495,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 
 		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
 		{
-			if(i->second->id.empty() || !i->second->visible) continue;
+			if(i->second->id.empty()) continue;
 			if(!i->second->visible && !i->second->service && !i->second->internal && !i->second->transform)
 			{
 				_bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
