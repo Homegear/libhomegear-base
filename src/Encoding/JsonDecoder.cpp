@@ -956,7 +956,7 @@ void JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shar
     {
         while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
         {
-            if (number >= 214748364)
+            if(number >= 922337203685477580ll)
             {
                 value->type = VariableType::tFloat;
                 isDouble = true;
@@ -1041,12 +1041,13 @@ void JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shar
     }
     else
     {
-        if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
+        value->integerValue64 = minus ? -((int64_t)number) : number;
+
+        if(value->integerValue64 > 2147483647ll || value->integerValue64 < -2147483648ll)
         {
             value->type = VariableType::tInteger64;
         }
 
-        value->integerValue64 = minus ? -((int64_t)number) : number;
         value->integerValue = value->integerValue64;
         value->floatValue = value->integerValue64;
     }
@@ -1070,7 +1071,7 @@ void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
     }
 
     bool isDouble = false;
-    uint64_t number = 0;
+    int64_t number = 0;
     if(json[pos] == '0')
     {
         number = 0;
@@ -1081,7 +1082,7 @@ void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
     {
         while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
         {
-            if (number >= 214748364)
+            if(number >= 922337203685477580ll)
             {
                 value->type = VariableType::tFloat;
                 isDouble = true;
@@ -1166,12 +1167,14 @@ void JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
     }
     else
     {
-        if(value->type == VariableType::tInteger && ((int64_t)number > 2147483647ll || (int64_t)number < -2147483648ll))
+
+        value->integerValue64 = minus ? -((int64_t)number) : number;
+
+        if(value->integerValue64 > 2147483647ll || value->integerValue64 < -2147483648ll)
         {
             value->type = VariableType::tInteger64;
         }
 
-        value->integerValue64 = minus ? -((int64_t)number) : number;
         value->integerValue = value->integerValue64;
         value->floatValue = value->integerValue64;
     }
