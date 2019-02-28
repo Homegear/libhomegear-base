@@ -1198,7 +1198,7 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
     }
 }
 
-void Peer::saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t specialType, const BaseLib::PVariable& metadata)
+void Peer::saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t specialType, const BaseLib::PVariable& metadata, const std::string& roles)
 {
     try
     {
@@ -1222,6 +1222,7 @@ void Peer::saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::
         data.push_back(std::make_shared<Database::DataColumn>(value));
         data.push_back(std::make_shared<Database::DataColumn>(specialType));
         data.push_back(std::make_shared<Database::DataColumn>(encodedMetadata));
+        data.push_back(std::make_shared<Database::DataColumn>(roles));
         _bl->db->saveSpecialPeerParameterAsynchronous(data);
     }
     catch(const std::exception& ex)
@@ -2347,10 +2348,12 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
 
         variableIterator->second.addRole(roleId);
 
-        Database::DataRow data;
-        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
-        data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
-        _bl->db->savePeerParameterRolesAsynchronous(data);
+        {
+            Database::DataRow data;
+            data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.getRoleString()));
+            data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+            _bl->db->savePeerParameterRolesAsynchronous(data);
+        }
 
         //{{{ Add variables from metadata
             auto roleMetadata = _bl->db->getRoleMetadata(roleId);
@@ -2372,8 +2375,17 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
                     roleInfo->structValue->emplace("variableInfo", variableInfo);
                     roleInfo->structValue->emplace("variableBaseName", std::make_shared<BaseLib::Variable>(parameter->id));
 
+                    auto rolesIterator = variableInfo->structValue->find("roles");
+                    if(rolesIterator != variableInfo->structValue->end())
+                    {
+                        for(auto& role : *rolesIterator->second->arrayValue)
+                        {
+                            if(role->integerValue64 != 0) parameterStruct.addRole(role->integerValue64);
+                        }
+                    }
+
                     std::vector<uint8_t> data = parameterStruct.getBinaryData();
-                    saveSpecialTypeParameter(0, ParameterGroup::Type::variables, channel, parameter->id, data, 1, metadata);
+                    saveSpecialTypeParameter(0, ParameterGroup::Type::variables, channel, parameter->id, data, 1, metadata, parameterStruct.getRoleString());
                 }
             }
         //}}}
