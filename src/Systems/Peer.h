@@ -159,6 +159,11 @@ public:
 	uint64_t databaseId = 0;
 
 	/**
+	 * The special type of the parameter (0 = none, 1 = roles).
+	 */
+	int32_t specialType = 0;
+
+	/**
 	 * The RPC parameter as defined in the XML file.
 	 */
 	DeviceDescription::PParameter rpcParameter;
@@ -550,7 +555,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

@@ -1858,12 +1858,12 @@ void Peer::loadConfig()
                 {
                     _bl->out.printError("Error: Added peer parameter with unknown channel. Device: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameterInfo->channel));
                     data.clear();
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int64_t)parameterInfo->parameterGroupType)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->channel)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->parameterName)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->remoteAddress)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameterInfo->remoteChannel)));
+                    data.push_back(std::make_shared<Database::DataColumn>(_peerID));
+                    data.push_back(std::make_shared<Database::DataColumn>((int64_t)parameterInfo->parameterGroupType));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameterInfo->channel));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameterInfo->parameterName));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameterInfo->remoteAddress));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameterInfo->remoteChannel));
                     _bl->db->deletePeerParameter(_peerID, data);
                     continue;
                 }
@@ -1896,19 +1896,19 @@ void Peer::loadConfig()
                     if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
                     {
                         currentParameterGroup = parameter->function->configParameters;
-                        Parameters::iterator parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
+                        auto parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
                         if(parameterIterator != parameter->function->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                     else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
                     {
                         currentParameterGroup = parameter->function->variables;
-                        Parameters::iterator parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
+                        auto parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
                         if(parameterIterator != parameter->function->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                     else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
                     {
                         currentParameterGroup = parameter->function->linkParameters;
-                        Parameters::iterator parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
+                        auto parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
                         if(parameterIterator != parameter->function->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                 }
@@ -1920,19 +1920,19 @@ void Peer::loadConfig()
                     if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
                     {
                         currentParameterGroup = alternativeFunction->configParameters;
-                        Parameters::iterator parameterIterator = alternativeFunction->configParameters->parameters.find(parameter->parameterName);
+                        auto parameterIterator = alternativeFunction->configParameters->parameters.find(parameter->parameterName);
                         if(parameterIterator != alternativeFunction->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                     else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
                     {
                         currentParameterGroup = alternativeFunction->variables;
-                        Parameters::iterator parameterIterator = alternativeFunction->variables->parameters.find(parameter->parameterName);
+                        auto parameterIterator = alternativeFunction->variables->parameters.find(parameter->parameterName);
                         if(parameterIterator != alternativeFunction->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                     else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
                     {
                         currentParameterGroup = alternativeFunction->linkParameters;
-                        Parameters::iterator parameterIterator = alternativeFunction->linkParameters->parameters.find(parameter->parameterName);
+                        auto parameterIterator = alternativeFunction->linkParameters->parameters.find(parameter->parameterName);
                         if(parameterIterator != alternativeFunction->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                     }
                 }
@@ -1942,19 +1942,19 @@ void Peer::loadConfig()
                 if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
                 {
                     currentParameterGroup = parameter->function->configParameters;
-                    Parameters::iterator parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
+                    auto parameterIterator = parameter->function->configParameters->parameters.find(parameter->parameterName);
                     if(parameterIterator != parameter->function->configParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                 }
                 else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::variables)
                 {
                     currentParameterGroup = parameter->function->variables;
-                    Parameters::iterator parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
+                    auto parameterIterator = parameter->function->variables->parameters.find(parameter->parameterName);
                     if(parameterIterator != parameter->function->variables->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                 }
                 else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
                 {
                     currentParameterGroup = parameter->function->linkParameters;
-                    Parameters::iterator parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
+                    auto parameterIterator = parameter->function->linkParameters->parameters.find(parameter->parameterName);
                     if(parameterIterator != parameter->function->linkParameters->parameters.end()) parameter->parameter.rpcParameter = parameterIterator->second;
                 }
             }
@@ -1964,6 +1964,7 @@ void Peer::loadConfig()
                 auto roleInfoIterator = parameter->metadata->structValue->find("roleInfo");
                 if(roleInfoIterator != parameter->metadata->structValue->end())
                 {
+                    parameter->parameter.specialType = parameter->specialType;
                     auto variableInfoIterator = roleInfoIterator->second->structValue->find("variableInfo");
                     auto variableBaseNameIterator = roleInfoIterator->second->structValue->find("variableBaseName");
 
@@ -1978,10 +1979,10 @@ void Peer::loadConfig()
             {
                 if(!parameterGroupSelector || !parameter->function->parameterGroupSelector || parameter->function->alternativeFunctions.empty()) _bl->out.printWarning("Warning: Deleting parameter " + parameter->parameterName + ", because no corresponding RPC parameter was found. Peer: " + std::to_string(_peerID) + " Channel: " + std::to_string(parameter->channel) + " Parameter set type: " + std::to_string((uint32_t)(parameter->parameterGroupType)));
                 Database::DataRow data;
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_peerID)));
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn((int32_t)(parameter->parameterGroupType))));
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->channel)));
-                data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->parameterName)));
+                data.push_back(std::make_shared<Database::DataColumn>(_peerID));
+                data.push_back(std::make_shared<Database::DataColumn>((int32_t)(parameter->parameterGroupType)));
+                data.push_back(std::make_shared<Database::DataColumn>(parameter->channel));
+                data.push_back(std::make_shared<Database::DataColumn>(parameter->parameterName));
                 if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
                 {
                     configCentral[parameter->channel].erase(parameter->parameterName);
@@ -1993,8 +1994,8 @@ void Peer::loadConfig()
                 else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link)
                 {
                     linksCentral[parameter->channel][parameter->remoteAddress][parameter->remoteChannel].erase(parameter->parameterName);
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->remoteAddress)));
-                    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(parameter->remoteChannel)));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameter->remoteAddress));
+                    data.push_back(std::make_shared<Database::DataColumn>(parameter->remoteChannel));
                 }
                 _bl->db->deletePeerParameter(_peerID, data);
             }
@@ -2587,7 +2588,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
         config->structValue->insert(StructElement("TYPE_ID", PVariable(new Variable(_deviceType))));
         config->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
         PVariable channels(new Variable(VariableType::tArray));
-        for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
+        for(auto i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
         {
             if(!i->second) continue;
             if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
@@ -2604,57 +2605,63 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
             channel->structValue->insert(StructElement("PARAMSET", parameters));
             channels->arrayValue->push_back(channel);
 
+            auto configIterator = configCentral.find(i->first);
+            if(configIterator == configCentral.end()) continue;
+            
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::config);
             if(!parameterGroup) continue;
 
-            for(Parameters::iterator j = parameterGroup->parameters.begin(); j != parameterGroup->parameters.end(); ++j)
+            for(auto& parameterIterator : configIterator->second)
             {
-                if(!j->second || j->second->id.empty() || !j->second->visible) continue;
-                if(!j->second->visible && !j->second->service && !j->second->internal  && !j->second->transform)
+                RpcConfigurationParameter& parameter = parameterIterator.second;
+                if(!parameter.rpcParameter || parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(parameter.specialType == 0)
                 {
-                    _bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
+                if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal  && !parameter.rpcParameter->transform)
+                {
+                    _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
                     continue;
                 }
-                std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator configCentralIterator = configCentral.find(i->first);
-                if(configCentralIterator == configCentral.end()) continue;
-                std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = configCentralIterator->second.find(j->second->id);
-                if(parameterIterator == configCentralIterator->second.end()) continue;
 #ifdef CCU2
-                if(j->second->logical->type == ILogical::Type::tInteger64) continue;
+                if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 
-                if(getAllConfigHook2(clientInfo, j->second, i->first, parameters)) continue;
+                if(getAllConfigHook2(clientInfo, parameter.rpcParameter, i->first, parameters)) continue;
 
                 PVariable element(new Variable(VariableType::tStruct));
                 PVariable value;
-                if(j->second->readable)
+                if(parameter.rpcParameter->readable)
                 {
-                    std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
-                    if(!convertFromPacketHook(j->second, parameterData, value)) value = j->second->convertFromPacket(parameterData);
-                    if(j->second->password) value.reset(new Variable(value->type));
+                    std::vector<uint8_t> parameterData = parameter.getBinaryData();
+                    if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
+                    if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) value.reset(new Variable(value->type));
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
                 }
 
-                if(j->second->logical->type == ILogical::Type::tBoolean)
+                if(parameter.rpcParameter->logical->type == ILogical::Type::tBoolean)
                 {
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tString)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tString)
                 {
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tInteger)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger)
                 {
-                    LogicalInteger* parameter = (LogicalInteger*)j->second->logical.get();
+                    LogicalInteger* logicalInteger = (LogicalInteger*)parameter.rpcParameter->logical.get();
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
 
-                    if(!parameter->specialValuesStringMap.empty())
+                    if(!logicalInteger->specialValuesStringMap.empty())
                     {
                         PVariable specialValues(new Variable(VariableType::tArray));
-                        for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                        for(auto j = logicalInteger->specialValuesStringMap.begin(); j != logicalInteger->specialValuesStringMap.end(); ++j)
                         {
                             PVariable specialElement(new Variable(VariableType::tStruct));
                             specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -2664,31 +2671,51 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
                         element->structValue->insert(StructElement("SPECIAL", specialValues));
                     }
                 }
-                else if(j->second->logical->type == ILogical::Type::tEnum)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger64)
                 {
-                    LogicalEnumeration* parameter = (LogicalEnumeration*)j->second->logical.get();
+                    LogicalInteger64* logicalInteger = (LogicalInteger64*)parameter.rpcParameter->logical.get();
+                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
+
+                    if(!logicalInteger->specialValuesStringMap.empty())
+                    {
+                        PVariable specialValues(new Variable(VariableType::tArray));
+                        for(auto j = logicalInteger->specialValuesStringMap.begin(); j != logicalInteger->specialValuesStringMap.end(); ++j)
+                        {
+                            PVariable specialElement(new Variable(VariableType::tStruct));
+                            specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
+                            specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+                            specialValues->arrayValue->push_back(specialElement);
+                        }
+                        element->structValue->insert(StructElement("SPECIAL", specialValues));
+                    }
+                }
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tEnum)
+                {
+                    LogicalEnumeration* logicalEnumeration = (LogicalEnumeration*)parameter.rpcParameter->logical.get();
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
 
                     PVariable valueList(new Variable(VariableType::tArray));
-                    for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
+                    for(std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j)
                     {
                         valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
                     }
                     element->structValue->insert(StructElement("VALUE_LIST", valueList));
                 }
-                else if(j->second->logical->type == ILogical::Type::tFloat)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tFloat)
                 {
-                    LogicalDecimal* parameter = (LogicalDecimal*)j->second->logical.get();
+                    LogicalDecimal* logicalDecimal = (LogicalDecimal*)parameter.rpcParameter->logical.get();
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
 
-                    if(!parameter->specialValuesStringMap.empty())
+                    if(!logicalDecimal->specialValuesStringMap.empty())
                     {
                         PVariable specialValues(new Variable(VariableType::tArray));
-                        for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                        for(std::unordered_map<std::string, double>::iterator j = logicalDecimal->specialValuesStringMap.begin(); j != logicalDecimal->specialValuesStringMap.end(); ++j)
                         {
                             PVariable specialElement(new Variable(VariableType::tStruct));
                             specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -2698,17 +2725,17 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
                         element->structValue->insert(StructElement("SPECIAL", specialValues));
                     }
                 }
-                else if(j->second->logical->type == ILogical::Type::tArray)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tArray)
                 {
                     if(!clientInfo->initNewFormat) continue;
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tStruct)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tStruct)
                 {
                     if(!clientInfo->initNewFormat) continue;
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
                 }
-                parameters->structValue->insert(StructElement(j->second->id, element));
+                parameters->structValue->insert(StructElement(parameter.rpcParameter->id, element));
             }
         }
         config->structValue->insert(StructElement("CHANNELS", channels));
@@ -2741,25 +2768,25 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
         auto central = getCentral();
         if(!central) return Variable::createError(-32500, "Could not get central.");
 
-        values->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
-        values->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
-        values->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
-        values->structValue->insert(StructElement("TYPE", PVariable(new Variable(_rpcTypeString))));
-        values->structValue->insert(StructElement("TYPE_ID", PVariable(new Variable(_deviceType))));
-        values->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
+        values->structValue->insert(StructElement("FAMILY", std::make_shared<Variable>((uint32_t)getCentral()->deviceFamily())));
+        values->structValue->insert(StructElement("ID", std::make_shared<Variable>((uint32_t)_peerID)));
+        values->structValue->insert(StructElement("ADDRESS", std::make_shared<Variable>(_serialNumber)));
+        values->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(_rpcTypeString)));
+        values->structValue->insert(StructElement("TYPE_ID", std::make_shared<Variable>(_deviceType)));
+        values->structValue->insert(StructElement("NAME", std::make_shared<Variable>(getName(-1))));
         PVariable channels(new Variable(VariableType::tArray));
-        for(Functions::iterator i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
+        for(auto i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
         {
             if(!i->second) continue;
             if(!i->second->countFromVariable.empty() && configCentral[0].find(i->second->countFromVariable) != configCentral[0].end())
             {
                 std::vector<uint8_t> parameterData = configCentral[0][i->second->countFromVariable].getBinaryData();
-                if(parameterData.size() > 0 && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
+                if(!parameterData.empty() && i->first >= i->second->channel + parameterData.at(parameterData.size() - 1)) continue;
             }
             PVariable channel(new Variable(VariableType::tStruct));
-            channel->structValue->insert(StructElement("INDEX", PVariable(new Variable(i->first))));
-            channel->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(i->first)))));
-            channel->structValue->insert(StructElement("TYPE", PVariable(new Variable(i->second->type))));
+            channel->structValue->insert(StructElement("INDEX", std::make_shared<Variable>(i->first)));
+            channel->structValue->insert(StructElement("NAME", std::make_shared<Variable>(getName(i->first))));
+            channel->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(i->second->type)));
 
             PVariable parameters(new Variable(VariableType::tStruct));
             channel->structValue->insert(StructElement("PARAMSET", parameters));
@@ -2767,96 +2794,101 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
 
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::variables);
             if(!parameterGroup) continue;
+            
+            auto valuesIterator = valuesCentral.find(i->first);
+            if(valuesIterator == valuesCentral.end()) continue;
 
-            for(Parameters::iterator j = parameterGroup->parameters.begin(); j != parameterGroup->parameters.end(); ++j)
+            for(auto& parameterIterator : valuesIterator->second)
             {
-                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), i->first, j->first)) continue;
+                RpcConfigurationParameter& parameter = parameterIterator.second;
+                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), i->first, parameter.rpcParameter->id)) continue;
 
-                if(!j->second || j->second->id.empty() || !j->second->visible) continue;
-                if(!j->second->visible && !j->second->service && !j->second->internal  && !j->second->transform)
+                if(!parameter.rpcParameter || parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(parameter.specialType == 0)
                 {
-                    _bl->out.printDebug("Debug: Omitting parameter " + j->second->id + " because of it's ui flag.");
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
+                if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal  && !parameter.rpcParameter->transform)
+                {
+                    _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
                     continue;
                 }
-                if(!j->second->readable && !j->second->transmitted && !returnWriteOnly) continue;
+                if(!parameter.rpcParameter->readable && !parameter.rpcParameter->transmitted && !returnWriteOnly) continue;
 #ifdef CCU2
-                if(j->second->logical->type == ILogical::Type::tInteger64) continue;
+                if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
-                if(clientInfo->clientType == RpcClientType::ccu2 && !j->second->ccu2Visible) continue;
+                if(clientInfo->clientType == RpcClientType::ccu2 && !parameter.rpcParameter->ccu2Visible) continue;
 
-                std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(i->first);
-                if(valuesCentralIterator == valuesCentral.end()) continue;
-                std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = valuesCentralIterator->second.find(j->second->id);
-                if(parameterIterator == valuesCentralIterator->second.end()) continue;
-
-                if(getAllValuesHook2(clientInfo, j->second, i->first, parameters)) continue;
+                if(getAllValuesHook2(clientInfo, parameter.rpcParameter, i->first, parameters)) continue;
 
                 PVariable element(new Variable(VariableType::tStruct));
                 PVariable value;
-                if(j->second->readable || j->second->transmitted)
+                if(parameter.rpcParameter->readable || parameter.rpcParameter->transmitted)
                 {
-                    std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
-                    if(j->second->password || parameterData.empty()) value.reset(new Variable(j->second->logical->type));
+                    std::vector<uint8_t> parameterData = parameter.getBinaryData();
+                    if((parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) || parameterData.empty()) value.reset(new Variable(parameter.rpcParameter->logical->type));
                     else
                     {
-                        if(!convertFromPacketHook(j->second, parameterData, value)) value = j->second->convertFromPacket(parameterData);
+                        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
                     }
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
                 }
 
-                element->structValue->insert(StructElement("READABLE", PVariable(new Variable(j->second->readable))));
-                element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(j->second->writeable))));
-                element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(j->second->transmitted))));
-                element->structValue->insert(StructElement("UNIT", PVariable(new Variable(j->second->unit))));
-                if(j->second->logical->type == ILogical::Type::tBoolean)
+                element->structValue->insert(StructElement("READABLE", PVariable(new Variable(parameter.rpcParameter->readable))));
+                element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(parameter.rpcParameter->writeable))));
+                element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(parameter.rpcParameter->transmitted))));
+                element->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter.rpcParameter->unit))));
+                if(parameter.rpcParameter->logical->type == ILogical::Type::tBoolean)
                 {
                     if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("BOOL"))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tString)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tString)
                 {
                     if(value) value->type = VariableType::tString; //For some families/variables "convertFromPacket" returns wrong type
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("STRING"))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tAction)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tAction)
                 {
                     if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ACTION"))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tInteger)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger)
                 {
                     if(value) value->type = VariableType::tInteger; //For some families/variables "convertFromPacket" returns wrong type
-                    LogicalInteger* parameter = (LogicalInteger*)j->second->logical.get();
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    LogicalInteger* logicalInteger = (LogicalInteger*)parameter.rpcParameter->logical.get();
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("INTEGER"))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
 
-                    if(!parameter->specialValuesStringMap.empty())
+                    if(!logicalInteger->specialValuesStringMap.empty())
                     {
                         PVariable specialValues(new Variable(VariableType::tArray));
-                        for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                        for(std::unordered_map<std::string, int32_t>::iterator j = logicalInteger->specialValuesStringMap.begin(); j != logicalInteger->specialValuesStringMap.end(); ++j)
                         {
                             PVariable specialElement(new Variable(VariableType::tStruct));
-                            specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-                            specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+                            specialElement->structValue->insert(StructElement("ID", std::make_shared<Variable>(j->first)));
+                            specialElement->structValue->insert(StructElement("VALUE", std::make_shared<Variable>(j->second)));
                             specialValues->arrayValue->push_back(specialElement);
                         }
                         element->structValue->insert(StructElement("SPECIAL", specialValues));
                     }
                 }
-                else if(j->second->logical->type == ILogical::Type::tInteger64)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tInteger64)
                 {
                     if(value) value->type = VariableType::tInteger64; //For some families/variables "convertFromPacket" returns wrong type
-                    LogicalInteger64* parameter = (LogicalInteger64*)j->second->logical.get();
+                    LogicalInteger64* logicalInteger64 = (LogicalInteger64*)parameter.rpcParameter->logical.get();
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger64->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger64->maximumValue))));
 
-                    if(!parameter->specialValuesStringMap.empty())
+                    if(!logicalInteger64->specialValuesStringMap.empty())
                     {
                         PVariable specialValues(new Variable(VariableType::tArray));
-                        for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                        for(std::unordered_map<std::string, int64_t>::iterator j = logicalInteger64->specialValuesStringMap.begin(); j != logicalInteger64->specialValuesStringMap.end(); ++j)
                         {
                             PVariable specialElement(new Variable(VariableType::tStruct));
                             specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -2866,55 +2898,55 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                         element->structValue->insert(StructElement("SPECIAL", specialValues));
                     }
                 }
-                else if(j->second->logical->type == ILogical::Type::tEnum)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tEnum)
                 {
                     if(value) value->type = VariableType::tInteger; //For some families/variables "convertFromPacket" returns wrong type
-                    LogicalEnumeration* parameter = (LogicalEnumeration*)j->second->logical.get();
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    LogicalEnumeration* logicalEnumeration = (LogicalEnumeration*)parameter.rpcParameter->logical.get();
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ENUM"))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
 
                     PVariable valueList(new Variable(VariableType::tArray));
-                    for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
+                    for(std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j)
                     {
-                        valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
+                        valueList->arrayValue->push_back(std::make_shared<Variable>(j->id));
                     }
                     element->structValue->insert(StructElement("VALUE_LIST", valueList));
                 }
-                else if(j->second->logical->type == ILogical::Type::tFloat)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tFloat)
                 {
                     if(value) value->type = VariableType::tFloat; //For some families/variables "convertFromPacket" returns wrong type
-                    LogicalDecimal* parameter = (LogicalDecimal*)j->second->logical.get();
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
-                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
-                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
+                    LogicalDecimal* logicalDecimal = (LogicalDecimal*)parameter.rpcParameter->logical.get();
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("FLOAT"))));
+                    element->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
+                    element->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
 
-                    if(!parameter->specialValuesStringMap.empty())
+                    if(!logicalDecimal->specialValuesStringMap.empty())
                     {
                         PVariable specialValues(new Variable(VariableType::tArray));
-                        for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                        for(std::unordered_map<std::string, double>::iterator j = logicalDecimal->specialValuesStringMap.begin(); j != logicalDecimal->specialValuesStringMap.end(); ++j)
                         {
                             PVariable specialElement(new Variable(VariableType::tStruct));
-                            specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-                            specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+                            specialElement->structValue->insert(StructElement("ID", std::make_shared<Variable>(j->first)));
+                            specialElement->structValue->insert(StructElement("VALUE", std::make_shared<Variable>(j->second)));
                             specialValues->arrayValue->push_back(specialElement);
                         }
                         element->structValue->insert(StructElement("SPECIAL", specialValues));
                     }
                 }
-                else if(j->second->logical->type == ILogical::Type::tArray)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tArray)
                 {
                     if(!clientInfo->initNewFormat) continue;
                     if(value) value->type = VariableType::tArray; //For some families/variables "convertFromPacket" returns wrong type
                     element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
                 }
-                else if(j->second->logical->type == ILogical::Type::tStruct)
+                else if(parameter.rpcParameter->logical->type == ILogical::Type::tStruct)
                 {
                     if(!clientInfo->initNewFormat) continue;
                     if(value) value->type = VariableType::tStruct; //For some families/variables "convertFromPacket" returns wrong type
-                    element->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
+                    element->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("STRUCT"))));
                 }
-                parameters->structValue->insert(StructElement(j->second->id, element));
+                parameters->structValue->insert(StructElement(parameter.rpcParameter->id, element));
             }
         }
         values->structValue->insert(StructElement("CHANNELS", channels));
@@ -2945,20 +2977,18 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
         std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
         if(channelIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
         std::unordered_map<std::string, RpcConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(name);
-        if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+        if(parameterIterator == channelIterator->second.end() || !parameterIterator->second.rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 
         //Check if channel still exists in device description
         Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
         if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel (2).");
 
         PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::config);
-        PParameter parameter = parameterGroup->parameters.at(name);
-        if(!parameter) return Variable::createError(-5, "Unknown parameter.");
-        if(!parameter->readable) return Variable::createError(-6, "Parameter is not readable.");
+        if(!parameterIterator->second.rpcParameter->readable) return Variable::createError(-6, "Parameter is not readable.");
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
         PVariable variable;
-        if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter->convertFromPacket(parameterData);
-        if(parameter->password) variable.reset(new Variable(variable->type));
+        if(!convertFromPacketHook(parameterIterator->second.rpcParameter, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData);
+        if(parameterIterator->second.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
     catch(const std::exception& ex)
@@ -3664,7 +3694,15 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
             for(auto& parameterIterator : valuesIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
-                if(parameter.rpcParameter->id.empty()) continue;
+                if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, parameter.rpcParameter->id)) continue;
+                if(!parameter.rpcParameter->readable) continue;
+                if(parameter.specialType == 0)
+                {
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
                 if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal && !parameter.rpcParameter->transform)
                 {
                     _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
@@ -3680,6 +3718,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
+                if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
                 variables->structValue->insert(StructElement(parameter.rpcParameter->id, element));
             }
         }
@@ -3690,7 +3729,13 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
             for(auto& parameterIterator : configIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
-                if(parameter.rpcParameter->id.empty()) continue;
+                if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(parameter.specialType == 0)
+                {
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
                 if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal && !parameter.rpcParameter->transform)
                 {
                     _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
@@ -3705,7 +3750,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
-                if(parameter.rpcParameter->password) element.reset(new Variable(element->type));
+                if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
                 variables->structValue->insert(StructElement(parameter.rpcParameter->id, element));
             }
         }
@@ -3725,7 +3770,13 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
             for(auto& parameterIterator : remoteChannelIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
-                if(parameter.rpcParameter->id.empty()) continue;
+                if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(parameter.specialType == 0)
+                {
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
                 if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal && !parameter.rpcParameter->transform)
                 {
                     _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
@@ -3740,6 +3791,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
+                if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
                 variables->structValue->insert(StructElement(parameter.rpcParameter->id, element));
             }
         }
@@ -3773,23 +3825,90 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
 
         PVariable descriptions(new Variable(VariableType::tStruct));
         uint32_t index = 0;
-        for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
+
+        if(parameterGroup->type() == ParameterGroup::Type::Enum::variables)
         {
-            if(parameterGroup->type() == ParameterGroup::Type::variables && checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, i->first)) continue;
-
-            if(!i->second || i->second->id.empty() || !i->second->visible) continue;
-            if(!i->second->visible && !i->second->service && !i->second->internal  && !i->second->transform)
+            auto valuesIterator = valuesCentral.find(channel);
+            if(valuesIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            for(auto& parameterIterator : valuesIterator->second)
             {
-                _bl->out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
-                continue;
+                RpcConfigurationParameter& parameter = parameterIterator.second;
+                if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
+                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, parameter.rpcParameter->id)) continue;
+                if(!parameter.rpcParameter->readable) continue;
+                if(parameter.specialType == 0)
+                {
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
+                if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal && !parameter.rpcParameter->transform)
+                {
+                    _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
+                    continue;
+                }
+                if(clientInfo->clientType == RpcClientType::ccu2 && !parameter.rpcParameter->ccu2Visible) continue;
+#ifdef CCU2
+                if(parameter.rpcParameter && parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
+#endif
+
+                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index);
+                if(!description || description->errorStruct) continue;
+
+                index++;
+                descriptions->structValue->emplace(StructElement(parameter.rpcParameter->id, std::move(description)));
             }
-
-            PVariable description = getVariableDescription(clientInfo, i, channel, parameterGroup->type(), index);
-            if(!description || description->errorStruct) continue;
-
-            index++;
-            descriptions->structValue->insert(StructElement(i->second->id, description));
         }
+        else if(parameterGroup->type() == ParameterGroup::Type::Enum::config)
+        {
+            auto configIterator = configCentral.find(channel);
+            if(configIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            for(auto& parameterIterator : configIterator->second)
+            {
+                RpcConfigurationParameter& parameter = parameterIterator.second;
+                if(parameter.rpcParameter->id.empty()) continue;
+                if(parameter.specialType == 0)
+                {
+                    //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+                    auto parameter2 = parameterGroup->getParameter(parameter.rpcParameter->id);
+                    if(!parameter2) continue;
+                }
+                if(!parameter.rpcParameter->visible && !parameter.rpcParameter->service && !parameter.rpcParameter->internal && !parameter.rpcParameter->transform)
+                {
+                    _bl->out.printDebug("Debug: Omitting parameter " + parameter.rpcParameter->id + " because of it's ui flag.");
+                    continue;
+                }
+                if(clientInfo->clientType == RpcClientType::ccu2 && !parameter.rpcParameter->ccu2Visible) continue;
+#ifdef CCU2
+                if(parameter.rpcParameter && parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
+#endif
+
+                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index);
+                if(!description || description->errorStruct) continue;
+
+                index++;
+                descriptions->structValue->emplace(StructElement(parameter.rpcParameter->id, std::move(description)));
+            }
+        }
+        else if(parameterGroup->type() == ParameterGroup::Type::Enum::link)
+        {
+            for(auto& parameter : parameterGroup->parameters)
+            {
+                if(!parameter.second || parameter.second->id.empty() || !parameter.second->visible) continue;
+                if(!parameter.second->visible && !parameter.second->service && !parameter.second->internal  && !parameter.second->transform)
+                {
+                    _bl->out.printDebug("Debug: Omitting parameter " + parameter.second->id + " because of it's ui flag.");
+                    continue;
+                }
+
+                PVariable description = getVariableDescription(clientInfo, parameter.second, channel, parameterGroup->type(), index);
+                if(!description || description->errorStruct) continue;
+
+                index++;
+                descriptions->structValue->insert(StructElement(parameter.second->id, description));
+            }
+        }
+        
         return descriptions;
     }
     catch(const std::exception& ex)
@@ -3906,12 +4025,12 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         if(requestFromDevice)
         {
             variable = getValueFromDevice(parameter.rpcParameter, channel, asynchronous);
-            if(parameter.rpcParameter->password) variable.reset(new Variable(variable->type));
+            if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
             if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
         }
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
         if(!convertFromPacketHook(parameter.rpcParameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData);
-        if(parameter.rpcParameter->password) variable.reset(new Variable(variable->type));
+        if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
     catch(const std::exception& ex)
@@ -3929,91 +4048,91 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index)
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index)
 {
     try
     {
-        if(!parameterIterator->second || parameterIterator->second->id.empty() || !parameterIterator->second->visible) return Variable::createError(-5, "Unknown parameter.");
-        if(!parameterIterator->second->visible && !parameterIterator->second->service && !parameterIterator->second->internal  && !parameterIterator->second->transform)
+        if(!parameter || parameter->id.empty() || !parameter->visible) return Variable::createError(-5, "Unknown parameter.");
+        if(!parameter->visible && !parameter->service && !parameter->internal  && !parameter->transform)
         {
-            _bl->out.printDebug("Debug: Omitting parameter " + parameterIterator->second->id + " because of it's ui flag.");
+            _bl->out.printDebug("Debug: Omitting parameter " + parameter->id + " because of it's ui flag.");
             return Variable::createError(-5, "Unknown parameter (1).");
         }
 #ifdef CCU2
-        if(parameterIterator->second->logical->type == ILogical::Type::tInteger64) continue;
+        if(parameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
-        if(clientInfo->clientType == RpcClientType::ccu2 && !parameterIterator->second->ccu2Visible) return Variable::createError(-5, "Parameter is invisible on the CCU2.");
+        if(clientInfo->clientType == RpcClientType::ccu2 && !parameter->ccu2Visible) return Variable::createError(-5, "Parameter is invisible on the CCU2.");
 
         PVariable description = std::make_shared<Variable>(VariableType::tStruct);
 
         int32_t operations = 0;
-        if(parameterIterator->second->readable) operations += 4;
-        if(parameterIterator->second->writeable) operations += 2;
-        if(parameterIterator->second->transmitted) operations += 1;
+        if(parameter->readable) operations += 4;
+        if(parameter->writeable) operations += 2;
+        if(parameter->transmitted) operations += 1;
         int32_t uiFlags = 0;
-        if(parameterIterator->second->visible) uiFlags += 1;
-        if(parameterIterator->second->internal) uiFlags += 2;
-        if(parameterIterator->second->transform) uiFlags += 4;
-        if(parameterIterator->second->service) uiFlags += 8;
-        if(parameterIterator->second->sticky) uiFlags += 0x10;
-        if(parameterIterator->second->logical->type == ILogical::Type::tBoolean)
+        if(parameter->visible) uiFlags += 1;
+        if(parameter->internal) uiFlags += 2;
+        if(parameter->transform) uiFlags += 4;
+        if(parameter->service) uiFlags += 8;
+        if(parameter->sticky) uiFlags += 0x10;
+        if(parameter->logical->type == ILogical::Type::tBoolean)
         {
-            LogicalBoolean* parameter = (LogicalBoolean*)parameterIterator->second->logical.get();
+            LogicalBoolean* logicalBoolean = (LogicalBoolean*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalBoolean->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalBoolean->defaultValue))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
             description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
             description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tString)
+        else if(parameter->logical->type == ILogical::Type::tString)
         {
-            LogicalString* parameter = (LogicalString*)parameterIterator->second->logical.get();
+            LogicalString* logicalString = (LogicalString*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalString->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalString->defaultValue))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
             description->structValue->insert(StructElement("MAX", PVariable(new Variable(std::string("")))));
             description->structValue->insert(StructElement("MIN", PVariable(new Variable(std::string("")))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tAction)
+        else if(parameter->logical->type == ILogical::Type::tAction)
         {
-            LogicalAction* parameter = (LogicalAction*)parameterIterator->second->logical.get();
+            LogicalAction* logicalAction = (LogicalAction*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalAction->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalAction->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
             description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
             description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations & 0xFE)))); //Remove read
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tInteger)
+        else if(parameter->logical->type == ILogical::Type::tInteger)
         {
-            LogicalInteger* parameter = (LogicalInteger*)parameterIterator->second->logical.get();
+            LogicalInteger* logicalInteger = (LogicalInteger*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalInteger->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger->defaultValue))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
+            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!parameter->specialValuesStringMap.empty())
+            if(!logicalInteger->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
-                for(std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                for(std::unordered_map<std::string, int32_t>::iterator j = logicalInteger->specialValuesStringMap.begin(); j != logicalInteger->specialValuesStringMap.end(); ++j)
                 {
                     PVariable specialElement(new Variable(VariableType::tStruct));
                     specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -4026,22 +4145,22 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tInteger64)
+        else if(parameter->logical->type == ILogical::Type::tInteger64)
         {
-            LogicalInteger64* parameter = (LogicalInteger64*)parameterIterator->second->logical.get();
+            LogicalInteger64* logicalInteger64 = (LogicalInteger64*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalInteger64->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger64->defaultValue))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger64->maximumValue))));
+            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger64->minimumValue))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!parameter->specialValuesStringMap.empty())
+            if(!logicalInteger64->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
-                for(std::unordered_map<std::string, int64_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                for(std::unordered_map<std::string, int64_t>::iterator j = logicalInteger64->specialValuesStringMap.begin(); j != logicalInteger64->specialValuesStringMap.end(); ++j)
                 {
                     PVariable specialElement(new Variable(VariableType::tStruct));
                     specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -4054,43 +4173,43 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tEnum)
+        else if(parameter->logical->type == ILogical::Type::tEnum)
         {
-            LogicalEnumeration* parameter = (LogicalEnumeration*)parameterIterator->second->logical.get();
+            LogicalEnumeration* logicalEnumeration = (LogicalEnumeration*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValueExists ? parameter->defaultValue : 0))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalEnumeration->defaultValueExists ? logicalEnumeration->defaultValue : 0))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
+            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
 
             PVariable valueList(new Variable(VariableType::tArray));
-            for(std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j)
+            for(std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j)
             {
                 valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
             }
             description->structValue->insert(StructElement("VALUE_LIST", valueList));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tFloat)
+        else if(parameter->logical->type == ILogical::Type::tFloat)
         {
-            LogicalDecimal* parameter = (LogicalDecimal*)parameterIterator->second->logical.get();
+            LogicalDecimal* logicalDecimal = (LogicalDecimal*)parameter->logical.get();
 
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
-            if(parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(parameter->defaultValue))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(logicalDecimal->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalDecimal->defaultValue))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(parameter->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(parameter->minimumValue))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
+            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!parameter->specialValuesStringMap.empty())
+            if(!logicalDecimal->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
-                for(std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j)
+                for(std::unordered_map<std::string, double>::iterator j = logicalDecimal->specialValuesStringMap.begin(); j != logicalDecimal->specialValuesStringMap.end(); ++j)
                 {
                     PVariable specialElement(new Variable(VariableType::tStruct));
                     specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
@@ -4103,37 +4222,37 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tArray)
+        else if(parameter->logical->type == ILogical::Type::tArray)
         {
             if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
         }
-        else if(parameterIterator->second->logical->type == ILogical::Type::tStruct)
+        else if(parameter->logical->type == ILogical::Type::tStruct)
         {
             if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-            if(!parameterIterator->second->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameterIterator->second->control))));
+            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
             description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameterIterator->second->id))));
+            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
             description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
             if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
             description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
         }
 
-        description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameterIterator->second->unit))));
-        if(parameterIterator->second->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(parameterIterator->second->mandatory));
-        if(!parameterIterator->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameterIterator->second->formFieldType))));
-        if(parameterIterator->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameterIterator->second->formPosition))));
+        description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter->unit))));
+        if(parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(parameter->mandatory));
+        if(!parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameter->formFieldType))));
+        if(parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameter->formPosition))));
 
         if(type == ParameterGroup::Type::Enum::variables)
         {
             std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(channel);
             if(valuesCentralIterator == valuesCentral.end()) return Variable::createError(-5, "Unknown parameter (2).");
-            std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameterIterator->second->id);
+            std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameter->id);
             if(valueParameterIterator == valuesCentralIterator->second.end()) return Variable::createError(-5, "Unknown parameter (3).");
 
             auto room = valueParameterIterator->second.getRoom();
@@ -4168,7 +4287,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, Parameters::it
         if(!central) return description;
         std::string language = clientInfo ? clientInfo->language : "en-US";
         std::string filename = _rpcDevice->getFilename();
-        auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameterIterator->second->parent()->type(), parameterIterator->second->parent()->id, parameterIterator->second->id);
+        auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
         if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
         if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
 
@@ -4199,10 +4318,20 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t chann
         PParameterGroup parameterGroup = getParameterSet(channel, ParameterGroup::Type::Enum::variables);
         if(!parameterGroup) return Variable::createError(-2, "Unknown channel.");
 
-        Parameters::iterator parameterIterator = parameterGroup->parameters.find(valueKey);
-        if(parameterIterator == parameterGroup->parameters.end()) return Variable::createError(-5, "Unknown parameter.");
+        auto channelIterator = valuesCentral.find(channel);
+        if(channelIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 
-        return getVariableDescription(clientInfo, parameterIterator, channel, ParameterGroup::Type::Enum::variables, -1);
+        auto parameterIterator = channelIterator->second.find(valueKey);
+        if(parameterIterator == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+
+        if(parameterIterator->second.specialType == 0)
+        {
+            //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
+            auto parameterIterator2 = channelIterator->second.find(valueKey);
+            if(parameterIterator2 == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
+        }
+
+        return getVariableDescription(clientInfo, parameterIterator->second.rpcParameter, channel, ParameterGroup::Type::Enum::variables, -1);
     }
     catch(const std::exception& ex)
     {
