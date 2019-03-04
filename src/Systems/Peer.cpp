@@ -3682,7 +3682,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
         if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
         PParameterGroup parameterGroup = getParameterSet(channel, type);
         if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
-        PVariable variables(new Variable(VariableType::tStruct));
+        PVariable variables = std::make_shared<Variable>(VariableType::tStruct);
 
         auto central = getCentral();
         if(!central) return Variable::createError(-32500, "Could not get central.");
@@ -3690,7 +3690,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
         if(type == ParameterGroup::Type::Enum::variables)
         {
             auto valuesIterator = valuesCentral.find(channel);
-            if(valuesIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            if(valuesIterator == valuesCentral.end()) return variables;
             for(auto& parameterIterator : valuesIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
@@ -3725,7 +3725,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
         else if(type == ParameterGroup::Type::Enum::config)
         {
             auto configIterator = configCentral.find(channel);
-            if(configIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            if(configIterator == configCentral.end()) return variables;
             for(auto& parameterIterator : configIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
@@ -3829,7 +3829,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
         if(parameterGroup->type() == ParameterGroup::Type::Enum::variables)
         {
             auto valuesIterator = valuesCentral.find(channel);
-            if(valuesIterator == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            if(valuesIterator == valuesCentral.end()) return descriptions; //Parameter set exists but is empty
             for(auto& parameterIterator : valuesIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
@@ -3862,7 +3862,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
         else if(parameterGroup->type() == ParameterGroup::Type::Enum::config)
         {
             auto configIterator = configCentral.find(channel);
-            if(configIterator == configCentral.end()) return Variable::createError(-2, "Unknown channel.");
+            if(configIterator == configCentral.end()) return descriptions; //Parameter set exists but is empty
             for(auto& parameterIterator : configIterator->second)
             {
                 RpcConfigurationParameter& parameter = parameterIterator.second;
