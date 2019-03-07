@@ -57,6 +57,8 @@ SerialReaderWriter::~SerialReaderWriter()
 
 void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, CharacterSize characterSize, bool twoStopBits)
 {
+
+
 	_handles++;
 	if(_fileDescriptor->descriptor > -1) return;
 	if(_createLockFile) createLockFile();
