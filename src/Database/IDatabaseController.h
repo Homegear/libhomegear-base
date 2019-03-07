@@ -228,6 +228,7 @@ public:
 	virtual void deletePeer(uint64_t id) = 0;
 	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
 	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
+    virtual void saveSpecialPeerParameterAsynchronous(DataRow& data) = 0;
 	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerParameterRolesAsynchronous(BaseLib::Database::DataRow& data) = 0;

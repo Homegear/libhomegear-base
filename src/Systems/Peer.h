@@ -159,6 +159,11 @@ public:
 	uint64_t databaseId = 0;
 
 	/**
+	 * The special type of the parameter (0 = none, 1 = roles).
+	 */
+	int32_t specialType = 0;
+
+	/**
 	 * The RPC parameter as defined in the XML file.
 	 */
 	DeviceDescription::PParameter rpcParameter;
@@ -371,7 +376,8 @@ public:
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
 	virtual void loadConfig();
     virtual void saveConfig();
-	virtual void saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, std::string parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
+	virtual void saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
+    virtual void saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t specialType, const BaseLib::PVariable& metadata, const std::string& roles);
 	virtual void saveParameter(uint32_t parameterID, uint32_t address, std::vector<uint8_t>& value);
 	virtual void saveParameter(uint32_t parameterID, std::vector<uint8_t>& value);
 	virtual void loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows);
@@ -521,6 +527,15 @@ protected:
 	//End ServiceMessages event handling
 
 	/**
+	 * Creates an RPC parameter based on settings provided in variableInfo. Available settings are: "id" (String), "type" (String), "default", "min", "max".
+	 *
+	 * @param variableInfo A Struct containing the information to create a RPC parameter.
+	 * @param parameterGroup The parameter group the parameter should belong to.
+	 * @return Returns a RPC parameter based on variableInfo.
+	 */
+	BaseLib::DeviceDescription::PParameter createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const ParameterGroup* parameterGroup);
+
+	/**
 	 * Gets a variable value directly from the device. This method is used as an inheritable hook method within getValue().
 	 *
 	 * @see getValue
@@ -540,7 +555,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, Parameters::iterator& parameterIterator, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.
