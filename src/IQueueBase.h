@@ -49,6 +49,12 @@ public:
 	IQueueBase(SharedObjects* baseLib, uint32_t queueCount);
 	virtual ~IQueueBase() {}
 
+	/**
+	 * Prints a rate limited (1 output per 10 seconds) error message and keeps count of error messages.
+	 *
+	 * @param out The output object.
+	 * @param message The message to print.
+	 */
 	void printQueueFullError(BaseLib::Output& out, std::string message);
 protected:
 	SharedObjects* _bl = nullptr;
