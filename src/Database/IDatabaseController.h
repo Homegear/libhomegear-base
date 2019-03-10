@@ -131,6 +131,16 @@ public:
 	virtual BaseLib::PVariable updateCategory(uint64_t categoryId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	// }}}
 
+	// {{{ Roles
+	virtual BaseLib::PVariable createRole(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable deleteRole(uint64_t roleId) = 0;
+	virtual BaseLib::PVariable getRoles(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
+	virtual BaseLib::PVariable getRoleMetadata(uint64_t roleId) = 0;
+	virtual bool roleExists(uint64_t roleId) = 0;
+	virtual BaseLib::PVariable setRoleMetadata(uint64_t roleId, BaseLib::PVariable metadata) = 0;
+	virtual BaseLib::PVariable updateRole(uint64_t roleId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+	// }}}
+
 	// {{{ Node data
 	virtual BaseLib::PVariable setNodeData(std::string& node, std::string& key, BaseLib::PVariable& value) = 0;
 	virtual BaseLib::PVariable getNodeData(std::string& node, std::string& key, bool requestFromTrustedServer = false) = 0;
@@ -218,8 +228,10 @@ public:
 	virtual void deletePeer(uint64_t id) = 0;
 	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
 	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
+    virtual void saveSpecialPeerParameterAsynchronous(DataRow& data) = 0;
 	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow& data) = 0;
+	virtual void savePeerParameterRolesAsynchronous(BaseLib::Database::DataRow& data) = 0;
 	virtual void savePeerVariableAsynchronous(DataRow& data) = 0;
 	virtual std::shared_ptr<DataTable> getPeerParameters(uint64_t peerID) = 0;
 	virtual std::shared_ptr<DataTable> getPeerVariables(uint64_t peerID) = 0;

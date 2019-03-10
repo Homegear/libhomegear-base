@@ -36,6 +36,7 @@
 #include "Physical.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
+#include <set>
 
 using namespace rapidxml;
 using namespace BaseLib::DeviceDescription::ParameterCast;
@@ -53,6 +54,8 @@ class ParameterGroup;
 
 typedef std::shared_ptr<Parameter> PParameter;
 typedef std::map<std::string, PParameter> Parameters;
+typedef std::string ParameterRole;
+typedef std::set<uint64_t> ParameterRoles;
 
 class Parameter
 {
@@ -111,6 +114,7 @@ public:
 	bool resetAfterRestart = false;
 	bool ccu2Visible = true;
 	Casts casts;
+	ParameterRoles roles;
 
 	//Elements
 	std::shared_ptr<ILogical> logical;
@@ -122,8 +126,8 @@ public:
 	//Helpers
 	bool hasDelayedAutoResetParameters = false;
 
-	Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent);
-	Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent);
+	Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent);
+	Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent);
 	virtual ~Parameter();
 
 	//Helpers
@@ -142,7 +146,7 @@ public:
 	 * @param[in] value The value to convert.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const PVariable value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue);
 
 	/**
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
@@ -150,16 +154,16 @@ public:
 	 * @param[in] value The value to convert.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(std::string value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue);
 
 	void adjustBitPosition(std::vector<uint8_t>& data);
 
-	ParameterGroup* parent();
+	const ParameterGroup* parent();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 
 	//Helpers
-	ParameterGroup* _parent = nullptr;
+	const ParameterGroup* _parent = nullptr;
 
 	/**
 	 * Reverses a binary array.

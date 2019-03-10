@@ -48,7 +48,7 @@ void DeviceTranslations::clear()
 	_deviceTranslations.clear();
 }
 
-std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(std::string& filename, std::string& language)
+std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::string& filename, std::string& language)
 {
 	try
 	{
@@ -85,7 +85,7 @@ std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(std::string&
     return PHomegearDeviceTranslation();
 }
 
-PHomegearDeviceTranslation DeviceTranslations::getTranslation(std::string& filename, std::string& language)
+PHomegearDeviceTranslation DeviceTranslations::getTranslation(const std::string& filename, std::string& language)
 {
     try
     {
@@ -126,7 +126,7 @@ PHomegearDeviceTranslation DeviceTranslations::getTranslation(std::string& filen
     return PHomegearDeviceTranslation();
 }
 
-std::string DeviceTranslations::getTypeDescription(std::string& filename, std::string& language, std::string& deviceId)
+std::string DeviceTranslations::getTypeDescription(const std::string& filename, std::string& language, const std::string& deviceId)
 {
     try
     {
@@ -151,7 +151,7 @@ std::string DeviceTranslations::getTypeDescription(std::string& filename, std::s
     return "";
 }
 
-std::string DeviceTranslations::getTypeLongDescription(std::string& filename, std::string& language, std::string& deviceId)
+std::string DeviceTranslations::getTypeLongDescription(const std::string& filename, std::string& language, const std::string& deviceId)
 {
     try
     {
@@ -176,7 +176,7 @@ std::string DeviceTranslations::getTypeLongDescription(std::string& filename, st
     return "";
 }
 
-std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations(std::string& filename, std::string& language, ParameterGroup::Type::Enum parameterGroupType, std::string& parameterGroupId, std::string& parameterId)
+std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations(const std::string& filename, std::string& language, ParameterGroup::Type::Enum parameterGroupType, const std::string& parameterGroupId, const std::string& parameterId)
 {
     try
     {

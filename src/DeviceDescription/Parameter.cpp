@@ -55,7 +55,7 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent)
 {
 	_bl = baseLib;
 	_parent = parent;
@@ -63,7 +63,7 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent) : Parameter(baseLib, parent)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -138,6 +138,24 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, this)));
 						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
+					}
+				}
+				else if(propertyName == "roles")
+				{
+					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+					{
+						_bl->out.printWarning("Warning: Unknown attribute for \"roles\": " + std::string(attr->name()));
+					}
+					for(xml_node<>* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
+					{
+						std::string roleName(roleNode->name());
+						std::string roleValue(roleNode->value());
+						if(roleName == "role")
+						{
+						    auto roleId = Math::getUnsignedNumber64(roleValue);
+							if(!roleId != 0) roles.emplace(roleId);
+						}
+						else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
 					}
 				}
 				else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
@@ -382,7 +400,7 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
     return PVariable(new Variable(VariableType::tInteger));
 }
 
-void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -409,7 +427,8 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
 		else if(logical->type == ILogical::Type::Enum::tBoolean || logical->type == ILogical::Type::Enum::tAction)
 		{
 			rpcValue.reset(new Variable(false));
-			if(HelperFunctions::toLower(value) == "true") rpcValue->booleanValue = true;
+			std::string valueCopy = value;
+			if(HelperFunctions::toLower(valueCopy) == "true") rpcValue->booleanValue = true;
 		}
 		else if(logical->type == ILogical::Type::Enum::tFloat) rpcValue.reset(new Variable(Math::getDouble(value)));
 		else if(logical->type == ILogical::Type::Enum::tString) rpcValue.reset(new Variable(value));
@@ -434,7 +453,7 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
     }
 }
 
-void Parameter::convertToPacket(const PVariable value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -690,7 +709,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
     }
 }
 
-ParameterGroup* Parameter::parent()
+const ParameterGroup* Parameter::parent()
 {
 	return _parent;
 }
