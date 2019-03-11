@@ -560,7 +560,7 @@ std::vector<char> HelperFunctions::getBinary(const std::string& hexString)
 {
     std::vector<char> binary;
     if(hexString.empty()) return binary;
-    if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0 && !std::isspace(hexString.back()))
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
@@ -594,7 +594,7 @@ std::string HelperFunctions::getBinaryString(const std::string& hexString)
 {
     std::string binary;
     if(hexString.empty()) return binary;
-    if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0 && !std::isspace(hexString.back()))
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
@@ -628,7 +628,7 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::string& hexString)
 {
     std::vector<uint8_t> binary;
     if(hexString.empty()) return binary;
-    if(hexString.size() % 2 != 0)
+    if(hexString.size() % 2 != 0 && !std::isspace(hexString.back()))
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(hexStringCopy.size() / 2);
@@ -662,7 +662,7 @@ std::vector<uint8_t>& HelperFunctions::getUBinary(const std::string& hexString, 
 {
     if(hexString.empty()) return binary;
     if(size > hexString.size()) size = (uint32_t)hexString.size();
-    if(size % 2 != 0)
+    if(size % 2 != 0 && !std::isspace(hexString.back()))
     {
         std::string hexStringCopy = hexString.substr(1);
         binary.reserve(size / 2);
