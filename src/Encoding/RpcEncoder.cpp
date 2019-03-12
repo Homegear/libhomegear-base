@@ -41,12 +41,12 @@ RpcEncoder::RpcEncoder(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 	_encoder = std::unique_ptr<BinaryEncoder>(new BinaryEncoder(baseLib));
 
-	strncpy(&_packetStartRequest[0], "Bin", 4);
-	strncpy(&_packetStartResponse[0], "Bin", 4);
+	strncpy(_packetStartRequest, "Bin", 4);
+	strncpy(_packetStartResponse, "Bin", 4);
 	_packetStartResponse[3] = 1;
 	_packetStartResponse[4] = 0;
-	strncpy(&_packetStartError[0], "Bin", 4);
-	_packetStartError[3] = 0xFF;
+	strncpy(_packetStartError, "Bin", 4);
+	_packetStartError[3] = (char)(uint8_t)0xFF;
 	_packetStartError[4] = 0;
 }
 
@@ -62,6 +62,7 @@ void RpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list
 	try
 	{
 		encodedData.clear();
+		encodedData.reserve(1024);
 		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
 		uint32_t headerSize = 0;
 		if(header)
@@ -105,6 +106,7 @@ void RpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list
 	try
 	{
 		encodedData.clear();
+        encodedData.reserve(1024);
 		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
 		uint32_t headerSize = 0;
 		if(header)
@@ -148,6 +150,7 @@ void RpcEncoder::encodeRequest(std::string methodName, PArray parameters, std::v
 	try
 	{
 		encodedData.clear();
+        encodedData.reserve(1024);
 		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
 		uint32_t headerSize = 0;
 		if(header)
@@ -191,6 +194,7 @@ void RpcEncoder::encodeRequest(std::string methodName, PArray parameters, std::v
 	try
 	{
 		encodedData.clear();
+        encodedData.reserve(1024);
 		encodedData.insert(encodedData.begin(), _packetStartRequest, _packetStartRequest + 4);
 		uint32_t headerSize = 0;
 		if(header)
@@ -234,6 +238,7 @@ void RpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<
 	try
 	{
 		encodedData.clear();
+        encodedData.reserve(1024);
 		if(!variable) variable.reset(new Variable(VariableType::tVoid));
 		if(variable->errorStruct) encodedData.insert(encodedData.begin(), _packetStartError, _packetStartError + 4);
 		else encodedData.insert(encodedData.begin(), _packetStartResponse, _packetStartResponse + 4);
@@ -265,6 +270,7 @@ void RpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<
 	try
 	{
 		encodedData.clear();
+        encodedData.reserve(1024);
 		if(!variable) variable.reset(new Variable(VariableType::tVoid));
 		if(variable->errorStruct) encodedData.insert(encodedData.begin(), _packetStartError, _packetStartError + 4);
 		else encodedData.insert(encodedData.begin(), _packetStartResponse, _packetStartResponse + 4);

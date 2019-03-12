@@ -55,7 +55,7 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent)
 {
 	_bl = baseLib;
 	_parent = parent;
@@ -63,7 +63,7 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, ParameterGroup* parent)
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, ParameterGroup* parent) : Parameter(baseLib, parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent) : Parameter(baseLib, parent)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -400,7 +400,7 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
     return PVariable(new Variable(VariableType::tInteger));
 }
 
-void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -427,7 +427,8 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
 		else if(logical->type == ILogical::Type::Enum::tBoolean || logical->type == ILogical::Type::Enum::tAction)
 		{
 			rpcValue.reset(new Variable(false));
-			if(HelperFunctions::toLower(value) == "true") rpcValue->booleanValue = true;
+			std::string valueCopy = value;
+			if(HelperFunctions::toLower(valueCopy) == "true") rpcValue->booleanValue = true;
 		}
 		else if(logical->type == ILogical::Type::Enum::tFloat) rpcValue.reset(new Variable(Math::getDouble(value)));
 		else if(logical->type == ILogical::Type::Enum::tString) rpcValue.reset(new Variable(value));
@@ -452,7 +453,7 @@ void Parameter::convertToPacket(std::string value, std::vector<uint8_t>& convert
     }
 }
 
-void Parameter::convertToPacket(const PVariable value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -708,7 +709,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
     }
 }
 
-ParameterGroup* Parameter::parent()
+const ParameterGroup* Parameter::parent()
 {
 	return _parent;
 }

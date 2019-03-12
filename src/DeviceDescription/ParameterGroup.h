@@ -82,7 +82,7 @@ public:
 	Lists lists;
 	PParameter parameterGroupSelector;
 
-	virtual Type::Enum type() = 0;
+	virtual Type::Enum type() const = 0;
 	static Type::Enum typeFromString(std::string type);
 	PParameter getParameter(std::string id);
 	void getIndices(uint32_t startIndex, uint32_t endIndex, int32_t list, std::vector<PParameter>& result);
@@ -101,7 +101,7 @@ public:
 	virtual ~ConfigParameters() {}
 
 	//Helpers
-	Type::Enum type() { return Type::Enum::config; };
+	Type::Enum type() const { return Type::Enum::config; };
 };
 
 class Variables : public ParameterGroup
@@ -112,7 +112,7 @@ public:
 	virtual ~Variables() {}
 
 	//Helpers
-	Type::Enum type() { return Type::Enum::variables; };
+	Type::Enum type() const { return Type::Enum::variables; };
 };
 
 class LinkParameters : public ParameterGroup
@@ -123,7 +123,7 @@ public:
 	virtual ~LinkParameters() {}
 
 	//Helpers
-	Type::Enum type() { return Type::Enum::link; };
+	Type::Enum type() const { return Type::Enum::link; };
 
 	//Attributes
 	int32_t peerChannelMemoryOffset = -1;
