@@ -789,6 +789,21 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
 			settings->password = value;
 			_bl->out.printDebug("Debug: password set");
 		}
+		else if(name == "passwordS20")
+		{
+			settings->passwordS20 = value;
+			_bl->out.printDebug("Debug: password S2 0 set");
+		}
+		else if(name == "passwordS21")
+		{
+			settings->passwordS21 = value;
+			_bl->out.printDebug("Debug: password S2 1 set");
+		}
+		else if(name == "passwordS22")
+		{
+			settings->passwordS22 = value;
+			_bl->out.printDebug("Debug: password S2 2 set");
+		}
 		else if(name == "additionalcommands")
 		{
 			settings->additionalCommands = value;
