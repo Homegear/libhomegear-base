@@ -3696,7 +3696,6 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 RpcConfigurationParameter& parameter = parameterIterator.second;
                 if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
                 if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, parameter.rpcParameter->id)) continue;
-                if(!parameter.rpcParameter->readable) continue;
                 if(parameter.specialType == 0)
                 {
                     //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
@@ -3835,7 +3834,6 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                 RpcConfigurationParameter& parameter = parameterIterator.second;
                 if(parameter.rpcParameter->id.empty() || !parameter.rpcParameter->visible) continue;
                 if(checkAcls && !clientInfo->acls->checkVariableReadAccess(central->getPeer(_peerID), channel, parameter.rpcParameter->id)) continue;
-                if(!parameter.rpcParameter->readable) continue;
                 if(parameter.specialType == 0)
                 {
                     //Parameter also needs to be in ParamsetDescription, this is not necessarily the case (e. g. for switchable parameter sets)
