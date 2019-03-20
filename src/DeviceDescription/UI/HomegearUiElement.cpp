@@ -55,6 +55,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
             else _bl->out.printWarning("Warning: Unknown value for homegearUiElement\\type: " + value);
         }
         else if(nodeName == "control") control = value;
+        else if(nodeName == "role") role = Math::getUnsignedNumber64(value, true);
         else if(nodeName == "icons")
         {
             for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
@@ -115,6 +116,7 @@ HomegearUiElement::HomegearUiElement(HomegearUiElement const& rhs)
     id = rhs.id;
     type = rhs.type;
     control = rhs.control;
+    role = rhs.role;
 
     for(auto& icon : rhs.icons)
     {
@@ -172,6 +174,7 @@ HomegearUiElement& HomegearUiElement::operator=(const HomegearUiElement& rhs)
     id = rhs.id;
     type = rhs.type;
     control = rhs.control;
+    role = rhs.role;
 
     for(auto& icon : rhs.icons)
     {
@@ -246,6 +249,7 @@ PVariable HomegearUiElement::getElementInfo()
     if(type == Type::simple)
     {
         uiElement->structValue->emplace("control", std::make_shared<BaseLib::Variable>(control));
+        uiElement->structValue->emplace("role", std::make_shared<BaseLib::Variable>(role));
 
         auto inputs = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
         inputs->arrayValue->reserve(variableInputs.size());
@@ -353,6 +357,8 @@ PVariable HomegearUiElement::getElementInfo()
             gridElement->structValue->emplace("rows", std::make_shared<BaseLib::Variable>(grid->rows));
             uiElement->structValue->emplace("grid", gridElement);
         }
+
+        uiElement->structValue->emplace("role", std::make_shared<BaseLib::Variable>(role));
 
         auto controlElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
         controlElements->arrayValue->reserve(controls.size());

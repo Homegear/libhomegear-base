@@ -50,9 +50,6 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t 
 	_stopPacketProcessingThread = false;
 	_stopCallbackThread = false;
 	_stopped = false;
-
-	_lifetick1.first = 0;
-	_lifetick1.second = true;
 }
 
 IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings) : IPhysicalInterface(baseLib, familyId)
@@ -74,14 +71,11 @@ bool IPhysicalInterface::lifetick()
 {
 	try
 	{
-		_lifetick1Mutex.lock();
-		if(!_lifetick1.second && BaseLib::HelperFunctions::getTime() - _lifetick1.first > 60000)
+		if(!_lifetick1.second.load(std::memory_order_acquire) && BaseLib::HelperFunctions::getTime() - _lifetick1.first.load(std::memory_order_acquire) > 60000)
 		{
 			_bl->out.printCritical("Critical: Physical interface's (" + _settings->id + ") lifetick was not updated for more than 60 seconds.");
-			_lifetick1Mutex.unlock();
 			return false;
 		}
-		_lifetick1Mutex.unlock();
 		return true;
 	}
 	catch(const std::exception& ex)
@@ -96,7 +90,6 @@ bool IPhysicalInterface::lifetick()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _lifetick1Mutex.unlock();
     return false;
 }
 
@@ -183,10 +176,8 @@ void IPhysicalInterface::processPackets()
 
 			while(_packetBufferHead != _packetBufferTail)
 			{
-				_lifetick1Mutex.lock();
-				_lifetick1.second = false;
-				_lifetick1.first = BaseLib::HelperFunctions::getTime();
-				_lifetick1Mutex.unlock();
+				_lifetick1.second.store(false, std::memory_order_release);
+				_lifetick1.first.store(BaseLib::HelperFunctions::getTime(), std::memory_order_release);
 
 				int64_t processingTime = HelperFunctions::getTime();
 				_lastPacketReceived = processingTime;
@@ -214,9 +205,7 @@ void IPhysicalInterface::processPackets()
 				if(_bl->settings.devLog() || _bl->debugLevel >= 5) _bl->out.printDebug("Debug (" + _settings->id + "): Packet processing of packet " + packet->hexString() + " took " + std::to_string(processingTime) + " ms.");
 				if(processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");
 
-				_lifetick1Mutex.lock();
-				_lifetick1.second = true;
-				_lifetick1Mutex.unlock();
+				_lifetick1.second.store(true, std::memory_order_release);
 
 				lock.lock();
 			}
