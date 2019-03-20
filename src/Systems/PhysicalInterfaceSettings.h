@@ -96,6 +96,9 @@ public:
 	std::string dataPath;
 	std::string user;
 	std::string password;
+	std::string passwordS21;
+	std::string passwordS22;
+	std::string passwordS23;
 	std::string additionalCommands;
 	std::string mode;
     std::string serialNumber;

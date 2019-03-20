@@ -132,8 +132,7 @@ protected:
 	int64_t _lastPacketReceived = -1;
 	int64_t _maxPacketProcessingTime = 1000;
 	bool _updateMode = false;
-	std::mutex _lifetick1Mutex;
-	std::pair<int64_t, bool> _lifetick1;
+	std::pair<std::atomic<int64_t>, std::atomic_bool> _lifetick1{0, true};
 
 	int32_t _myAddress = 0;
 	std::string _hostname;
