@@ -106,7 +106,7 @@ public:
 	 * @see getTimeMicroseconds()
 	 * @return The current unix time stamp in seconds.
 	 */
-	static int32_t getTimeSeconds();
+	static int64_t getTimeSeconds();
 
 	/**
 	 * Gets the last modified time of a file.
@@ -682,15 +682,15 @@ private:
 	 */
 	bool _isBigEndian = true;
 
-	/**
-	 * Map to faster convert hexadecimal numbers.
-	 */
-	int32_t _asciiToBinaryTable[23];
+    /**
+     * Map to faster convert hexadecimal numbers.
+     */
+    static constexpr std::array<int32_t, 23> _asciiToBinaryTable{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10 ,11 ,12, 13, 14, 15};
 
-	/**
+    /**
 	 * Map to faster convert hexadecimal numbers.
 	 */
-	char _binaryToASCIITable[16];
+    static constexpr std::array<int32_t, 16> _binaryToASCIITable{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46};
 
 	/**
 	 * Checks if the system is little or big endian.
