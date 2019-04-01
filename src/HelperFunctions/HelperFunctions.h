@@ -685,12 +685,12 @@ private:
     /**
      * Map to faster convert hexadecimal numbers.
      */
-    static constexpr std::array<int32_t, 23> _asciiToBinaryTable{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10 ,11 ,12, 13, 14, 15};
+    static const std::array<int32_t, 23> _asciiToBinaryTable;
 
     /**
 	 * Map to faster convert hexadecimal numbers.
 	 */
-    static constexpr std::array<int32_t, 16> _binaryToASCIITable{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46};
+    static const std::array<int32_t, 16> _binaryToASCIITable;
 
 	/**
 	 * Checks if the system is little or big endian.
