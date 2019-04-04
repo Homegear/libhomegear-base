@@ -9,8 +9,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
@@ -35,6 +33,10 @@
 namespace BaseLib
 {
 
+const std::array<int32_t, 23> HelperFunctions::_asciiToBinaryTable{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10 ,11 ,12, 13, 14, 15};
+
+const std::array<int32_t, 16> HelperFunctions::_binaryToASCIITable{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46};
+
 HelperFunctions::HelperFunctions()
 {
 }
@@ -43,47 +45,6 @@ void HelperFunctions::init(SharedObjects* baseLib)
 {
     _bl = baseLib;
     checkEndianness();
-
-    _asciiToBinaryTable[0] = 0;
-    _asciiToBinaryTable[1] = 1;
-    _asciiToBinaryTable[2] = 2;
-    _asciiToBinaryTable[3] = 3;
-    _asciiToBinaryTable[4] = 4;
-    _asciiToBinaryTable[5] = 5;
-    _asciiToBinaryTable[6] = 6;
-    _asciiToBinaryTable[7] = 7;
-    _asciiToBinaryTable[8] = 8;
-    _asciiToBinaryTable[9] = 9;
-    _asciiToBinaryTable[10] = 0;
-    _asciiToBinaryTable[11] = 0;
-    _asciiToBinaryTable[12] = 0;
-    _asciiToBinaryTable[13] = 0;
-    _asciiToBinaryTable[14] = 0;
-    _asciiToBinaryTable[15] = 0;
-    _asciiToBinaryTable[16] = 0;
-    _asciiToBinaryTable[17] = 10;
-    _asciiToBinaryTable[18] = 11;
-    _asciiToBinaryTable[19] = 12;
-    _asciiToBinaryTable[20] = 13;
-    _asciiToBinaryTable[21] = 14;
-    _asciiToBinaryTable[22] = 15;
-
-    _binaryToASCIITable[0] = 0x30;
-    _binaryToASCIITable[1] = 0x31;
-    _binaryToASCIITable[2] = 0x32;
-    _binaryToASCIITable[3] = 0x33;
-    _binaryToASCIITable[4] = 0x34;
-    _binaryToASCIITable[5] = 0x35;
-    _binaryToASCIITable[6] = 0x36;
-    _binaryToASCIITable[7] = 0x37;
-    _binaryToASCIITable[8] = 0x38;
-    _binaryToASCIITable[9] = 0x39;
-    _binaryToASCIITable[0xA] = 0x41;
-    _binaryToASCIITable[0xB] = 0x42;
-    _binaryToASCIITable[0xC] = 0x43;
-    _binaryToASCIITable[0xD] = 0x44;
-    _binaryToASCIITable[0xE] = 0x45;
-    _binaryToASCIITable[0xF] = 0x46;
 }
 
 HelperFunctions::~HelperFunctions()
@@ -101,9 +62,9 @@ int64_t HelperFunctions::getTimeMicroseconds()
     return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-int32_t HelperFunctions::getTimeSeconds()
+int64_t HelperFunctions::getTimeSeconds()
 {
-    int32_t time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
+    auto time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
     if(time < 0) time = 0;
     return time;
 }
