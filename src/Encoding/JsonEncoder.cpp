@@ -442,7 +442,7 @@ std::string JsonEncoder::encodeString(const std::string& s)
 				bool invalid = false;
 				if((b1 & 0xE0) == 0xC0) //Two bytes
 				{
-					if(i + 1 == (signed)s.size())invalid = true;
+					if(i + 1 >= (signed)s.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t)s.at(i + 1);
@@ -456,7 +456,7 @@ std::string JsonEncoder::encodeString(const std::string& s)
 				}
 				else if((b1 & 0xF0) == 0xE0) //Three bytes
 				{
-					if(i + 2 == (signed)s.size()) invalid = true;
+					if(i + 2 >= (signed)s.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) s.at(i + 1);
@@ -471,7 +471,7 @@ std::string JsonEncoder::encodeString(const std::string& s)
 				}
 				else if((b1 & 0xF8) == 0xF0) //Four bytes
 				{
-					if(i + 3 == (signed)s.size()) invalid = true;
+					if(i + 3 >= (signed)s.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) s.at(i + 1);
@@ -585,7 +585,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 				bool invalid = false;
 				if((b1 & 0xE0) == 0xC0) //Two bytes
 				{
-					if(i + 1 == (signed)variable->stringValue.size())invalid = true;
+					if(i + 1 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t)variable->stringValue.at(i + 1);
@@ -599,7 +599,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 				}
 				else if((b1 & 0xF0) == 0xE0) //Three bytes
 				{
-					if(i + 2 == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 2 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
@@ -614,7 +614,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::o
 				}
 				else if((b1 & 0xF8) == 0xF0) //Four bytes
 				{
-					if(i + 3 == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 3 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
@@ -718,7 +718,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 				bool invalid = false;
 				if((b1 & 0xE0) == 0xC0) //Two bytes
 				{
-					if(i + 1 == (signed)variable->stringValue.size())invalid = true;
+					if(i + 1 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t)variable->stringValue.at(i + 1);
@@ -732,7 +732,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 				}
 				else if((b1 & 0xF0) == 0xE0) //Three bytes
 				{
-					if(i + 2 == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 2 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
@@ -747,7 +747,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 				}
 				else if((b1 & 0xF8) == 0xF0) //Four bytes
 				{
-					if(i + 3 == (signed)variable->stringValue.size()) invalid = true;
+					if(i + 3 >= (signed)variable->stringValue.size()) invalid = true;
 					else
 					{
 						auto b2 = (uint8_t) variable->stringValue.at(i + 1);
