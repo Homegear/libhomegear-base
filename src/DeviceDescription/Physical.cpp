@@ -105,10 +105,6 @@ IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node<
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);

@@ -37,11 +37,6 @@ namespace BaseLib
 namespace Rpc
 {
 
-JsonDecoder::JsonDecoder(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
-}
-
 std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json)
 {
     uint32_t pos = 0;
@@ -818,31 +813,24 @@ void JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::share
     if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
     switch (json[pos]) {
         case 'n':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
             decodeNull(json, pos, value);
             break;
         case 't':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
             decodeBoolean(json, pos, value);
             break;
         case 'f':
-            if(_bl->debugLevel >= 65) _bl->out.printDebug("Decoding JSON boolean.");
             decodeBoolean(json, pos, value);
             break;
         case '"':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
             decodeString(json, pos, value);
             break;
         case '{':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
             decodeObject(json, pos, value);
             break;
         case '[':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
             decodeArray(json, pos, value);
             break;
         default:
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
             decodeNumber(json, pos, value);
             break;
     }
@@ -853,31 +841,24 @@ void JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std:
     if(!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
     switch (json[pos]) {
         case 'n':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON null.");
             decodeNull(json, pos, value);
             break;
         case 't':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
             decodeBoolean(json, pos, value);
             break;
         case 'f':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON boolean.");
             decodeBoolean(json, pos, value);
             break;
         case '"':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON string.");
             decodeString(json, pos, value);
             break;
         case '{':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON object.");
             decodeObject(json, pos, value);
             break;
         case '[':
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON array.");
             decodeArray(json, pos, value);
             break;
         default:
-            if(_bl->debugLevel >= 6) _bl->out.printDebug("Decoding JSON number.");
             decodeNumber(json, pos, value);
             break;
     }

@@ -66,10 +66,6 @@ int32_t BinaryDecoder::decodeInteger(std::vector<char>& encodedData, uint32_t& p
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -98,10 +94,6 @@ int32_t BinaryDecoder::decodeInteger(std::vector<uint8_t>& encodedData, uint32_t
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -119,10 +111,6 @@ int64_t BinaryDecoder::decodeInteger64(std::vector<char>& encodedData, uint32_t&
 		position += 8;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -146,10 +134,6 @@ int64_t BinaryDecoder::decodeInteger64(std::vector<uint8_t>& encodedData, uint32
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -170,10 +154,6 @@ uint8_t BinaryDecoder::decodeByte(std::vector<char>& encodedData, uint32_t& posi
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -191,10 +171,6 @@ uint8_t BinaryDecoder::decodeByte(std::vector<uint8_t>& encodedData, uint32_t& p
 		position += 1;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -228,10 +204,6 @@ std::string BinaryDecoder::decodeString(std::vector<char>& encodedData, uint32_t
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -262,10 +234,6 @@ std::string BinaryDecoder::decodeString(std::vector<uint8_t>& encodedData, uint3
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -288,10 +256,6 @@ std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<char>& encodedData,
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -311,10 +275,6 @@ std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<uint8_t>& encodedDa
 		return data;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -348,10 +308,6 @@ double BinaryDecoder::decodeFloat(std::vector<char>& encodedData, uint32_t& posi
 		return floatValue;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -389,10 +345,6 @@ double BinaryDecoder::decodeFloat(std::vector<uint8_t>& encodedData, uint32_t& p
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -413,10 +365,6 @@ bool BinaryDecoder::decodeBoolean(std::vector<char>& encodedData, uint32_t& posi
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -434,10 +382,6 @@ bool BinaryDecoder::decodeBoolean(std::vector<uint8_t>& encodedData, uint32_t& p
 		return boolean;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

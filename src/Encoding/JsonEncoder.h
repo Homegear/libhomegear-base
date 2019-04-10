@@ -50,18 +50,18 @@ namespace Rpc
 class JsonEncoder
 {
 public:
-    JsonEncoder(BaseLib::SharedObjects* baseLib);
-    virtual ~JsonEncoder() {}
+    JsonEncoder() = default;
+    explicit JsonEncoder(BaseLib::SharedObjects* dummy) {}
+    virtual ~JsonEncoder() = default;
 
-    void encode(const std::shared_ptr<Variable> variable, std::string& json);
-    void encode(const std::shared_ptr<Variable> variable, std::vector<char>& json);
+    void encode(const std::shared_ptr<Variable>& variable, std::string& json);
+    void encode(const std::shared_ptr<Variable>& variable, std::vector<char>& json);
     void encodeRequest(std::string& methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<char>& encodedData);
     void encodeResponse(const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
-    void encodeMQTTResponse(const std::string methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
+    void encodeMQTTResponse(const std::string& methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
 
     std::string encodeString(const std::string& s);
 private:
-    BaseLib::SharedObjects* _bl = nullptr;
     int32_t _requestId = 1;
 
     void encodeValue(const std::shared_ptr<Variable>& variable, std::ostringstream& s);

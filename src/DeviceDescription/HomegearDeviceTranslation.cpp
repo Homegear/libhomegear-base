@@ -47,10 +47,6 @@ HomegearDeviceTranslation::HomegearDeviceTranslation(BaseLib::SharedObjects* bas
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -93,10 +89,6 @@ void HomegearDeviceTranslation::load(std::string xmlFilename)
 	catch(const std::exception& ex)
     {
     	_bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
@@ -172,10 +164,6 @@ void HomegearDeviceTranslation::parseXML(xml_node<>* node)
 		}
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

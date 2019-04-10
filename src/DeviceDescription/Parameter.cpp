@@ -389,10 +389,6 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -440,10 +436,6 @@ void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& 
 		return convertToPacket(rpcValue, convertedValue);
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -621,10 +613,6 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -647,10 +635,6 @@ void Parameter::reverseData(const std::vector<uint8_t>& data, std::vector<uint8_
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -696,10 +680,6 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

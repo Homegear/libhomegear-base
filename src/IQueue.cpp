@@ -136,10 +136,6 @@ bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry, bool wa
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
 	catch(...)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -178,10 +174,6 @@ void IQueue::process(int32_t index)
 			} while(_bufferCount[index] > 0 && !_stopProcessingThread[index]);
 		}
 		catch(const std::exception& ex)
-		{
-			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-		}
-		catch(const BaseLib::Exception& ex)
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 		}

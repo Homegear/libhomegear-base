@@ -26,7 +26,7 @@
  * do not wish to do so, delete this exception statement from your
  * version.  If you delete this exception statement from all source
  * files in the program, then also delete it here.
-*/
+ */
 
 #ifndef JSONDECODER_H_
 #define JSONDECODER_H_
@@ -47,14 +47,15 @@ namespace Rpc
 class JsonDecoderException : public BaseLib::Exception
 {
 public:
-	JsonDecoderException(std::string message) : BaseLib::Exception(message) {}
+	explicit JsonDecoderException(std::string message) : BaseLib::Exception(message) {}
 };
 
 class JsonDecoder
 {
 public:
-	JsonDecoder(BaseLib::SharedObjects* baseLib);
-	virtual ~JsonDecoder() {}
+    JsonDecoder() = default;
+	explicit JsonDecoder(BaseLib::SharedObjects* dummy) {};
+	virtual ~JsonDecoder() = default;
 
 	std::shared_ptr<Variable> decode(const std::string& json);
 	std::shared_ptr<Variable> decode(const std::string& json, uint32_t& bytesRead);
@@ -63,8 +64,6 @@ public:
 
 	std::string decodeString(const std::string& s);
 private:
-	BaseLib::SharedObjects* _bl = nullptr;
-
 	static inline bool posValid(const std::string& json, uint32_t pos);
 	static inline bool posValid(const std::vector<char>& json, uint32_t pos);
 	void skipWhitespace(const std::string& json, uint32_t& pos);

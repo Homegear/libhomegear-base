@@ -129,10 +129,6 @@ void ParameterGroup::getIndices(uint32_t startIndex, uint32_t endIndex, int32_t 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);

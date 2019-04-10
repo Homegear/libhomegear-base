@@ -120,10 +120,6 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -197,10 +193,6 @@ LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node
 		}
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -280,10 +272,6 @@ LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -360,10 +348,6 @@ LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -411,10 +395,6 @@ LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node
 		}
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -468,10 +448,6 @@ LogicalString::LogicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -522,10 +498,6 @@ LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -564,10 +536,6 @@ LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib, xml_node<>* node) : 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -603,10 +571,6 @@ LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 		}
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

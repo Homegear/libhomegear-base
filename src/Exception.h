@@ -38,13 +38,13 @@ namespace BaseLib
 /**
  * Base class for all exceptions defined in Homegear
  */
-class Exception
+class Exception : public std::exception
 {
     public:
-        Exception(std::string message) {  _message = message; }
-        virtual ~Exception() {}
+        explicit Exception(const std::string& message) {  _message = message; }
+        ~Exception() override = default;
 
-        const std::string what() const { return _message; }
+        const char* what() const noexcept override { return _message.c_str(); }
     protected:
         std::string _message;
 };

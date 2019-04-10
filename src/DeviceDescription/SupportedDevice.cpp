@@ -83,10 +83,6 @@ bool SupportedDevice::matches(uint32_t typeNumber, uint32_t firmwareVersion)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(const Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
 	catch(...)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -106,10 +102,6 @@ bool SupportedDevice::matches(const std::string& typeId)
 		if(id == typeId) return true;
 	}
 	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(const Exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}

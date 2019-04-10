@@ -104,10 +104,6 @@ void HomegearDevice::setDynamicChannelCount(int32_t value)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -135,10 +131,6 @@ HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlF
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -152,10 +144,6 @@ HomegearDevice::HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlF
 		load(xmlFilename, xml);
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -195,10 +183,6 @@ void HomegearDevice::load(std::string xmlFilename, std::vector<char>& xml)
 		_loaded = true;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -250,10 +234,6 @@ void HomegearDevice::load(std::string xmlFilename, bool& oldFormat)
 	catch(const std::exception& ex)
     {
     	_bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     catch(...)
     {
@@ -307,10 +287,6 @@ void HomegearDevice::postLoad()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -345,10 +321,6 @@ void HomegearDevice::save(std::string& filename)
 		fileStream.close();
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -1144,10 +1116,6 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -2190,10 +2158,6 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -2267,10 +2231,6 @@ void HomegearDevice::saveParameterPacket(xml_document<>* doc, xml_node<>* parent
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -2294,10 +2254,6 @@ void HomegearDevice::saveScenario(xml_document<>* doc, xml_node<>* parentNode, P
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -2488,10 +2444,6 @@ void HomegearDevice::saveFunction(xml_document<>* doc, xml_node<>* parentNode, P
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -2637,10 +2589,6 @@ void HomegearDevice::parseXML(xml_node<>* node)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -2718,10 +2666,6 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -2738,10 +2682,6 @@ PSupportedDevice HomegearDevice::getType(uint32_t typeNumber)
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -2762,10 +2702,6 @@ PSupportedDevice HomegearDevice::getType(uint32_t typeNumber, int32_t firmwareVe
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
