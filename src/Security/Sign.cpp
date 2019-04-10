@@ -120,13 +120,12 @@ std::vector<char> Sign::sign(const std::vector<char>& data)
 
 bool Sign::verify(const std::vector<char>& data, const std::vector<char>& signature)
 {
-    if(!_privateKey) throw SignException("Private key is not set.");
     if(!_publicKey) throw SignException("Public key is not set.");
 
     gnutls_digest_algorithm_t hashAlgorithm;
     if(gnutls_pubkey_get_preferred_hash_algorithm(_publicKey, &hashAlgorithm, 0) != GNUTLS_E_SUCCESS) throw SignException("Error determining hash algorithm.");
 
-    int result = gnutls_privkey_get_pk_algorithm(_privateKey, nullptr);
+    int result = gnutls_pubkey_get_pk_algorithm(_publicKey, nullptr);
     if(result < 0) throw SignException("Error determining public key algorithm of private key.");
 
     gnutls_sign_algorithm_t signAlgorithm = gnutls_pk_to_sign((gnutls_pk_algorithm_t)result, hashAlgorithm);

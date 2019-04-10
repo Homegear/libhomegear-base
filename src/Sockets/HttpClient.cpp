@@ -176,7 +176,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 		{
 			if(!firstLoop && !_socket->connected())
 			{
-				if(http.getContentSize() == 0)
+				if(http.getContentSize() == 0 || http.getHeader().responseCode == -1)
 				{
 					_socketMutex.unlock();
 					throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Connection closed.");
