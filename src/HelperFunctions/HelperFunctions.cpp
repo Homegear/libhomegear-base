@@ -905,7 +905,7 @@ bool HelperFunctions::checkCliCommand(const std::string& command, const std::str
     showHelp = false;
 
     bool isLongCommand = (command.size() == longCommand.size() || (command.size() > longCommand.size() && command.at(longCommand.size()) == ' ')) && command.compare(0, longCommand.size(), longCommand) == 0;
-    bool isShortCommand1 = (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
+    bool isShortCommand1 = !shortCommand1.empty() && (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
     bool isShortCommand2 = !shortCommand2.empty() && (command.size() == shortCommand2.size() || (command.size() > shortCommand2.size() && command.at(shortCommand2.size()) == ' ')) && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
     if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
 

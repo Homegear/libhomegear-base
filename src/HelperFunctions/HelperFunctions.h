@@ -658,7 +658,7 @@ public:
 	 *
 	 * @param command The CLI command.
 	 * @param longCommand The long CLI command to search for at the beginning of command.
-	 * @param shortCommand1 The short CLI command to search for at the beginning of command.
+	 * @param shortCommand1 An optional short CLI command to search for at the beginning of command.
 	 * @param shortCommand2 An optional second short CLI command to search for at the beginning of command. Set to empty string if not needed.
 	 * @param minArgumentCount The minimum number of arguments.
 	 * @param[out] arguments A string vector which is filled with the arguments.
