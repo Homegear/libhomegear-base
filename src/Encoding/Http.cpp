@@ -900,7 +900,6 @@ std::string Http::encodeURL(const std::string& url)
 
 std::string Http::decodeURL(const std::string& url)
 {
-	Math math;
 	std::ostringstream decoded;
 	char character;
 	for(std::string::const_iterator i = url.begin(); i != url.end(); ++i)
@@ -909,10 +908,10 @@ std::string Http::decodeURL(const std::string& url)
 		{
 			i++;
 			if(i == url.end()) return decoded.str();
-			character = (char)(math.getNumber(*i) << 4);
+			character = (char)(Math::getNumber(*i) << 4);
 			i++;
 			if(i == url.end()) return decoded.str();
-			character += (char)math.getNumber(*i);
+			character += (char)Math::getNumber(*i);
 			decoded << character;
 		}
 		else decoded << *i;

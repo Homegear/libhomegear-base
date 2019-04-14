@@ -182,13 +182,13 @@ public:
 		Point2D _c;
 	};
 
-	Math();
+	Math() = delete;
 
 	/**
 	 * Destructor.
 	 * Does nothing.
 	 */
-	virtual ~Math() = default;
+	~Math() = default;
 
 	/**
 	 * Checks if a string is a number.
@@ -252,7 +252,7 @@ public:
 	 * @param hexChar The hexadecimal character.
 	 * @return Returns the integer or "0" on error.
 	 */
-	int32_t getNumber(char hexChar);
+	static int32_t getNumber(char hexChar);
 
 	/**
 	 * Converts a string (decimal or hexadecimal) to an unsigned integer.
@@ -413,10 +413,10 @@ public:
 		return e[exponent];
 	}
 protected:
-	/**
-	 * Map to faster convert hexadecimal numbers.
-	 */
-	std::map<char, int32_t> _hexMap;
+    /**
+     * Map to faster convert hexadecimal numbers.
+     */
+    static const std::array<int32_t, 23> _asciiToBinaryTable;
 };
 
 }

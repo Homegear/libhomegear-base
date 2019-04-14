@@ -199,31 +199,7 @@ double Math::Triangle::distance(const Point2D& p, Point2D* closestPoint)
 	return distance;
 }
 
-Math::Math()
-{
-	_hexMap['0'] = 0x0;
-	_hexMap['1'] = 0x1;
-	_hexMap['2'] = 0x2;
-	_hexMap['3'] = 0x3;
-	_hexMap['4'] = 0x4;
-	_hexMap['5'] = 0x5;
-	_hexMap['6'] = 0x6;
-	_hexMap['7'] = 0x7;
-	_hexMap['8'] = 0x8;
-	_hexMap['9'] = 0x9;
-	_hexMap['A'] = 0xA;
-	_hexMap['B'] = 0xB;
-	_hexMap['C'] = 0xC;
-	_hexMap['D'] = 0xD;
-	_hexMap['E'] = 0xE;
-	_hexMap['F'] = 0xF;
-	_hexMap['a'] = 0xA;
-	_hexMap['b'] = 0xB;
-	_hexMap['c'] = 0xC;
-	_hexMap['d'] = 0xD;
-	_hexMap['e'] = 0xE;
-	_hexMap['f'] = 0xF;
-}
+const std::array<int32_t, 23> Math::_asciiToBinaryTable{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10 ,11 ,12, 13, 14, 15};
 
 bool Math::isNumber(const std::string& s, bool hex)
 {
@@ -254,8 +230,7 @@ int64_t Math::getNumber64(const std::string& s, bool isHex)
 
 int32_t Math::getNumber(char hexChar)
 {
-	if(_hexMap.find(hexChar) == _hexMap.end()) return 0;
-	return _hexMap.at(hexChar);
+	return _asciiToBinaryTable[std::toupper(hexChar) - '0'];
 }
 
 uint32_t Math::getUnsignedNumber(const std::string &s, bool isHex)

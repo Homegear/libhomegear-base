@@ -90,17 +90,6 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeReq
     	doc.clear();
     	return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what()))});
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    	doc.clear();
-    	return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what()))});
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    	doc.clear();
-    }
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. Not well formed.")});
 }
 
@@ -119,17 +108,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::string& packet)
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     	doc.clear();
     	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    	doc.clear();
-    	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    	doc.clear();
     }
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
@@ -162,17 +140,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::vector<char>& packe
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     	doc.clear();
     	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    	doc.clear();
-    	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    	doc.clear();
     }
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
@@ -222,15 +189,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document<>* doc)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    	return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: " + std::string(ex.what())));
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
@@ -294,14 +252,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeParameter(xml_node<>* valueNode)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return std::shared_ptr<Variable>(new Variable(0));
 }
 
@@ -328,14 +278,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeStruct(xml_node<>* structNode)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 	return rpcStruct;
 }
 
@@ -357,14 +299,6 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeArray(xml_node<>* arrayNode)
 	catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 	return rpcArray;
 }
