@@ -41,12 +41,12 @@ namespace BaseLib
 class Exception : public std::exception
 {
     public:
-        explicit Exception(const std::string& message) {  _message = message; }
+        explicit Exception(const std::string& message) {  _message = message.c_str(); }
         ~Exception() override = default;
 
-        const char* what() const noexcept override { return _message.c_str(); }
+        const char* what() const noexcept override { return _message; }
     protected:
-        std::string _message;
+        const char* _message = nullptr;
 };
 }
 #endif // EXCEPTION_H

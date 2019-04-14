@@ -33,7 +33,7 @@
 
 #include <memory>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <mutex>
 
 #include <unistd.h>
@@ -58,7 +58,7 @@ public:
 };
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
-typedef std::map<int32_t, PFileDescriptor> FileDescriptors;
+typedef std::unordered_map<int32_t, PFileDescriptor> FileDescriptors;
 
 class FileDescriptorManager
 {
