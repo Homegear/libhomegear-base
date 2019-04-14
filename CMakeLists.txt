@@ -178,7 +178,6 @@ set(SOURCE_FILES
         src/Systems/IDeviceFamily.h
         src/Systems/IPhysicalInterface.cpp
         src/Systems/IPhysicalInterface.h
-        src/Systems/Packet.cpp
         src/Systems/Packet.h
         src/Systems/Peer.cpp
         src/Systems/Peer.h
