@@ -225,14 +225,6 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint32_t parentId, IPeerEventSink* e
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 Peer::Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::string serialNumber, uint32_t parentId, IPeerEventSink* eventHandler) : Peer(baseLib, parentId, eventHandler)
@@ -251,14 +243,6 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::s
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -378,14 +362,6 @@ void Peer::onSaveParameter(std::string name, uint32_t channel, std::vector<uint8
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 std::shared_ptr<Database::DataTable> Peer::onGetServiceMessages()
@@ -414,14 +390,6 @@ void Peer::onEnqueuePendingQueues()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 //End ServiceMessages event handling
@@ -684,14 +652,6 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return _rxModes;
 }
 
@@ -729,14 +689,6 @@ std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> Peer::getPe
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     _peersMutex.unlock();
     return std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>();
@@ -776,14 +728,6 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, std::string serialNumb
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     _peersMutex.unlock();
     return std::shared_ptr<BasicPeer>();
 }
@@ -812,14 +756,6 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, int32_t address, int32
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     _peersMutex.unlock();
     return std::shared_ptr<BasicPeer>();
@@ -875,14 +811,6 @@ std::shared_ptr<BasicPeer> Peer::getPeer(int32_t channel, uint64_t id, int32_t r
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     _peersMutex.unlock();
     return std::shared_ptr<BasicPeer>();
 }
@@ -912,14 +840,6 @@ void Peer::updatePeer(uint64_t oldId, uint64_t newId)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::deleteFromDatabase()
@@ -934,14 +854,6 @@ void Peer::deleteFromDatabase()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -970,14 +882,6 @@ void Peer::initializeCentralConfig()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     _bl->db->releaseSavepointAsynchronous(savepointName);
 }
@@ -1013,14 +917,6 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1059,14 +955,6 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
@@ -1080,14 +968,6 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1111,14 +991,6 @@ void Peer::save(bool savePeer, bool variables, bool centralConfig)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     if(variables || centralConfig) _bl->db->releaseSavepointAsynchronous(savepointName);
 }
 
@@ -1139,14 +1011,6 @@ void Peer::saveParameter(uint32_t parameterID, std::vector<uint8_t>& value)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1175,14 +1039,6 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
@@ -1209,14 +1065,6 @@ void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parame
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1250,14 +1098,6 @@ void Peer::saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1348,14 +1188,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<BaseLib::Database::D
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::saveVariables()
@@ -1373,14 +1205,6 @@ void Peer::saveVariables()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1412,14 +1236,6 @@ void Peer::saveVariable(uint32_t index, int32_t intValue)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::saveVariable(uint32_t index, int64_t intValue)
@@ -1449,14 +1265,6 @@ void Peer::saveVariable(uint32_t index, int64_t intValue)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1488,14 +1296,6 @@ void Peer::saveVariable(uint32_t index, std::string& stringValue)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
@@ -1526,14 +1326,6 @@ void Peer::saveVariable(uint32_t index, std::vector<char>& binaryValue)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
@@ -1563,14 +1355,6 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1700,14 +1484,6 @@ BaseLib::DeviceDescription::PParameter Peer::createRoleRpcParameter(BaseLib::PVa
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return PParameter();
 }
 
@@ -1775,14 +1551,6 @@ void Peer::saveConfig()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -2051,14 +1819,6 @@ void Peer::loadConfig()
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Peer::initializeTypeString()
@@ -2079,14 +1839,6 @@ void Peer::initializeTypeString()
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -2110,14 +1862,6 @@ bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t 
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
 }
@@ -2147,14 +1891,6 @@ void Peer::removeRoomFromVariables(uint64_t roomId)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 uint64_t Peer::getVariableRoom(int32_t channel, const std::string& variableName)
@@ -2171,14 +1907,6 @@ uint64_t Peer::getVariableRoom(int32_t channel, const std::string& variableName)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return 0;
 }
@@ -2205,14 +1933,6 @@ bool Peer::addCategoryToVariable(int32_t channel, std::string& variableName, uin
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -2237,14 +1957,6 @@ bool Peer::removeCategoryFromVariable(int32_t channel, std::string& variableName
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
 }
@@ -2271,14 +1983,6 @@ void Peer::removeCategoryFromVariables(uint64_t categoryId)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& variableName)
@@ -2295,14 +1999,6 @@ std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& var
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::set<uint64_t>();
 }
@@ -2322,14 +2018,6 @@ bool Peer::variableHasCategory(int32_t channel, const std::string& variableName,
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -2347,14 +2035,6 @@ bool Peer::variableHasCategories(int32_t channel, const std::string& variableNam
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
 }
@@ -2419,14 +2099,6 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -2473,14 +2145,6 @@ bool Peer::removeRoleFromVariable(int32_t channel, std::string& variableName, ui
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -2506,14 +2170,6 @@ void Peer::removeRoleFromVariables(uint64_t roleId)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 std::set<uint64_t> Peer::getVariableRoles(int32_t channel, std::string& variableName)
@@ -2530,14 +2186,6 @@ std::set<uint64_t> Peer::getVariableRoles(int32_t channel, std::string& variable
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::set<uint64_t>();
 }
@@ -2557,14 +2205,6 @@ bool Peer::variableHasRole(int32_t channel, const std::string& variableName, uin
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -2582,14 +2222,6 @@ bool Peer::variableHasRoles(int32_t channel, const std::string& variableName)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return false;
 }
@@ -2767,14 +2399,6 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -2979,14 +2603,6 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -3016,14 +2632,6 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -3273,14 +2881,6 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -3312,14 +2912,6 @@ std::shared_ptr<std::vector<PVariable>> Peer::getDeviceDescriptions(PRpcClientIn
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return std::shared_ptr<std::vector<PVariable>>();
 }
 
@@ -3349,14 +2941,6 @@ PVariable Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, b
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return PVariable();
 }
@@ -3570,14 +3154,6 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -3596,14 +3172,6 @@ PVariable Peer::getLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, ui
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -3680,14 +3248,6 @@ PVariable Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool re
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -3823,14 +3383,6 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -3935,14 +3487,6 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -3966,14 +3510,6 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4003,14 +3539,6 @@ PVariable Peer::getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, Param
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4056,14 +3584,6 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4317,14 +3837,6 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -4356,14 +3868,6 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t chann
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4400,14 +3904,6 @@ PVariable Peer::getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categ
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -4442,14 +3938,6 @@ PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, b
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4486,14 +3974,6 @@ PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -4507,14 +3987,6 @@ PVariable Peer::reportValueUsage(PRpcClientInfo clientInfo)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4561,14 +4033,6 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -4586,14 +4050,6 @@ PVariable Peer::setLinkInfo(PRpcClientInfo clientInfo, int32_t senderChannel, ui
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -4620,14 +4076,6 @@ PVariable Peer::setId(PRpcClientInfo clientInfo, uint64_t newPeerId)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
@@ -4711,14 +4159,6 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }

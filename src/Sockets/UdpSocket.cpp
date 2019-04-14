@@ -304,12 +304,6 @@ void UdpSocket::getSocketDescriptor()
     	_readMutex.unlock();
 		throw(ex);
     }
-	catch(Exception& ex)
-	{
-		_writeMutex.unlock();
-		_readMutex.unlock();
-		throw(ex);
-	}
 
 }
 

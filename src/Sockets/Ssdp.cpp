@@ -84,14 +84,6 @@ void Ssdp::getAddress()
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bindToMulticast)
@@ -157,14 +149,6 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return serverSocketDescriptor;
 }
@@ -274,28 +258,12 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 			{
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 			}
-			catch(Exception& ex)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(...)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-			}
 		}
 		getDeviceInfo(info, devices);
 	}
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
@@ -372,28 +340,12 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
 			{
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 			}
-			catch(Exception& ex)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(...)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-			}
 		}
 		getDeviceInfo(info, devices);
 	}
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
@@ -421,14 +373,6 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::map<std::
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info)
@@ -455,14 +399,6 @@ void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::ma
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -524,14 +460,6 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 

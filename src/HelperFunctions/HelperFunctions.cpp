@@ -198,14 +198,6 @@ void HelperFunctions::memcpyBigEndian(char* to, const char* from, const uint32_t
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length)
@@ -217,14 +209,6 @@ void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const ui
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -242,14 +226,6 @@ void HelperFunctions::memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& f
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -271,14 +247,6 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& f
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from)
@@ -295,14 +263,6 @@ void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& f
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -327,14 +287,6 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& f
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -398,14 +350,6 @@ char HelperFunctions::getHexChar(int32_t nibble)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return 0;
 }

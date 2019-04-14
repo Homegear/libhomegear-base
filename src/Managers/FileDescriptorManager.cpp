@@ -152,6 +152,7 @@ PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
     std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
     auto descriptorIterator = _opaquePointer->_descriptors.find(fileDescriptor);
     if(descriptorIterator != _opaquePointer->_descriptors.end()) return descriptorIterator->second;
+    return PFileDescriptor();
 }
 
 bool FileDescriptorManager::isValid(int32_t fileDescriptor, int32_t id)

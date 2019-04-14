@@ -277,16 +277,6 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
     	_socketMutex.unlock();
     	throw ex;
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	_socketMutex.unlock();
-    	throw ex;
-    }
-    catch(...)
-    {
-    	_socketMutex.unlock();
-    	throw Exception("Unknown exception.");
-    }
 }
 
 }

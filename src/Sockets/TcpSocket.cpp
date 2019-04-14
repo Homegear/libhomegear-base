@@ -435,16 +435,6 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
             if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
-		catch(BaseLib::Exception& ex)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
-		catch(...)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
 	}
 
 	void TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
@@ -471,16 +461,6 @@ std::string TcpSocket::getIpAddress()
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
-		catch(BaseLib::Exception& ex)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
-		catch(...)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
 	}
 
 	void TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
@@ -503,16 +483,6 @@ std::string TcpSocket::getIpAddress()
 			}
 		}
 		catch(const std::exception& ex)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
-		catch(BaseLib::Exception& ex)
-		{
-			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
-		}
-		catch(...)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
@@ -671,16 +641,6 @@ std::string TcpSocket::getIpAddress()
 						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
 						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 					}
-					catch(BaseLib::Exception& ex)
-					{
-						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-					}
-					catch(...)
-					{
-						_bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-					}
 					continue;
 				}
 
@@ -702,14 +662,6 @@ std::string TcpSocket::getIpAddress()
 			catch(const std::exception& ex)
 			{
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(BaseLib::Exception& ex)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(...)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 			}
 		}
         std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
@@ -869,17 +821,11 @@ void TcpSocket::initSsl()
                 binaryData = Io::getUBinaryFileContent(_dhParamFile);
                 binaryData.push_back(0); //gnutls_datum_t.data needs to be null terminated
             }
-            catch(BaseLib::Exception& ex)
+            catch(const std::exception& ex)
             {
                 gnutls_dh_params_deinit(_dhParams);
                 _dhParams = nullptr;
                 throw SocketSSLException("Error: Could not load DH parameters: " + std::string(ex.what()));
-            }
-            catch(...)
-            {
-                gnutls_dh_params_deinit(_dhParams);
-                _dhParams = nullptr;
-                throw SocketSSLException("Error: Could not load DH parameter file \"" + _dhParamFile + "\".");
             }
             data.data = binaryData.data();
             data.size = static_cast<unsigned int>(binaryData.size());
