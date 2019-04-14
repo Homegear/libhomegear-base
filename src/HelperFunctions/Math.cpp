@@ -31,6 +31,8 @@
 #include "Math.h"
 #include "HelperFunctions.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 

@@ -67,6 +67,28 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
     return *this;
 }
 
+std::string RpcConfigurationParameter::getCategoryString()
+{
+    std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex);
+    std::ostringstream categories;
+    for(auto category : _categories)
+    {
+        categories << std::to_string(category) << ",";
+    }
+    return categories.str();
+}
+
+std::string RpcConfigurationParameter::getRoleString()
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    std::ostringstream roles;
+    for(auto role : _roles)
+    {
+        roles << std::to_string(role) << ",";
+    }
+    return roles.str();
+}
+
 void RpcConfigurationParameter::lock() noexcept
 {
     _binaryDataMutex.lock();

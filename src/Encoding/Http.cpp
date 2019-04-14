@@ -32,6 +32,8 @@
 #include "../HelperFunctions/Math.h"
 #include "../HelperFunctions/HelperFunctions.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 
@@ -967,7 +969,7 @@ size_t Http::readFirstContentLine(char* buffer, size_t requestLength)
 	size_t bytesRead = 0;
 	char* posTemp = (char*)memchr(&_content.at(_contentStreamPos), '\n', _content.size() - 1 - _contentStreamPos);
 	int32_t newlinePos = 0;
-	if(posTemp > 0) newlinePos = posTemp - &_content.at(0);
+	if(posTemp != nullptr) newlinePos = posTemp - &_content.at(0);
 	if(newlinePos > 0 && _content.at(newlinePos - 1) == '\r') newlinePos--;
 	else if(newlinePos <= 0) newlinePos = _content.size() - 1;
 	if(_contentStreamPos < (unsigned)newlinePos)

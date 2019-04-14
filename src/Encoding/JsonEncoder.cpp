@@ -31,6 +31,8 @@
 #include "JsonEncoder.h"
 #include "../BaseLib.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 namespace Rpc

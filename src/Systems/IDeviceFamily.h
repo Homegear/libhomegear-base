@@ -39,7 +39,6 @@
 #include "../Variable.h"
 #include "../DeviceDescription/Devices.h"
 
-#include <iostream>
 #include <string>
 #include <memory>
 

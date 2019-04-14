@@ -31,7 +31,6 @@
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
-#include <iostream>
 #include <string>
 #include <map>
 #include <vector>

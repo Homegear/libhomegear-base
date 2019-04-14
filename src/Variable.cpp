@@ -31,6 +31,8 @@
 #include "Variable.h"
 #include "BaseLib.h"
 
+#include <iostream>
+
 namespace BaseLib
 {
 

@@ -32,12 +32,7 @@
 #define FILEDESCRIPTORMANAGER_H_
 
 #include <memory>
-#include <string>
-#include <unordered_map>
 #include <mutex>
-
-#include <unistd.h>
-#include <sys/socket.h>
 
 #include <gnutls/gnutls.h>
 
@@ -46,42 +41,36 @@ namespace BaseLib
 
 class SharedObjects;
 
-class FileDescriptor
+struct FileDescriptor
 {
-public:
-	virtual ~FileDescriptor() {}
-	FileDescriptor() {}
-
 	int32_t id = -1;
 	int32_t descriptor = -1;
 	gnutls_session_t tlsSession = nullptr;
 };
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
-typedef std::unordered_map<int32_t, PFileDescriptor> FileDescriptors;
 
 class FileDescriptorManager
 {
 public:
 	FileDescriptorManager();
-	virtual ~FileDescriptorManager() {}
-	void init(BaseLib::SharedObjects* baseLib);
+	FileDescriptorManager(const FileDescriptorManager&) = delete; //Copy constructor
+	FileDescriptorManager(FileDescriptorManager&&) noexcept; //Move constructor
+	FileDescriptorManager& operator=(const FileDescriptorManager&) = delete; //Copy assignment operator
+	~FileDescriptorManager();
 	void dispose();
 
-	virtual PFileDescriptor add(int32_t fileDescriptor);
-	virtual void remove(PFileDescriptor descriptor);
-	virtual void close(PFileDescriptor descriptor);
-	virtual void shutdown(PFileDescriptor descriptor);
-	virtual PFileDescriptor get(int32_t fileDescriptor);
-	virtual bool isValid(int32_t fileDescriptor, int32_t id);
-	virtual bool isValid(PFileDescriptor descriptor);
-	virtual std::unique_lock<std::mutex> getLock();
+	PFileDescriptor add(int32_t fileDescriptor);
+	void remove(PFileDescriptor& descriptor);
+	void close(PFileDescriptor& descriptor);
+	void shutdown(PFileDescriptor& descriptor);
+	PFileDescriptor get(int32_t fileDescriptor);
+	bool isValid(int32_t fileDescriptor, int32_t id);
+	bool isValid(const PFileDescriptor& descriptor);
+	std::unique_lock<std::mutex> getLock();
 private:
-	bool _disposed = false;
-	BaseLib::SharedObjects* _bl = nullptr;
-	uint32_t _currentID = 0;
-	std::mutex _descriptorsMutex;
-	FileDescriptors _descriptors;
+	struct OpaquePointer;
+	std::unique_ptr<OpaquePointer> _opaquePointer;
 
 };
 }

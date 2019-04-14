@@ -35,13 +35,11 @@
 #include "../Exception.h"
 #include "../HelperFunctions/Math.h"
 
-#include <iostream>
 #include <string>
 #include <map>
 #include <cstring>
 #include <memory>
 #include <vector>
-#include <iomanip>
 #include <set>
 
 namespace BaseLib

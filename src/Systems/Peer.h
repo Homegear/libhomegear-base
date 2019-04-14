@@ -140,14 +140,14 @@ public:
 	void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); }
 	void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); }
     std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
-	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
+	std::string getCategoryString();
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
 	void addRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id); }
 	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
 	std::set<uint64_t> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
-	std::string getRoleString() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); std::ostringstream roles; for(auto role : _roles) { roles << std::to_string(role) << ","; } return roles.str(); }
+	std::string getRoleString();
 	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
 
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }

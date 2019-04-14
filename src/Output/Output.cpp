@@ -31,6 +31,10 @@
 #include "Output.h"
 #include "../BaseLib.h"
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
 namespace BaseLib
 {
 std::mutex Output::_outputMutex;

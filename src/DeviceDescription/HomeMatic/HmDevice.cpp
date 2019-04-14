@@ -31,6 +31,8 @@
 #include "HmDevice.h"
 #include "../../BaseLib.h"
 
+#include <iostream>
+
 namespace BaseLib
 {
 namespace HmDeviceDescription

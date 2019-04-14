@@ -40,7 +40,6 @@ SharedObjects::SharedObjects(bool testMaxThreadCount)
 	shuttingDown = false;
 
 	threadManager.init(this, testMaxThreadCount);
-	fileDescriptorManager.init(this);
 	serialDeviceManager.init(this);
 	hf.init(this);
 	io.init(this);

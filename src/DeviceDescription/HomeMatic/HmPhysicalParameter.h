@@ -34,10 +34,7 @@
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../HelperFunctions/HelperFunctions.h"
 
-#include <fstream>
 #include <string>
-#include <sstream>
-#include <iostream>
 #include <vector>
 #include <memory>
 

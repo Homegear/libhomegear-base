@@ -28,6 +28,9 @@
 
 #include "HelperFunctions.h"
 #include "../BaseLib.h"
+
+#include <iomanip>
+
 #include "sys/resource.h"
 
 namespace BaseLib
