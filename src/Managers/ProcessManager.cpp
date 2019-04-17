@@ -207,9 +207,6 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     {
         //Child process
 
-        // Close all non standard descriptors
-        for(int32_t i = 3; i < maxFd; ++i) close(i);
-
         if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
 
         if(dup2(pipeOut[1], STDOUT_FILENO) == -1) _exit(1);
@@ -223,6 +220,9 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
         close(pipeOut[1]);
         close(pipeErr[0]);
         close(pipeErr[1]);
+
+        // Close all non standard descriptors. Don't do this before calling dup2 otherwise dup2 will fail.
+        for(int32_t i = 3; i < maxFd; ++i) close(i);
 
         setsid();
         std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
@@ -253,7 +253,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
 int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string& output)
 {
     pid_t pid = 0;
-    FILE* pipe = popen(command.c_str(), "r", maxFd, pid);
+    FILE* pipe = popen2(command.c_str(), "r", maxFd, pid);
     if(!pipe) return -1;
     try
     {
@@ -286,34 +286,37 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
     return -1; //No status was found.
 }
 
-FILE* ProcessManager::popen(const std::string& command, const std::string& type, int maxFd, pid_t& pid)
+FILE* ProcessManager::popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid)
 {
     int fd[2];
     if(pipe(fd) == -1) throw ProcessException("Error: Couln't create pipe.");
 
-    static constexpr int READ = 0;
-    static constexpr int WRITE = 1;
-
     pid = fork();
-    if(pid == -1) return nullptr;
+    if(pid == -1)
+    {
+        close(fd[0]);
+        close(fd[1]);
+
+        return nullptr;
+    }
 
     if(pid == 0)
     {
         //Child process
-
-        // Close all non standard descriptors
-        for(int32_t i = 3; i < maxFd; ++i) close(i);
-
         if (type == "r")
         {
-            close(fd[READ]);    //Close the READ end of the pipe since the child's fd is write-only
-            dup2(fd[WRITE], 1); //Redirect stdout to pipe
+            if(dup2(fd[1], STDOUT_FILENO) == -1) _exit(1);
         }
         else
         {
-            close(fd[WRITE]);    //Close the WRITE end of the pipe since the child's fd is read-only
-            dup2(fd[READ], 0);   //Redirect stdin to pipe
+            if(dup2(fd[0], STDIN_FILENO) == -1) _exit(1);
         }
+
+        close(fd[0]);
+        close(fd[1]);
+
+        // Close all non standard descriptors. Don't do this before calling dup2 otherwise dup2 will fail.
+        for(int32_t i = 3; i < maxFd; ++i) close(i);
 
         setsid();
         execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
@@ -323,20 +326,20 @@ FILE* ProcessManager::popen(const std::string& command, const std::string& type,
     {
         if (type == "r")
         {
-            close(fd[WRITE]); //Close the WRITE end of the pipe since parent's fd is read-only
+            close(fd[1]);
         }
         else
         {
-            close(fd[READ]); //Close the READ end of the pipe since parent's fd is write-only
+            close(fd[0]);
         }
     }
 
     if (type == "r")
     {
-        return fdopen(fd[READ], "r");
+        return fdopen(fd[0], "r");
     }
 
-    return fdopen(fd[WRITE], "w");
+    return fdopen(fd[1], "w");
 }
 
 }

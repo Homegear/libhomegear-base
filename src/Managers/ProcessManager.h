@@ -104,7 +104,7 @@ public:
      * @param pid
      * @return
      */
-    static FILE* popen(const std::string& command, const std::string& type, int maxFd, pid_t& pid);
+    static FILE* popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid);
 private:
     struct OpaquePointer;
     static std::unique_ptr<OpaquePointer> _opaquePointer;
