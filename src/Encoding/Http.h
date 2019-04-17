@@ -52,7 +52,7 @@ public:
 	HttpException(std::string message) : Exception(message) {}
 	HttpException(std::string message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
 
-	int32_t responseCode() { return _responseCode; }
+	int32_t responseCode() const { return _responseCode; }
 };
 
 class Http
