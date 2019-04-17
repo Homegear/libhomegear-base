@@ -34,9 +34,11 @@
 
 #include <string>
 #include <unordered_map>
+#include <atomic>
 
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/resource.h>
 
 namespace BaseLib
 {
@@ -45,7 +47,8 @@ typedef std::unordered_map<int32_t, PFileDescriptor> FileDescriptors;
 
 struct FileDescriptorManager::OpaquePointer
 {
-    uint32_t _currentID = 0;
+    uint32_t _currentId = 0;
+    std::atomic_int _maxFd{0};
     std::mutex _descriptorsMutex;
     FileDescriptors _descriptors;
 };
@@ -73,7 +76,7 @@ void FileDescriptorManager::dispose()
     _opaquePointer->_descriptors.clear();
 }
 
-PFileDescriptor FileDescriptorManager::add(int32_t fileDescriptor)
+PFileDescriptor FileDescriptorManager::add(int fileDescriptor)
 {
     std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
     if(fileDescriptor < 0 ) return std::make_shared<FileDescriptor>();
@@ -89,9 +92,10 @@ PFileDescriptor FileDescriptorManager::add(int32_t fileDescriptor)
         oldDescriptor->descriptor = -1;
     }
     PFileDescriptor descriptor = std::make_shared<FileDescriptor>();
-    descriptor->id = _opaquePointer->_currentID++;
+    descriptor->id = _opaquePointer->_currentId++;
     descriptor->descriptor = fileDescriptor;
     _opaquePointer->_descriptors[fileDescriptor] = descriptor;
+    if(fileDescriptor > _opaquePointer->_maxFd) _opaquePointer->_maxFd.store(fileDescriptor, std::memory_order_relaxed);
     return descriptor;
 }
 
@@ -146,7 +150,7 @@ std::unique_lock<std::mutex> FileDescriptorManager::getLock()
 	return std::unique_lock<std::mutex>(_opaquePointer->_descriptorsMutex, std::defer_lock);
 }
 
-PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
+PFileDescriptor FileDescriptorManager::get(int fileDescriptor)
 {
     if(fileDescriptor < 0) return PFileDescriptor();
     std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
@@ -155,7 +159,7 @@ PFileDescriptor FileDescriptorManager::get(int32_t fileDescriptor)
     return PFileDescriptor();
 }
 
-bool FileDescriptorManager::isValid(int32_t fileDescriptor, int32_t id)
+bool FileDescriptorManager::isValid(int fileDescriptor, int32_t id)
 {
     if(fileDescriptor < 0) return false;
     std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
@@ -171,6 +175,17 @@ bool FileDescriptorManager::isValid(const PFileDescriptor& descriptor)
     FileDescriptors::iterator descriptorIterator = _opaquePointer->_descriptors.find(descriptor->descriptor);
     if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second->id == descriptor->id) return true;
 	return false;
+}
+
+int32_t FileDescriptorManager::getMax()
+{
+    //Child process
+    struct rlimit limits{};
+    if(getrlimit(RLIMIT_NOFILE, &limits) == -1 || limits.rlim_cur >= INT32_MAX)
+    {
+        return _opaquePointer->_maxFd.load(std::memory_order_relaxed) + 1024;
+    }
+    return limits.rlim_cur;
 }
 
 }

@@ -44,7 +44,7 @@ class SharedObjects;
 struct FileDescriptor
 {
 	int32_t id = -1;
-	int32_t descriptor = -1;
+	int descriptor = -1;
 	gnutls_session_t tlsSession = nullptr;
 };
 
@@ -60,13 +60,14 @@ public:
 	~FileDescriptorManager();
 	void dispose();
 
-	PFileDescriptor add(int32_t fileDescriptor);
+	PFileDescriptor add(int fileDescriptor);
 	void remove(PFileDescriptor& descriptor);
 	void close(PFileDescriptor& descriptor);
 	void shutdown(PFileDescriptor& descriptor);
-	PFileDescriptor get(int32_t fileDescriptor);
-	bool isValid(int32_t fileDescriptor, int32_t id);
+	PFileDescriptor get(int fileDescriptor);
+	bool isValid(int fileDescriptor, int32_t id);
 	bool isValid(const PFileDescriptor& descriptor);
+	int32_t getMax();
 	std::unique_lock<std::mutex> getLock();
 private:
 	struct OpaquePointer;
