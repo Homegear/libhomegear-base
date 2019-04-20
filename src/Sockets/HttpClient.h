@@ -49,8 +49,8 @@ class HttpClientException : public Exception
 private:
 	int32_t _responseCode = -1;
 public:
-	HttpClientException(std::string message) : Exception(message) {}
-	HttpClientException(std::string message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
+	explicit HttpClientException(const std::string& message) : Exception(message) {}
+	HttpClientException(const std::string& message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
 
 	int32_t responseCode() const { return _responseCode; }
 };
@@ -64,7 +64,7 @@ public:
 class HttpClientTimeOutException : public HttpClientException
 {
 public:
-	HttpClientTimeOutException(std::string message) : HttpClientException(message) {}
+	explicit HttpClientTimeOutException(const std::string& message) : HttpClientException(message) {}
 };
 
 /**

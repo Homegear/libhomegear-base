@@ -189,15 +189,15 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t>& buffer, u
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -237,15 +237,15 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t>& 
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -285,15 +285,15 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -333,15 +333,15 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t>&
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -377,15 +377,15 @@ void Modbus::writeSingleCoil(uint16_t address, bool value)
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -413,15 +413,15 @@ void Modbus::writeSingleRegister(uint16_t address, uint16_t value)
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -457,15 +457,15 @@ void Modbus::writeMultipleCoils(uint16_t startAddress, const std::vector<uint8_t
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -502,15 +502,15 @@ void Modbus::writeMultipleRegisters(uint16_t startAddress, const std::vector<uin
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -554,15 +554,15 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
         catch(Exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -606,18 +606,18 @@ Modbus::DeviceInfo Modbus::readDeviceIdentification()
             catch(ModbusServerBusyException& ex)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                if(i == 9) throw ex;
+                if(i == 9) throw;
             }
             catch(ModbusException& ex)
             {
-                if(ex.getCode() != 2 && ex.getCode() != 3) throw ex;
+                if(ex.getCode() != 2 && ex.getCode() != 3) throw;
                 exception = true;
                 response = ex.getPacket();
                 break;
             }
             catch(Exception& ex)
             {
-                if(i == 9) throw ex;
+                if(i == 9) throw;
             }
         }
 
