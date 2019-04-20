@@ -1086,6 +1086,8 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	if(nfds <= 0)
 	{
 		fileDescriptorGuard.unlock();
+		readGuard.unlock();
+		close();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
@@ -1097,6 +1099,8 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	}
 	if(bytesRead != 1)
 	{
+        readGuard.unlock();
+        close();
 		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
 	}
 	if(_socketDescriptor->tlsSession)
@@ -1120,9 +1124,19 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 		if(bytesRead == -1)
 		{
 			if(errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
-			else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+			else
+            {
+                readGuard.unlock();
+                close();
+                throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3): " + strerror(errno));
+            }
 		}
-		else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
+		else
+        {
+            readGuard.unlock();
+            close();
+            throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
+        }
 	}
 	if(bytesRead > bufferSize) bytesRead = bufferSize;
 	return bytesRead;
@@ -1176,6 +1190,8 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1187,6 +1203,8 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		}
 		if(readyFds != 1)
 		{
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
@@ -1259,6 +1277,8 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1270,6 +1290,8 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		}
 		if(readyFds != 1)
 		{
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
 		}
 
@@ -1342,6 +1364,8 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		if(nfds <= 0)
 		{
 			fileDescriptorGuard.unlock();
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (6).");
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
@@ -1353,6 +1377,8 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		}
 		if(readyFds != 1)
 		{
+            writeGuard.unlock();
+            close();
 			throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
 		}
 
@@ -1533,28 +1559,6 @@ void TcpSocket::getSsl()
 	}
 	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
 }
-
-/*bool TcpSocket::waitForSocket()
-{
-	if(!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
-	timeval timeout;
-	timeout.tv_sec = 10;
-	timeout.tv_usec = 0;
-	fd_set readFileDescriptor;
-	FD_ZERO(&readFileDescriptor);
-	_bl->fileDescriptorManager.lock();
-	int32_t nfds = _socketDescriptor->descriptor + 1;
-	if(nfds <= 0)
-	{
-		_bl->fileDescriptorManager.unlock();
-		throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
-	}
-	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
-	_bl->fileDescriptorManager.unlock();
-	int32_t bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
-	if(bytesRead != 1) return false;
-	return true;
-}*/
 
 void TcpSocket::getConnection()
 {

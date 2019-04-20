@@ -68,6 +68,18 @@ public:
 };
 
 /**
+ * Exception class for timeouts of the HTTP client.
+ *
+ * @see HttpClient
+ * @see HTTPClientException
+ */
+class HttpClientSocketClosedException : public HttpClientException
+{
+public:
+    explicit HttpClientSocketClosedException(const std::string& message) : HttpClientException(message) {}
+};
+
+/**
  * This class provides a basic HTTP client. The class is thread safe.
  *
  * @see HTTPClientException

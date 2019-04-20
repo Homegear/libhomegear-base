@@ -202,7 +202,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
         catch(const BaseLib::SocketClosedException& ex)
         {
             http.setFinished();
-            break;
+            throw HttpClientSocketClosedException("Connection to client was closed.");
         }
         catch(const BaseLib::SocketOperationException& ex)
         {
