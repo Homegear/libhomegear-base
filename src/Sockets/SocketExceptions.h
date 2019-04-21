@@ -39,13 +39,13 @@ namespace BaseLib
 class SocketOperationException : public Exception
 {
 public:
-	SocketOperationException(std::string message) : Exception(message) {}
+	explicit SocketOperationException(const std::string& message) : Exception(message) {}
 };
 
 class SocketSizeMismatchException : public SocketOperationException
 {
 public:
-	SocketSizeMismatchException(std::string message) : SocketOperationException(message) {}
+    explicit SocketSizeMismatchException(const std::string& message) : SocketOperationException(message) {}
 };
 
 class SocketTimeOutException : public SocketOperationException
@@ -58,8 +58,8 @@ public:
 		readTimeout
 	};
 
-	SocketTimeOutException(std::string message) : SocketOperationException(message) {}
-	SocketTimeOutException(std::string message, SocketTimeOutType type) : SocketOperationException(message), _type(type) {}
+    explicit SocketTimeOutException(const std::string& message) : SocketOperationException(message) {}
+	SocketTimeOutException(const std::string& message, SocketTimeOutType type) : SocketOperationException(message), _type(type) {}
 
 	SocketTimeOutType getType() { return _type; }
 private:
@@ -69,37 +69,43 @@ private:
 class SocketClosedException : public SocketOperationException
 {
 public:
-	SocketClosedException(std::string message) : SocketOperationException(message) {}
+    explicit SocketClosedException(const std::string& message) : SocketOperationException(message) {}
 };
 
 class SocketInvalidParametersException : public SocketOperationException
 {
 public:
-	SocketInvalidParametersException(std::string message) : SocketOperationException(message) {}
+    explicit SocketInvalidParametersException(const std::string& message) : SocketOperationException(message) {}
 };
 
 class SocketDataLimitException : public SocketOperationException
 {
 public:
-	SocketDataLimitException(std::string message) : SocketOperationException(message) {}
+    explicit SocketDataLimitException(const std::string& message) : SocketOperationException(message) {}
 };
 
-class SocketSSLException : public SocketOperationException
+class SocketSslException : public SocketOperationException
 {
 public:
-	SocketSSLException(std::string message) : SocketOperationException(message) {}
+    explicit SocketSslException(const std::string& message) : SocketOperationException(message) {}
+};
+
+class SocketSslHandshakeFailedException : public SocketSslException
+{
+public:
+    explicit SocketSslHandshakeFailedException(const std::string& message) : SocketSslException(message) {}
 };
 
 class SocketBindException : public SocketOperationException
 {
 public:
-	SocketBindException(std::string message) : SocketOperationException(message) {}
+    explicit SocketBindException(const std::string& message) : SocketOperationException(message) {}
 };
 
 class SocketAddressInUseException : public SocketBindException
 {
 public:
-	SocketAddressInUseException(std::string message) : SocketBindException(message) {}
+    explicit SocketAddressInUseException(const std::string& message) : SocketBindException(message) {}
 };
 
 }
