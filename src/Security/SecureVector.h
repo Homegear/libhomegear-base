@@ -53,14 +53,31 @@ public:
     SecureVector(SecureVector&&) noexcept = default; //Move constructor
     SecureVector& operator=(const SecureVector&) = delete; //Copy assignment operator
 
-    ~SecureVector();
-};
+    ~SecureVector()
+    {
+        std::fill(this->begin(), this->end(), 0);
+    }
 
-template<typename T>
-SecureVector<T>::~SecureVector()
-{
-    std::fill(this->begin(), this->end(), 0);
-}
+    void prepend(const SecureVector& other)
+    {
+        std::vector<uint8_t> newVector;
+        newVector.resize(this->size() + other.size());
+        std::copy(other.begin(), other.end(), newVector.begin());
+        std::copy(this->begin(), this->end(), newVector.begin() + other.size());
+        this->swap(newVector);
+        std::fill(newVector.begin(), newVector.end(), 0);
+    }
+
+    void append(const SecureVector& other)
+    {
+        std::vector<uint8_t> newVector;
+        newVector.resize(this->size() + other.size());
+        std::copy(this->begin(), this->end(), newVector.begin());
+        std::copy(other.begin(), other.end(), newVector.begin() + this->size());
+        this->swap(newVector);
+        std::fill(newVector.begin(), newVector.end(), 0);
+    }
+};
 
 }
 }
