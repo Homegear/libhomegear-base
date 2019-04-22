@@ -29,6 +29,7 @@
 */
 
 #include "Gcrypt.h"
+#include "SecureVector.h"
 
 namespace BaseLib
 {
@@ -146,6 +147,8 @@ template void Gcrypt::encrypt<std::vector<char>, std::vector<char>>(std::vector<
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+template void Gcrypt::encrypt<std::vector<char>, SecureVector<char>>(std::vector<char>& out, const SecureVector<char>& in);
+template void Gcrypt::encrypt<std::vector<uint8_t>, SecureVector<uint8_t>>(std::vector<uint8_t>& out, const SecureVector<uint8_t>& in);
 #endif
 
 void Gcrypt::decrypt(void* out, const size_t outLength, const void* in, const size_t inLength)
@@ -167,6 +170,8 @@ template void Gcrypt::decrypt<std::vector<char>, std::vector<char>>(std::vector<
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+template void Gcrypt::decrypt<SecureVector<char>, std::vector<char>>(SecureVector<char>& out, const std::vector<char>& in);
+template void Gcrypt::decrypt<SecureVector<uint8_t>, std::vector<uint8_t>>(SecureVector<uint8_t>& out, const std::vector<uint8_t>& in);
 #endif
 
 bool Gcrypt::authenticate(const void* in, const size_t inLength)
