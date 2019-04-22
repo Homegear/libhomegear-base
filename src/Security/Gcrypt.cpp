@@ -81,6 +81,7 @@ template<typename Data> void Gcrypt::setIv(const Data& iv)
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setIv<std::vector<char>>(const std::vector<char>& iv);
 template void Gcrypt::setIv<std::vector<uint8_t>>(const std::vector<uint8_t>& iv);
+template void Gcrypt::setIv<std::array<uint8_t, 16>>(const std::array<uint8_t, 16>& counter);
 #endif
 
 void Gcrypt::setIv(const void* iv, const size_t length)
@@ -98,6 +99,7 @@ template<typename Data> void Gcrypt::setCounter(const Data& counter)
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setCounter<std::vector<char>>(const std::vector<char>& counter);
 template void Gcrypt::setCounter<std::vector<uint8_t>>(const std::vector<uint8_t>& counter);
+template void Gcrypt::setCounter<std::array<uint8_t, 16>>(const std::array<uint8_t, 16>& counter);
 #endif
 
 void Gcrypt::setCounter(const void* counter, const size_t length)
@@ -115,6 +117,7 @@ template<typename Data> void Gcrypt::setKey(const Data& key)
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setKey<std::vector<char>>(const std::vector<char>& key);
 template void Gcrypt::setKey<std::vector<uint8_t>>(const std::vector<uint8_t>& key);
+template void Gcrypt::setKey<std::array<uint8_t, 32>>(const std::array<uint8_t, 32>& key);
 #endif
 
 void Gcrypt::setKey(const void* key, const size_t length)
