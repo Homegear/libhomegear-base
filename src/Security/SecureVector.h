@@ -39,8 +39,8 @@ namespace Security
 {
 
 /**
- * The class only makes sure that the vector is not copyable and the data is zeroed on destruction. Once created, do not
- * add data to the vector.
+ * The class only makes sure that the vector is not copyable and the data is zeroed on destruction. Once created, only
+ * use methods prepended with the word "secure". You can safely use the methods secureAppend() and securePrepend().
  */
 template<typename T>
 class SecureVector : public std::vector<T>
@@ -58,7 +58,37 @@ public:
         std::fill(this->begin(), this->end(), 0);
     }
 
-    void prepend(const SecureVector& other)
+    void secureResize(size_t count)
+    {
+        if(count <= this->capacity())
+        {
+            this->resize(count);
+            return;
+        }
+
+        std::vector<uint8_t> newVector;
+        newVector.resize(count);
+        std::copy(this->begin(), this->end(), newVector.begin());
+        this->swap(newVector);
+        std::fill(newVector.begin(), newVector.end(), 0);
+    }
+
+    void secureResize(size_t count, const T& value)
+    {
+        if(count <= this->capacity())
+        {
+            this->resize(count, value);
+            return;
+        }
+
+        std::vector<uint8_t> newVector;
+        newVector.resize(count, value);
+        std::copy(this->begin(), this->end(), newVector.begin());
+        this->swap(newVector);
+        std::fill(newVector.begin(), newVector.end(), 0);
+    }
+
+    void securePrepend(const SecureVector& other)
     {
         std::vector<uint8_t> newVector;
         newVector.resize(this->size() + other.size());
@@ -68,7 +98,7 @@ public:
         std::fill(newVector.begin(), newVector.end(), 0);
     }
 
-    void append(const SecureVector& other)
+    void secureAppend(const SecureVector& other)
     {
         std::vector<uint8_t> newVector;
         newVector.resize(this->size() + other.size());
