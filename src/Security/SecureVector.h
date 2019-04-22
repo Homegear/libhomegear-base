@@ -42,13 +42,13 @@ namespace Security
  * The class only makes sure that the vector is not copyable and the data is zeroed on destruction. Once created, do not
  * add data to the vector.
  */
-template<typename _Tp, typename _Alloc = std::allocator<_Tp>>
-class SecureVector : public std::vector<_Tp, _Alloc>
+template<typename T>
+class SecureVector : public std::vector<T>
 {
 public:
-    SecureVector() : std::vector<_Tp, _Alloc>() {};
-    explicit SecureVector(size_t count) : std::vector<_Tp, _Alloc>(count) {}
-    explicit SecureVector(size_t count, const _Tp& value) : std::vector<_Tp, _Alloc>(count, value) {}
+    SecureVector() : std::vector<T>() {};
+    explicit SecureVector(size_t count) : std::vector<T>(count) {}
+    explicit SecureVector(size_t count, const T& value) : std::vector<T>(count, value) {}
     SecureVector(const SecureVector&) = delete; //Copy constructor
     SecureVector(SecureVector&&) noexcept = default; //Move constructor
     SecureVector& operator=(const SecureVector&) = delete; //Copy assignment operator
@@ -56,8 +56,8 @@ public:
     ~SecureVector();
 };
 
-template<typename _Tp, typename _Alloc>
-SecureVector<_Tp, _Alloc>::~SecureVector()
+template<typename T>
+SecureVector<T>::~SecureVector()
 {
     std::fill(this->begin(), this->end(), 0);
 }

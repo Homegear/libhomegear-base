@@ -30,6 +30,7 @@
 
 #include "Io.h"
 #include "../BaseLib.h"
+#include "../Security/SecureVector.h"
 
 #include <sys/stat.h>
 
@@ -137,6 +138,22 @@ std::vector<uint8_t> Io::getUBinaryFileContent(const std::string& filename)
 		return(contents);
 	}
 	throw Exception(strerror(errno));
+}
+
+BaseLib::Security::SecureVector<uint8_t> Io::getUBinaryFileContentSecure(const std::string& filename)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if(in)
+    {
+        Security::SecureVector<uint8_t> contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read((char*)contents.data(), contents.size());
+        in.close();
+        return(contents);
+    }
+    throw Exception(strerror(errno));
 }
 
 void Io::writeFile(const std::string& filename, const std::string& content)
