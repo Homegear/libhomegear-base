@@ -35,7 +35,7 @@ namespace BaseLib
 namespace Security
 {
 
-Gcrypt::Gcrypt(int algorithm, int mode, unsigned int flags) : _algorithm(algorithm)
+Gcrypt::Gcrypt(int algorithm, int mode, unsigned int flags) : _algorithm(algorithm), _mode(mode), _flags(flags)
 {
 	gcry_error_t result = gcry_cipher_open(&_handle, algorithm, mode, flags);
 	if(result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
@@ -47,11 +47,20 @@ Gcrypt::~Gcrypt()
 	if(_handle) gcry_cipher_close(_handle);
 }
 
+void Gcrypt::reset()
+{
+    if(_handle) gcry_cipher_close(_handle);
+    _handle = nullptr;
+    gcry_error_t result = gcry_cipher_open(&_handle, _algorithm, _mode, _flags);
+    if(result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
+    if(!_handle) throw GcryptException("Could not get handle.");
+}
+
 std::string Gcrypt::getError(int32_t errorCode)
 {
-	std::vector<char> result(512);
+	std::array<char, 512> result{};
 	gpg_strerror_r(errorCode, result.data(), result.size());
-	result.at(result.size() - 1) = 0;
+	result.back() = 0;
 	std::string resultString(result.data());
 	return resultString;
 }
@@ -69,7 +78,6 @@ template<typename Data> void Gcrypt::setIv(const Data& iv)
 	setIv(iv.data(), iv.size());
 }
 
-
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setIv<std::vector<char>>(const std::vector<char>& iv);
 template void Gcrypt::setIv<std::vector<uint8_t>>(const std::vector<uint8_t>& iv);
@@ -86,7 +94,6 @@ template<typename Data> void Gcrypt::setCounter(const Data& counter)
 	if(counter.empty()) throw GcryptException("counter is empty.");
 	setCounter(counter.data(), counter.size());
 }
-
 
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setCounter<std::vector<char>>(const std::vector<char>& counter);
