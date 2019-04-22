@@ -31,6 +31,7 @@
 #ifndef LIBHOMEGEAR_BASE_SECUREVECTOR_H
 #define LIBHOMEGEAR_BASE_SECUREVECTOR_H
 
+#include <cstdint>
 #include <vector>
 
 namespace BaseLib
