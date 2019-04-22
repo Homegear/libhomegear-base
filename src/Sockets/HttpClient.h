@@ -116,9 +116,9 @@ public:
 	 * @param certPath (default "") Path to the PEM encoded client certificate
 	 * @param clientCertData The PEM-encoded client certificate (not the path).
 	 * @param keyPath (default "") Path to the PEM encoded client keyfile
-	 * @param clientKeyData The PEM-encoded client key (not the path).
+	 * @param keyData The PEM-encoded client key (not the path).
 	 */
-	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, bool verifyCertificate, std::string caFile, std::string caData, std::string certPath, std::string certData, std::string keyPath, std::string keyData);
+	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, bool verifyCertificate, std::string caFile, std::string caData, std::string certPath, std::string certData, std::string keyPath, const std::shared_ptr<Security::SecureVector<uint8_t>>& keyData);
 
 	/**
 	 * Destructor

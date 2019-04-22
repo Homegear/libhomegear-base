@@ -28,9 +28,11 @@
  * files in the program, then also delete it here.
 */
 
-#include <gnutls/gnutls.h>
-#include "../BaseLib.h"
 #include "TcpSocket.h"
+#include "../BaseLib.h"
+#include "../Security/SecureVector.h"
+#include <gnutls/gnutls.h>
+
 
 namespace BaseLib
 {
@@ -108,11 +110,11 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, const std::shared_ptr<Security::SecureVector<uint8_t>>& clientKeyData) : TcpSocket(baseLib, hostname, port)
 {
 	_useSsl = useSsl;
 	_verifyCertificate = verifyCertificate;
-	if(!caData.empty() || !clientCertData.empty() || !clientKeyData.empty())
+	if(!caData.empty() || !clientCertData.empty() || (clientKeyData && !clientKeyData->empty()))
 	{
 		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
 		certificateInfo->caData = caData;
@@ -124,11 +126,11 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
 	if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, std::string clientKeyData) : TcpSocket(baseLib, hostname, port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, const std::shared_ptr<Security::SecureVector<uint8_t>>& clientKeyData) : TcpSocket(baseLib, hostname, port)
 {
     _useSsl = useSsl;
     _verifyCertificate = verifyCertificate;
-	if(!caFile.empty() || !caData.empty() || !clientCertFile.empty() || !clientCertData.empty() || !clientKeyFile.empty() || !clientKeyData.empty())
+	if(!caFile.empty() || !caData.empty() || !clientCertFile.empty() || !clientCertData.empty() || !clientKeyFile.empty() || (clientKeyData && !clientKeyData->empty()))
 	{
 		PCertificateInfo certificateInfo = std::make_shared<CertificateInfo>();
 		certificateInfo->caFile = caFile;
@@ -929,15 +931,15 @@ void TcpSocket::initSsl()
 
         if(_isServer)
         {
-            if(!certificateInfo.second->certData.empty() && !certificateInfo.second->keyData.empty())
+            if(!certificateInfo.second->certData.empty() && (certificateInfo.second->keyData && !certificateInfo.second->keyData->empty()))
             {
                 gnutls_datum_t certData;
                 certData.data = (unsigned char*) certificateInfo.second->certData.c_str();
                 certData.size = certificateInfo.second->certData.size();
 
                 gnutls_datum_t keyData;
-                keyData.data = (unsigned char*)certificateInfo.second->keyData.c_str();
-                keyData.size = certificateInfo.second->keyData.size();
+                keyData.data = (unsigned char*)certificateInfo.second->keyData->data();
+                keyData.size = certificateInfo.second->keyData->size();
 
                 if((result = gnutls_certificate_set_x509_key_mem(x509Credentials, &certData, &keyData, GNUTLS_X509_FMT_PEM)) < 0)
                 {
@@ -946,6 +948,8 @@ void TcpSocket::initSsl()
 					freeCredentials();
                     throw SocketSslException("Could not load server certificate or key file: " + std::string(gnutls_strerror(result)));
                 }
+
+                std::fill(keyData.data, keyData.data + keyData.size, 0);
             }
             else if(!certificateInfo.second->certFile.empty() && !certificateInfo.second->keyFile.empty())
             {
@@ -966,15 +970,15 @@ void TcpSocket::initSsl()
         }
         else
         {
-            if(!certificateInfo.second->certData.empty() && !certificateInfo.second->keyData.empty())
+            if(!certificateInfo.second->certData.empty() && (certificateInfo.second->keyData && !certificateInfo.second->keyData->empty()))
             {
                 gnutls_datum_t clientCertData{};
                 clientCertData.data = (unsigned char*) certificateInfo.second->certData.c_str();
                 clientCertData.size = static_cast<unsigned int>(certificateInfo.second->certData.size());
 
                 gnutls_datum_t clientKeyData{};
-                clientKeyData.data = (unsigned char*) certificateInfo.second->keyData.c_str();
-                clientKeyData.size = static_cast<unsigned int>(certificateInfo.second->keyData.size());
+                clientKeyData.data = (unsigned char*) certificateInfo.second->keyData->data();
+                clientKeyData.size = static_cast<unsigned int>(certificateInfo.second->keyData->size());
 
                 if((result = gnutls_certificate_set_x509_key_mem(x509Credentials, &clientCertData, &clientKeyData, GNUTLS_X509_FMT_PEM)) < 0)
                 {
@@ -983,6 +987,8 @@ void TcpSocket::initSsl()
 					freeCredentials();
                     throw SocketSslException("Could not load client certificate or key: " + std::string(gnutls_strerror(result)));
                 }
+
+                std::fill(clientKeyData.data, clientKeyData.data + clientKeyData.size, 0);
             }
             else if(!certificateInfo.second->certFile.empty() && !certificateInfo.second->keyFile.empty())
             {

@@ -129,7 +129,7 @@ public:
         std::string certFile;
         std::string certData;
         std::string keyFile;
-        std::string keyData;
+        std::shared_ptr<Security::SecureVector<uint8_t>> keyData;
         bool verifyCertificate = true;
         std::string caFile; //For client certificate verification
         std::string caData; //For client certificate verification

@@ -75,6 +75,7 @@ size_t Gcrypt::getBlockSize()
 
 template<typename Data> void Gcrypt::setIv(const Data& iv)
 {
+    if(!_keySet) throw GcryptException("Please set the key first");
 	if(iv.empty()) throw GcryptException("iv is empty.");
 	setIv(iv.data(), iv.size());
 }
@@ -94,6 +95,7 @@ void Gcrypt::setIv(const void* iv, const size_t length)
 
 template<typename Data> void Gcrypt::setCounter(const Data& counter)
 {
+    if(!_keySet) throw GcryptException("Please set the key first");
 	if(counter.empty()) throw GcryptException("counter is empty.");
 	setCounter(counter.data(), counter.size());
 }
@@ -139,6 +141,7 @@ void Gcrypt::encrypt(void* out, const size_t outLength, const void* in, const si
 
 template<typename DataOut, typename DataIn> void Gcrypt::encrypt(DataOut& out, const DataIn& in)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
@@ -162,6 +165,7 @@ void Gcrypt::decrypt(void* out, const size_t outLength, const void* in, const si
 
 template<typename DataOut, typename DataIn> void Gcrypt::decrypt(DataOut& out, const DataIn& in)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
@@ -179,6 +183,7 @@ template void Gcrypt::decrypt<SecureVector<uint8_t>, std::vector<uint8_t>>(Secur
 
 bool Gcrypt::authenticate(const void* in, const size_t inLength)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	gcry_error_t result = gcry_cipher_authenticate(_handle, in, inLength);
 	return result == GPG_ERR_NO_ERROR;
 }
