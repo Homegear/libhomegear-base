@@ -81,7 +81,7 @@ void Devices::load(std::string& xmlPath)
 		{
 			files = _bl->io.getFiles(deviceDir);
 		}
-		catch(const Exception& ex)
+		catch(const std::exception& ex)
 		{
 			_bl->out.printError("Could not read device description files in directory: \"" + xmlPath + "\": " + ex.what());
 			return;

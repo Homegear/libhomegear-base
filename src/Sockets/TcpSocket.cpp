@@ -1454,10 +1454,6 @@ void TcpSocket::getSocketDescriptor()
 
 		if(_useSsl) getSsl();
 	}
-	catch(Exception& ex)
-	{
-		throw;
-	}
 	catch(const std::exception& ex)
 	{
 		throw;
