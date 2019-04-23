@@ -476,12 +476,19 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				node->append_node(subnode);
 			}
 
-			if(device->memorySize != 1024)
+			if(device->memorySize != 0)
 			{
 				tempString = std::to_string(device->memorySize);
 				xml_node<>* subnode = doc->allocate_node(node_element, "memorySize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
+
+            if(device->memorySize2 != 0)
+            {
+                tempString = std::to_string(device->memorySize2);
+                xml_node<>* subnode = doc->allocate_node(node_element, "memorySize2", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                node->append_node(subnode);
+            }
 
 			if(!device->visible)
 			{
@@ -2499,6 +2506,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					else if(propertyName == "encryption") { if(propertyValue == "true") encryption = true; }
 					else if(propertyName == "timeout") timeout = Math::getUnsignedNumber(propertyValue);
 					else if(propertyName == "memorySize") memorySize = Math::getUnsignedNumber(propertyValue);
+                    else if(propertyName == "memorySize2") memorySize2 = Math::getUnsignedNumber(propertyValue);
 					else if(propertyName == "visible")  { if(propertyValue == "false") visible = false; }
 					else if(propertyName == "deletable") { if(propertyValue == "false") deletable = false; }
 					else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
