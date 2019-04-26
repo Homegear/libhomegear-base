@@ -47,7 +47,11 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json)
     auto variable = std::make_shared<Variable>();
     skipWhitespace(json, pos);
     if(!posValid(json, pos)) return variable;
-    decodeValue(json, pos, variable);
+    if(!decodeValue(json, pos, variable))
+    {
+        variable->type = VariableType::tString;
+        variable->stringValue = decodeString(std::string(json.begin(), json.end()));
+    }
     return variable;
 }
 
@@ -57,7 +61,7 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::string& json, uint32_t&
     auto variable = std::make_shared<Variable>();
     skipWhitespace(json, bytesRead);
     if(!posValid(json, bytesRead)) return variable;
-    decodeValue(json, bytesRead, variable);
+    if(!decodeValue(json, bytesRead, variable)) throw JsonDecoderException("Invalid JSON.");
     return variable;
 }
 
@@ -67,7 +71,11 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json)
     auto variable = std::make_shared<Variable>();
     skipWhitespace(json, pos);
     if(!posValid(json, pos)) return variable;
-    decodeValue(json, pos, variable);
+    if(!decodeValue(json, pos, variable))
+    {
+        variable->type = VariableType::tString;
+        variable->stringValue = decodeString(std::string(json.begin(), json.end()));
+    }
     return variable;
 }
 
@@ -77,7 +85,7 @@ std::shared_ptr<Variable> JsonDecoder::decode(const std::vector<char>& json, uin
     auto variable = std::make_shared<Variable>();
     skipWhitespace(json, bytesRead);
     if(!posValid(json, bytesRead)) return variable;
-    decodeValue(json, bytesRead, variable);
+    if(!decodeValue(json, bytesRead, variable)) throw JsonDecoderException("Invalid JSON.");
     return variable;
 }
 
@@ -752,9 +760,9 @@ void JsonDecoder::decodeString(const std::vector<char>& json, uint32_t& pos, std
 
 #endif
 
-void JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
+bool JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-    if(!posValid(json, pos)) return;
+    if(!posValid(json, pos)) return false;
     switch (json[pos])
     {
         case 'n':
@@ -777,21 +785,16 @@ void JsonDecoder::decodeValue(const std::string& json, uint32_t& pos, std::share
             break;
         default:
         {
-            uint32_t storedPos = pos;
-            if(!decodeNumber(json, pos, value))
-            {
-                //Invalid number, interpret as string
-                pos = storedPos;
-                decodeString(json, pos, value);
-            }
+            if(!decodeNumber(json, pos, value)) return false;
             break;
         }
     }
+    return true;
 }
 
-void JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
+bool JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value)
 {
-    if(!posValid(json, pos)) return;
+    if(!posValid(json, pos)) return false;
     switch (json[pos])
     {
         case 'n':
@@ -814,16 +817,11 @@ void JsonDecoder::decodeValue(const std::vector<char>& json, uint32_t& pos, std:
             break;
         default:
         {
-            uint32_t storedPos = pos;
-            if(!decodeNumber(json, pos, value))
-            {
-                //Invalid number, interpret as string
-                pos = storedPos;
-                decodeString(json, pos, value);
-            }
+            if(!decodeNumber(json, pos, value)) return false;
             break;
         }
     }
+    return true;
 }
 
 void JsonDecoder::decodeBoolean(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value)
@@ -893,7 +891,7 @@ bool JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shar
     {
         number = 0;
         pos++;
-        if(!posValid(json, pos)) return false;
+        if(!posValid(json, pos)) return true;
     }
     else if(json[pos] >= '1' && json[pos] <= '9')
     {
@@ -921,55 +919,58 @@ bool JsonDecoder::decodeNumber(const std::string& json, uint32_t& pos, std::shar
         }
     }
 
-    if(!posValid(json, pos)) return false;
     int32_t exponent = 0;
-    if(json[pos] == '.')
+    if(posValid(json, pos))
     {
-        if(!isDouble)
+        if(json[pos] == '.')
         {
-            value->type = VariableType::tFloat;
-            isDouble = true;
-            value->floatValue = number;
-        }
-        pos++;
-        while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
-        {
-            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            if(!isDouble)
+            {
+                value->type = VariableType::tFloat;
+                isDouble = true;
+                value->floatValue = number;
+            }
             pos++;
-            exponent--;
+            while(pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+            {
+                value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+                pos++;
+                exponent--;
+            }
         }
     }
 
-    if(!posValid(json, pos)) return false;
     int32_t exponent2 = 0;
-    if(json[pos] == 'e' || json[pos] == 'E')
+    if(posValid(json, pos))
     {
-        pos++;
-        if(!posValid(json, pos)) return false;
+        if(json[pos] == 'e' || json[pos] == 'E')
+        {
+            pos++;
+            if(!posValid(json, pos)) return false;
 
-        bool negative = false;
-        if(json[pos] == '-')
-        {
-            negative = true;
-            pos++;
-            if(!posValid(json, pos)) return false;
-        }
-        else if(json[pos] == '+')
-        {
-            pos++;
-            if(!posValid(json, pos)) return false;
-        }
-        if (json[pos] >= '0' && json[pos] <= '9')
-        {
-            exponent2 = json[pos] - '0';
-            pos++;
-            if(!posValid(json, pos)) return false;
-            while (pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+            bool negative = false;
+            if(json[pos] == '-')
             {
-                exponent2 = exponent2 * 10 + (json[pos] - '0');
+                negative = true;
+                pos++;
+                if(!posValid(json, pos)) return false;
             }
+            else if(json[pos] == '+')
+            {
+                pos++;
+                if(!posValid(json, pos)) return false;
+            }
+            if(json[pos] >= '0' && json[pos] <= '9')
+            {
+                exponent2 = json[pos] - '0';
+                pos++;
+                while(pos < json.length() && json[pos] >= '0' && json[pos] <= '9')
+                {
+                    exponent2 = exponent2 * 10 + (json[pos] - '0');
+                }
+            }
+            if(negative) exponent2 *= -1;
         }
-        if(negative) exponent2 *= -1;
     }
 
     if(isDouble)
@@ -1021,7 +1022,7 @@ bool JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
     {
         number = 0;
         pos++;
-        if(!posValid(json, pos)) return false;
+        if(!posValid(json, pos)) return true;
     }
     else if(json[pos] >= '1' && json[pos] <= '9')
     {
@@ -1049,55 +1050,58 @@ bool JsonDecoder::decodeNumber(const std::vector<char>& json, uint32_t& pos, std
         }
     }
 
-    if(!posValid(json, pos)) return false;
     int32_t exponent = 0;
-    if(json[pos] == '.')
+    if(posValid(json, pos))
     {
-        if(!isDouble)
+        if(json[pos] == '.')
         {
-            value->type = VariableType::tFloat;
-            isDouble = true;
-            value->floatValue = number;
-        }
-        pos++;
-        while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
-        {
-            value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+            if(!isDouble)
+            {
+                value->type = VariableType::tFloat;
+                isDouble = true;
+                value->floatValue = number;
+            }
             pos++;
-            exponent--;
+            while(pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+            {
+                value->floatValue = value->floatValue * 10 + (json[pos] - '0');
+                pos++;
+                exponent--;
+            }
         }
     }
 
-    if(!posValid(json, pos)) return false;
     int32_t exponent2 = 0;
-    if(json[pos] == 'e' || json[pos] == 'E')
+    if(posValid(json, pos))
     {
-        pos++;
-        if(!posValid(json, pos)) return false;
+        if(json[pos] == 'e' || json[pos] == 'E')
+        {
+            pos++;
+            if(!posValid(json, pos)) return false;
 
-        bool negative = false;
-        if(json[pos] == '-')
-        {
-            negative = true;
-            pos++;
-            if(!posValid(json, pos)) return false;
-        }
-        else if(json[pos] == '+')
-        {
-            pos++;
-            if(!posValid(json, pos)) return false;
-        }
-        if (json[pos] >= '0' && json[pos] <= '9')
-        {
-            exponent2 = json[pos] - '0';
-            pos++;
-            if(!posValid(json, pos)) return false;
-            while (pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+            bool negative = false;
+            if(json[pos] == '-')
             {
-                exponent2 = exponent2 * 10 + (json[pos] - '0');
+                negative = true;
+                pos++;
+                if(!posValid(json, pos)) return false;
             }
+            else if(json[pos] == '+')
+            {
+                pos++;
+                if(!posValid(json, pos)) return false;
+            }
+            if(json[pos] >= '0' && json[pos] <= '9')
+            {
+                exponent2 = json[pos] - '0';
+                pos++;
+                while(pos < json.size() && json[pos] >= '0' && json[pos] <= '9')
+                {
+                    exponent2 = exponent2 * 10 + (json[pos] - '0');
+                }
+            }
+            if(negative) exponent2 *= -1;
         }
-        if(negative) exponent2 *= -1;
     }
 
     if(isDouble)

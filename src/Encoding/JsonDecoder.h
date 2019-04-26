@@ -76,8 +76,8 @@ private:
     static void decodeString(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
     static void decodeString(const std::string& json, uint32_t& pos, std::string& s);
     static void decodeString(const std::vector<char>& json, uint32_t& pos, std::string& s);
-    static void decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
+    static bool decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
+    static bool decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
     static void decodeBoolean(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
     static void decodeBoolean(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
     static void decodeNull(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
