@@ -1103,7 +1103,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
 	fileDescriptorGuard.unlock();
-	bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
+	bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
 	if(bytesRead == 0)
 	{
 		throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
