@@ -130,6 +130,9 @@ void Settings::reset()
 	_nodeBlueDataPathUser = "";
 	_nodeBlueDataPathGroup = "";
 	_nodeBlueDebugOutput = false;
+	_nodeBlueEventLimit1 = 100;
+    _nodeBlueEventLimit2 = 300;
+    _nodeBlueEventLimit3 = 400;
 	_adminUiPath = "/var/lib/homegear/admin-ui/";
 	_adminUiPathPermissions = 504;
 	_adminUiPathUser = "";
@@ -483,6 +486,21 @@ void Settings::load(std::string filename, std::string executablePath)
 					_nodeBlueDebugOutput = value == "true";
 					_bl->out.printDebug("Debug: nodeBlueDebugOutput set to " + std::to_string(_nodeBlueDebugOutput));
 				}
+                else if(name == "nodeblueeventlimit1")
+                {
+                    _nodeBlueEventLimit1 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit1 set to " + std::to_string(_nodeBlueEventLimit1));
+                }
+                else if(name == "nodeblueeventlimit2")
+                {
+                    _nodeBlueEventLimit2 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit2 set to " + std::to_string(_nodeBlueEventLimit2));
+                }
+                else if(name == "nodeblueeventlimit3")
+                {
+                    _nodeBlueEventLimit3 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit3 set to " + std::to_string(_nodeBlueEventLimit3));
+                }
 				else if(name == "maxnodethreadsperprocess")
 				{
 					_maxNodeThreadsPerProcess = Math::getNumber(value);

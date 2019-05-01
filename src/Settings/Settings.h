@@ -136,6 +136,9 @@ public:
 	std::string nodeBlueDataPathUser() { return _nodeBlueDataPathUser; }
 	std::string nodeBlueDataPathGroup() { return _nodeBlueDataPathGroup; }
 	bool nodeBlueDebugOutput() { return _nodeBlueDebugOutput; }
+	uint32_t nodeBlueEventLimit1() { return _nodeBlueEventLimit1; }
+    uint32_t nodeBlueEventLimit2() { return _nodeBlueEventLimit2; }
+    uint32_t nodeBlueEventLimit3() { return _nodeBlueEventLimit3; }
 	std::string adminUiPath() { return _adminUiPath; }
 	uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
 	std::string adminUiPathUser() { return _adminUiPathUser; }
@@ -256,6 +259,9 @@ private:
 	std::string _nodeBlueDataPathUser;
 	std::string _nodeBlueDataPathGroup;
 	bool _nodeBlueDebugOutput = false;
+	uint32_t _nodeBlueEventLimit1 = 100;
+    uint32_t _nodeBlueEventLimit2 = 300;
+    uint32_t _nodeBlueEventLimit3 = 400;
 	std::string _adminUiPath;
 	uint32_t _adminUiPathPermissions = 504;
 	std::string _adminUiPathUser;
