@@ -161,7 +161,7 @@ void HttpClient::sendRequest(const std::string& request, Http& http, bool respon
 
     int32_t bufferPos = 0;
     const int32_t bufferMax = 4096;
-    std::array<char, bufferMax + 1> buffer;
+    std::array<char, bufferMax + 1> buffer{};
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
 
