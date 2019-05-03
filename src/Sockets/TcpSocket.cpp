@@ -785,12 +785,20 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 	}
 	listenPort = addressInfo.sin_port;
 
-	if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
-	else if(listenAddress == "::")
-	{
-
-		listenAddress = Net::getMyIp6Address();
-	}
+	try
+    {
+        if(listenAddress == "0.0.0.0") listenAddress = Net::getMyIpAddress();
+        else if(listenAddress == "::")
+        {
+            listenAddress = Net::getMyIp6Address();
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        fileDescriptorManager.shutdown(socketDescriptor);
+        socketDescriptor.reset();
+        throw;
+    }
 	return socketDescriptor;
 }
 
