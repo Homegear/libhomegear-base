@@ -49,6 +49,31 @@ Acls::~Acls()
     clear();
 }
 
+PVariable Acls::toVariable()
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    auto serializedData = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+    serializedData->arrayValue->reserve(_acls.size());
+    for(auto& acl : _acls)
+    {
+        serializedData->arrayValue->emplace_back(std::move(acl->toVariable()));
+    }
+    return serializedData;
+}
+
+void Acls::fromVariable(PVariable serializedData)
+{
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    _acls.clear();
+    _acls.reserve(serializedData->arrayValue->size());
+    for(auto& element : *serializedData->arrayValue)
+    {
+        auto acl = std::make_shared<Acl>();
+        acl->fromVariable(element);
+        _acls.emplace_back(std::move(acl));
+    }
+}
+
 bool Acls::categoriesReadSet()
 {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);

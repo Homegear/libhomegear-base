@@ -133,6 +133,7 @@ set(SOURCE_FILES
         src/Managers/ThreadManager.h
         src/Output/Output.cpp
         src/Output/Output.h
+        src/ScriptEngine/ScriptInfo.cpp
         src/ScriptEngine/ScriptInfo.h
         src/Security/Acl.cpp
         src/Security/Acl.h

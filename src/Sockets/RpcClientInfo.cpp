@@ -29,6 +29,7 @@
 */
 
 #include "RpcClientInfo.h"
+#include "../Security/Acls.h"
 
 BaseLib::RpcClientInfo::RpcClientInfo()
 {
@@ -97,4 +98,76 @@ BaseLib::RpcClientInfo& BaseLib::RpcClientInfo::operator=(const BaseLib::RpcClie
     peerId = rhs.peerId;
 
     return *this;
+}
+
+BaseLib::PVariable BaseLib::RpcClientInfo::serialize()
+{
+    if(serializedInfo) return serializedInfo;
+
+    serializedInfo = std::make_shared<Variable>(VariableType::tArray);
+    serializedInfo->arrayValue->reserve(28);
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(id));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(sendEventsToRpcServer));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(closed));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(addon));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(flowsServer));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(scriptEngineServer));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(ipcServer));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(mqttClient));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(familyModule));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(webSocketClientId));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(address));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(port));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initUrl));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initInterfaceId));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(language));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(user));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(hasClientCertificate));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(distinguishedName));
+    serializedInfo->arrayValue->emplace_back(acls->toVariable());
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>((int32_t)rpcType));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>((int32_t)clientType));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initKeepAlive));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initBinaryMode));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initNewFormat));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initSubscribePeers));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initJsonMode));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initSendNewDevices));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(peerId));
+    return serializedInfo;
+}
+
+void BaseLib::RpcClientInfo::unserialize(BaseLib::SharedObjects* bl, BaseLib::PVariable data)
+{
+    if(!data) return;
+    int32_t pos = 0;
+    id = data->arrayValue->at(pos)->integerValue; pos++;
+    sendEventsToRpcServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    closed = data->arrayValue->at(pos)->booleanValue; pos++;
+    addon = data->arrayValue->at(pos)->booleanValue; pos++;
+    flowsServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    scriptEngineServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    ipcServer = data->arrayValue->at(pos)->booleanValue; pos++;
+    mqttClient = data->arrayValue->at(pos)->booleanValue; pos++;
+    familyModule = data->arrayValue->at(pos)->booleanValue; pos++;
+    webSocketClientId = data->arrayValue->at(pos)->stringValue; pos++;
+    address = data->arrayValue->at(pos)->stringValue; pos++;
+    port = data->arrayValue->at(pos)->integerValue; pos++;
+    initUrl = data->arrayValue->at(pos)->stringValue; pos++;
+    initInterfaceId = data->arrayValue->at(pos)->stringValue; pos++;
+    language = data->arrayValue->at(pos)->stringValue; pos++;
+    user = data->arrayValue->at(pos)->stringValue; pos++;
+    hasClientCertificate = data->arrayValue->at(pos)->booleanValue; pos++;
+    distinguishedName = data->arrayValue->at(pos)->stringValue; pos++;
+    acls = std::make_shared<BaseLib::Security::Acls>(bl, id);
+    acls->fromVariable(data->arrayValue->at(pos)); pos++;
+    rpcType = (RpcType)data->arrayValue->at(pos)->integerValue; pos++;
+    clientType = (RpcClientType)data->arrayValue->at(pos)->integerValue; pos++;
+    initKeepAlive = data->arrayValue->at(pos)->booleanValue; pos++;
+    initBinaryMode = data->arrayValue->at(pos)->booleanValue; pos++;
+    initNewFormat = data->arrayValue->at(pos)->booleanValue; pos++;
+    initSubscribePeers = data->arrayValue->at(pos)->booleanValue; pos++;
+    initJsonMode = data->arrayValue->at(pos)->booleanValue; pos++;
+    initSendNewDevices = data->arrayValue->at(pos)->booleanValue; pos++;
+    peerId = data->arrayValue->at(pos)->integerValue64; pos++;
 }
