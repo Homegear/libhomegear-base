@@ -235,7 +235,7 @@ void ServerInfo::load(std::string filename)
 				}
 				else if(name == "authtype")
 				{
-                    info->authType = Info::AuthType::none;
+                    info->authType = Info::AuthType::undefined;
 					HelperFunctions::toLower(value);
                     auto fields = HelperFunctions::splitAll(value, ',');
                     for(auto& field : fields)
