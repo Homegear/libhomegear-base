@@ -88,6 +88,7 @@ public:
 	std::string initInterfaceId;
 	std::string language = "en-US";
 	std::string user;
+	bool authenticated = false;
 	bool hasClientCertificate = false;
 	std::string distinguishedName;
 	Security::PAcls acls;

@@ -122,6 +122,7 @@ BaseLib::PVariable BaseLib::RpcClientInfo::serialize()
     serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(initInterfaceId));
     serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(language));
     serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(user));
+    serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(authenticated));
     serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(hasClientCertificate));
     serializedInfo->arrayValue->emplace_back(std::make_shared<BaseLib::Variable>(distinguishedName));
     serializedInfo->arrayValue->emplace_back(acls->toVariable());
@@ -157,6 +158,7 @@ void BaseLib::RpcClientInfo::unserialize(BaseLib::SharedObjects* bl, BaseLib::PV
     initInterfaceId = data->arrayValue->at(pos)->stringValue; pos++;
     language = data->arrayValue->at(pos)->stringValue; pos++;
     user = data->arrayValue->at(pos)->stringValue; pos++;
+    authenticated = data->arrayValue->at(pos)->booleanValue; pos++;
     hasClientCertificate = data->arrayValue->at(pos)->booleanValue; pos++;
     distinguishedName = data->arrayValue->at(pos)->stringValue; pos++;
     acls = std::make_shared<BaseLib::Security::Acls>(bl, id);
