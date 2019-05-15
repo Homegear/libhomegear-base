@@ -292,7 +292,21 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& f
     }
 }
 
-std::string& HelperFunctions::regexReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
+std::string& HelperFunctions::stringReplace(std::string& haystack, const std::string& search, const std::string& replace)
+{
+    if(search.empty()) return haystack;
+    int32_t pos = 0;
+    while(true)
+    {
+        pos = haystack.find(search, pos);
+        if (pos == (signed)std::string::npos) break;
+        haystack.replace(pos, search.size(), replace);
+        pos += replace.size();
+    }
+    return haystack;
+}
+
+std::string& HelperFunctions::regexReplace(std::string& haystack, const std::string& search, const std::string& replace, bool ignoreCase)
 {
     std::regex regex(search, std::regex::icase);
 

@@ -416,7 +416,7 @@ bool Variable::operator!=(const Variable& rhs)
 	return !(operator==(rhs));
 }
 
-Variable::operator Variable::bool_type() const
+Variable::operator bool_type() const
 {
 	bool result = false;
 	if(type != VariableType::tBoolean)

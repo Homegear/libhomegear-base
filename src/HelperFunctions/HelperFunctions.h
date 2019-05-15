@@ -253,19 +253,7 @@ public:
 	 * @param replace The substring to replace "search" with.
 	 * @return Returns a reference to the modified string.
 	 */
-	static std::string& stringReplace(std::string& haystack, std::string search, std::string replace)
-	{
-		if(search.empty()) return haystack;
-		int32_t pos = 0;
-		while(true)
-		{
-			 pos = haystack.find(search, pos);
-			 if (pos == (signed)std::string::npos) break;
-			 haystack.replace(pos, search.size(), replace);
-			 pos += replace.size();
-		}
-		return haystack;
-	}
+	static std::string& stringReplace(std::string& haystack, const std::string& search, const std::string& replace);
 
 	/**
 	 * Replaces substrings within a string using regex.
@@ -276,7 +264,7 @@ public:
 	 * @param ignoreCase Set to true, to ignore the case.
 	 * @return Returns a reference to the modified string.
 	 */
-	static std::string& regexReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
+	static std::string& regexReplace(std::string& haystack, const std::string& search, const std::string& replace, bool ignoreCase);
 
 	/**
 	 * Splits a string at the first occurrence of a delimiter.
