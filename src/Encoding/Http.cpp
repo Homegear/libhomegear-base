@@ -422,7 +422,7 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXm
 	int32_t processedBytes = 0;
 	if(!_header.parsed) processedBytes = processHeader(&buffer, bufferLength);
 	if(!_header.parsed) return processedBytes;
-	if((_header.method == "GET" && _header.contentLength == 0) || _header.method == "M-SEARCH" || (_header.method == "NOTIFY" && _header.contentLength == 0) || (_contentLengthSet && _header.contentLength == 0))
+	if((_header.method == "GET" && _header.contentLength == 0) || (_header.method == "DELETE" && _header.contentLength == 0) || _header.method == "M-SEARCH" || (_header.method == "NOTIFY" && _header.contentLength == 0) || (_contentLengthSet && _header.contentLength == 0))
 	{
 		_dataProcessingStarted = true;
 		setFinished();
