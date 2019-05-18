@@ -158,7 +158,7 @@ public:
 	//System variables
 	virtual BaseLib::PVariable deleteSystemVariable(std::string& variableId) = 0;
 	virtual BaseLib::PVariable getSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, bool checkAcls) = 0;
-	virtual Database::PSystemVariable getSystemVariableInternal(std::string& variableId) = 0;
+	virtual Database::PSystemVariable getSystemVariableInternal(const std::string& variableId) = 0;
     virtual BaseLib::PVariable getSystemVariableCategories(std::string& variableId) = 0;
     virtual std::set<uint64_t> getSystemVariableCategoriesInternal(std::string& variableId) = 0;
     virtual BaseLib::PVariable getSystemVariableRoom(std::string& variableId) = 0;
