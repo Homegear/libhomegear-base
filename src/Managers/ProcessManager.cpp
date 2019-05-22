@@ -45,6 +45,8 @@
 namespace BaseLib
 {
 
+std::unique_ptr<ProcessManager::OpaquePointer> ProcessManager::_opaquePointer;
+
 class ProcessManager::OpaquePointer
 {
 public:

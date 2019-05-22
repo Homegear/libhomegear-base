@@ -155,7 +155,7 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     strippedString.reserve(s.size());
     for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
     {
-        if(std::isprint(*i)) strippedString.push_back(*i);
+        if(std::isprint(*i, std::locale("en_US.UTF-8"))) strippedString.push_back(*i);
     }
     return strippedString;
 }
