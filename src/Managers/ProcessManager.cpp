@@ -36,6 +36,7 @@
 #include <mutex>
 #include <map>
 #include <unordered_map>
+#include <list>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -119,6 +120,50 @@ void ProcessManager::unregisterCallbackHandler(int32_t id)
     if(id == -1) return;
     std::lock_guard<std::mutex> callbackHandlersGuard(_opaquePointer->_callbackHandlersMutex);
     _opaquePointer->_callbackHandlers.erase(id);
+}
+
+std::vector<std::string> ProcessManager::splitArguments(const std::string& arguments)
+{
+    std::list<std::string> argumentList;
+    std::string currentArgument;
+    currentArgument.reserve(1024);
+    bool doubleQuoted = false;
+    bool singleQuoted = false;
+    bool escaped = false;
+    for(int32_t i = 0; i < (signed)arguments.size(); i++)
+    {
+        if(escaped)
+        {
+            escaped = false;
+            currentArgument.push_back(arguments[i]);
+            if(currentArgument.size() + 1 > currentArgument.capacity()) currentArgument.reserve(currentArgument.size() + 1024);
+        }
+        else if(!doubleQuoted && !singleQuoted && arguments[i] == '"') doubleQuoted = true;
+        else if(!doubleQuoted && !singleQuoted && arguments[i] == '\'') singleQuoted = true;
+        else if(doubleQuoted && arguments[i] == '"') doubleQuoted = false;
+        else if(singleQuoted && arguments[i] == '\'') singleQuoted = false;
+        else if((doubleQuoted || singleQuoted) && arguments[i] == '\\') escaped = true;
+        else if(!singleQuoted && !doubleQuoted && arguments[i] == ' ')
+        {
+            if(!currentArgument.empty()) argumentList.push_back(currentArgument);
+            currentArgument.clear();
+        }
+        else
+        {
+            currentArgument.push_back(arguments[i]);
+            if(currentArgument.size() + 1 > currentArgument.capacity()) currentArgument.reserve(currentArgument.size() + 1024);
+        }
+    }
+
+    if(!currentArgument.empty()) argumentList.push_back(currentArgument);
+
+    std::vector<std::string> argumentVector;
+    argumentVector.reserve(argumentList.size());
+    for(auto& argument : argumentList)
+    {
+        argumentVector.push_back(argument);
+    }
+    return argumentVector;
 }
 
 pid_t ProcessManager::system(const std::string& command, const std::vector<std::string>& arguments, int maxFd)

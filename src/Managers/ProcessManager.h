@@ -63,6 +63,8 @@ public:
     static int32_t registerCallbackHandler(std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)> callbackHandler);
     static void unregisterCallbackHandler(int32_t id);
 
+    static std::vector<std::string> splitArguments(const std::string& arguments);
+
     /**
      * Starts a program and returns the process id.
      *
