@@ -136,7 +136,6 @@ std::vector<std::string> ProcessManager::splitArguments(const std::string& argum
         {
             escaped = false;
             currentArgument.push_back(arguments[i]);
-            if(currentArgument.size() + 1 > currentArgument.capacity()) currentArgument.reserve(currentArgument.size() + 1024);
         }
         else if(!doubleQuoted && !singleQuoted && arguments[i] == '"') doubleQuoted = true;
         else if(!doubleQuoted && !singleQuoted && arguments[i] == '\'') singleQuoted = true;
@@ -148,11 +147,9 @@ std::vector<std::string> ProcessManager::splitArguments(const std::string& argum
             if(!currentArgument.empty()) argumentList.push_back(currentArgument);
             currentArgument.clear();
         }
-        else
-        {
-            currentArgument.push_back(arguments[i]);
-            if(currentArgument.size() + 1 > currentArgument.capacity()) currentArgument.reserve(currentArgument.size() + 1024);
-        }
+        else currentArgument.push_back(arguments[i]);
+
+        if(currentArgument.size() + 1 > currentArgument.capacity()) currentArgument.reserve(currentArgument.size() + 1024);
     }
 
     if(!currentArgument.empty()) argumentList.push_back(currentArgument);
