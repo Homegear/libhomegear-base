@@ -47,6 +47,7 @@ struct SystemVariable
 	std::string name;
 	uint64_t room = 0;
 	std::set<uint64_t> categories;
+    std::set<uint64_t> roles;
 	int32_t flags = 0;
 	BaseLib::PVariable value;
 };
@@ -161,17 +162,23 @@ public:
 	virtual Database::PSystemVariable getSystemVariableInternal(const std::string& variableId) = 0;
     virtual BaseLib::PVariable getSystemVariableCategories(std::string& variableId) = 0;
     virtual std::set<uint64_t> getSystemVariableCategoriesInternal(std::string& variableId) = 0;
+    virtual BaseLib::PVariable getSystemVariableRoles(std::string& variableId) = 0;
+    virtual std::set<uint64_t> getSystemVariableRolesInternal(std::string& variableId) = 0;
     virtual BaseLib::PVariable getSystemVariableRoom(std::string& variableId) = 0;
 	virtual BaseLib::PVariable getSystemVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getSystemVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls) = 0;
 	virtual BaseLib::PVariable getSystemVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls) = 0;
     virtual uint64_t getSystemVariableRoomInternal(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsCategoriesFlags, bool checkAcls) = 0;
+	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsCategoriesRolesFlags, bool checkAcls) = 0;
     virtual void removeCategoryFromSystemVariables(uint64_t categoryId) = 0;
+    virtual void removeRoleFromSystemVariables(uint64_t roleId) = 0;
     virtual void removeRoomFromSystemVariables(uint64_t roomId) = 0;
 	virtual BaseLib::PVariable setSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, BaseLib::PVariable& value, int32_t flags, bool checkAcls) = 0;
     virtual BaseLib::PVariable setSystemVariableCategories(std::string& variableId, std::set<uint64_t>& categories) = 0;
+    virtual BaseLib::PVariable setSystemVariableRoles(std::string& variableId, std::set<uint64_t>& roles) = 0;
     virtual BaseLib::PVariable setSystemVariableRoom(std::string& variableId, uint64_t room) = 0;
     virtual bool systemVariableHasCategory(std::string& variableId, uint64_t categoryId) = 0;
+    virtual bool systemVariableHasRole(std::string& variableId, uint64_t roleId) = 0;
 	//End system variables
 
 	//Users

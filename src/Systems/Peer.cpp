@@ -3827,9 +3827,12 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
         if(!central) return description;
         std::string language = clientInfo ? clientInfo->language : "en-US";
         std::string filename = _rpcDevice->getFilename();
-        auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
-        if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
-        if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+        if(parameter->parent())
+        {
+            auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
+            if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
+            if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+        }
 
         return description;
     }

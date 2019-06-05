@@ -70,6 +70,7 @@ public:
     virtual void onRPCNewDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceDescriptions) = 0;
     virtual void onRPCDeleteDevices(std::vector<uint64_t>& ids, std::shared_ptr<Variable> deviceAddresses, std::shared_ptr<Variable> deviceInfo) = 0;
     virtual void onEvent(std::string source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> values) = 0;
+    virtual void onProcessEvent(pid_t processId, const BaseLib::PVariable& data) = 0;
     virtual void onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait) = 0;
     virtual BaseLib::PVariable onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters) = 0;
     virtual int32_t onCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey) = 0;
