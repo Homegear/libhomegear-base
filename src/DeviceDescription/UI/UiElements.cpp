@@ -162,7 +162,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             {
                 if(peerInfo->inputPeers.empty() || i >= (int32_t)peerInfo->inputPeers.at(0).size()) break;
                 variableInput->peerId = peerInfo->inputPeers.at(0).at(i)->peerId;
-                if(peerInfo->inputPeers.at(0).at(i)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
+                variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
                 if(!peerInfo->inputPeers.at(0).at(i)->name.empty()) variableInput->name = peerInfo->inputPeers.at(0).at(i)->name;
                 if(peerInfo->inputPeers.at(0).at(i)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(0).at(i)->minimumValue;
                 if(peerInfo->inputPeers.at(0).at(i)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(0).at(i)->maximumValue;
@@ -176,7 +176,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             {
                 if(peerInfo->outputPeers.empty() || i >= (int32_t)peerInfo->outputPeers.at(0).size()) break;
                 variableOutput->peerId = peerInfo->outputPeers.at(0).at(i)->peerId;
-                if(peerInfo->outputPeers.at(0).at(i)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
+                variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
                 if(!peerInfo->outputPeers.at(0).at(i)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(0).at(i)->name;
                 if(peerInfo->outputPeers.at(0).at(i)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(0).at(i)->minimumValue;
                 if(peerInfo->outputPeers.at(0).at(i)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(0).at(i)->maximumValue;
@@ -200,7 +200,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     {
                         if(j >= (int32_t)peerInfo->inputPeers.at(i).size()) break;
                         variableInput->peerId = peerInfo->inputPeers.at(i).at(j)->peerId;
-                        if(peerInfo->inputPeers.at(i).at(j)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
+                        variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
                         if(!peerInfo->inputPeers.at(i).at(j)->name.empty()) variableInput->name = peerInfo->inputPeers.at(i).at(j)->name;
                         if(peerInfo->inputPeers.at(i).at(j)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(i).at(j)->minimumValue;
                         if(peerInfo->inputPeers.at(i).at(j)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(i).at(j)->maximumValue;
@@ -217,7 +217,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     {
                         if(j >= (int32_t)peerInfo->outputPeers.at(i).size()) break;
                         variableOutput->peerId = peerInfo->outputPeers.at(i).at(j)->peerId;
-                        if(peerInfo->outputPeers.at(i).at(j)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
+                        variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
                         if(!peerInfo->outputPeers.at(i).at(j)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(i).at(j)->name;
                         if(peerInfo->outputPeers.at(i).at(j)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(i).at(j)->minimumValue;
                         if(peerInfo->outputPeers.at(i).at(j)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(i).at(j)->maximumValue;
