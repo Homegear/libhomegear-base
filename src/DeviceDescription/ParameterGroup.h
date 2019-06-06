@@ -56,7 +56,7 @@ typedef std::shared_ptr<Variables> PVariables;
 typedef std::map<uint32_t, std::vector<PParameter>> Lists;
 
 
-class ParameterGroup
+class ParameterGroup : public std::enable_shared_from_this<ParameterGroup>
 {
 public:
 	struct Type

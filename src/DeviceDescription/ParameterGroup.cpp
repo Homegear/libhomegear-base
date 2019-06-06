@@ -78,7 +78,7 @@ void ParameterGroup::parseElements(xml_node<>* node)
 		std::string nodeName(subNode->name());
 		if(nodeName == "parameter")
 		{
-			PParameter parameter = std::make_shared<Parameter>(_bl, subNode, this);
+			PParameter parameter = std::make_shared<Parameter>(_bl, subNode, shared_from_this());
 			if(!parameter->id.empty())
 			{
 				parameters.insert(std::pair<std::string, PParameter>(parameter->id, parameter));

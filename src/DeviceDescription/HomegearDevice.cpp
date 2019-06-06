@@ -2479,7 +2479,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 			{
 				for(xml_node<>* typeNode = subNode->first_node("device"); typeNode; typeNode = typeNode->next_sibling("device"))
 				{
-					PSupportedDevice supportedDevice(new SupportedDevice(_bl, typeNode, this));
+					PSupportedDevice supportedDevice(new SupportedDevice(_bl, typeNode));
 					supportedDevices.push_back(supportedDevice);
 				}
 			}

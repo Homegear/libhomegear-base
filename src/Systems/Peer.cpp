@@ -1358,7 +1358,7 @@ void Peer::saveVariable(uint32_t index, std::vector<uint8_t>& binaryValue)
     }
 }
 
-BaseLib::DeviceDescription::PParameter Peer::createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const ParameterGroup* parameterGroup)
+BaseLib::DeviceDescription::PParameter Peer::createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const PParameterGroup& parameterGroup)
 {
     try
     {
@@ -1760,7 +1760,7 @@ void Peer::loadConfig()
 
                     if(variableInfoIterator != roleInfoIterator->second->structValue->end() && variableBaseNameIterator != roleInfoIterator->second->structValue->end())
                     {
-                        parameter->parameter.rpcParameter = createRoleRpcParameter(variableInfoIterator->second, variableBaseNameIterator->second->stringValue, currentParameterGroup.get());
+                        parameter->parameter.rpcParameter = createRoleRpcParameter(variableInfoIterator->second, variableBaseNameIterator->second->stringValue, currentParameterGroup);
                     }
                 }
             }
@@ -3829,12 +3829,6 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
         std::string filename = _rpcDevice->getFilename();
         if(parameter->parent())
         {
-            if(_bl->settings.devLog())
-            {
-                _bl->out.printInfo(std::string("Devlog: Translations exist (" + parameter->id + "): ") + (central->getTranslations() ? "yes" : "no"));
-                _bl->out.printInfo(std::string("Devlog: Parent exists (" + parameter->id + "): ") + (parameter->parent() ? "yes" : "no"));
-                _bl->out.printInfo(std::string("Devlog: Parent ID (" + parameter->id + "): ") + parameter->parent()->id + ", type: " + std::to_string(parameter->parent()->type()));
-            }
             auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
             if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
             if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));

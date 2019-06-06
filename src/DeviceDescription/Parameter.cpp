@@ -55,15 +55,14 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent) : _parent(parent)
 {
 	_bl = baseLib;
-	_parent = parent;
 	logical.reset(new LogicalInteger(baseLib));
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent) : Parameter(baseLib, parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameterGroup& parent) : Parameter(baseLib, parent)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -113,30 +112,30 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const Pa
 					for(xml_node<>* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
 					{
 						std::string castName(castNode->name());
-						if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, this)));
-						else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, this)));
-						else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, this)));
-						else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, this)));
-						else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, this)));
-						else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, this)));
-						else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, this)));
-						else if(castName == "decimalConfigTime") casts.push_back(PDecimalConfigTime (new DecimalConfigTime(_bl, castNode, this)));
-						else if(castName == "integerTinyFloat") casts.push_back(PIntegerTinyFloat(new IntegerTinyFloat(_bl, castNode, this)));
-						else if(castName == "stringUnsignedInteger") casts.push_back(PStringUnsignedInteger(new StringUnsignedInteger(_bl, castNode, this)));
-						else if(castName == "blindTest") casts.push_back(PBlindTest(new BlindTest(_bl, castNode, this)));
-						else if(castName == "optionString") casts.push_back(POptionString(new OptionString(_bl, castNode, this)));
-						else if(castName == "optionInteger") casts.push_back(POptionInteger(new OptionInteger(_bl, castNode, this)));
-						else if(castName == "stringJsonArrayDecimal") casts.push_back(PStringJsonArrayDecimal(new StringJsonArrayDecimal(_bl, castNode, this)));
-						else if(castName == "rpcBinary") casts.push_back(PRpcBinary(new RpcBinary(_bl, castNode, this)));
-						else if(castName == "toggle") casts.push_back(PToggle(new Toggle(_bl, castNode, this)));
-						else if(castName == "cfm") casts.push_back(PCfm(new Cfm(_bl, castNode, this)));
-						else if(castName == "ccrtdnParty") casts.push_back(PCcrtdnParty(new CcrtdnParty(_bl, castNode, this)));
-						else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, this)));
-						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, this)));
-						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, this)));
-						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, this)));
-						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, this)));
-						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
+						if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, shared_from_this())));
+						else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, shared_from_this())));
+						else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, shared_from_this())));
+						else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, shared_from_this())));
+						else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, shared_from_this())));
+						else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, shared_from_this())));
+						else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, shared_from_this())));
+						else if(castName == "decimalConfigTime") casts.push_back(PDecimalConfigTime (new DecimalConfigTime(_bl, castNode, shared_from_this())));
+						else if(castName == "integerTinyFloat") casts.push_back(PIntegerTinyFloat(new IntegerTinyFloat(_bl, castNode, shared_from_this())));
+						else if(castName == "stringUnsignedInteger") casts.push_back(PStringUnsignedInteger(new StringUnsignedInteger(_bl, castNode, shared_from_this())));
+						else if(castName == "blindTest") casts.push_back(PBlindTest(new BlindTest(_bl, castNode, shared_from_this())));
+						else if(castName == "optionString") casts.push_back(POptionString(new OptionString(_bl, castNode, shared_from_this())));
+						else if(castName == "optionInteger") casts.push_back(POptionInteger(new OptionInteger(_bl, castNode, shared_from_this())));
+						else if(castName == "stringJsonArrayDecimal") casts.push_back(PStringJsonArrayDecimal(new StringJsonArrayDecimal(_bl, castNode, shared_from_this())));
+						else if(castName == "rpcBinary") casts.push_back(PRpcBinary(new RpcBinary(_bl, castNode, shared_from_this())));
+						else if(castName == "toggle") casts.push_back(PToggle(new Toggle(_bl, castNode, shared_from_this())));
+						else if(castName == "cfm") casts.push_back(PCfm(new Cfm(_bl, castNode, shared_from_this())));
+						else if(castName == "ccrtdnParty") casts.push_back(PCcrtdnParty(new CcrtdnParty(_bl, castNode, shared_from_this())));
+						else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, shared_from_this())));
+						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, shared_from_this())));
+						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, shared_from_this())));
+						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, shared_from_this())));
+						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, shared_from_this())));
+						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, shared_from_this())));
 						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
 					}
 				}
@@ -689,9 +688,9 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
     }
 }
 
-const ParameterGroup* Parameter::parent()
+const PParameterGroup Parameter::parent()
 {
-	return _parent;
+	return _parent.lock();
 }
 
 }

@@ -51,13 +51,14 @@ namespace DeviceDescription
 
 class Parameter;
 class ParameterGroup;
+typedef std::shared_ptr<ParameterGroup> PParameterGroup;
 
 typedef std::shared_ptr<Parameter> PParameter;
 typedef std::map<std::string, PParameter> Parameters;
 typedef std::string ParameterRole;
 typedef std::set<uint64_t> ParameterRoles;
 
-class Parameter
+class Parameter : public std::enable_shared_from_this<Parameter>
 {
 public:
 	class Packet
@@ -126,8 +127,8 @@ public:
 	//Helpers
 	bool hasDelayedAutoResetParameters = false;
 
-	Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent);
-	Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent);
+	explicit Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent);
+	explicit Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameterGroup& parent);
 	virtual ~Parameter();
 
 	//Helpers
@@ -158,12 +159,12 @@ public:
 
 	void adjustBitPosition(std::vector<uint8_t>& data);
 
-	const ParameterGroup* parent();
+	const PParameterGroup parent();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 
 	//Helpers
-	const ParameterGroup* _parent = nullptr;
+	std::weak_ptr<ParameterGroup> _parent;
 
 	/**
 	 * Reverses a binary array.

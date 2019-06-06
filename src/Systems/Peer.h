@@ -533,7 +533,7 @@ protected:
 	 * @param parameterGroup The parameter group the parameter should belong to.
 	 * @return Returns a RPC parameter based on variableInfo.
 	 */
-	BaseLib::DeviceDescription::PParameter createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const ParameterGroup* parameterGroup);
+	BaseLib::DeviceDescription::PParameter createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const PParameterGroup& parameterGroup);
 
 	/**
 	 * Gets a variable value directly from the device. This method is used as an inheritable hook method within getValue().
