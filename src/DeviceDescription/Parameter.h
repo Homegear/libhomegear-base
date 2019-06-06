@@ -128,8 +128,9 @@ public:
 	bool hasDelayedAutoResetParameters = false;
 
 	explicit Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent);
-	explicit Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameterGroup& parent);
 	virtual ~Parameter();
+
+	void parseXml(xml_node<>* node);
 
 	//Helpers
 	/**

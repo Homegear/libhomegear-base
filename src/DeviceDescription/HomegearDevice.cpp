@@ -2546,17 +2546,20 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					std::string parameterGroupName(parameterGroupNode->name());
 					if(parameterGroupName == "configParameters")
 					{
-						PConfigParameters config(new ConfigParameters(_bl, parameterGroupNode));
+						PConfigParameters config(new ConfigParameters(_bl));
+						config->parseXml(parameterGroupNode);
 						configParameters[config->id] = config;
 					}
 					else if(parameterGroupName == "variables")
 					{
-						PVariables config(new Variables(_bl, parameterGroupNode));
+						PVariables config(new Variables(_bl));
+						config->parseXml(parameterGroupNode);
 						variables[config->id] = config;
 					}
 					else if(parameterGroupName == "linkParameters")
 					{
-						PLinkParameters config(new LinkParameters(_bl, parameterGroupNode));
+						PLinkParameters config(new LinkParameters(_bl));
+                        config->parseXml(parameterGroupNode);
 						linkParameters[config->id] = config;
 					}
 					else _bl->out.printWarning("Warning: Unknown parameter group: " + parameterGroupName);
@@ -2596,10 +2599,6 @@ void HomegearDevice::parseXML(xml_node<>* node)
     catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
