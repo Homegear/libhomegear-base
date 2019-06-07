@@ -55,6 +55,7 @@ void Settings::reset()
 	_ssdpPort = 1900;
 	_enableMonitoring = true;
 	_devLog = false;
+    _ipcLog = false;
 	_enableCoreDumps = true;
 	_enableNodeBlue = true;
 	_setDevicePermissions = true;
@@ -263,9 +264,14 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "devlog")
 				{
-					if(HelperFunctions::toLower(value) == "true") _devLog = true;
+					_devLog = HelperFunctions::toLower(value) == "true";
 					_bl->out.printDebug("Debug: devLog set to " + std::to_string(_devLog));
 				}
+                else if(name == "ipclog")
+                {
+                    _ipcLog = HelperFunctions::toLower(value) == "true";
+                    _bl->out.printDebug("Debug: ipcLog set to " + std::to_string(_ipcLog));
+                }
 				else if(name == "enablecoredumps")
 				{
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;

@@ -58,6 +58,7 @@ public:
 	int32_t ssdpPort() { return _ssdpPort; }
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
+    bool ipcLog() { return _ipcLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
 	bool enableNodeBlue() { return _enableNodeBlue; }
 	bool setDevicePermissions() { return _setDevicePermissions; }
@@ -182,6 +183,7 @@ private:
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
 	bool _devLog = false;
+    bool _ipcLog = false;
 	bool _enableCoreDumps = true;
 	bool _enableNodeBlue = true;
 	bool _setDevicePermissions = true;
