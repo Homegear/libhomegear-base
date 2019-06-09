@@ -32,6 +32,7 @@
 #define LIBHOMEGEAR_BASE_PROCESSMANAGER_H
 
 #include "../Exception.h"
+#include "ThreadManager.h"
 
 #include <string>
 #include <vector>
@@ -58,7 +59,19 @@ class ProcessManager
 public:
     ProcessManager() = delete;
 
-    static void registerSignalHandler();
+    /**
+     * Starts the signal handler thread. Must be called from main thread. You need to call stopSignalHandler() before
+     * exiting the program. When using ThreadManager, pass it to this method.
+     */
+    static void startSignalHandler();
+
+    /**
+     * Starts the signal handler thread. Must be called from main thread. You need to call stopSignalHandler() before
+     * exiting the program. When using ThreadManager, pass it to this method.
+     */
+    static void startSignalHandler(BaseLib::ThreadManager& threadManager);
+    static void stopSignalHandler();
+    static void stopSignalHandler(BaseLib::ThreadManager& threadManager);
 
     static int32_t registerCallbackHandler(std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)> callbackHandler);
     static void unregisterCallbackHandler(int32_t id);
@@ -109,7 +122,6 @@ public:
     static FILE* popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid);
 private:
     struct OpaquePointer;
-    static std::unique_ptr<OpaquePointer> _opaquePointer;
 };
 
 }

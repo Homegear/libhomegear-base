@@ -37,57 +37,82 @@
 #include <map>
 #include <unordered_map>
 #include <list>
+#include <atomic>
+#include <thread>
+#include <iostream>
 
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <thread>
+#include <signal.h>
+#include <bits/types/siginfo_t.h>
 
 namespace BaseLib
 {
-
-std::unique_ptr<ProcessManager::OpaquePointer> ProcessManager::_opaquePointer;
-
 class ProcessManager::OpaquePointer
 {
 public:
     static int32_t _currentId;
     static std::mutex _callbackHandlersMutex;
     static std::unordered_map<int32_t, std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)>> _callbackHandlers;
+    static std::atomic_bool _stopSignalHandlerThread;
+    static std::thread _signalHandlerThread;
 
     static std::mutex _lastExitStatusMutex;
     static std::map<int64_t, std::pair<pid_t, int>> _lastExitStatus;
 
-    static void signalHandler(int signalNumber)
+    static void signalHandler()
     {
+        sigset_t set{};
+        timespec timeout{};
+        timeout.tv_sec = 0;
+        timeout.tv_nsec = 100000000;
+        int signalNumber = -1;
+        int exitCode = -1;
+        int childSignalNumber = -1;
+        sigemptyset(&set);
+        sigaddset(&set, SIGCHLD);
+
         pid_t pid;
         int status;
 
-        while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+        while(!_stopSignalHandlerThread)
         {
-            int exitCode = WEXITSTATUS(status);
-            int signal = -1;
-            bool coreDumped = false;
-            if(WIFSIGNALED(status))
+            try
             {
-                signal = WTERMSIG(status);
-                if(WCOREDUMP(status)) coreDumped = true;
-            }
+                siginfo_t info{};
+                signalNumber = sigtimedwait(&set, &info, &timeout);
+                if(signalNumber != SIGCHLD) continue;
 
-            {
-                std::lock_guard<std::mutex> lastExistStatusGuard(_opaquePointer->_lastExitStatusMutex);
-                auto time = HelperFunctions::getTime();
-                while(_lastExitStatus.find(time) != _lastExitStatus.end()) time++;
-                _lastExitStatus.emplace(time, std::make_pair(pid, exitCode));
-                while(!_lastExitStatus.empty() && time - _lastExitStatus.begin()->first > 60000) _lastExitStatus.erase(_lastExitStatus.begin());
-            }
-
-            {
-                std::lock_guard<std::mutex> callbackHandlersGuard(_opaquePointer->_callbackHandlersMutex);
-                for(auto& callbackHandler : _callbackHandlers)
+                pid = info.si_pid;
+                status = info.si_status;
+                exitCode = WEXITSTATUS(status);
+                bool coreDumped = false;
+                if(WIFSIGNALED(status))
                 {
-                    callbackHandler.second(pid, exitCode, signal, coreDumped);
+                    childSignalNumber = WTERMSIG(status);
+                    if(WCOREDUMP(status)) coreDumped = true;
                 }
+
+                {
+                    std::lock_guard<std::mutex> lastExistStatusGuard(_lastExitStatusMutex);
+                    auto time = HelperFunctions::getTime();
+                    while(_lastExitStatus.find(time) != _lastExitStatus.end()) time++;
+                    _lastExitStatus.emplace(time, std::make_pair(pid, exitCode));
+                    while(!_lastExitStatus.empty() && time - _lastExitStatus.begin()->first > 60000) _lastExitStatus.erase(_lastExitStatus.begin());
+                }
+
+                {
+                    std::lock_guard<std::mutex> callbackHandlersGuard(_callbackHandlersMutex);
+                    for(auto& callbackHandler : _callbackHandlers)
+                    {
+                        callbackHandler.second(pid, exitCode, childSignalNumber, coreDumped);
+                    }
+                }
+            }
+            catch(const std::exception& ex)
+            {
+                std::cerr << "Error in ProcessManager::signalHandler: " << ex.what() << std::endl;
             }
         }
     }
@@ -98,28 +123,61 @@ std::mutex ProcessManager::OpaquePointer::_callbackHandlersMutex;
 std::unordered_map<int32_t, std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)>> ProcessManager::OpaquePointer::_callbackHandlers;
 std::mutex ProcessManager::OpaquePointer::_lastExitStatusMutex;
 std::map<int64_t, std::pair<pid_t, int>> ProcessManager::OpaquePointer::_lastExitStatus;
+std::atomic_bool ProcessManager::OpaquePointer::_stopSignalHandlerThread{true};
+std::thread ProcessManager::OpaquePointer::_signalHandlerThread;
 
-void ProcessManager::registerSignalHandler()
+void ProcessManager::startSignalHandler()
 {
-    struct sigaction sa{};
-    sa.sa_handler = _opaquePointer->signalHandler;
-    sigaction(SIGCHLD, &sa, nullptr);
+    OpaquePointer::_stopSignalHandlerThread = false;
+
+    sigset_t set{};
+    sigemptyset(&set);
+    sigprocmask(SIG_BLOCK, nullptr, &set);
+    sigaddset(&set, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &set, nullptr);
+
+    OpaquePointer::_signalHandlerThread = std::thread(&OpaquePointer::signalHandler);
+}
+
+void ProcessManager::startSignalHandler(BaseLib::ThreadManager& threadManager)
+{
+    OpaquePointer::_stopSignalHandlerThread = false;
+
+    sigset_t set{};
+    sigemptyset(&set);
+    sigprocmask(SIG_BLOCK, nullptr, &set);
+    sigaddset(&set, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &set, nullptr);
+
+    threadManager.start(OpaquePointer::_signalHandlerThread, true, &ProcessManager::OpaquePointer::signalHandler);
+}
+
+void ProcessManager::stopSignalHandler()
+{
+    OpaquePointer::_stopSignalHandlerThread = true;
+    if(OpaquePointer::_signalHandlerThread.joinable()) OpaquePointer::_signalHandlerThread.join();
+}
+
+void ProcessManager::stopSignalHandler(BaseLib::ThreadManager& threadManager)
+{
+    OpaquePointer::_stopSignalHandlerThread = true;
+    threadManager.join(OpaquePointer::_signalHandlerThread);
 }
 
 int32_t ProcessManager::registerCallbackHandler(std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)> callbackHandler)
 {
-    std::lock_guard<std::mutex> callbackHandlersGuard(_opaquePointer->_callbackHandlersMutex);
+    std::lock_guard<std::mutex> callbackHandlersGuard(OpaquePointer::_callbackHandlersMutex);
     int32_t currentId = -1;
-    while(currentId == -1) currentId = _opaquePointer->_currentId++;
-    _opaquePointer->_callbackHandlers[currentId].swap(callbackHandler);
+    while(currentId == -1) currentId = OpaquePointer::_currentId++;
+    OpaquePointer::_callbackHandlers[currentId].swap(callbackHandler);
     return currentId;
 }
 
 void ProcessManager::unregisterCallbackHandler(int32_t id)
 {
     if(id == -1) return;
-    std::lock_guard<std::mutex> callbackHandlersGuard(_opaquePointer->_callbackHandlersMutex);
-    _opaquePointer->_callbackHandlers.erase(id);
+    std::lock_guard<std::mutex> callbackHandlersGuard(OpaquePointer::_callbackHandlersMutex);
+    OpaquePointer::_callbackHandlers.erase(id);
 }
 
 std::vector<std::string> ProcessManager::splitArguments(const std::string& arguments)
@@ -174,6 +232,24 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
     if(pid == -1) return pid;
     else if(pid == 0)
     {
+        sigset_t set{};
+        sigemptyset(&set);
+        sigaddset(&set, SIGHUP);
+        sigaddset(&set, SIGTERM);
+        sigaddset(&set, SIGINT);
+        sigaddset(&set, SIGABRT);
+        sigaddset(&set, SIGSEGV);
+        sigaddset(&set, SIGQUIT);
+        sigaddset(&set, SIGILL);
+        sigaddset(&set, SIGFPE);
+        sigaddset(&set, SIGALRM);
+        sigaddset(&set, SIGUSR1);
+        sigaddset(&set, SIGUSR2);
+        sigaddset(&set, SIGTSTP);
+        sigaddset(&set, SIGTTIN);
+        sigaddset(&set, SIGTTOU);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+
         // Close all non standard descriptors
         for(int32_t i = 3; i < maxFd; ++i)
         {
@@ -190,11 +266,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
             argv[i + 1] = (char*)arguments[i].c_str();
         }
         argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1)
-        {
-            throw ProcessException("Error: Could not start program: " + std::string(strerror(errno)));
-        }
-        _exit(1);
+        if(execv(command.c_str(), argv) == -1) _exit(1);
     }
 
     //Parent process
@@ -250,6 +322,24 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     else if(pid == 0)
     {
         //Child process
+
+        sigset_t set{};
+        sigemptyset(&set);
+        sigaddset(&set, SIGHUP);
+        sigaddset(&set, SIGTERM);
+        sigaddset(&set, SIGINT);
+        sigaddset(&set, SIGABRT);
+        sigaddset(&set, SIGSEGV);
+        sigaddset(&set, SIGQUIT);
+        sigaddset(&set, SIGILL);
+        sigaddset(&set, SIGFPE);
+        sigaddset(&set, SIGALRM);
+        sigaddset(&set, SIGUSR1);
+        sigaddset(&set, SIGUSR2);
+        sigaddset(&set, SIGTSTP);
+        sigaddset(&set, SIGTTIN);
+        sigaddset(&set, SIGTTOU);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
 
         if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
 
@@ -322,8 +412,8 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    std::lock_guard<std::mutex> lastExistStatusGuard(_opaquePointer->_lastExitStatusMutex);
-    for(auto& entry : _opaquePointer->_lastExitStatus)
+    std::lock_guard<std::mutex> lastExistStatusGuard(OpaquePointer::_lastExitStatusMutex);
+    for(auto& entry : OpaquePointer::_lastExitStatus)
     {
         if(entry.second.first == pid) return entry.second.second;
     }
@@ -347,6 +437,25 @@ FILE* ProcessManager::popen2(const std::string& command, const std::string& type
     if(pid == 0)
     {
         //Child process
+
+        sigset_t set{};
+        sigemptyset(&set);
+        sigaddset(&set, SIGHUP);
+        sigaddset(&set, SIGTERM);
+        sigaddset(&set, SIGINT);
+        sigaddset(&set, SIGABRT);
+        sigaddset(&set, SIGSEGV);
+        sigaddset(&set, SIGQUIT);
+        sigaddset(&set, SIGILL);
+        sigaddset(&set, SIGFPE);
+        sigaddset(&set, SIGALRM);
+        sigaddset(&set, SIGUSR1);
+        sigaddset(&set, SIGUSR2);
+        sigaddset(&set, SIGTSTP);
+        sigaddset(&set, SIGTTIN);
+        sigaddset(&set, SIGTTOU);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+
         if (type == "r")
         {
             if(dup2(fd[1], STDOUT_FILENO) == -1) _exit(1);
