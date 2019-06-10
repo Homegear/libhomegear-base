@@ -45,7 +45,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
-#include <bits/types/siginfo_t.h>
 
 namespace BaseLib
 {
