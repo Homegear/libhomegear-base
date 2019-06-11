@@ -84,6 +84,7 @@ public:
                 if(signalNumber != SIGCHLD) continue;
 
                 pid = info.si_pid;
+                if(waitpid(pid, nullptr, 0) == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
                 status = info.si_status;
                 exitCode = WEXITSTATUS(status);
                 bool coreDumped = false;
