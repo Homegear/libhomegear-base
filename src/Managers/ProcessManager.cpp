@@ -231,8 +231,11 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
     if(pid == -1) return pid;
     else if(pid == 0)
     {
+        //Child process
+
         sigset_t set{};
         sigemptyset(&set);
+        sigaddset(&set, SIGCHLD);
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGTERM);
         sigaddset(&set, SIGINT);
@@ -324,6 +327,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
 
         sigset_t set{};
         sigemptyset(&set);
+        sigaddset(&set, SIGCHLD);
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGTERM);
         sigaddset(&set, SIGINT);
@@ -439,6 +443,7 @@ FILE* ProcessManager::popen2(const std::string& command, const std::string& type
 
         sigset_t set{};
         sigemptyset(&set);
+        sigaddset(&set, SIGCHLD);
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGTERM);
         sigaddset(&set, SIGINT);
