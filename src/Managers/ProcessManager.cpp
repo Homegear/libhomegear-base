@@ -73,12 +73,8 @@ public:
         timeout.tv_nsec = 100000000;
         int signalNumber = -1;
         int exitCode = -1;
-        int childSignalNumber = -1;
         sigemptyset(&set);
         sigaddset(&set, SIGCHLD);
-
-        pid_t pid;
-        int status;
 
         while(!_stopSignalHandlerThread)
         {
@@ -88,11 +84,13 @@ public:
                 signalNumber = sigtimedwait(&set, &info, &timeout);
                 if(signalNumber != SIGCHLD) continue;
 
-                pid = info.si_pid;
+                auto pid = info.si_pid;
+                int status = 0;
                 auto result = waitpid(pid, &status, 0);
                 if(result == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
                 exitCode = (result == -1 ? -1 : WEXITSTATUS(status));
                 bool coreDumped = false;
+                int childSignalNumber = -1;
                 if(WIFSIGNALED(status))
                 {
                     childSignalNumber = WTERMSIG(status);
