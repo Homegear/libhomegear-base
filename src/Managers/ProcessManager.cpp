@@ -58,7 +58,12 @@ public:
     static std::thread _signalHandlerThread;
 
     static std::mutex _lastExitStatusMutex;
-    static std::map<int64_t, std::pair<pid_t, int>> _lastExitStatus;
+    struct ExitInfo
+    {
+        int64_t time = 0;
+        int exitCode = -1;
+    };
+    static std::unordered_map<pid_t, ExitInfo> _lastExitStatus;
 
     static void signalHandler()
     {
@@ -84,9 +89,9 @@ public:
                 if(signalNumber != SIGCHLD) continue;
 
                 pid = info.si_pid;
-                if(waitpid(pid, nullptr, 0) == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
-                status = info.si_status;
-                exitCode = WEXITSTATUS(status);
+                auto result = waitpid(pid, &status, 0);
+                if(result == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
+                exitCode = (result == -1 ? -1 : WEXITSTATUS(status));
                 bool coreDumped = false;
                 if(WIFSIGNALED(status))
                 {
@@ -97,9 +102,20 @@ public:
                 {
                     std::lock_guard<std::mutex> lastExistStatusGuard(_lastExitStatusMutex);
                     auto time = HelperFunctions::getTime();
-                    while(_lastExitStatus.find(time) != _lastExitStatus.end()) time++;
-                    _lastExitStatus.emplace(time, std::make_pair(pid, exitCode));
-                    while(!_lastExitStatus.empty() && time - _lastExitStatus.begin()->first > 60000) _lastExitStatus.erase(_lastExitStatus.begin());
+                    _lastExitStatus.erase(pid);
+                    ExitInfo exitInfo{};
+                    exitInfo.time = time;
+                    exitInfo.exitCode = exitCode;
+                    _lastExitStatus.emplace(pid, std::move(exitInfo));
+                    std::unordered_set<pid_t> entriesToErase;
+                    for(auto& entry : _lastExitStatus)
+                    {
+                        if(time - entry.second.time > 60000) entriesToErase.emplace(entry.first);
+                    }
+                    for(auto entry : entriesToErase)
+                    {
+                        _lastExitStatus.erase(entry);
+                    }
                 }
 
                 {
@@ -122,7 +138,7 @@ int32_t ProcessManager::OpaquePointer::_currentId = 0;
 std::mutex ProcessManager::OpaquePointer::_callbackHandlersMutex;
 std::unordered_map<int32_t, std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)>> ProcessManager::OpaquePointer::_callbackHandlers;
 std::mutex ProcessManager::OpaquePointer::_lastExitStatusMutex;
-std::map<int64_t, std::pair<pid_t, int>> ProcessManager::OpaquePointer::_lastExitStatus;
+std::unordered_map<pid_t, ProcessManager::OpaquePointer::ExitInfo> ProcessManager::OpaquePointer::_lastExitStatus;
 std::atomic_bool ProcessManager::OpaquePointer::_stopSignalHandlerThread{true};
 std::thread ProcessManager::OpaquePointer::_signalHandlerThread;
 
@@ -410,18 +426,21 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
     {
     }
     fclose(pipe);
-    int status = 0;
-    while(waitpid(pid, &status, WNOHANG) == 0)
+
+    while(!OpaquePointer::_stopSignalHandlerThread)
     {
+        {
+            std::lock_guard<std::mutex> lastExistStatusGuard(OpaquePointer::_lastExitStatusMutex);
+            auto entry = OpaquePointer::_lastExitStatus.find(pid);
+            if(entry != OpaquePointer::_lastExitStatus.end())
+            {
+                return entry->second.exitCode;
+            }
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    std::lock_guard<std::mutex> lastExistStatusGuard(OpaquePointer::_lastExitStatusMutex);
-    for(auto& entry : OpaquePointer::_lastExitStatus)
-    {
-        if(entry.second.first == pid) return entry.second.second;
-    }
-    return -1; //No status was found.
+    return -1;
 }
 
 FILE* ProcessManager::popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid)
