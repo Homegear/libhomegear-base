@@ -178,6 +178,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                 variableOutput->peerId = peerInfo->outputPeers.at(0).at(i)->peerId;
                 variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
                 if(!peerInfo->outputPeers.at(0).at(i)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(0).at(i)->name;
+                if(peerInfo->outputPeers.at(0).at(i)->value) variableOutput->value = peerInfo->outputPeers.at(0).at(i)->value;
                 if(peerInfo->outputPeers.at(0).at(i)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(0).at(i)->minimumValue;
                 if(peerInfo->outputPeers.at(0).at(i)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(0).at(i)->maximumValue;
                 if(peerInfo->outputPeers.at(0).at(i)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(0).at(i)->minimumValueScaled;
@@ -219,6 +220,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                         variableOutput->peerId = peerInfo->outputPeers.at(i).at(j)->peerId;
                         variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
                         if(!peerInfo->outputPeers.at(i).at(j)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(i).at(j)->name;
+                        if(peerInfo->outputPeers.at(i).at(j)->value) variableOutput->value = peerInfo->outputPeers.at(i).at(j)->value;
                         if(peerInfo->outputPeers.at(i).at(j)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(i).at(j)->minimumValue;
                         if(peerInfo->outputPeers.at(i).at(j)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(i).at(j)->maximumValue;
                         if(peerInfo->outputPeers.at(i).at(j)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(i).at(j)->minimumValueScaled;

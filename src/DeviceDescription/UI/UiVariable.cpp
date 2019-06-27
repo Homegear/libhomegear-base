@@ -104,6 +104,11 @@ UiVariable::UiVariable(UiVariable const& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    if(rhs.value)
+    {
+        value = std::make_shared<Variable>();
+        *value = *rhs.value;
+    }
     visualizeInOverview = rhs.visualizeInOverview;
     unit = rhs.unit;
     if(rhs.minimumValue)
@@ -146,6 +151,11 @@ UiVariable& UiVariable::operator=(const UiVariable& rhs)
     deviceTypeId = rhs.deviceTypeId;
     channel = rhs.channel;
     name = rhs.name;
+    if(rhs.value)
+    {
+        value = std::make_shared<Variable>();
+        *value = *rhs.value;
+    }
     visualizeInOverview = rhs.visualizeInOverview;
     unit = rhs.unit;
     if(rhs.minimumValue)

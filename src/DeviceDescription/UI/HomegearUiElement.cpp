@@ -334,6 +334,7 @@ PVariable HomegearUiElement::getElementInfo()
             output->structValue->emplace("peer", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
             output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
             output->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableOutput->name));
+            if(variableOutput->value) output->structValue->emplace("value", variableOutput->value);
 
             auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             if(variableOutput->minimumValue) variableProperties->structValue->emplace("minimum", variableOutput->minimumValue);

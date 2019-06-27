@@ -57,6 +57,7 @@ public:
         uint64_t peerId = 0;
         int32_t channel = -1;
         std::string name;
+        PVariable value;
         PVariable minimumValue;
         PVariable maximumValue;
         PVariable minimumValueScaled;
