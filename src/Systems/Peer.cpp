@@ -4097,6 +4097,69 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         PParameter rpcParameter = parameter.rpcParameter;
         if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 
+        // {{{ Boundary check and variable conversion
+        if(rpcParameter->logical->type == ILogical::Type::tBoolean)
+        {
+            if(value->type == BaseLib::VariableType::tInteger) value->booleanValue = (bool)value->integerValue;
+            else if(value->type == BaseLib::VariableType::tInteger64) value->booleanValue = (bool)value->integerValue64;
+            else if(value->type == BaseLib::VariableType::tFloat)  value->booleanValue = (bool)value->floatValue;
+        }
+        else if(rpcParameter->logical->type == ILogical::Type::tInteger)
+        {
+            if(value->type == BaseLib::VariableType::tInteger64) value->integerValue = value->integerValue64;
+            else if(value->type == BaseLib::VariableType::tFloat)  value->integerValue = (int32_t)value->floatValue;
+            else if(value->type == BaseLib::VariableType::tBoolean)  value->integerValue = value->booleanValue;
+
+            PLogicalInteger logical = std::dynamic_pointer_cast<LogicalInteger>(rpcParameter->logical);
+            if(logical)
+            {
+                if(value->integerValue > logical->maximumValue) value->integerValue = logical->maximumValue;
+                else if(value->integerValue < logical->minimumValue) value->integerValue = logical->minimumValue;
+            }
+        }
+        else if(rpcParameter->logical->type == ILogical::Type::tInteger64)
+        {
+            if(value->type == BaseLib::VariableType::tInteger && value->integerValue64 == 0) value->integerValue64 = value->integerValue;
+            else if(value->type == BaseLib::VariableType::tFloat)  value->integerValue64 = (int64_t)value->floatValue;
+            else if(value->type == BaseLib::VariableType::tBoolean)  value->integerValue64 = value->booleanValue;
+
+            PLogicalInteger64 logical = std::dynamic_pointer_cast<LogicalInteger64>(rpcParameter->logical);
+            if(logical)
+            {
+                if(value->integerValue64 > logical->maximumValue) value->integerValue64 = logical->maximumValue;
+                else if(value->integerValue64 < logical->minimumValue) value->integerValue64 = logical->minimumValue;
+            }
+        }
+        else if(rpcParameter->logical->type == ILogical::Type::tFloat)
+        {
+            if(value->type == BaseLib::VariableType::tInteger) value->floatValue = value->integerValue;
+            else if(value->type == BaseLib::VariableType::tInteger64)  value->floatValue = value->integerValue64;
+            else if(value->type == BaseLib::VariableType::tBoolean)  value->floatValue = value->booleanValue;
+
+            PLogicalDecimal logical = std::dynamic_pointer_cast<LogicalDecimal>(rpcParameter->logical);
+            if(logical)
+            {
+                if(value->floatValue > logical->maximumValue) value->floatValue = logical->maximumValue;
+                else if(value->floatValue < logical->minimumValue) value->floatValue = logical->minimumValue;
+            }
+        }
+        else if(rpcParameter->logical->type == ILogical::Type::tEnum)
+        {
+            int32_t enumValue = 0;
+            if(value->type == BaseLib::VariableType::tInteger) enumValue = value->integerValue;
+            else if(value->type == BaseLib::VariableType::tInteger64)  enumValue = value->integerValue64;
+            else if(value->type == BaseLib::VariableType::tFloat)  enumValue = (int32_t)value->floatValue;
+            else if(value->type == BaseLib::VariableType::tBoolean)  enumValue = value->booleanValue;
+
+            PLogicalEnumeration logical = std::dynamic_pointer_cast<LogicalEnumeration>(rpcParameter->logical);
+            if(logical)
+            {
+                int32_t index = std::abs(logical->minimumValue) + enumValue;
+                if(index < 0 || index >= (signed)logical->values.size() || !logical->values.at(index).indexDefined) return Variable::createError(-11, "Unknown enumeration index.");
+            }
+        }
+        // }}}
+
         value->setType(rpcParameter->logical->type);
 
         //Perform operation on value
