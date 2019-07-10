@@ -435,7 +435,7 @@ public:
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-    virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
+    virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);
     virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
 	virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls);
     virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
@@ -555,7 +555,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index, const std::unordered_set<std::string>& fields);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

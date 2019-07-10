@@ -1355,12 +1355,12 @@ PVariable ICentral::getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t ch
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey)
+PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields)
 {
 	try
 	{
 		std::shared_ptr<Peer> peer(getPeer(id));
-		if(peer) return peer->getVariableDescription(clientInfo, channel, valueKey);
+		if(peer) return peer->getVariableDescription(clientInfo, channel, valueKey, fields);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)

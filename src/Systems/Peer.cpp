@@ -3424,7 +3424,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                 if(parameter.rpcParameter && parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 
-                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index);
+                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index, std::unordered_set<std::string>());
                 if(!description || description->errorStruct) continue;
 
                 index++;
@@ -3455,7 +3455,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                 if(parameter.rpcParameter && parameter.rpcParameter->logical->type == ILogical::Type::tInteger64) continue;
 #endif
 
-                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index);
+                PVariable description = getVariableDescription(clientInfo, parameter.rpcParameter, channel, parameterGroup->type(), index, std::unordered_set<std::string>());
                 if(!description || description->errorStruct) continue;
 
                 index++;
@@ -3473,7 +3473,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                     continue;
                 }
 
-                PVariable description = getVariableDescription(clientInfo, parameter.second, channel, parameterGroup->type(), index);
+                PVariable description = getVariableDescription(clientInfo, parameter.second, channel, parameterGroup->type(), index, std::unordered_set<std::string>());
                 if(!description || description->errorStruct) continue;
 
                 index++;
@@ -3588,7 +3588,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index)
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index, const std::unordered_set<std::string>& fields)
 {
     try
     {
@@ -3619,57 +3619,57 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
         {
             LogicalBoolean* logicalBoolean = (LogicalBoolean*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalBoolean->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalBoolean->defaultValue))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalBoolean->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalBoolean->defaultValue))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("BOOL")))));
         }
         else if(parameter->logical->type == ILogical::Type::tString)
         {
             LogicalString* logicalString = (LogicalString*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalString->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalString->defaultValue))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(std::string("")))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(std::string("")))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalString->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalString->defaultValue))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(std::string("")))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(std::string("")))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRING")))));
         }
         else if(parameter->logical->type == ILogical::Type::tAction)
         {
             LogicalAction* logicalAction = (LogicalAction*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalAction->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalAction->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations & 0xFE)))); //Remove read
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalAction->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalAction->defaultValue)))); //CCU needs this, otherwise updates are not processed in programs
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(true))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(false))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations & 0xFE)))); //Remove read
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ACTION")))));
         }
         else if(parameter->logical->type == ILogical::Type::tInteger)
         {
             LogicalInteger* logicalInteger = (LogicalInteger*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalInteger->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger->defaultValue))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalInteger->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger->defaultValue))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger->maximumValue))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger->minimumValue))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!logicalInteger->specialValuesStringMap.empty())
+            if((fields.empty() || fields.find("SPECIAL") != fields.end()) && !logicalInteger->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
                 for(std::unordered_map<std::string, int32_t>::iterator j = logicalInteger->specialValuesStringMap.begin(); j != logicalInteger->specialValuesStringMap.end(); ++j)
@@ -3682,22 +3682,22 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
                 description->structValue->insert(StructElement("SPECIAL", specialValues));
             }
 
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER")))));
         }
         else if(parameter->logical->type == ILogical::Type::tInteger64)
         {
             LogicalInteger64* logicalInteger64 = (LogicalInteger64*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalInteger64->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger64->defaultValue))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger64->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger64->minimumValue))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalInteger64->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalInteger64->defaultValue))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalInteger64->maximumValue))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalInteger64->minimumValue))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!logicalInteger64->specialValuesStringMap.empty())
+            if((fields.empty() || fields.find("SPECIAL") != fields.end()) && !logicalInteger64->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
                 for(std::unordered_map<std::string, int64_t>::iterator j = logicalInteger64->specialValuesStringMap.begin(); j != logicalInteger64->specialValuesStringMap.end(); ++j)
@@ -3710,43 +3710,46 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
                 description->structValue->insert(StructElement("SPECIAL", specialValues));
             }
 
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("INTEGER64")))));
         }
         else if(parameter->logical->type == ILogical::Type::tEnum)
         {
             LogicalEnumeration* logicalEnumeration = (LogicalEnumeration*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalEnumeration->defaultValueExists ? logicalEnumeration->defaultValue : 0))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(fields.empty() || fields.find("DEFAULT") != fields.end()) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalEnumeration->defaultValueExists ? logicalEnumeration->defaultValue : 0))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
 
-            PVariable valueList(new Variable(VariableType::tArray));
-            for(std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j)
+            if(fields.empty() || fields.find("VALUE_LIST") != fields.end())
             {
-                valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
+                PVariable valueList(new Variable(VariableType::tArray));
+                for(std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j)
+                {
+                    valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
+                }
+                description->structValue->insert(StructElement("VALUE_LIST", valueList));
             }
-            description->structValue->insert(StructElement("VALUE_LIST", valueList));
         }
         else if(parameter->logical->type == ILogical::Type::tFloat)
         {
             LogicalDecimal* logicalDecimal = (LogicalDecimal*)parameter->logical.get();
 
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            if(logicalDecimal->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalDecimal->defaultValue))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
-            description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalDecimal->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalDecimal->defaultValue))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
+            if(fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
 
-            if(!logicalDecimal->specialValuesStringMap.empty())
+            if((fields.empty() || fields.find("SPECIAL") != fields.end()) && !logicalDecimal->specialValuesStringMap.empty())
             {
                 PVariable specialValues(new Variable(VariableType::tArray));
                 for(std::unordered_map<std::string, double>::iterator j = logicalDecimal->specialValuesStringMap.begin(); j != logicalDecimal->specialValuesStringMap.end(); ++j)
@@ -3759,34 +3762,34 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
                 description->structValue->insert(StructElement("SPECIAL", specialValues));
             }
 
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
         }
         else if(parameter->logical->type == ILogical::Type::tArray)
         {
             if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
         }
         else if(parameter->logical->type == ILogical::Type::tStruct)
         {
             if(!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-            if(!parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-            description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-            description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-            description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-            if(index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-            description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
+            if((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
+            if(fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
+            if(fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
+            if(fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+            if((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
+            if(fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
         }
 
-        description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter->unit))));
-        if(parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(parameter->mandatory));
-        if(!parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameter->formFieldType))));
-        if(parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameter->formPosition))));
+        if(fields.empty() || fields.find("UNIT") != fields.end()) description->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter->unit))));
+        if((fields.empty() || fields.find("MANDATORY") != fields.end()) && parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(parameter->mandatory));
+        if((fields.empty() || fields.find("FORM_FIELD_TYPE") != fields.end()) && !parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameter->formFieldType))));
+        if((fields.empty() || fields.find("FORM_POSITION") != fields.end()) && parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameter->formPosition))));
 
         if(type == ParameterGroup::Type::Enum::variables)
         {
@@ -3795,43 +3798,55 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
             std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameter->id);
             if(valueParameterIterator == valuesCentralIterator->second.end()) return Variable::createError(-5, "Unknown parameter (3).");
 
-            auto room = valueParameterIterator->second.getRoom();
-            if(room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
-
-            auto categories = valueParameterIterator->second.getCategories();
-            if(!categories.empty())
+            if(fields.empty() || fields.find("ROOM") != fields.end())
             {
-                PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
-                categoriesResult->arrayValue->reserve(categories.size());
-                for(auto category : categories)
-                {
-                    categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
-                }
-                description->structValue->emplace("CATEGORIES", categoriesResult);
+                auto room = valueParameterIterator->second.getRoom();
+                if(room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
             }
 
-            auto roles = valueParameterIterator->second.getRoles();
-            if(!roles.empty())
+            if(fields.empty() || fields.find("CATEGORIES") != fields.end())
             {
-                PVariable rolesResult = std::make_shared<Variable>(VariableType::tArray);
-                rolesResult->arrayValue->reserve(roles.size());
-                for(auto role : roles)
+                auto categories = valueParameterIterator->second.getCategories();
+                if(!categories.empty())
                 {
-                    rolesResult->arrayValue->push_back(std::make_shared<Variable>(role));
+                    PVariable categoriesResult = std::make_shared<Variable>(VariableType::tArray);
+                    categoriesResult->arrayValue->reserve(categories.size());
+                    for(auto category : categories)
+                    {
+                        categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
+                    }
+                    description->structValue->emplace("CATEGORIES", categoriesResult);
                 }
-                description->structValue->emplace("ROLES", rolesResult);
+            }
+
+            if(fields.empty() || fields.find("ROLES") != fields.end())
+            {
+                auto roles = valueParameterIterator->second.getRoles();
+                if(!roles.empty())
+                {
+                    PVariable rolesResult = std::make_shared<Variable>(VariableType::tArray);
+                    rolesResult->arrayValue->reserve(roles.size());
+                    for(auto role : roles)
+                    {
+                        rolesResult->arrayValue->push_back(std::make_shared<Variable>(role));
+                    }
+                    description->structValue->emplace("ROLES", rolesResult);
+                }
             }
         }
 
-        std::shared_ptr<ICentral> central = getCentral();
-        if(!central) return description;
-        std::string language = clientInfo ? clientInfo->language : "en-US";
-        std::string filename = _rpcDevice->getFilename();
-        if(parameter->parent())
+        if(fields.empty() || fields.find("LABEL") != fields.end() || fields.find("DESCRIPTION") != fields.end())
         {
-            auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
-            if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
-            if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+            std::shared_ptr<ICentral> central = getCentral();
+            if(!central) return description;
+            std::string language = clientInfo ? clientInfo->language : "en-US";
+            std::string filename = _rpcDevice->getFilename();
+            if(parameter->parent())
+            {
+                auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
+                if(!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
+                if(!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+            }
         }
 
         return description;
@@ -3843,7 +3858,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey)
+PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields)
 {
     try
     {
@@ -3866,7 +3881,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, uint32_t chann
             if(parameterIterator2 == channelIterator->second.end()) return Variable::createError(-5, "Unknown parameter.");
         }
 
-        return getVariableDescription(clientInfo, parameterIterator->second.rpcParameter, channel, ParameterGroup::Type::Enum::variables, -1);
+        return getVariableDescription(clientInfo, parameterIterator->second.rpcParameter, channel, ParameterGroup::Type::Enum::variables, -1, fields);
     }
     catch(const std::exception& ex)
     {
