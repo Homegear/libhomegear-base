@@ -198,6 +198,12 @@ public:
     virtual bool userNameExists(const std::string& name) = 0;
 	//End users
 
+	//{{{ User data
+    virtual BaseLib::PVariable setUserData(uint64_t userId, const std::string& component, const std::string& key, const BaseLib::PVariable& value) = 0;
+    virtual BaseLib::PVariable getUserData(uint64_t userId, const std::string& component, const std::string& key) = 0;
+    virtual BaseLib::PVariable deleteUserData(uint64_t userId, const std::string& component, const std::string& key) = 0;
+	//}}}
+
     //Groups
     virtual BaseLib::PVariable createGroup(BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;
     virtual BaseLib::PVariable deleteGroup(uint64_t groupId) = 0;
