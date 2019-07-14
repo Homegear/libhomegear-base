@@ -48,7 +48,7 @@ void UiElements::clear()
     _uiInfo.clear();
 }
 
-void UiElements::load(std::string& language)
+void UiElements::load(const std::string& language)
 {
     try
     {
@@ -122,7 +122,7 @@ void UiElements::load(std::string& language)
     }
 }
 
-PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& id)
+PHomegearUiElement UiElements::getUiElement(const std::string& language, const std::string& id)
 {
     try
     {
@@ -145,7 +145,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
     return PHomegearUiElement();
 }
 
-PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& id, PUiPeerInfo peerInfo)
+PHomegearUiElement UiElements::getUiElement(const std::string& language, const std::string& id, PUiPeerInfo peerInfo)
 {
     try
     {
@@ -242,7 +242,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
     return PHomegearUiElement();
 }
 
-PVariable UiElements::getUiElements(std::string& language)
+PVariable UiElements::getUiElements(const std::string& language)
 {
     try
     {

@@ -76,8 +76,8 @@ public:
     virtual ~UiElements() = default;
     void clear();
 
-    PVariable getUiElements(std::string& language);
-    PHomegearUiElement getUiElement(std::string& language, std::string& id);
+    PVariable getUiElements(const std::string& language);
+    PHomegearUiElement getUiElement(const std::string& language, const std::string& id);
 
     /**
      * Returns an UI element and assigns peer IDs to it.
@@ -87,13 +87,13 @@ public:
      * @param peerInfo The peer IDs to assign
      * @return Returns the UI element on success.
      */
-    PHomegearUiElement getUiElement(std::string& language, std::string& id, PUiPeerInfo peerInfo);
+    PHomegearUiElement getUiElement(const std::string& language, const std::string& id, PUiPeerInfo peerInfo);
 protected:
     BaseLib::SharedObjects* _bl = nullptr;
     std::mutex _uiInfoMutex;
     std::unordered_map<std::string, std::unordered_map<std::string, PHomegearUiElement>> _uiInfo;
 
-    void load(std::string& language);
+    void load(const std::string& language);
 };
 
 }
