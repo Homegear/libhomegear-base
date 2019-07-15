@@ -48,7 +48,7 @@ void UiElements::clear()
     _uiInfo.clear();
 }
 
-void UiElements::load(std::string& language)
+void UiElements::load(const std::string& language)
 {
     try
     {
@@ -120,17 +120,9 @@ void UiElements::load(std::string& language)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
-PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& id)
+PHomegearUiElement UiElements::getUiElement(const std::string& language, const std::string& id)
 {
     try
     {
@@ -150,18 +142,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return PHomegearUiElement();
 }
 
-PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& id, PUiPeerInfo peerInfo)
+PHomegearUiElement UiElements::getUiElement(const std::string& language, const std::string& id, PUiPeerInfo peerInfo)
 {
     try
     {
@@ -178,7 +162,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             {
                 if(peerInfo->inputPeers.empty() || i >= (int32_t)peerInfo->inputPeers.at(0).size()) break;
                 variableInput->peerId = peerInfo->inputPeers.at(0).at(i)->peerId;
-                if(peerInfo->inputPeers.at(0).at(i)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
+                variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
                 if(!peerInfo->inputPeers.at(0).at(i)->name.empty()) variableInput->name = peerInfo->inputPeers.at(0).at(i)->name;
                 if(peerInfo->inputPeers.at(0).at(i)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(0).at(i)->minimumValue;
                 if(peerInfo->inputPeers.at(0).at(i)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(0).at(i)->maximumValue;
@@ -192,8 +176,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
             {
                 if(peerInfo->outputPeers.empty() || i >= (int32_t)peerInfo->outputPeers.at(0).size()) break;
                 variableOutput->peerId = peerInfo->outputPeers.at(0).at(i)->peerId;
-                if(peerInfo->outputPeers.at(0).at(i)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
+                variableOutput->channel = peerInfo->outputPeers.at(0).at(i)->channel;
                 if(!peerInfo->outputPeers.at(0).at(i)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(0).at(i)->name;
+                if(peerInfo->outputPeers.at(0).at(i)->value) variableOutput->value = peerInfo->outputPeers.at(0).at(i)->value;
                 if(peerInfo->outputPeers.at(0).at(i)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(0).at(i)->minimumValue;
                 if(peerInfo->outputPeers.at(0).at(i)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(0).at(i)->maximumValue;
                 if(peerInfo->outputPeers.at(0).at(i)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(0).at(i)->minimumValueScaled;
@@ -216,7 +201,7 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     {
                         if(j >= (int32_t)peerInfo->inputPeers.at(i).size()) break;
                         variableInput->peerId = peerInfo->inputPeers.at(i).at(j)->peerId;
-                        if(peerInfo->inputPeers.at(i).at(j)->channel != -1) variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
+                        variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
                         if(!peerInfo->inputPeers.at(i).at(j)->name.empty()) variableInput->name = peerInfo->inputPeers.at(i).at(j)->name;
                         if(peerInfo->inputPeers.at(i).at(j)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(i).at(j)->minimumValue;
                         if(peerInfo->inputPeers.at(i).at(j)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(i).at(j)->maximumValue;
@@ -233,8 +218,9 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
                     {
                         if(j >= (int32_t)peerInfo->outputPeers.at(i).size()) break;
                         variableOutput->peerId = peerInfo->outputPeers.at(i).at(j)->peerId;
-                        if(peerInfo->outputPeers.at(i).at(j)->channel != -1) variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
+                        variableOutput->channel = peerInfo->outputPeers.at(i).at(j)->channel;
                         if(!peerInfo->outputPeers.at(i).at(j)->name.empty()) variableOutput->name = peerInfo->outputPeers.at(i).at(j)->name;
+                        if(peerInfo->outputPeers.at(i).at(j)->value) variableOutput->value = peerInfo->outputPeers.at(i).at(j)->value;
                         if(peerInfo->outputPeers.at(i).at(j)->minimumValue) variableOutput->minimumValue = peerInfo->outputPeers.at(i).at(j)->minimumValue;
                         if(peerInfo->outputPeers.at(i).at(j)->maximumValue) variableOutput->maximumValue = peerInfo->outputPeers.at(i).at(j)->maximumValue;
                         if(peerInfo->outputPeers.at(i).at(j)->minimumValueScaled) variableOutput->minimumValueScaled = peerInfo->outputPeers.at(i).at(j)->minimumValueScaled;
@@ -253,18 +239,10 @@ PHomegearUiElement UiElements::getUiElement(std::string& language, std::string& 
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return PHomegearUiElement();
 }
 
-PVariable UiElements::getUiElements(std::string& language)
+PVariable UiElements::getUiElements(const std::string& language)
 {
     try
     {
@@ -290,14 +268,6 @@ PVariable UiElements::getUiElements(std::string& language)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }

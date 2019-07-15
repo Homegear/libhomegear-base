@@ -68,6 +68,7 @@ public:
     int32_t deviceTypeId = -1;
     int32_t channel = -1;
     std::string name;
+    PVariable value;
 
     //Properties
     bool visualizeInOverview = true;

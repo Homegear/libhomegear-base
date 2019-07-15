@@ -82,6 +82,9 @@ public:
     bool fromUser(std::string& userName);
     bool fromGroups(std::vector<uint64_t>& groupIds);
 
+    PVariable toVariable();
+    void fromVariable(PVariable serializedData);
+
     /**
      * Checks if the ACLs grant access to a service.
      *

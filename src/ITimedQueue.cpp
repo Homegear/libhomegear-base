@@ -97,10 +97,6 @@ bool ITimedQueue::enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entr
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
 	catch(...)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -116,10 +112,6 @@ void ITimedQueue::removeQueueEntry(int32_t index, int64_t id)
 		_buffer[index].erase(id);
 	}
 	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
@@ -166,10 +158,6 @@ void ITimedQueue::process(int32_t index)
 			if(entry) processQueueEntry(index, id, entry);
 		}
 		catch(const std::exception& ex)
-		{
-			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-		}
-		catch(const BaseLib::Exception& ex)
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 		}

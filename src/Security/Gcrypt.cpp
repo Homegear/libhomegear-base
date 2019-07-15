@@ -29,13 +29,14 @@
 */
 
 #include "Gcrypt.h"
+#include "SecureVector.h"
 
 namespace BaseLib
 {
 namespace Security
 {
 
-Gcrypt::Gcrypt(int algorithm, int mode, unsigned int flags) : _algorithm(algorithm)
+Gcrypt::Gcrypt(int algorithm, int mode, unsigned int flags) : _algorithm(algorithm), _mode(mode), _flags(flags)
 {
 	gcry_error_t result = gcry_cipher_open(&_handle, algorithm, mode, flags);
 	if(result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
@@ -47,11 +48,20 @@ Gcrypt::~Gcrypt()
 	if(_handle) gcry_cipher_close(_handle);
 }
 
+void Gcrypt::reset()
+{
+    if(_handle) gcry_cipher_close(_handle);
+    _handle = nullptr;
+    gcry_error_t result = gcry_cipher_open(&_handle, _algorithm, _mode, _flags);
+    if(result != GPG_ERR_NO_ERROR) throw GcryptException(getError(result));
+    if(!_handle) throw GcryptException("Could not get handle.");
+}
+
 std::string Gcrypt::getError(int32_t errorCode)
 {
-	std::vector<char> result(512);
+	std::array<char, 512> result{};
 	gpg_strerror_r(errorCode, result.data(), result.size());
-	result.at(result.size() - 1) = 0;
+	result.back() = 0;
 	std::string resultString(result.data());
 	return resultString;
 }
@@ -65,14 +75,16 @@ size_t Gcrypt::getBlockSize()
 
 template<typename Data> void Gcrypt::setIv(const Data& iv)
 {
+    if(!_keySet) throw GcryptException("Please set the key first");
 	if(iv.empty()) throw GcryptException("iv is empty.");
 	setIv(iv.data(), iv.size());
 }
 
-
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setIv<std::vector<char>>(const std::vector<char>& iv);
 template void Gcrypt::setIv<std::vector<uint8_t>>(const std::vector<uint8_t>& iv);
+template void Gcrypt::setIv<SecureVector<uint8_t>>(const SecureVector<uint8_t>& iv);
+template void Gcrypt::setIv<std::array<uint8_t, 16>>(const std::array<uint8_t, 16>& counter);
 #endif
 
 void Gcrypt::setIv(const void* iv, const size_t length)
@@ -83,14 +95,16 @@ void Gcrypt::setIv(const void* iv, const size_t length)
 
 template<typename Data> void Gcrypt::setCounter(const Data& counter)
 {
+    if(!_keySet) throw GcryptException("Please set the key first");
 	if(counter.empty()) throw GcryptException("counter is empty.");
 	setCounter(counter.data(), counter.size());
 }
 
-
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setCounter<std::vector<char>>(const std::vector<char>& counter);
 template void Gcrypt::setCounter<std::vector<uint8_t>>(const std::vector<uint8_t>& counter);
+template void Gcrypt::setCounter<SecureVector<uint8_t>>(const SecureVector<uint8_t>& counter);
+template void Gcrypt::setCounter<std::array<uint8_t, 16>>(const std::array<uint8_t, 16>& counter);
 #endif
 
 void Gcrypt::setCounter(const void* counter, const size_t length)
@@ -108,6 +122,8 @@ template<typename Data> void Gcrypt::setKey(const Data& key)
 #ifndef DOXYGEN_SKIP
 template void Gcrypt::setKey<std::vector<char>>(const std::vector<char>& key);
 template void Gcrypt::setKey<std::vector<uint8_t>>(const std::vector<uint8_t>& key);
+template void Gcrypt::setKey<SecureVector<uint8_t>>(const SecureVector<uint8_t>& key);
+template void Gcrypt::setKey<std::array<uint8_t, 32>>(const std::array<uint8_t, 32>& key);
 #endif
 
 void Gcrypt::setKey(const void* key, const size_t length)
@@ -125,6 +141,7 @@ void Gcrypt::encrypt(void* out, const size_t outLength, const void* in, const si
 
 template<typename DataOut, typename DataIn> void Gcrypt::encrypt(DataOut& out, const DataIn& in)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
@@ -136,6 +153,8 @@ template void Gcrypt::encrypt<std::vector<char>, std::vector<char>>(std::vector<
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::encrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+template void Gcrypt::encrypt<std::vector<char>, SecureVector<char>>(std::vector<char>& out, const SecureVector<char>& in);
+template void Gcrypt::encrypt<std::vector<uint8_t>, SecureVector<uint8_t>>(std::vector<uint8_t>& out, const SecureVector<uint8_t>& in);
 #endif
 
 void Gcrypt::decrypt(void* out, const size_t outLength, const void* in, const size_t inLength)
@@ -146,6 +165,7 @@ void Gcrypt::decrypt(void* out, const size_t outLength, const void* in, const si
 
 template<typename DataOut, typename DataIn> void Gcrypt::decrypt(DataOut& out, const DataIn& in)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	out.clear();
 	if(in.empty()) return;
 	out.resize(in.size());
@@ -157,10 +177,13 @@ template void Gcrypt::decrypt<std::vector<char>, std::vector<char>>(std::vector<
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<uint8_t>>(std::vector<uint8_t>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<char>, std::vector<uint8_t>>(std::vector<char>& out, const std::vector<uint8_t>& in);
 template void Gcrypt::decrypt<std::vector<uint8_t>, std::vector<char>>(std::vector<uint8_t>& out, const std::vector<char>& in);
+template void Gcrypt::decrypt<SecureVector<char>, std::vector<char>>(SecureVector<char>& out, const std::vector<char>& in);
+template void Gcrypt::decrypt<SecureVector<uint8_t>, std::vector<uint8_t>>(SecureVector<uint8_t>& out, const std::vector<uint8_t>& in);
 #endif
 
 bool Gcrypt::authenticate(const void* in, const size_t inLength)
 {
+    if(!_keySet) throw GcryptException("No key set.");
 	gcry_error_t result = gcry_cipher_authenticate(_handle, in, inLength);
 	return result == GPG_ERR_NO_ERROR;
 }

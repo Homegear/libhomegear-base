@@ -40,17 +40,9 @@
 #include <random>
 #include <vector>
 #include <regex>
-
-#include <dirent.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <grp.h>
+#include <unordered_set>
 
 #include <gcrypt.h>
-#include <unordered_set>
 
 namespace BaseLib
 {
@@ -261,19 +253,7 @@ public:
 	 * @param replace The substring to replace "search" with.
 	 * @return Returns a reference to the modified string.
 	 */
-	static std::string& stringReplace(std::string& haystack, std::string search, std::string replace)
-	{
-		if(search.empty()) return haystack;
-		int32_t pos = 0;
-		while(true)
-		{
-			 pos = haystack.find(search, pos);
-			 if (pos == (signed)std::string::npos) break;
-			 haystack.replace(pos, search.size(), replace);
-			 pos += replace.size();
-		}
-		return haystack;
-	}
+	static std::string& stringReplace(std::string& haystack, const std::string& search, const std::string& replace);
 
 	/**
 	 * Replaces substrings within a string using regex.
@@ -284,7 +264,7 @@ public:
 	 * @param ignoreCase Set to true, to ignore the case.
 	 * @return Returns a reference to the modified string.
 	 */
-	static std::string& regexReplace(std::string& haystack, std::string regex, std::string replace, bool ignoreCase);
+	static std::string& regexReplace(std::string& haystack, const std::string& search, const std::string& replace, bool ignoreCase);
 
 	/**
 	 * Splits a string at the first occurrence of a delimiter.
@@ -606,38 +586,6 @@ public:
 	gid_t groupId(std::string groupname);
 
 	/**
-	 * Starts a program and returns the process id.
-	 *
-	 * @param path The program to start.
-	 * @param arguments The arguments to pass.
-	 * @throws Exception
-	 * @return Returns the PID on success and "-1" on error.
-	 */
-    static pid_t system(std::string path, std::vector<std::string> arguments);
-
-	/**
-	 * Starts a program with redirected pipe and returns the process id.
-	 *
-	 * @param path The program to start.
-	 * @param arguments The arguments to pass.
-	 * @param[out] stdIn Will be filled with the input file descriptor. Close it when the process finishes.
-	 * @param[out] stdOut Will be filled with the output file descriptor. Close it when the process finishes.
-	 * @param[out] stdErr Will be filled with the error file descriptor. Close it when the process finishes.
-	 * @throws Exception
-	 * @return Returns the PID on success and "-1" on error.
-	 */
-	static pid_t systemp(std::string path, std::vector<std::string> arguments, int& stdIn, int& stdOut, int& stdErr);
-
-	/**
-	 * Starts a program and returns the output.
-	 *
-	 * @param command The command to execute (passed to sh with "-c").
-	 * @param[out] output The program output.
-	 * @return Returns the programs exit code.
-	 */
-	static int32_t exec(std::string command, std::string& output);
-
-	/**
 	 * Converts GNUTLS certificate verification error codes to human readable error messages.
 	 *
 	 * @param errorCode The GNUTLS certificate verification error code.
@@ -658,7 +606,7 @@ public:
 	 *
 	 * @param command The CLI command.
 	 * @param longCommand The long CLI command to search for at the beginning of command.
-	 * @param shortCommand1 The short CLI command to search for at the beginning of command.
+	 * @param shortCommand1 An optional short CLI command to search for at the beginning of command.
 	 * @param shortCommand2 An optional second short CLI command to search for at the beginning of command. Set to empty string if not needed.
 	 * @param minArgumentCount The minimum number of arguments.
 	 * @param[out] arguments A string vector which is filled with the arguments.

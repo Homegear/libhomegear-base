@@ -175,7 +175,7 @@ public:
 	virtual PVariable getSniffedDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);
 	virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
 	virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkDeviceAcls, bool checkVariableAcls);
 	virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);

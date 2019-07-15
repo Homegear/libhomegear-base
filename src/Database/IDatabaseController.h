@@ -47,6 +47,7 @@ struct SystemVariable
 	std::string name;
 	uint64_t room = 0;
 	std::set<uint64_t> categories;
+    std::set<uint64_t> roles;
 	int32_t flags = 0;
 	BaseLib::PVariable value;
 };
@@ -156,22 +157,17 @@ public:
 	//End metadata
 
 	//System variables
-	virtual BaseLib::PVariable deleteSystemVariable(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, bool checkAcls) = 0;
-	virtual Database::PSystemVariable getSystemVariableInternal(std::string& variableId) = 0;
-    virtual BaseLib::PVariable getSystemVariableCategories(std::string& variableId) = 0;
-    virtual std::set<uint64_t> getSystemVariableCategoriesInternal(std::string& variableId) = 0;
-    virtual BaseLib::PVariable getSystemVariableRoom(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getSystemVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls) = 0;
-	virtual BaseLib::PVariable getSystemVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls) = 0;
-    virtual uint64_t getSystemVariableRoomInternal(std::string& variableId) = 0;
-	virtual BaseLib::PVariable getAllSystemVariables(PRpcClientInfo clientInfo, bool returnRoomsCategoriesFlags, bool checkAcls) = 0;
+	virtual void deleteSystemVariable(std::string& variableId) = 0;
+    virtual std::shared_ptr<BaseLib::Database::DataTable> getAllSystemVariables() = 0;
+	virtual std::shared_ptr<BaseLib::Database::DataTable> getSystemVariable(const std::string& variableId) = 0;
+    virtual std::shared_ptr<BaseLib::Database::DataTable> getSystemVariablesInRoom(uint64_t roomId) = 0;
     virtual void removeCategoryFromSystemVariables(uint64_t categoryId) = 0;
+    virtual void removeRoleFromSystemVariables(uint64_t roleId) = 0;
     virtual void removeRoomFromSystemVariables(uint64_t roomId) = 0;
-	virtual BaseLib::PVariable setSystemVariable(PRpcClientInfo clientInfo, std::string& variableId, BaseLib::PVariable& value, int32_t flags, bool checkAcls) = 0;
-    virtual BaseLib::PVariable setSystemVariableCategories(std::string& variableId, std::set<uint64_t>& categories) = 0;
+	virtual BaseLib::PVariable setSystemVariable(std::string& variableId, BaseLib::PVariable& value, uint64_t roomId, const std::string& categories, const std::string& roles, int32_t flags) = 0;
+    virtual BaseLib::PVariable setSystemVariableCategories(std::string& variableId, const std::string& categories) = 0;
+    virtual BaseLib::PVariable setSystemVariableRoles(std::string& variableId, const std::string& roles) = 0;
     virtual BaseLib::PVariable setSystemVariableRoom(std::string& variableId, uint64_t room) = 0;
-    virtual bool systemVariableHasCategory(std::string& variableId, uint64_t categoryId) = 0;
 	//End system variables
 
 	//Users
@@ -190,6 +186,12 @@ public:
     virtual BaseLib::PVariable setUserMetadata(uint64_t userId, BaseLib::PVariable metadata) = 0;
     virtual bool userNameExists(const std::string& name) = 0;
 	//End users
+
+	//{{{ User data
+    virtual BaseLib::PVariable setUserData(uint64_t userId, const std::string& component, const std::string& key, const BaseLib::PVariable& value) = 0;
+    virtual BaseLib::PVariable getUserData(uint64_t userId, const std::string& component, const std::string& key) = 0;
+    virtual BaseLib::PVariable deleteUserData(uint64_t userId, const std::string& component, const std::string& key) = 0;
+	//}}}
 
     //Groups
     virtual BaseLib::PVariable createGroup(BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;

@@ -36,13 +36,12 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, HomegearDevice* device)
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib)
 {
 	_bl = baseLib;
-	_device = device;
 }
 
-SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node, HomegearDevice* device) : SupportedDevice(baseLib, device)
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node) : SupportedDevice(baseLib)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -72,18 +71,9 @@ bool SupportedDevice::matches(uint32_t typeNumber, uint32_t firmwareVersion)
 {
 	try
 	{
-		if(!_device)
-		{
-			_bl->out.printError("Error: Variable _device in SupportedDevice is nullptr.");
-			return false;
-		}
 		if(typeNumber == this->typeNumber && checkFirmwareVersion(firmwareVersion)) return true;
 	}
 	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(const Exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
@@ -98,18 +88,9 @@ bool SupportedDevice::matches(const std::string& typeId)
 {
 	try
 	{
-		if(!_device)
-		{
-			_bl->out.printError("Error: Variable _device in SupportedDevice is nullptr.");
-			return false;
-		}
 		if(id == typeId) return true;
 	}
 	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(const Exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}

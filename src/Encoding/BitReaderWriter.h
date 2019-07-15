@@ -108,17 +108,17 @@ public:
 	 * @param position The position in bits starting with bit 7 of index 0 (position 1 is bit 6 of index 0 and so on). Example: If source is 00000101, position is 2, size is 3 and target.size() is 2 then the result is 00101000 00000000.
 	 * @param size The size in bits of the data to set.
 	 * @param target The byte array to write to. Index 0 is the most significant byte.
-	 * @param source The right aligned byte array of the data to set. size bits are read LSB first and set at position in target (counted from the most significant bit of the most significant byte).
+	 * @param source The right aligned byte array of the data to set. size bits and bytes are read LSB first by default and set at position in target (counted from the most significant bit of the most significant byte).
 	 */
 	static void setPosition(uint32_t position, uint32_t size, std::vector<uint8_t>& target, const std::vector<uint8_t>& source);
 
 	/**
 	 * Sets any number of bits at any position in a byte array.
 	 *
-	 * @param position The position in bits starting with bit 7 of index 0 (position 1 is bit 6 of index 0 and so on). Example: If source is 00000101, position is 2, size is 3 and target.size() is 2 then the result is 00101000 00000000.
+	 * @param position The position in bits starting with bit 7 of index 0 (position 1 is bit 6 of index 0 and so on). Example: If source is 00000101, position is 2, size is 3 and target.size() is 2 then the result is 00101000 00000000. Example 2: If source is 0xABCD, position is 0 and size is 16, the result is 0xCDAB.
 	 * @param size The size in bits of the data to set.
 	 * @param target The byte array to write to. Index 0 is the most significant byte.
-	 * @param source The right aligned byte array of the data to set. size bits are read LSB first and set at position in target (counted from the most significant bit of the most significant byte).
+	 * @param source The right aligned byte array of the data to set. size bits and bytes are read LSB first by default and set at position in target (counted from the most significant bit of the most significant byte).
 	 */
 	static void setPosition(uint32_t position, uint32_t size, std::vector<char>& target, const std::vector<uint8_t>& source);
 private:

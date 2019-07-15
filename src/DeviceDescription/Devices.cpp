@@ -62,10 +62,6 @@ void Devices::load()
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -85,7 +81,7 @@ void Devices::load(std::string& xmlPath)
 		{
 			files = _bl->io.getFiles(deviceDir);
 		}
-		catch(const Exception& ex)
+		catch(const std::exception& ex)
 		{
 			_bl->out.printError("Could not read device description files in directory: \"" + xmlPath + "\": " + ex.what());
 			return;
@@ -105,10 +101,6 @@ void Devices::load(std::string& xmlPath)
 		if(_devices.empty()) _bl->out.printError("Could not load any devices from xml files in \"" + deviceDir + "\".");
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -164,10 +156,6 @@ std::shared_ptr<HomegearDevice> Devices::loadFile(std::string& filepath)
 		else if(device && device->loaded()) return device;
 	}
     catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -1225,10 +1213,6 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -1250,10 +1234,6 @@ uint32_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
 		}
 	}
 	catch(const std::exception& ex)
-    {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -1301,10 +1281,6 @@ std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firm
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -1330,10 +1306,6 @@ std::unordered_map<std::string, uint32_t> Devices::getIdTypeNumberMap()
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -1356,10 +1328,6 @@ std::unordered_set<uint32_t> Devices::getKnownTypeNumbers()
 		}
 	}
 	catch(const std::exception& ex)
-    {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -1558,10 +1526,6 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -1704,10 +1668,6 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -1742,10 +1702,6 @@ PVariable Devices::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels
 		return descriptions;
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

@@ -74,7 +74,7 @@ void HmConverter::convert(std::shared_ptr<Device> homematicDevice, std::shared_p
 		 * priority
 		 */
 
-		PSupportedDevice supportedDevice(new SupportedDevice(_bl, homegearDevice.get()));
+		PSupportedDevice supportedDevice(new SupportedDevice(_bl));
 		supportedDevice->id = (*i)->id;
 		supportedDevice->description = (*i)->name;
 		int32_t typeId = -1;
@@ -318,7 +318,7 @@ void HmConverter::convertChannel(std::shared_ptr<DeviceChannel> homematicChannel
 		homegearFunction->configParameters->memoryAddressStep = parameterSet->second->addressStep;
 		for(std::vector<std::shared_ptr<HmDeviceDescription::HomeMaticParameter>>::iterator i = parameterSet->second->parameters.begin(); i != parameterSet->second->parameters.end(); ++i)
 		{
-			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->configParameters.get()));
+			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->configParameters));
 			convertParameter(*i, parameter);
 			if(parameter->id.empty()) continue;
 			if(parameter->parameterGroupSelector)
@@ -351,7 +351,7 @@ void HmConverter::convertChannel(std::shared_ptr<DeviceChannel> homematicChannel
 		homegearFunction->variables->memoryAddressStep = parameterSet->second->addressStep;
 		for(std::vector<std::shared_ptr<HmDeviceDescription::HomeMaticParameter>>::iterator i = parameterSet->second->parameters.begin(); i != parameterSet->second->parameters.end(); ++i)
 		{
-			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->variables.get()));
+			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->variables));
 			convertParameter(*i, parameter);
 			if(parameter->id.empty()) continue;
 			homegearFunction->variables->parameters[parameter->id] = parameter;
@@ -383,7 +383,7 @@ void HmConverter::convertChannel(std::shared_ptr<DeviceChannel> homematicChannel
 		homegearFunction->linkParameters->maxLinkCount = parameterSet->second->count;
 		for(std::vector<std::shared_ptr<HmDeviceDescription::HomeMaticParameter>>::iterator i = parameterSet->second->parameters.begin(); i != parameterSet->second->parameters.end(); ++i)
 		{
-			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->linkParameters.get()));
+			PParameter parameter(new BaseLib::DeviceDescription::Parameter(_bl, homegearFunction->linkParameters));
 			convertParameter(*i, parameter);
 			if(parameter->id.empty()) continue;
 			homegearFunction->linkParameters->parameters[parameter->id] = parameter;

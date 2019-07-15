@@ -35,13 +35,10 @@
 #include "../Managers/FileDescriptorManager.h"
 
 #include <thread>
-#include <iostream>
-#include <iomanip>
 #include <string>
 #include <vector>
 #include <list>
 #include <iterator>
-#include <sstream>
 #include <mutex>
 #include <memory>
 #include <map>
@@ -69,6 +66,11 @@
 
 namespace BaseLib
 {
+
+namespace Security
+{
+    template<typename T> class SecureVector;
+}
 
 class SharedObjects;
 
@@ -176,7 +178,7 @@ public:
         std::string certFile;
         std::string certData;
         std::string keyFile;
-        std::string keyData;
+        std::shared_ptr<Security::SecureVector<uint8_t>> keyData;
         std::string caFile; //For client certificate verification
         std::string caData; //For client certificate verification
     };
@@ -273,7 +275,7 @@ public:
 		 * @param clientCertData The PEM-encoded client certificate (not the path).
 		 * @param clientKeyData The PEM-encoded client key (not the path).
 		 */
-		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, std::string clientKeyData);
+		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData, std::string clientCertData, const std::shared_ptr<Security::SecureVector<uint8_t>>& clientKeyData);
 
         /**
          * Constructor to create a TCP client socket with SSL enabled using certificate login.
@@ -290,7 +292,7 @@ public:
          * @param clientKeyFile Path to a file containing the PEM-encoded client key file.
          * @param clientKeyData The PEM-encoded client key (not the path).
          */
-        TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, std::string clientKeyData);
+        TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caFile, std::string caData, std::string clientCertFile, std::string clientCertData, std::string clientKeyFile, const std::shared_ptr<Security::SecureVector<uint8_t>>& );
 	// }}}
 
 	// {{{ TCP server

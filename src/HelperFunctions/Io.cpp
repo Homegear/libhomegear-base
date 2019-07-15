@@ -30,6 +30,7 @@
 
 #include "Io.h"
 #include "../BaseLib.h"
+#include "../Security/SecureVector.h"
 
 #include <sys/stat.h>
 
@@ -58,14 +59,14 @@ bool Io::fileExists(const std::string& filename)
 
 bool Io::directoryExists(const std::string& path)
 {
-	struct stat s;
+	struct stat s{};
 	if(stat(path.c_str(), &s) == 0 && (s.st_mode & S_IFDIR)) return true;
 	return false;
 }
 
 int32_t Io::isDirectory(const std::string& path, bool& result)
 {
-	struct stat s;
+	struct stat s{};
 	result = false;
 	if(stat(path.c_str(), &s) == 0)
 	{
@@ -84,7 +85,7 @@ bool Io::createDirectory(const std::string& path, uint32_t /* Don't change to mo
 
 int32_t Io::getFileLastModifiedTime(const std::string& filename)
 {
-	struct stat attributes;
+	struct stat attributes{};
 	if(stat(filename.c_str(), &attributes) == -1) return -1;
 	return attributes.st_mtim.tv_sec;
 }
@@ -98,7 +99,7 @@ std::string Io::getFileContent(const std::string& filename)
 		in.seekg(0, std::ios::end);
 		contents.resize(in.tellg());
 		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
+		in.read((char*)contents.data(), contents.size());
 		in.close();
 		return contents;
 	}
@@ -116,7 +117,7 @@ std::vector<char> Io::getBinaryFileContent(const std::string& filename, uint32_t
 		if(maxBytes > size || maxBytes == 0) maxBytes = size;
 		contents.resize(maxBytes);
 		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
+		in.read(contents.data(), contents.size());
 		in.close();
 		return(contents);
 	}
@@ -132,11 +133,27 @@ std::vector<uint8_t> Io::getUBinaryFileContent(const std::string& filename)
 		in.seekg(0, std::ios::end);
 		contents.resize(in.tellg());
 		in.seekg(0, std::ios::beg);
-		in.read((char*)&contents[0], contents.size());
+		in.read((char*)contents.data(), contents.size());
 		in.close();
 		return(contents);
 	}
 	throw Exception(strerror(errno));
+}
+
+BaseLib::Security::SecureVector<uint8_t> Io::getUBinaryFileContentSecure(const std::string& filename)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if(in)
+    {
+        Security::SecureVector<uint8_t> contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read((char*)contents.data(), contents.size());
+        in.close();
+        return(contents);
+    }
+    throw Exception(strerror(errno));
 }
 
 void Io::writeFile(const std::string& filename, const std::string& content)
@@ -198,7 +215,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 	std::vector<std::string> files;
 	DIR* directory;
 	struct dirent* entry;
-	struct stat statStruct;
+	struct stat statStruct{};
 
 	std::string fixedPath = path;
 	if(fixedPath.back() != '/') fixedPath += '/';
@@ -242,7 +259,7 @@ std::vector<std::string> Io::getDirectories(const std::string& path, bool recurs
 	std::vector<std::string> directories;
 	DIR* directory;
 	struct dirent* entry;
-	struct stat statStruct;
+	struct stat statStruct{};
 
 	std::string fixedPath = path;
 	if(fixedPath.back() != '/') fixedPath += '/';
@@ -330,14 +347,6 @@ bool Io::copyFile(const std::string& source, const std::string& dest)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -380,21 +389,13 @@ std::string Io::sha512(const std::string& file)
 			gcry_md_close(stribogHandle);
 			return "";
 		}
-		std::string sha512 =_bl->hf.getHexString(digest, gcry_md_get_algo_dlen(GCRY_MD_SHA512));
+		std::string sha512 = HelperFunctions::getHexString(digest, gcry_md_get_algo_dlen(GCRY_MD_SHA512));
 		gcry_md_close(stribogHandle);
 		return sha512;
 	}
 	catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return "";
 }

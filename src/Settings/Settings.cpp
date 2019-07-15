@@ -55,6 +55,7 @@ void Settings::reset()
 	_ssdpPort = 1900;
 	_enableMonitoring = true;
 	_devLog = false;
+    _ipcLog = false;
 	_enableCoreDumps = true;
 	_enableNodeBlue = true;
 	_setDevicePermissions = true;
@@ -130,6 +131,9 @@ void Settings::reset()
 	_nodeBlueDataPathUser = "";
 	_nodeBlueDataPathGroup = "";
 	_nodeBlueDebugOutput = false;
+	_nodeBlueEventLimit1 = 100;
+    _nodeBlueEventLimit2 = 300;
+    _nodeBlueEventLimit3 = 400;
 	_adminUiPath = "/var/lib/homegear/admin-ui/";
 	_adminUiPathPermissions = 504;
 	_adminUiPathUser = "";
@@ -260,9 +264,14 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "devlog")
 				{
-					if(HelperFunctions::toLower(value) == "true") _devLog = true;
+					_devLog = HelperFunctions::toLower(value) == "true";
 					_bl->out.printDebug("Debug: devLog set to " + std::to_string(_devLog));
 				}
+                else if(name == "ipclog")
+                {
+                    _ipcLog = HelperFunctions::toLower(value) == "true";
+                    _bl->out.printDebug("Debug: ipcLog set to " + std::to_string(_ipcLog));
+                }
 				else if(name == "enablecoredumps")
 				{
 					if(HelperFunctions::toLower(value) == "false") _enableCoreDumps = false;
@@ -483,6 +492,21 @@ void Settings::load(std::string filename, std::string executablePath)
 					_nodeBlueDebugOutput = value == "true";
 					_bl->out.printDebug("Debug: nodeBlueDebugOutput set to " + std::to_string(_nodeBlueDebugOutput));
 				}
+                else if(name == "nodeblueeventlimit1")
+                {
+                    _nodeBlueEventLimit1 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit1 set to " + std::to_string(_nodeBlueEventLimit1));
+                }
+                else if(name == "nodeblueeventlimit2")
+                {
+                    _nodeBlueEventLimit2 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit2 set to " + std::to_string(_nodeBlueEventLimit2));
+                }
+                else if(name == "nodeblueeventlimit3")
+                {
+                    _nodeBlueEventLimit3 = Math::getUnsignedNumber(value);
+                    _bl->out.printDebug("Debug: nodeBlueEventLimit3 set to " + std::to_string(_nodeBlueEventLimit3));
+                }
 				else if(name == "maxnodethreadsperprocess")
 				{
 					_maxNodeThreadsPerProcess = Math::getNumber(value);
@@ -892,14 +916,6 @@ void Settings::load(std::string filename, std::string executablePath)
 	catch(const std::exception& ex)
     {
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 

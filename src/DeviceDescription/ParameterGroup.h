@@ -56,7 +56,7 @@ typedef std::shared_ptr<Variables> PVariables;
 typedef std::map<uint32_t, std::vector<PParameter>> Lists;
 
 
-class ParameterGroup
+class ParameterGroup : public std::enable_shared_from_this<ParameterGroup>
 {
 public:
 	struct Type
@@ -64,9 +64,10 @@ public:
 		enum Enum { none = 0, config = 1, variables = 2, link = 3 };
 	};
 
-	ParameterGroup(BaseLib::SharedObjects* baseLib);
-	ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	explicit ParameterGroup(BaseLib::SharedObjects* baseLib);
 	virtual ~ParameterGroup();
+
+	virtual void parseXml(xml_node<>* node);
 
 	//Attributes
 	std::string id;
@@ -96,34 +97,33 @@ protected:
 class ConfigParameters : public ParameterGroup
 {
 public:
-	ConfigParameters(BaseLib::SharedObjects* baseLib);
-	ConfigParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-	virtual ~ConfigParameters() {}
+	explicit ConfigParameters(BaseLib::SharedObjects* baseLib);
+	~ConfigParameters() override = default;
 
 	//Helpers
-	Type::Enum type() const { return Type::Enum::config; };
+	Type::Enum type() const override { return Type::Enum::config; };
 };
 
 class Variables : public ParameterGroup
 {
 public:
-	Variables(BaseLib::SharedObjects* baseLib);
-	Variables(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-	virtual ~Variables() {}
+	explicit Variables(BaseLib::SharedObjects* baseLib);
+	~Variables() override = default;
 
 	//Helpers
-	Type::Enum type() const { return Type::Enum::variables; };
+	Type::Enum type() const override { return Type::Enum::variables; };
 };
 
 class LinkParameters : public ParameterGroup
 {
 public:
-	LinkParameters(BaseLib::SharedObjects* baseLib);
-	LinkParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node);
-	virtual ~LinkParameters() {}
+	explicit LinkParameters(BaseLib::SharedObjects* baseLib);
+	~LinkParameters() override = default;
+
+    void parseXml(xml_node<>* node) override;
 
 	//Helpers
-	Type::Enum type() const { return Type::Enum::link; };
+	Type::Enum type() const override { return Type::Enum::link; };
 
 	//Attributes
 	int32_t peerChannelMemoryOffset = -1;

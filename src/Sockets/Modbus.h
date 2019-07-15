@@ -45,11 +45,11 @@ namespace BaseLib
 class ModbusException : public Exception
 {
 public:
-    ModbusException(std::string message) : Exception(message) {}
-    ModbusException(std::string message, uint8_t code, std::vector<char> packet) : Exception(message), _code(code), _packet(packet) {}
+    ModbusException(const std::string& message) : Exception(message) {}
+    ModbusException(const std::string& message, uint8_t code, std::vector<char> packet) : Exception(message), _code(code), _packet(std::move(packet)) {}
 
-    uint8_t getCode() { return _code; }
-    std::vector<char> getPacket() { return _packet; }
+    uint8_t getCode() const { return _code; }
+    std::vector<char> getPacket() const { return _packet; }
 private:
     uint8_t _code = 0;
     std::vector<char> _packet;
@@ -129,7 +129,7 @@ public:
         std::string certFile;
         std::string certData;
         std::string keyFile;
-        std::string keyData;
+        std::shared_ptr<Security::SecureVector<uint8_t>> keyData;
         bool verifyCertificate = true;
         std::string caFile; //For client certificate verification
         std::string caData; //For client certificate verification

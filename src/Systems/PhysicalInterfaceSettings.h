@@ -33,10 +33,15 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <memory>
 
 namespace BaseLib
 {
+
+class Variable;
+typedef std::shared_ptr<Variable> PVariable;
+
 namespace Systems
 {
 
@@ -53,8 +58,9 @@ public:
 class PhysicalInterfaceSettings
 {
 public:
-	PhysicalInterfaceSettings() {}
-	virtual ~PhysicalInterfaceSettings() {}
+	PhysicalInterfaceSettings() = default;
+	virtual ~PhysicalInterfaceSettings() = default;
+    std::unordered_map<std::string, PVariable> all;
 	std::string id;
 	bool isDefault = false;
 	std::string device;

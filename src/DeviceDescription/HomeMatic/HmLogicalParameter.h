@@ -34,10 +34,7 @@
 #include "../../Variable.h"
 #include "../../Encoding/RapidXml/rapidxml.hpp"
 
-#include <fstream>
 #include <string>
-#include <sstream>
-#include <iostream>
 #include <vector>
 #include <memory>
 #include <unordered_map>

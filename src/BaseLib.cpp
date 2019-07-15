@@ -36,11 +36,7 @@ namespace BaseLib
 
 SharedObjects::SharedObjects(bool testMaxThreadCount)
 {
-	booting = true;
-	shuttingDown = false;
-
 	threadManager.init(this, testMaxThreadCount);
-	fileDescriptorManager.init(this);
 	serialDeviceManager.init(this);
 	hf.init(this);
 	io.init(this);
@@ -61,6 +57,16 @@ std::string SharedObjects::version()
 void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
 {
 	out.setErrorCallback(errorCallback);
+}
+
+int64_t SharedObjects::getStartTime()
+{
+    return _startTime;
+}
+
+void SharedObjects::setStartTime(int64_t time)
+{
+    _startTime = time;
 }
 
 }

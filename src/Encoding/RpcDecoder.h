@@ -60,7 +60,6 @@ public:
 	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<uint8_t>& packet, std::string& methodName);
 	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet, uint32_t offset = 0);
 	virtual std::shared_ptr<Variable> decodeResponse(std::vector<uint8_t>& packet, uint32_t offset = 0);
-	virtual void decodeResponse(PVariable& variable, uint32_t offset = 0);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;
@@ -69,7 +68,6 @@ private:
 
 	std::shared_ptr<Variable> decodeParameter(std::vector<char>& packet, uint32_t& position);
 	std::shared_ptr<Variable> decodeParameter(std::vector<uint8_t>& packet, uint32_t& position);
-	void decodeParameter(PVariable& variable, uint32_t& position);
 	VariableType decodeType(std::vector<char>& packet, uint32_t& position);
 	VariableType decodeType(std::vector<uint8_t>& packet, uint32_t& position);
 	std::shared_ptr<Array> decodeArray(std::vector<char>& packet, uint32_t& position);

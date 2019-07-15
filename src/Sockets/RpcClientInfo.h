@@ -88,6 +88,9 @@ public:
 	std::string initInterfaceId;
 	std::string language = "en-US";
 	std::string user;
+	bool authenticated = false;
+	bool hasClientCertificate = false;
+	std::string distinguishedName;
 	Security::PAcls acls;
 
 	RpcType rpcType = RpcType::unknown;
@@ -122,6 +125,14 @@ public:
 	virtual ~RpcClientInfo() = default;
 
     RpcClientInfo& operator=(const RpcClientInfo& rhs);
+
+    /**
+     * Serializes the data part of the object.
+     */
+    PVariable serialize();
+    void unserialize(BaseLib::SharedObjects* bl, PVariable data);
+protected:
+    PVariable serializedInfo;
 };
 
 typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;

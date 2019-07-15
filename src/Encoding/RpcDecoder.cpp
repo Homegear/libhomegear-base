@@ -70,14 +70,6 @@ std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<char>& packet)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return header;
 }
 
@@ -103,14 +95,6 @@ std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(std::vector<uint8_t>& packet
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return header;
 }
@@ -141,14 +125,6 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeReques
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
 
@@ -177,14 +153,6 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> RpcDecoder::decodeReques
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
@@ -215,19 +183,6 @@ std::shared_ptr<Variable> RpcDecoder::decodeResponse(std::vector<uint8_t>& packe
         if(response->structValue->find("faultString") == response->structValue->end()) response->structValue->insert(StructElement("faultString", std::make_shared<Variable>(std::string("undefined"))));
     }
     return response;
-}
-
-void RpcDecoder::decodeResponse(PVariable& variable, uint32_t offset)
-{
-    uint32_t position = offset + 8;
-    decodeParameter(variable, position);
-    if(variable->binaryValue.size() < 4) return; //response is Void when packet is empty.
-    if(variable->binaryValue.at(3) == 0xFF)
-    {
-        variable->errorStruct = true;
-        if(variable->structValue->find("faultCode") == variable->structValue->end()) variable->structValue->insert(StructElement("faultCode", std::make_shared<Variable>(-1)));
-        if(variable->structValue->find("faultString") == variable->structValue->end()) variable->structValue->insert(StructElement("faultString", std::make_shared<Variable>(std::string("undefined"))));
-    }
 }
 
 VariableType RpcDecoder::decodeType(std::vector<char>& packet, uint32_t& position)
@@ -308,14 +263,6 @@ std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<char>& packet,
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return std::shared_ptr<Variable>();
 }
 
@@ -387,91 +334,7 @@ std::shared_ptr<Variable> RpcDecoder::decodeParameter(std::vector<uint8_t>& pack
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return std::shared_ptr<Variable>();
-}
-
-void RpcDecoder::decodeParameter(PVariable& variable, uint32_t& position)
-{
-    try
-    {
-        variable->type = decodeType(variable->binaryValue, position);
-        if(variable->type == VariableType::tVoid)
-        {
-            //Nothing
-        }
-        else if(variable->type == VariableType::tString || variable->type == VariableType::tBase64)
-        {
-            variable->stringValue = _decoder->decodeString(variable->binaryValue, position);
-            variable->integerValue64 = Math::getNumber64(variable->stringValue);
-            variable->integerValue = (int32_t)variable->integerValue64;
-            variable->booleanValue = !variable->stringValue.empty() && variable->stringValue != "0" && variable->stringValue != "false" && variable->stringValue != "f";
-
-        }
-        else if(variable->type == VariableType::tInteger)
-        {
-            variable->integerValue = _decoder->decodeInteger(variable->binaryValue, position);
-            variable->integerValue64 = variable->integerValue;
-            variable->booleanValue = (bool)variable->integerValue;
-            variable->floatValue = variable->integerValue;
-        }
-        else if(variable->type == VariableType::tInteger64)
-        {
-            variable->integerValue64 = _decoder->decodeInteger64(variable->binaryValue, position);
-            variable->integerValue = (int32_t)variable->integerValue64;
-            variable->booleanValue = (bool)variable->integerValue64;
-            variable->floatValue = variable->integerValue64;
-            if(_setInteger32 && (int64_t)variable->integerValue == variable->integerValue64) variable->type = VariableType::tInteger;
-        }
-        else if(variable->type == VariableType::tFloat)
-        {
-            variable->floatValue = _decoder->decodeFloat(variable->binaryValue, position);
-            variable->integerValue = (int32_t)std::lround(variable->floatValue);
-            variable->integerValue64 = std::llround(variable->floatValue);
-            variable->booleanValue = (bool)variable->floatValue;
-        }
-        else if(variable->type == VariableType::tBoolean)
-        {
-            variable->booleanValue = _decoder->decodeBoolean(variable->binaryValue, position);
-            variable->integerValue = (int32_t)variable->booleanValue;
-            variable->integerValue64 = (int64_t)variable->booleanValue;
-        }
-        else if(variable->type == VariableType::tBinary)
-        {
-            variable->binaryValue = _decoder->decodeBinary(variable->binaryValue, position);
-        }
-        else if(variable->type == VariableType::tArray)
-        {
-            variable->arrayValue = decodeArray(variable->binaryValue, position);
-        }
-        else if(variable->type == VariableType::tStruct)
-        {
-            variable->structValue = decodeStruct(variable->binaryValue, position);
-            if(variable->structValue->size() == 2 && variable->structValue->find("faultCode") != variable->structValue->end() && variable->structValue->find("faultString") != variable->structValue->end())
-            {
-                variable->errorStruct = true;
-            }
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 PArray RpcDecoder::decodeArray(std::vector<char>& packet, uint32_t& position)
@@ -489,14 +352,6 @@ PArray RpcDecoder::decodeArray(std::vector<char>& packet, uint32_t& position)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
@@ -516,14 +371,6 @@ PArray RpcDecoder::decodeArray(std::vector<uint8_t>& packet, uint32_t& position)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>();
 }
@@ -545,14 +392,6 @@ PStruct RpcDecoder::decodeStruct(std::vector<char>& packet, uint32_t& position)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return PStruct();
 }
 
@@ -572,14 +411,6 @@ PStruct RpcDecoder::decodeStruct(std::vector<uint8_t>& packet, uint32_t& positio
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return PStruct();
 }
