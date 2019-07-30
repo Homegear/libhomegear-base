@@ -258,8 +258,8 @@ PVariable HomegearUiElement::getElementInfo()
             auto input = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             if(variableInput->familyId != -1) input->structValue->emplace("family", std::make_shared<BaseLib::Variable>(variableInput->familyId));
             if(variableInput->deviceTypeId != -1) input->structValue->emplace("deviceTypeId", std::make_shared<BaseLib::Variable>(variableInput->deviceTypeId));
-            if(variableInput->peerId != 0) input->structValue->emplace("peer", std::make_shared<BaseLib::Variable>(variableInput->peerId));
-            if(variableInput->channel != -1) input->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableInput->channel));
+            input->structValue->emplace("peer", std::make_shared<BaseLib::Variable>(variableInput->peerId));
+            input->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableInput->channel));
             input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
 
             auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
@@ -331,9 +331,10 @@ PVariable HomegearUiElement::getElementInfo()
             auto output = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             if(variableOutput->familyId != -1) output->structValue->emplace("family", std::make_shared<BaseLib::Variable>(variableOutput->familyId));
             if(variableOutput->deviceTypeId != -1) output->structValue->emplace("deviceTypeId", std::make_shared<BaseLib::Variable>(variableOutput->deviceTypeId));
-            if(variableOutput->peerId != 0) output->structValue->emplace("peer", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
-            if(variableOutput->channel != -1) output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
+            output->structValue->emplace("peer", std::make_shared<BaseLib::Variable>(variableOutput->peerId));
+            output->structValue->emplace("channel", std::make_shared<BaseLib::Variable>(variableOutput->channel));
             output->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableOutput->name));
+            if(variableOutput->value) output->structValue->emplace("value", variableOutput->value);
 
             auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
             if(variableOutput->minimumValue) variableProperties->structValue->emplace("minimum", variableOutput->minimumValue);

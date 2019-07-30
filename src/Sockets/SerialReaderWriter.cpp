@@ -353,14 +353,6 @@ void SerialReaderWriter::writeLine(std::string& data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void SerialReaderWriter::writeData(const std::vector<char>& data)
@@ -388,14 +380,6 @@ void SerialReaderWriter::writeData(const std::vector<char>& data)
     catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -425,14 +409,6 @@ void SerialReaderWriter::writeData(const std::vector<uint8_t>& data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void SerialReaderWriter::writeChar(char data)
@@ -459,14 +435,6 @@ void SerialReaderWriter::writeChar(char data)
     catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -501,14 +469,6 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity, CharacterSize c
 					{
 						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 					}
-					catch(BaseLib::Exception& ex)
-					{
-						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-					}
-					catch(...)
-					{
-						_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-					}
 					i->second->unlock();
 				}
 			}
@@ -517,14 +477,6 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity, CharacterSize c
 		catch(const std::exception& ex)
 		{
 			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-		}
-		catch(BaseLib::Exception& ex)
-		{
-			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-		}
-		catch(...)
-		{
-			_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 		}
 		_bl->fileDescriptorManager.close(_fileDescriptor);
 	}

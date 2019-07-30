@@ -82,7 +82,8 @@ public:
 	ReceiveModes::Enum receiveModes = ReceiveModes::none;
 	bool encryption = false;
 	uint32_t timeout = 0;
-	uint32_t memorySize = 1024;
+	uint32_t memorySize = 0;
+    uint32_t memorySize2 = 0;
 	bool visible = true;
 	bool deletable = true;
 	bool internal = false;

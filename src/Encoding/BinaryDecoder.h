@@ -32,7 +32,6 @@
 #define BINARYDECODER_H_
 
 #include "Ansi.h"
-#include <iostream>
 #include <memory>
 #include <cstring>
 #include <vector>

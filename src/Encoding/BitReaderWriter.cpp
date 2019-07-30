@@ -294,14 +294,14 @@ void BitReaderWriter::setPosition(uint32_t position, uint32_t size, std::vector<
 {
 	if(size == 0) return;
 
-	uint32_t bytePosition = position / 8; //0
-	uint32_t bitPosition = position % 8; //1
-	uint32_t relativeEndPosition = bitPosition + size; //2
-	uint32_t targetBytePosition = bytePosition; //0
-	uint32_t targetByteCount = relativeEndPosition / 8 + ((relativeEndPosition & 7) != 0 ? 1 : 0); //1
-	uint32_t endIndex = bytePosition + (targetByteCount - 1); //0
-	uint32_t sourceByteCount = size / 8 + ((size & 7) != 0 ? 1 : 0); //1
-	uint32_t requiredSize = bytePosition + targetByteCount; //1
+	uint32_t bytePosition = position / 8;
+	uint32_t bitPosition = position % 8;
+	uint32_t relativeEndPosition = bitPosition + size;
+	uint32_t targetBytePosition = bytePosition;
+	uint32_t targetByteCount = relativeEndPosition / 8 + ((relativeEndPosition & 7) != 0 ? 1 : 0);
+	uint32_t endIndex = bytePosition + (targetByteCount - 1);
+	uint32_t sourceByteCount = size / 8 + ((size & 7) != 0 ? 1 : 0);
+	uint32_t requiredSize = bytePosition + targetByteCount;
 	if(target.size() < requiredSize) target.resize(requiredSize, 0);
 
 	if(endIndex == bytePosition) target.at(bytePosition) &= (_bitMaskSetTargetStart[bitPosition] | _bitMaskSetTargetEnd[relativeEndPosition & 7]);

@@ -74,10 +74,6 @@ std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::s
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -115,10 +111,6 @@ PHomegearDeviceTranslation DeviceTranslations::getTranslation(const std::string&
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -140,10 +132,6 @@ std::string DeviceTranslations::getTypeDescription(const std::string& filename, 
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -162,10 +150,6 @@ std::string DeviceTranslations::getTypeLongDescription(const std::string& filena
         if(idIterator != translation->typeLongDescriptions.end()) return idIterator->second;
     }
     catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -208,10 +192,6 @@ std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations
         return std::make_pair(parameterIterator->second.label, parameterIterator->second.description);
     }
     catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }

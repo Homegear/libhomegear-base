@@ -186,18 +186,18 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t>& buffer, u
             if((uint8_t)response.at(8) == coilBytes && response.size() == coilBytes + 9) break;
             else if(i == 4) throw ModbusException("Could not read Modbus coils from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -234,18 +234,18 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t>& 
             if((uint8_t)response.at(8) == inputBytes && response.size() == inputBytes + 9) break;
             else if(i == 4) throw ModbusException("Could not read Modbus inputs from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -285,15 +285,15 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
         catch(ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
         catch(ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -330,18 +330,18 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t>&
             if((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) break;
             else if(i == 4) throw ModbusException("Could not read Modbus input registers from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -374,18 +374,18 @@ void Modbus::writeSingleCoil(uint16_t address, bool value)
             if(response == packet) break;
             else if(i == 4) throw ModbusException("Could not write Modbus coil at address 0x" + BaseLib::HelperFunctions::getHexString(address));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -410,18 +410,18 @@ void Modbus::writeSingleRegister(uint16_t address, uint16_t value)
             if(response == packet) break;
             else if(i == 4) throw ModbusException("Could not write Modbus register at address 0x" + BaseLib::HelperFunctions::getHexString(address));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -454,18 +454,18 @@ void Modbus::writeMultipleCoils(uint16_t startAddress, const std::vector<uint8_t
             if(response.size() == 12 && response.at(8) == (char)(uint8_t)(startAddress >> 8) && response.at(9) == (char)(uint8_t)(startAddress & 0xFF) && response.at(10) == (char)(uint8_t)(coilCount >> 8) && response.at(11) == (char)(uint8_t)(coilCount & 0xFF)) break;
             else if(i == 4) throw ModbusException("Could not write Modbus coils at address 0x" + BaseLib::HelperFunctions::getHexString(startAddress));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -499,18 +499,18 @@ void Modbus::writeMultipleRegisters(uint16_t startAddress, const std::vector<uin
             if(response.size() == 12 && response.at(8) == (char)(uint8_t)(startAddress >> 8) && response.at(9) == (char)(uint8_t)(startAddress & 0xFF) && response.at(10) == (char)(uint8_t)(registerCount >> 8) && response.at(11) == (char)(uint8_t)(registerCount & 0xFF)) break;
             else if(i == 4) throw ModbusException("Could not write Modbus registers at address 0x" + BaseLib::HelperFunctions::getHexString(startAddress));
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 }
@@ -551,18 +551,18 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
             if((uint8_t)response.at(8) == readRegisterBytes && response.size() == (uint32_t)readRegisterBytes + 9) break;
             else if(i == 4) throw ModbusException("Could not read/write Modbus registers at address 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (write) and 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (read)");
         }
-        catch(ModbusServerBusyException& ex)
+        catch(const ModbusServerBusyException& ex)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
-        catch(ModbusException& ex)
+        catch(const ModbusException& ex)
         {
-            throw ex;
+            throw;
         }
-        catch(Exception& ex)
+        catch(const std::exception& ex)
         {
-            if(i == 4) throw ex;
+            if(i == 4) throw;
         }
     }
 
@@ -603,21 +603,21 @@ Modbus::DeviceInfo Modbus::readDeviceIdentification()
                 if(response.size() >= 15 && response.at(8) == 0x2B && response.at(9) == 0x0E && response.at(10) == currentDeviceId) break;
                 else if(i == 9) throw ModbusException("Could not read Modbus device identification.");
             }
-            catch(ModbusServerBusyException& ex)
+            catch(const ModbusServerBusyException& ex)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                if(i == 9) throw ex;
+                if(i == 9) throw;
             }
-            catch(ModbusException& ex)
+            catch(const ModbusException& ex)
             {
-                if(ex.getCode() != 2 && ex.getCode() != 3) throw ex;
+                if(ex.getCode() != 2 && ex.getCode() != 3) throw;
                 exception = true;
                 response = ex.getPacket();
                 break;
             }
-            catch(Exception& ex)
+            catch(const std::exception& ex)
             {
-                if(i == 9) throw ex;
+                if(i == 9) throw;
             }
         }
 

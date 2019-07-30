@@ -43,6 +43,10 @@
 
 namespace BaseLib
 {
+
+class RpcClientInfo;
+typedef std::shared_ptr<RpcClientInfo> PRpcClientInfo;
+
 namespace ScriptEngine
 {
 
@@ -82,6 +86,7 @@ public:
 
 		Http http; //Web
 		Rpc::PServerInfo serverInfo; //Web
+        PRpcClientInfo clientInfo; //Web
 		std::string contentPath;
 
 		std::string script; //Device
@@ -117,15 +122,15 @@ public:
 		PTcpSocket socket;
 	// }}}
 
-	ScriptInfo(ScriptType type) { _type = type; }
-	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& arguments) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->arguments = arguments; }
-	ScriptInfo(ScriptType type, std::string& contentPath, std::string& fullPath, std::string& relativePath, Http& http, Rpc::PServerInfo& serverInfo) { _type = type; this->contentPath = contentPath; this->fullPath = fullPath; this->relativePath = relativePath; this->http = http; this->serverInfo = serverInfo; }
-	ScriptInfo(ScriptType type, std::string& contentPath, std::string& fullPath, std::string& relativePath, PVariable http, PVariable serverInfo) { _type = type; this->contentPath = contentPath; this->fullPath = fullPath; this->relativePath = relativePath; this->http.unserialize(http); this->serverInfo.reset(new Rpc::ServerInfo::Info()); this->serverInfo->unserialize(serverInfo); }
-	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; }
-	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments, int64_t peerId) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->script = script; this->arguments = arguments; this->peerId = peerId; }
-	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t inputPort, PVariable message) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->nodeInfo = nodeInfo; this->inputPort = inputPort; this->message = message; }
-	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t maxThreadCount) { _type = type; this->fullPath = fullPath; this->relativePath = relativePath; this->nodeInfo = nodeInfo; this->maxThreadCount = maxThreadCount; }
-	virtual ~ScriptInfo() {}
+	explicit ScriptInfo(ScriptType type);
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& arguments);
+	ScriptInfo(ScriptType type, std::string& contentPath, std::string& fullPath, std::string& relativePath, Http& http, Rpc::PServerInfo& serverInfo, PRpcClientInfo& clientInfo);
+	ScriptInfo(BaseLib::SharedObjects* bl, ScriptType type, std::string& contentPath, std::string& fullPath, std::string& relativePath, PVariable http, PVariable serverInfo, PVariable clientInfo);
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments);
+	ScriptInfo(ScriptType type, std::string& fullPath, std::string& relativePath, std::string& script, std::string& arguments, int64_t peerId);
+	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t inputPort, PVariable message);
+	ScriptInfo(ScriptType type, PVariable nodeInfo, std::string& fullPath, std::string& relativePath, uint32_t maxThreadCount);
+	virtual ~ScriptInfo() = default;
 	ScriptType getType() { return _type; }
 protected:
 	ScriptType _type = ScriptType::cli;

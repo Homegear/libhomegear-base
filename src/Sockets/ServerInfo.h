@@ -56,7 +56,7 @@ public:
 	class Info
 	{
 	public:
-		enum AuthType { none = 0, basic = 1, cert = 2, session = 4, oauth2Local = 8 };
+		enum AuthType { undefined = 0, none = 1, basic = 2, cert = 4, session = 8, oauth2Local = 16 };
 
 		Info()
 		{

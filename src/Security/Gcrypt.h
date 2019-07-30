@@ -51,7 +51,7 @@ namespace Security
 class GcryptException : public Exception
 {
 public:
-	GcryptException(std::string message) : Exception(message) {}
+	explicit GcryptException(const std::string& message) : Exception(message) {}
 };
 
 class Gcrypt
@@ -66,6 +66,16 @@ private:
 	 * The algorithm used.
 	 */
 	int _algorithm = 0;
+
+	/**
+	 * The mode used.
+	 */
+	int _mode = 0;
+
+	/**
+	 * The flags used.
+	 */
+	unsigned int _flags = 0;
 
 	/**
 	 * The Gcrypt handle
@@ -87,6 +97,11 @@ public:
 	 * Destructor.
 	 */
 	virtual ~Gcrypt();
+
+	/**
+	 * Resets everything.
+	 */
+	void reset();
 
 	/**
 	 * Returns the underlying gcry_cipher_hd_t.

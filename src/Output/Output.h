@@ -33,10 +33,7 @@
 
 #include "../Exception.h"
 
-#include <iostream>
-#include <iomanip>
 #include <string>
-#include <sstream>
 #include <memory>
 #include <vector>
 #include <map>

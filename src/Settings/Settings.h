@@ -31,7 +31,6 @@
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
-#include <iostream>
 #include <string>
 #include <map>
 #include <vector>
@@ -59,6 +58,7 @@ public:
 	int32_t ssdpPort() { return _ssdpPort; }
 	bool enableMonitoring() { return _enableMonitoring; };
 	bool devLog() { return _devLog; }
+    bool ipcLog() { return _ipcLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
 	bool enableNodeBlue() { return _enableNodeBlue; }
 	bool setDevicePermissions() { return _setDevicePermissions; }
@@ -137,6 +137,9 @@ public:
 	std::string nodeBlueDataPathUser() { return _nodeBlueDataPathUser; }
 	std::string nodeBlueDataPathGroup() { return _nodeBlueDataPathGroup; }
 	bool nodeBlueDebugOutput() { return _nodeBlueDebugOutput; }
+	uint32_t nodeBlueEventLimit1() { return _nodeBlueEventLimit1; }
+    uint32_t nodeBlueEventLimit2() { return _nodeBlueEventLimit2; }
+    uint32_t nodeBlueEventLimit3() { return _nodeBlueEventLimit3; }
 	std::string adminUiPath() { return _adminUiPath; }
 	uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
 	std::string adminUiPathUser() { return _adminUiPathUser; }
@@ -180,6 +183,7 @@ private:
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
 	bool _devLog = false;
+    bool _ipcLog = false;
 	bool _enableCoreDumps = true;
 	bool _enableNodeBlue = true;
 	bool _setDevicePermissions = true;
@@ -257,6 +261,9 @@ private:
 	std::string _nodeBlueDataPathUser;
 	std::string _nodeBlueDataPathGroup;
 	bool _nodeBlueDebugOutput = false;
+	uint32_t _nodeBlueEventLimit1 = 100;
+    uint32_t _nodeBlueEventLimit2 = 300;
+    uint32_t _nodeBlueEventLimit3 = 400;
 	std::string _adminUiPath;
 	uint32_t _adminUiPathPermissions = 504;
 	std::string _adminUiPathUser;

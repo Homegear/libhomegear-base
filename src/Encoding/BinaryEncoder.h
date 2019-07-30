@@ -31,7 +31,6 @@
 #ifndef BINARYENCODER_H_
 #define BINARYENCODER_H_
 
-#include <iostream>
 #include <memory>
 #include <cstring>
 #include <vector>

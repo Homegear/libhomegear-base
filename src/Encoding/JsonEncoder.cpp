@@ -31,109 +31,61 @@
 #include "JsonEncoder.h"
 #include "../BaseLib.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 namespace Rpc
 {
 
-JsonEncoder::JsonEncoder(BaseLib::SharedObjects* baseLib)
-{
-	_bl = baseLib;
-}
-
 void JsonEncoder::encodeRequest(std::string& methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<char>& encodedData)
 {
-	try
-	{
-		std::shared_ptr<Variable> methodCall(new Variable(VariableType::tStruct));
-		methodCall->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
-		methodCall->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
-		std::shared_ptr<Variable> params(new Variable(VariableType::tArray));
-		for(std::list<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i)
-		{
-			params->arrayValue->push_back(*i);
-		}
-		methodCall->structValue->insert(StructElement("params", params));
-		methodCall->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(_requestId++))));
-		encode(methodCall, encodedData);
-	}
-	catch(const std::exception& ex)
+    std::shared_ptr<Variable> methodCall(new Variable(VariableType::tStruct));
+    methodCall->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
+    methodCall->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
+    std::shared_ptr<Variable> params(new Variable(VariableType::tArray));
+    for(std::list<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        params->arrayValue->push_back(*i);
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    methodCall->structValue->insert(StructElement("params", params));
+    methodCall->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(_requestId++))));
+    encode(methodCall, encodedData);
 }
 
 void JsonEncoder::encodeResponse(const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json)
 {
-	try
-	{
-		std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
-		response->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
-		if(variable->errorStruct)
-		{
-			std::shared_ptr<Variable> error(new Variable(VariableType::tStruct));
-			error->structValue->insert(StructElement("code", variable->structValue->at("faultCode")));
-			error->structValue->insert(StructElement("message", variable->structValue->at("faultString")));
-			response->structValue->insert(StructElement("error", error));
-		}
-		else response->structValue->insert(StructElement("result", variable));
-		response->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(id))));
-		encode(response, json);
-	}
-	catch(const std::exception& ex)
+    std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
+    response->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
+    if(variable->errorStruct)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        std::shared_ptr<Variable> error(new Variable(VariableType::tStruct));
+        error->structValue->insert(StructElement("code", variable->structValue->at("faultCode")));
+        error->structValue->insert(StructElement("message", variable->structValue->at("faultString")));
+        response->structValue->insert(StructElement("error", error));
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    else response->structValue->insert(StructElement("result", variable));
+    response->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(id))));
+    encode(response, json);
 }
 
-void JsonEncoder::encodeMQTTResponse(const std::string methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json)
+void JsonEncoder::encodeMQTTResponse(const std::string& methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json)
 {
-	try
-	{
-		std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
-		response->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
-		if(variable->errorStruct)
-		{
-			std::shared_ptr<Variable> error(new Variable(VariableType::tStruct));
-			error->structValue->insert(StructElement("code", variable->structValue->at("faultCode")));
-			error->structValue->insert(StructElement("message", variable->structValue->at("faultString")));
-			response->structValue->insert(StructElement("error", error));
-		}
-		else response->structValue->insert(StructElement("result", variable));
-		response->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(id))));
-		encode(response, json);
-	}
-	catch(const std::exception& ex)
+    std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
+    response->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
+    if(variable->errorStruct)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        std::shared_ptr<Variable> error(new Variable(VariableType::tStruct));
+        error->structValue->insert(StructElement("code", variable->structValue->at("faultCode")));
+        error->structValue->insert(StructElement("message", variable->structValue->at("faultString")));
+        response->structValue->insert(StructElement("error", error));
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    else response->structValue->insert(StructElement("result", variable));
+    response->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(id))));
+    encode(response, json);
 }
 
-void JsonEncoder::encode(const std::shared_ptr<Variable> variable, std::string& json)
+void JsonEncoder::encode(const std::shared_ptr<Variable>& variable, std::string& json)
 {
 	if(!variable) return;
 	std::ostringstream s;
@@ -154,7 +106,7 @@ void JsonEncoder::encode(const std::shared_ptr<Variable> variable, std::string& 
 	json = s.str();
 }
 
-void JsonEncoder::encode(const std::shared_ptr<Variable> variable, std::vector<char>& json)
+void JsonEncoder::encode(const std::shared_ptr<Variable>& variable, std::vector<char>& json)
 {
 	if(!variable) return;
 	json.clear();
@@ -180,47 +132,36 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::os
 	switch(variable->type)
 	{
 	case VariableType::tArray:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON array.");
 		encodeArray(variable, s);
 		break;
 	case VariableType::tStruct:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON struct.");
 		encodeStruct(variable, s);
 		break;
 	case VariableType::tBoolean:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON boolean.");
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
 		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON float.");
 		encodeFloat(variable, s);
 		break;
 	case VariableType::tBase64:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tString:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tVoid:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tVariant:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tBinary:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	}
@@ -232,47 +173,36 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable>& variable, std::ve
 	switch(variable->type)
 	{
 	case VariableType::tArray:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON array.");
 		encodeArray(variable, s);
 		break;
 	case VariableType::tStruct:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON struct.");
 		encodeStruct(variable, s);
 		break;
 	case VariableType::tBoolean:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON boolean.");
 		encodeBoolean(variable, s);
 		break;
 	case VariableType::tInteger:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON integer \"" + std::to_string(variable->integerValue) + "\".");
 		encodeInteger(variable, s);
 		break;
 	case VariableType::tInteger64:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON 64-bit integer \"" + std::to_string(variable->integerValue64) + "\".");
 		encodeInteger64(variable, s);
 		break;
 	case VariableType::tFloat:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON float.");
 		encodeFloat(variable, s);
 		break;
 	case VariableType::tBase64:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tString:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON string.");
 		encodeString(variable, s);
 		break;
 	case VariableType::tVoid:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tVariant:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	case VariableType::tBinary:
-		if(_bl->debugLevel >= 6) _bl->out.printDebug("Encoding JSON null.");
 		encodeVoid(variable, s);
 		break;
 	}

@@ -66,14 +66,6 @@ SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<>* node)
     {
     	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 bool SetRequestEx::checkCondition(int32_t lhs)
@@ -266,14 +258,6 @@ PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>
 	catch(const std::exception& ex)
     {
     	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	baseLib->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 

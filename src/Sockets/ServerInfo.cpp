@@ -235,7 +235,7 @@ void ServerInfo::load(std::string filename)
 				}
 				else if(name == "authtype")
 				{
-                    info->authType = Info::AuthType::none;
+                    info->authType = Info::AuthType::undefined;
 					HelperFunctions::toLower(value);
                     auto fields = HelperFunctions::splitAll(value, ',');
                     for(auto& field : fields)
@@ -357,14 +357,6 @@ void ServerInfo::load(std::string filename)
 	catch(const std::exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 

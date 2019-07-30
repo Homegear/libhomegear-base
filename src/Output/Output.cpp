@@ -31,6 +31,10 @@
 #include "Output.h"
 #include "../BaseLib.h"
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
 namespace BaseLib
 {
 std::mutex Output::_outputMutex;
@@ -98,14 +102,6 @@ void Output::printThreadPriority()
     {
     	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Output::printBinary(std::vector<unsigned char>& data)
@@ -126,14 +122,6 @@ void Output::printBinary(std::vector<unsigned char>& data)
 	catch(const std::exception& ex)
     {
     	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -156,14 +144,6 @@ void Output::printBinary(std::shared_ptr<std::vector<char>> data)
     {
     	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void Output::printBinary(std::vector<char>& data)
@@ -184,14 +164,6 @@ void Output::printBinary(std::vector<char>& data)
 	catch(const std::exception& ex)
     {
     	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 

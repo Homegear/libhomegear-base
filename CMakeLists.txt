@@ -133,6 +133,7 @@ set(SOURCE_FILES
         src/Managers/ThreadManager.h
         src/Output/Output.cpp
         src/Output/Output.h
+        src/ScriptEngine/ScriptInfo.cpp
         src/ScriptEngine/ScriptInfo.h
         src/Security/Acl.cpp
         src/Security/Acl.h
@@ -178,7 +179,6 @@ set(SOURCE_FILES
         src/Systems/IDeviceFamily.h
         src/Systems/IPhysicalInterface.cpp
         src/Systems/IPhysicalInterface.h
-        src/Systems/Packet.cpp
         src/Systems/Packet.h
         src/Systems/Peer.cpp
         src/Systems/Peer.h
@@ -203,6 +203,6 @@ set(SOURCE_FILES
         src/ITimedQueue.h
         src/Variable.cpp
         src/Variable.h
-        config.h src/Security/Acls.cpp src/Security/Acls.h)
+        config.h src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

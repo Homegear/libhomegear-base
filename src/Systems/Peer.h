@@ -140,14 +140,14 @@ public:
 	void addCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.emplace(id); }
 	void removeCategory(uint64_t id) { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); _categories.erase(id); }
     std::set<uint64_t> getCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return _categories; }
-	std::string getCategoryString() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); std::ostringstream categories; for(auto category : _categories) { categories << std::to_string(category) << ","; } return categories.str(); }
+	std::string getCategoryString();
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
 	void addRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id); }
 	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
 	std::set<uint64_t> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
-	std::string getRoleString() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); std::ostringstream roles; for(auto role : _roles) { roles << std::to_string(role) << ","; } return roles.str(); }
+	std::string getRoleString();
 	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
 
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
@@ -435,7 +435,7 @@ public:
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
-    virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey);
+    virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);
     virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
 	virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls);
     virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
@@ -533,7 +533,7 @@ protected:
 	 * @param parameterGroup The parameter group the parameter should belong to.
 	 * @return Returns a RPC parameter based on variableInfo.
 	 */
-	BaseLib::DeviceDescription::PParameter createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const ParameterGroup* parameterGroup);
+	BaseLib::DeviceDescription::PParameter createRoleRpcParameter(BaseLib::PVariable& variableInfo, const std::string& baseVariableName, const PParameterGroup& parameterGroup);
 
 	/**
 	 * Gets a variable value directly from the device. This method is used as an inheritable hook method within getValue().
@@ -555,7 +555,7 @@ protected:
 	 */
 	virtual PParameterGroup getParameterSet(int32_t channel, ParameterGroup::Type::Enum type) = 0;
 
-	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index);
+	virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, const PParameter& parameter, int32_t channel, ParameterGroup::Type::Enum type, int32_t index, const std::unordered_set<std::string>& fields);
 
 	/**
 	 * Overridable hook in initializeCentralConfig to set a custom default value. See BidCoSPeer for an implementation example. There it is used to conditionally set "AES_ACTIVE", depending on whether the physical interface supports it.

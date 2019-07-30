@@ -50,6 +50,7 @@ namespace DeviceDescription
 {
 
 class Parameter;
+typedef std::shared_ptr<Parameter> PParameter;
 
 namespace ParameterCast
 {
@@ -57,27 +58,27 @@ namespace ParameterCast
 class ICast
 {
 public:
-	ICast(BaseLib::SharedObjects* baseLib);
-	ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~ICast() {}
+	explicit ICast(BaseLib::SharedObjects* baseLib);
+	explicit ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	virtual ~ICast() = default;
 
 	virtual bool needsBinaryPacketData() { return false; }
-	virtual void fromPacket(PVariable value);
-	virtual void toPacket(PVariable value);
+	virtual void fromPacket(PVariable& value);
+	virtual void toPacket(PVariable& value);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
-	Parameter* _parameter = nullptr;
+	const std::weak_ptr<Parameter> _parameter;
 };
 
 class DecimalIntegerScale : public ICast
 {
 public:
-	DecimalIntegerScale(BaseLib::SharedObjects* baseLib);
-	DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~DecimalIntegerScale() {}
+    explicit DecimalIntegerScale(BaseLib::SharedObjects* baseLib);
+    explicit DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~DecimalIntegerScale() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	double factor = 1.0;
@@ -92,12 +93,12 @@ public:
 		enum Enum { none = 0, division = 1, multiplication = 2 };
 	};
 
-	IntegerIntegerScale(BaseLib::SharedObjects* baseLib);
-	IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~IntegerIntegerScale() {}
+    explicit IntegerIntegerScale(BaseLib::SharedObjects* baseLib);
+    explicit IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~IntegerIntegerScale() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	Operation::Enum operation = Operation::none;
@@ -108,12 +109,12 @@ public:
 class IntegerOffset : public ICast
 {
 public:
-	IntegerOffset(BaseLib::SharedObjects* baseLib);
-	IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~IntegerOffset() {}
+    explicit IntegerOffset(BaseLib::SharedObjects* baseLib);
+    explicit IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~IntegerOffset() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	bool directionToPacket = true;
@@ -124,12 +125,12 @@ public:
 class DecimalOffset : public ICast
 {
 public:
-	DecimalOffset(BaseLib::SharedObjects* baseLib);
-	DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~DecimalOffset() {}
+    explicit DecimalOffset(BaseLib::SharedObjects* baseLib);
+    explicit DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~DecimalOffset() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	bool directionToPacket = true;
@@ -145,12 +146,12 @@ public:
 		enum Enum { none = 0, fromDevice = 1, toDevice = 2, both = 3 };
 	};
 
-	IntegerIntegerMap(BaseLib::SharedObjects* baseLib);
-	IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~IntegerIntegerMap() {}
+    explicit IntegerIntegerMap(BaseLib::SharedObjects* baseLib);
+    explicit IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~IntegerIntegerMap() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	Direction::Enum direction = Direction::none;
@@ -161,12 +162,12 @@ public:
 class BooleanInteger : public ICast
 {
 public:
-	BooleanInteger(BaseLib::SharedObjects* baseLib);
-	BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~BooleanInteger() {}
+    explicit BooleanInteger(BaseLib::SharedObjects* baseLib);
+    explicit BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~BooleanInteger() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	int32_t trueValue = 0;
@@ -178,12 +179,12 @@ public:
 class BooleanString : public ICast
 {
 public:
-	BooleanString(BaseLib::SharedObjects* baseLib);
-	BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~BooleanString() {}
+    explicit BooleanString(BaseLib::SharedObjects* baseLib);
+    explicit BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~BooleanString() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::string trueValue;
@@ -194,12 +195,12 @@ public:
 class DecimalConfigTime : public ICast
 {
 public:
-	DecimalConfigTime(BaseLib::SharedObjects* baseLib);
-	DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~DecimalConfigTime() {}
+    explicit DecimalConfigTime(BaseLib::SharedObjects* baseLib);
+    explicit DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~DecimalConfigTime() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::vector<double> factors;
@@ -209,12 +210,12 @@ public:
 class IntegerTinyFloat : public ICast
 {
 public:
-	IntegerTinyFloat(BaseLib::SharedObjects* baseLib);
-	IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~IntegerTinyFloat() {}
+    explicit IntegerTinyFloat(BaseLib::SharedObjects* baseLib);
+    explicit IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~IntegerTinyFloat() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	int32_t mantissaStart = 5;
@@ -226,23 +227,23 @@ public:
 class StringUnsignedInteger : public ICast
 {
 public:
-	StringUnsignedInteger(BaseLib::SharedObjects* baseLib);
-	StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~StringUnsignedInteger() {}
+    explicit StringUnsignedInteger(BaseLib::SharedObjects* baseLib);
+    explicit StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~StringUnsignedInteger() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class BlindTest : public ICast
 {
 public:
-	BlindTest(BaseLib::SharedObjects* baseLib);
-	BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~BlindTest() {}
+    explicit BlindTest(BaseLib::SharedObjects* baseLib);
+    explicit BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~BlindTest() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	int32_t value = 0;
@@ -251,23 +252,23 @@ public:
 class OptionString : public ICast
 {
 public:
-	OptionString(BaseLib::SharedObjects* baseLib);
-	OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~OptionString() {}
+    explicit OptionString(BaseLib::SharedObjects* baseLib);
+    explicit OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~OptionString() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class OptionInteger : public ICast
 {
 public:
-	OptionInteger(BaseLib::SharedObjects* baseLib);
-	OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~OptionInteger() {}
+    explicit OptionInteger(BaseLib::SharedObjects* baseLib);
+    explicit OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~OptionInteger() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::map<int32_t, int32_t> valueMapFromDevice;
@@ -277,24 +278,24 @@ public:
 class StringJsonArrayDecimal : public ICast
 {
 public:
-	StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib);
-	StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~StringJsonArrayDecimal() {}
+    explicit StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib);
+    explicit StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~StringJsonArrayDecimal() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class RpcBinary : public ICast
 {
 public:
-	RpcBinary(BaseLib::SharedObjects* baseLib);
-	RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~RpcBinary() {}
+    explicit RpcBinary(BaseLib::SharedObjects* baseLib);
+    explicit RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~RpcBinary() override = default;
 
-	bool needsBinaryPacketData() { return true; }
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	bool needsBinaryPacketData() override { return true; }
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 private:
 	//Helpers
 	std::shared_ptr<BaseLib::Rpc::RpcDecoder> _binaryDecoder;
@@ -304,12 +305,12 @@ private:
 class Toggle : public ICast
 {
 public:
-	Toggle(BaseLib::SharedObjects* baseLib);
-	Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~Toggle() {}
+    explicit Toggle(BaseLib::SharedObjects* baseLib);
+    explicit Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~Toggle() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::string parameter;
@@ -320,36 +321,36 @@ public:
 class CcrtdnParty : public ICast
 {
 public:
-	CcrtdnParty(BaseLib::SharedObjects* baseLib);
-	CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~CcrtdnParty() {}
+    explicit CcrtdnParty(BaseLib::SharedObjects* baseLib);
+    explicit CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~CcrtdnParty() override = default;
 
-	bool needsBinaryPacketData() { return true; }
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	bool needsBinaryPacketData() override { return true; }
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class Cfm : public ICast
 {
 public:
-	Cfm(BaseLib::SharedObjects* baseLib);
-	Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~Cfm() {}
+    explicit Cfm(BaseLib::SharedObjects* baseLib);
+    explicit Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~Cfm() override = default;
 
-	bool needsBinaryPacketData() { return true; }
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	bool needsBinaryPacketData() override { return true; }
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class StringReplace : public ICast
 {
 public:
-	StringReplace(BaseLib::SharedObjects* baseLib);
-	StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~StringReplace() {}
+    explicit StringReplace(BaseLib::SharedObjects* baseLib);
+    explicit StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~StringReplace() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::string search;
@@ -359,45 +360,45 @@ public:
 class HexStringByteArray : public ICast
 {
 public:
-	HexStringByteArray(BaseLib::SharedObjects* baseLib);
-	HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~HexStringByteArray() {}
+    explicit HexStringByteArray(BaseLib::SharedObjects* baseLib);
+    explicit HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~HexStringByteArray() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class TimeStringSeconds : public ICast
 {
 public:
-	TimeStringSeconds(BaseLib::SharedObjects* baseLib);
-	TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~TimeStringSeconds() {}
+    explicit TimeStringSeconds(BaseLib::SharedObjects* baseLib);
+    explicit TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~TimeStringSeconds() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class Invert : public ICast
 {
 public:
-	Invert(BaseLib::SharedObjects* baseLib);
-	Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~Invert() {}
+    explicit Invert(BaseLib::SharedObjects* baseLib);
+    explicit Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~Invert() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 };
 
 class Round : public ICast
 {
 public:
-	Round(BaseLib::SharedObjects* baseLib);
-	Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~Round() {}
+    explicit Round(BaseLib::SharedObjects* baseLib);
+    explicit Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~Round() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	bool roundToPoint5 = false;
@@ -407,12 +408,12 @@ public:
 class Generic : public ICast
 {
 public:
-	Generic(BaseLib::SharedObjects* baseLib);
-	Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter);
-	virtual ~Generic() {}
+    explicit Generic(BaseLib::SharedObjects* baseLib);
+    explicit Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~Generic() override = default;
 
-	void fromPacket(PVariable value);
-	void toPacket(PVariable value);
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
 
 	//Elements
 	std::string type;

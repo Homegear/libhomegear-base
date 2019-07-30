@@ -36,6 +36,7 @@
 #include <atomic>
 #include <forward_list>
 #include <mutex>
+#include <unordered_map>
 
 namespace BaseLib
 {
@@ -62,7 +63,7 @@ private:
 };
 
 typedef std::shared_ptr<EventHandler> PEventHandler;
-typedef std::map<IEventSinkBase*, PEventHandler> EventHandlers;
+typedef std::unordered_map<IEventSinkBase*, PEventHandler> EventHandlers;
 
 class IEventSinkBase
 {

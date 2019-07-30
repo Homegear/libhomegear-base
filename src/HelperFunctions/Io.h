@@ -36,6 +36,11 @@
 
 namespace BaseLib
 {
+namespace Security
+{
+    template<typename T> class SecureVector;
+}
+
 class SharedObjects;
 
 /**
@@ -114,6 +119,16 @@ public:
 	 * @return Returns the content of the file as an unsigned char array.
 	 */
 	static std::vector<uint8_t> getUBinaryFileContent(const std::string& filename);
+
+    /**
+     * Reads a file and returns the content as an unsigned binary secure array, which is cleaned up automatically on
+     * destruction.
+     *
+     * @param filename The path to the file to read.
+     * @return Returns the content of the file as an unsigned binary secure array, which is cleaned up automatically on
+     * destruction.
+     */
+    static Security::SecureVector<uint8_t> getUBinaryFileContentSecure(const std::string& filename);
 
 	/**
 	 * Checks if a file exists.

@@ -31,6 +31,8 @@
 #include "ParameterCast.h"
 #include "../BaseLib.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 namespace DeviceDescription
@@ -38,21 +40,19 @@ namespace DeviceDescription
 namespace ParameterCast
 {
 
-ICast::ICast(BaseLib::SharedObjects* baseLib)
-{
-	_bl = baseLib;
-}
-
-ICast::ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib)
-{
-	_parameter = parameter;
-}
-
-void ICast::fromPacket(PVariable value)
+ICast::ICast(BaseLib::SharedObjects* baseLib) : _bl(baseLib)
 {
 }
 
-void ICast::toPacket(PVariable value)
+ICast::ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : _bl(baseLib), _parameter(parameter)
+{
+}
+
+void ICast::fromPacket(PVariable& value)
+{
+}
+
+void ICast::toPacket(PVariable& value)
 {
 }
 
@@ -60,7 +60,7 @@ DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib) : ICas
 {
 }
 
-DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -80,7 +80,7 @@ DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_no
 	}
 }
 
-void DecimalIntegerScale::fromPacket(PVariable value)
+void DecimalIntegerScale::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tFloat;
@@ -88,7 +88,7 @@ void DecimalIntegerScale::fromPacket(PVariable value)
 	value->integerValue = 0;
 }
 
-void DecimalIntegerScale::toPacket(PVariable value)
+void DecimalIntegerScale::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->integerValue = std::lround((value->floatValue + offset) * factor);
@@ -100,7 +100,7 @@ IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib) : ICas
 {
 }
 
-IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -126,7 +126,7 @@ IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_no
 	}
 }
 
-void IntegerIntegerScale::fromPacket(PVariable value)
+void IntegerIntegerScale::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -135,7 +135,7 @@ void IntegerIntegerScale::fromPacket(PVariable value)
 	else _bl->out.printWarning("Warning: Operation is not set for parameter conversion integerIntegerScale.");
 }
 
-void IntegerIntegerScale::toPacket(PVariable value)
+void IntegerIntegerScale::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -148,7 +148,7 @@ IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -169,7 +169,7 @@ IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 	}
 }
 
-void IntegerOffset::fromPacket(PVariable value)
+void IntegerOffset::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -177,7 +177,7 @@ void IntegerOffset::fromPacket(PVariable value)
 	else value->integerValue = addOffset ? value->integerValue + offset : offset - value->integerValue;
 }
 
-void IntegerOffset::toPacket(PVariable value)
+void IntegerOffset::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -189,7 +189,7 @@ DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -210,7 +210,7 @@ DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 	}
 }
 
-void DecimalOffset::fromPacket(PVariable value)
+void DecimalOffset::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tFloat;
@@ -218,7 +218,7 @@ void DecimalOffset::fromPacket(PVariable value)
 	else value->floatValue = addOffset ? value->floatValue + offset : offset - value->floatValue;
 }
 
-void DecimalOffset::toPacket(PVariable value)
+void DecimalOffset::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tFloat;
@@ -230,7 +230,7 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -270,7 +270,7 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>
 	}
 }
 
-void IntegerIntegerMap::fromPacket(PVariable value)
+void IntegerIntegerMap::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -281,7 +281,7 @@ void IntegerIntegerMap::fromPacket(PVariable value)
 	}
 }
 
-void IntegerIntegerMap::toPacket(PVariable value)
+void IntegerIntegerMap::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -296,7 +296,7 @@ BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -314,7 +314,7 @@ BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node
 	}
 }
 
-void BooleanInteger::fromPacket(PVariable value)
+void BooleanInteger::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tBoolean;
@@ -332,7 +332,7 @@ void BooleanInteger::fromPacket(PVariable value)
 	value->integerValue = 0;
 }
 
-void BooleanInteger::toPacket(PVariable value)
+void BooleanInteger::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -347,7 +347,7 @@ BooleanString::BooleanString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -364,7 +364,7 @@ BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 	}
 }
 
-void BooleanString::fromPacket(PVariable value)
+void BooleanString::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tBoolean;
@@ -373,7 +373,7 @@ void BooleanString::fromPacket(PVariable value)
 	value->stringValue.clear();
 }
 
-void BooleanString::toPacket(PVariable value)
+void BooleanString::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tString;
@@ -387,7 +387,7 @@ DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -420,7 +420,7 @@ DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>
 	}
 }
 
-void DecimalConfigTime::fromPacket(PVariable value)
+void DecimalConfigTime::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tFloat;
@@ -472,7 +472,7 @@ void DecimalConfigTime::fromPacket(PVariable value)
 	value->integerValue = 0;
 }
 
-void DecimalConfigTime::toPacket(PVariable value)
+void DecimalConfigTime::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -510,7 +510,7 @@ IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib) : ICast(base
 {
 }
 
-IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -528,7 +528,7 @@ IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* 
 	}
 }
 
-void IntegerTinyFloat::fromPacket(PVariable value)
+void IntegerTinyFloat::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -537,7 +537,7 @@ void IntegerTinyFloat::fromPacket(PVariable value)
 	value->integerValue = mantissa * (1 << exponent);
 }
 
-void IntegerTinyFloat::toPacket(PVariable value)
+void IntegerTinyFloat::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -563,7 +563,7 @@ StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib) : 
 {
 }
 
-StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -575,7 +575,7 @@ StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xm
 	}
 }
 
-void StringUnsignedInteger::fromPacket(PVariable value)
+void StringUnsignedInteger::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tString;
@@ -583,7 +583,7 @@ void StringUnsignedInteger::fromPacket(PVariable value)
 	value->integerValue = 0;
 }
 
-void StringUnsignedInteger::toPacket(PVariable value)
+void StringUnsignedInteger::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -595,7 +595,7 @@ BlindTest::BlindTest(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -604,20 +604,20 @@ BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
-		std::string value(subNode->value());
-		if(name == "value") value = Math::getNumber(value);
+		std::string stringValue(subNode->value());
+		if(name == "value") value = Math::getNumber(stringValue);
 		else _bl->out.printWarning("Warning: Unknown node in \"blindTest\": " + name);
 	}
 }
 
-void BlindTest::fromPacket(PVariable value)
+void BlindTest::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
 	value->integerValue = this->value;
 }
 
-void BlindTest::toPacket(PVariable value)
+void BlindTest::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -628,7 +628,7 @@ OptionString::OptionString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -640,11 +640,12 @@ OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, Pa
 	}
 }
 
-void OptionString::fromPacket(PVariable value)
+void OptionString::fromPacket(PVariable& value)
 {
-	if(!value || !_parameter) return;
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
 	value->type = VariableType::tInteger;
-	LogicalEnumeration* logicalEnum = (LogicalEnumeration*)_parameter->logical.get();
+	LogicalEnumeration* logicalEnum = (LogicalEnumeration*)parameter->logical.get();
 	value->integerValue = -1;
 	for(std::vector<EnumerationValue>::iterator i = logicalEnum->values.begin(); i != logicalEnum->values.end(); ++i)
 	{
@@ -662,13 +663,14 @@ void OptionString::fromPacket(PVariable value)
 	value->stringValue = "";
 }
 
-void OptionString::toPacket(PVariable value)
+void OptionString::toPacket(PVariable& value)
 {
-	if(!value || !_parameter) return;
-	if(_parameter->logical->type == ILogical::Type::Enum::tEnum)
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
+	if(parameter->logical->type == ILogical::Type::Enum::tEnum)
 	{
 		value->type = VariableType::tString;
-		LogicalEnumeration* logicalEnum = (LogicalEnumeration*)_parameter->logical.get();
+		LogicalEnumeration* logicalEnum = (LogicalEnumeration*)parameter->logical.get();
 		if(value->integerValue >= 0 && value->integerValue < (signed)logicalEnum->values.size())
 		{
 			value->stringValue = logicalEnum->values.at(value->integerValue).id;
@@ -682,7 +684,7 @@ OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -715,7 +717,7 @@ OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 	}
 }
 
-void OptionInteger::fromPacket(PVariable value)
+void OptionInteger::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -723,7 +725,7 @@ void OptionInteger::fromPacket(PVariable value)
 	if(element != valueMapFromDevice.end()) value->integerValue = element->second;
 }
 
-void OptionInteger::toPacket(PVariable value)
+void OptionInteger::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tInteger;
@@ -735,7 +737,7 @@ StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib) 
 {
 }
 
-StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -747,10 +749,11 @@ StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, 
 	}
 }
 
-void StringJsonArrayDecimal::fromPacket(PVariable value)
+void StringJsonArrayDecimal::fromPacket(PVariable& value)
 {
-	if(!value || !_parameter) return;
-	if(_parameter->logical->type == ILogical::Type::Enum::tString)
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
+	if(parameter->logical->type == ILogical::Type::Enum::tString)
 	{
 		value->type = VariableType::tString;
 		if(value->arrayValue->size() > 0) value->stringValue = std::to_string(value->arrayValue->at(0)->floatValue);
@@ -766,10 +769,11 @@ void StringJsonArrayDecimal::fromPacket(PVariable value)
 	else _bl->out.printWarning("Warning: Only strings can be created from Json arrays.");
 }
 
-void StringJsonArrayDecimal::toPacket(PVariable value)
+void StringJsonArrayDecimal::toPacket(PVariable& value)
 {
-	if(!value || !_parameter) return;
-	if(_parameter->logical->type == ILogical::Type::Enum::tString)
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
+	if(parameter->logical->type == ILogical::Type::Enum::tString)
 	{
 		std::vector<std::string> arrayElements = HelperFunctions::splitAll(value->stringValue, ';');
 		for(std::vector<std::string>::iterator i = arrayElements.begin(); i != arrayElements.end(); ++i)
@@ -788,7 +792,7 @@ RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 }
 
-RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
@@ -803,13 +807,14 @@ RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, Paramete
 	}
 }
 
-void RpcBinary::fromPacket(PVariable value)
+void RpcBinary::fromPacket(PVariable& value)
 {
 	if(!value) return;
-	_binaryDecoder->decodeResponse(value);
+	auto response = _binaryDecoder->decodeResponse(value->binaryValue);
+	*value = *response;
 }
 
-void RpcBinary::toPacket(PVariable value)
+void RpcBinary::toPacket(PVariable& value)
 {
 	if(!value) return;
 	_binaryEncoder->encodeResponse(value, value->binaryValue);
@@ -820,7 +825,7 @@ Toggle::Toggle(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -838,11 +843,11 @@ Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* par
 	}
 }
 
-void Toggle::fromPacket(PVariable value)
+void Toggle::fromPacket(PVariable& value)
 {
 }
 
-void Toggle::toPacket(PVariable value)
+void Toggle::toPacket(PVariable& value)
 {
 }
 
@@ -850,7 +855,7 @@ CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -862,13 +867,13 @@ CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, Para
 	}
 }
 
-void CcrtdnParty::fromPacket(PVariable value)
+void CcrtdnParty::fromPacket(PVariable& value)
 {
 	value->stringValue = "";
 	value->type = VariableType::tString;
 }
 
-void CcrtdnParty::toPacket(PVariable value)
+void CcrtdnParty::toPacket(PVariable& value)
 {
 	if(!value) return;
 	//Cannot currently easily be handled by ParameterConversion::toPacket
@@ -906,7 +911,7 @@ Cfm::Cfm(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -918,13 +923,13 @@ Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter
 	}
 }
 
-void Cfm::fromPacket(PVariable value)
+void Cfm::fromPacket(PVariable& value)
 {
 	value->stringValue = "";
 	value->type = VariableType::tString;
 }
 
-void Cfm::toPacket(PVariable value)
+void Cfm::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->binaryValue.resize(14, 0);
@@ -965,7 +970,7 @@ StringReplace::StringReplace(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -981,13 +986,13 @@ StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 	}
 }
 
-void StringReplace::fromPacket(PVariable value)
+void StringReplace::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	HelperFunctions::stringReplace(value->stringValue, replace, search);
 }
 
-void StringReplace::toPacket(PVariable value)
+void StringReplace::toPacket(PVariable& value)
 {
 	if(!value) return;
 	HelperFunctions::stringReplace(value->stringValue, search, replace);
@@ -997,7 +1002,7 @@ HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib) : ICast(
 {
 }
 
-HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1009,13 +1014,13 @@ HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node
 	}
 }
 
-void HexStringByteArray::fromPacket(PVariable value)
+void HexStringByteArray::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->stringValue = _bl->hf.getHexString(value->stringValue);
 }
 
-void HexStringByteArray::toPacket(PVariable value)
+void HexStringByteArray::toPacket(PVariable& value)
 {
 	if(!value) return;
 	if(value->stringValue.find(',') != std::string::npos)
@@ -1039,7 +1044,7 @@ TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1051,7 +1056,7 @@ TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>
 	}
 }
 
-void TimeStringSeconds::fromPacket(PVariable value)
+void TimeStringSeconds::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	std::vector<std::string> parts = BaseLib::HelperFunctions::splitAll(value->stringValue, ':');
@@ -1067,7 +1072,7 @@ void TimeStringSeconds::fromPacket(PVariable value)
 	value->stringValue.clear();
 }
 
-void TimeStringSeconds::toPacket(PVariable value)
+void TimeStringSeconds::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->type = VariableType::tString;
@@ -1081,7 +1086,7 @@ Invert::Invert(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1093,44 +1098,46 @@ Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* par
 	}
 }
 
-void Invert::fromPacket(PVariable value)
+void Invert::fromPacket(PVariable& value)
 {
-	if(!value) return;
-	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
+	if(parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
-		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
+		LogicalInteger* logical = (LogicalInteger*)parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
+	else if(parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
-		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
+		LogicalInteger64* logical = (LogicalInteger64*)parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
+	else if(parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
-		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
+		LogicalDecimal* logical = (LogicalDecimal*)parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
 	}
 }
 
-void Invert::toPacket(PVariable value)
+void Invert::toPacket(PVariable& value)
 {
-	if(!value) return;
-	if(_parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
-	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger)
+    auto parameter = _parameter.lock();
+	if(!value || !parameter) return;
+	if(parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
+	else if(parameter->logical->type == ILogical::Type::Enum::tInteger)
 	{
-		LogicalInteger* logical = (LogicalInteger*)_parameter->logical.get();
+		LogicalInteger* logical = (LogicalInteger*)parameter->logical.get();
 		value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
 	}
-	else if(_parameter->logical->type == ILogical::Type::Enum::tInteger64)
+	else if(parameter->logical->type == ILogical::Type::Enum::tInteger64)
 	{
-		LogicalInteger64* logical = (LogicalInteger64*)_parameter->logical.get();
+		LogicalInteger64* logical = (LogicalInteger64*)parameter->logical.get();
 		value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
 	}
-	else if(_parameter->logical->type == ILogical::Type::Enum::tFloat)
+	else if(parameter->logical->type == ILogical::Type::Enum::tFloat)
 	{
-		LogicalDecimal* logical = (LogicalDecimal*)_parameter->logical.get();
+		LogicalDecimal* logical = (LogicalDecimal*)parameter->logical.get();
 		value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
 	}
 }
@@ -1139,7 +1146,7 @@ Round::Round(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1162,13 +1169,13 @@ Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* param
 	}
 }
 
-void Round::fromPacket(PVariable value)
+void Round::fromPacket(PVariable& value)
 {
 	if(!value) return;
 	value->floatValue = std::round(value->floatValue * (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces))) / (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces));
 }
 
-void Round::toPacket(PVariable value)
+void Round::toPacket(PVariable& value)
 {
 	if(!value) return;
 	value->floatValue = std::round(value->floatValue * (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces))) / (roundToPoint5 ? 2.0 : Math::Pow10(decimalPlaces));
@@ -1178,7 +1185,7 @@ Generic::Generic(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* parameter) : ICast(baseLib, node, parameter)
+Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
@@ -1193,11 +1200,11 @@ Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, Parameter* p
 	}
 }
 
-void Generic::fromPacket(PVariable value)
+void Generic::fromPacket(PVariable& value)
 {
 }
 
-void Generic::toPacket(PVariable value)
+void Generic::toPacket(PVariable& value)
 {
 }
 

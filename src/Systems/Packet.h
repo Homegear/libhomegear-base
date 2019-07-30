@@ -42,32 +42,19 @@ namespace Systems
 class Packet
 {
 public:
-	Packet();
-	virtual ~Packet();
+	Packet() = default;
+	virtual ~Packet() = default;
 
-	virtual uint8_t length() { return _length; }
-	virtual uint8_t controlByte() { return _controlByte; }
-	virtual int32_t senderAddress() { return _senderAddress; }
-	virtual int32_t destinationAddress() { return _destinationAddress; }
-	virtual std::vector<uint8_t>* payload() { return &_payload; }
-	virtual std::string hexString() { return ""; }
-	//virtual std::vector<uint8_t> byteArray() { return std::vector<uint8_t>(); }
-	virtual int64_t timeReceived() { return _timeReceived; }
-	virtual int64_t timeSending() { return _timeSending; }
+	virtual int32_t getTag() { return _tag; };
+	virtual void setTag(int32_t tag) { _tag = tag; }
+	virtual int64_t getTimeReceived() { return _timeReceived; }
+	virtual int64_t getTimeSending() { return _timeSending; }
 	virtual void setTimeReceived(int64_t time) { _timeReceived = time; }
 	virtual void setTimeSending(int64_t time) { _timeSending = time; }
-	virtual std::vector<uint8_t> getPosition(double index, double size, int32_t mask) { return std::vector<uint8_t>(); }
-	virtual void setPosition(double index, double size, std::vector<uint8_t>& value) {}
 protected:
-	uint8_t _length = 0;
-    uint8_t _controlByte = 0;
-    int32_t _senderAddress = 0;
-    int32_t _destinationAddress = 0;
-    std::vector<uint8_t> _payload;
-    uint32_t _bitmask[9] = {0xFF, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF};
+    int32_t _tag = 0;
 	int64_t _timeReceived = 0;
     int64_t _timeSending = 0;
-
 };
 
 }

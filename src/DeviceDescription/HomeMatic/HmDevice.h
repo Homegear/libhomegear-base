@@ -31,10 +31,7 @@
 #ifndef HMDEVICE_H_
 #define HMDEVICE_H_
 
-#include <fstream>
 #include <string>
-#include <sstream>
-#include <iostream>
 #include <vector>
 #include <map>
 #include <unordered_map>

@@ -94,6 +94,9 @@ namespace BaseLib
 class SharedObjects
 {
 public:
+    SharedObjects(const SharedObjects&) = delete;  //Copy constructor
+    SharedObjects& operator=(const SharedObjects&) = delete; //Copy assignment operator
+
 	/**
 	 * The current debug level for logging.
 	 */
@@ -112,12 +115,12 @@ public:
 	/**
 	 * True when Homegear is still starting. It is set to false, when start up is complete and isOpen() of all interfaces is "true" (plus 30 seconds).
 	 */
-	std::atomic_bool booting;
+	std::atomic_bool booting{ true };
 
 	/**
 	 * True when Homegear received signal 15.
 	 */
-	std::atomic_bool shuttingDown;
+	std::atomic_bool shuttingDown{ false };
 
 	/**
 	 * The FileDescriptorManager object where all file or socket descriptors should be registered.
@@ -144,6 +147,18 @@ public:
 	 * Port, the non-ssl RPC server listens on.
 	 */
 	uint32_t rpcPort = 0;
+
+	/**
+	 * Return the time of the creation of the object (the Homegear start time).
+	 *
+	 * @return The unix epoch time in milliseconds.
+	 */
+	int64_t getStartTime();
+
+	/**
+	 * Set the start time.
+	 */
+	void setStartTime(int64_t time);
 
 	/**
 	 * Object to store information about running updates and to only allow one update at a time.
@@ -198,8 +213,7 @@ public:
 	 */
 	void setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback);
 private:
-	SharedObjects(const SharedObjects&);
-	SharedObjects& operator=(const SharedObjects&);
+	int64_t _startTime = 0;
 };
 }
 #endif

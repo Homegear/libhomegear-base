@@ -55,9 +55,9 @@ typedef std::vector<PSupportedDevice> SupportedDevices;
 class SupportedDevice
 {
 public:
-	SupportedDevice(BaseLib::SharedObjects* baseLib, HomegearDevice* device);
-	SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node, HomegearDevice* device);
-	virtual ~SupportedDevice() {}
+	explicit SupportedDevice(BaseLib::SharedObjects* baseLib);
+    explicit SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	virtual ~SupportedDevice() = default;
 
 	std::string id;
 	std::string description;
@@ -79,7 +79,6 @@ public:
 	bool checkFirmwareVersion(int32_t version);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
-	HomegearDevice* _device = nullptr;
 };
 }
 }

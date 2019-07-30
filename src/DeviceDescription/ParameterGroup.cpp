@@ -41,18 +41,18 @@ ParameterGroup::ParameterGroup(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-ParameterGroup::ParameterGroup(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib)
-{
-	parseAttributes(node);
-	parseElements(node);
-}
-
 ParameterGroup::~ParameterGroup()
 {
 	parameters.clear();
 	parametersOrdered.clear();
 	scenarios.clear();
 	lists.clear();
+}
+
+void ParameterGroup::parseXml(xml_node<>* node)
+{
+    parseAttributes(node);
+    parseElements(node);
 }
 
 void ParameterGroup::parseAttributes(xml_node<>* node)
@@ -78,7 +78,8 @@ void ParameterGroup::parseElements(xml_node<>* node)
 		std::string nodeName(subNode->name());
 		if(nodeName == "parameter")
 		{
-			PParameter parameter = std::make_shared<Parameter>(_bl, subNode, this);
+			PParameter parameter = std::make_shared<Parameter>(_bl, shared_from_this());
+			parameter->parseXml(subNode);
 			if(!parameter->id.empty())
 			{
 				parameters.insert(std::pair<std::string, PParameter>(parameter->id, parameter));
@@ -129,10 +130,6 @@ void ParameterGroup::getIndices(uint32_t startIndex, uint32_t endIndex, int32_t 
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -143,15 +140,7 @@ ConfigParameters::ConfigParameters(BaseLib::SharedObjects* baseLib) : ParameterG
 {
 }
 
-ConfigParameters::ConfigParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
-{
-}
-
 Variables::Variables(BaseLib::SharedObjects* baseLib) : ParameterGroup(baseLib)
-{
-}
-
-Variables::Variables(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
 {
 }
 
@@ -159,25 +148,25 @@ LinkParameters::LinkParameters(BaseLib::SharedObjects* baseLib) : ParameterGroup
 {
 }
 
-LinkParameters::LinkParameters(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ParameterGroup(baseLib, node)
+void LinkParameters::parseXml(xml_node<>* node)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-	{
-		std::string attributeName(attr->name());
-		std::string attributeValue(attr->value());
-		if(attributeName == "id")
-		{
-			id = attributeValue;
-		}
-		else if(attributeName == "memoryAddressStart") memoryAddressStart = Math::getNumber(attributeValue);
-		else if(attributeName == "memoryAddressStep") memoryAddressStep = Math::getNumber(attributeValue);
-		else if(attributeName == "peerChannelMemoryOffset") peerChannelMemoryOffset = Math::getNumber(attributeValue);
-		else if(attributeName == "channelMemoryOffset") channelMemoryOffset = Math::getNumber(attributeValue);
-		else if(attributeName == "peerAddressMemoryOffset") peerAddressMemoryOffset = Math::getNumber(attributeValue);
-		else if(attributeName == "maxLinkCount") maxLinkCount = Math::getNumber(attributeValue);
-		else _bl->out.printWarning("Warning: Unknown attribute for \"linkParameters\": " + attributeName);
-	}
-	parseElements(node);
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string attributeName(attr->name());
+        std::string attributeValue(attr->value());
+        if(attributeName == "id")
+        {
+            id = attributeValue;
+        }
+        else if(attributeName == "memoryAddressStart") memoryAddressStart = Math::getNumber(attributeValue);
+        else if(attributeName == "memoryAddressStep") memoryAddressStep = Math::getNumber(attributeValue);
+        else if(attributeName == "peerChannelMemoryOffset") peerChannelMemoryOffset = Math::getNumber(attributeValue);
+        else if(attributeName == "channelMemoryOffset") channelMemoryOffset = Math::getNumber(attributeValue);
+        else if(attributeName == "peerAddressMemoryOffset") peerAddressMemoryOffset = Math::getNumber(attributeValue);
+        else if(attributeName == "maxLinkCount") maxLinkCount = Math::getNumber(attributeValue);
+        else _bl->out.printWarning("Warning: Unknown attribute for \"linkParameters\": " + attributeName);
+    }
+    parseElements(node);
 }
 
 }

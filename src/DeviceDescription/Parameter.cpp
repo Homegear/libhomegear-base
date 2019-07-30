@@ -55,249 +55,248 @@ bool Parameter::Packet::checkCondition(int32_t lhs)
 	}
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, const ParameterGroup* parent)
+Parameter::Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent) : _parent(parent)
 {
 	_bl = baseLib;
-	_parent = parent;
 	logical.reset(new LogicalInteger(baseLib));
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::Parameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, const ParameterGroup* parent) : Parameter(baseLib, parent)
-{
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-	{
-		std::string attributeName(attr->name());
-		std::string attributeValue(attr->value());
-		if(attributeName == "id")
-		{
-			id = attributeValue;
-		}
-		else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + attributeName);
-	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-	{
-		std::string nodeName(subNode->name());
-		if(nodeName == "properties")
-		{
-			for(xml_node<>* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
-			{
-				std::string propertyName(propertyNode->name());
-				std::string propertyValue(propertyNode->value());
-				if(propertyName == "readable") readable = propertyValue == "true";
-				else if(propertyName == "writeable") writeable = propertyValue == "true";
-				else if(propertyName == "transmitted") transmitted = propertyValue == "true";
-				else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }
-				else if(propertyName == "password") { if(propertyValue == "true") password = true; }
-				else if(propertyName == "visible") { if(propertyValue == "false") visible = false; }
-				else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
-				else if(propertyName == "parameterGroupSelector") { if(propertyValue == "true") parameterGroupSelector = true; }
-				else if(propertyName == "service") { if(propertyValue == "true") service = true; }
-				else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
-				else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
-				else if(propertyName == "signed") { isSignedSet = true; isSigned = propertyValue == "true"; }
-				else if(propertyName == "control") control = propertyValue;
-				else if(propertyName == "unit") unit = propertyValue;
-				else if(propertyName == "mandatory") mandatory = (propertyValue == "true");
-				else if(propertyName == "formFieldType") formFieldType = propertyValue;
-				else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
-				else if(propertyName == "metadata") metadata = propertyValue;
-				else if(propertyName == "resetAfterRestart") { resetAfterRestart = propertyValue == "true"; }
-				else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
-				else if(propertyName == "casts")
-				{
-					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
-					{
-						_bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
-					}
-					for(xml_node<>* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
-					{
-						std::string castName(castNode->name());
-						if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, this)));
-						else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, this)));
-						else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, this)));
-						else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, this)));
-						else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, this)));
-						else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, this)));
-						else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, this)));
-						else if(castName == "decimalConfigTime") casts.push_back(PDecimalConfigTime (new DecimalConfigTime(_bl, castNode, this)));
-						else if(castName == "integerTinyFloat") casts.push_back(PIntegerTinyFloat(new IntegerTinyFloat(_bl, castNode, this)));
-						else if(castName == "stringUnsignedInteger") casts.push_back(PStringUnsignedInteger(new StringUnsignedInteger(_bl, castNode, this)));
-						else if(castName == "blindTest") casts.push_back(PBlindTest(new BlindTest(_bl, castNode, this)));
-						else if(castName == "optionString") casts.push_back(POptionString(new OptionString(_bl, castNode, this)));
-						else if(castName == "optionInteger") casts.push_back(POptionInteger(new OptionInteger(_bl, castNode, this)));
-						else if(castName == "stringJsonArrayDecimal") casts.push_back(PStringJsonArrayDecimal(new StringJsonArrayDecimal(_bl, castNode, this)));
-						else if(castName == "rpcBinary") casts.push_back(PRpcBinary(new RpcBinary(_bl, castNode, this)));
-						else if(castName == "toggle") casts.push_back(PToggle(new Toggle(_bl, castNode, this)));
-						else if(castName == "cfm") casts.push_back(PCfm(new Cfm(_bl, castNode, this)));
-						else if(castName == "ccrtdnParty") casts.push_back(PCcrtdnParty(new CcrtdnParty(_bl, castNode, this)));
-						else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, this)));
-						else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, this)));
-						else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, this)));
-						else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, this)));
-						else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, this)));
-						else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, this)));
-						else _bl->out.printWarning("Warning: Unknown cast: " + castName);
-					}
-				}
-				else if(propertyName == "roles")
-				{
-					for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
-					{
-						_bl->out.printWarning("Warning: Unknown attribute for \"roles\": " + std::string(attr->name()));
-					}
-					for(xml_node<>* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
-					{
-						std::string roleName(roleNode->name());
-						std::string roleValue(roleNode->value());
-						if(roleName == "role")
-						{
-						    auto roleId = Math::getUnsignedNumber64(roleValue);
-							if(!roleId != 0) roles.emplace(roleId);
-						}
-						else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
-					}
-				}
-				else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
-			}
-		}
-		else if(nodeName == "logicalBoolean") logical.reset(new LogicalBoolean(_bl, subNode));
-		else if(nodeName == "logicalAction") logical.reset(new LogicalAction(_bl, subNode));
-		else if(nodeName == "logicalArray") logical.reset(new LogicalArray(_bl, subNode));
-		else if(nodeName == "logicalInteger") logical.reset(new LogicalInteger(_bl, subNode));
-		else if(nodeName == "logicalInteger64") logical.reset(new LogicalInteger64(_bl, subNode));
-		else if(nodeName == "logicalDecimal") logical.reset(new LogicalDecimal(_bl, subNode));
-		else if(nodeName == "logicalString") logical.reset(new LogicalString(_bl, subNode));
-		else if(nodeName == "logicalStruct") logical.reset(new LogicalStruct(_bl, subNode));
-		else if(nodeName == "logicalEnumeration") logical.reset(new LogicalEnumeration(_bl, subNode));
-		else if(nodeName == "physical" || nodeName == "physicalNone") physical.reset(new Physical(_bl, subNode));
-		else if(nodeName == "physicalInteger") physical.reset(new PhysicalInteger(_bl, subNode));
-		else if(nodeName == "physicalBoolean") physical.reset(new PhysicalBoolean(_bl, subNode));
-		else if(nodeName == "physicalString") physical.reset(new PhysicalString(_bl, subNode));
-		else if(nodeName == "packets")
-		{
-			for(xml_node<>* packetsNode = subNode->first_node(); packetsNode; packetsNode = packetsNode->next_sibling())
-			{
-				std::string packetsNodeName(packetsNode->name());
-				if(packetsNodeName == "packet")
-				{
-					std::shared_ptr<Packet> packet(new Packet());
-					for(xml_attribute<>* attr = packetsNode->first_attribute(); attr; attr = attr->next_attribute())
-					{
-						std::string attributeName(attr->name());
-						if(attributeName == "id") packet->id = std::string(attr->value());
-						else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\": " + std::string(attr->name()));
-					}
-					for(xml_node<>* packetNode = packetsNode->first_node(); packetNode; packetNode = packetNode->next_sibling())
-					{
-						std::string packetNodeName(packetNode->name());
-						if(packetNodeName == "type")
-						{
-							for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
-							{
-								_bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\type\": " + std::string(attr->name()));
-							}
-							std::string value(packetNode->value());
-							if(value == "get")
-							{
-								packet->type = Packet::Type::Enum::get;
-								getPackets.push_back(packet);
-							}
-							else if(value == "set")
-							{
-								packet->type = Packet::Type::Enum::set;
-								setPackets.push_back(packet);
-							}
-							else if(value == "event")
-							{
-								packet->type = Packet::Type::Enum::event;
-								eventPackets.push_back(packet);
-							}
-							else _bl->out.printWarning("Warning: Unknown value for \"parameter\\packets\\packet\\type\": " + value);
-						}
-						else if(packetNodeName == "responseId")
-						{
-							for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
-							{
-								_bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\response\": " + std::string(attr->name()));
-							}
-							packet->responseId = std::string(packetNode->value());
-						}
-						else if(packetNodeName == "autoReset")
-						{
-							for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
-							{
-								_bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\autoReset\": " + std::string(attr->name()));
-							}
-							for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
-							{
-								std::string autoResetNodeName(autoResetNode->name());
-								std::string autoResetNodeValue(autoResetNode->value());
-								if(autoResetNodeValue.empty()) continue;
-								if(autoResetNodeName == "parameterId") packet->autoReset.push_back(autoResetNodeValue);
-								else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\autoReset\": " + packetsNodeName);
-							}
-						}
-						else if(packetNodeName == "delayedAutoReset")
-						{
-							for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
-							{
-								_bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\delayedAutoReset\": " + std::string(attr->name()));
-							}
-							for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
-							{
-								std::string autoResetNodeName(autoResetNode->name());
-								std::string autoResetNodeValue(autoResetNode->value());
-								if(autoResetNodeValue.empty()) continue;
-								if(autoResetNodeName == "resetDelayParameterId") packet->delayedAutoReset.first = autoResetNodeValue;
-								else if(autoResetNodeName == "resetTo") packet->delayedAutoReset.second = Math::getNumber(autoResetNodeValue);
-								else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\delayedAutoReset\": " + packetsNodeName);
-								hasDelayedAutoResetParameters = true;
-							}
-						}
-						else if(packetNodeName == "conditionOperator")
-						{
-							std::string value(packetNode->value());
-							HelperFunctions::toLower(HelperFunctions::trim(value));
-							if(value == "e" || value == "eq") packet->conditionOperator = Packet::ConditionOperator::Enum::e;
-							else if(value == "g") packet->conditionOperator = Packet::ConditionOperator::Enum::g;
-							else if(value == "l") packet->conditionOperator = Packet::ConditionOperator::Enum::l;
-							else if(value == "ge") packet->conditionOperator = Packet::ConditionOperator::Enum::ge;
-							else if(value == "le") packet->conditionOperator = Packet::ConditionOperator::Enum::le;
-							else baseLib->out.printWarning("Warning: Unknown attribute value for \"cond\" in node \"setEx\": " + value);
-						}
-						else if(packetNodeName == "conditionValue")
-						{
-							std::string value(packetNode->value());
-							packet->conditionValue = Math::getNumber(value);
-						}
-						else if(packetNodeName == "delay")
-						{
-							std::string value(packetNode->value());
-							packet->delay = Math::getNumber(value);
-						}
-						else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\": " + packetsNodeName);
-					}
-				}
-				else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\": " + packetsNodeName);
-			}
-		}
-		else _bl->out.printWarning("Warning: Unknown node in \"parameter\": " + nodeName);
-	}
-	if(logical->type == ILogical::Type::Enum::tFloat)
-	{
-		LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
-	}
-	else if(logical->type == ILogical::Type::Enum::tInteger)
-	{
-		LogicalInteger* parameter = (LogicalInteger*)logical.get();
-		if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
-	}
-}
-
 Parameter::~Parameter()
 {
+}
+
+void Parameter::parseXml(xml_node<>* node)
+{
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string attributeName(attr->name());
+        std::string attributeValue(attr->value());
+        if(attributeName == "id")
+        {
+            id = attributeValue;
+        }
+        else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + attributeName);
+    }
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string nodeName(subNode->name());
+        if(nodeName == "properties")
+        {
+            for(xml_node<>* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
+            {
+                std::string propertyName(propertyNode->name());
+                std::string propertyValue(propertyNode->value());
+                if(propertyName == "readable") readable = propertyValue == "true";
+                else if(propertyName == "writeable") writeable = propertyValue == "true";
+                else if(propertyName == "transmitted") transmitted = propertyValue == "true";
+                else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }
+                else if(propertyName == "password") { if(propertyValue == "true") password = true; }
+                else if(propertyName == "visible") { if(propertyValue == "false") visible = false; }
+                else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
+                else if(propertyName == "parameterGroupSelector") { if(propertyValue == "true") parameterGroupSelector = true; }
+                else if(propertyName == "service") { if(propertyValue == "true") service = true; }
+                else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
+                else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
+                else if(propertyName == "signed") { isSignedSet = true; isSigned = propertyValue == "true"; }
+                else if(propertyName == "control") control = propertyValue;
+                else if(propertyName == "unit") unit = propertyValue;
+                else if(propertyName == "mandatory") mandatory = (propertyValue == "true");
+                else if(propertyName == "formFieldType") formFieldType = propertyValue;
+                else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
+                else if(propertyName == "metadata") metadata = propertyValue;
+                else if(propertyName == "resetAfterRestart") { resetAfterRestart = propertyValue == "true"; }
+                else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
+                else if(propertyName == "casts")
+                {
+                    for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    {
+                        _bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
+                    }
+                    for(xml_node<>* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
+                    {
+                        std::string castName(castNode->name());
+                        if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, shared_from_this())));
+                        else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, shared_from_this())));
+                        else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, shared_from_this())));
+                        else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, shared_from_this())));
+                        else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, shared_from_this())));
+                        else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, shared_from_this())));
+                        else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, shared_from_this())));
+                        else if(castName == "decimalConfigTime") casts.push_back(PDecimalConfigTime (new DecimalConfigTime(_bl, castNode, shared_from_this())));
+                        else if(castName == "integerTinyFloat") casts.push_back(PIntegerTinyFloat(new IntegerTinyFloat(_bl, castNode, shared_from_this())));
+                        else if(castName == "stringUnsignedInteger") casts.push_back(PStringUnsignedInteger(new StringUnsignedInteger(_bl, castNode, shared_from_this())));
+                        else if(castName == "blindTest") casts.push_back(PBlindTest(new BlindTest(_bl, castNode, shared_from_this())));
+                        else if(castName == "optionString") casts.push_back(POptionString(new OptionString(_bl, castNode, shared_from_this())));
+                        else if(castName == "optionInteger") casts.push_back(POptionInteger(new OptionInteger(_bl, castNode, shared_from_this())));
+                        else if(castName == "stringJsonArrayDecimal") casts.push_back(PStringJsonArrayDecimal(new StringJsonArrayDecimal(_bl, castNode, shared_from_this())));
+                        else if(castName == "rpcBinary") casts.push_back(PRpcBinary(new RpcBinary(_bl, castNode, shared_from_this())));
+                        else if(castName == "toggle") casts.push_back(PToggle(new Toggle(_bl, castNode, shared_from_this())));
+                        else if(castName == "cfm") casts.push_back(PCfm(new Cfm(_bl, castNode, shared_from_this())));
+                        else if(castName == "ccrtdnParty") casts.push_back(PCcrtdnParty(new CcrtdnParty(_bl, castNode, shared_from_this())));
+                        else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, shared_from_this())));
+                        else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, shared_from_this())));
+                        else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, shared_from_this())));
+                        else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, shared_from_this())));
+                        else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, shared_from_this())));
+                        else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, shared_from_this())));
+                        else _bl->out.printWarning("Warning: Unknown cast: " + castName);
+                    }
+                }
+                else if(propertyName == "roles")
+                {
+                    for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    {
+                        _bl->out.printWarning("Warning: Unknown attribute for \"roles\": " + std::string(attr->name()));
+                    }
+                    for(xml_node<>* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
+                    {
+                        std::string roleName(roleNode->name());
+                        std::string roleValue(roleNode->value());
+                        if(roleName == "role")
+                        {
+                            auto roleId = Math::getUnsignedNumber64(roleValue);
+                            if(!roleId != 0) roles.emplace(roleId);
+                        }
+                        else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
+                    }
+                }
+                else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
+            }
+        }
+        else if(nodeName == "logicalBoolean") logical.reset(new LogicalBoolean(_bl, subNode));
+        else if(nodeName == "logicalAction") logical.reset(new LogicalAction(_bl, subNode));
+        else if(nodeName == "logicalArray") logical.reset(new LogicalArray(_bl, subNode));
+        else if(nodeName == "logicalInteger") logical.reset(new LogicalInteger(_bl, subNode));
+        else if(nodeName == "logicalInteger64") logical.reset(new LogicalInteger64(_bl, subNode));
+        else if(nodeName == "logicalDecimal") logical.reset(new LogicalDecimal(_bl, subNode));
+        else if(nodeName == "logicalString") logical.reset(new LogicalString(_bl, subNode));
+        else if(nodeName == "logicalStruct") logical.reset(new LogicalStruct(_bl, subNode));
+        else if(nodeName == "logicalEnumeration") logical.reset(new LogicalEnumeration(_bl, subNode));
+        else if(nodeName == "physical" || nodeName == "physicalNone") physical.reset(new Physical(_bl, subNode));
+        else if(nodeName == "physicalInteger") physical.reset(new PhysicalInteger(_bl, subNode));
+        else if(nodeName == "physicalBoolean") physical.reset(new PhysicalBoolean(_bl, subNode));
+        else if(nodeName == "physicalString") physical.reset(new PhysicalString(_bl, subNode));
+        else if(nodeName == "packets")
+        {
+            for(xml_node<>* packetsNode = subNode->first_node(); packetsNode; packetsNode = packetsNode->next_sibling())
+            {
+                std::string packetsNodeName(packetsNode->name());
+                if(packetsNodeName == "packet")
+                {
+                    std::shared_ptr<Packet> packet(new Packet());
+                    for(xml_attribute<>* attr = packetsNode->first_attribute(); attr; attr = attr->next_attribute())
+                    {
+                        std::string attributeName(attr->name());
+                        if(attributeName == "id") packet->id = std::string(attr->value());
+                        else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\": " + std::string(attr->name()));
+                    }
+                    for(xml_node<>* packetNode = packetsNode->first_node(); packetNode; packetNode = packetNode->next_sibling())
+                    {
+                        std::string packetNodeName(packetNode->name());
+                        if(packetNodeName == "type")
+                        {
+                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\type\": " + std::string(attr->name()));
+                            }
+                            std::string value(packetNode->value());
+                            if(value == "get")
+                            {
+                                packet->type = Packet::Type::Enum::get;
+                                getPackets.push_back(packet);
+                            }
+                            else if(value == "set")
+                            {
+                                packet->type = Packet::Type::Enum::set;
+                                setPackets.push_back(packet);
+                            }
+                            else if(value == "event")
+                            {
+                                packet->type = Packet::Type::Enum::event;
+                                eventPackets.push_back(packet);
+                            }
+                            else _bl->out.printWarning("Warning: Unknown value for \"parameter\\packets\\packet\\type\": " + value);
+                        }
+                        else if(packetNodeName == "responseId")
+                        {
+                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\response\": " + std::string(attr->name()));
+                            }
+                            packet->responseId = std::string(packetNode->value());
+                        }
+                        else if(packetNodeName == "autoReset")
+                        {
+                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\autoReset\": " + std::string(attr->name()));
+                            }
+                            for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
+                            {
+                                std::string autoResetNodeName(autoResetNode->name());
+                                std::string autoResetNodeValue(autoResetNode->value());
+                                if(autoResetNodeValue.empty()) continue;
+                                if(autoResetNodeName == "parameterId") packet->autoReset.push_back(autoResetNodeValue);
+                                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\autoReset\": " + packetsNodeName);
+                            }
+                        }
+                        else if(packetNodeName == "delayedAutoReset")
+                        {
+                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\delayedAutoReset\": " + std::string(attr->name()));
+                            }
+                            for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
+                            {
+                                std::string autoResetNodeName(autoResetNode->name());
+                                std::string autoResetNodeValue(autoResetNode->value());
+                                if(autoResetNodeValue.empty()) continue;
+                                if(autoResetNodeName == "resetDelayParameterId") packet->delayedAutoReset.first = autoResetNodeValue;
+                                else if(autoResetNodeName == "resetTo") packet->delayedAutoReset.second = Math::getNumber(autoResetNodeValue);
+                                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\delayedAutoReset\": " + packetsNodeName);
+                                hasDelayedAutoResetParameters = true;
+                            }
+                        }
+                        else if(packetNodeName == "conditionOperator")
+                        {
+                            std::string value(packetNode->value());
+                            HelperFunctions::toLower(HelperFunctions::trim(value));
+                            if(value == "e" || value == "eq") packet->conditionOperator = Packet::ConditionOperator::Enum::e;
+                            else if(value == "g") packet->conditionOperator = Packet::ConditionOperator::Enum::g;
+                            else if(value == "l") packet->conditionOperator = Packet::ConditionOperator::Enum::l;
+                            else if(value == "ge") packet->conditionOperator = Packet::ConditionOperator::Enum::ge;
+                            else if(value == "le") packet->conditionOperator = Packet::ConditionOperator::Enum::le;
+                            else _bl->out.printWarning("Warning: Unknown attribute value for \"cond\" in node \"setEx\": " + value);
+                        }
+                        else if(packetNodeName == "conditionValue")
+                        {
+                            std::string value(packetNode->value());
+                            packet->conditionValue = Math::getNumber(value);
+                        }
+                        else if(packetNodeName == "delay")
+                        {
+                            std::string value(packetNode->value());
+                            packet->delay = Math::getNumber(value);
+                        }
+                        else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\": " + packetsNodeName);
+                    }
+                }
+                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\": " + packetsNodeName);
+            }
+        }
+        else _bl->out.printWarning("Warning: Unknown node in \"parameter\": " + nodeName);
+    }
+    if(logical->type == ILogical::Type::Enum::tFloat)
+    {
+        LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
+        if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
+    }
+    else if(logical->type == ILogical::Type::Enum::tInteger)
+    {
+        LogicalInteger* parameter = (LogicalInteger*)logical.get();
+        if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
+    }
 }
 
 PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
@@ -389,10 +388,6 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -440,10 +435,6 @@ void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& 
 		return convertToPacket(rpcValue, convertedValue);
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -621,10 +612,6 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -647,10 +634,6 @@ void Parameter::reverseData(const std::vector<uint8_t>& data, std::vector<uint8_
 		}
 	}
 	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -699,19 +682,15 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
-const ParameterGroup* Parameter::parent()
+const PParameterGroup Parameter::parent()
 {
-	return _parent;
+	return _parent.lock();
 }
 
 }

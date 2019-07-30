@@ -84,14 +84,6 @@ void Ssdp::getAddress()
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bindToMulticast)
@@ -122,14 +114,14 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 			_bl->out.printWarning("Warning: Could set SSDP socket options: " + std::string(strerror(errno)));
 		}
 
-		struct in_addr localInterface;
+		struct in_addr localInterface{};
 		localInterface.s_addr = inet_addr(_address.c_str());
 		if(setsockopt(serverSocketDescriptor->descriptor, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) == -1)
 		{
 			_bl->out.printWarning("Warning: Could set SSDP socket options: " + std::string(strerror(errno)));
 		}
 
-		struct sockaddr_in localSock;
+		struct sockaddr_in localSock{};
 		memset((char *) &localSock, 0, sizeof(localSock));
 		localSock.sin_family = AF_INET;
 		localSock.sin_port = htons(port);
@@ -144,7 +136,7 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 
         if(!bindToMulticast)
         {
-            struct ip_mreq group;
+            struct ip_mreq group{};
             group.imr_multiaddr.s_addr = inet_addr("239.255.255.250");
             group.imr_interface.s_addr = inet_addr(_address.c_str());
 
@@ -158,21 +150,13 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 	return serverSocketDescriptor;
 }
 
 void Ssdp::sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout)
 {
 	if(!serverSocketDescriptor || serverSocketDescriptor->descriptor == -1) return;
-	struct sockaddr_in addessInfo;
+	struct sockaddr_in addessInfo{};
 	addessInfo.sin_family = AF_INET;
 	addessInfo.sin_addr.s_addr = inet_addr("239.255.255.250");
 	addessInfo.sin_port = htons(1900);
@@ -207,12 +191,12 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 		sendSearchBroadcast(serverSocketDescriptor, stHeader, timeout);
 
 		uint64_t startTime = _bl->hf.getTime();
-		char buffer[1024];
+		std::array<char, 1024> buffer;
 		int32_t bytesReceived = 0;
-		struct sockaddr_in si_other;
+		struct sockaddr_in si_other{};
 		socklen_t slen = sizeof(si_other);
 		fd_set readFileDescriptor;
-		timeval socketTimeout;
+		timeval socketTimeout{};
 		int32_t nfds = 0;
 		Http http;
 		std::map<std::string, SsdpInfo> info;
@@ -237,7 +221,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 				}
 				FD_SET(serverSocketDescriptor->descriptor, &readFileDescriptor);
 				fileDescriptorGuard.unlock();
-				bytesReceived = select(nfds, &readFileDescriptor, NULL, NULL, &socketTimeout);
+				bytesReceived = select(nfds, &readFileDescriptor, nullptr, nullptr, &socketTimeout);
 				if(bytesReceived == 0)
 				{
 					http.reset();
@@ -250,7 +234,7 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
                     continue;
 				}
 
-				bytesReceived = recvfrom(serverSocketDescriptor->descriptor, buffer, 1024, 0, (struct sockaddr *)&si_other, &slen);
+				bytesReceived = recvfrom(serverSocketDescriptor->descriptor, buffer.data(), buffer.size(), 0, (struct sockaddr *)&si_other, &slen);
 				if(bytesReceived == 0)
 				{
 					http.reset();
@@ -262,8 +246,8 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
                     _bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
                     continue;
                 }
-				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer, bytesReceived));
-				http.process(buffer, bytesReceived, false);
+				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer.data(), bytesReceived));
+				http.process(buffer.data(), bytesReceived, false);
 				if(http.headerIsFinished())
 				{
 					processPacket(http, stHeader, info);
@@ -274,28 +258,12 @@ void Ssdp::searchDevices(const std::string& stHeader, uint32_t timeout, std::vec
 			{
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 			}
-			catch(Exception& ex)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(...)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-			}
 		}
 		getDeviceInfo(info, devices);
 	}
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
@@ -316,12 +284,12 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
 		if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Searching for SSDP devices ...");
 
 		uint64_t startTime = _bl->hf.getTime();
-		char buffer[1024];
+		std::array<char, 1024> buffer;
 		int32_t bytesReceived = 0;
-		struct sockaddr_in si_other;
+		struct sockaddr_in si_other{};
 		socklen_t slen = sizeof(si_other);
 		fd_set readFileDescriptor;
-		timeval socketTimeout;
+		timeval socketTimeout{};
 		int32_t nfds = 0;
 		Http http;
 		std::map<std::string, SsdpInfo> info;
@@ -346,7 +314,7 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
 				}
 				FD_SET(serverSocketDescriptor->descriptor, &readFileDescriptor);
 				fileDescriptorGuard.unlock();
-				bytesReceived = select(nfds, &readFileDescriptor, NULL, NULL, &socketTimeout);
+				bytesReceived = select(nfds, &readFileDescriptor, nullptr, nullptr, &socketTimeout);
 				if(bytesReceived == 0) continue;
 				if(bytesReceived != 1)
 				{
@@ -355,7 +323,7 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
                     continue;
 				}
 
-				bytesReceived = recvfrom(serverSocketDescriptor->descriptor, buffer, 1024, 0, (struct sockaddr *)&si_other, &slen);
+				bytesReceived = recvfrom(serverSocketDescriptor->descriptor, buffer.data(), buffer.size(), 0, (struct sockaddr *)&si_other, &slen);
 				if(bytesReceived == 0) continue;
                 else if(bytesReceived == -1)
                 {
@@ -363,22 +331,14 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
                     _bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
                     continue;
                 }
-				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer, bytesReceived));
+				if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: SSDP response received:\n" + std::string(buffer.data(), bytesReceived));
 				http.reset();
-				http.process(buffer, bytesReceived, false);
+				http.process(buffer.data(), bytesReceived, false);
 				if(http.headerIsFinished()) processPacketPassive(http, stHeader, info);
 			}
 			catch(const std::exception& ex)
 			{
 				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(Exception& ex)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-			}
-			catch(...)
-			{
-				_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 			}
 		}
 		getDeviceInfo(info, devices);
@@ -386,14 +346,6 @@ void Ssdp::searchDevicesPassive(const std::string& stHeader, uint32_t timeout, s
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	_bl->fileDescriptorManager.shutdown(serverSocketDescriptor);
 }
@@ -421,14 +373,6 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::map<std::
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info)
@@ -455,14 +399,6 @@ void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::ma
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -496,7 +432,7 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
             {
                 client.get(path, xml);
             }
-            catch(Exception& ex)
+            catch(const std::exception& ex)
             {
                 _bl->out.printDebug("Debug: Could not get additional SSDP information from " + location);
             }
@@ -524,14 +460,6 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(Exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 

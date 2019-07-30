@@ -32,6 +32,8 @@
 #include "../HelperFunctions/Math.h"
 #include "../HelperFunctions/HelperFunctions.h"
 
+#include <iomanip>
+
 namespace BaseLib
 {
 
@@ -420,7 +422,7 @@ int32_t Http::process(char* buffer, int32_t bufferLength, bool checkForChunkedXm
 	int32_t processedBytes = 0;
 	if(!_header.parsed) processedBytes = processHeader(&buffer, bufferLength);
 	if(!_header.parsed) return processedBytes;
-	if(_header.method == "GET" || _header.method == "M-SEARCH" || (_header.method == "NOTIFY" && _header.contentLength == 0) || (_contentLengthSet && _header.contentLength == 0))
+	if((_header.method == "GET" && _header.contentLength == 0) || (_header.method == "DELETE" && _header.contentLength == 0) || _header.method == "M-SEARCH" || (_header.method == "NOTIFY" && _header.contentLength == 0) || (_contentLengthSet && _header.contentLength == 0))
 	{
 		_dataProcessingStarted = true;
 		setFinished();
@@ -898,7 +900,6 @@ std::string Http::encodeURL(const std::string& url)
 
 std::string Http::decodeURL(const std::string& url)
 {
-	Math math;
 	std::ostringstream decoded;
 	char character;
 	for(std::string::const_iterator i = url.begin(); i != url.end(); ++i)
@@ -907,10 +908,10 @@ std::string Http::decodeURL(const std::string& url)
 		{
 			i++;
 			if(i == url.end()) return decoded.str();
-			character = (char)(math.getNumber(*i) << 4);
+			character = (char)(Math::getNumber(*i) << 4);
 			i++;
 			if(i == url.end()) return decoded.str();
-			character += (char)math.getNumber(*i);
+			character += (char)Math::getNumber(*i);
 			decoded << character;
 		}
 		else decoded << *i;
@@ -967,7 +968,7 @@ size_t Http::readFirstContentLine(char* buffer, size_t requestLength)
 	size_t bytesRead = 0;
 	char* posTemp = (char*)memchr(&_content.at(_contentStreamPos), '\n', _content.size() - 1 - _contentStreamPos);
 	int32_t newlinePos = 0;
-	if(posTemp > 0) newlinePos = posTemp - &_content.at(0);
+	if(posTemp != nullptr) newlinePos = posTemp - &_content.at(0);
 	if(newlinePos > 0 && _content.at(newlinePos - 1) == '\r') newlinePos--;
 	else if(newlinePos <= 0) newlinePos = _content.size() - 1;
 	if(_contentStreamPos < (unsigned)newlinePos)

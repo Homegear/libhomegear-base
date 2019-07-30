@@ -34,6 +34,7 @@
 #include "../Exception.h"
 #include "../Output/Output.h"
 #include <mutex>
+#include <thread>
 
 namespace BaseLib
 {

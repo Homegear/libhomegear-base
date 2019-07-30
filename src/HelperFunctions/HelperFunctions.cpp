@@ -28,7 +28,12 @@
 
 #include "HelperFunctions.h"
 #include "../BaseLib.h"
-#include "sys/resource.h"
+
+#include <iomanip>
+
+#include <pwd.h>
+#include <grp.h>
+#include <sys/resource.h>
 
 namespace BaseLib
 {
@@ -150,7 +155,7 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     strippedString.reserve(s.size());
     for(std::string::const_iterator i = s.begin(); i != s.end(); ++i)
     {
-        if(std::isprint(*i)) strippedString.push_back(*i);
+        if(std::isprint(*i, std::locale("en_US.UTF-8"))) strippedString.push_back(*i);
     }
     return strippedString;
 }
@@ -195,14 +200,6 @@ void HelperFunctions::memcpyBigEndian(char* to, const char* from, const uint32_t
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length)
@@ -214,14 +211,6 @@ void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const ui
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -239,14 +228,6 @@ void HelperFunctions::memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& f
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -268,14 +249,6 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& f
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from)
@@ -292,14 +265,6 @@ void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& f
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -325,17 +290,23 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& f
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
-std::string& HelperFunctions::regexReplace(std::string& haystack, std::string search, std::string replace, bool ignoreCase)
+std::string& HelperFunctions::stringReplace(std::string& haystack, const std::string& search, const std::string& replace)
+{
+    if(search.empty()) return haystack;
+    int32_t pos = 0;
+    while(true)
+    {
+        pos = haystack.find(search, pos);
+        if (pos == (signed)std::string::npos) break;
+        haystack.replace(pos, search.size(), replace);
+        pos += replace.size();
+    }
+    return haystack;
+}
+
+std::string& HelperFunctions::regexReplace(std::string& haystack, const std::string& search, const std::string& replace, bool ignoreCase)
 {
     std::regex regex(search, std::regex::icase);
 
@@ -395,14 +366,6 @@ char HelperFunctions::getHexChar(int32_t nibble)
     catch(const std::exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return 0;
 }
@@ -707,169 +670,6 @@ gid_t HelperFunctions::groupId(std::string groupname)
     return grp.gr_gid;
 }
 
-pid_t HelperFunctions::system(std::string command, std::vector<std::string> arguments)
-{
-    pid_t pid;
-
-    if(command.empty() || command.back() == '/') return -1;
-
-    pid = fork();
-
-    if(pid == -1) return pid;
-    else if(pid == 0)
-    {
-        //Child process
-        struct rlimit limits;
-        if(getrlimit(RLIMIT_NOFILE, &limits) == -1)
-        {
-            throw Exception("Error: Couldn't read rlimits.");
-            _exit(1);
-        }
-        // Close all non standard descriptors - safety
-        for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
-
-        setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
-        if(programName.empty()) _exit(1);
-        char* argv[arguments.size() + 2];
-        argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
-        for(uint32_t i = 0; i < arguments.size(); i++)
-        {
-            argv[i + 1] = &arguments[i][0];
-        }
-        argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1)
-        {
-            throw Exception("Error: Could not start program: " + std::string(strerror(errno)));
-        }
-        _exit(1);
-    }
-
-    //Parent process
-
-    return pid;
-}
-
-pid_t HelperFunctions::systemp(std::string command, std::vector<std::string> arguments, int& stdIn, int& stdOut, int& stdErr)
-{
-    pid_t pid;
-
-    stdIn = -1;
-    stdOut = -1;
-    stdErr = -1;
-
-    if(command.empty() || command.back() == '/') return -1;
-
-    int pipeIn[2];
-    int pipeOut[2];
-    int pipeErr[2];
-
-    if(pipe(pipeIn) == -1) throw Exception("Error: Couln't create pipe for STDIN.");
-
-    if(pipe(pipeOut) == -1)
-    {
-        close(pipeIn[0]);
-        close(pipeIn[1]);
-        throw Exception("Error: Couln't create pipe for STDOUT.");
-    }
-
-    if(pipe(pipeErr) == -1)
-    {
-        close(pipeIn[0]);
-        close(pipeIn[1]);
-        close(pipeOut[0]);
-        close(pipeOut[1]);
-        throw Exception("Error: Couln't create pipe for STDERR.");
-    }
-
-    pid = fork();
-
-    if(pid == -1)
-    {
-        close(pipeIn[0]);
-        close(pipeIn[1]);
-        close(pipeOut[0]);
-        close(pipeOut[1]);
-        close(pipeErr[0]);
-        close(pipeErr[1]);
-
-        return pid;
-    }
-    else if(pid == 0)
-    {
-        //Child process
-
-        if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
-
-        if(dup2(pipeOut[1], STDOUT_FILENO) == -1) _exit(1);
-
-        if(dup2(pipeErr[1], STDERR_FILENO) == -1) _exit(1);
-
-        //Close pipes for child
-        close(pipeIn[0]);
-        close(pipeIn[1]);
-        close(pipeOut[0]);
-        close(pipeOut[1]);
-        close(pipeErr[0]);
-        close(pipeErr[1]);
-
-        struct rlimit limits;
-        if(getrlimit(RLIMIT_NOFILE, &limits) == -1) _exit(1);
-
-        // Close all non standard descriptors - safety
-        for(uint32_t i = 3; i < limits.rlim_cur; ++i) ::close(i);
-
-        setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
-        if(programName.empty()) _exit(1);
-        char* argv[arguments.size() + 2];
-        argv[0] = &programName[0]; //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
-        for(uint32_t i = 0; i < arguments.size(); i++)
-        {
-            argv[i + 1] = &arguments[i][0];
-        }
-        argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1) _exit(1);
-    }
-
-    //Parent process
-    close(pipeIn[0]);
-    close(pipeOut[1]);
-    close(pipeErr[1]);
-
-    stdIn = pipeIn[1];
-    stdOut = pipeOut[0];
-    stdErr = pipeErr[0];
-
-    return pid;
-}
-
-
-int32_t HelperFunctions::exec(std::string command, std::string& output)
-{
-    FILE* pipe = popen(command.c_str(), "r");
-    if (!pipe) return -1;
-    std::array<char, 128> buffer;
-    output.reserve(1024);
-    try
-    {
-        while(!feof(pipe))
-        {
-            if(fgets(buffer.data(), 128, pipe) != nullptr)
-            {
-                if(output.size() + buffer.size() > output.capacity()) output.reserve(output.capacity() + 1024);
-                output.insert(output.end(), buffer.begin(), buffer.begin() + strnlen(buffer.data(), buffer.size()));
-            }
-        }
-    }
-    catch(...)
-    {
-    }
-    auto exitStatus = pclose(pipe);
-    if(errno == ECHILD) return 0; //Currently this method always return 0, because we use a custom sigchld handler.
-    return WEXITSTATUS(exitStatus);
-}
-
 void HelperFunctions::checkEndianness()
 {
     union {
@@ -905,7 +705,7 @@ bool HelperFunctions::checkCliCommand(const std::string& command, const std::str
     showHelp = false;
 
     bool isLongCommand = (command.size() == longCommand.size() || (command.size() > longCommand.size() && command.at(longCommand.size()) == ' ')) && command.compare(0, longCommand.size(), longCommand) == 0;
-    bool isShortCommand1 = (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
+    bool isShortCommand1 = !shortCommand1.empty() && (command.size() == shortCommand1.size() || (command.size() > shortCommand1.size() && command.at(shortCommand1.size()) == ' ')) && command.compare(0, shortCommand1.size(), shortCommand1) == 0;
     bool isShortCommand2 = !shortCommand2.empty() && (command.size() == shortCommand2.size() || (command.size() > shortCommand2.size() && command.at(shortCommand2.size()) == ' ')) && command.compare(0, shortCommand2.size(), shortCommand2) == 0;
     if(!isLongCommand && !isShortCommand1 && !isShortCommand2) return false;
 

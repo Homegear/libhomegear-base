@@ -46,10 +46,6 @@ HomegearUiElements::HomegearUiElements(BaseLib::SharedObjects* baseLib, std::str
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -89,10 +85,6 @@ void HomegearUiElements::load(std::string xmlFilename)
     {
         _bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
     }
-    catch(const Exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
     catch(...)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -124,10 +116,6 @@ void HomegearUiElements::parseXML(xml_node<>* node)
         }
     }
     catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(const Exception& ex)
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
