@@ -348,6 +348,7 @@ void SerialReaderWriter::writeLine(std::string& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -376,6 +377,7 @@ void SerialReaderWriter::writeData(const std::vector<char>& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -404,6 +406,7 @@ void SerialReaderWriter::writeData(const std::vector<uint8_t>& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -431,6 +434,7 @@ void SerialReaderWriter::writeChar(char data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
