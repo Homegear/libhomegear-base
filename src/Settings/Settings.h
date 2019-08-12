@@ -52,6 +52,8 @@ public:
 	std::string runAsGroup() { return _runAsGroup; }
 	int32_t debugLevel() { return _debugLevel; }
 	bool memoryDebugging() { return _memoryDebugging; }
+    std::string waitForIp4OnInterface() { return _waitForIp4OnInterface; }
+    std::string waitForIp6OnInterface() { return _waitForIp6OnInterface; }
 	bool enableUPnP() { return _enableUPnP; }
 	std::string uPnPIpAddress() { return _uPnPIpAddress; }
 	std::string ssdpIpAddress() { return _ssdpIpAddress; }
@@ -177,6 +179,8 @@ private:
 	std::string _runAsGroup;
 	int32_t _debugLevel = 3;
 	bool _memoryDebugging = false;
+	std::string _waitForIp4OnInterface;
+    std::string _waitForIp6OnInterface;
 	bool _enableUPnP = true;
 	std::string _uPnPIpAddress;
 	std::string _ssdpIpAddress;

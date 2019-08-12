@@ -236,6 +236,16 @@ void Settings::load(std::string filename, std::string executablePath)
 					if(HelperFunctions::toLower(value) == "true") _memoryDebugging = true;
 					_bl->out.printDebug("Debug: memoryDebugging set to " + std::to_string(_memoryDebugging));
 				}
+                else if(name == "waitforip4oninterface")
+                {
+                    _waitForIp4OnInterface = value;
+                    _bl->out.printDebug("Debug: waitForIp4OnInterface set to " + _waitForIp4OnInterface);
+                }
+                else if(name == "waitforip6oninterface")
+                {
+                    _waitForIp6OnInterface = value;
+                    _bl->out.printDebug("Debug: waitForIp6OnInterface set to " + _waitForIp6OnInterface);
+                }
 				else if(name == "enableupnp")
 				{
 					_enableUPnP = BaseLib::HelperFunctions::toLower(value) == "true";
