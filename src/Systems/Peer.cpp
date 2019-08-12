@@ -2743,6 +2743,12 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
             auto room = getRoom(-1);
             if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
 
+            if(fields.find("ROOMNAME") != fields.end() && room != 0)
+            {
+                auto name = _bl->db->getRoomName(clientInfo, room);
+                if(!name.empty()) description->structValue->emplace("ROOMNAME", std::make_shared<Variable>(name));
+            }
+
             auto categories = getCategories(-1);
             if(fields.find("CATEGORIES") != fields.end() && !categories.empty())
             {
@@ -2862,6 +2868,12 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 
             auto room = getRoom(channel);
             if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
+
+            if(fields.find("ROOMNAME") != fields.end() && room != 0)
+            {
+                auto name = _bl->db->getRoomName(clientInfo, room);
+                if(!name.empty()) description->structValue->emplace("ROOMNAME", std::make_shared<Variable>(name));
+            }
 
             auto categories = getCategories(channel);
             if(fields.find("CATEGORIES") != fields.end() && !categories.empty())
