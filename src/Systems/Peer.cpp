@@ -3264,6 +3264,99 @@ PVariable Peer::getLinkPeers(PRpcClientInfo clientInfo, int32_t channel, bool re
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable Peer::getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls)
+{
+    try
+    {
+        if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+        if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+        auto central = getCentral();
+        if(!central) return Variable::createError(-32500, "Could not get central.");
+        auto me = central->getPeer(_peerID);
+        if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+        auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        for(auto& channelIterator : valuesCentral)
+        {
+            auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+
+                auto roleIds = variableIterator.second.getRoles();
+                if(!roleIds.empty())
+                {
+                    auto roles = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                    roles->arrayValue->reserve(roleIds.size());
+                    for(auto roleId : roleIds)
+                    {
+                        roles->arrayValue->push_back(std::make_shared<BaseLib::Variable>(roleId));
+                    }
+                    variables->structValue->emplace(variableIterator.first, roles);
+                }
+            }
+            if(!variables->structValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+        }
+
+        return channels;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+{
+    try
+    {
+        if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
+        if(!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+        auto central = getCentral();
+        if(!central) return Variable::createError(-32500, "Could not get central.");
+        auto me = central->getPeer(_peerID);
+        if(!me) return Variable::createError(-32500, "Could not get peer object.");
+
+        auto channels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        for(auto& channelIterator : valuesCentral)
+        {
+            auto variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            for(auto& variableIterator : channelIterator.second)
+            {
+                if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+
+                if(variableIterator.second.getRoom() == roomId)
+                {
+                    auto roleIds = variableIterator.second.getRoles();
+                    if(!roleIds.empty())
+                    {
+                        auto roles = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+                        roles->arrayValue->reserve(roleIds.size());
+                        for(auto roleId : roleIds)
+                        {
+                            roles->arrayValue->push_back(std::make_shared<BaseLib::Variable>(roleId));
+                        }
+                        variables->structValue->emplace(variableIterator.first, roles);
+                    }
+                }
+            }
+            if(!variables->structValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+        }
+
+        return channels;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls)
 {
     try

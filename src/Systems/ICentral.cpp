@@ -1302,6 +1302,31 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, std::string serialNumbe
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+PVariable ICentral::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkDeviceAcls, bool checkVariableAcls)
+{
+    try
+    {
+        PVariable variables = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+        std::vector<std::shared_ptr<Peer>> peers = getPeers();
+
+        for(std::shared_ptr<Peer> peer : peers)
+        {
+            if(checkDeviceAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
+
+            auto result = peer->getRolesInRoom(clientInfo, roomId, checkVariableAcls);
+            if(!result->structValue->empty()) variables->structValue->emplace(std::to_string(peer->getID()), result);
+        }
+
+        return variables;
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls)
 {
 	try

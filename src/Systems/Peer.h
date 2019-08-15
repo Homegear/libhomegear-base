@@ -433,6 +433,8 @@ public:
     virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, PParameterGroup parameterSet, bool checkAcls);
     virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+    virtual PVariable getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls);
+    virtual PVariable getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);

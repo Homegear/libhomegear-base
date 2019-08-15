@@ -134,8 +134,10 @@ public:
 	// }}}
 
 	// {{{ Roles
+	virtual void createDefaultRoles() = 0;
 	virtual BaseLib::PVariable createRole(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteRole(uint64_t roleId) = 0;
+	virtual void deleteAllRoles() = 0;
 	virtual BaseLib::PVariable getRoles(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual BaseLib::PVariable getRoleMetadata(uint64_t roleId) = 0;
 	virtual bool roleExists(uint64_t roleId) = 0;
