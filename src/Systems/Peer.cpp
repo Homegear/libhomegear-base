@@ -45,6 +45,7 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
 {
     rpcParameter = rhs.rpcParameter;
     databaseId = rhs.databaseId;
+    specialType = rhs.specialType;
     _binaryData = rhs._binaryData;
     _partialBinaryData = rhs._partialBinaryData;
     _logicalData = rhs._logicalData;
@@ -58,6 +59,7 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
     if(&rhs == this) return *this;
     rpcParameter = rhs.rpcParameter;
     databaseId = rhs.databaseId;
+    specialType = rhs.specialType;
     _binaryData = rhs._binaryData;
     _partialBinaryData = rhs._partialBinaryData;
     _logicalData = rhs._logicalData;
@@ -2076,7 +2078,7 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
                     auto roleInfo = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
                     metadata->structValue->emplace("roleInfo", roleInfo);
                     roleInfo->structValue->emplace("variableInfo", variableInfo);
-                    roleInfo->structValue->emplace("variableBaseName", std::make_shared<BaseLib::Variable>(parameter->id));
+                    roleInfo->structValue->emplace("variableBaseName", std::make_shared<BaseLib::Variable>(variableIterator->first));
 
                     auto rolesIterator = variableInfo->structValue->find("roles");
                     if(rolesIterator != variableInfo->structValue->end())
@@ -2420,6 +2422,19 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
         values->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(_rpcTypeString)));
         values->structValue->insert(StructElement("TYPE_ID", std::make_shared<Variable>(_deviceType)));
         values->structValue->insert(StructElement("NAME", std::make_shared<Variable>(getName(-1))));
+        auto room = getRoom(-1);
+        if(room != 0) values->structValue->insert(StructElement("ROOM", std::make_shared<Variable>(room)));
+        auto categoryIds = getCategories(-1);
+        if(!categoryIds.empty())
+        {
+            auto categories = std::make_shared<Variable>(VariableType::tArray);
+            categories->arrayValue->reserve(categoryIds.size());
+            for(auto categoryId : categoryIds)
+            {
+                categories->arrayValue->push_back(std::make_shared<Variable>(categoryId));
+            }
+            values->structValue->insert(StructElement("CATEGORIES", categories));
+        }
         PVariable channels(new Variable(VariableType::tArray));
         for(auto i = _rpcDevice->functions.begin(); i != _rpcDevice->functions.end(); ++i)
         {
@@ -2433,6 +2448,19 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
             channel->structValue->insert(StructElement("INDEX", std::make_shared<Variable>(i->first)));
             channel->structValue->insert(StructElement("NAME", std::make_shared<Variable>(getName(i->first))));
             channel->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(i->second->type)));
+            auto room = getRoom(i->first);
+            if(room != 0) channel->structValue->insert(StructElement("ROOM", std::make_shared<Variable>(room)));
+            auto categoryIds = getCategories(i->first);
+            if(!categoryIds.empty())
+            {
+                auto categories = std::make_shared<Variable>(VariableType::tArray);
+                categories->arrayValue->reserve(categoryIds.size());
+                for(auto categoryId : categoryIds)
+                {
+                    categories->arrayValue->push_back(std::make_shared<Variable>(categoryId));
+                }
+                channel->structValue->insert(StructElement("CATEGORIES", categories));
+            }
 
             PVariable parameters(new Variable(VariableType::tStruct));
             channel->structValue->insert(StructElement("PARAMSET", parameters));
@@ -2487,6 +2515,30 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                 element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(parameter.rpcParameter->writeable))));
                 element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(parameter.rpcParameter->transmitted))));
                 element->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter.rpcParameter->unit))));
+                auto room = parameter.getRoom();
+                if(room != 0) element->structValue->insert(StructElement("ROOM", std::make_shared<Variable>(room)));
+                auto categoryIds = parameter.getCategories();
+                if(!categoryIds.empty())
+                {
+                    auto categories = std::make_shared<Variable>(VariableType::tArray);
+                    categories->arrayValue->reserve(categoryIds.size());
+                    for(auto categoryId : categoryIds)
+                    {
+                        categories->arrayValue->push_back(std::make_shared<Variable>(categoryId));
+                    }
+                    element->structValue->insert(StructElement("CATEGORIES", categories));
+                }
+                auto roleIds = parameter.getRoles();
+                if(!roleIds.empty())
+                {
+                    auto roles = std::make_shared<Variable>(VariableType::tArray);
+                    roles->arrayValue->reserve(roleIds.size());
+                    for(auto roleId : roleIds)
+                    {
+                        roles->arrayValue->push_back(std::make_shared<Variable>(roleId));
+                    }
+                    element->structValue->insert(StructElement("ROLES", roles));
+                }
                 if(parameter.rpcParameter->logical->type == ILogical::Type::tBoolean)
                 {
                     if(value) value->type = VariableType::tBoolean; //For some families/variables "convertFromPacket" returns wrong type
@@ -3901,9 +3953,9 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
 
         if(type == ParameterGroup::Type::Enum::variables)
         {
-            std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesCentralIterator = valuesCentral.find(channel);
+            auto valuesCentralIterator = valuesCentral.find(channel);
             if(valuesCentralIterator == valuesCentral.end()) return Variable::createError(-5, "Unknown parameter (2).");
-            std::unordered_map<std::string, RpcConfigurationParameter>::iterator valueParameterIterator = valuesCentralIterator->second.find(parameter->id);
+            auto valueParameterIterator = valuesCentralIterator->second.find(parameter->id);
             if(valueParameterIterator == valuesCentralIterator->second.end()) return Variable::createError(-5, "Unknown parameter (3).");
 
             if(fields.empty() || fields.find("ROOM") != fields.end())
