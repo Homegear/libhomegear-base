@@ -3330,7 +3330,10 @@ PVariable Peer::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool 
             {
                 if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
 
-                if(variableIterator.second.getRoom() == roomId)
+                auto peerRoomId = variableIterator.second.getRoom();
+                if(peerRoomId == 0) peerRoomId = getRoom(channelIterator.first);
+                if(peerRoomId == 0) peerRoomId = getRoom(-1);
+                if(peerRoomId != 0 && peerRoomId == roomId)
                 {
                     auto roleIds = variableIterator.second.getRoles();
                     if(!roleIds.empty())
