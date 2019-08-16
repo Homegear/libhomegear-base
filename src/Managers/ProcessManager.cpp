@@ -182,7 +182,7 @@ int32_t ProcessManager::registerCallbackHandler(std::function<void(pid_t pid, in
 {
     std::lock_guard<std::mutex> callbackHandlersGuard(OpaquePointer::_callbackHandlersMutex);
     int32_t currentId = -1;
-    while(currentId == -1) currentId = OpaquePointer::_currentId++;
+    while(currentId == -1 || OpaquePointer::_callbackHandlers.find(currentId) != OpaquePointer::_callbackHandlers.end()) currentId = OpaquePointer::_currentId++;
     OpaquePointer::_callbackHandlers[currentId].swap(callbackHandler);
     return currentId;
 }
