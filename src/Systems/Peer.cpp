@@ -4288,8 +4288,11 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             PLogicalInteger logical = std::dynamic_pointer_cast<LogicalInteger>(rpcParameter->logical);
             if(logical)
             {
-                if(value->integerValue > logical->maximumValue) value->integerValue = logical->maximumValue;
-                else if(value->integerValue < logical->minimumValue) value->integerValue = logical->minimumValue;
+                if(logical->specialValuesIntegerMap.find(value->integerValue) == logical->specialValuesIntegerMap.end())
+                {
+                    if(value->integerValue > logical->maximumValue) value->integerValue = logical->maximumValue;
+                    else if(value->integerValue < logical->minimumValue) value->integerValue = logical->minimumValue;
+                }
             }
         }
         else if(rpcParameter->logical->type == ILogical::Type::tInteger64)
@@ -4301,8 +4304,11 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             PLogicalInteger64 logical = std::dynamic_pointer_cast<LogicalInteger64>(rpcParameter->logical);
             if(logical)
             {
-                if(value->integerValue64 > logical->maximumValue) value->integerValue64 = logical->maximumValue;
-                else if(value->integerValue64 < logical->minimumValue) value->integerValue64 = logical->minimumValue;
+                if(logical->specialValuesIntegerMap.find(value->integerValue64) == logical->specialValuesIntegerMap.end())
+                {
+                    if(value->integerValue64 > logical->maximumValue) value->integerValue64 = logical->maximumValue;
+                    else if(value->integerValue64 < logical->minimumValue) value->integerValue64 = logical->minimumValue;
+                }
             }
         }
         else if(rpcParameter->logical->type == ILogical::Type::tFloat)
@@ -4314,8 +4320,11 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             PLogicalDecimal logical = std::dynamic_pointer_cast<LogicalDecimal>(rpcParameter->logical);
             if(logical)
             {
-                if(value->floatValue > logical->maximumValue) value->floatValue = logical->maximumValue;
-                else if(value->floatValue < logical->minimumValue) value->floatValue = logical->minimumValue;
+                if(logical->specialValuesFloatMap.find(value->floatValue) == logical->specialValuesFloatMap.end())
+                {
+                    if(value->floatValue > logical->maximumValue) value->floatValue = logical->maximumValue;
+                    else if(value->floatValue < logical->minimumValue) value->floatValue = logical->minimumValue;
+                }
             }
         }
         else if(rpcParameter->logical->type == ILogical::Type::tEnum)
