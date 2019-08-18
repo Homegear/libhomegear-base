@@ -40,6 +40,7 @@
 #include <atomic>
 #include <thread>
 #include <iostream>
+#include <condition_variable>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -58,6 +59,7 @@ public:
     static std::thread _signalHandlerThread;
 
     static std::mutex _lastExitStatusMutex;
+    static std::condition_variable _lastExitStatusConditionVariable;
     struct ExitInfo
     {
         int64_t time = 0;
@@ -98,7 +100,7 @@ public:
                 }
 
                 {
-                    std::lock_guard<std::mutex> lastExistStatusGuard(_lastExitStatusMutex);
+                    std::lock_guard<std::mutex> lastExitStatusGuard(_lastExitStatusMutex);
                     auto time = HelperFunctions::getTime();
                     _lastExitStatus.erase(pid);
                     ExitInfo exitInfo{};
@@ -115,6 +117,8 @@ public:
                         _lastExitStatus.erase(entry);
                     }
                 }
+
+                _lastExitStatusConditionVariable.notify_all();
 
                 {
                     std::lock_guard<std::mutex> callbackHandlersGuard(_callbackHandlersMutex);
@@ -136,6 +140,7 @@ int32_t ProcessManager::OpaquePointer::_currentId = 0;
 std::mutex ProcessManager::OpaquePointer::_callbackHandlersMutex;
 std::unordered_map<int32_t, std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)>> ProcessManager::OpaquePointer::_callbackHandlers;
 std::mutex ProcessManager::OpaquePointer::_lastExitStatusMutex;
+std::condition_variable ProcessManager::OpaquePointer::_lastExitStatusConditionVariable;
 std::unordered_map<pid_t, ProcessManager::OpaquePointer::ExitInfo> ProcessManager::OpaquePointer::_lastExitStatus;
 std::atomic_bool ProcessManager::OpaquePointer::_stopSignalHandlerThread{true};
 std::thread ProcessManager::OpaquePointer::_signalHandlerThread;
@@ -170,12 +175,14 @@ void ProcessManager::stopSignalHandler()
 {
     OpaquePointer::_stopSignalHandlerThread = true;
     if(OpaquePointer::_signalHandlerThread.joinable()) OpaquePointer::_signalHandlerThread.join();
+    OpaquePointer::_lastExitStatusConditionVariable.notify_all();
 }
 
 void ProcessManager::stopSignalHandler(BaseLib::ThreadManager& threadManager)
 {
     OpaquePointer::_stopSignalHandlerThread = true;
     threadManager.join(OpaquePointer::_signalHandlerThread);
+    OpaquePointer::_lastExitStatusConditionVariable.notify_all();
 }
 
 int32_t ProcessManager::registerCallbackHandler(std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)> callbackHandler)
@@ -425,17 +432,22 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
     }
     fclose(pipe);
 
+    if(std::this_thread::get_id() == OpaquePointer::_signalHandlerThread.get_id())
+    {
+        //Prevent deadlock when exec is called from signalHandlerThread.
+        throw ProcessException("Error: exec called from signal handler thread. The process was executed, but can't return exit code.");
+    }
+
     while(!OpaquePointer::_stopSignalHandlerThread)
     {
+        std::unique_lock<std::mutex> lock(OpaquePointer::_lastExitStatusMutex);
+        OpaquePointer::_lastExitStatusConditionVariable.wait_for(lock, std::chrono::milliseconds(1000), [&] { return OpaquePointer::_stopSignalHandlerThread || OpaquePointer::_lastExitStatus.find(pid) != OpaquePointer::_lastExitStatus.end(); });
+
+        auto entry = OpaquePointer::_lastExitStatus.find(pid);
+        if(entry != OpaquePointer::_lastExitStatus.end())
         {
-            std::lock_guard<std::mutex> lastExistStatusGuard(OpaquePointer::_lastExitStatusMutex);
-            auto entry = OpaquePointer::_lastExitStatus.find(pid);
-            if(entry != OpaquePointer::_lastExitStatus.end())
-            {
-                return entry->second.exitCode;
-            }
+            return entry->second.exitCode;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     return -1;
