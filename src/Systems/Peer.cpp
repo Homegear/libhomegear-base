@@ -250,17 +250,20 @@ Peer::Peer(BaseLib::SharedObjects* baseLib, uint64_t id, int32_t address, std::s
 
 Peer::~Peer()
 {
-    serviceMessages->resetEventHandler();
+    dispose();
 }
 
 void Peer::dispose()
 {
+    if(_disposing) return;
     _disposing = true;
     _central.reset();
     _peersMutex.lock();
     _peers.clear();
     _peersMutex.unlock();
     _variableDatabaseIDs.clear();
+    if(serviceMessages) serviceMessages->resetEventHandler();
+    serviceMessages.reset();
 }
 
 void Peer::homegearStarted()
