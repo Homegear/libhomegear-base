@@ -171,7 +171,7 @@ void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, Ch
 	_termios.c_cc[VTIME] = 0;
 	cfsetispeed(&_termios, baudrate);
 	cfsetospeed(&_termios, baudrate);
-	if(tcflush(_fileDescriptor->descriptor, TCIFLUSH) == -1) throw SerialReaderWriterException("Couldn't flush device " + _device);
+	if(tcflush(_fileDescriptor->descriptor, TCIOFLUSH) == -1) throw SerialReaderWriterException("Couldn't flush device " + _device);
 	if(tcsetattr(_fileDescriptor->descriptor, TCSANOW, &_termios) == -1) throw SerialReaderWriterException("Couldn't set device settings for device " + _device);
 
 	int flags = fcntl(_fileDescriptor->descriptor, F_GETFL);

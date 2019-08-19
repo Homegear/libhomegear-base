@@ -77,20 +77,26 @@ public:
         int exitCode = -1;
         sigemptyset(&set);
         sigaddset(&set, SIGCHLD);
+        pid_t pid = -1;
+        int status = 0;
 
         while(!_stopSignalHandlerThread)
         {
             try
             {
-                siginfo_t info{};
-                signalNumber = sigtimedwait(&set, &info, &timeout);
-                if(signalNumber != SIGCHLD) continue;
+                pid = waitpid(-1, &status, WNOHANG);
+                if(pid == -1 || pid == 0) //Possible errors: ECHILD, EINTR and EINVAL => No error or not possible => Don't output error message.
+                {
+                    siginfo_t info{};
+                    signalNumber = sigtimedwait(&set, &info, &timeout);
+                    if(signalNumber != SIGCHLD) continue;
+                    pid = info.si_pid;
 
-                auto pid = info.si_pid;
-                int status = 0;
-                auto result = waitpid(pid, &status, 0);
-                if(result == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
-                exitCode = (result == -1 ? -1 : WEXITSTATUS(status));
+                    auto result = waitpid(pid, &status, 0);
+                    if(result == -1) continue; //Signal was already handled
+                }
+
+                exitCode = WEXITSTATUS(status);
                 bool coreDumped = false;
                 int childSignalNumber = -1;
                 if(WIFSIGNALED(status))
