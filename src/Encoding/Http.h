@@ -191,8 +191,8 @@ private:
 	std::string _partialChunkSize;
 	size_t _streamPos = 0;
 	size_t _contentStreamPos = 0;
-	std::map <std::string, std::string> _extMimeTypeMap;
-	std::map <int32_t, std::string> _statusCodeMap;
+	static const std::map <std::string, std::string> _extMimeTypeMap;
+	static const std::map <int32_t, std::string> _statusCodeMap;
 	std::string _redirectUrl;
 	std::string _redirectQueryString;
 	int32_t _redirectStatus = -1;

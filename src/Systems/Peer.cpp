@@ -260,6 +260,7 @@ void Peer::dispose()
     _peersMutex.lock();
     _peers.clear();
     _peersMutex.unlock();
+    _variableDatabaseIDs.clear();
 }
 
 void Peer::homegearStarted()
