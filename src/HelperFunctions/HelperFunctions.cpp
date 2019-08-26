@@ -358,16 +358,8 @@ std::vector<uint8_t> HelperFunctions::hexToBin(const std::string& data)
 
 char HelperFunctions::getHexChar(int32_t nibble)
 {
-    try
-    {
-        if(nibble < 0 || nibble > 15) return 0;
-        return _binaryToASCIITable[nibble];
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    return 0;
+    if(nibble < 0 || nibble > 15) return 0;
+    return _binaryToASCIITable[nibble];
 }
 
 std::string HelperFunctions::getHexString(const uint8_t* buffer, uint32_t size)
