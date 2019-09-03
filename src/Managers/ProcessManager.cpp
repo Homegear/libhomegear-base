@@ -260,6 +260,7 @@ std::string ProcessManager::findProgramInPath(const std::string& relativePath)
         auto path = HelperFunctions::splitAll(Environment::get("PATH"), ':');
         for(auto& element : path)
         {
+            HelperFunctions::trim(element);
             if(element.empty()) continue;
 
             auto absolutePath = element.append(element.back() == '/' ? "" : "/").append(relativePath);

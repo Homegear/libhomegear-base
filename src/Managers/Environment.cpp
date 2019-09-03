@@ -4,6 +4,11 @@
 
 #include "Environment.h"
 
+namespace BaseLib
+{
+
+std::mutex Environment::_environmentMutex;
+
 std::string Environment::get(const std::string& name)
 {
     std::lock_guard<std::mutex> environmentGuard(_environmentMutex);
@@ -17,4 +22,6 @@ void Environment::set(const std::string& name, const std::string& value)
 {
     std::lock_guard<std::mutex> environmentGuard(_environmentMutex);
     setenv(name.c_str(), value.c_str(), 1);
+}
+
 }

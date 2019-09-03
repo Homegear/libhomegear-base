@@ -7,6 +7,9 @@
 
 #include <mutex>
 
+namespace BaseLib
+{
+
 class Environment
 {
 private:
@@ -15,8 +18,10 @@ public:
     Environment() = delete;
 
     static std::string get(const std::string& name);
+
     static void set(const std::string& name, const std::string& value);
 };
 
+}
 
 #endif //LIBHOMEGEAR_BASE_ENVIRONMENT_H
