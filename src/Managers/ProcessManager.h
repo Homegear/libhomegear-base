@@ -105,11 +105,21 @@ public:
     /**
      * Starts a program and returns the output.
      *
-     * @param command The command to execute (passed to sh with "-c").
+     * @param command The command to execute.
+     * @param maxFd The maximum number of file descriptors.
      * @param[out] output The program output.
      * @return Returns the programs exit code.
      */
     static int32_t exec(const std::string& command, int maxFd, std::string& output);
+
+    /**
+     * Starts a program and detaches it, so it continues to run when the parent process finishes.
+     *
+     * @param command The command to execute.
+     * @param maxFd The maximum number of file descriptors.
+     * @return Returns true when the process started successfully.
+     */
+    static bool exec(const std::string& command, int maxFd);
 
     /**
      * Custom implementation of popen that returns the pid.

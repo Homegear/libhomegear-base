@@ -46,6 +46,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/stat.h>
 
 namespace BaseLib
 {
@@ -457,6 +458,69 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
     }
 
     return -1;
+}
+
+bool ProcessManager::exec(const std::string& command, int maxFd)
+{
+    pid_t pid, sid;
+    pid = fork();
+    if(pid == -1)
+    {
+        return false;
+    }
+    if(pid > 0)
+    {
+        //Parent
+        return true;
+    }
+
+    //Child
+    sigset_t set{};
+    sigemptyset(&set);
+    sigaddset(&set, SIGCHLD);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGQUIT);
+    sigaddset(&set, SIGILL);
+    sigaddset(&set, SIGFPE);
+    sigaddset(&set, SIGALRM);
+    sigaddset(&set, SIGUSR1);
+    sigaddset(&set, SIGUSR2);
+    sigaddset(&set, SIGTSTP);
+    sigaddset(&set, SIGTTIN);
+    sigaddset(&set, SIGTTOU);
+    sigprocmask(SIG_UNBLOCK, &set, nullptr);
+
+    // Close all non standard descriptors.
+    for(int32_t i = 3; i < maxFd; ++i) close(i);
+
+    pid = fork();
+    if(pid == -1)
+    {
+        exit(1);
+    }
+    if(pid > 0)
+    {
+        //Parent
+        exit(0);
+    }
+
+    //Set process permission
+    umask(S_IWGRP | S_IWOTH);
+
+    //Set child processe's id
+    sid = setsid();
+    if(sid == -1)
+    {
+        exit(1);
+    }
+
+    execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
+
+    exit(0);
 }
 
 FILE* ProcessManager::popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid)
