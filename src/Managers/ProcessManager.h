@@ -33,6 +33,7 @@
 
 #include "../Exception.h"
 #include "ThreadManager.h"
+#include "Environment.h"
 
 #include <string>
 #include <vector>
@@ -78,10 +79,12 @@ public:
 
     static std::vector<std::string> splitArguments(const std::string& arguments);
 
+    static std::string findProgramInPath(const std::string& relativePath);
+
     /**
      * Starts a program and returns the process id.
      *
-     * @param path The program to start.
+     * @param path The program to start. If path is relative, PATH is searched.
      * @param arguments The arguments to pass.
      * @param maxFd The maximum possible file descriptor. Needed to close all open file descriptors in the child process.
      * @throws Exception
@@ -92,7 +95,7 @@ public:
     /**
      * Starts a program with redirected pipe and returns the process id.
      *
-     * @param path The program to start.
+     * @param path The program to start. If path is relative, PATH is searched.
      * @param arguments The arguments to pass.
      * @param[out] stdIn Will be filled with the input file descriptor. Close it when the process finishes.
      * @param[out] stdOut Will be filled with the output file descriptor. Close it when the process finishes.

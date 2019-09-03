@@ -30,6 +30,7 @@
 
 #include "ProcessManager.h"
 #include "../HelperFunctions/HelperFunctions.h"
+#include "../HelperFunctions/Io.h"
 
 #include <cstring>
 #include <array>
@@ -249,11 +250,34 @@ std::vector<std::string> ProcessManager::splitArguments(const std::string& argum
     return argumentVector;
 }
 
+std::string ProcessManager::findProgramInPath(const std::string& relativePath)
+{
+    if(relativePath.empty()) return "";
+    if(Io::fileExists(relativePath)) return relativePath;
+
+    if(relativePath.front() != '/')
+    {
+        auto path = HelperFunctions::splitAll(Environment::get("PATH"), ':');
+        for(auto& element : path)
+        {
+            if(element.empty()) continue;
+
+            auto absolutePath = element.append(element.back() == '/' ? "" : "/").append(relativePath);
+
+            if(Io::fileExists(absolutePath)) return absolutePath;
+        }
+    }
+
+    return "";
+}
+
 pid_t ProcessManager::system(const std::string& command, const std::vector<std::string>& arguments, int maxFd)
 {
     pid_t pid;
 
     if(command.empty() || command.back() == '/') return -1;
+    std::string absoluteFilename = findProgramInPath(command);
+    if(absoluteFilename.empty()) return -1;
 
     pid = fork();
 
@@ -288,7 +312,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
         }
 
         setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+        std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
         char* argv[arguments.size() + 2];
         argv[0] = (char*) programName.c_str(); //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
@@ -297,7 +321,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
             argv[i + 1] = (char*)arguments[i].c_str();
         }
         argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1) _exit(1);
+        if(execv(absoluteFilename.c_str(), argv) == -1) _exit(1);
     }
 
     //Parent process
@@ -314,6 +338,8 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     stdErr = -1;
 
     if(command.empty() || command.back() == '/') return -1;
+    std::string absoluteFilename = findProgramInPath(command);
+    if(absoluteFilename.empty()) return -1;
 
     int pipeIn[2];
     int pipeOut[2];
@@ -391,7 +417,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
         for(int32_t i = 3; i < maxFd; ++i) close(i);
 
         setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+        std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
         char* argv[arguments.size() + 2];
         argv[0] = (char*)programName.c_str(); //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
@@ -400,7 +426,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
             argv[i + 1] = (char*)arguments[i].c_str();
         }
         argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1) _exit(1);
+        if(execv(absoluteFilename.c_str(), argv) == -1) _exit(1);
     }
 
     //Parent process
