@@ -62,6 +62,14 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
         else if(name == "y") y = Math::getNumber(value);
         else if(name == "columns") columns = Math::getNumber(value);
         else if(name == "rows") rows = Math::getNumber(value);
+        else if(name == "metadata")
+        {
+            for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
+            {
+                std::string metadataNodeName(metadataNode->name());
+                metadata.emplace(metadataNodeName, std::string(metadataNode->value()));
+            }
+        }
         else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
     }
 }
@@ -75,6 +83,7 @@ UiControl::UiControl(UiControl const& rhs)
     y = rhs.y;
     columns = rhs.columns;
     rows = rhs.rows;
+    metadata = rhs.metadata;
 
     if(rhs.uiElement)
     {
@@ -94,6 +103,7 @@ UiControl& UiControl::operator=(const UiControl& rhs)
     y = rhs.y;
     columns = rhs.columns;
     rows = rhs.rows;
+    metadata = rhs.metadata;
 
     if(rhs.uiElement)
     {
