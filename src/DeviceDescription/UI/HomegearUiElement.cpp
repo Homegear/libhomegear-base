@@ -55,7 +55,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
             else _bl->out.printWarning("Warning: Unknown value for homegearUiElement\\type: " + value);
         }
         else if(nodeName == "control") control = value;
-        else if(nodeName == "role") role = Math::getUnsignedNumber64(value, true);
+        else if(nodeName == "role") role = Math::getUnsignedNumber64(value);
         else if(nodeName == "icons")
         {
             for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
