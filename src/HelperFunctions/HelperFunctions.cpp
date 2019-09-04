@@ -160,6 +160,51 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
+PVariable HelperFunctions::xml2variable(xml_node<>* node)
+{
+    auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
+
+    bool hasElements = false;
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string attributeName(attr->name());
+        std::string attributeValue(attr->value());
+
+        nodeVariable->structValue->emplace("@" + attributeName, std::make_shared<Variable>(attributeValue));
+    }
+
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        hasElements = true;
+        std::string nodeName(subNode->name());
+        std::string nodeValue(subNode->value());
+
+        auto variableIterator = nodeVariable->structValue->find(nodeName);
+        if(variableIterator == nodeVariable->structValue->end())
+        {
+            variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
+            variableIterator->second->arrayValue->reserve(100);
+        }
+
+        if(variableIterator->second->arrayValue->size() == variableIterator->second->arrayValue->capacity()) variableIterator->second->arrayValue->reserve(variableIterator->second->arrayValue->size() + 100);
+
+        auto subNodeVariable = xml2variable(subNode);
+        if(!subNodeVariable->errorStruct) variableIterator->second->arrayValue->emplace_back(subNodeVariable);
+    }
+
+    if(!hasElements)
+    {
+        if(nodeVariable->structValue->empty()) return std::make_shared<Variable>(std::string(node->value()));
+        else
+        {
+            std::string nodeValue = std::string(node->value());
+            if(!nodeValue.empty()) nodeVariable->structValue->emplace("@@value", std::make_shared<Variable>());
+            return nodeVariable;
+        }
+    }
+    else return nodeVariable;
+}
+
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 {
     std::random_device rd;

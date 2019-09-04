@@ -67,7 +67,7 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
             for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
             {
                 std::string metadataNodeName(metadataNode->name());
-                metadata.emplace(metadataNodeName, std::string(metadataNode->value()));
+                metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);

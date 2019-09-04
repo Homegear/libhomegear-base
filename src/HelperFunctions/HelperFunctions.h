@@ -31,6 +31,8 @@
 #ifndef HELPERFUNCTIONS_H_
 #define HELPERFUNCTIONS_H_
 
+#include "../Variable.h"
+
 #include <algorithm>
 #include <ctime>
 #include <map>
@@ -347,6 +349,8 @@ public:
 	 * @return Returns the stripped string.
 	 */
 	static std::string stripNonPrintable(const std::string& s);
+
+	static PVariable xml2variable(xml_node<>* node);
 
 	/**
 	 * Returns the endianess of the system.
