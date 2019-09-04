@@ -49,6 +49,8 @@ void Settings::reset()
 	_runAsGroup = "";
 	_debugLevel = 3;
 	_memoryDebugging = false;
+	_waitForIp4OnInterface = "";
+	_waitForIp6OnInterface = "";
 	_enableUPnP = true;
 	_uPnPIpAddress = "";
 	_ssdpIpAddress = "";
