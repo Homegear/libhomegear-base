@@ -175,9 +175,11 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
 
     for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
-        hasElements = true;
         std::string nodeName(subNode->name());
+        if(nodeName.empty()) continue;
         std::string nodeValue(subNode->value());
+
+        hasElements = true;
 
         auto variableIterator = nodeVariable->structValue->find(nodeName);
         if(variableIterator == nodeVariable->structValue->end())
@@ -194,11 +196,21 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
 
     if(!hasElements)
     {
-        if(nodeVariable->structValue->empty()) return std::make_shared<Variable>(std::string(node->value()));
+        std::string nodeValue = std::string(node->value());
+        PVariable jsonNodeValue;
+        try
+        {
+            jsonNodeValue = Rpc::JsonDecoder::decode(nodeValue);
+        }
+        catch(const std::exception& ex)
+        {
+            jsonNodeValue = std::make_shared<Variable>(nodeValue);
+        }
+
+        if(nodeVariable->structValue->empty()) return jsonNodeValue;
         else
         {
-            std::string nodeValue = std::string(node->value());
-            if(!nodeValue.empty()) nodeVariable->structValue->emplace("@@value", std::make_shared<Variable>());
+            if(!nodeValue.empty()) nodeVariable->structValue->emplace("@@value", jsonNodeValue);
             return nodeVariable;
         }
     }
