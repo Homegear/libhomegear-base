@@ -59,6 +59,8 @@ public:
 	std::string ssdpIpAddress() { return _ssdpIpAddress; }
 	int32_t ssdpPort() { return _ssdpPort; }
 	bool enableMonitoring() { return _enableMonitoring; };
+    bool enableHgdc() { return _enableHgdc; };
+    int32_t hgdcPort() { return _hgdcPort; }
 	bool devLog() { return _devLog; }
     bool ipcLog() { return _ipcLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
@@ -186,6 +188,8 @@ private:
 	std::string _ssdpIpAddress;
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
+	bool _enableHgdc = false;
+	int32_t _hgdcPort = 2017;
 	bool _devLog = false;
     bool _ipcLog = false;
 	bool _enableCoreDumps = true;

@@ -147,6 +147,8 @@ set(SOURCE_FILES
         src/Security/Sign.h
         src/Settings/Settings.cpp
         src/Settings/Settings.h
+        src/Sockets/Hgdc.cpp
+        src/Sockets/Hgdc.h
         src/Sockets/HttpClient.cpp
         src/Sockets/HttpClient.h
         src/Sockets/HttpServer.cpp
@@ -203,6 +205,6 @@ set(SOURCE_FILES
         src/ITimedQueue.h
         src/Variable.cpp
         src/Variable.h
-        config.h src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h src/Managers/Environment.cpp src/Managers/Environment.h)
+        config.h src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h src/Managers/Environment.cpp src/Managers/Environment.h src/Sockets/Hgdc.cpp src/Sockets/Hgdc.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

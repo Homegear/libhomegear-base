@@ -56,6 +56,8 @@ void Settings::reset()
 	_ssdpIpAddress = "";
 	_ssdpPort = 1900;
 	_enableMonitoring = true;
+	_enableHgdc = false;
+	_hgdcPort = 2017;
 	_devLog = false;
     _ipcLog = false;
 	_enableCoreDumps = true;
@@ -271,9 +273,20 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "enablemonitoring")
 				{
-					if(HelperFunctions::toLower(value) == "false") _enableMonitoring = false;
+					_enableMonitoring = (HelperFunctions::toLower(value) == "true");
 					_bl->out.printDebug("Debug: enableMonitoring set to " + std::to_string(_enableMonitoring));
 				}
+                else if(name == "enablehgdc")
+                {
+                    _enableHgdc = (HelperFunctions::toLower(value) == "true");
+                    _bl->out.printDebug("Debug: enableHgdc set to " + std::to_string(_enableHgdc));
+                }
+                else if(name == "hgdcport")
+                {
+                    _hgdcPort = Math::getNumber(value);
+                    if(_hgdcPort < 1 || _hgdcPort > 65535) _hgdcPort = 2017;
+                    _bl->out.printDebug("Debug: hgdcPort set to " + std::to_string(_hgdcPort));
+                }
 				else if(name == "devlog")
 				{
 					_devLog = HelperFunctions::toLower(value) == "true";
