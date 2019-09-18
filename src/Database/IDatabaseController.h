@@ -47,7 +47,7 @@ struct SystemVariable
 	std::string name;
 	uint64_t room = 0;
 	std::set<uint64_t> categories;
-    std::set<uint64_t> roles;
+    std::unordered_map<uint64_t, Role> roles;
 	int32_t flags = 0;
 	BaseLib::PVariable value;
 };

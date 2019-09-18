@@ -157,8 +157,17 @@ void Parameter::parseXml(xml_node<>* node)
                         std::string roleValue(roleNode->value());
                         if(roleName == "role")
                         {
-                            auto roleId = Math::getUnsignedNumber64(roleValue);
-                            if(!roleId != 0) roles.emplace(roleId);
+                            Role role;
+                            for(xml_attribute<>* attr = roleNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                std::string attributeName(attr->name());
+                                if(attributeName == "direction") role.direction = (RoleDirection)Math::getNumber(std::string(attr->value()));
+                                else if(attributeName == "invert") role.invert = std::string(attr->value()) == "true";
+                                else _bl->out.printWarning("Warning: Unknown attribute for \"role\": " + std::string(attr->name()));
+                            }
+
+                            role.id = Math::getUnsignedNumber64(roleValue);
+                            if(!role.id != 0) roles.emplace(role.id, role);
                         }
                         else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
                     }

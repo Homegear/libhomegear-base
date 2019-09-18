@@ -205,6 +205,6 @@ set(SOURCE_FILES
         src/ITimedQueue.h
         src/Variable.cpp
         src/Variable.h
-        config.h src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h src/Managers/Environment.cpp src/Managers/Environment.h src/Sockets/Hgdc.cpp src/Sockets/Hgdc.h)
+        config.h src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h src/Managers/Environment.cpp src/Managers/Environment.h src/Sockets/Hgdc.cpp src/Sockets/Hgdc.h src/Systems/Role.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

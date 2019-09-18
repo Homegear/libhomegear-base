@@ -1774,9 +1774,22 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 				for(auto& role : parameter->roles)
 				{
-					tempString = std::to_string(role);
+					tempString = std::to_string(role.first);
 					xml_node<>* roleNode = doc->allocate_node(node_element, "role", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(roleNode);
+
+					if(role.second.direction != RoleDirection::both)
+                    {
+                        tempString = std::to_string((int32_t)role.second.direction);
+                        attr = doc->allocate_attribute("direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+                    }
+                    else if(role.second.invert)
+                    {
+                        tempString = "true";
+                        attr = doc->allocate_attribute("invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+                    }
 				}
 			}
 		// }}}

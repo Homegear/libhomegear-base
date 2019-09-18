@@ -78,6 +78,10 @@ void Hgdc::start()
             {
                 _out.printInfo("Info: Successfully connected.");
                 _stopped = false;
+                std::shared_ptr<QueueEntry> queueEntry = std::make_shared<QueueEntry>();
+                queueEntry->method = "reconnected";
+                auto baseQueueEntry = static_cast<std::shared_ptr<IQueueEntry>>(queueEntry);
+                enqueue(0, baseQueueEntry);
             }
         }
         catch(const std::exception& ex)
