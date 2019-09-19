@@ -811,6 +811,11 @@ void Settings::load(std::string filename, std::string executablePath)
 					_uiPathGroup = value;
 					_bl->out.printDebug("Debug: uiPathGroup set to " + _uiPathGroup);
 				}
+                else if(name == "reloadrolesonstartup")
+                {
+                    _reloadRolesOnStartup = HelperFunctions::toLower(value) == "true";
+                    _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));
+                }
 				else if(name == "firmwarepath")
 				{
 					_firmwarePath = value;

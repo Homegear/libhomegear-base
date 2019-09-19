@@ -152,6 +152,7 @@ public:
 	uint32_t uiPathPermissions() { return _uiPathPermissions; }
 	std::string uiPathUser() { return _uiPathUser; }
 	std::string uiPathGroup() { return _uiPathGroup; }
+	bool reloadRolesOnStartup() { return _reloadRolesOnStartup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -280,6 +281,7 @@ private:
 	uint32_t _uiPathPermissions = 504;
 	std::string _uiPathUser;
 	std::string _uiPathGroup;
+	bool _reloadRolesOnStartup = true;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;
