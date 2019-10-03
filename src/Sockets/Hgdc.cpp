@@ -104,9 +104,9 @@ void Hgdc::stop()
     {
         stopQueue(0);
         _stopCallbackThread = true;
-        if(_tcpSocket) _tcpSocket->close();
         _bl->threadManager.join(_listenThread);
         _stopped = true;
+        if(_tcpSocket) _tcpSocket->close();
         _tcpSocket.reset();
     }
     catch(const std::exception& ex)
@@ -243,6 +243,7 @@ void Hgdc::listen()
                     if(_stopped) _out.printWarning("Warning: Connection to device closed. Trying to reconnect...");
                     _tcpSocket->close();
                     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    if(_stopCallbackThread) return;
                     _tcpSocket->open();
                     if(_tcpSocket->connected())
                     {
