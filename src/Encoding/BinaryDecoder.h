@@ -49,20 +49,20 @@ public:
 	BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi);
 	virtual ~BinaryDecoder() {}
 
-	virtual int32_t decodeInteger(std::vector<char>& encodedData, uint32_t& position);
-	virtual int32_t decodeInteger(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual int64_t decodeInteger64(std::vector<char>& encodedData, uint32_t& position);
-	virtual int64_t decodeInteger64(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual uint8_t decodeByte(std::vector<char>& encodedData, uint32_t& position);
-	virtual uint8_t decodeByte(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual std::string decodeString(std::vector<char>& encodedData, uint32_t& position);
-	virtual std::string decodeString(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual std::vector<uint8_t> decodeBinary(std::vector<char>& encodedData, uint32_t& position);
-	virtual std::vector<uint8_t> decodeBinary(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual bool decodeBoolean(std::vector<char>& encodedData, uint32_t& position);
-	virtual bool decodeBoolean(std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual double decodeFloat(std::vector<char>& encodedData, uint32_t& position);
-	virtual double decodeFloat(std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
+	virtual int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
+	virtual int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
+	virtual uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual std::string decodeString(const std::vector<char>& encodedData, uint32_t& position);
+	virtual std::string decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
+	virtual std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
+	virtual bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	virtual double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
+	virtual double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;

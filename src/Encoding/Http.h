@@ -144,8 +144,8 @@ public:
 	 * @see _finished
 	 */
 	void setFinished();
-	std::vector<char>& getRawHeader() { return _rawHeader; }
-	std::vector<char>& getContent() { return _content; }
+	const std::vector<char>& getRawHeader() const { return _rawHeader; }
+	const std::vector<char>& getContent() const { return _content; }
 	uint32_t getContentSize() { return _content.empty() ? 0 : (_finished ? _content.size() - 1 : _content.size()); }
 	Header& getHeader() { return _header; }
 	void reset();

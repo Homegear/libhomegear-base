@@ -41,12 +41,12 @@ XmlrpcDecoder::XmlrpcDecoder(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeRequest(std::vector<char>& packet, std::string& methodName)
+std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeRequest(const std::vector<char>& packet, std::string& methodName)
 {
 	xml_document<> doc;
 	try
 	{
-		doc.parse<0>(&packet.at(0));
+        doc.parse<0>((char*)packet.data()); //Dirty, but there is no modification of the data
 		xml_node<>* node = doc.first_node();
 		if(node == nullptr || std::string(doc.first_node()->name()) != "methodCall")
 		{
@@ -93,12 +93,12 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeReq
     return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. Not well formed.")});
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::string& packet)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::string& packet)
 {
 	xml_document<> doc;
 	try
 	{
-		doc.parse<0>(&packet.at(0));
+		doc.parse<0>((char*)packet.data()); //Dirty, but there is no modification of the data
 		std::shared_ptr<Variable> response = decodeResponse(&doc);
 		doc.clear();
 		return response;
@@ -112,7 +112,7 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::string& packet)
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::vector<char>& packet)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::vector<char>& packet)
 {
 	xml_document<> doc;
 	try
@@ -130,7 +130,7 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(std::vector<char>& packe
 			}
 		}
 		if(startPos >= (signed)packet.size()) return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: Could not find \"<\"."));
-		doc.parse<0>(&packet.at(startPos));
+		doc.parse<0>((char*)packet.data() + startPos); //Dirty, but there is no modification of the data
 		std::shared_ptr<Variable> response = decodeResponse(&doc);
 		doc.clear();
 		return response;

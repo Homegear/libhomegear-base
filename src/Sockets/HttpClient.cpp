@@ -117,7 +117,7 @@ void HttpClient::sendRequest(const std::string& request, std::string& response, 
 	sendRequest(request, http, responseIsHeaderOnly);
 	if(http.isFinished() && http.getContentSize() > 0)
 	{
-		std::vector<char>& content = http.getContent();
+		const std::vector<char>& content = http.getContent();
 		response.insert(response.end(), content.begin(), content.begin() + http.getContentSize());
 	}
 }
