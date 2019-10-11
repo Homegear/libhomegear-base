@@ -740,7 +740,7 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 			if(fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw SocketOperationException("Error: Could not set socket options.");
 		}
 		if(setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
-		if(bind(socketDescriptor->descriptor, info->ai_addr, info->ai_addrlen) == -1)
+		if(bind(socketDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1)
 		{
 			socketDescriptor.reset();
 			error = errno;

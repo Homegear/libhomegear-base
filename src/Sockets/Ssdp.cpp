@@ -127,7 +127,7 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 		localSock.sin_port = htons(port);
 		localSock.sin_addr.s_addr = inet_addr(bindToMulticast ? "239.255.255.250" : _address.c_str());
 
-		if(bind(serverSocketDescriptor->descriptor, (struct sockaddr*)&localSock, sizeof(localSock)) == -1)
+		if(bind(serverSocketDescriptor->descriptor.load(), (struct sockaddr*)&localSock, sizeof(localSock)) == -1)
 		{
 			_bl->out.printError("Error: Binding to address " + _address + " failed: " + std::string(strerror(errno)));
 			_bl->fileDescriptorManager.close(serverSocketDescriptor);

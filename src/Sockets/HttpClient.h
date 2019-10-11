@@ -126,6 +126,12 @@ public:
 	virtual ~HttpClient();
 
 	/**
+	 * Returns the underlying TcpSocket.
+	 * @return Returns the underlying TcpSocket.
+	 */
+	std::shared_ptr<TcpSocket> getSocket() { return _socket; }
+
+	/**
 	 * Sets the socket timeout.
 	 * @param value The timeout in milliseconds.
 	 */
@@ -225,7 +231,7 @@ protected:
 	/**
 	 * The socket object.
 	 */
-	std::unique_ptr<TcpSocket> _socket;
+	std::shared_ptr<TcpSocket> _socket;
 
 	/**
 	 * The hostname of the HTTP server.
