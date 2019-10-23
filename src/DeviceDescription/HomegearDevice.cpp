@@ -1297,6 +1297,24 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 						}
 					}
 
+                    {
+                        PDecimalStringScale decimalStringScale;
+                        decimalStringScale = std::dynamic_pointer_cast<DecimalStringScale>(*i);
+                        if(decimalStringScale)
+                        {
+                            xml_node<>* castNode = doc->allocate_node(node_element, "decimalStringScale");
+                            node->append_node(castNode);
+                            if(decimalStringScale->factor != 0)
+                            {
+                                tempString = Math::toString(decimalStringScale->factor, 6);
+                                xml_node<>* subnode = doc->allocate_node(node_element, "factor", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                                castNode->append_node(subnode);
+                            }
+
+                            continue;
+                        }
+                    }
+
 					{
 						PIntegerIntegerScale integerIntegerScale;
 						integerIntegerScale = std::dynamic_pointer_cast<IntegerIntegerScale>(*i);

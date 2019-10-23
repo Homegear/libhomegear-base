@@ -1,4 +1,5 @@
 #include <memory>
+#include <iostream>
 
 /* Copyright 2013-2019 Homegear GmbH
  *

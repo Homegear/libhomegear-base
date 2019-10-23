@@ -493,17 +493,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
 				bool specialValue = (variable->floatValue == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, double>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->floatValue)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+				if(!specialValue) specialValue = parameter->specialValuesFloatMap.find(variable->floatValue) != parameter->specialValuesFloatMap.end();
 				if(!specialValue)
 				{
 					if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
@@ -520,17 +510,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalInteger* parameter = (LogicalInteger*)logical.get();
 				bool specialValue = (variable->integerValue == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, int32_t>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->integerValue)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
@@ -547,17 +527,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();
 				bool specialValue = (variable->integerValue64 == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, int64_t>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->integerValue64)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
