@@ -197,6 +197,11 @@ public:
 	std::shared_ptr<Hgdc> hgdc;
 
 	/**
+	 * Default signal mask
+	 */
+	static sigset_t defaultSignalMask;
+
+	/**
 	 * Main constructor.
 	 *
 	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.

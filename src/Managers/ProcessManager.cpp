@@ -31,6 +31,7 @@
 #include "ProcessManager.h"
 #include "../HelperFunctions/HelperFunctions.h"
 #include "../HelperFunctions/Io.h"
+#include "../BaseLib.h"
 
 #include <cstring>
 #include <array>
@@ -159,9 +160,9 @@ void ProcessManager::startSignalHandler()
 
     sigset_t set{};
     sigemptyset(&set);
-    sigprocmask(SIG_BLOCK, nullptr, &set);
+    pthread_sigmask(SIG_BLOCK, nullptr, &set);
     sigaddset(&set, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &set, nullptr);
+    pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
     OpaquePointer::_signalHandlerThread = std::thread(&OpaquePointer::signalHandler);
 }
@@ -172,9 +173,9 @@ void ProcessManager::startSignalHandler(BaseLib::ThreadManager& threadManager)
 
     sigset_t set{};
     sigemptyset(&set);
-    sigprocmask(SIG_BLOCK, nullptr, &set);
+    pthread_sigmask(SIG_BLOCK, nullptr, &set);
     sigaddset(&set, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &set, nullptr);
+    pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
     threadManager.start(OpaquePointer::_signalHandlerThread, true, &ProcessManager::OpaquePointer::signalHandler);
 }
@@ -286,25 +287,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
     else if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         // Close all non standard descriptors
         for(int32_t i = 3; i < maxFd; ++i)
@@ -380,25 +363,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     else if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
 
@@ -502,24 +467,7 @@ bool ProcessManager::exec(const std::string& command, int maxFd)
     }
 
     //Child
-    sigset_t set{};
-    sigemptyset(&set);
-    sigaddset(&set, SIGCHLD);
-    sigaddset(&set, SIGHUP);
-    sigaddset(&set, SIGTERM);
-    sigaddset(&set, SIGINT);
-    sigaddset(&set, SIGABRT);
-    sigaddset(&set, SIGSEGV);
-    sigaddset(&set, SIGQUIT);
-    sigaddset(&set, SIGILL);
-    sigaddset(&set, SIGFPE);
-    sigaddset(&set, SIGALRM);
-    sigaddset(&set, SIGUSR1);
-    sigaddset(&set, SIGUSR2);
-    sigaddset(&set, SIGTSTP);
-    sigaddset(&set, SIGTTIN);
-    sigaddset(&set, SIGTTOU);
-    sigprocmask(SIG_UNBLOCK, &set, nullptr);
+    pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
     // Close all non standard descriptors.
     for(int32_t i = 3; i < maxFd; ++i) close(i);
@@ -564,25 +512,7 @@ FILE* ProcessManager::popen2(const std::string& command, const std::string& type
     if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         if (type == "r")
         {
