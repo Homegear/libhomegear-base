@@ -310,6 +310,7 @@ bool Variable::operator==(const Variable& rhs)
 		{
 			if(*(i.first) != *(i.second)) return false;
 		}
+		return true;
 	}
 	if(type == VariableType::tStruct)
 	{
@@ -318,6 +319,7 @@ bool Variable::operator==(const Variable& rhs)
 		{
 			if(i.first->first != i.first->first || *(i.second->second) != *(i.second->second)) return false;
 		}
+		return true;
 	}
 	if(type == VariableType::tBase64) return stringValue == rhs.stringValue;
 	if(type == VariableType::tBinary)
