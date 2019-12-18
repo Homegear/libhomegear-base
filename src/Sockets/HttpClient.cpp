@@ -32,6 +32,8 @@
 #include "../Encoding/Http.h"
 #include "HttpClient.h"
 
+#include <memory>
+
 namespace BaseLib
 {
 
@@ -42,7 +44,7 @@ HttpClient::HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, in
 	if(_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
 	if(port > 0 && port < 65536) _port = port;
 	_keepAlive = keepAlive;
-	_socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath));
+	_socket = std::make_shared<BaseLib::TcpSocket>(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath);
 	_socket->setConnectionRetries(1);
 }
 

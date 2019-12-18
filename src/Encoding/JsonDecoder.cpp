@@ -160,7 +160,7 @@ void JsonDecoder::decodeObject(const std::string& json, uint32_t& pos, std::shar
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
         auto element = std::make_shared<Variable>();
-        decodeValue(json, pos,element);
+        if(!decodeValue(json, pos,element)) throw JsonDecoderException("Invalid JSON.");
         variable->structValue->insert(StructElement(name, element));
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
@@ -225,7 +225,7 @@ void JsonDecoder::decodeObject(const std::vector<char>& json, uint32_t& pos, std
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
         auto  element = std::make_shared<Variable>();
-        decodeValue(json, pos,element);
+        if(!decodeValue(json, pos,element)) throw JsonDecoderException("Invalid JSON.");
         variable->structValue->insert(StructElement(name, element));
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing '}' found.");
@@ -266,7 +266,7 @@ void JsonDecoder::decodeArray(const std::string& json, uint32_t& pos, std::share
     while(pos < json.length())
     {
         auto element = std::make_shared<Variable>();
-        decodeValue(json, pos, element);
+        if(!decodeValue(json, pos,element)) throw JsonDecoderException("Invalid JSON.");
         variable->arrayValue->push_back(element);
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");
@@ -307,7 +307,7 @@ void JsonDecoder::decodeArray(const std::vector<char>& json, uint32_t& pos, std:
     while(pos < json.size())
     {
         auto element = std::make_shared<Variable>();
-        decodeValue(json, pos, element);
+        if(!decodeValue(json, pos,element)) throw JsonDecoderException("Invalid JSON.");
         variable->arrayValue->push_back(element);
         skipWhitespace(json, pos);
         if(!posValid(json, pos)) throw JsonDecoderException("No closing ']' found.");

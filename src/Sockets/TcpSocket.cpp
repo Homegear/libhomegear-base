@@ -33,7 +33,6 @@
 #include "../Security/SecureVector.h"
 #include <gnutls/gnutls.h>
 
-
 namespace BaseLib
 {
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
@@ -927,6 +926,15 @@ void TcpSocket::initSsl()
         else if(_requireClientCert && _isServer)
         {
             throw SocketSslException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
+        }
+        else if(!_isServer)
+        {
+            if((result = gnutls_certificate_set_x509_system_trust(x509Credentials)) < 0)
+            {
+                gnutls_certificate_free_credentials(x509Credentials);
+                x509Credentials = nullptr;
+                throw SocketSslException("Could not load system certificates: " + std::string(gnutls_strerror(result)));
+            }
         }
 
         if(caCertificateCount == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
