@@ -536,7 +536,7 @@ std::string TcpSocket::getIpAddress()
                     socketDescriptor = _socketDescriptor->descriptor;
                 }
 
-				timeval timeout;
+				timeval timeout{};
 				timeout.tv_sec = 0;
 				timeout.tv_usec = 100000;
 				fd_set readFileDescriptor;
@@ -1205,7 +1205,7 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
@@ -1292,7 +1292,7 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < bytesToWrite)
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
@@ -1379,7 +1379,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
