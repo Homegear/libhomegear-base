@@ -66,6 +66,7 @@
 #include "Security/Mac.h"
 #include "Security/Gcrypt.h"
 #include "Settings/Settings.h"
+#include "Sockets/Hgdc.h"
 #include "Sockets/IWebserverEventSink.h"
 #include "Sockets/ServerInfo.h"
 #include "Sockets/RpcClientInfo.h"
@@ -189,6 +190,16 @@ public:
 	 * Global service messages.
 	 */
 	Systems::GlobalServiceMessages globalServiceMessages;
+
+	/**
+	 * Homegear Daisy Chain
+	 */
+	std::shared_ptr<Hgdc> hgdc;
+
+	/**
+	 * Default signal mask
+	 */
+	static sigset_t defaultSignalMask;
 
 	/**
 	 * Main constructor.

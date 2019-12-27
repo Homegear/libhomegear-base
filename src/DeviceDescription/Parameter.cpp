@@ -1,3 +1,5 @@
+#include <memory>
+
 /* Copyright 2013-2019 Homegear GmbH
  *
  * libhomegear-base is free software: you can redistribute it and/or
@@ -116,30 +118,30 @@ void Parameter::parseXml(xml_node<>* node)
                     for(xml_node<>* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
                     {
                         std::string castName(castNode->name());
-                        if(castName == "decimalIntegerScale") casts.push_back(PDecimalIntegerScale(new DecimalIntegerScale(_bl, castNode, shared_from_this())));
-                        else if(castName == "integerIntegerScale") casts.push_back(PIntegerIntegerScale(new IntegerIntegerScale(_bl, castNode, shared_from_this())));
-                        else if(castName == "integerOffset") casts.push_back(PIntegerOffset(new IntegerOffset(_bl, castNode, shared_from_this())));
-                        else if(castName == "decimalOffset") casts.push_back(PDecimalOffset(new DecimalOffset(_bl, castNode, shared_from_this())));
-                        else if(castName == "integerIntegerMap") casts.push_back(PIntegerIntegerMap(new IntegerIntegerMap(_bl, castNode, shared_from_this())));
-                        else if(castName == "booleanInteger") casts.push_back(PBooleanInteger(new BooleanInteger(_bl, castNode, shared_from_this())));
-                        else if(castName == "booleanString") casts.push_back(PBooleanInteger (new BooleanInteger(_bl, castNode, shared_from_this())));
-                        else if(castName == "decimalConfigTime") casts.push_back(PDecimalConfigTime (new DecimalConfigTime(_bl, castNode, shared_from_this())));
-                        else if(castName == "integerTinyFloat") casts.push_back(PIntegerTinyFloat(new IntegerTinyFloat(_bl, castNode, shared_from_this())));
-                        else if(castName == "stringUnsignedInteger") casts.push_back(PStringUnsignedInteger(new StringUnsignedInteger(_bl, castNode, shared_from_this())));
-                        else if(castName == "blindTest") casts.push_back(PBlindTest(new BlindTest(_bl, castNode, shared_from_this())));
-                        else if(castName == "optionString") casts.push_back(POptionString(new OptionString(_bl, castNode, shared_from_this())));
-                        else if(castName == "optionInteger") casts.push_back(POptionInteger(new OptionInteger(_bl, castNode, shared_from_this())));
-                        else if(castName == "stringJsonArrayDecimal") casts.push_back(PStringJsonArrayDecimal(new StringJsonArrayDecimal(_bl, castNode, shared_from_this())));
-                        else if(castName == "rpcBinary") casts.push_back(PRpcBinary(new RpcBinary(_bl, castNode, shared_from_this())));
-                        else if(castName == "toggle") casts.push_back(PToggle(new Toggle(_bl, castNode, shared_from_this())));
-                        else if(castName == "cfm") casts.push_back(PCfm(new Cfm(_bl, castNode, shared_from_this())));
-                        else if(castName == "ccrtdnParty") casts.push_back(PCcrtdnParty(new CcrtdnParty(_bl, castNode, shared_from_this())));
-                        else if(castName == "stringReplace") casts.push_back(PStringReplace(new StringReplace(_bl, castNode, shared_from_this())));
-                        else if(castName == "hexStringByteArray") casts.push_back(PHexStringByteArray(new HexStringByteArray(_bl, castNode, shared_from_this())));
-                        else if(castName == "timeStringSeconds") casts.push_back(PTimeStringSeconds(new TimeStringSeconds(_bl, castNode, shared_from_this())));
-                        else if(castName == "invert") casts.push_back(PInvert(new Invert(_bl, castNode, shared_from_this())));
-                        else if(castName == "round") casts.push_back(PRound(new Round(_bl, castNode, shared_from_this())));
-                        else if(castName == "generic") casts.push_back(PGeneric(new Generic(_bl, castNode, shared_from_this())));
+                        if(castName == "decimalIntegerScale") casts.push_back(std::make_shared<DecimalIntegerScale>(_bl, castNode, shared_from_this()));
+                        else if(castName == "integerIntegerScale") casts.push_back(std::make_shared<IntegerIntegerScale>(_bl, castNode, shared_from_this()));
+                        else if(castName == "integerOffset") casts.push_back(std::make_shared<IntegerOffset>(_bl, castNode, shared_from_this()));
+                        else if(castName == "decimalOffset") casts.push_back(std::make_shared<DecimalOffset>(_bl, castNode, shared_from_this()));
+                        else if(castName == "integerIntegerMap") casts.push_back(std::make_shared<IntegerIntegerMap>(_bl, castNode, shared_from_this()));
+                        else if(castName == "booleanInteger") casts.push_back(std::make_shared<BooleanInteger>(_bl, castNode, shared_from_this()));
+                        else if(castName == "booleanString") casts.push_back(std::make_shared<BooleanInteger>(_bl, castNode, shared_from_this()));
+                        else if(castName == "decimalConfigTime") casts.push_back(std::make_shared<DecimalConfigTime>(_bl, castNode, shared_from_this()));
+                        else if(castName == "integerTinyFloat") casts.push_back(std::make_shared<IntegerTinyFloat>(_bl, castNode, shared_from_this()));
+                        else if(castName == "stringUnsignedInteger") casts.push_back(std::make_shared<StringUnsignedInteger>(_bl, castNode, shared_from_this()));
+                        else if(castName == "blindTest") casts.push_back(std::make_shared<BlindTest>(_bl, castNode, shared_from_this()));
+                        else if(castName == "optionString") casts.push_back(std::make_shared<OptionString>(_bl, castNode, shared_from_this()));
+                        else if(castName == "optionInteger") casts.push_back(std::make_shared<OptionInteger>(_bl, castNode, shared_from_this()));
+                        else if(castName == "stringJsonArrayDecimal") casts.push_back(std::make_shared<StringJsonArrayDecimal>(_bl, castNode, shared_from_this()));
+                        else if(castName == "rpcBinary") casts.push_back(std::make_shared<RpcBinary>(_bl, castNode, shared_from_this()));
+                        else if(castName == "toggle") casts.push_back(std::make_shared<Toggle>(_bl, castNode, shared_from_this()));
+                        else if(castName == "cfm") casts.push_back(std::make_shared<Cfm>(_bl, castNode, shared_from_this()));
+                        else if(castName == "ccrtdnParty") casts.push_back(std::make_shared<CcrtdnParty>(_bl, castNode, shared_from_this()));
+                        else if(castName == "stringReplace") casts.push_back(std::make_shared<StringReplace>(_bl, castNode, shared_from_this()));
+                        else if(castName == "hexStringByteArray") casts.push_back(std::make_shared<HexStringByteArray>(_bl, castNode, shared_from_this()));
+                        else if(castName == "timeStringSeconds") casts.push_back(std::make_shared<TimeStringSeconds>(_bl, castNode, shared_from_this()));
+                        else if(castName == "invert") casts.push_back(std::make_shared<Invert>(_bl, castNode, shared_from_this()));
+                        else if(castName == "round") casts.push_back(std::make_shared<Round>(_bl, castNode, shared_from_this()));
+                        else if(castName == "generic") casts.push_back(std::make_shared<Generic>(_bl, castNode, shared_from_this()));
                         else _bl->out.printWarning("Warning: Unknown cast: " + castName);
                     }
                 }
@@ -155,8 +157,17 @@ void Parameter::parseXml(xml_node<>* node)
                         std::string roleValue(roleNode->value());
                         if(roleName == "role")
                         {
-                            auto roleId = Math::getUnsignedNumber64(roleValue);
-                            if(!roleId != 0) roles.emplace(roleId);
+                            Role role;
+                            for(xml_attribute<>* attr = roleNode->first_attribute(); attr; attr = attr->next_attribute())
+                            {
+                                std::string attributeName(attr->name());
+                                if(attributeName == "direction") role.direction = (RoleDirection)Math::getNumber(std::string(attr->value()));
+                                else if(attributeName == "invert") role.invert = std::string(attr->value()) == "true";
+                                else _bl->out.printWarning("Warning: Unknown attribute for \"role\": " + std::string(attr->name()));
+                            }
+
+                            role.id = Math::getUnsignedNumber64(roleValue);
+                            if(!role.id != 0) roles.emplace(role.id, role);
                         }
                         else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
                     }
@@ -482,17 +493,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
 				bool specialValue = (variable->floatValue == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, double>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->floatValue)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+				if(!specialValue) specialValue = parameter->specialValuesFloatMap.find(variable->floatValue) != parameter->specialValuesFloatMap.end();
 				if(!specialValue)
 				{
 					if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
@@ -509,17 +510,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalInteger* parameter = (LogicalInteger*)logical.get();
 				bool specialValue = (variable->integerValue == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, int32_t>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->integerValue)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
@@ -536,17 +527,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				}
 				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();
 				bool specialValue = (variable->integerValue64 == parameter->defaultValue);
-				if(!specialValue)
-				{
-					for(std::unordered_map<std::string, int64_t>::const_iterator i = parameter->specialValuesStringMap.begin(); i != parameter->specialValuesStringMap.end(); ++i)
-					{
-						if(i->second == variable->integerValue64)
-						{
-							specialValue = true;
-							break;
-						}
-					}
-				}
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;

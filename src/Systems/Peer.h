@@ -37,6 +37,7 @@
 #include "../ScriptEngine/ScriptInfo.h"
 #include "ServiceMessages.h"
 #include "../DeviceDescription/DeviceTranslations.h"
+#include "Role.h"
 
 #include <string>
 #include <unordered_map>
@@ -144,9 +145,11 @@ public:
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
-	void addRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id); }
+    void addRole(const Role& role) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(role.id, role); }
+	void addRole(uint64_t id, RoleDirection direction, bool invert) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id, std::move(Role(id, direction, invert))); }
 	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
-	std::set<uint64_t> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
+    Role getRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); auto rolesIterator = _roles.find(id); if(rolesIterator != _roles.end()) return rolesIterator->second; else return Role(); }
+    std::unordered_map<uint64_t, Role> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
 	std::string getRoleString();
 	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
 
@@ -176,7 +179,7 @@ private:
     std::mutex _categoriesMutex;
 	std::set<uint64_t> _categories;
 	std::mutex _rolesMutex;
-	std::set<uint64_t> _roles;
+	std::unordered_map<uint64_t, Role> _roles;
     std::mutex _roomMutex;
     uint64_t _room = 0;
 };
@@ -365,10 +368,10 @@ public:
     virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
     virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
 	virtual bool variableHasCategories(int32_t channel, const std::string& variableName);
-	virtual bool addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId);
+	virtual bool addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId, RoleDirection direction, bool invert);
 	virtual bool removeRoleFromVariable(int32_t channel, std::string& variableName, uint64_t roleId);
 	virtual void removeRoleFromVariables(uint64_t roleId);
-	virtual std::set<uint64_t> getVariableRoles(int32_t channel, std::string& variableName);
+	virtual std::unordered_map<uint64_t, Role> getVariableRoles(int32_t channel, std::string& variableName);
 	virtual bool variableHasRole(int32_t channel, const std::string& variableName, uint64_t roleId);
 	virtual bool variableHasRoles(int32_t channel, const std::string& variableName);
 
@@ -433,6 +436,8 @@ public:
     virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, PParameterGroup parameterSet, bool checkAcls);
     virtual PVariable getParamsetDescription(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, bool checkAcls);
     virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+    virtual PVariable getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls);
+    virtual PVariable getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
     virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
     virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);

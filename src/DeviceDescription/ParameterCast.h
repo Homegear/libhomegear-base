@@ -85,6 +85,20 @@ public:
 	double offset = 0;
 };
 
+class DecimalStringScale : public ICast
+{
+public:
+    explicit DecimalStringScale(BaseLib::SharedObjects* baseLib);
+    explicit DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    ~DecimalStringScale() override = default;
+
+    void fromPacket(PVariable& value) override;
+    void toPacket(PVariable& value) override;
+
+    //Elements
+    double factor = 1.0;
+};
+
 class IntegerIntegerScale : public ICast
 {
 public:
@@ -428,6 +442,7 @@ typedef std::shared_ptr<CcrtdnParty> PCcrtdnParty;
 typedef std::shared_ptr<Cfm> PCfm;
 typedef std::shared_ptr<DecimalConfigTime> PDecimalConfigTime;
 typedef std::shared_ptr<DecimalIntegerScale> PDecimalIntegerScale;
+typedef std::shared_ptr<DecimalStringScale> PDecimalStringScale;
 typedef std::shared_ptr<IntegerIntegerMap> PIntegerIntegerMap;
 typedef std::shared_ptr<IntegerIntegerScale> PIntegerIntegerScale;
 typedef std::shared_ptr<IntegerOffset> PIntegerOffset;

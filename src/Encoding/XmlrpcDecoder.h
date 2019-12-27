@@ -52,9 +52,9 @@ public:
 	XmlrpcDecoder(BaseLib::SharedObjects* baseLib);
 	virtual ~XmlrpcDecoder() {}
 
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<char>& packet, std::string& methodName);
-	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet);
-	virtual std::shared_ptr<Variable> decodeResponse(std::string& packet);
+	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<char>& packet, std::string& methodName);
+	virtual std::shared_ptr<Variable> decodeResponse(const std::vector<char>& packet);
+	virtual std::shared_ptr<Variable> decodeResponse(const std::string& packet);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 

@@ -49,11 +49,15 @@ void Settings::reset()
 	_runAsGroup = "";
 	_debugLevel = 3;
 	_memoryDebugging = false;
+	_waitForIp4OnInterface = "";
+	_waitForIp6OnInterface = "";
 	_enableUPnP = true;
 	_uPnPIpAddress = "";
 	_ssdpIpAddress = "";
 	_ssdpPort = 1900;
 	_enableMonitoring = true;
+	_enableHgdc = false;
+	_hgdcPort = 2017;
 	_devLog = false;
     _ipcLog = false;
 	_enableCoreDumps = true;
@@ -236,6 +240,16 @@ void Settings::load(std::string filename, std::string executablePath)
 					if(HelperFunctions::toLower(value) == "true") _memoryDebugging = true;
 					_bl->out.printDebug("Debug: memoryDebugging set to " + std::to_string(_memoryDebugging));
 				}
+                else if(name == "waitforip4oninterface")
+                {
+                    _waitForIp4OnInterface = value;
+                    _bl->out.printDebug("Debug: waitForIp4OnInterface set to " + _waitForIp4OnInterface);
+                }
+                else if(name == "waitforip6oninterface")
+                {
+                    _waitForIp6OnInterface = value;
+                    _bl->out.printDebug("Debug: waitForIp6OnInterface set to " + _waitForIp6OnInterface);
+                }
 				else if(name == "enableupnp")
 				{
 					_enableUPnP = BaseLib::HelperFunctions::toLower(value) == "true";
@@ -259,9 +273,20 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "enablemonitoring")
 				{
-					if(HelperFunctions::toLower(value) == "false") _enableMonitoring = false;
+					_enableMonitoring = (HelperFunctions::toLower(value) == "true");
 					_bl->out.printDebug("Debug: enableMonitoring set to " + std::to_string(_enableMonitoring));
 				}
+                else if(name == "enablehgdc")
+                {
+                    _enableHgdc = (HelperFunctions::toLower(value) == "true");
+                    _bl->out.printDebug("Debug: enableHgdc set to " + std::to_string(_enableHgdc));
+                }
+                else if(name == "hgdcport")
+                {
+                    _hgdcPort = Math::getNumber(value);
+                    if(_hgdcPort < 1 || _hgdcPort > 65535) _hgdcPort = 2017;
+                    _bl->out.printDebug("Debug: hgdcPort set to " + std::to_string(_hgdcPort));
+                }
 				else if(name == "devlog")
 				{
 					_devLog = HelperFunctions::toLower(value) == "true";
@@ -786,6 +811,11 @@ void Settings::load(std::string filename, std::string executablePath)
 					_uiPathGroup = value;
 					_bl->out.printDebug("Debug: uiPathGroup set to " + _uiPathGroup);
 				}
+                else if(name == "reloadrolesonstartup")
+                {
+                    _reloadRolesOnStartup = HelperFunctions::toLower(value) == "true";
+                    _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));
+                }
 				else if(name == "firmwarepath")
 				{
 					_firmwarePath = value;

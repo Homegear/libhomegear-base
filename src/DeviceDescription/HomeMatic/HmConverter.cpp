@@ -470,6 +470,15 @@ void HmConverter::convertParameter(std::shared_ptr<HomeMaticParameter> homematic
 				parameter->casts.push_back(cast);
 			}
 		}
+        else if((*i)->type == ParameterConversion::Type::floatUint8StringScale)
+        {
+            if((*i)->factor != 0)
+            {
+                PDecimalStringScale cast(new DecimalStringScale(_bl));
+                cast->factor = (*i)->factor;
+                parameter->casts.push_back(cast);
+            }
+        }
 		else if((*i)->type == ParameterConversion::Type::integerIntegerMap)
 		{
 			PIntegerIntegerMap cast(new IntegerIntegerMap(_bl));

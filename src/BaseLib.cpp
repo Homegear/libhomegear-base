@@ -34,6 +34,8 @@
 namespace BaseLib
 {
 
+sigset_t SharedObjects::defaultSignalMask;
+
 SharedObjects::SharedObjects(bool testMaxThreadCount)
 {
 	threadManager.init(this, testMaxThreadCount);
@@ -43,6 +45,12 @@ SharedObjects::SharedObjects(bool testMaxThreadCount)
 	settings.init(this);
 	out.init(this);
 	globalServiceMessages.init(this);
+
+    if(pthread_sigmask(SIG_BLOCK, nullptr, &defaultSignalMask) < 0)
+    {
+        out.printCritical("SIG_BLOCK error. Exiting Homegear.");
+        exit(1);
+    }
 }
 
 SharedObjects::~SharedObjects()

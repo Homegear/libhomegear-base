@@ -43,12 +43,13 @@ IQueueBase::IQueueBase(SharedObjects* baseLib, uint32_t queueCount)
 
 void IQueueBase::printQueueFullError(BaseLib::Output& out, std::string message)
 {
-	uint32_t droppedEntries = ++_droppedEntries;
+    std::lock_guard<std::mutex> queueFullErrorGuard(_queueFullErrorMutex);
+	_droppedEntries++;
 	if(BaseLib::HelperFunctions::getTime() - _lastQueueFullError > 10000)
 	{
 		_lastQueueFullError = BaseLib::HelperFunctions::getTime();
 		_droppedEntries = 0;
-		out.printError(message + " This message won't repeat for 10 seconds. Dropped outputs since last message: " + std::to_string(droppedEntries));
+		out.printError(message + " This message won't repeat for 10 seconds. Dropped outputs since last message: " + std::to_string(_droppedEntries));
 	}
 }
 

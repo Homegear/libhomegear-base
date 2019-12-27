@@ -144,9 +144,9 @@ public:
 	 * @see _finished
 	 */
 	void setFinished();
-	std::vector<char>& getRawHeader() { return _rawHeader; }
-	std::vector<char>& getContent() { return _content; }
-	uint32_t getContentSize() { return _content.empty() ? 0 : (_finished ? _content.size() - 1 : _content.size()); }
+	const std::vector<char>& getRawHeader() const { return _rawHeader; }
+	const std::vector<char>& getContent() const { return _content; }
+	uint32_t getContentSize() const { return _content.empty() ? 0 : (_finished ? _content.size() - 1 : _content.size()); }
 	Header& getHeader() { return _header; }
 	void reset();
 
@@ -191,8 +191,8 @@ private:
 	std::string _partialChunkSize;
 	size_t _streamPos = 0;
 	size_t _contentStreamPos = 0;
-	std::map <std::string, std::string> _extMimeTypeMap;
-	std::map <int32_t, std::string> _statusCodeMap;
+	static const std::map <std::string, std::string> _extMimeTypeMap;
+	static const std::map <int32_t, std::string> _statusCodeMap;
 	std::string _redirectUrl;
 	std::string _redirectQueryString;
 	int32_t _redirectStatus = -1;

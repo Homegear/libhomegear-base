@@ -127,7 +127,7 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
 		localSock.sin_port = htons(port);
 		localSock.sin_addr.s_addr = inet_addr(bindToMulticast ? "239.255.255.250" : _address.c_str());
 
-		if(bind(serverSocketDescriptor->descriptor, (struct sockaddr*)&localSock, sizeof(localSock)) == -1)
+		if(bind(serverSocketDescriptor->descriptor.load(), (struct sockaddr*)&localSock, sizeof(localSock)) == -1)
 		{
 			_bl->out.printError("Error: Binding to address " + _address + " failed: " + std::string(strerror(errno)));
 			_bl->fileDescriptorManager.close(serverSocketDescriptor);
@@ -354,7 +354,7 @@ void Ssdp::processPacket(Http& http, const std::string& stHeader, std::map<std::
 {
 	try
 	{
-		Http::Header& header = http.getHeader();
+		const Http::Header& header = http.getHeader();
 		if(header.responseCode != 200 || (header.fields.at("st") != stHeader && stHeader != "ssdp:all")) return;
 
 		std::string location = header.fields.at("location");
@@ -379,7 +379,7 @@ void Ssdp::processPacketPassive(Http& http, const std::string& stHeader, std::ma
 {
     try
     {
-        Http::Header& header = http.getHeader();
+        const Http::Header& header = http.getHeader();
         if(header.method != "NOTIFY") return;
         auto headerIterator = header.fields.find("nt");
         if(headerIterator == header.fields.end() || (headerIterator->second != stHeader && stHeader != "ssdp:all")) return;

@@ -82,7 +82,7 @@ public:
     std::unordered_map<std::string, PUiText> texts;
     std::list<PUiVariable> variableInputs;
     std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, std::string> metadata;
+    std::unordered_map<std::string, PVariable> metadata;
     PUiGrid grid;
     std::list<PUiControl> controls;
 

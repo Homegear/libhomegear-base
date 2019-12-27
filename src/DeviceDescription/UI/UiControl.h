@@ -32,8 +32,9 @@
 #define UICONTROL_H_
 
 #include "../../Encoding/RapidXml/rapidxml.hpp"
+#include "../../Variable.h"
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
 using namespace rapidxml;
@@ -69,6 +70,7 @@ public:
     int32_t y = -1;
     int32_t columns = 1;
     int32_t rows = 1;
+    std::unordered_map<std::string, PVariable> metadata;
 
     //Helpers
     std::shared_ptr<HomegearUiElement> uiElement;
