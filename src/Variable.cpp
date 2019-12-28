@@ -308,16 +308,19 @@ bool Variable::operator==(const Variable& rhs)
 		if(arrayValue->size() != rhs.arrayValue->size()) return false;
 		for(std::pair<Array::iterator, Array::iterator> i(arrayValue->begin(), rhs.arrayValue->begin()); i.first != arrayValue->end(); ++i.first, ++i.second)
 		{
-			if(*(i.first) != *(i.second)) return false;
+			if(**(i.first) != **(i.second)) return false;
 		}
+		return true;
 	}
 	if(type == VariableType::tStruct)
 	{
 		if(structValue->size() != rhs.structValue->size()) return false;
-		for(std::pair<Struct::iterator, Struct::iterator> i(structValue->begin(), rhs.structValue->begin()); i.first != structValue->end(); ++i.first, ++i.second)
-		{
-			if(i.first->first != i.first->first || *(i.second->second) != *(i.second->second)) return false;
-		}
+		for(auto& element : *structValue)
+        {
+		    auto rhsIterator = rhs.structValue->find(element.first);
+		    if(rhsIterator == rhs.structValue->end() || *element.second != *rhsIterator->second) return false;
+        }
+		return true;
 	}
 	if(type == VariableType::tBase64) return stringValue == rhs.stringValue;
 	if(type == VariableType::tBinary)

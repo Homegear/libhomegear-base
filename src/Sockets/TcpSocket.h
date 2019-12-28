@@ -232,7 +232,7 @@ public:
 		 * @param hostname The host name or IP address to connect to.
 		 * @param port The port to connect to.
 		 * @param useSsl Set to `true` to enable SSL.
-		 * @param caFile Path to a file containing the PEM-encoded CA certificate used to sign the server certificate.
+		 * @param caFile Path to a file containing the PEM-encoded CA certificate used to sign the server certificate. If empty, the system's certificate store is used.
 		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, std::string caFile, bool verifyCertificate);
@@ -245,7 +245,7 @@ public:
 		 * @param port The port to connect to.
 		 * @param useSsl Set to `true` to enable SSL.
 		 * @param verifyCertificate Enable certificate verification. Only set to `false` for testing.
-		 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
+		 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate. If empty, the system's certificate store is used.
 		 */
 		TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, bool useSsl, bool verifyCertificate, std::string caData);
 

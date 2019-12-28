@@ -55,7 +55,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
             else _bl->out.printWarning("Warning: Unknown value for homegearUiElement\\type: " + value);
         }
         else if(nodeName == "control") control = value;
-        else if(nodeName == "role") role = Math::getUnsignedNumber64(value, true);
+        else if(nodeName == "role") role = Math::getUnsignedNumber64(value);
         else if(nodeName == "icons")
         {
             for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
@@ -102,7 +102,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
             for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
             {
                 std::string metadataNodeName(metadataNode->name());
-                metadata.emplace(metadataNodeName, std::string(metadataNode->value()));
+                metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"homegearUiElement\": " + nodeName);
@@ -376,6 +376,13 @@ PVariable HomegearUiElement::getElementInfo()
 
             controlElement->structValue->emplace("cell", cellElement);
 
+            auto metadataElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+            for(auto& entry : control->metadata)
+            {
+                metadataElement->structValue->emplace(entry.first, entry.second);
+            }
+            controlElement->structValue->emplace("metadata", metadataElement);
+
             controlElements->arrayValue->emplace_back(controlElement);
         }
 
@@ -400,7 +407,7 @@ PVariable HomegearUiElement::getElementInfo()
     auto metadataElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
     for(auto& entry : metadata)
     {
-        metadataElement->structValue->emplace(entry.first, std::make_shared<BaseLib::Variable>(entry.second));
+        metadataElement->structValue->emplace(entry.first, entry.second);
     }
     uiElement->structValue->emplace("metadata", metadataElement);
 

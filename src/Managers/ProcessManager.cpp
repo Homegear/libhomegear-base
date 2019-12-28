@@ -30,6 +30,8 @@
 
 #include "ProcessManager.h"
 #include "../HelperFunctions/HelperFunctions.h"
+#include "../HelperFunctions/Io.h"
+#include "../BaseLib.h"
 
 #include <cstring>
 #include <array>
@@ -40,11 +42,13 @@
 #include <atomic>
 #include <thread>
 #include <iostream>
+#include <condition_variable>
 
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/stat.h>
 
 namespace BaseLib
 {
@@ -58,6 +62,7 @@ public:
     static std::thread _signalHandlerThread;
 
     static std::mutex _lastExitStatusMutex;
+    static std::condition_variable _lastExitStatusConditionVariable;
     struct ExitInfo
     {
         int64_t time = 0;
@@ -75,20 +80,26 @@ public:
         int exitCode = -1;
         sigemptyset(&set);
         sigaddset(&set, SIGCHLD);
+        pid_t pid = -1;
+        int status = 0;
 
         while(!_stopSignalHandlerThread)
         {
             try
             {
-                siginfo_t info{};
-                signalNumber = sigtimedwait(&set, &info, &timeout);
-                if(signalNumber != SIGCHLD) continue;
+                pid = waitpid(-1, &status, WNOHANG);
+                if(pid == -1 || pid == 0) //Possible errors: ECHILD, EINTR and EINVAL => No error or not possible => Don't output error message.
+                {
+                    siginfo_t info{};
+                    signalNumber = sigtimedwait(&set, &info, &timeout);
+                    if(signalNumber != SIGCHLD) continue;
+                    pid = info.si_pid;
 
-                auto pid = info.si_pid;
-                int status = 0;
-                auto result = waitpid(pid, &status, 0);
-                if(result == -1) std::cerr << "Error in waitpid for process " << pid << ": " << strerror(errno) << std::endl;
-                exitCode = (result == -1 ? -1 : WEXITSTATUS(status));
+                    auto result = waitpid(pid, &status, 0);
+                    if(result == -1) continue; //Signal was already handled
+                }
+
+                exitCode = WEXITSTATUS(status);
                 bool coreDumped = false;
                 int childSignalNumber = -1;
                 if(WIFSIGNALED(status))
@@ -98,7 +109,7 @@ public:
                 }
 
                 {
-                    std::lock_guard<std::mutex> lastExistStatusGuard(_lastExitStatusMutex);
+                    std::lock_guard<std::mutex> lastExitStatusGuard(_lastExitStatusMutex);
                     auto time = HelperFunctions::getTime();
                     _lastExitStatus.erase(pid);
                     ExitInfo exitInfo{};
@@ -115,6 +126,8 @@ public:
                         _lastExitStatus.erase(entry);
                     }
                 }
+
+                _lastExitStatusConditionVariable.notify_all();
 
                 {
                     std::lock_guard<std::mutex> callbackHandlersGuard(_callbackHandlersMutex);
@@ -136,6 +149,7 @@ int32_t ProcessManager::OpaquePointer::_currentId = 0;
 std::mutex ProcessManager::OpaquePointer::_callbackHandlersMutex;
 std::unordered_map<int32_t, std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)>> ProcessManager::OpaquePointer::_callbackHandlers;
 std::mutex ProcessManager::OpaquePointer::_lastExitStatusMutex;
+std::condition_variable ProcessManager::OpaquePointer::_lastExitStatusConditionVariable;
 std::unordered_map<pid_t, ProcessManager::OpaquePointer::ExitInfo> ProcessManager::OpaquePointer::_lastExitStatus;
 std::atomic_bool ProcessManager::OpaquePointer::_stopSignalHandlerThread{true};
 std::thread ProcessManager::OpaquePointer::_signalHandlerThread;
@@ -146,9 +160,9 @@ void ProcessManager::startSignalHandler()
 
     sigset_t set{};
     sigemptyset(&set);
-    sigprocmask(SIG_BLOCK, nullptr, &set);
+    pthread_sigmask(SIG_BLOCK, nullptr, &set);
     sigaddset(&set, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &set, nullptr);
+    pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
     OpaquePointer::_signalHandlerThread = std::thread(&OpaquePointer::signalHandler);
 }
@@ -159,9 +173,9 @@ void ProcessManager::startSignalHandler(BaseLib::ThreadManager& threadManager)
 
     sigset_t set{};
     sigemptyset(&set);
-    sigprocmask(SIG_BLOCK, nullptr, &set);
+    pthread_sigmask(SIG_BLOCK, nullptr, &set);
     sigaddset(&set, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &set, nullptr);
+    pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
     threadManager.start(OpaquePointer::_signalHandlerThread, true, &ProcessManager::OpaquePointer::signalHandler);
 }
@@ -170,19 +184,21 @@ void ProcessManager::stopSignalHandler()
 {
     OpaquePointer::_stopSignalHandlerThread = true;
     if(OpaquePointer::_signalHandlerThread.joinable()) OpaquePointer::_signalHandlerThread.join();
+    OpaquePointer::_lastExitStatusConditionVariable.notify_all();
 }
 
 void ProcessManager::stopSignalHandler(BaseLib::ThreadManager& threadManager)
 {
     OpaquePointer::_stopSignalHandlerThread = true;
     threadManager.join(OpaquePointer::_signalHandlerThread);
+    OpaquePointer::_lastExitStatusConditionVariable.notify_all();
 }
 
 int32_t ProcessManager::registerCallbackHandler(std::function<void(pid_t pid, int exitCode, int signal, bool coreDumped)> callbackHandler)
 {
     std::lock_guard<std::mutex> callbackHandlersGuard(OpaquePointer::_callbackHandlersMutex);
     int32_t currentId = -1;
-    while(currentId == -1) currentId = OpaquePointer::_currentId++;
+    while(currentId == -1 || OpaquePointer::_callbackHandlers.find(currentId) != OpaquePointer::_callbackHandlers.end()) currentId = OpaquePointer::_currentId++;
     OpaquePointer::_callbackHandlers[currentId].swap(callbackHandler);
     return currentId;
 }
@@ -235,11 +251,35 @@ std::vector<std::string> ProcessManager::splitArguments(const std::string& argum
     return argumentVector;
 }
 
+std::string ProcessManager::findProgramInPath(const std::string& relativePath)
+{
+    if(relativePath.empty()) return "";
+    if(Io::fileExists(relativePath)) return relativePath;
+
+    if(relativePath.front() != '/')
+    {
+        auto path = HelperFunctions::splitAll(Environment::get("PATH"), ':');
+        for(auto& element : path)
+        {
+            HelperFunctions::trim(element);
+            if(element.empty()) continue;
+
+            auto absolutePath = element.append(element.back() == '/' ? "" : "/").append(relativePath);
+
+            if(Io::fileExists(absolutePath)) return absolutePath;
+        }
+    }
+
+    return "";
+}
+
 pid_t ProcessManager::system(const std::string& command, const std::vector<std::string>& arguments, int maxFd)
 {
     pid_t pid;
 
     if(command.empty() || command.back() == '/') return -1;
+    std::string absoluteFilename = findProgramInPath(command);
+    if(absoluteFilename.empty()) return -1;
 
     pid = fork();
 
@@ -247,25 +287,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
     else if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         // Close all non standard descriptors
         for(int32_t i = 3; i < maxFd; ++i)
@@ -274,7 +296,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
         }
 
         setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+        std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
         char* argv[arguments.size() + 2];
         argv[0] = (char*) programName.c_str(); //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
@@ -283,7 +305,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
             argv[i + 1] = (char*)arguments[i].c_str();
         }
         argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1) _exit(1);
+        if(execv(absoluteFilename.c_str(), argv) == -1) _exit(1);
     }
 
     //Parent process
@@ -300,6 +322,8 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     stdErr = -1;
 
     if(command.empty() || command.back() == '/') return -1;
+    std::string absoluteFilename = findProgramInPath(command);
+    if(absoluteFilename.empty()) return -1;
 
     int pipeIn[2];
     int pipeOut[2];
@@ -339,25 +363,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
     else if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         if(dup2(pipeIn[0], STDIN_FILENO) == -1) _exit(1);
 
@@ -377,7 +383,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
         for(int32_t i = 3; i < maxFd; ++i) close(i);
 
         setsid();
-        std::string programName = (command.find('/') == std::string::npos) ? command : command.substr(command.find_last_of('/') + 1);
+        std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
         char* argv[arguments.size() + 2];
         argv[0] = (char*)programName.c_str(); //Dirty, but as argv is not modified, there are no problems. Since C++11 the data is null terminated.
@@ -386,7 +392,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
             argv[i + 1] = (char*)arguments[i].c_str();
         }
         argv[arguments.size() + 1] = nullptr;
-        if(execv(command.c_str(), argv) == -1) _exit(1);
+        if(execv(absoluteFilename.c_str(), argv) == -1) _exit(1);
     }
 
     //Parent process
@@ -425,20 +431,68 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
     }
     fclose(pipe);
 
+    if(std::this_thread::get_id() == OpaquePointer::_signalHandlerThread.get_id())
+    {
+        //Prevent deadlock when exec is called from signalHandlerThread.
+        throw ProcessException("Error: exec called from signal handler thread. The process was executed, but can't return exit code.");
+    }
+
     while(!OpaquePointer::_stopSignalHandlerThread)
     {
+        std::unique_lock<std::mutex> lock(OpaquePointer::_lastExitStatusMutex);
+        OpaquePointer::_lastExitStatusConditionVariable.wait_for(lock, std::chrono::milliseconds(1000), [&] { return OpaquePointer::_stopSignalHandlerThread || OpaquePointer::_lastExitStatus.find(pid) != OpaquePointer::_lastExitStatus.end(); });
+
+        auto entry = OpaquePointer::_lastExitStatus.find(pid);
+        if(entry != OpaquePointer::_lastExitStatus.end())
         {
-            std::lock_guard<std::mutex> lastExistStatusGuard(OpaquePointer::_lastExitStatusMutex);
-            auto entry = OpaquePointer::_lastExitStatus.find(pid);
-            if(entry != OpaquePointer::_lastExitStatus.end())
-            {
-                return entry->second.exitCode;
-            }
+            return entry->second.exitCode;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     return -1;
+}
+
+bool ProcessManager::exec(const std::string& command, int maxFd)
+{
+    pid_t pid, sid;
+    pid = fork();
+    if(pid == -1)
+    {
+        return false;
+    }
+    if(pid > 0)
+    {
+        //Parent
+        return true;
+    }
+
+    //Child
+    pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
+
+    // Close all non standard descriptors.
+    for(int32_t i = 3; i < maxFd; ++i) close(i);
+
+    //Start new session without controlling terminals
+    sid = setsid();
+    if(sid == -1)
+    {
+        exit(1);
+    }
+
+    pid = fork();
+    if(pid == -1)
+    {
+        exit(1);
+    }
+    if(pid > 0)
+    {
+        //Parent
+        exit(0);
+    }
+
+    execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
+
+    exit(0);
 }
 
 FILE* ProcessManager::popen2(const std::string& command, const std::string& type, int maxFd, pid_t& pid)
@@ -458,25 +512,7 @@ FILE* ProcessManager::popen2(const std::string& command, const std::string& type
     if(pid == 0)
     {
         //Child process
-
-        sigset_t set{};
-        sigemptyset(&set);
-        sigaddset(&set, SIGCHLD);
-        sigaddset(&set, SIGHUP);
-        sigaddset(&set, SIGTERM);
-        sigaddset(&set, SIGINT);
-        sigaddset(&set, SIGABRT);
-        sigaddset(&set, SIGSEGV);
-        sigaddset(&set, SIGQUIT);
-        sigaddset(&set, SIGILL);
-        sigaddset(&set, SIGFPE);
-        sigaddset(&set, SIGALRM);
-        sigaddset(&set, SIGUSR1);
-        sigaddset(&set, SIGUSR2);
-        sigaddset(&set, SIGTSTP);
-        sigaddset(&set, SIGTTIN);
-        sigaddset(&set, SIGTTOU);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_SETMASK, &SharedObjects::defaultSignalMask, nullptr);
 
         if (type == "r")
         {

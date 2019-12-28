@@ -35,6 +35,7 @@
 #include "Logical.h"
 #include "Physical.h"
 #include "../Encoding/RapidXml/rapidxml.hpp"
+#include "../Systems/Role.h"
 #include <string>
 #include <set>
 
@@ -56,7 +57,7 @@ typedef std::shared_ptr<ParameterGroup> PParameterGroup;
 typedef std::shared_ptr<Parameter> PParameter;
 typedef std::map<std::string, PParameter> Parameters;
 typedef std::string ParameterRole;
-typedef std::set<uint64_t> ParameterRoles;
+typedef std::unordered_map<uint64_t, Role> ParameterRoles;
 
 class Parameter : public std::enable_shared_from_this<Parameter>
 {
@@ -83,8 +84,8 @@ public:
 		int32_t conditionValue = -1;
 		int32_t delay = -1;
 
-		Packet() {}
-		virtual ~Packet() {}
+		Packet() = default;
+		virtual ~Packet() = default;
 
 		bool checkCondition(int32_t value);
 	};

@@ -96,6 +96,45 @@ void DecimalIntegerScale::toPacket(PVariable& value)
 	value->floatValue = 0;
 }
 
+DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
+{
+}
+
+DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+{
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        _bl->out.printWarning("Warning: Unknown attribute for \"decimalStringScale\": " + std::string(attr->name()));
+    }
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string name(subNode->name());
+        std::string value(subNode->value());
+        if(name == "factor")
+        {
+            factor = Math::getDouble(value);
+            if(factor == 0) factor = 1;
+        }
+        else _bl->out.printWarning("Warning: Unknown node in \"decimalStringScale\": " + name);
+    }
+}
+
+void DecimalStringScale::fromPacket(PVariable& value)
+{
+    if(!value) return;
+    value->type = VariableType::tFloat;
+    value->floatValue = (Math::getDouble(value->stringValue) / factor);
+    value->stringValue.clear();
+}
+
+void DecimalStringScale::toPacket(PVariable& value)
+{
+    if(!value) return;
+    value->stringValue = std::to_string(std::lround(value->floatValue * factor));
+    value->type = VariableType::tString;
+    value->floatValue = 0;
+}
+
 IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }

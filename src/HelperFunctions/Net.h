@@ -58,9 +58,12 @@ class Net
 public:
 	struct RouteInfo
 	{
-        uint32_t destinationAddress;
-        uint32_t sourceAddress;
-        uint32_t gateway;
+	    bool ipv6 = false;
+        std::array<uint8_t, 16> destinationAddress{};
+        uint8_t sourceNetmask = 0;
+        std::array<uint8_t, 16> sourceAddress{};
+        uint8_t destinationNetmask = 0;
+        std::array<uint8_t, 16> gateway{};
         std::string interfaceName;
 	};
 

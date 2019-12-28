@@ -33,6 +33,7 @@
 
 #include <memory>
 #include <mutex>
+#include <atomic>
 
 #include <gnutls/gnutls.h>
 
@@ -44,7 +45,7 @@ class SharedObjects;
 struct FileDescriptor
 {
 	int32_t id = -1;
-	int descriptor = -1;
+	std::atomic_int descriptor{-1};
 	gnutls_session_t tlsSession = nullptr;
 };
 

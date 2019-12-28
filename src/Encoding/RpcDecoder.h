@@ -54,26 +54,26 @@ public:
 	RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteger32 = true);
 	virtual ~RpcDecoder() {}
 
-	virtual std::shared_ptr<RpcHeader> decodeHeader(std::vector<char>& packet);
-	virtual std::shared_ptr<RpcHeader> decodeHeader(std::vector<uint8_t>& packet);
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<char>& packet, std::string& methodName);
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(std::vector<uint8_t>& packet, std::string& methodName);
-	virtual std::shared_ptr<Variable> decodeResponse(std::vector<char>& packet, uint32_t offset = 0);
-	virtual std::shared_ptr<Variable> decodeResponse(std::vector<uint8_t>& packet, uint32_t offset = 0);
+	virtual std::shared_ptr<RpcHeader> decodeHeader(const std::vector<char>& packet);
+	virtual std::shared_ptr<RpcHeader> decodeHeader(const std::vector<uint8_t>& packet);
+	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<char>& packet, std::string& methodName);
+	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<uint8_t>& packet, std::string& methodName);
+	virtual std::shared_ptr<Variable> decodeResponse(const std::vector<char>& packet, uint32_t offset = 0);
+	virtual std::shared_ptr<Variable> decodeResponse(const std::vector<uint8_t>& packet, uint32_t offset = 0);
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;
 	std::unique_ptr<BinaryDecoder> _decoder;
 	bool _setInteger32 = true;
 
-	std::shared_ptr<Variable> decodeParameter(std::vector<char>& packet, uint32_t& position);
-	std::shared_ptr<Variable> decodeParameter(std::vector<uint8_t>& packet, uint32_t& position);
-	VariableType decodeType(std::vector<char>& packet, uint32_t& position);
-	VariableType decodeType(std::vector<uint8_t>& packet, uint32_t& position);
-	std::shared_ptr<Array> decodeArray(std::vector<char>& packet, uint32_t& position);
-	std::shared_ptr<Array> decodeArray(std::vector<uint8_t>& packet, uint32_t& position);
-	std::shared_ptr<Struct> decodeStruct(std::vector<char>& packet, uint32_t& position);
-	std::shared_ptr<Struct> decodeStruct(std::vector<uint8_t>& packet, uint32_t& position);
+	std::shared_ptr<Variable> decodeParameter(const std::vector<char>& packet, uint32_t& position);
+	std::shared_ptr<Variable> decodeParameter(const std::vector<uint8_t>& packet, uint32_t& position);
+	VariableType decodeType(const std::vector<char>& packet, uint32_t& position);
+	VariableType decodeType(const std::vector<uint8_t>& packet, uint32_t& position);
+	std::shared_ptr<Array> decodeArray(const std::vector<char>& packet, uint32_t& position);
+	std::shared_ptr<Array> decodeArray(const std::vector<uint8_t>& packet, uint32_t& position);
+	std::shared_ptr<Struct> decodeStruct(const std::vector<char>& packet, uint32_t& position);
+	std::shared_ptr<Struct> decodeStruct(const std::vector<uint8_t>& packet, uint32_t& position);
 };
 }
 }

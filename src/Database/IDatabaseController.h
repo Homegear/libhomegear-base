@@ -47,7 +47,7 @@ struct SystemVariable
 	std::string name;
 	uint64_t room = 0;
 	std::set<uint64_t> categories;
-    std::set<uint64_t> roles;
+    std::unordered_map<uint64_t, Role> roles;
 	int32_t flags = 0;
 	BaseLib::PVariable value;
 };
@@ -115,6 +115,7 @@ public:
 	// {{{ Rooms
 	virtual BaseLib::PVariable createRoom(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteRoom(uint64_t roomId) = 0;
+    virtual std::string getRoomName(PRpcClientInfo clientInfo, uint64_t roomId) = 0;
     virtual BaseLib::PVariable getRoomMetadata(uint64_t roomId) = 0;
 	virtual BaseLib::PVariable getRooms(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual bool roomExists(uint64_t roomId) = 0;
@@ -133,8 +134,10 @@ public:
 	// }}}
 
 	// {{{ Roles
+	virtual void createDefaultRoles() = 0;
 	virtual BaseLib::PVariable createRole(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
 	virtual BaseLib::PVariable deleteRole(uint64_t roleId) = 0;
+	virtual void deleteAllRoles() = 0;
 	virtual BaseLib::PVariable getRoles(PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
 	virtual BaseLib::PVariable getRoleMetadata(uint64_t roleId) = 0;
 	virtual bool roleExists(uint64_t roleId) = 0;

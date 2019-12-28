@@ -528,7 +528,8 @@ ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMa
 		if(attributeName == "type")
 		{
 			if(attributeValue == "float_integer_scale") type = Type::Enum::floatIntegerScale;
-			else if(attributeValue == "integer_integer_scale") type = Type::Enum::integerIntegerScale;
+            else if(attributeValue == "integer_integer_scale") type = Type::Enum::integerIntegerScale;
+			else if(attributeValue == "float_uint8_string_scale") type = Type::Enum::floatUint8StringScale;
 			else if(attributeValue == "integer_integer_map") type = Type::Enum::integerIntegerMap;
 			else if(attributeValue == "boolean_integer") type = Type::Enum::booleanInteger;
 			else if(attributeValue == "boolean_string") type = Type::Enum::booleanString;

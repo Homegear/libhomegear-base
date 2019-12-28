@@ -52,11 +52,15 @@ public:
 	std::string runAsGroup() { return _runAsGroup; }
 	int32_t debugLevel() { return _debugLevel; }
 	bool memoryDebugging() { return _memoryDebugging; }
+    std::string waitForIp4OnInterface() { return _waitForIp4OnInterface; }
+    std::string waitForIp6OnInterface() { return _waitForIp6OnInterface; }
 	bool enableUPnP() { return _enableUPnP; }
 	std::string uPnPIpAddress() { return _uPnPIpAddress; }
 	std::string ssdpIpAddress() { return _ssdpIpAddress; }
 	int32_t ssdpPort() { return _ssdpPort; }
 	bool enableMonitoring() { return _enableMonitoring; };
+    bool enableHgdc() { return _enableHgdc; };
+    int32_t hgdcPort() { return _hgdcPort; }
 	bool devLog() { return _devLog; }
     bool ipcLog() { return _ipcLog; }
 	bool enableCoreDumps() { return _enableCoreDumps; };
@@ -148,6 +152,7 @@ public:
 	uint32_t uiPathPermissions() { return _uiPathPermissions; }
 	std::string uiPathUser() { return _uiPathUser; }
 	std::string uiPathGroup() { return _uiPathGroup; }
+	bool reloadRolesOnStartup() { return _reloadRolesOnStartup; }
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
@@ -177,11 +182,15 @@ private:
 	std::string _runAsGroup;
 	int32_t _debugLevel = 3;
 	bool _memoryDebugging = false;
+	std::string _waitForIp4OnInterface;
+    std::string _waitForIp6OnInterface;
 	bool _enableUPnP = true;
 	std::string _uPnPIpAddress;
 	std::string _ssdpIpAddress;
 	int32_t _ssdpPort = 1900;
 	bool _enableMonitoring = true;
+	bool _enableHgdc = false;
+	int32_t _hgdcPort = 2017;
 	bool _devLog = false;
     bool _ipcLog = false;
 	bool _enableCoreDumps = true;
@@ -272,6 +281,7 @@ private:
 	uint32_t _uiPathPermissions = 504;
 	std::string _uiPathUser;
 	std::string _uiPathGroup;
+	bool _reloadRolesOnStartup = true;
 	std::string _firmwarePath;
 	std::string _tempPath;
 	std::string _lockFilePath;

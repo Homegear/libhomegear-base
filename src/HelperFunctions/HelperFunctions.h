@@ -31,6 +31,8 @@
 #ifndef HELPERFUNCTIONS_H_
 #define HELPERFUNCTIONS_H_
 
+#include "../Variable.h"
+
 #include <algorithm>
 #include <ctime>
 #include <map>
@@ -348,6 +350,8 @@ public:
 	 */
 	static std::string stripNonPrintable(const std::string& s);
 
+	static PVariable xml2variable(xml_node<>* node);
+
 	/**
 	 * Returns the endianess of the system.
 	 *
@@ -522,7 +526,7 @@ public:
 	 * @param nibble The nibble to convert.
 	 * @return Returns the hex character of the nibble.
 	 */
-	char getHexChar(int32_t nibble);
+    static char getHexChar(int32_t nibble);
 
 	/**
 	 * Converts a hex string to a char vector.
@@ -530,7 +534,7 @@ public:
 	 * @param hexString The string to convert.
 	 * @return Returns a vector of type char.
 	 */
-	std::vector<char> getBinary(const std::string& hexString);
+    static std::vector<char> getBinary(const std::string& hexString);
 
 	/**
 	 * Converts a hex string to an unsigned char vector.
@@ -539,7 +543,7 @@ public:
 	 * @param hexString The string to convert.
 	 * @return Returns a vector of type unsigned char.
 	 */
-	std::vector<uint8_t> getUBinary(const std::string& hexString);
+	static std::vector<uint8_t> getUBinary(const std::string& hexString);
 
 	/**
 	 * Converts a hex string to an unsigned char vector.
@@ -550,7 +554,7 @@ public:
 	 * @param binary The unsigned char vector to append the converted bytes to. Already existing elements will not be cleared.
 	 * @return Returns a reference to "binary".
 	 */
-	std::vector<uint8_t>& getUBinary(const std::string& hexString, uint32_t size, std::vector<uint8_t>& binary);
+    static std::vector<uint8_t>& getUBinary(const std::string& hexString, uint32_t size, std::vector<uint8_t>& binary);
 
 	/**
 	 * Converts an unsigned char vector filled with ASCII characters to an unsigned char vector.
@@ -559,7 +563,7 @@ public:
 	 * @param hexData The vector with ASCII characters to convert.
 	 * @return Returns a vector of type unsigned char.
 	 */
-	std::vector<uint8_t> getUBinary(const std::vector<uint8_t>& hexData);
+    static std::vector<uint8_t> getUBinary(const std::vector<uint8_t>& hexData);
 
 	/**
 	 * Converts a hex string to a binary array of type string.
@@ -567,7 +571,7 @@ public:
 	 * @param hexString The hex string to convert.
 	 * @return Returns a string containing the binary data.
 	 */
-	std::string getBinaryString(const std::string& hexString);
+    static std::string getBinaryString(const std::string& hexString);
 
 	/**
 	 * Gets the UID of a user.

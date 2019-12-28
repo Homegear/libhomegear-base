@@ -45,7 +45,7 @@ BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi) : Binar
 	if(_ansi) _ansiConverter.reset(new Ansi(true, false));
 }
 
-int32_t BinaryDecoder::decodeInteger(std::vector<char>& encodedData, uint32_t& position)
+int32_t BinaryDecoder::decodeInteger(const std::vector<char>& encodedData, uint32_t& position)
 {
 	int32_t integer = 0;
 	try
@@ -73,7 +73,7 @@ int32_t BinaryDecoder::decodeInteger(std::vector<char>& encodedData, uint32_t& p
 	return integer;
 }
 
-int32_t BinaryDecoder::decodeInteger(std::vector<uint8_t>& encodedData, uint32_t& position)
+int32_t BinaryDecoder::decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	int32_t integer = 0;
 	try
@@ -101,7 +101,7 @@ int32_t BinaryDecoder::decodeInteger(std::vector<uint8_t>& encodedData, uint32_t
 	return integer;
 }
 
-int64_t BinaryDecoder::decodeInteger64(std::vector<char>& encodedData, uint32_t& position)
+int64_t BinaryDecoder::decodeInteger64(const std::vector<char>& encodedData, uint32_t& position)
 {
 	int64_t integer = 0;
 	try
@@ -121,7 +121,7 @@ int64_t BinaryDecoder::decodeInteger64(std::vector<char>& encodedData, uint32_t&
 	return integer;
 }
 
-int64_t BinaryDecoder::decodeInteger64(std::vector<uint8_t>& encodedData, uint32_t& position)
+int64_t BinaryDecoder::decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	int64_t integer = 0;
 	try
@@ -141,7 +141,7 @@ int64_t BinaryDecoder::decodeInteger64(std::vector<uint8_t>& encodedData, uint32
 	return integer;
 }
 
-uint8_t BinaryDecoder::decodeByte(std::vector<char>& encodedData, uint32_t& position)
+uint8_t BinaryDecoder::decodeByte(const std::vector<char>& encodedData, uint32_t& position)
 {
 	uint8_t byte = 0;
 	try
@@ -161,7 +161,7 @@ uint8_t BinaryDecoder::decodeByte(std::vector<char>& encodedData, uint32_t& posi
 	return byte;
 }
 
-uint8_t BinaryDecoder::decodeByte(std::vector<uint8_t>& encodedData, uint32_t& position)
+uint8_t BinaryDecoder::decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	uint8_t byte = 0;
 	try
@@ -181,7 +181,7 @@ uint8_t BinaryDecoder::decodeByte(std::vector<uint8_t>& encodedData, uint32_t& p
 	return byte;
 }
 
-std::string BinaryDecoder::decodeString(std::vector<char>& encodedData, uint32_t& position)
+std::string BinaryDecoder::decodeString(const std::vector<char>& encodedData, uint32_t& position)
 {
 	try
 	{
@@ -211,7 +211,7 @@ std::string BinaryDecoder::decodeString(std::vector<char>& encodedData, uint32_t
     return "";
 }
 
-std::string BinaryDecoder::decodeString(std::vector<uint8_t>& encodedData, uint32_t& position)
+std::string BinaryDecoder::decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	try
 	{
@@ -241,7 +241,7 @@ std::string BinaryDecoder::decodeString(std::vector<uint8_t>& encodedData, uint3
     return "";
 }
 
-std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<char>& encodedData, uint32_t& position)
+std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<char>& encodedData, uint32_t& position)
 {
 	std::vector<uint8_t> data;
 	try
@@ -263,7 +263,7 @@ std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<char>& encodedData,
     return data;
 }
 
-std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<uint8_t>& encodedData, uint32_t& position)
+std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	std::vector<uint8_t> data;
 	try
@@ -285,7 +285,7 @@ std::vector<uint8_t> BinaryDecoder::decodeBinary(std::vector<uint8_t>& encodedDa
     return data;
 }
 
-double BinaryDecoder::decodeFloat(std::vector<char>& encodedData, uint32_t& position)
+double BinaryDecoder::decodeFloat(const std::vector<char>& encodedData, uint32_t& position)
 {
 	try
 	{
@@ -318,7 +318,7 @@ double BinaryDecoder::decodeFloat(std::vector<char>& encodedData, uint32_t& posi
     return 0;
 }
 
-double BinaryDecoder::decodeFloat(std::vector<uint8_t>& encodedData, uint32_t& position)
+double BinaryDecoder::decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	try
 	{
@@ -352,7 +352,7 @@ double BinaryDecoder::decodeFloat(std::vector<uint8_t>& encodedData, uint32_t& p
     return 0;
 }
 
-bool BinaryDecoder::decodeBoolean(std::vector<char>& encodedData, uint32_t& position)
+bool BinaryDecoder::decodeBoolean(const std::vector<char>& encodedData, uint32_t& position)
 {
 	try
 	{
@@ -372,7 +372,7 @@ bool BinaryDecoder::decodeBoolean(std::vector<char>& encodedData, uint32_t& posi
     return false;
 }
 
-bool BinaryDecoder::decodeBoolean(std::vector<uint8_t>& encodedData, uint32_t& position)
+bool BinaryDecoder::decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	try
 	{

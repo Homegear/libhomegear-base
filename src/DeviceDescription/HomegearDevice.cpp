@@ -1297,6 +1297,24 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 						}
 					}
 
+                    {
+                        PDecimalStringScale decimalStringScale;
+                        decimalStringScale = std::dynamic_pointer_cast<DecimalStringScale>(*i);
+                        if(decimalStringScale)
+                        {
+                            xml_node<>* castNode = doc->allocate_node(node_element, "decimalStringScale");
+                            node->append_node(castNode);
+                            if(decimalStringScale->factor != 0)
+                            {
+                                tempString = Math::toString(decimalStringScale->factor, 6);
+                                xml_node<>* subnode = doc->allocate_node(node_element, "factor", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                                castNode->append_node(subnode);
+                            }
+
+                            continue;
+                        }
+                    }
+
 					{
 						PIntegerIntegerScale integerIntegerScale;
 						integerIntegerScale = std::dynamic_pointer_cast<IntegerIntegerScale>(*i);
@@ -1774,9 +1792,22 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 				propertiesNode->append_node(node);
 				for(auto& role : parameter->roles)
 				{
-					tempString = std::to_string(role);
+					tempString = std::to_string(role.first);
 					xml_node<>* roleNode = doc->allocate_node(node_element, "role", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 					node->append_node(roleNode);
+
+					if(role.second.direction != RoleDirection::both)
+                    {
+                        tempString = std::to_string((int32_t)role.second.direction);
+                        attr = doc->allocate_attribute("direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+                    }
+                    else if(role.second.invert)
+                    {
+                        tempString = "true";
+                        attr = doc->allocate_attribute("invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+                    }
 				}
 			}
 		// }}}

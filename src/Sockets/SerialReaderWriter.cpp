@@ -171,7 +171,7 @@ void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, Ch
 	_termios.c_cc[VTIME] = 0;
 	cfsetispeed(&_termios, baudrate);
 	cfsetospeed(&_termios, baudrate);
-	if(tcflush(_fileDescriptor->descriptor, TCIFLUSH) == -1) throw SerialReaderWriterException("Couldn't flush device " + _device);
+	if(tcflush(_fileDescriptor->descriptor, TCIOFLUSH) == -1) throw SerialReaderWriterException("Couldn't flush device " + _device);
 	if(tcsetattr(_fileDescriptor->descriptor, TCSANOW, &_termios) == -1) throw SerialReaderWriterException("Couldn't set device settings for device " + _device);
 
 	int flags = fcntl(_fileDescriptor->descriptor, F_GETFL);
@@ -250,7 +250,7 @@ int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 		FD_ZERO(&readFileDescriptor);
 		FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
 		//Timeout needs to be set every time, so don't put it outside of the while loop
-		timeval timeval;
+		timeval timeval{};
 		timeval.tv_sec = timeout / 1000000;
 		timeval.tv_usec = timeout % 1000000;
 		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);
@@ -348,6 +348,7 @@ void SerialReaderWriter::writeLine(std::string& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -376,6 +377,7 @@ void SerialReaderWriter::writeData(const std::vector<char>& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -404,6 +406,7 @@ void SerialReaderWriter::writeData(const std::vector<uint8_t>& data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {
@@ -431,6 +434,7 @@ void SerialReaderWriter::writeChar(char data)
             }
             bytesWritten += i;
         }
+        tcdrain(_fileDescriptor->descriptor);
     }
     catch(const std::exception& ex)
     {

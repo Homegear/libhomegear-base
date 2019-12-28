@@ -33,7 +33,6 @@
 #include "../Security/SecureVector.h"
 #include <gnutls/gnutls.h>
 
-
 namespace BaseLib
 {
 TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
@@ -537,7 +536,7 @@ std::string TcpSocket::getIpAddress()
                     socketDescriptor = _socketDescriptor->descriptor;
                 }
 
-				timeval timeout;
+				timeval timeout{};
 				timeout.tv_sec = 0;
 				timeout.tv_usec = 100000;
 				fd_set readFileDescriptor;
@@ -740,7 +739,7 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 			if(fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw SocketOperationException("Error: Could not set socket options.");
 		}
 		if(setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
-		if(bind(socketDescriptor->descriptor, info->ai_addr, info->ai_addrlen) == -1)
+		if(bind(socketDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1)
 		{
 			socketDescriptor.reset();
 			error = errno;
@@ -927,6 +926,15 @@ void TcpSocket::initSsl()
         else if(_requireClientCert && _isServer)
         {
             throw SocketSslException("Client certificate authentication is enabled, but \"caFile\" and \"caData\" are not specified.");
+        }
+        else if(!_isServer)
+        {
+            if((result = gnutls_certificate_set_x509_system_trust(x509Credentials)) < 0)
+            {
+                gnutls_certificate_free_credentials(x509Credentials);
+                x509Credentials = nullptr;
+                throw SocketSslException("Could not load system certificates: " + std::string(gnutls_strerror(result)));
+            }
         }
 
         if(caCertificateCount == 0 && ((_verifyCertificate && !_isServer) || (_requireClientCert && _isServer)))
@@ -1197,7 +1205,7 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
@@ -1284,7 +1292,7 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < bytesToWrite)
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);
@@ -1371,7 +1379,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		timeval timeout;
+		timeval timeout{};
 		int32_t seconds = _writeTimeout / 1000000;
 		timeout.tv_sec = seconds;
 		timeout.tv_usec = _writeTimeout - (1000000 * seconds);

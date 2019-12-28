@@ -369,7 +369,7 @@ void UdpSocket::getConnection()
 		clientInfo.sin_family = _serverInfo->ai_family;
 		clientInfo.sin_addr.s_addr = INADDR_ANY;
 		clientInfo.sin_port = htons(0);
-		if(bind(_socketDescriptor->descriptor, (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
+		if(bind(_socketDescriptor->descriptor.load(), (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
 		{
 			freeaddrinfo(_serverInfo);
 			_serverInfo = nullptr;
@@ -398,7 +398,7 @@ void UdpSocket::getConnection()
 		clientInfo.sin6_family = _serverInfo->ai_family;
 		clientInfo.sin6_addr = in6addr_any;
 		clientInfo.sin6_port = htons(0);
-		if(bind(_socketDescriptor->descriptor, (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
+		if(bind(_socketDescriptor->descriptor.load(), (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
 		{
 			freeaddrinfo(_serverInfo);
 			_serverInfo = nullptr;

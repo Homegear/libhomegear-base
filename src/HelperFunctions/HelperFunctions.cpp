@@ -160,6 +160,63 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
+PVariable HelperFunctions::xml2variable(xml_node<>* node)
+{
+    auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
+
+    bool hasElements = false;
+    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        std::string attributeName(attr->name());
+        std::string attributeValue(attr->value());
+
+        nodeVariable->structValue->emplace("@" + attributeName, std::make_shared<Variable>(attributeValue));
+    }
+
+    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    {
+        std::string nodeName(subNode->name());
+        if(nodeName.empty()) continue;
+        std::string nodeValue(subNode->value());
+
+        hasElements = true;
+
+        auto variableIterator = nodeVariable->structValue->find(nodeName);
+        if(variableIterator == nodeVariable->structValue->end())
+        {
+            variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
+            variableIterator->second->arrayValue->reserve(100);
+        }
+
+        if(variableIterator->second->arrayValue->size() == variableIterator->second->arrayValue->capacity()) variableIterator->second->arrayValue->reserve(variableIterator->second->arrayValue->size() + 100);
+
+        auto subNodeVariable = xml2variable(subNode);
+        if(!subNodeVariable->errorStruct) variableIterator->second->arrayValue->emplace_back(subNodeVariable);
+    }
+
+    if(!hasElements)
+    {
+        std::string nodeValue = std::string(node->value());
+        PVariable jsonNodeValue;
+        try
+        {
+            jsonNodeValue = Rpc::JsonDecoder::decode(nodeValue);
+        }
+        catch(const std::exception& ex)
+        {
+            jsonNodeValue = std::make_shared<Variable>(nodeValue);
+        }
+
+        if(nodeVariable->structValue->empty()) return jsonNodeValue;
+        else
+        {
+            if(!nodeValue.empty()) nodeVariable->structValue->emplace("@@value", jsonNodeValue);
+            return nodeVariable;
+        }
+    }
+    else return nodeVariable;
+}
+
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)
 {
     std::random_device rd;
@@ -358,16 +415,8 @@ std::vector<uint8_t> HelperFunctions::hexToBin(const std::string& data)
 
 char HelperFunctions::getHexChar(int32_t nibble)
 {
-    try
-    {
-        if(nibble < 0 || nibble > 15) return 0;
-        return _binaryToASCIITable[nibble];
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    return 0;
+    if(nibble < 0 || nibble > 15) return 0;
+    return _binaryToASCIITable[nibble];
 }
 
 std::string HelperFunctions::getHexString(const uint8_t* buffer, uint32_t size)

@@ -37,6 +37,7 @@
 #include <atomic>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/resource.h>
 
@@ -96,6 +97,7 @@ PFileDescriptor FileDescriptorManager::add(int fileDescriptor)
     descriptor->descriptor = fileDescriptor;
     _opaquePointer->_descriptors[fileDescriptor] = descriptor;
     if(fileDescriptor > _opaquePointer->_maxFd) _opaquePointer->_maxFd.store(fileDescriptor, std::memory_order_relaxed);
+    fcntl(fileDescriptor, F_SETFD, fcntl(fileDescriptor, F_GETFD) | FD_CLOEXEC);
     return descriptor;
 }
 
