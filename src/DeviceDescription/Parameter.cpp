@@ -180,7 +180,7 @@ void Parameter::parseXml(xml_node<>* node)
         else if(nodeName == "logicalArray") logical.reset(new LogicalArray(_bl, subNode));
         else if(nodeName == "logicalInteger") logical.reset(new LogicalInteger(_bl, subNode));
         else if(nodeName == "logicalInteger64") logical.reset(new LogicalInteger64(_bl, subNode));
-        else if(nodeName == "logicalDecimal") logical.reset(new LogicalDecimal(_bl, subNode));
+        else if(nodeName == "logicalDecimal" || nodeName == "logicalFloat") logical.reset(new LogicalDecimal(_bl, subNode));
         else if(nodeName == "logicalString") logical.reset(new LogicalString(_bl, subNode));
         else if(nodeName == "logicalStruct") logical.reset(new LogicalStruct(_bl, subNode));
         else if(nodeName == "logicalEnumeration") logical.reset(new LogicalEnumeration(_bl, subNode));
