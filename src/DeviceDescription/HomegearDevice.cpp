@@ -1941,7 +1941,7 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 			}
 			else if(parameter->logical->type == ILogical::Type::Enum::tFloat)
 			{
-				node = doc->allocate_node(node_element, "logicalDecimal");
+				node = doc->allocate_node(node_element, "logicalFloat");
 				parentNode->append_node(node);
 
 				LogicalDecimal* logical = (LogicalDecimal*)parameter->logical.get();
