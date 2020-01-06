@@ -455,9 +455,18 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
 bool ProcessManager::exec(const std::string& command, int maxFd)
 {
     pid_t pid, sid;
+
+    //Start new session without controlling terminals
+    sid = setsid();
+    if(sid == -1)
+    {
+        exit(1);
+    }
+
     pid = fork();
     if(pid == -1)
     {
+        //Parent => error
         return false;
     }
     if(pid > 0)
@@ -471,24 +480,6 @@ bool ProcessManager::exec(const std::string& command, int maxFd)
 
     // Close all non standard descriptors.
     for(int32_t i = 3; i < maxFd; ++i) close(i);
-
-    //Start new session without controlling terminals
-    sid = setsid();
-    if(sid == -1)
-    {
-        exit(1);
-    }
-
-    pid = fork();
-    if(pid == -1)
-    {
-        exit(1);
-    }
-    if(pid > 0)
-    {
-        //Parent
-        exit(0);
-    }
 
     execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
 

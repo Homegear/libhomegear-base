@@ -1446,7 +1446,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 
 bool TcpSocket::connected()
 {
-	if(!_socketDescriptor || _socketDescriptor->descriptor < 0 || _connecting) return false;
+	if(!_socketDescriptor || _socketDescriptor->descriptor == -1 || _connecting) return false;
 	char buffer[1];
 	if(recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
 	return true;
