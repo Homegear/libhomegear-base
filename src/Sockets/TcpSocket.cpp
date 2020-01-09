@@ -1597,16 +1597,16 @@ void TcpSocket::getConnection()
 	for(int32_t i = 0; i < _connectionRetries; ++i)
 	{
 		struct addrinfo *serverInfo = nullptr;
-		struct addrinfo hostInfo;
-		memset(&hostInfo, 0, sizeof hostInfo);
+		struct addrinfo hostInfo{};
 
 		hostInfo.ai_family = AF_UNSPEC;
 		hostInfo.ai_socktype = SOCK_STREAM;
 
-		if(getaddrinfo(_hostname.c_str(), _port.c_str(), &hostInfo, &serverInfo) != 0)
+		int32_t result = getaddrinfo(_hostname.c_str(), _port.c_str(), &hostInfo, &serverInfo);
+		if(result != 0)
 		{
 			freeaddrinfo(serverInfo);
-			throw SocketOperationException("Could not get address information: " + std::string(strerror(errno)));
+			throw SocketOperationException("Could not get address information: " + std::string(gai_strerror(result)));
 		}
 
 		char ipStringBuffer[INET6_ADDRSTRLEN];
