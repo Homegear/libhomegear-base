@@ -31,14 +31,15 @@
 #ifndef RPCDECODER_H_
 #define RPCDECODER_H_
 
+#include "../Variable.h"
+#include "../Exception.h"
+#include "BinaryDecoder.h"
+#include "RpcHeader.h"
+
 #include <memory>
 #include <vector>
 #include <cstring>
 #include <cmath>
-
-#include "../Variable.h"
-#include "BinaryDecoder.h"
-#include "RpcHeader.h"
 
 namespace BaseLib
 {
@@ -47,21 +48,37 @@ class SharedObjects;
 
 namespace Rpc
 {
+
+class RpcDecoderException : public BaseLib::Exception
+{
+public:
+    explicit RpcDecoderException(std::string message) : BaseLib::Exception(message) {}
+};
+
 class RpcDecoder
 {
 public:
-	RpcDecoder(BaseLib::SharedObjects* baseLib);
-	RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteger32 = true);
-	virtual ~RpcDecoder() {}
+    RpcDecoder();
+    explicit RpcDecoder(bool ansi, bool setInteger32 = true);
 
-	virtual std::shared_ptr<RpcHeader> decodeHeader(const std::vector<char>& packet);
-	virtual std::shared_ptr<RpcHeader> decodeHeader(const std::vector<uint8_t>& packet);
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<char>& packet, std::string& methodName);
-	virtual std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<uint8_t>& packet, std::string& methodName);
-	virtual std::shared_ptr<Variable> decodeResponse(const std::vector<char>& packet, uint32_t offset = 0);
-	virtual std::shared_ptr<Variable> decodeResponse(const std::vector<uint8_t>& packet, uint32_t offset = 0);
+    /**
+     * Dummy constructor for backwards compatibility.
+     */
+	explicit RpcDecoder(BaseLib::SharedObjects* baseLib);
+
+    /**
+     * Dummy constructor for backwards compatibility.
+     */
+	RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteger32 = true);
+	~RpcDecoder() = default;
+
+	std::shared_ptr<RpcHeader> decodeHeader(const std::vector<char>& packet);
+	std::shared_ptr<RpcHeader> decodeHeader(const std::vector<uint8_t>& packet);
+	std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<char>& packet, std::string& methodName);
+	std::shared_ptr<std::vector<std::shared_ptr<Variable>>> decodeRequest(const std::vector<uint8_t>& packet, std::string& methodName);
+	std::shared_ptr<Variable> decodeResponse(const std::vector<char>& packet, uint32_t offset = 0);
+	std::shared_ptr<Variable> decodeResponse(const std::vector<uint8_t>& packet, uint32_t offset = 0);
 private:
-	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;
 	std::unique_ptr<BinaryDecoder> _decoder;
 	bool _setInteger32 = true;

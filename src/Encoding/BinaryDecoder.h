@@ -32,6 +32,8 @@
 #define BINARYDECODER_H_
 
 #include "Ansi.h"
+#include "../Exception.h"
+
 #include <memory>
 #include <cstring>
 #include <vector>
@@ -42,29 +44,44 @@ namespace BaseLib
 
 class SharedObjects;
 
+class BinaryDecoderException : public BaseLib::Exception
+{
+public:
+    explicit BinaryDecoderException(std::string message) : BaseLib::Exception(message) {}
+};
+
 class BinaryDecoder
 {
 public:
-	BinaryDecoder(BaseLib::SharedObjects* baseLib);
-	BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi);
-	virtual ~BinaryDecoder() {}
+    BinaryDecoder();
+    explicit BinaryDecoder(bool ansi);
 
-	virtual int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
-	virtual int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
-	virtual int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
-	virtual uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual std::string decodeString(const std::vector<char>& encodedData, uint32_t& position);
-	virtual std::string decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
-	virtual std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
-	virtual bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	virtual double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
-	virtual double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    /**
+     * Dummy constructor for backwards compatability.
+     */
+	explicit BinaryDecoder(BaseLib::SharedObjects* baseLib);
+
+    /**
+     * Dummy constructor for backwards compatability.
+     */
+	BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi);
+	~BinaryDecoder() = default;
+
+	int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
+	int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
+	int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
+	uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	std::string decodeString(const std::vector<char>& encodedData, uint32_t& position);
+	std::string decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
+	std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
+	bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
+	double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
 protected:
-	BaseLib::SharedObjects* _bl = nullptr;
 	bool _ansi = false;
 	std::shared_ptr<Ansi> _ansiConverter;
 };
