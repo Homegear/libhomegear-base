@@ -327,6 +327,15 @@ public:
     void setVerificationHostname(std::string hostname) { close(); _verificationHostname = hostname; }
 	std::unordered_map<std::string, gnutls_certificate_credentials_t>& getCredentials() { return _x509Credentials; }
 
+	/**
+	 * Tests in this order and returns false if one of the tests fails:
+	 *
+	 * 1. Tests if there is a valid socket (!= -1)
+	 * 2. If we are currently connecting
+	 * 3. Calls recv with the MSG_PEEK flag set and checks for an error return.
+	 *
+	 * @return Returns true if the socket is connected.
+	 */
 	bool connected();
 
 	/**
@@ -353,10 +362,51 @@ public:
 	 * @throws SocketClosedException Thrown when socket is closed.
 	 */
 	int32_t proofread(char* buffer, int32_t bufferSize, bool& moreData);
+
+	/**
+	 * Writes data to a socket.
+	 *
+	 * @returns Returns the number of bytes written. Never returns a negative number.
+     * @throws SocketOperationException Thrown when socket is nullptr.
+     * @throws SocketDataLimitException Thrown when trying to send more than 104857600 bytes of data.
+     * @throws SocketTimeOutException Thrown when writing times out.
+     * @throws SocketClosedException Thrown when socket is closed.
+     */
 	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
+
+    /**
+     * Writes data to a socket.
+     *
+     * @returns Returns the number of bytes written. Never returns a negative number.
+     * @throws SocketOperationException Thrown when socket is nullptr.
+     * @throws SocketDataLimitException Thrown when trying to send more than 104857600 bytes of data.
+     * @throws SocketTimeOutException Thrown when writing times out.
+     * @throws SocketClosedException Thrown when socket is closed.
+     */
 	int32_t proofwrite(const std::vector<char>& data);
+
+    /**
+     * Writes data to a socket.
+     *
+     * @returns Returns the number of bytes written. Never returns a negative number.
+     * @throws SocketOperationException Thrown when socket is nullptr.
+     * @throws SocketDataLimitException Thrown when trying to send more than 104857600 bytes of data.
+     * @throws SocketTimeOutException Thrown when writing times out.
+     * @throws SocketClosedException Thrown when socket is closed.
+     */
 	int32_t proofwrite(const std::string& data);
+
+    /**
+     * Writes data to a socket.
+     *
+     * @returns Returns the number of bytes written. Never returns a negative number.
+     * @throws SocketOperationException Thrown when socket is nullptr.
+     * @throws SocketDataLimitException Thrown when trying to send more than 104857600 bytes of data.
+     * @throws SocketTimeOutException Thrown when writing times out.
+     * @throws SocketClosedException Thrown when socket is closed.
+     */
 	int32_t proofwrite(const char* buffer, int32_t bytesToWrite);
+
 	void open();
 	void close();
 

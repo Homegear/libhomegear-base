@@ -60,8 +60,8 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t 
 IPhysicalInterface::~IPhysicalInterface()
 {
 	_stopPacketProcessingThread = true;
-	_packetProcessingPacketAvailable = true;
 	std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+    _packetProcessingPacketAvailable = true;
 	lock.unlock();
 	_packetProcessingConditionVariable.notify_one();
 	_bl->threadManager.join(_packetProcessingThread);
@@ -90,13 +90,15 @@ void IPhysicalInterface::startListening()
 	try
 	{
 		_stopPacketProcessingThread = true;
-		_packetProcessingPacketAvailable = true;
 		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+        _packetProcessingPacketAvailable = true;
 		lock.unlock();
 		_packetProcessingConditionVariable.notify_one();
 		_bl->threadManager.join(_packetProcessingThread);
 		_stopPacketProcessingThread = false;
+        lock.lock();
 		_packetProcessingPacketAvailable = false;
+		lock.unlock();
 		_packetBufferHead = 0;
 		_packetBufferTail = 0;
 		_bl->threadManager.start(_packetProcessingThread, true, 45, SCHED_FIFO, &IPhysicalInterface::processPackets, this);
@@ -112,8 +114,8 @@ void IPhysicalInterface::stopListening()
 	try
 	{
 		_stopPacketProcessingThread = true;
-		_packetProcessingPacketAvailable = true;
 		std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
+        _packetProcessingPacketAvailable = true;
 		lock.unlock();
 		_packetProcessingConditionVariable.notify_one();
 		_bl->threadManager.join(_packetProcessingThread);
