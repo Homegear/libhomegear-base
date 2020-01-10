@@ -116,8 +116,7 @@ public:
     static int32_t exec(const std::string& command, int maxFd, std::string& output);
 
     /**
-     * Starts a program and detaches it, so it continues to run when the parent process finishes. Can only be called
-     * from the main thread as the process would crash otherwise.
+     * Starts a program and detaches it, so it continues to run when the parent process finishes.
      *
      * @param command The command to execute.
      * @param maxFd The maximum number of file descriptors.
