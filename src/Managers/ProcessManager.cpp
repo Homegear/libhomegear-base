@@ -295,6 +295,7 @@ pid_t ProcessManager::system(const std::string& command, const std::vector<std::
             close(i);
         }
 
+        //Note that setsid() only returns -1 if the process already is a process group leader, so we don't check for errors.
         setsid();
         std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
@@ -382,6 +383,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
         // Close all non standard descriptors. Don't do this before calling dup2 otherwise dup2 will fail.
         for(int32_t i = 3; i < maxFd; ++i) close(i);
 
+        //Note that setsid() only returns -1 if the process already is a process group leader, so we don't check for errors.
         setsid();
         std::string programName = (absoluteFilename.find('/') == std::string::npos) ? absoluteFilename : absoluteFilename.substr(absoluteFilename.find_last_of('/') + 1);
         if(programName.empty()) _exit(1);
@@ -454,10 +456,16 @@ int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string&
 
 bool ProcessManager::exec(const std::string& command, int maxFd)
 {
-    pid_t pid, sid;
+    pid_t pid;
+
+    //Start new session without controlling terminals
+    //Note that setsid() only returns -1 if the process already is a process group leader, so we don't check for errors.
+    setsid();
+
     pid = fork();
     if(pid == -1)
     {
+        //Parent => error
         return false;
     }
     if(pid > 0)
@@ -471,24 +479,6 @@ bool ProcessManager::exec(const std::string& command, int maxFd)
 
     // Close all non standard descriptors.
     for(int32_t i = 3; i < maxFd; ++i) close(i);
-
-    //Start new session without controlling terminals
-    sid = setsid();
-    if(sid == -1)
-    {
-        exit(1);
-    }
-
-    pid = fork();
-    if(pid == -1)
-    {
-        exit(1);
-    }
-    if(pid > 0)
-    {
-        //Parent
-        exit(0);
-    }
 
     execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
 
@@ -529,6 +519,7 @@ FILE* ProcessManager::popen2(const std::string& command, const std::string& type
         // Close all non standard descriptors. Don't do this before calling dup2 otherwise dup2 will fail.
         for(int32_t i = 3; i < maxFd; ++i) close(i);
 
+        //Note that setsid() only returns -1 if the process already is a process group leader, so we don't check for errors.
         setsid();
         execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
         exit(0);

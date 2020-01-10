@@ -131,7 +131,7 @@ protected:
 	int64_t _lastPacketSent = -1;
 	int64_t _lastPacketReceived = -1;
 	int64_t _maxPacketProcessingTime = 1000;
-	bool _updateMode = false;
+    std::atomic_bool _updateMode{false};
 	std::atomic<int64_t> _lifetickTime{0};
     std::atomic_bool _lifetickState{true};
 
