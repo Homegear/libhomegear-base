@@ -53,7 +53,7 @@ public:
 class BinaryDecoder
 {
 public:
-    BinaryDecoder();
+    BinaryDecoder() = default;
     explicit BinaryDecoder(bool ansi);
 
     /**
@@ -67,20 +67,20 @@ public:
 	BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi);
 	~BinaryDecoder() = default;
 
-	int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
-	int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
-	int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
-	uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
+	static int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
+    static int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    static int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
+    static int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    static uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
+    static uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
 	std::string decodeString(const std::vector<char>& encodedData, uint32_t& position);
 	std::string decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
-	std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
-	bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
-	double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    static std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
+    static std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    static bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
+    static bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
+    static double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
+    static double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
 protected:
 	bool _ansi = false;
 	std::shared_ptr<Ansi> _ansiConverter;

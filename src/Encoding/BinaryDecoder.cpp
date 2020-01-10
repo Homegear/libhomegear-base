@@ -34,11 +34,6 @@
 namespace BaseLib
 {
 
-BinaryDecoder::BinaryDecoder()
-{
-
-}
-
 BinaryDecoder::BinaryDecoder(bool ansi)
 {
     _ansi = ansi;
@@ -126,7 +121,8 @@ uint8_t BinaryDecoder::decodeByte(const std::vector<uint8_t>& encodedData, uint3
 std::string BinaryDecoder::decodeString(const std::vector<char>& encodedData, uint32_t& position)
 {
     int32_t stringLength = decodeInteger(encodedData, position);
-    if(position + stringLength > encodedData.size() || stringLength == 0) throw BinaryDecoderException("Unexpected end of data.");
+    if(stringLength == 0) return "";
+    if(position + stringLength > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
     if(_ansi && _ansiConverter)
     {
         std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
@@ -144,7 +140,8 @@ std::string BinaryDecoder::decodeString(const std::vector<char>& encodedData, ui
 std::string BinaryDecoder::decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
     int32_t stringLength = decodeInteger(encodedData, position);
-    if(position + stringLength > encodedData.size() || stringLength == 0) throw BinaryDecoderException("Unexpected end of data.");
+    if(stringLength == 0) return "";
+    if(position + stringLength > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
     if(_ansi && _ansiConverter)
     {
         std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
@@ -162,7 +159,8 @@ std::string BinaryDecoder::decodeString(const std::vector<uint8_t>& encodedData,
 std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<char>& encodedData, uint32_t& position)
 {
     int32_t length = decodeInteger(encodedData, position);
-    if(position + length > encodedData.size() || length == 0) throw BinaryDecoderException("Unexpected end of data.");
+    if(length == 0) return std::vector<uint8_t>();
+    if(position + length > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
     std::vector<uint8_t> data(encodedData.begin() + position, encodedData.begin() + position + length);
     position += length;
     return data;
@@ -171,7 +169,8 @@ std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<char>& encode
 std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
     int32_t length = decodeInteger(encodedData, position);
-    if(position + length > encodedData.size() || length == 0) throw BinaryDecoderException("Unexpected end of data.");
+    if(length == 0) return std::vector<uint8_t>();
+    if(position + length > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
     std::vector<uint8_t> data(encodedData.begin() + position, encodedData.begin() + position + length);
     position += length;
     return data;
