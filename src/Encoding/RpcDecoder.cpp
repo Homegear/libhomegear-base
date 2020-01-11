@@ -57,11 +57,11 @@ RpcDecoder::RpcDecoder(BaseLib::SharedObjects* baseLib, bool ansi, bool setInteg
 std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(const std::vector<char>& packet)
 {
     std::shared_ptr<RpcHeader> header = std::make_shared<RpcHeader>();
-    if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) throw RpcDecoderException("Invalid header.");
+    if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) return header;
     uint32_t position = 4;
     uint32_t headerSize = 0;
     headerSize = _decoder->decodeInteger(packet, position);
-    if(headerSize < 4) throw RpcDecoderException("Invalid header.");
+    if(headerSize < 4) return header;
     uint32_t parameterCount = _decoder->decodeInteger(packet, position);
     for(uint32_t i = 0; i < parameterCount; i++)
     {
@@ -76,11 +76,11 @@ std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(const std::vector<char>& pac
 std::shared_ptr<RpcHeader> RpcDecoder::decodeHeader(const std::vector<uint8_t>& packet)
 {
     std::shared_ptr<RpcHeader> header = std::make_shared<RpcHeader>();
-    if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) throw RpcDecoderException("Invalid header.");
+    if(!(packet.size() < 12 || packet.at(3) == 0x40 || packet.at(3) == 0x41)) return header;
     uint32_t position = 4;
     uint32_t headerSize = 0;
     headerSize = _decoder->decodeInteger(packet, position);
-    if(headerSize < 4) throw RpcDecoderException("Invalid header.");
+    if(headerSize < 4) return header;
     uint32_t parameterCount = _decoder->decodeInteger(packet, position);
     for(uint32_t i = 0; i < parameterCount; i++)
     {
