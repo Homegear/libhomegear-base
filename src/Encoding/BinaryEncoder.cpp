@@ -36,283 +36,128 @@ namespace BaseLib
 
 BinaryEncoder::BinaryEncoder(BaseLib::SharedObjects* baseLib)
 {
-	_bl = baseLib;
 }
 
 void BinaryEncoder::encodeInteger(std::vector<char>& encodedData, int32_t integer)
 {
-	try
-	{
-		char result[4];
-		_bl->hf.memcpyBigEndian(result, (char*)&integer, 4);
-		encodedData.insert(encodedData.end(), result, result + 4);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    char result[4];
+    HelperFunctions::memcpyBigEndian(result, (char*)&integer, 4);
+    encodedData.insert(encodedData.end(), result, result + 4);
 }
 
 void BinaryEncoder::encodeInteger(std::vector<uint8_t>& encodedData, int32_t integer)
 {
-	try
-	{
-		uint8_t result[4];
-		_bl->hf.memcpyBigEndian(result, (uint8_t*)&integer, 4);
-		encodedData.insert(encodedData.end(), result, result + 4);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    uint8_t result[4];
+    HelperFunctions::memcpyBigEndian(result, (uint8_t*)&integer, 4);
+    encodedData.insert(encodedData.end(), result, result + 4);
 }
 
 void BinaryEncoder::encodeInteger64(std::vector<char>& encodedData, int64_t integer)
 {
-	try
-	{
-		char result[8];
-		_bl->hf.memcpyBigEndian(result, (char*)&integer, 8);
-		encodedData.insert(encodedData.end(), result, result + 8);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    char result[8];
+    HelperFunctions::memcpyBigEndian(result, (char*)&integer, 8);
+    encodedData.insert(encodedData.end(), result, result + 8);
 }
 
 void BinaryEncoder::encodeInteger64(std::vector<uint8_t>& encodedData, int64_t integer)
 {
-	try
-	{
-		char result[8];
-		_bl->hf.memcpyBigEndian(result, (char*)&integer, 8);
-		encodedData.insert(encodedData.end(), result, result + 8);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    char result[8];
+    HelperFunctions::memcpyBigEndian(result, (char*)&integer, 8);
+    encodedData.insert(encodedData.end(), result, result + 8);
 }
 
 void BinaryEncoder::encodeByte(std::vector<char>& encodedData, uint8_t byte)
 {
-	try
-	{
-		encodedData.push_back(byte);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+	encodedData.push_back(byte);
 }
 
 void BinaryEncoder::encodeByte(std::vector<uint8_t>& encodedData, uint8_t byte)
 {
-	try
-	{
-		encodedData.push_back(byte);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+	encodedData.push_back(byte);
 }
 
-void BinaryEncoder::encodeString(std::vector<char>& encodedData, std::string& string)
+void BinaryEncoder::encodeString(std::vector<char>& encodedData, const std::string& string)
 {
-	try
-	{
-		encodeInteger(encodedData, string.size());
-		if(string.size() > 0) encodedData.insert(encodedData.end(), string.begin(), string.end());
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    encodeInteger(encodedData, string.size());
+    if(!string.empty()) encodedData.insert(encodedData.end(), string.begin(), string.end());
 }
 
-void BinaryEncoder::encodeString(std::vector<uint8_t>& encodedData, std::string& string)
+void BinaryEncoder::encodeString(std::vector<uint8_t>& encodedData, const std::string& string)
 {
-	try
-	{
-		encodeInteger(encodedData, string.size());
-		if(string.size() > 0) encodedData.insert(encodedData.end(), string.begin(), string.end());
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    encodeInteger(encodedData, string.size());
+    if(!string.empty()) encodedData.insert(encodedData.end(), string.begin(), string.end());
 }
 
-void BinaryEncoder::encodeBinary(std::vector<char>& encodedData, std::vector<uint8_t>& data)
+void BinaryEncoder::encodeBinary(std::vector<char>& encodedData, const std::vector<uint8_t>& data)
 {
-	try
-	{
-		encodeInteger(encodedData, data.size());
-		if(data.size() > 0) encodedData.insert(encodedData.end(), data.begin(), data.end());
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    encodeInteger(encodedData, data.size());
+    if(!data.empty()) encodedData.insert(encodedData.end(), data.begin(), data.end());
 }
 
-void BinaryEncoder::encodeBinary(std::vector<uint8_t>& encodedData, std::vector<uint8_t>& data)
+void BinaryEncoder::encodeBinary(std::vector<uint8_t>& encodedData, const std::vector<uint8_t>& data)
 {
-	try
-	{
-		encodeInteger(encodedData, data.size());
-		if(data.size() > 0) encodedData.insert(encodedData.end(), data.begin(), data.end());
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    encodeInteger(encodedData, data.size());
+    if(!data.empty()) encodedData.insert(encodedData.end(), data.begin(), data.end());
 }
 
 void BinaryEncoder::encodeBoolean(std::vector<char>& encodedData, bool boolean)
 {
-	try
-	{
-		encodedData.push_back((char)boolean);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+	encodedData.push_back((char)boolean);
 }
 
 void BinaryEncoder::encodeBoolean(std::vector<uint8_t>& encodedData, bool boolean)
 {
-	try
-	{
-		encodedData.push_back((uint8_t)boolean);
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+	encodedData.push_back((uint8_t)boolean);
 }
 
 void BinaryEncoder::encodeFloat(std::vector<char>& encodedData, double floatValue)
 {
-	try
-	{
-		double temp = std::abs(floatValue);
-		int32_t exponent = 0;
-		if(temp != 0 && temp < 0.5)
-		{
-			while(temp < 0.5)
-			{
-				temp *= 2;
-				exponent--;
-			}
-		}
-		else while(temp >= 1)
-		{
-			temp /= 2;
-			exponent++;
-		}
-		if(floatValue < 0) temp *= -1;
-		int32_t mantissa = std::lround(temp * 0x40000000);
-		char data[8];
-		_bl->hf.memcpyBigEndian(data, (char*)&mantissa, 4);
-		_bl->hf.memcpyBigEndian(data + 4, (char*)&exponent, 4);
-		encodedData.insert(encodedData.end(), data, data + 8);
-	}
-	catch(const std::exception& ex)
+    double temp = std::abs(floatValue);
+    int32_t exponent = 0;
+    if(temp != 0 && temp < 0.5)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        while(temp < 0.5)
+        {
+            temp *= 2;
+            exponent--;
+        }
     }
-    catch(...)
+    else while(temp >= 1)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        temp /= 2;
+        exponent++;
     }
+    if(floatValue < 0) temp *= -1;
+    int32_t mantissa = std::lround(temp * 0x40000000);
+    char data[8];
+    HelperFunctions::memcpyBigEndian(data, (char*)&mantissa, 4);
+    HelperFunctions::memcpyBigEndian(data + 4, (char*)&exponent, 4);
+    encodedData.insert(encodedData.end(), data, data + 8);
 }
 
 void BinaryEncoder::encodeFloat(std::vector<uint8_t>& encodedData, double floatValue)
 {
-	try
-	{
-		double temp = std::abs(floatValue);
-		int32_t exponent = 0;
-		if(temp != 0 && temp < 0.5)
-		{
-			while(temp < 0.5)
-			{
-				temp *= 2;
-				exponent--;
-			}
-		}
-		else while(temp >= 1)
-		{
-			temp /= 2;
-			exponent++;
-		}
-		if(floatValue < 0) temp *= -1;
-		int32_t mantissa = std::lround(temp * 0x40000000);
-		char data[8];
-		_bl->hf.memcpyBigEndian(data, (char*)&mantissa, 4);
-		_bl->hf.memcpyBigEndian(data + 4, (char*)&exponent, 4);
-		encodedData.insert(encodedData.end(), data, data + 8);
-	}
-	catch(const std::exception& ex)
+    double temp = std::abs(floatValue);
+    int32_t exponent = 0;
+    if(temp != 0 && temp < 0.5)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        while(temp < 0.5)
+        {
+            temp *= 2;
+            exponent--;
+        }
     }
-    catch(...)
+    else while(temp >= 1)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        temp /= 2;
+        exponent++;
     }
+    if(floatValue < 0) temp *= -1;
+    int32_t mantissa = std::lround(temp * 0x40000000);
+    char data[8];
+    HelperFunctions::memcpyBigEndian(data, (char*)&mantissa, 4);
+    HelperFunctions::memcpyBigEndian(data + 4, (char*)&exponent, 4);
+    encodedData.insert(encodedData.end(), data, data + 8);
 }
 
 }

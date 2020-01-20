@@ -984,4 +984,16 @@ size_t Http::readFirstContentLine(char* buffer, size_t requestLength)
 	return bytesRead;
 }
 
+std::unordered_map<std::string, std::string> Http::getParsedQueryString()
+{
+    std::unordered_map<std::string, std::string> parsedQueryString;
+
+    auto parts = BaseLib::HelperFunctions::splitAll(_header.args, '&');
+    for(auto& part : parts)
+    {
+        parsedQueryString.emplace(BaseLib::HelperFunctions::splitFirst(part, '='));
+    }
+    return parsedQueryString;
+}
+
 }

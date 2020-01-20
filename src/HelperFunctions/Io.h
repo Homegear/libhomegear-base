@@ -243,6 +243,26 @@ public:
 	static bool deleteFile(const std::string& file);
 
 	/**
+	 * Write locks a file using fcntl as defined in the Single Unix Specification. Note that the file stays locked until
+	 * the file descriptor is closed the first time.
+	 *
+	 * @param fileDescriptor The filedescriptor of the file to lock.
+	 * @param wait Wait for the lock to be acquired.
+	 * @return Returns true if the file was locked successful and false if the file is locked already.
+	 */
+	static bool writeLockFile(int fileDescriptor, bool wait);
+
+    /**
+     * Read locks a file using fcntl as defined in the Single Unix Specification. Note that the file stays locked until
+     * the file descriptor is closed the first time.
+     *
+     * @param fileDescriptor The filedescriptor of the file to lock.
+     * @param wait Wait for the lock to be acquired.
+     * @return Returns true if the file was locked successful and false if the file is locked already.
+     */
+    static bool readLockFile(int fileDescriptor, bool wait);
+
+	/**
 	 * Calculates the SHA-2 SHA-512 of a given file.
 	 *
 	 * @param file The file to calculate the SHA-512 for.

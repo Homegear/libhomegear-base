@@ -46,17 +46,6 @@ HelperFunctions::HelperFunctions()
 {
 }
 
-void HelperFunctions::init(SharedObjects* baseLib)
-{
-    _bl = baseLib;
-    checkEndianness();
-}
-
-HelperFunctions::~HelperFunctions()
-{
-
-}
-
 int64_t HelperFunctions::getTime()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -241,112 +230,80 @@ std::vector<uint8_t> HelperFunctions::getRandomBytes(uint32_t size)
 
 void HelperFunctions::memcpyBigEndian(char* to, const char* from, const uint32_t& length)
 {
-    try
+    static bool bigEndian = isBigEndian();
+
+    if(bigEndian) memcpy(to, from, length);
+    else
     {
-        if(_isBigEndian) memcpy(to, from, length);
-        else
+        uint32_t last = length - 1;
+        for(uint32_t i = 0; i < length; i++)
         {
-            uint32_t last = length - 1;
-            for(uint32_t i = 0; i < length; i++)
-            {
-                to[i] = from[last - i];
-            }
+            to[i] = from[last - i];
         }
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
 }
 
 void HelperFunctions::memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length)
 {
-    try
-    {
-        memcpyBigEndian((char*)to, (char*)from, length);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    memcpyBigEndian((char*)to, (char*)from, length);
 }
 
 void HelperFunctions::memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& from)
 {
-    try
-    {
-        to = 0; //Necessary if length is < 4
-        if(from.empty()) return;
-        uint32_t length = from.size();
-        if(length > 4) length = 4;
-        if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (4 - length), &from.at(0), length);
-        else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    static bool bigEndian = isBigEndian();
+
+    to = 0; //Necessary if length is < 4
+    if(from.empty()) return;
+    uint32_t length = from.size();
+    if(length > 4) length = 4;
+    if(bigEndian) memcpyBigEndian(((uint8_t*)&to) + (4 - length), &from.at(0), length);
+    else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
 }
 
 void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& from)
 {
-    try
-    {
-        if(!to.empty()) to.clear();
-        int32_t length = 4;
-        if(from < 0) length = 4;
-        else if(from < 256) length = 1;
-        else if(from < 65536) length = 2;
-        else if(from < 16777216) length = 3;
-        to.resize(length, 0);
-        if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (4 - length), length);
-        else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    static bool bigEndian = isBigEndian();
+
+    if(!to.empty()) to.clear();
+    int32_t length = 4;
+    if(from < 0) length = 4;
+    else if(from < 256) length = 1;
+    else if(from < 65536) length = 2;
+    else if(from < 16777216) length = 3;
+    to.resize(length, 0);
+    if(bigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (4 - length), length);
+    else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
 }
 
 void HelperFunctions::memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from)
 {
-    try
-    {
-        to = 0; //Necessary if length is < 8
-        if(from.empty()) return;
-        uint32_t length = from.size();
-        if(length > 8) length = 8;
-        if(_isBigEndian) memcpyBigEndian(((uint8_t*)&to) + (8 - length), &from.at(0), length);
-        else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    static bool bigEndian = isBigEndian();
+
+    to = 0; //Necessary if length is < 8
+    if(from.empty()) return;
+    uint32_t length = from.size();
+    if(length > 8) length = 8;
+    if(bigEndian) memcpyBigEndian(((uint8_t*)&to) + (8 - length), &from.at(0), length);
+    else memcpyBigEndian(((uint8_t*)&to), &from.at(0), length);
 }
 
 void HelperFunctions::memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from)
 {
-    try
-    {
-        if(!to.empty()) to.clear();
-        int32_t length = 8;
-        if(from < 0) length = 8;
-        else if(from <= 0xFF) length = 1;
-        else if(from <= 0xFFFF) length = 2;
-        else if(from <= 0xFFFFFF) length = 3;
-        else if(from <= 0xFFFFFFFFll) length = 4;
-        else if(from <= 0xFFFFFFFFFFll) length = 5;
-        else if(from <= 0xFFFFFFFFFFFFll) length = 6;
-        else if(from <= 0xFFFFFFFFFFFFFFll) length = 7;
-        to.resize(length, 0);
-        if(_isBigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (8 - length), length);
-        else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    static bool bigEndian = isBigEndian();
+
+    if(!to.empty()) to.clear();
+    int32_t length = 8;
+    if(from < 0) length = 8;
+    else if(from <= 0xFF) length = 1;
+    else if(from <= 0xFFFF) length = 2;
+    else if(from <= 0xFFFFFF) length = 3;
+    else if(from <= 0xFFFFFFFFll) length = 4;
+    else if(from <= 0xFFFFFFFFFFll) length = 5;
+    else if(from <= 0xFFFFFFFFFFFFll) length = 6;
+    else if(from <= 0xFFFFFFFFFFFFFFll) length = 7;
+    to.resize(length, 0);
+    if(bigEndian) memcpyBigEndian(&to.at(0), (uint8_t*)&from + (8 - length), length);
+    else memcpyBigEndian(&to.at(0), (uint8_t*)&from, length);
 }
 
 std::string& HelperFunctions::stringReplace(std::string& haystack, const std::string& search, const std::string& replace)
@@ -683,50 +640,46 @@ std::vector<uint8_t> HelperFunctions::getUBinary(const std::vector<uint8_t>& hex
     return binary;
 }
 
-uid_t HelperFunctions::userId(std::string username)
+uid_t HelperFunctions::userId(const std::string& username)
 {
     if(username.empty()) return -1;
-    struct passwd pwd;
-    struct passwd* pwdResult;
+    struct passwd pwd{};
+    struct passwd* pwdResult = nullptr;
     int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if(bufferSize < 0) bufferSize = 16384;
     std::vector<char> buffer(bufferSize);
-    int32_t result = getpwnam_r(username.c_str(), &pwd, &buffer.at(0), buffer.size(), &pwdResult);
-    if(!pwdResult)
-    {
-        if(result == 0) _bl->out.printError("User name " + username + " not found.");
-        else _bl->out.printError("Error getting UID for user name " + username + ": " + std::string(strerror(result)));
-        return -1;
-    }
+    getpwnam_r(username.c_str(), &pwd, &buffer.at(0), buffer.size(), &pwdResult);
+    if(!pwdResult) return -1;
     return pwd.pw_uid;
 }
 
-gid_t HelperFunctions::groupId(std::string groupname)
+gid_t HelperFunctions::groupId(const std::string& groupname)
 {
     if(groupname.empty()) return -1;
-    struct group grp;
-    struct group* grpResult;
+    struct group grp{};
+    struct group* grpResult = nullptr;
     int32_t bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if(bufferSize < 0) bufferSize = 16384;
     std::vector<char> buffer(bufferSize);
-    int32_t result = getgrnam_r(groupname.c_str(), &grp, &buffer.at(0), buffer.size(), &grpResult);
-    if(!grpResult)
-    {
-        if(result == 0) _bl->out.printError("User name " + groupname + " not found.");
-        else _bl->out.printError("Error getting GID for group name " + groupname + ": " + std::string(strerror(result)));
-        return -1;
-    }
+    getgrnam_r(groupname.c_str(), &grp, &buffer.at(0), buffer.size(), &grpResult);
+    if(!grpResult) return -1;
     return grp.gr_gid;
 }
 
-void HelperFunctions::checkEndianness()
+bool HelperFunctions::getBigEndian()
+{
+    static bool bigEndian = isBigEndian();
+    return bigEndian;
+}
+
+bool HelperFunctions::isBigEndian()
 {
     union {
         uint32_t i;
         char c[4];
     } bint = {0x01020304};
 
-    _isBigEndian = bint.c[0] == 1;
+    return bint.c[0] == 1;
 }
 
 std::string HelperFunctions::getGNUTLSCertVerificationError(uint32_t errorCode)

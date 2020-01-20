@@ -34,362 +34,205 @@
 namespace BaseLib
 {
 
-BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib)
+BinaryDecoder::BinaryDecoder(bool ansi)
 {
-	_bl = baseLib;
+    _ansi = ansi;
+    if(_ansi) _ansiConverter = std::make_shared<Ansi>(true, false);
 }
 
-BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi) : BinaryDecoder(baseLib)
+BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib)
 {
-	_ansi = ansi;
-	if(_ansi) _ansiConverter.reset(new Ansi(true, false));
+}
+
+BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi) : BinaryDecoder(ansi)
+{
 }
 
 int32_t BinaryDecoder::decodeInteger(const std::vector<char>& encodedData, uint32_t& position)
 {
 	int32_t integer = 0;
-	try
-	{
-		if(position + 4 > encodedData.size())
-		{
-			if(position + 1 > encodedData.size()) return 0;
-			//IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
-			std::string string(&encodedData.at(position), encodedData.size());
-			position = encodedData.size();
-			integer = Math::getNumber(string);
-			return integer;
-		}
-		_bl->hf.memcpyBigEndian((char*)&integer, &encodedData.at(position), 4);
-		position += 4;
-	}
-	catch(const std::exception& ex)
+    if(position + 4 > encodedData.size())
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+        //IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
+        std::string string(&encodedData.at(position), encodedData.size());
+        position = encodedData.size();
+        integer = Math::getNumber(string);
+        return integer;
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    HelperFunctions::memcpyBigEndian((char*)&integer, &encodedData.at(position), 4);
+    position += 4;
 	return integer;
 }
 
 int32_t BinaryDecoder::decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	int32_t integer = 0;
-	try
-	{
-		if(position + 4 > encodedData.size())
-		{
-			if(position + 1 > encodedData.size()) return 0;
-			//IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
-			std::string string((char*)&encodedData.at(position), encodedData.size());
-			position = encodedData.size();
-			integer = Math::getNumber(string);
-			return integer;
-		}
-		_bl->hf.memcpyBigEndian((char*)&integer, (char*)&encodedData.at(position), 4);
-		position += 4;
-	}
-	catch(const std::exception& ex)
+    if(position + 4 > encodedData.size())
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+        //IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
+        std::string string((char*)&encodedData.at(position), encodedData.size());
+        position = encodedData.size();
+        integer = Math::getNumber(string);
+        return integer;
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    HelperFunctions::memcpyBigEndian((char*)&integer, (char*)&encodedData.at(position), 4);
+    position += 4;
 	return integer;
 }
 
 int64_t BinaryDecoder::decodeInteger64(const std::vector<char>& encodedData, uint32_t& position)
 {
 	int64_t integer = 0;
-	try
-	{
-		if(position + 8 > encodedData.size()) return 0;
-		_bl->hf.memcpyBigEndian((char*)&integer, &encodedData.at(position), 8);
-		position += 8;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    if(position + 8 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    HelperFunctions::memcpyBigEndian((char*)&integer, &encodedData.at(position), 8);
+    position += 8;
 	return integer;
 }
 
 int64_t BinaryDecoder::decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	int64_t integer = 0;
-	try
-	{
-		if(position + 8 > encodedData.size()) return 0;
-		_bl->hf.memcpyBigEndian((char*)&integer, (char*)&encodedData.at(position), 8);
-		position += 8;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    if(position + 8 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    HelperFunctions::memcpyBigEndian((char*)&integer, (char*)&encodedData.at(position), 8);
+    position += 8;
 	return integer;
 }
 
 uint8_t BinaryDecoder::decodeByte(const std::vector<char>& encodedData, uint32_t& position)
 {
 	uint8_t byte = 0;
-	try
-	{
-		if(position + 1 > encodedData.size()) return 0;
-		byte = encodedData.at(position);
-		position += 1;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    byte = encodedData.at(position);
+    position += 1;
 	return byte;
 }
 
 uint8_t BinaryDecoder::decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
 	uint8_t byte = 0;
-	try
-	{
-		if(position + 1 > encodedData.size()) return 0;
-		byte = encodedData.at(position);
-		position += 1;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    byte = encodedData.at(position);
+    position += 1;
 	return byte;
 }
 
 std::string BinaryDecoder::decodeString(const std::vector<char>& encodedData, uint32_t& position)
 {
-	try
-	{
-		int32_t stringLength = decodeInteger(encodedData, position);
-		if(position + stringLength > encodedData.size() || stringLength == 0) return "";
-		if(_ansi && _ansiConverter)
-		{
-			std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
-			position += stringLength;
-			return string;
-		}
-		else
-		{
-			std::string string(&encodedData.at(position), stringLength);
-			position += stringLength;
-			return string;
-		}
-	}
-	catch(const std::exception& ex)
+    int32_t stringLength = decodeInteger(encodedData, position);
+    if(stringLength == 0) return "";
+    if(position + stringLength > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    if(_ansi && _ansiConverter)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
+        position += stringLength;
+        return string;
     }
-    catch(...)
+    else
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        std::string string(&encodedData.at(position), stringLength);
+        position += stringLength;
+        return string;
     }
-    return "";
 }
 
 std::string BinaryDecoder::decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
-	try
-	{
-		int32_t stringLength = decodeInteger(encodedData, position);
-		if(position + stringLength > encodedData.size() || stringLength == 0) return "";
-		if(_ansi && _ansiConverter)
-		{
-			std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
-			position += stringLength;
-			return string;
-		}
-		else
-		{
-			std::string string((char*)&encodedData.at(position), stringLength);
-			position += stringLength;
-			return string;
-		}
-	}
-	catch(const std::exception& ex)
+    int32_t stringLength = decodeInteger(encodedData, position);
+    if(stringLength == 0) return "";
+    if(position + stringLength > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    if(_ansi && _ansiConverter)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        std::string string = std::move(_ansiConverter->toUtf8((char*)&encodedData.at(position), stringLength));
+        position += stringLength;
+        return string;
     }
-    catch(...)
+    else
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        std::string string((char*)&encodedData.at(position), stringLength);
+        position += stringLength;
+        return string;
     }
-    return "";
 }
 
 std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<char>& encodedData, uint32_t& position)
 {
-	std::vector<uint8_t> data;
-	try
-	{
-		int32_t length = decodeInteger(encodedData, position);
-		if(position + length > encodedData.size() || length == 0) return data;
-		data.insert(data.end(), &encodedData.at(position), &encodedData.at(position) + length);
-		position += length;
-		return data;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    int32_t length = decodeInteger(encodedData, position);
+    if(length == 0) return std::vector<uint8_t>();
+    if(position + length > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    std::vector<uint8_t> data(encodedData.begin() + position, encodedData.begin() + position + length);
+    position += length;
     return data;
 }
 
 std::vector<uint8_t> BinaryDecoder::decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
-	std::vector<uint8_t> data;
-	try
-	{
-		int32_t length = decodeInteger(encodedData, position);
-		if(position + length > encodedData.size() || length == 0) return data;
-		data.insert(data.end(), &encodedData.at(position), &encodedData.at(position) + length);
-		position += length;
-		return data;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+    int32_t length = decodeInteger(encodedData, position);
+    if(length == 0) return std::vector<uint8_t>();
+    if(position + length > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    std::vector<uint8_t> data(encodedData.begin() + position, encodedData.begin() + position + length);
+    position += length;
     return data;
 }
 
 double BinaryDecoder::decodeFloat(const std::vector<char>& encodedData, uint32_t& position)
 {
-	try
-	{
-		if(position + 8 > encodedData.size()) return 0;
-		int32_t mantissa = 0;
-		int32_t exponent = 0;
-		_bl->hf.memcpyBigEndian((char*)&mantissa, &encodedData.at(position), 4);
-		position += 4;
-		_bl->hf.memcpyBigEndian((char*)&exponent, &encodedData.at(position), 4);
-		position += 4;
-		double floatValue = (double)mantissa / 0x40000000;
-		floatValue *= std::pow(2, exponent);
-		if(floatValue != 0)
-		{
-			int32_t digits = std::lround(std::floor(std::log10(floatValue) + 1));
-			double factor = std::pow(10, 9 - digits);
-			//Round to 9 digits
-			floatValue = std::floor(floatValue * factor + 0.5) / factor;
-		}
-		return floatValue;
-	}
-	catch(const std::exception& ex)
+    if(position + 8 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    int32_t mantissa = 0;
+    int32_t exponent = 0;
+    HelperFunctions::memcpyBigEndian((char*)&mantissa, &encodedData.at(position), 4);
+    position += 4;
+    HelperFunctions::memcpyBigEndian((char*)&exponent, &encodedData.at(position), 4);
+    position += 4;
+    double floatValue = (double)mantissa / 0x40000000;
+    floatValue *= std::pow(2, exponent);
+    if(floatValue != 0)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        int32_t digits = std::lround(std::floor(std::log10(floatValue) + 1));
+        double factor = std::pow(10, 9 - digits);
+        //Round to 9 digits
+        floatValue = std::floor(floatValue * factor + 0.5) / factor;
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return 0;
+    return floatValue;
 }
 
 double BinaryDecoder::decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
-	try
-	{
-		if(position + 8 > encodedData.size()) return 0;
-		int32_t mantissa = 0;
-		int32_t exponent = 0;
-		_bl->hf.memcpyBigEndian((char*)&mantissa, (char*)&encodedData.at(position), 4);
-		position += 4;
-		_bl->hf.memcpyBigEndian((char*)&exponent, (char*)&encodedData.at(position), 4);
-		position += 4;
-		double floatValue = (double)mantissa / 0x40000000;
-		if(exponent >= 0) floatValue *= (1 << exponent);
-		else floatValue /= (1 << (exponent * -1));
-		if(floatValue != 0)
-		{
-			int32_t digits = std::lround(std::floor(std::log10(floatValue) + 1));
-			double factor = std::pow(10, 9 - digits);
-			//Round to 9 digits
-			floatValue = std::floor(floatValue * factor + 0.5) / factor;
-		}
-		return floatValue;
-	}
-	catch(const std::exception& ex)
+    if(position + 8 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    int32_t mantissa = 0;
+    int32_t exponent = 0;
+    HelperFunctions::memcpyBigEndian((char*)&mantissa, (char*)&encodedData.at(position), 4);
+    position += 4;
+    HelperFunctions::memcpyBigEndian((char*)&exponent, (char*)&encodedData.at(position), 4);
+    position += 4;
+    double floatValue = (double)mantissa / 0x40000000;
+    if(exponent >= 0) floatValue *= (1 << exponent);
+    else floatValue /= (1 << (exponent * -1));
+    if(floatValue != 0)
     {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        int32_t digits = std::lround(std::floor(std::log10(floatValue) + 1));
+        double factor = std::pow(10, 9 - digits);
+        //Round to 9 digits
+        floatValue = std::floor(floatValue * factor + 0.5) / factor;
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return 0;
+    return floatValue;
 }
 
 bool BinaryDecoder::decodeBoolean(const std::vector<char>& encodedData, uint32_t& position)
 {
-	try
-	{
-		if(position + 1 > encodedData.size()) return 0;
-		bool boolean = (bool)encodedData.at(position);
-		position += 1;
-		return boolean;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return false;
+    if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    bool boolean = (bool)encodedData.at(position);
+    position += 1;
+    return boolean;
 }
 
 bool BinaryDecoder::decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position)
 {
-	try
-	{
-		if(position + 1 > encodedData.size()) return 0;
-		bool boolean = (bool)encodedData.at(position);
-		position += 1;
-		return boolean;
-	}
-	catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return false;
+    if(position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
+    bool boolean = (bool)encodedData.at(position);
+    position += 1;
+    return boolean;
 }
 
 }

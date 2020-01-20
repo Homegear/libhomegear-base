@@ -57,23 +57,9 @@ class HelperFunctions
 {
 public:
 	/**
-	 * Constructor.
-	 * It does nothing. You need to call init() to initialize the object.
+	 * Dummy constructor for backwards compatibility
 	 */
 	HelperFunctions();
-
-	/**
-	 * Destructor.
-	 * Does nothing.
-	 */
-	virtual ~HelperFunctions();
-
-	/**
-	 * Initializes the object.
-	 *
-	 * @param baseLib Pointer to the common base library object.
-	 */
-	void init(SharedObjects* baseLib);
 
 	/**
 	 * Gets the current unix time stamp in milliseconds.
@@ -357,7 +343,7 @@ public:
 	 *
 	 * @return Returns true if the system is big endian, otherwise false.
 	 */
-	bool getBigEndian() { return _isBigEndian; }
+	static bool getBigEndian();
 
 	/**
 	 * Generates a random integer.
@@ -383,7 +369,7 @@ public:
 	 * @param[in] from The source array.
 	 * @param length The number of bytes to copy.
 	 */
-	void memcpyBigEndian(char* to, const char* from, const uint32_t& length);
+	static void memcpyBigEndian(char* to, const char* from, const uint32_t& length);
 
 	/**
 	 * Copies binary values from one memory location to another reversing the byte order when the system is little endian.
@@ -392,7 +378,7 @@ public:
 	 * @param[in] from The source array.
 	 * @param length The number of bytes to copy.
 	 */
-	void memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length);
+    static void memcpyBigEndian(uint8_t* to, const uint8_t* from, const uint32_t& length);
 
 	/**
 	 * Copies binary values from a vector to an integer reversing the byte order when the system is little endian.
@@ -400,7 +386,7 @@ public:
 	 * @param[out] to The destination integer.
 	 * @param[in] from The source array. A length less than 4 bytes is allowed.
 	 */
-	void memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& from);
+    static void memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& from);
 
 	/**
 	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian.
@@ -408,7 +394,7 @@ public:
 	 * @param[out] to The destination array.
 	 * @param[in] from The source integer.
 	 */
-	void memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& from);
+    static void memcpyBigEndian(std::vector<uint8_t>& to, const int32_t& from);
 
 	/**
 	 * Copies binary values from a vector to an integer reversing the byte order when the system is little endian.
@@ -416,7 +402,7 @@ public:
 	 * @param[out] to The destination integer.
 	 * @param[in] from The source array. A length less than 4 bytes is allowed.
 	 */
-	void memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from);
+    static void memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from);
 
 	/**
 	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian.
@@ -424,7 +410,7 @@ public:
 	 * @param[out] to The destination array.
 	 * @param[in] from The source integer.
 	 */
-	void memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from);
+    static void memcpyBigEndian(std::vector<uint8_t>& to, const int64_t& from);
 
 	/**
 	 * Converts a hex string to a byte array.
@@ -579,7 +565,7 @@ public:
 	 * @param username The name of the user to get the UID for.
 	 * @return Returns the user ID or "-1" on error.
 	 */
-	uid_t userId(std::string username);
+	static uid_t userId(const std::string& username);
 
 	/**
 	 * Gets the GID of a group.
@@ -587,7 +573,7 @@ public:
 	 * @param groupname The name of the group to get the GID for.
 	 * @return Returns the group ID or "-1" on error.
 	 */
-	gid_t groupId(std::string groupname);
+	static gid_t groupId(const std::string& groupname);
 
 	/**
 	 * Converts GNUTLS certificate verification error codes to human readable error messages.
@@ -624,16 +610,6 @@ public:
 	 */
 	static void* memrchr(const void* s, int c, size_t n);
 private:
-	/**
-	 * Pointer to the common base library object.
-	 */
-	BaseLib::SharedObjects* _bl = nullptr;
-
-	/**
-	 * The result of checkEndianness() is stored in this variable. This is done through calling "init".
-	 */
-	bool _isBigEndian = true;
-
     /**
      * Map to faster convert hexadecimal numbers.
      */
@@ -647,7 +623,7 @@ private:
 	/**
 	 * Checks if the system is little or big endian.
 	 */
-	void checkEndianness();
+	static bool isBigEndian();
 };
 }
 #endif

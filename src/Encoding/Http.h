@@ -148,6 +148,7 @@ public:
 	const std::vector<char>& getContent() const { return _content; }
 	uint32_t getContentSize() const { return _content.empty() ? 0 : (_finished ? _content.size() - 1 : _content.size()); }
 	Header& getHeader() { return _header; }
+	std::unordered_map<std::string, std::string> getParsedQueryString();
 	void reset();
 
 	/**

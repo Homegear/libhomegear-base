@@ -306,6 +306,7 @@ public:
 
 	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort);
 
+	PFileDescriptor getFileDescriptor();
 	std::string getIpAddress();
 	int32_t getPort() { return _boundListenPort; }
 	bool getRequireClientCert() { return _requireClientCert; }

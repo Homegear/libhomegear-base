@@ -167,7 +167,8 @@ public:
 	Systems::UpdateInfo deviceUpdateInfo;
 
 	/**
-	 * Functions to ease your life for a lot of standard operations.
+	 * Functions to ease your life for a lot of standard operations. As all methods are static, this variable is only
+	 * kept for backwards compatibility.
 	 */
 	HelperFunctions hf;
 

@@ -400,4 +400,24 @@ std::string Io::sha512(const std::string& file)
     return "";
 }
 
+bool Io::writeLockFile(int fileDescriptor, bool wait)
+{
+    struct flock lock{};
+    lock.l_type = F_WRLCK;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+    return fcntl(fileDescriptor, wait ? F_SETLKW : F_SETLK, &lock) != -1;
+}
+
+bool Io::readLockFile(int fileDescriptor, bool wait)
+{
+    struct flock lock{};
+    lock.l_type = F_RDLCK;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+    return fcntl(fileDescriptor, wait ? F_SETLKW : F_SETLK, &lock) != -1;
+}
+
 }
