@@ -50,53 +50,64 @@ namespace Rpc
 class RpcEncoder
 {
 public:
-	RpcEncoder(BaseLib::SharedObjects* baseLib);
-	RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64, bool encodeVoid);
-	virtual ~RpcEncoder() {}
+    RpcEncoder();
+    RpcEncoder(bool forceInteger64, bool encodeVoid);
 
-	virtual void insertHeader(std::vector<char>& packet, const RpcHeader& header);
-	virtual void insertHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<char>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
-	virtual void encodeRequest(std::string methodName, PArray parameters, std::vector<uint8_t>& encodedData, std::shared_ptr<RpcHeader> header = nullptr);
-	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData);
-	virtual void encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData);
+    /**
+     * Dummy constructor for backwards compatibility.
+     */
+	explicit RpcEncoder(BaseLib::SharedObjects* baseLib);
+
+    /**
+     * Dummy constructor for backwards compatibility.
+     */
+	RpcEncoder(BaseLib::SharedObjects* baseLib, bool forceInteger64, bool encodeVoid);
+
+	~RpcEncoder() = default;
+
+	static void insertHeader(std::vector<char>& packet, const RpcHeader& header);
+	static void insertHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
+	void encodeRequest(const std::string& methodName, const std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<char>& encodedData, const std::shared_ptr<RpcHeader>& header = nullptr);
+	void encodeRequest(const std::string& methodName, const std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<uint8_t>& encodedData, const std::shared_ptr<RpcHeader>& header = nullptr);
+	void encodeRequest(const std::string& methodName, const PArray& parameters, std::vector<char>& encodedData, const std::shared_ptr<RpcHeader>& header = nullptr);
+	void encodeRequest(const std::string& methodName, const PArray& parameters, std::vector<uint8_t>& encodedData, const std::shared_ptr<RpcHeader>& header = nullptr);
+	void encodeResponse(const std::shared_ptr<Variable>& variable, std::vector<char>& encodedData);
+	void encodeResponse(const std::shared_ptr<Variable>& variable, std::vector<uint8_t>& encodedData);
 private:
-	BaseLib::SharedObjects* _bl = nullptr;
 	bool _forceInteger64 = false;
 	bool _encodeVoid = false;
-	std::unique_ptr<BinaryEncoder> _encoder;
 	char _packetStartRequest[4];
 	char _packetStartResponse[5];
 	char _packetStartError[5];
 
-	uint32_t encodeHeader(std::vector<char>& packet, const RpcHeader& header);
-	uint32_t encodeHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
-	void encodeVariable(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeVariable(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeInteger(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeInteger(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeInteger64(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeInteger64(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeFloat(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeFloat(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBoolean(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBoolean(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeType(std::vector<char>& packet, VariableType type);
-	void encodeType(std::vector<uint8_t>& packet, VariableType type);
-	void encodeString(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeString(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBase64(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBase64(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBinary(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeBinary(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeVoid(std::vector<char>& packet);
-	void encodeVoid(std::vector<uint8_t>& packet);
-	void encodeStruct(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeStruct(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
-	void encodeArray(std::vector<char>& packet, std::shared_ptr<Variable>& variable);
-	void encodeArray(std::vector<uint8_t>& packet, std::shared_ptr<Variable>& variable);
+	static void expandPacket(std::vector<char>& packet, size_t sizeToInsert);
+    static void expandPacket(std::vector<uint8_t>& packet, size_t sizeToInsert);
+	static uint32_t encodeHeader(std::vector<char>& packet, const RpcHeader& header);
+	static uint32_t encodeHeader(std::vector<uint8_t>& packet, const RpcHeader& header);
+	void encodeVariable(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+	void encodeVariable(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+	static void encodeInteger(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeInteger(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeInteger64(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeInteger64(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeFloat(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeFloat(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBoolean(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBoolean(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+	static void encodeType(std::vector<char>& packet, VariableType type);
+	static void encodeType(std::vector<uint8_t>& packet, VariableType type);
+    static void encodeString(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeString(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBase64(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBase64(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBinary(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+    static void encodeBinary(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+    void encodeVoid(std::vector<char>& packet);
+    void encodeVoid(std::vector<uint8_t>& packet);
+	void encodeStruct(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+	void encodeStruct(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
+	void encodeArray(std::vector<char>& packet, const std::shared_ptr<Variable>& variable);
+	void encodeArray(std::vector<uint8_t>& packet, const std::shared_ptr<Variable>& variable);
 };
 }
 }

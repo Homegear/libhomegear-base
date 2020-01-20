@@ -63,6 +63,11 @@ void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, Ch
 	_fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags));
 	if(_fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't open device \"" + _device + "\": " + strerror(errno));
 
+	if(!Io::writeLockFile(_fileDescriptor->descriptor, false))
+    {
+	    throw SerialReaderWriterException("Couldn't open device \"" + _device + "\": Device is locked.");
+    }
+
 	tcflag_t baudrate;
 	switch(_baudrate)
 	{
@@ -293,7 +298,7 @@ int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout, char s
 		FD_ZERO(&readFileDescriptor);
 		FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
 		//Timeout needs to be set every time, so don't put it outside of the while loop
-		timeval timeval;
+		timeval timeval{};
 		timeval.tv_sec = timeout / 1000000;
 		timeval.tv_usec = timeout % 1000000;
 		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);

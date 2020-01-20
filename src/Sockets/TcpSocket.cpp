@@ -181,6 +181,12 @@ TcpSocket::~TcpSocket()
 	if(_dhParams) gnutls_dh_params_deinit(_dhParams);
 }
 
+PFileDescriptor TcpSocket::getFileDescriptor()
+{
+    std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
+    return _socketDescriptor;
+}
+
 std::string TcpSocket::getIpAddress()
 {
 	if(!_ipAddress.empty()) return _ipAddress;
@@ -558,7 +564,7 @@ std::string TcpSocket::getIpAddress()
 					}
 				}
 
-				result = select(maxfd + 1, &readFileDescriptor, NULL, NULL, &timeout);
+				result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
 				if(result == 0)
 				{
 					if(HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections)
@@ -577,7 +583,7 @@ std::string TcpSocket::getIpAddress()
 
 				if (FD_ISSET(socketDescriptor, &readFileDescriptor) && !_stopServer)
 				{
-					struct sockaddr_storage clientInfo;
+					struct sockaddr_storage clientInfo{};
 					socklen_t addressSize = sizeof(addressSize);
 					std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *) &clientInfo, &addressSize));
 					if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
@@ -589,11 +595,11 @@ std::string TcpSocket::getIpAddress()
 						uint16_t port = 0;
 						char ipString[INET6_ADDRSTRLEN];
 						if (clientInfo.ss_family == AF_INET) {
-							struct sockaddr_in *s = (struct sockaddr_in *)&clientInfo;
+							auto *s = (struct sockaddr_in *)&clientInfo;
 							port = ntohs(s->sin_port);
 							inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
 						} else { // AF_INET6
-							struct sockaddr_in6 *s = (struct sockaddr_in6 *)&clientInfo;
+							auto *s = (struct sockaddr_in6 *)&clientInfo;
 							port = ntohs(s->sin6_port);
 							inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
 						}
