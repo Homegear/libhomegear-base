@@ -523,6 +523,14 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::serverThread()
 	{
+        sigset_t signalSet{};
+        sigemptyset(&signalSet);
+        sigaddset(&signalSet, SIGPIPE);
+        if (pthread_sigmask(SIG_BLOCK, &signalSet, nullptr) != 0)
+        {
+            _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
+        }
+
 		int32_t result = 0;
         int32_t socketDescriptor = -1;
         std::map<int32_t, PTcpClientData> clients;
