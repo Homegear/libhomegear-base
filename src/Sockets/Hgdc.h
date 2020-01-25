@@ -47,6 +47,22 @@ namespace BaseLib
 class Hgdc : public IQueue
 {
 private:
+    struct RequestInfo
+    {
+        std::mutex waitMutex;
+        std::condition_variable conditionVariable;
+    };
+    typedef std::shared_ptr<RequestInfo> PRequestInfo;
+
+    struct RpcResponse
+    {
+        std::atomic_bool finished{false};
+        int32_t packetId = 0;
+        BaseLib::PVariable response;
+    };
+
+    typedef std::shared_ptr<RpcResponse> PRpcResponse;
+
     class QueueEntry : public BaseLib::IQueueEntry
     {
     public:
@@ -75,14 +91,17 @@ private:
     std::mutex _reconnectedEventHandlersMutex;
     std::unordered_map<int32_t, std::function<void()>> _reconnectedEventHandlers;
 
-    std::mutex _invokeMutex;
-    std::mutex _requestMutex;
-    std::atomic_bool _waitForResponse{false};
-    std::condition_variable _requestConditionVariable;
-    BaseLib::PVariable _rpcResponse;
+    // {{{ Needed for "invoke()"
+    std::mutex _requestInfoMutex;
+    std::map<pthread_t, PRequestInfo> _requestInfo;
+    std::mutex _packetIdMutex;
+    int32_t _currentPacketId = 0;
+    std::mutex _rpcResponsesMutex;
+    std::unordered_map<pthread_t, std::unordered_map<int32_t, PRpcResponse>> _rpcResponses;
+    // }}}
 
     void listen();
-    PVariable invoke(const std::string& methodName, const PArray& parameters);
+    PVariable invoke(const std::string& methodName, const PArray& parameters, int32_t timeout = 10000);
     void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry) override;
 public:
     explicit Hgdc(SharedObjects* bl, uint16_t port);
