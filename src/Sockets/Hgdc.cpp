@@ -68,7 +68,7 @@ void Hgdc::start()
 
         _tcpSocket.reset(new BaseLib::TcpSocket(_bl, "localhost", std::to_string(_port)));
         _tcpSocket->setConnectionRetries(1);
-        _tcpSocket->setReadTimeout(5000000);
+        _tcpSocket->setReadTimeout(1000000);
         _tcpSocket->setWriteTimeout(5000000);
 
         try
@@ -409,6 +409,33 @@ bool Hgdc::sendPacket(const std::string& serialNumber, const std::vector<char>& 
         if(result->errorStruct)
         {
             _out.printError("Error sending packet " + BaseLib::HelperFunctions::getHexString(packet) + ": " + result->structValue->at("faultString")->stringValue);
+            return false;
+        }
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return false;
+}
+
+bool Hgdc::setMode(const std::string& serialNumber, uint8_t mode)
+{
+    try
+    {
+        if(!_tcpSocket || !_tcpSocket->connected()) return false;
+
+        BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
+        parameters->reserve(2);
+        parameters->push_back(std::make_shared<BaseLib::Variable>(serialNumber));
+        parameters->push_back(std::make_shared<BaseLib::Variable>((int64_t)mode));
+
+        auto result = invoke("moduleSetMode", parameters);
+        if(result->errorStruct)
+        {
+            _out.printError("Error setting mode: " + result->structValue->at("faultString")->stringValue);
             return false;
         }
 

@@ -1237,7 +1237,7 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1324,7 +1324,7 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1411,7 +1411,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1512,7 +1512,7 @@ void TcpSocket::getSsl()
 		throw SocketSslException("Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
 	}
 	if(!_socketDescriptor->tlsSession) throw SocketSslException("Could not initialize TLS session.");
-	if((result = gnutls_priority_set_direct(_socketDescriptor->tlsSession, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
+	if((result = gnutls_priority_set_direct(_socketDescriptor->tlsSession, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
 	{
 		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSslException("Could not set cipher priorities: " + std::string(gnutls_strerror(result)));

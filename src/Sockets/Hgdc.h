@@ -101,6 +101,7 @@ public:
     PVariable getModules(int64_t familyId = -1);
     bool sendPacket(const std::string& serialNumber, const std::vector<uint8_t>& packet);
     bool sendPacket(const std::string& serialNumber, const std::vector<char>& packet);
+    bool setMode(const std::string& serialNumber, uint8_t mode);
 };
 
 }
