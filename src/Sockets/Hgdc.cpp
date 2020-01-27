@@ -302,7 +302,7 @@ void Hgdc::listen()
                                 else
                                 {
                                     pthread_t threadId = response->arrayValue->at(0)->integerValue64;
-                                    int32_t packetId = response->arrayValue->at(0)->integerValue;
+                                    int32_t packetId = response->arrayValue->at(1)->integerValue;
 
                                     std::lock_guard<std::mutex> requestInfoGuard(_requestInfoMutex);
                                     auto requestIterator = _requestInfo.find(threadId);
@@ -433,6 +433,8 @@ PVariable Hgdc::invoke(const std::string& methodName, const PArray& parameters, 
             requestInfoGuard.lock();
             _requestInfo.erase(threadId);
         }
+
+        return result;
     }
     catch(const std::exception& ex)
     {
