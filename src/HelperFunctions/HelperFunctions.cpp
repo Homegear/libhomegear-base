@@ -115,8 +115,8 @@ std::string HelperFunctions::getTimeString(std::string format, int64_t time)
 std::string HelperFunctions::getTimeUuid(int64_t time)
 {
     std::string uuid;
-    uuid.reserve(54);
     uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
+    uuid.reserve(53);
     uuid.push_back('-');
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");

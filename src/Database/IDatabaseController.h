@@ -61,7 +61,7 @@ class IDatabaseController
 public:
 	struct HomegearVariables
 	{
-		enum Enum { version = 0, upnpusn = 1 };
+		enum Enum { version = 0, upnpusn = 1, uniqueid = 2 };
 	};
 
 	IDatabaseController() {}
