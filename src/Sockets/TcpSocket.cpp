@@ -218,7 +218,7 @@ std::string TcpSocket::getIpAddress()
 		_stopServer = false;
 		listenAddress = _ipAddress;
 
-        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
 		for(auto& serverThread : _serverThreads)
 		{
@@ -238,7 +238,7 @@ std::string TcpSocket::getIpAddress()
 		bindSocket();
 		listenAddress = _ipAddress;
 
-        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
         for(auto& serverThread : _serverThreads)
         {
@@ -259,7 +259,7 @@ std::string TcpSocket::getIpAddress()
 		listenAddress = _ipAddress;
 		listenPort = _boundListenPort;
 
-        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
         for(auto& serverThread : _serverThreads)
         {
@@ -694,9 +694,13 @@ std::string TcpSocket::getIpAddress()
 
 				if(clientData && !clientData->busy)
                 {
-                    clientData->busy = true;
-                    std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
-                    enqueue(0, queueEntry);
+                    if(queueIsStarted(0))
+                    {
+                        clientData->busy = true;
+                        std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
+                        enqueue(0, queueEntry);
+                    }
+                    else readClient(clientData);
                 }
 			}
 			catch(const std::exception& ex)

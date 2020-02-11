@@ -450,8 +450,9 @@ public:
 		 * @see bindServerSocket
 		 *
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startPreboundServer(std::string& listenAddress, size_t processingThreads = 1);
+		void startPreboundServer(std::string& listenAddress, size_t processingThreads = 0);
 
 		/**
 		 * Starts listening.
@@ -459,8 +460,9 @@ public:
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
 		 * @param port The port number to bind the server to.
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 1);
+		void startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 0);
 
 		/**
 		 * Starts listening on a dynamically assigned port.
@@ -468,8 +470,9 @@ public:
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 * @param[out] listenPort The port the server was bound to (e. g. `45735`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads = 1);
+		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads = 0);
 
 		/**
 		 * Starts stopping the server and returns immediately.
