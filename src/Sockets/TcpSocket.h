@@ -33,6 +33,7 @@
 
 #include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
+#include "../IQueue.h"
 
 #include <thread>
 #include <string>
@@ -153,7 +154,7 @@ class SharedObjects;
  *     }
  *
  */
-class TcpSocket
+class TcpSocket : public IQueue
 {
 public:
 	typedef std::vector<uint8_t> TcpPacket;
@@ -165,6 +166,7 @@ public:
 		std::vector<uint8_t> buffer;
 		std::shared_ptr<TcpSocket> socket;
         std::string clientCertDn;
+        std::atomic_bool busy{false};
 
 		TcpClientData()
 		{
@@ -172,6 +174,21 @@ public:
 		}
 	};
 	typedef std::shared_ptr<TcpClientData> PTcpClientData;
+
+    class QueueEntry : public BaseLib::IQueueEntry
+    {
+    public:
+        QueueEntry() = default;
+
+        explicit QueueEntry(const PTcpClientData& clientData)
+        {
+            this->clientData = clientData;
+        }
+
+        ~QueueEntry() override = default;
+
+        PTcpClientData clientData;
+    };
 
     struct CertificateInfo
     {
@@ -434,7 +451,7 @@ public:
 		 *
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 */
-		void startPreboundServer(std::string& listenAddress);
+		void startPreboundServer(std::string& listenAddress, size_t processingThreads = 1);
 
 		/**
 		 * Starts listening.
@@ -443,7 +460,7 @@ public:
 		 * @param port The port number to bind the server to.
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 */
-		void startServer(std::string address, std::string port, std::string& listenAddress);
+		void startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 1);
 
 		/**
 		 * Starts listening on a dynamically assigned port.
@@ -452,7 +469,7 @@ public:
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 * @param[out] listenPort The port the server was bound to (e. g. `45735`).
 		 */
-		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort);
+		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads = 1);
 
 		/**
 		 * Starts stopping the server and returns immediately.
@@ -471,7 +488,7 @@ public:
 		 * @param packet The data to send.
 		 * @param closeConnection Close the connection after sending the packet.
 		 */
-		void sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection = false);
+        bool sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection = false);
 
         /**
          * Sends a response to a TCP client connected to the server.
@@ -480,7 +497,7 @@ public:
          * @param packet The data to send.
          * @param closeConnection Close the connection after sending the packet.
          */
-        void sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
+        bool sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
 
         /**
          * Closes the connection to a connected client.
@@ -567,6 +584,7 @@ protected:
 		void bindSocket();
 
 		void serverThread();
+		void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry) override;
 		void collectGarbage();
 		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
 		void initClientSsl(PTcpClientData& clientData);

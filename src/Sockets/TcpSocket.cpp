@@ -35,7 +35,7 @@
 
 namespace BaseLib
 {
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -44,7 +44,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -54,7 +54,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 	else _socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -144,7 +144,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
     if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_connecting = false;
@@ -213,17 +213,20 @@ std::string TcpSocket::getIpAddress()
 		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
 	}
 
-	void TcpSocket::startPreboundServer(std::string& listenAddress)
+	void TcpSocket::startPreboundServer(std::string& listenAddress, size_t processingThreads)
 	{
 		_stopServer = false;
 		listenAddress = _ipAddress;
+
+        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
 		for(auto& serverThread : _serverThreads)
 		{
 			_bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
 		}
 	}
 
-	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
+	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads)
 	{
 		waitForServerStopped();
 
@@ -234,13 +237,16 @@ std::string TcpSocket::getIpAddress()
 		_listenPort = port;
 		bindSocket();
 		listenAddress = _ipAddress;
+
+        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
         for(auto& serverThread : _serverThreads)
         {
             _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
         }
 	}
 
-	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort)
+	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads)
 	{
 		waitForServerStopped();
 
@@ -252,6 +258,9 @@ std::string TcpSocket::getIpAddress()
 		bindSocket();
 		listenAddress = _ipAddress;
 		listenPort = _boundListenPort;
+
+        startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
         for(auto& serverThread : _serverThreads)
         {
             _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
@@ -265,6 +274,8 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::waitForServerStopped()
 	{
+        stopQueue(0);
+
 		_stopServer = true;
         for(auto& serverThread : _serverThreads)
         {
@@ -444,7 +455,7 @@ std::string TcpSocket::getIpAddress()
 		}
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
+	bool TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -452,7 +463,7 @@ std::string TcpSocket::getIpAddress()
 			{
 				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 				auto clientIterator = _clients.find(clientId);
-				if(clientIterator == _clients.end()) return;
+				if(clientIterator == _clients.end()) return false;
 				clientData = clientIterator->second;
 			}
 
@@ -462,15 +473,17 @@ std::string TcpSocket::getIpAddress()
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
+			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
+        return false;
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
+	bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -478,7 +491,7 @@ std::string TcpSocket::getIpAddress()
 			{
 				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 				auto clientIterator = _clients.find(clientId);
-				if(clientIterator == _clients.end()) return;
+				if(clientIterator == _clients.end()) return false;
 				clientData = clientIterator->second;
 			}
 
@@ -488,12 +501,14 @@ std::string TcpSocket::getIpAddress()
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
+			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
 			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
+		return false;
 	}
 
 	void TcpSocket::closeClientConnection(int32_t clientId)
@@ -565,7 +580,7 @@ std::string TcpSocket::getIpAddress()
 					{
 						for(auto& client : clients)
 						{
-							if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+							if(client.second->busy || !client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
 							FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
 							if(client.second->fileDescriptor->descriptor > maxfd) maxfd = client.second->fileDescriptor->descriptor;
 						}
@@ -677,7 +692,12 @@ std::string TcpSocket::getIpAddress()
 					}
 				}
 
-				if(clientData) readClient(clientData);
+				if(clientData && !clientData->busy)
+                {
+                    clientData->busy = true;
+                    std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
+                    enqueue(0, queueEntry);
+                }
 			}
 			catch(const std::exception& ex)
 			{
@@ -687,6 +707,23 @@ std::string TcpSocket::getIpAddress()
         std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
 		_bl->fileDescriptorManager.close(_socketDescriptor);
 	}
+
+    void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry)
+    {
+        try
+        {
+            std::shared_ptr<QueueEntry> queueEntry;
+            queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
+            if(!queueEntry) return;
+
+            readClient(queueEntry->clientData);
+            queueEntry->clientData->busy = false;
+        }
+        catch(const std::exception& ex)
+        {
+            _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        }
+    }
 
 	void TcpSocket::collectGarbage()
 	{

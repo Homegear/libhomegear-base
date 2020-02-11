@@ -67,14 +67,14 @@ void HttpServer::bind(std::string address, std::string port, std::string& listen
 	_socket->bindServerSocket(address, port, listenAddress);
 }
 
-void HttpServer::startPrebound(std::string& listenAddress)
+void HttpServer::startPrebound(std::string& listenAddress, size_t processingThreads)
 {
-	_socket->startPreboundServer(listenAddress);
+	_socket->startPreboundServer(listenAddress, processingThreads);
 }
 
-void HttpServer::start(std::string address, std::string port, std::string& listenAddress)
+void HttpServer::start(std::string address, std::string port, std::string& listenAddress, size_t processingThreads)
 {
-	_socket->startServer(address, port, listenAddress);
+	_socket->startServer(address, port, listenAddress, processingThreads);
 }
 
 void HttpServer::stop()

@@ -162,9 +162,9 @@ public:
 	 *
 	 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 	 */
-	void startPrebound(std::string& listenAddress);
+	void startPrebound(std::string& listenAddress, size_t processingThreads = 1);
 
-	void start(std::string address, std::string port, std::string& listenAddress);
+	void start(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 1);
 	void stop();
 	void waitForStop();
 
