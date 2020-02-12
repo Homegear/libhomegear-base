@@ -444,8 +444,36 @@ std::string TcpSocket::getIpAddress()
 
 				if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
 
-				std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
-				if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
+                if(_packetReceivedCallback)
+                {
+                    if(queueIsStarted(0))
+                    {
+                        auto bytesReceived = std::make_shared<std::vector<uint8_t>>(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+                        std::lock_guard<std::mutex> backlogGuard(clientData->backlogMutex);
+                        clientData->backlog.push(std::move(bytesReceived));
+                        if(clientData->backlog.size() > 10000)
+                        {
+                            while(!clientData->backlog.empty())
+                            {
+                                clientData->backlog.pop();
+                            }
+                            _bl->fileDescriptorManager.close(clientData->fileDescriptor);
+                            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                            return;
+                        }
+                        if(!clientData->busy)
+                        {
+                            clientData->busy = true;
+                            std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
+                            enqueue(0, queueEntry);
+                        }
+                    }
+                    else
+                    {
+                        std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+                        _packetReceivedCallback(clientData->id, bytesReceived);
+                    }
+                }
 			}
 		}
 		catch(const std::exception& ex)
@@ -580,7 +608,7 @@ std::string TcpSocket::getIpAddress()
 					{
 						for(auto& client : clients)
 						{
-							if(client.second->busy || !client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+							if(!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
 							FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
 							if(client.second->fileDescriptor->descriptor > maxfd) maxfd = client.second->fileDescriptor->descriptor;
 						}
@@ -692,16 +720,7 @@ std::string TcpSocket::getIpAddress()
 					}
 				}
 
-				if(clientData && !clientData->busy)
-                {
-                    if(queueIsStarted(0))
-                    {
-                        clientData->busy = true;
-                        std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
-                        enqueue(0, queueEntry);
-                    }
-                    else readClient(clientData);
-                }
+				if(clientData) readClient(clientData);
 			}
 			catch(const std::exception& ex)
 			{
@@ -720,8 +739,24 @@ std::string TcpSocket::getIpAddress()
             queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
             if(!queueEntry) return;
 
-            readClient(queueEntry->clientData);
-            queueEntry->clientData->busy = false;
+            std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
+            bool more = !queueEntry->clientData->backlog.empty();
+            backlogGuard.unlock();
+
+            while(more)
+            {
+                backlogGuard.lock();
+                auto packet = queueEntry->clientData->backlog.front();
+                queueEntry->clientData->backlog.pop();
+                backlogGuard.unlock();
+
+                if(_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
+
+                backlogGuard.lock();
+                more = !queueEntry->clientData->backlog.empty();
+                if(!more) queueEntry->clientData->busy = false;
+                backlogGuard.unlock();
+            }
         }
         catch(const std::exception& ex)
         {

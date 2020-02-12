@@ -64,6 +64,7 @@
 
 #include <gnutls/x509.h>
 #include <gnutls/gnutls.h>
+#include <queue>
 
 namespace BaseLib
 {
@@ -166,7 +167,12 @@ public:
 		std::vector<uint8_t> buffer;
 		std::shared_ptr<TcpSocket> socket;
         std::string clientCertDn;
-        std::atomic_bool busy{false};
+        /**
+         * Mutex for `busy` and `backlog`
+         */
+        std::mutex backlogMutex;
+        bool busy = false;
+        std::queue<std::shared_ptr<TcpPacket>> backlog;
 
 		TcpClientData()
 		{
