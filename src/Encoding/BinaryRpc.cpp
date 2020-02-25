@@ -36,16 +36,13 @@ namespace BaseLib
 namespace Rpc
 {
 
-BinaryRpc::BinaryRpc(BaseLib::SharedObjects* bl)
+BinaryRpc::BinaryRpc()
 {
-	_bl = bl;
-	if(_bl == nullptr) throw BinaryRpcException("Base library pointer is null.");
 	_data.reserve(1024);
 }
 
-BinaryRpc::~BinaryRpc()
+BinaryRpc::BinaryRpc(BaseLib::SharedObjects* bl) : BinaryRpc()
 {
-
 }
 
 int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
@@ -77,7 +74,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 		if(_data[3] == 0x40 ||_data[3] == 0x41)
 		{
 			_hasHeader = true;
-			_bl->hf.memcpyBigEndian((char*)&_headerSize, _data.data() + 4, 4);
+			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_headerSize, _data.data() + 4, 4);
 			if(_headerSize > _maxHeaderSize)
 			{
 				_finished = true;
@@ -86,7 +83,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 		}
 		else
 		{
-			_bl->hf.memcpyBigEndian((char*)&_dataSize, _data.data() + 4, 4);
+			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_dataSize, _data.data() + 4, 4);
 			if(_dataSize > _maxContentSize)
 			{
 				_finished = true;
@@ -110,7 +107,7 @@ int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
 			_data.insert(_data.end(), buffer, buffer + sizeToInsert);
 			buffer += sizeToInsert;
 			bufferLength -= sizeToInsert;
-			_bl->hf.memcpyBigEndian((char*)&_dataSize, _data.data() + 8 + _headerSize, 4);
+			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_dataSize, _data.data() + 8 + _headerSize, 4);
 			_dataSize += _headerSize + 4;
 			if(_dataSize > _maxContentSize)
 			{

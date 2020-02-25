@@ -685,7 +685,10 @@ std::string TcpSocket::getIpAddress()
 
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-							currentClientId = _currentClientId++;
+							while(currentClientId == 0)
+                            {
+                                currentClientId = _currentClientId++;
+                            }
 							clientData->id = currentClientId;
 							_clients[currentClientId] = clientData;
 						}
