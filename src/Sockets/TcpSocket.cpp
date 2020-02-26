@@ -667,8 +667,6 @@ std::string TcpSocket::getIpAddress()
 							}
 						}
 
-						int32_t currentClientId = 0;
-
                         if(_stopServer)
                         {
                             _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
@@ -682,6 +680,8 @@ std::string TcpSocket::getIpAddress()
 						clientData->socket->setWriteTimeout(15000000);
 
                         if(_useSsl) initClientSsl(clientData);
+
+                        int32_t currentClientId = 0;
 
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
