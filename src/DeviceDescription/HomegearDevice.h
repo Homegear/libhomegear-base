@@ -91,6 +91,7 @@ public:
 	bool hasBattery = false;
 	uint32_t addressSize = 0;
 	std::string pairingMethod;
+	std::string interface;
 	// }}}
 
 	// {{{ Elements

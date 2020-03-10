@@ -531,6 +531,18 @@ void HomegearDevice::saveDevice(xml_document<>* doc, xml_node<>* parentNode, Hom
 				xml_node<>* subnode = doc->allocate_node(node_element, "addressSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
 				node->append_node(subnode);
 			}
+
+            if(!device->pairingMethod.empty())
+            {
+                xml_node<>* subnode = doc->allocate_node(node_element, "pairingMethod", doc->allocate_string(device->pairingMethod.c_str(), device->pairingMethod.size() + 1));
+                node->append_node(subnode);
+            }
+
+            if(!device->interface.empty())
+            {
+                xml_node<>* subnode = doc->allocate_node(node_element, "interface", doc->allocate_string(device->interface.c_str(), device->interface.size() + 1));
+                node->append_node(subnode);
+            }
 		// }}}
 
 		std::map<std::string, PConfigParameters> configParameters;
@@ -2545,6 +2557,7 @@ void HomegearDevice::parseXML(xml_node<>* node)
 					else if(propertyName == "hasBattery") { if(propertyValue == "true") hasBattery = true; }
 					else if(propertyName == "addressSize") addressSize = Math::getUnsignedNumber(propertyValue);
 					else if(propertyName == "pairingMethod") pairingMethod = propertyValue;
+                    else if(propertyName == "interface") interface = propertyValue;
 					else _bl->out.printWarning("Warning: Unknown device property: " + propertyName);
 				}
 				if(receiveModes == ReceiveModes::Enum::none) receiveModes = ReceiveModes::Enum::always;
