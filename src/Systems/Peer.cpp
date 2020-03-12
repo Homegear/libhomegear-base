@@ -916,8 +916,8 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
                 }
 
                 std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                parameterStruct.databaseId = createParameter(ParameterGroup::Type::config, channel, parameter.second->id, data);
                 channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
-                saveParameter(0, ParameterGroup::Type::config, channel, parameter.second->id, data);
             }
         }
     }
@@ -953,8 +953,8 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
                 }
 
                 std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                parameterStruct.databaseId = createParameter(ParameterGroup::Type::variables, channel, parameter.second->id, data);
                 channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
-                saveParameter(0, ParameterGroup::Type::variables, channel, parameter.second->id, data);
             }
         }
     }
@@ -1046,6 +1046,29 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
+}
+
+uint64_t Peer::createParameter(ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
+{
+    try
+    {
+        if(_peerID == 0 || (isTeam() && !_saveTeam)) return 0;
+        //Creates a new entry for parameter in database
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(_peerID));
+        data.push_back(std::make_shared<Database::DataColumn>((uint32_t)parameterSetType));
+        data.push_back(std::make_shared<Database::DataColumn>(channel));
+        data.push_back(std::make_shared<Database::DataColumn>(remoteAddress));
+        data.push_back(std::make_shared<Database::DataColumn>(remoteChannel));
+        data.push_back(std::make_shared<Database::DataColumn>(parameterName));
+        data.push_back(std::make_shared<Database::DataColumn>(value));
+        return _bl->db->savePeerParameterSynchronous(data);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return 0;
 }
 
 void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
@@ -1857,9 +1880,27 @@ bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t 
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) return false;
+        if(channelIterator == valuesCentral.end())
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room: Channel not found.");
+            return false;
+        }
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+        if(variableIterator == channelIterator->second.end())
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room: Variable not found.");
+            return false;
+        }
+        if(!variableIterator->second.rpcParameter)
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room: Variable has no associated RPC parameter. Try to restart Homegear.");
+            return false;
+        }
+        if(variableIterator->second.databaseId == 0)
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room: Variable has no associated database ID. Try to restart Homegear.");
+            return false;
+        }
         variableIterator->second.setRoom(roomId);
 
         Database::DataRow data;

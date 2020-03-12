@@ -379,6 +379,19 @@ public:
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
 	virtual void loadConfig();
     virtual void saveConfig();
+
+    /**
+     * In contrast to saveParameter() this method waits for the parameter to be created and returns it's database ID.
+     *
+     * @param parameterSetType
+     * @param channel
+     * @param parameterName
+     * @param value
+     * @param remoteAddress
+     * @param remoteChannel
+     * @return
+     */
+    virtual uint64_t createParameter(ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
 	virtual void saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
     virtual void saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t specialType, const BaseLib::PVariable& metadata, const std::string& roles);
 	virtual void saveParameter(uint32_t parameterID, uint32_t address, std::vector<uint8_t>& value);
