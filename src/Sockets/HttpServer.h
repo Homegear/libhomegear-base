@@ -170,6 +170,8 @@ public:
 
 	void send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection = true);
 	void send(int32_t clientId, const std::vector<char>& packet, bool closeConnection = true);
+
+	std::string getClientCertDn(int32_t clientId);
 protected:
 	struct HttpClientInfo
 	{

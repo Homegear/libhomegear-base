@@ -163,4 +163,9 @@ void HttpServer::send(int32_t clientId, const std::vector<char>& packet, bool cl
     _socket->sendToClient(clientId, packet, closeConnection);
 }
 
+std::string HttpServer::getClientCertDn(int32_t clientId)
+{
+    return _socket ? _socket->getClientCertDn(clientId) : "";
+}
+
 }
