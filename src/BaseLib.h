@@ -205,9 +205,9 @@ public:
 	/**
 	 * Main constructor.
 	 *
-	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.
+	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time. This is only relevant when using the thread manager.
 	 */
-	SharedObjects(bool testMaxThreadCount = false);
+	explicit SharedObjects(bool testMaxThreadCount = false);
 
 	/**
 	 * Destructor.

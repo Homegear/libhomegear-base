@@ -42,7 +42,7 @@ void* threadCountTest(void*)
     {
     	std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    return 0;
+    return nullptr;
 }
 
 ThreadManager::ThreadManager()
@@ -69,9 +69,9 @@ void ThreadManager::testMaxThreadCount()
 		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
 		{
 			_stopThreadCountTest = true;
-			for(std::vector<pthread_t>::iterator i = threads.begin(); i != threads.end(); ++i)
+			for(auto i : threads)
 			{
-				pthread_join(*i, nullptr);
+				pthread_join(i, nullptr);
 			}
 			_maxThreadCount = _maxThreadCount * 90 / 100;
 			return;

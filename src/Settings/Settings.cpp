@@ -87,7 +87,6 @@ void Settings::reset()
 	_waitForCorrectTime = true;
 	_prioritizeThreads = true;
 	_secureMemorySize = 65536;
-	_stackSize = 0;
 	_workerThreadWindow = 3000;
 	_scriptEngineThreadCount = 10;
 	_scriptEngineServerMaxConnections = 10;
@@ -460,12 +459,6 @@ void Settings::load(std::string filename, std::string executablePath)
 					//Allow 0 => disable secure memory. 16384 is minimum size. Values smaller than 16384 are set to 16384 by gcrypt: https://gnupg.org/documentation/manuals/gcrypt-devel/Controlling-the-library.html
 					_bl->out.printDebug("Debug: secureMemorySize set to " + std::to_string(_secureMemorySize));
 				}
-                else if(name == "stacksize")
-                {
-                    _stackSize = Math::getNumber(value);
-                    //Allow 0 => Use default stack size
-                    _bl->out.printDebug("Debug: stackSize set to " + std::to_string(_stackSize));
-                }
 				else if(name == "workerthreadwindow")
 				{
 					_workerThreadWindow = Math::getNumber(value);

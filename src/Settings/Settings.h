@@ -91,7 +91,6 @@ public:
 	bool prioritizeThreads() { return _prioritizeThreads; }
 	void setPrioritizeThreads(bool value) { _prioritizeThreads = value; }
 	uint32_t secureMemorySize() { return _secureMemorySize; }
-	uint32_t stackSize() { return _stackSize; }
 	uint32_t workerThreadWindow() { return _workerThreadWindow; }
 	uint32_t scriptEngineThreadCount() { return _scriptEngineThreadCount; }
 	uint32_t scriptEngineServerMaxConnections() { return _scriptEngineServerMaxConnections; }
@@ -221,7 +220,6 @@ private:
 	bool _waitForCorrectTime = true;
 	bool _prioritizeThreads = true;
 	uint32_t _secureMemorySize = 65536;
-    uint32_t _stackSize = 0;
 	uint32_t _workerThreadWindow = 3000;
 	uint32_t _scriptEngineThreadCount = 10;
 	uint32_t _scriptEngineServerMaxConnections = 20;
