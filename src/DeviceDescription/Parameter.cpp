@@ -125,7 +125,7 @@ void Parameter::parseXml(xml_node<>* node)
                         else if(castName == "integerIntegerMap") casts.push_back(std::make_shared<IntegerIntegerMap>(_bl, castNode, shared_from_this()));
                         else if(castName == "booleanInteger") casts.push_back(std::make_shared<BooleanInteger>(_bl, castNode, shared_from_this()));
                         else if(castName == "booleanDecimal") casts.push_back(std::make_shared<BooleanDecimal>(_bl, castNode, shared_from_this()));
-                        else if(castName == "booleanString") casts.push_back(std::make_shared<BooleanInteger>(_bl, castNode, shared_from_this()));
+                        else if(castName == "booleanString") casts.push_back(std::make_shared<BooleanString>(_bl, castNode, shared_from_this()));
                         else if(castName == "decimalConfigTime") casts.push_back(std::make_shared<DecimalConfigTime>(_bl, castNode, shared_from_this()));
                         else if(castName == "integerTinyFloat") casts.push_back(std::make_shared<IntegerTinyFloat>(_bl, castNode, shared_from_this()));
                         else if(castName == "stringUnsignedInteger") casts.push_back(std::make_shared<StringUnsignedInteger>(_bl, castNode, shared_from_this()));
