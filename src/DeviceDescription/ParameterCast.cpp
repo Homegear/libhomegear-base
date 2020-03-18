@@ -382,6 +382,57 @@ void BooleanInteger::toPacket(PVariable& value)
 	value->booleanValue = false;
 }
 
+BooleanDecimal::BooleanDecimal(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
+{
+}
+
+BooleanDecimal::BooleanDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"booleanDecimal\": " + std::string(attr->name()));
+	}
+	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "trueValue") trueValue = Math::getDouble(value);
+		else if(name == "falseValue") falseValue = Math::getDouble(value);
+		else if(name == "invert") { if(value == "true") invert = true; }
+		else if(name == "threshold") threshold = Math::getDouble(value);
+		else _bl->out.printWarning("Warning: Unknown node in \"booleanDecimal\": " + name);
+	}
+}
+
+void BooleanDecimal::fromPacket(PVariable& value)
+{
+	if(!value) return;
+	value->type = VariableType::tBoolean;
+	if(trueValue == 0 && falseValue == 0)
+	{
+		if(value->floatValue >= threshold) value->booleanValue = true;
+		else value->booleanValue = false;
+	}
+	else
+	{
+		if(value->floatValue == falseValue) value->booleanValue = false;
+		if(value->floatValue == trueValue || value->floatValue >= threshold) value->booleanValue = true;
+	}
+	if(invert) value->booleanValue = !value->booleanValue;
+	value->integerValue = 0;
+}
+
+void BooleanDecimal::toPacket(PVariable& value)
+{
+	if(!value) return;
+	value->type = VariableType::tFloat;
+	if(invert) value->booleanValue = !value->booleanValue;
+	if(trueValue == 0 && falseValue == 0) value->floatValue = (double)value->booleanValue;
+	else if(value->booleanValue) value->floatValue = trueValue;
+	else value->floatValue = falseValue;
+	value->booleanValue = false;
+}
+
 BooleanString::BooleanString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
