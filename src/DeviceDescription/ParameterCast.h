@@ -190,6 +190,23 @@ public:
 	int32_t threshold = 1;
 };
 
+class BooleanDecimal : public ICast
+{
+public:
+    explicit BooleanDecimal(BaseLib::SharedObjects* baseLib);
+    explicit BooleanDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	~BooleanDecimal() override = default;
+
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
+
+	//Elements
+	double trueValue = 0;
+	double falseValue = 0;
+	bool invert = false;
+	double threshold = 1;
+};
+
 class BooleanString : public ICast
 {
 public:
@@ -437,6 +454,7 @@ typedef std::shared_ptr<ICast> PICast;
 typedef std::vector<PICast> Casts;
 typedef std::shared_ptr<BlindTest> PBlindTest;
 typedef std::shared_ptr<BooleanInteger> PBooleanInteger;
+typedef std::shared_ptr<BooleanDecimal> PBooleanDecimal;
 typedef std::shared_ptr<BooleanString> PBooleanString;
 typedef std::shared_ptr<CcrtdnParty> PCcrtdnParty;
 typedef std::shared_ptr<Cfm> PCfm;

@@ -504,6 +504,15 @@ void HmConverter::convertParameter(std::shared_ptr<HomeMaticParameter> homematic
 			cast->threshold = (*i)->threshold;
 			parameter->casts.push_back(cast);
 		}
+		else if((*i)->type == ParameterConversion::Type::booleanDecimal)
+		{
+			PBooleanDecimal cast(new BooleanDecimal(_bl));
+			cast->trueValue = (*i)->valueTrue;
+			cast->falseValue = (*i)->valueFalse;
+			cast->invert = (*i)->invert;
+			cast->threshold = (*i)->threshold;
+			parameter->casts.push_back(cast);
+		}
 		else if((*i)->type == ParameterConversion::Type::booleanString)
 		{
 			PBooleanString cast(new BooleanString(_bl));

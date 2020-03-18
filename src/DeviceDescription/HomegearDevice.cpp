@@ -1470,6 +1470,45 @@ void HomegearDevice::saveParameter(xml_document<>* doc, xml_node<>* parentNode, 
 					}
 
 					{
+						PBooleanDecimal booleanDecimal;
+						booleanDecimal = std::dynamic_pointer_cast<BooleanDecimal>(*i);
+						if(booleanDecimal)
+						{
+							xml_node<>* castNode = doc->allocate_node(node_element, "booleanDecimal");
+							node->append_node(castNode);
+
+							if(booleanDecimal->trueValue != 0)
+							{
+								tempString = std::to_string(booleanDecimal->trueValue);
+								xml_node<>* subnode = doc->allocate_node(node_element, "trueValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+								castNode->append_node(subnode);
+							}
+
+							if(booleanDecimal->falseValue != 0)
+							{
+								tempString = std::to_string(booleanDecimal->falseValue);
+								xml_node<>* subnode = doc->allocate_node(node_element, "falseValue", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+								castNode->append_node(subnode);
+							}
+
+							if(booleanDecimal->invert)
+							{
+								tempString = "true";
+								xml_node<>* subnode = doc->allocate_node(node_element, "invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+								castNode->append_node(subnode);
+							}
+
+							if(booleanDecimal->threshold != 1)
+							{
+								tempString = std::to_string(booleanDecimal->threshold);
+								xml_node<>* subnode = doc->allocate_node(node_element, "threshold", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+								castNode->append_node(subnode);
+							}
+							continue;
+						}
+					}
+
+					{
 						PBooleanString booleanString;
 						booleanString = std::dynamic_pointer_cast<BooleanString>(*i);
 						if(booleanString)

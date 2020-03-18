@@ -238,6 +238,21 @@ void ParameterConversion::fromPacket(PVariable value)
 			}
 			if(invert) value->booleanValue = !value->booleanValue;
 		}
+		else if(type == Type::Enum::booleanDecimal)
+		{
+			value->type = VariableType::tBoolean;
+			if(valueTrue == 0 && valueFalse == 0)
+			{
+				if(value->floatValue >= threshold) value->booleanValue = true;
+				else value->booleanValue = false;
+			}
+			else
+			{
+				if(value->floatValue == valueFalse) value->booleanValue = false;
+				if(value->floatValue == valueTrue || value->floatValue >= threshold) value->booleanValue = true;
+			}
+			if(invert) value->booleanValue = !value->booleanValue;
+		}
 		else if(type == Type::Enum::booleanString)
 		{
 			value->type = VariableType::tBoolean;
@@ -396,6 +411,15 @@ void ParameterConversion::toPacket(PVariable value)
 			else value->integerValue = valueFalse;
 			value->type = VariableType::tInteger;
 		}
+		else if(type == Type::Enum::booleanDecimal)
+		{
+			if(value->stringValue.size() > 0 && value->stringValue == "true") value->booleanValue = true;
+			if(invert) value->booleanValue = !value->booleanValue;
+			if(valueTrue == 0 && valueFalse == 0) value->floatValue = (double)value->booleanValue;
+			else if(value->booleanValue) value->floatValue = valueTrue;
+			else value->floatValue = valueFalse;
+			value->type = VariableType::tFloat;
+		}
 		else if(type == Type::Enum::booleanString)
 		{
 			if(value->stringValue.size() > 0 && value->stringValue == "true") value->booleanValue = true;
@@ -532,6 +556,7 @@ ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMa
 			else if(attributeValue == "float_uint8_string_scale") type = Type::Enum::floatUint8StringScale;
 			else if(attributeValue == "integer_integer_map") type = Type::Enum::integerIntegerMap;
 			else if(attributeValue == "boolean_integer") type = Type::Enum::booleanInteger;
+			else if(attributeValue == "boolean_decimal") type = Type::Enum::booleanDecimal;
 			else if(attributeValue == "boolean_string") type = Type::Enum::booleanString;
 			else if(attributeValue == "float_configtime") type = Type::Enum::floatConfigTime;
 			else if(attributeValue == "option_integer") type = Type::Enum::optionInteger;
