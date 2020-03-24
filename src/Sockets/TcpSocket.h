@@ -218,6 +218,7 @@ public:
 		bool requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
 		std::function<void(int32_t clientId)> connectionClosedCallback;
+        std::function<void(int32_t clientId, int32_t errorCode, const std::string& errorString)> connectionClosedCallbackEx;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
 
@@ -555,6 +556,7 @@ protected:
 		bool _requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
 		std::function<void(int32_t clientId)> _connectionClosedCallback;
+        std::function<void(int32_t clientId, int32_t errorCode, const std::string& errorString)> _connectionClosedCallbackEx;
 		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
 
 		std::string _listenAddress;

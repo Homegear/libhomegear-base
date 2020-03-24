@@ -159,6 +159,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_requireClientCert = serverInfo.requireClientCert;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
     _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
+    _connectionClosedCallbackEx.swap(serverInfo.connectionClosedCallbackEx);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
     _serverThreads.resize(serverInfo.serverThreads);
@@ -458,7 +459,8 @@ std::string TcpSocket::getIpAddress()
                                 clientData->backlog.pop();
                             }
                             _bl->fileDescriptorManager.close(clientData->fileDescriptor);
-                            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -200, "Error reading from client: Backlog is full.");
+                            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
                             return;
                         }
                         if(!clientData->busy)
@@ -479,7 +481,8 @@ std::string TcpSocket::getIpAddress()
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -201, std::string("Error reading from client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
@@ -499,14 +502,16 @@ std::string TcpSocket::getIpAddress()
 			if(closeConnection)
 			{
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
+                else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
 			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -300, std::string("Error sending data to client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
         return false;
 	}
@@ -527,14 +532,16 @@ std::string TcpSocket::getIpAddress()
 			if(closeConnection)
 			{
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
+                else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
 			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -300, std::string("Error sending data to client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 		return false;
 	}
@@ -547,7 +554,8 @@ std::string TcpSocket::getIpAddress()
             if(clientIterator != _clients.end()) clientIterator->second->socket->close();
         }
 
-        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+        if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientId, 0, "");
+        else if(_connectionClosedCallback) _connectionClosedCallback(clientId);
 	}
 
     int32_t TcpSocket::clientCount()
