@@ -93,9 +93,11 @@ public:
 	// }}}
 
 	// {{{ UI
-	virtual uint64_t addUiElement(std::string& elementId, BaseLib::PVariable data) = 0;
+	virtual uint64_t addUiElement(const std::string& elementStringId, const BaseLib::PVariable& data, const BaseLib::PVariable& metadata) = 0;
     virtual std::shared_ptr<DataTable> getUiElements() = 0;
+    virtual BaseLib::PVariable getUiElementMetadata(uint64_t databaseId) = 0;
 	virtual void removeUiElement(uint64_t databaseId) = 0;
+    virtual BaseLib::PVariable setUiElementMetadata(uint64_t databaseId, const BaseLib::PVariable& metadata) = 0;
 	// }}}
 
     // {{{ Stories
