@@ -270,6 +270,13 @@ public:
 	virtual void saveLicenseVariable(int32_t moduleId, DataRow& data) = 0;
 	virtual void deleteLicenseVariable(int32_t moduleId, uint64_t mapKey) = 0;
 	// }}}
+
+	// {{{ Variable profiles
+    virtual uint64_t addVariableProfile(const BaseLib::PVariable& translations, const BaseLib::PVariable& profile) = 0;
+    virtual void deleteVariableProfile(uint64_t profileId) = 0;
+    virtual std::shared_ptr<BaseLib::Database::DataTable> getVariableProfiles() = 0;
+    virtual bool updateVariableProfile(uint64_t profileId, const BaseLib::PVariable& translations, const BaseLib::PVariable& profile) = 0;
+	// }}}
 };
 
 }
