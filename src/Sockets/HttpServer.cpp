@@ -40,6 +40,7 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
 
 	TcpSocket::TcpServerInfo tcpServerInfo;
 	tcpServerInfo.useSsl = serverInfo.useSsl;
+	tcpServerInfo.connectionBacklogSize = serverInfo.connectionBacklogSize;
 	tcpServerInfo.maxConnections = serverInfo.maxConnections;
     tcpServerInfo.serverThreads = serverInfo.serverThreads;
 	tcpServerInfo.certificates = serverInfo.certificates;

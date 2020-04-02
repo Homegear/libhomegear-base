@@ -127,6 +127,7 @@ public:
 	struct HttpServerInfo
 	{
 		bool useSsl = false;
+        uint32_t connectionBacklogSize = 100;
 		uint32_t maxConnections = 10;
 		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;

@@ -152,6 +152,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_stopServer = false;
 	_isServer = true;
 	_useSsl = serverInfo.useSsl;
+    if(serverInfo.connectionBacklogSize > 0) _backlogSize = serverInfo.connectionBacklogSize;
 	_maxConnections = serverInfo.maxConnections;
 	_certificates = serverInfo.certificates;
 	_dhParamFile = serverInfo.dhParamFile;
@@ -203,15 +204,15 @@ std::string TcpSocket::getIpAddress()
 
         if(_useSsl) initSsl();
 
-		_listenAddress = address;
-		_listenPort = port;
+		_listenAddress = std::move(address);
+		_listenPort = std::move(port);
 		bindSocket();
 		listenAddress = _ipAddress;
 	}
 
 	void TcpSocket::bindSocket()
 	{
-		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _backlogSize, _ipAddress, _boundListenPort);
 	}
 
 	void TcpSocket::startPreboundServer(std::string& listenAddress, size_t processingThreads)
@@ -234,8 +235,8 @@ std::string TcpSocket::getIpAddress()
 		if(_useSsl) initSsl();
 
 		_stopServer = false;
-		_listenAddress = address;
-		_listenPort = port;
+		_listenAddress = std::move(address);
+		_listenPort = std::move(port);
 		bindSocket();
 		listenAddress = _ipAddress;
 
@@ -809,20 +810,20 @@ std::string TcpSocket::getIpAddress()
     }
 // }}}
 
-PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort)
+PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, const std::string& address, const std::string& port, uint32_t connectionBacklogSize, std::string& listenAddress, int32_t& listenPort)
 {
 	PFileDescriptor socketDescriptor;
-	addrinfo hostInfo;
-	addrinfo *serverInfo = nullptr;
+	addrinfo hostInfo{};
+	addrinfo* serverInfo = nullptr;
 
-	int32_t yes = 1;
+	static constexpr int32_t yes = 1;
 
 	memset(&hostInfo, 0, sizeof(hostInfo));
 
 	hostInfo.ai_family = AF_UNSPEC;
 	hostInfo.ai_socktype = SOCK_STREAM;
 	hostInfo.ai_flags = AI_PASSIVE;
-	char buffer[100];
+	std::array<char, 101> buffer{};
 	int32_t result;
 	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
 	{
@@ -849,12 +850,14 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 		switch (info->ai_family)
 		{
 			case AF_INET:
-				inet_ntop (info->ai_family, &((struct sockaddr_in *) info->ai_addr)->sin_addr, buffer, 100);
-				listenAddress = std::string(buffer);
+				inet_ntop (info->ai_family, &((struct sockaddr_in *) info->ai_addr)->sin_addr, buffer.data(), buffer.size() - 1);
+				buffer.back() = '\0';
+				listenAddress = std::string(buffer.data());
 				break;
 			case AF_INET6:
-				inet_ntop (info->ai_family, &((struct sockaddr_in6 *) info->ai_addr)->sin6_addr, buffer, 100);
-				listenAddress = std::string(buffer);
+				inet_ntop (info->ai_family, &((struct sockaddr_in6 *) info->ai_addr)->sin6_addr, buffer.data(), buffer.size() - 1);
+                buffer.back() = '\0';
+				listenAddress = std::string(buffer.data());
 				break;
 		}
 		bound = true;
@@ -868,14 +871,14 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
         if(errno == EADDRINUSE) throw SocketAddressInUseException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 		else throw SocketBindException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 	}
-	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, 100) == -1)
+	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, connectionBacklogSize) == -1)
 	{
 		fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
 		throw SocketOperationException("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
 	}
 
-	struct sockaddr_in addressInfo;
+	struct sockaddr_in addressInfo{};
 	socklen_t addressInfoLength = sizeof(addressInfo);
 	if (getsockname(socketDescriptor->descriptor, (struct sockaddr*)&addressInfo, &addressInfoLength) == -1)
 	{
@@ -1270,7 +1273,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	return bytesRead;
 }
 
-int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>> data)
+int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>>& data)
 {
 	{
 		std::unique_lock<std::mutex> writeGuard(_writeMutex);

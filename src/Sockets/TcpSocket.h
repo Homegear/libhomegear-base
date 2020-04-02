@@ -210,6 +210,7 @@ public:
 	struct TcpServerInfo
 	{
 		bool useSsl = false;
+        uint32_t connectionBacklogSize = 100;
 		uint32_t maxConnections = 10;
 		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, PCertificateInfo> certificates;
@@ -328,7 +329,7 @@ public:
 
 	virtual ~TcpSocket();
 
-	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort);
+	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, const std::string& address, const std::string& port, uint32_t connectionBacklogSize, std::string& listenAddress, int32_t& listenPort);
 
 	PFileDescriptor getFileDescriptor();
 	std::string getIpAddress();
@@ -397,7 +398,7 @@ public:
      * @throws SocketTimeOutException Thrown when writing times out.
      * @throws SocketClosedException Thrown when socket is closed.
      */
-	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
+	int32_t proofwrite(const std::shared_ptr<std::vector<char>>& data);
 
     /**
      * Writes data to a socket.
@@ -550,6 +551,7 @@ protected:
 
 	// {{{ For server only
 		bool _isServer = false;
+		uint32_t _backlogSize = 100;
 		uint32_t _maxConnections = 10;
 		std::string _dhParamFile;
 		std::string _dhParamData;
