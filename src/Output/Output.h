@@ -41,6 +41,7 @@
 #include <ctime>
 #include <mutex>
 #include <functional>
+#include <atomic>
 
 namespace BaseLib
 {
@@ -78,60 +79,35 @@ public:
 	 * @see setPrefix()
 	 * @return Returns the prefix previously defined with setPrefix.
 	 */
-	std::string getPrefix() { return _prefix; }
+	std::string getPrefix();
 
 	/**
 	 * Sets a string, which will be used to prefix all output.
 	 * @see getPrefix()
 	 * @param prefix The new prefix.
 	 */
-	void setPrefix(std::string prefix) { _prefix = prefix; }
+	void setPrefix(const std::string& prefix);
 
 	/**
-	 * Returns the error callback function provided with init.
-	 * @see setErrorCallback()
-	 * @return Returns the error callback function.
+	 * Enables standard output and standard error.
 	 */
-	std::function<void(int32_t, std::string)>* getErrorCallback();
+    void enableStdOutput();
+
+    /**
+     * Disables standard output and standard error.
+     */
+	void disableStdOutput();
 
 	/**
-	 * Sets a callback function which will be called for all error messages. First parameter of the function is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
-	 * @see getErrorCallback()
-	 * @return Returns the error callback function.
+	 * Sets a callback function which will be called for all messages. First parameter of the function is the debug level (1 = critical, 2 = error, 3 = warning, 4 = info, >= 5 = debug ), second parameter is the message string.
 	 */
-	void setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback);
-
-	/**
-	 * Prints the policy and priority of the thread executing this method.
-	 */
-	void printThreadPriority();
+	void setOutputCallback(std::function<void(int32_t, std::string)> value);
 
 	/**
 	 * Returns a time string like "08/27/14 14:13:53.471".
 	 * @return Returns a time string like "08/27/14 14:13:53.471".
 	 */
 	static std::string getTimeString(int64_t time = 0);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::vector<unsigned char>& data);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::shared_ptr<std::vector<char>> data);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::vector<char>& data);
 
 	/**
 	 * Prints an error message with filename, line number and function name.
@@ -235,14 +211,19 @@ private:
 	std::string _prefix;
 
 	/**
+	 * Defines if output is printed to standard output / standard error
+	 */
+	std::atomic_bool _stdOutput{ true };
+
+	/**
 	 * Mutex to only print one output at a time.
 	 */
 	static std::mutex _outputMutex;
 
 	/**
-	 * Pointer to an optional callback function, which will be called whenever printEx, printWarning, printCritical or printError are called.
+	 * Pointer to an optional callback function, which will be called whenever printDebug, printInfo, printEx, printWarning, printCritical or printError are called.
 	 */
-	std::function<void(int32_t, std::string)>* _errorCallback = nullptr;
+	std::function<void(int32_t, std::string)> _outputCallback;
 
 	Output(const Output&);
 	Output& operator=(const Output&);

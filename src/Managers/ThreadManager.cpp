@@ -109,8 +109,8 @@ bool ThreadManager::checkThreadCount(bool highPriority)
 	if(_maxThreadCount == 0) return true;
 	if(highPriority && _currentThreadCount < (signed)_maxThreadCount) return true;
 	else if(_currentThreadCount < (signed)_maxThreadCount * 90 / 100) return true;
-	if(highPriority) _bl->out.printCritical("Critical: Can't start more threads. Thread limit reached.");
-	else _bl->out.printCritical("Critical: Can't start more low priority threads. 90% of thread limit reached.");
+	if(highPriority) _bl->out.printCritical("Critical: Can't start more threads. Thread limit reached (" + std::to_string(_maxThreadCount) + " threads).");
+	else _bl->out.printCritical("Critical: Can't start more low priority threads. 90% of thread limit reached (" + std::to_string(_currentThreadCount) + " of " + std::to_string(_maxThreadCount) + ").");
 	return false;
 }
 
