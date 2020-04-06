@@ -1684,7 +1684,6 @@ void TcpSocket::getSsl()
         }
 		gnutls_x509_crt_deinit(serverCert);
 	}
-	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
 }
 
 void TcpSocket::getConnection()

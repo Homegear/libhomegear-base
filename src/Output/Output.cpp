@@ -122,7 +122,11 @@ void Output::printEx(const std::string& file, uint32_t line, const std::string& 
             std::cerr << getTimeString() << " " << error << std::endl;
         }
 	}
-	if(_outputCallback) _outputCallback(2, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(2, error);
+    }
 }
 
 void Output::printCritical(const std::string& message)
@@ -135,7 +139,11 @@ void Output::printCritical(const std::string& message)
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-    if(_outputCallback) _outputCallback(1, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(1, error);
+    }
 }
 
 void Output::printError(const std::string& errorString)
@@ -148,7 +156,11 @@ void Output::printError(const std::string& errorString)
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-    if(_outputCallback) _outputCallback(2, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(2, error);
+    }
 }
 
 void Output::printWarning(const std::string& errorString)
@@ -161,7 +173,11 @@ void Output::printWarning(const std::string& errorString)
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-    if(_outputCallback) _outputCallback(3, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(3, error);
+    }
 }
 
 void Output::printInfo(const std::string& message)
@@ -172,7 +188,11 @@ void Output::printInfo(const std::string& message)
         std::lock_guard<std::mutex> outputGuard(_outputMutex);
         std::cout << getTimeString() << " " << _prefix << message << std::endl;
     }
-    if(_outputCallback) _outputCallback(4, message);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(4, message);
+    }
 }
 
 void Output::printDebug(const std::string& message, int32_t minDebugLevel)
@@ -183,7 +203,11 @@ void Output::printDebug(const std::string& message, int32_t minDebugLevel)
         std::lock_guard<std::mutex> outputGuard(_outputMutex);
         std::cout << getTimeString() << " " << _prefix << message << std::endl;
     }
-    if(_outputCallback) _outputCallback(minDebugLevel, message);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(minDebugLevel, message);
+    }
 }
 
 void Output::printMessage(const std::string& message, int32_t minDebugLevel, bool errorLog)
@@ -197,7 +221,11 @@ void Output::printMessage(const std::string& message, int32_t minDebugLevel, boo
         std::cout << getTimeString() << " " << prefixedMessage << std::endl;
         if(minDebugLevel <= 3 && errorLog) std::cerr << getTimeString() << " " << prefixedMessage << std::endl;
     }
-    if(_outputCallback) _outputCallback(minDebugLevel, prefixedMessage);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(minDebugLevel, prefixedMessage);
+    }
 }
 
 }
