@@ -59,7 +59,7 @@ void Output::disableStdOutput()
     _stdOutput = false;
 }
 
-void Output::setOutputCallback(std::function<void(int32_t, std::string)> value)
+void Output::setOutputCallback(std::function<void(int32_t, const std::string&)> value)
 {
 	_outputCallback.swap(value);
 }
@@ -98,7 +98,7 @@ std::string Output::getTimeString(int64_t time)
 	return timeStream.str();
 }
 
-void Output::printEx(std::string file, uint32_t line, std::string function, std::string what)
+void Output::printEx(const std::string& file, uint32_t line, const std::string& function, const std::string& what)
 {
 	if(_bl && _bl->debugLevel < 2) return;
 	std::string error;
@@ -125,10 +125,10 @@ void Output::printEx(std::string file, uint32_t line, std::string function, std:
 	if(_outputCallback) _outputCallback(2, error);
 }
 
-void Output::printCritical(std::string errorString, bool errorCallback)
+void Output::printCritical(const std::string& message)
 {
 	if(_bl && _bl->debugLevel < 1) return;
-	std::string error = _prefix + errorString;
+	std::string error = _prefix + message;
     if(_stdOutput)
 	{
     	std::lock_guard<std::mutex> outputGuard(_outputMutex);
@@ -138,7 +138,7 @@ void Output::printCritical(std::string errorString, bool errorCallback)
     if(_outputCallback) _outputCallback(1, error);
 }
 
-void Output::printError(std::string errorString)
+void Output::printError(const std::string& errorString)
 {
 	if(_bl && _bl->debugLevel < 2) return;
 	std::string error = _prefix + errorString;
@@ -151,7 +151,7 @@ void Output::printError(std::string errorString)
     if(_outputCallback) _outputCallback(2, error);
 }
 
-void Output::printWarning(std::string errorString)
+void Output::printWarning(const std::string& errorString)
 {
 	if(_bl && _bl->debugLevel < 3) return;
 	std::string error = _prefix + errorString;
@@ -164,7 +164,7 @@ void Output::printWarning(std::string errorString)
     if(_outputCallback) _outputCallback(3, error);
 }
 
-void Output::printInfo(std::string message)
+void Output::printInfo(const std::string& message)
 {
 	if(_bl && _bl->debugLevel < 4) return;
     if(_stdOutput)
@@ -175,7 +175,7 @@ void Output::printInfo(std::string message)
     if(_outputCallback) _outputCallback(4, message);
 }
 
-void Output::printDebug(std::string message, int32_t minDebugLevel)
+void Output::printDebug(const std::string& message, int32_t minDebugLevel)
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
     if(_stdOutput)
@@ -186,18 +186,18 @@ void Output::printDebug(std::string message, int32_t minDebugLevel)
     if(_outputCallback) _outputCallback(minDebugLevel, message);
 }
 
-void Output::printMessage(std::string message, int32_t minDebugLevel, bool errorLog)
+void Output::printMessage(const std::string& message, int32_t minDebugLevel, bool errorLog)
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
-	message = _prefix + message;
+	std::string prefixedMessage = _prefix + message;
 
 	if(_stdOutput)
     {
         std::lock_guard<std::mutex> outputGuard(_outputMutex);
-        std::cout << getTimeString() << " " << message << std::endl;
-        if(minDebugLevel <= 3 && errorLog) std::cerr << getTimeString() << " " << message << std::endl;
+        std::cout << getTimeString() << " " << prefixedMessage << std::endl;
+        if(minDebugLevel <= 3 && errorLog) std::cerr << getTimeString() << " " << prefixedMessage << std::endl;
     }
-    if(_outputCallback) _outputCallback(minDebugLevel, message);
+    if(_outputCallback) _outputCallback(minDebugLevel, prefixedMessage);
 }
 
 }

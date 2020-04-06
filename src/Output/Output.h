@@ -101,7 +101,7 @@ public:
 	/**
 	 * Sets a callback function which will be called for all messages. First parameter of the function is the debug level (1 = critical, 2 = error, 3 = warning, 4 = info, >= 5 = debug ), second parameter is the message string.
 	 */
-	void setOutputCallback(std::function<void(int32_t, std::string)> value);
+	void setOutputCallback(std::function<void(int32_t, const std::string&)> value);
 
 	/**
 	 * Returns a time string like "08/27/14 14:13:53.471".
@@ -117,7 +117,7 @@ public:
 	 * @param function The function name where the error occured.
 	 * @param what The error message.
 	 */
-	void printEx(std::string file, uint32_t line, std::string function, std::string what = "");
+	void printEx(const std::string& file, uint32_t line, const std::string& function, const std::string& what = "");
 
 	/**
 	 * Prints a critical error message (debug level < 1).
@@ -127,10 +127,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The error message.
-	 * @param errorCallback If set to false, the error will not be send to RPC event servers (default true)
+	 * @param message The error message.
 	 */
-	void printCritical(std::string errorString, bool errorCallback = true);
+	void printCritical(const std::string& message);
 
 	/**
 	 * Prints an error message (debug level < 2).
@@ -140,9 +139,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The error message.
+	 * @param message The error message.
 	 */
-	void printError(std::string errorString);
+	void printError(const std::string& message);
 
 	/**
 	 * Prints a warning message (debug level < 3).
@@ -152,9 +151,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The warning message.
+	 * @param message The warning message.
 	 */
-	void printWarning(std::string errorString);
+	void printWarning(const std::string& message);
 
 	/**
 	 * Prints a info message (debug level < 4).
@@ -166,7 +165,7 @@ public:
 	 * @see printMessage()
 	 * @param message The message.
 	 */
-	void printInfo(std::string message);
+	void printInfo(const std::string& message);
 
 	/**
 	 * Prints a debug message (debug level < 5).
@@ -179,7 +178,7 @@ public:
 	 * @param message The message.
 	 * @param minDebugLevel The minimal debug level (default 5).
 	 */
-	void printDebug(std::string message, int32_t minDebugLevel = 5);
+	void printDebug(const std::string& message, int32_t minDebugLevel = 5);
 
 	/**
 	 * Prints a message regardless of the current debug level.
@@ -193,7 +192,7 @@ public:
 	 * @param minDebugLevel The minimal debug level (default 0).
 	 * @param errorLog If set to true and minDebugLevel is at least "warning", the message is written to the error log, too (default false).
 	 */
-	void printMessage(std::string message, int32_t minDebugLevel = 0, bool errorLog = false);
+	void printMessage(const std::string& message, int32_t minDebugLevel = 0, bool errorLog = false);
 
 	/**
 	 * Calls the error callback function registered with the constructor.
@@ -223,7 +222,7 @@ private:
 	/**
 	 * Pointer to an optional callback function, which will be called whenever printDebug, printInfo, printEx, printWarning, printCritical or printError are called.
 	 */
-	std::function<void(int32_t, std::string)> _outputCallback;
+	std::function<void(int32_t, const std::string&)> _outputCallback;
 
 	Output(const Output&);
 	Output& operator=(const Output&);
