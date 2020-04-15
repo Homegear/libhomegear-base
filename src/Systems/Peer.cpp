@@ -3082,15 +3082,16 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
             if(!rpcFunction->linkSenderFunctionTypes.empty()) isSender = true;
             else if(rpcFunction->linkReceiverFunctionTypes.empty()) return array;
             //Return if no peers are paired to the channel
-            _peersMutex.lock();
-            std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
-            if(peersIterator == _peers.end() || peersIterator->second.empty())
+            std::vector<std::shared_ptr<BasicPeer>> peers;
             {
-                _peersMutex.unlock();
-                return array;
+                std::lock_guard<std::mutex> peersGuard(_peersMutex);
+                std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
+                if(peersIterator == _peers.end() || peersIterator->second.empty())
+                {
+                    return array;
+                }
+                peers = peersIterator->second;
             }
-            std::vector<std::shared_ptr<BasicPeer>> peers = peersIterator->second;
-            _peersMutex.unlock();
             for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
             {
                 if((*i)->isVirtual) continue;
@@ -3110,7 +3111,9 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
                 if(remotePeer->getPeer((*i)->channel, _peerID, channel)) peerKnowsMe = true;
 
                 //Don't continue if peer is sender and exists in central's peer array to avoid generation of duplicate results when requesting all links (only generate results when we are sender)
-                if(!isSender && peerKnowsMe && avoidDuplicates && peerID != _peerID) return array;
+                //Previously there was the following check: peerID != _peerID. It needed to be removed, because otherwise duplicate links were returned
+                //when a device was linked to itself.
+                if(!isSender && peerKnowsMe && avoidDuplicates) return array;
                 //If we are receiver this point is only reached, when the sender is not paired to this central
 
                 std::string peerSerialNumber = remotePeer->getSerialNumber();
