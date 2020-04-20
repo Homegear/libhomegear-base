@@ -192,7 +192,7 @@ public:
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable removeLink(PRpcClientInfo clientInfo, uint64_t senderId, int32_t senderChannel, uint64_t receiverId, int32_t receiverChannel) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable rssiInfo(PRpcClientInfo clientInfo, bool checkAcls);
-	virtual PVariable searchDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
+	virtual PVariable searchDevices(PRpcClientInfo clientInfo, const std::string& interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
 	virtual PVariable searchInterfaces(PRpcClientInfo clientInfo, PVariable metadata) { return Variable::createError(-32601, "Method not implemented for this central."); }
 
 	/**
