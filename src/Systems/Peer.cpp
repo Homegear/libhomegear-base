@@ -2041,9 +2041,9 @@ std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& var
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        if(channelIterator == valuesCentral.end()) return std::set<uint64_t>();
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return std::set<uint64_t>();
 
         return variableIterator->second.getCategories();
     }
