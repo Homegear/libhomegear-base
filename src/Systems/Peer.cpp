@@ -2228,9 +2228,9 @@ std::unordered_map<uint64_t, Role> Peer::getVariableRoles(int32_t channel, std::
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        if(channelIterator == valuesCentral.end()) return std::unordered_map<uint64_t, Role>();
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return std::unordered_map<uint64_t, Role>();
 
         return variableIterator->second.getRoles();
     }
@@ -2312,7 +2312,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 
             auto configIterator = configCentral.find(i->first);
             if(configIterator == configCentral.end()) continue;
-            
+
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::config);
             if(!parameterGroup) continue;
 
@@ -2517,7 +2517,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
 
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::variables);
             if(!parameterGroup) continue;
-            
+
             auto valuesIterator = valuesCentral.find(i->first);
             if(valuesIterator == valuesCentral.end()) continue;
 
@@ -3704,7 +3704,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                 descriptions->structValue->insert(StructElement(parameter.second->id, description));
             }
         }
-        
+
         return descriptions;
     }
     catch(const std::exception& ex)
