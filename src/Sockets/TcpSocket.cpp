@@ -1712,15 +1712,19 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not get address information: " + std::string(gai_strerror(result)));
 		}
 
-		char ipStringBuffer[INET6_ADDRSTRLEN];
-		if (serverInfo->ai_family == AF_INET) {
-			struct sockaddr_in *s = (struct sockaddr_in *)serverInfo->ai_addr;
-			inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
-		} else { // AF_INET6
-			struct sockaddr_in6 *s = (struct sockaddr_in6 *)serverInfo->ai_addr;
-			inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
-		}
-		_ipAddress = std::string(&ipStringBuffer[0]);
+        char ipStringBuffer[INET6_ADDRSTRLEN + 1];
+        if (serverInfo->ai_family == AF_INET)
+        {
+            auto s = (struct sockaddr_in *)serverInfo->ai_addr;
+            inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
+        }
+        else
+        { // AF_INET6
+            auto s = (struct sockaddr_in6 *)serverInfo->ai_addr;
+            inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
+        }
+        ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
+		_ipAddress = std::string(ipStringBuffer);
 
 		_socketDescriptor = _bl->fileDescriptorManager.add(socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol));
 		if(!_socketDescriptor || _socketDescriptor->descriptor == -1)

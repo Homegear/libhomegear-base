@@ -161,6 +161,7 @@ void Settings::reset()
 	_oauthKeyPath = "";
 	_oauthTokenLifetime = 3600;
 	_oauthRefreshTokenLifetime = 5184000;
+    _maxWaitForPhysicalInterfaces = 180;
 }
 
 bool Settings::changed()
@@ -888,6 +889,11 @@ void Settings::load(std::string filename, std::string executablePath)
 						_bl->out.printDebug("Debug: Added " + std::to_string(gpio) + " to exportGpios.");
 					}
 				}
+				else if(name == "maxwaitforphysicalinterfaces")
+                {
+                    _maxWaitForPhysicalInterfaces = Math::getUnsignedNumber(value);
+                    if(_maxWaitForPhysicalInterfaces < 1) _maxWaitForPhysicalInterfaces = 1;
+                }
 				// {{{ OAuth
 					else if(name == "oauthcertpath")
 					{
