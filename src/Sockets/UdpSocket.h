@@ -43,9 +43,9 @@ class UdpSocket
 {
 public:
 	UdpSocket(BaseLib::SharedObjects* baseLib);
-    UdpSocket(BaseLib::SharedObjects* baseLib, uint16_t listenPort);
+    UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort);
 	UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
-    UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, uint16_t listenPort);
+    UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, std::string listenPort);
 	virtual ~UdpSocket();
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }

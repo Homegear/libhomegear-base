@@ -38,25 +38,25 @@ UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib) : UdpSocket(baseLib, 0)
 {
 }
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, uint16_t listenPort)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort)
 {
     _bl = baseLib;
     _autoConnect = false;
     _socketDescriptor.reset(new FileDescriptor);
-    _listenPort = listenPort;
+    _listenPort = Math::getUnsignedNumber(listenPort);
 }
 
 UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : UdpSocket(baseLib, hostname, port, 0)
 {
 }
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, uint16_t listenPort)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, std::string listenPort)
 {
     _bl = baseLib;
     _socketDescriptor.reset(new FileDescriptor);
     _hostname = hostname;
     _port = port;
-    _listenPort = listenPort;
+    _listenPort = Math::getUnsignedNumber(listenPort);
 }
 
 UdpSocket::~UdpSocket()

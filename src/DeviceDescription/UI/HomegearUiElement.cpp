@@ -381,7 +381,7 @@ PVariable HomegearUiElement::getElementInfo()
             {
                 metadataElement->structValue->emplace(entry.first, entry.second);
             }
-            controlElement->structValue->emplace("metadata", metadataElement);
+            controlElement->structValue->emplace("controlMetadata", metadataElement);
 
             controlElements->arrayValue->emplace_back(controlElement);
         }
