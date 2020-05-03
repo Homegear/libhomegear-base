@@ -34,7 +34,7 @@
 namespace BaseLib
 {
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib) : UdpSocket(baseLib, 0)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib) : UdpSocket(baseLib, "")
 {
 }
 
