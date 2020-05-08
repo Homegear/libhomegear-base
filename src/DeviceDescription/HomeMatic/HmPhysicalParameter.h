@@ -31,14 +31,11 @@
 #ifndef HMPHYSICALPARAMETER_H_
 #define HMPHYSICALPARAMETER_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../HelperFunctions/HelperFunctions.h"
 
 #include <string>
 #include <vector>
 #include <memory>
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -88,7 +85,7 @@ public:
 	int32_t value = 0;
 
 	SetRequestEx() {}
-	SetRequestEx(SharedObjects* baseLib, xml_node<>* node);
+	SetRequestEx(SharedObjects* baseLib, xml_node* node);
 	virtual ~SetRequestEx() {}
 
 	bool checkCondition(int32_t value);
@@ -135,7 +132,7 @@ public:
 	PhysicalParameterAddress address;
 
 	PhysicalParameter();
-	PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~PhysicalParameter() {}
 };
 

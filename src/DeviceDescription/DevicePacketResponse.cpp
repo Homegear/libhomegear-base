@@ -41,13 +41,13 @@ DevicePacketResponse::DevicePacketResponse(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-DevicePacketResponse::DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DevicePacketResponse(baseLib)
+DevicePacketResponse::DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node* node) : DevicePacketResponse(baseLib)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         _bl->out.printWarning("Warning: Unknown attribute for \"packet\\responses\\response\": " + std::string(attr->name()));
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         std::string value(subNode->value());

@@ -39,13 +39,10 @@
 #include <memory>
 
 #include "../../Systems/Packet.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "HmLogicalParameter.h"
 #include "HmPhysicalParameter.h"
 #include "../../Encoding/RpcEncoder.h"
 #include "../../Encoding/RpcDecoder.h"
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -67,7 +64,7 @@ public:
 	std::string value;
 
 	DescriptionField() {}
-	DescriptionField(xml_node<>* node);
+	DescriptionField(xml_node* node);
 	virtual ~DescriptionField() {}
 };
 
@@ -77,7 +74,7 @@ public:
 	std::vector<DescriptionField> fields;
 
 	ParameterDescription() {}
-	ParameterDescription(xml_node<>* node);
+	ParameterDescription(xml_node* node);
 	virtual ~ParameterDescription() {}
 };
 
@@ -114,7 +111,7 @@ public:
 	bool toDevice = true;
 
 	ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter);
-	ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter, xml_node<>* node);
+	ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter, xml_node* node);
 	virtual ~ParameterConversion() {}
 	virtual void fromPacket(std::shared_ptr<Variable> value);
 	virtual void toPacket(std::shared_ptr<Variable> value);
@@ -173,7 +170,7 @@ public:
 	std::string subfield;
 
 	HomeMaticParameter(BaseLib::SharedObjects* baseLib);
-	HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, bool checkForID = false);
+	HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node* node, bool checkForID = false);
 	virtual ~HomeMaticParameter() {}
 	virtual bool checkCondition(int32_t value);
 
@@ -234,7 +231,7 @@ public:
 	Device* device = nullptr;
 
 	DeviceType(BaseLib::SharedObjects* baseLib);
-	DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* typeNode);
+	DeviceType(BaseLib::SharedObjects* baseLib, xml_node* typeNode);
 	virtual ~DeviceType() {}
 
 	virtual bool matches(int32_t family, std::string typeID);
@@ -271,9 +268,9 @@ public:
 	int32_t peerChannelOffset = -1;
 
 	ParameterSet(BaseLib::SharedObjects* baseLib);
-	ParameterSet(BaseLib::SharedObjects* baseLib, xml_node<>* parameterSetNode);
+	ParameterSet(BaseLib::SharedObjects* baseLib, xml_node* parameterSetNode);
 	virtual ~ParameterSet() {}
-	virtual void init(xml_node<>* parameterSetNode);
+	virtual void init(xml_node* parameterSetNode);
 	virtual std::vector<std::shared_ptr<HomeMaticParameter>> getIndices(uint32_t startIndex, uint32_t endIndex, int32_t list);
 	virtual std::vector<std::shared_ptr<HomeMaticParameter>> getList(int32_t list);
 	virtual std::shared_ptr<HomeMaticParameter> getIndex(double index);
@@ -291,7 +288,7 @@ public:
 	std::string value;
 
 	EnforceLink(BaseLib::SharedObjects* baseLib);
-	EnforceLink(BaseLib::SharedObjects* baseLib, xml_node<>* parameterSetNode);
+	EnforceLink(BaseLib::SharedObjects* baseLib, xml_node* parameterSetNode);
 	virtual ~EnforceLink() {}
 	virtual std::shared_ptr<Variable> getValue(LogicalParameter::Type::Enum type);
 protected:
@@ -305,7 +302,7 @@ public:
 	std::vector<std::string> targetNames;
 
 	LinkRole() {}
-	LinkRole(BaseLib::SharedObjects* baseLib, xml_node<>* parameterSetNode);
+	LinkRole(BaseLib::SharedObjects* baseLib, xml_node* parameterSetNode);
 	virtual ~LinkRole() {}
 };
 
@@ -349,7 +346,7 @@ public:
 	std::vector<std::shared_ptr<DeviceChannel>> subconfigs;
 
 	DeviceChannel(BaseLib::SharedObjects* baseLib);
-	DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& index);
+	DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& index);
 	virtual ~DeviceChannel() {}
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
@@ -396,7 +393,7 @@ public:
 	std::string metaString2;
 
 	DeviceFrame(BaseLib::SharedObjects* baseLib);
-	DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~DeviceFrame() {}
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
@@ -416,7 +413,7 @@ public:
 	uint32_t interval = 0;
 
 	DeviceProgram(BaseLib::SharedObjects* baseLib);
-	DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~DeviceProgram() {}
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
@@ -471,7 +468,7 @@ protected:
 	int32_t _countFromSysinfo = -1;
 
 	virtual void load(std::string xmlFilename);
-	virtual void parseXML(xml_node<>* node, std::string& xmlFilename);
+	virtual void parseXML(xml_node* node, std::string& xmlFilename);
 };
 }
 }

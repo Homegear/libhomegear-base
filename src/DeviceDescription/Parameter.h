@@ -34,7 +34,6 @@
 #include "ParameterCast.h"
 #include "Logical.h"
 #include "Physical.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include "../Systems/Role.h"
 #include <string>
 #include <set>
@@ -131,7 +130,7 @@ public:
 	explicit Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent);
 	virtual ~Parameter();
 
-	void parseXml(xml_node<>* node);
+	void parseXml(xml_node* node);
 
 	//Helpers
 	/**

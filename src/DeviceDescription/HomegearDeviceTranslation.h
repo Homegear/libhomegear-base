@@ -34,7 +34,11 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "../Encoding/RapidXml/rapidxml.hpp"
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -83,7 +87,7 @@ protected:
 	bool _loaded = false;
 
 	void load(std::string xmlFilename);
-	void parseXML(xml_node<>* node);
+	void parseXML(xml_node* node);
 };
 }
 }

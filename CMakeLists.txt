@@ -68,8 +68,8 @@ set(SOURCE_FILES
         src/DeviceDescription/Scenario.h
         src/DeviceDescription/SupportedDevice.cpp
         src/DeviceDescription/SupportedDevice.h
-        src/Encoding/RapidXml/rapidxml.hpp
-        src/Encoding/RapidXml/rapidxml_print.hpp
+        src/Encoding/RapidXml/rapidxml.cpp
+        src/Encoding/RapidXml/rapidxml.h
         src/Encoding/Ansi.cpp
         src/Encoding/Ansi.h
         src/Encoding/BinaryDecoder.cpp
@@ -205,6 +205,15 @@ set(SOURCE_FILES
         src/ITimedQueue.h
         src/Variable.cpp
         src/Variable.h
-        src/Security/Acls.cpp src/Security/Acls.h src/Managers/ProcessManager.cpp src/Managers/ProcessManager.h src/Security/SecureVector.h src/Managers/Environment.cpp src/Managers/Environment.h src/Sockets/Hgdc.cpp src/Sockets/Hgdc.h src/Systems/Role.h)
+        src/Security/Acls.cpp
+        src/Security/Acls.h
+        src/Managers/ProcessManager.cpp
+        src/Managers/ProcessManager.h
+        src/Security/SecureVector.h
+        src/Managers/Environment.cpp
+        src/Managers/Environment.h
+        src/Sockets/Hgdc.cpp
+        src/Sockets/Hgdc.h
+        src/Systems/Role.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

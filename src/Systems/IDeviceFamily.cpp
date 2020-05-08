@@ -68,27 +68,27 @@ bool IDeviceFamily::enabled()
     return setting->integerValue != 0;
 }
 
-FamilySettings::PFamilySetting IDeviceFamily::getFamilySetting(std::string& name)
+FamilySettings::PFamilySetting IDeviceFamily::getFamilySetting(const std::string& name)
 {
     return _settings->get(name);
 }
 
-void IDeviceFamily::setFamilySetting(std::string& name, std::string& value)
+void IDeviceFamily::setFamilySetting(const std::string& name, const std::string& value)
 {
     _settings->set(name, value);
 }
 
-void IDeviceFamily::setFamilySetting(std::string& name, int32_t value)
+void IDeviceFamily::setFamilySetting(const std::string& name, int32_t value)
 {
     _settings->set(name, value);
 }
 
-void IDeviceFamily::setFamilySetting(std::string& name, std::vector<char>& value)
+void IDeviceFamily::setFamilySetting(const std::string& name, const std::vector<char>& value)
 {
     _settings->set(name, value);
 }
 
-void IDeviceFamily::deleteFamilySettingFromDatabase(std::string& name)
+void IDeviceFamily::deleteFamilySettingFromDatabase(const std::string& name)
 {
     _settings->deleteFromDatabase(name);
 }

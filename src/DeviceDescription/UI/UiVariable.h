@@ -33,7 +33,6 @@
 
 #include "UiCondition.h"
 #include "../../Variable.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
 #include <list>
@@ -57,7 +56,7 @@ class UiVariable
 {
 public:
     UiVariable(BaseLib::SharedObjects* baseLib);
-    UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiVariable(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiVariable(UiVariable const& rhs);
     virtual ~UiVariable() = default;
 

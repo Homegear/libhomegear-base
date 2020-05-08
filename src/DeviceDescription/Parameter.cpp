@@ -68,9 +68,9 @@ Parameter::~Parameter()
 {
 }
 
-void Parameter::parseXml(xml_node<>* node)
+void Parameter::parseXml(xml_node* node)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string attributeName(attr->name());
         std::string attributeValue(attr->value());
@@ -80,12 +80,12 @@ void Parameter::parseXml(xml_node<>* node)
         }
         else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + attributeName);
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         if(nodeName == "properties")
         {
-            for(xml_node<>* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
+            for(xml_node* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
             {
                 std::string propertyName(propertyNode->name());
                 std::string propertyValue(propertyNode->value());
@@ -111,11 +111,11 @@ void Parameter::parseXml(xml_node<>* node)
                 else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
                 else if(propertyName == "casts")
                 {
-                    for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    for(xml_attribute* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
                     {
                         _bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
                     }
-                    for(xml_node<>* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
+                    for(xml_node* castNode = propertyNode->first_node(); castNode; castNode = castNode->next_sibling())
                     {
                         std::string castName(castNode->name());
                         if(castName == "decimalIntegerScale") casts.push_back(std::make_shared<DecimalIntegerScale>(_bl, castNode, shared_from_this()));
@@ -148,18 +148,18 @@ void Parameter::parseXml(xml_node<>* node)
                 }
                 else if(propertyName == "roles")
                 {
-                    for(xml_attribute<>* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    for(xml_attribute* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
                     {
                         _bl->out.printWarning("Warning: Unknown attribute for \"roles\": " + std::string(attr->name()));
                     }
-                    for(xml_node<>* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
+                    for(xml_node* roleNode = propertyNode->first_node(); roleNode; roleNode = roleNode->next_sibling())
                     {
                         std::string roleName(roleNode->name());
                         std::string roleValue(roleNode->value());
                         if(roleName == "role")
                         {
                             Role role;
-                            for(xml_attribute<>* attr = roleNode->first_attribute(); attr; attr = attr->next_attribute())
+                            for(xml_attribute* attr = roleNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
                                 std::string attributeName(attr->name());
                                 if(attributeName == "direction") role.direction = (RoleDirection)Math::getNumber(std::string(attr->value()));
@@ -191,24 +191,24 @@ void Parameter::parseXml(xml_node<>* node)
         else if(nodeName == "physicalString") physical.reset(new PhysicalString(_bl, subNode));
         else if(nodeName == "packets")
         {
-            for(xml_node<>* packetsNode = subNode->first_node(); packetsNode; packetsNode = packetsNode->next_sibling())
+            for(xml_node* packetsNode = subNode->first_node(); packetsNode; packetsNode = packetsNode->next_sibling())
             {
                 std::string packetsNodeName(packetsNode->name());
                 if(packetsNodeName == "packet")
                 {
                     std::shared_ptr<Packet> packet(new Packet());
-                    for(xml_attribute<>* attr = packetsNode->first_attribute(); attr; attr = attr->next_attribute())
+                    for(xml_attribute* attr = packetsNode->first_attribute(); attr; attr = attr->next_attribute())
                     {
                         std::string attributeName(attr->name());
                         if(attributeName == "id") packet->id = std::string(attr->value());
                         else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\": " + std::string(attr->name()));
                     }
-                    for(xml_node<>* packetNode = packetsNode->first_node(); packetNode; packetNode = packetNode->next_sibling())
+                    for(xml_node* packetNode = packetsNode->first_node(); packetNode; packetNode = packetNode->next_sibling())
                     {
                         std::string packetNodeName(packetNode->name());
                         if(packetNodeName == "type")
                         {
-                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
                                 _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\type\": " + std::string(attr->name()));
                             }
@@ -232,7 +232,7 @@ void Parameter::parseXml(xml_node<>* node)
                         }
                         else if(packetNodeName == "responseId")
                         {
-                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
                                 _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\response\": " + std::string(attr->name()));
                             }
@@ -240,11 +240,11 @@ void Parameter::parseXml(xml_node<>* node)
                         }
                         else if(packetNodeName == "autoReset")
                         {
-                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
                                 _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\autoReset\": " + std::string(attr->name()));
                             }
-                            for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
+                            for(xml_node* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
                             {
                                 std::string autoResetNodeName(autoResetNode->name());
                                 std::string autoResetNodeValue(autoResetNode->value());
@@ -255,11 +255,11 @@ void Parameter::parseXml(xml_node<>* node)
                         }
                         else if(packetNodeName == "delayedAutoReset")
                         {
-                            for(xml_attribute<>* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
+                            for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
                                 _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\delayedAutoReset\": " + std::string(attr->name()));
                             }
-                            for(xml_node<>* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
+                            for(xml_node* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
                             {
                                 std::string autoResetNodeName(autoResetNode->name());
                                 std::string autoResetNodeValue(autoResetNode->value());

@@ -41,20 +41,20 @@ RunProgram::RunProgram(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : RunProgram(baseLib)
+RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node* node) : RunProgram(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"runProgram\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		std::string value(subNode->value());
 		if(nodeName == "path") path = value;
 		else if(nodeName == "arguments")
 		{
-			for(xml_node<>* argumentNode = subNode->first_node(); argumentNode; argumentNode = argumentNode->next_sibling())
+			for(xml_node* argumentNode = subNode->first_node(); argumentNode; argumentNode = argumentNode->next_sibling())
 			{
 				if(std::string(argumentNode->name()) == "argument") arguments.push_back(std::string(argumentNode->value()));
 				else _bl->out.printWarning("Warning: Unknown node for \"runProgram\\arguments\": " + std::string(argumentNode->name()));
@@ -70,7 +70,7 @@ RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : RunP
 		else if(nodeName == "interval") interval = Math::getUnsignedNumber(value);
 		else if(nodeName == "script")
 		{
-			xml_node<>* cdataNode = subNode->first_node();
+			xml_node* cdataNode = subNode->first_node();
 			if(cdataNode && cdataNode->type() == node_type::node_cdata)
 			{
 				script = std::string(cdataNode->value());
@@ -79,7 +79,7 @@ RunProgram::RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : RunP
 		}
 		else if(nodeName == "script2")
 		{
-			xml_node<>* cdataNode = subNode->first_node();
+			xml_node* cdataNode = subNode->first_node();
 			if(cdataNode && cdataNode->type() == node_type::node_cdata)
 			{
 				script2 = std::string(cdataNode->value());

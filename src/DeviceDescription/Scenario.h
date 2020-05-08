@@ -31,10 +31,14 @@
 #ifndef SCENARIO_H_
 #define SCENARIO_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -62,7 +66,7 @@ public:
 	ScenarioEntries scenarioEntries;
 
 	Scenario(BaseLib::SharedObjects* baseLib);
-	Scenario(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	Scenario(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~Scenario();
 
 protected:

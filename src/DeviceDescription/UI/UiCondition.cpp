@@ -41,9 +41,9 @@ UiCondition::UiCondition(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-UiCondition::UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCondition(baseLib)
+UiCondition::UiCondition(BaseLib::SharedObjects* baseLib, xml_node* node) : UiCondition(baseLib)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string name(attr->name());
         std::string value(attr->value());
@@ -51,13 +51,13 @@ UiCondition::UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Ui
         else if(name == "value") conditionValue = value;
         else _bl->out.printWarning("Warning: Unknown attribute for \"condition\": " + std::string(attr->name()));
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
         if(name == "icons")
         {
-            for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
+            for(xml_node* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
             {
                 auto icon = std::make_shared<UiIcon>(baseLib, iconNode);
                 if(!icon->id.empty()) icons.emplace(icon->id, std::move(icon));
@@ -65,7 +65,7 @@ UiCondition::UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Ui
         }
         else if(name == "texts")
         {
-            for(xml_node<>* textNode = subNode->first_node("text"); textNode; textNode = textNode->next_sibling("text"))
+            for(xml_node* textNode = subNode->first_node("text"); textNode; textNode = textNode->next_sibling("text"))
             {
                 auto text = std::make_shared<UiText>(baseLib, textNode);
                 if(!text->id.empty()) texts.emplace(text->id, std::move(text));

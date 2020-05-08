@@ -44,9 +44,9 @@ Function::Function(BaseLib::SharedObjects* baseLib)
 	variables.reset(new Variables(baseLib));
 }
 
-Function::Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& channelIndex) : Function(baseLib)
+Function::Function(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& channelIndex) : Function(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -60,12 +60,12 @@ Function::Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& 
 		else if(attributeName == "xmlns") {}
 		else _bl->out.printWarning("Warning: Unknown attribute for \"function\": " + attributeName);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		if(nodeName == "properties")
 		{
-			for(xml_node<>* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
+			for(xml_node* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
 			{
 				std::string propertyName(propertyNode->name());
 				std::string propertyValue(propertyNode->value());
@@ -96,7 +96,7 @@ Function::Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& 
 				else if(propertyName == "groupId") groupId = propertyValue;
 				else if(propertyName == "linkSenderFunctionTypes")
 				{
-					for(xml_node<>* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
+					for(xml_node* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
 					{
 						std::string functionTypeValue(functionTypeNode->value());
 						if(functionTypeValue.empty()) continue;
@@ -105,7 +105,7 @@ Function::Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& 
 				}
 				else if(propertyName == "linkReceiverFunctionTypes")
 				{
-					for(xml_node<>* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
+					for(xml_node* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
 					{
 						std::string functionTypeValue(functionTypeNode->value());
 						if(functionTypeValue.empty()) continue;

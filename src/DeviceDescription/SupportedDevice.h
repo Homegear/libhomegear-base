@@ -31,10 +31,14 @@
 #ifndef SUPPORTEDDEVICE_H_
 #define SUPPORTEDDEVICE_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <memory>
 #include <vector>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -56,7 +60,7 @@ class SupportedDevice
 {
 public:
 	explicit SupportedDevice(BaseLib::SharedObjects* baseLib);
-    explicit SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    explicit SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~SupportedDevice() = default;
 
 	std::string id;

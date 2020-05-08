@@ -44,7 +44,7 @@ ICast::ICast(BaseLib::SharedObjects* baseLib) : _bl(baseLib)
 {
 }
 
-ICast::ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : _bl(baseLib), _parameter(parameter)
+ICast::ICast(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : _bl(baseLib), _parameter(parameter)
 {
 }
 
@@ -60,13 +60,13 @@ DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib) : ICas
 {
 }
 
-DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"decimalIntegerScale\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -100,13 +100,13 @@ DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib) : ICast(
 {
 }
 
-DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         _bl->out.printWarning("Warning: Unknown attribute for \"decimalStringScale\": " + std::string(attr->name()));
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
@@ -139,13 +139,13 @@ IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib) : ICas
 {
 }
 
-IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"integerIntegerScale\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -187,13 +187,13 @@ IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+IntegerOffset::IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"integerOffset\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -228,13 +228,13 @@ DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+DecimalOffset::DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"decimalOffset\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -269,25 +269,25 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"integerIntegerMap\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
 		if(name == "value")
 		{
-			for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+			for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 			{
 				_bl->out.printWarning("Warning: Unknown attribute for \"integerIntegerMap\\value\": " + std::string(attr->name()));
 			}
 			int32_t physicalValue = 0;
 			int32_t logicalValue = 0;
-			for(xml_node<>* valueNode = subNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
+			for(xml_node* valueNode = subNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
 			{
 				std::string valueName(valueNode->name());
 				std::string valueValue(valueNode->value());
@@ -335,13 +335,13 @@ BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+BooleanInteger::BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"booleanInteger\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -386,13 +386,13 @@ BooleanDecimal::BooleanDecimal(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanDecimal::BooleanDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+BooleanDecimal::BooleanDecimal(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"booleanDecimal\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -437,13 +437,13 @@ BooleanString::BooleanString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+BooleanString::BooleanString(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"booleanString\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -477,23 +477,23 @@ DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+DecimalConfigTime::DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"decimalConfigTime\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
 		if(name == "factors")
 		{
-			for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+			for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 			{
 				_bl->out.printWarning("Warning: Unknown attribute for \"decimalConfigTime\\factors\": " + std::string(attr->name()));
 			}
-			for(xml_node<>* factorNode = subNode->first_node(); factorNode; factorNode = factorNode->next_sibling())
+			for(xml_node* factorNode = subNode->first_node(); factorNode; factorNode = factorNode->next_sibling())
 			{
 				std::string factorName(factorNode->name());
 				std::string factorValue(factorNode->value());
@@ -600,13 +600,13 @@ IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib) : ICast(base
 {
 }
 
-IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+IntegerTinyFloat::IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"integerTinyFloat\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -653,13 +653,13 @@ StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib) : 
 {
 }
 
-StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"stringUnsignedInteger\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"stringUnsignedInteger\": " + std::string(subNode->name()));
 	}
@@ -685,13 +685,13 @@ BlindTest::BlindTest(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+BlindTest::BlindTest(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"blindTest\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string stringValue(subNode->value());
@@ -718,13 +718,13 @@ OptionString::OptionString(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+OptionString::OptionString(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"optionString\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"optionString\": " + std::string(subNode->name()));
 	}
@@ -774,25 +774,25 @@ OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+OptionInteger::OptionInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"optionInteger\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
 		if(name == "value")
 		{
-			for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+			for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 			{
 				_bl->out.printWarning("Warning: Unknown attribute for \"optionInteger\\value\": " + std::string(attr->name()));
 			}
 			int32_t physicalValue = 0;
 			int32_t logicalValue = 0;
-			for(xml_node<>* valueNode = subNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
+			for(xml_node* valueNode = subNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
 			{
 				std::string valueName(valueNode->name());
 				std::string valueValue(valueNode->value());
@@ -827,13 +827,13 @@ StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib) 
 {
 }
 
-StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+StringJsonArrayDecimal::StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"stringJsonArrayDecimal\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"stringJsonArrayDecimal\": " + std::string(subNode->name()));
 	}
@@ -882,16 +882,16 @@ RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 }
 
-RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+RpcBinary::RpcBinary(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
 	_binaryEncoder = std::shared_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(_bl));
 	_binaryDecoder = std::shared_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(_bl));
 
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"rpcBinary\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"rpcBinary\": " + std::string(subNode->name()));
 	}
@@ -915,13 +915,13 @@ Toggle::Toggle(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+Toggle::Toggle(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"toggle\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 
 		std::string name(subNode->name());
@@ -945,13 +945,13 @@ CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+CcrtdnParty::CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"ccrtdnParty\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"ccrtdnParty\": " + std::string(subNode->name()));
 	}
@@ -1001,13 +1001,13 @@ Cfm::Cfm(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+Cfm::Cfm(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"cfm\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"cfm\": " + std::string(subNode->name()));
 	}
@@ -1060,13 +1060,13 @@ StringReplace::StringReplace(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+StringReplace::StringReplace(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"booleanString\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -1092,13 +1092,13 @@ HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib) : ICast(
 {
 }
 
-HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"hexStringByteArray\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"hexStringByteArray\": " + std::string(node->name()));
 	}
@@ -1134,13 +1134,13 @@ TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib) : ICast(ba
 {
 }
 
-TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+TimeStringSeconds::TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"timestringDuration\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"timestringDuration\": " + std::string(subNode->name()));
 	}
@@ -1176,13 +1176,13 @@ Invert::Invert(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+Invert::Invert(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"invert\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"invert\": " + std::string(subNode->name()));
 	}
@@ -1236,13 +1236,13 @@ Round::Round(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Round::Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+Round::Round(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"decimalPlaces\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string name(subNode->name());
 		std::string value(subNode->value());
@@ -1275,16 +1275,16 @@ Generic::Generic(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {
 }
 
-Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+Generic::Generic(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string name(attr->name());
 		std::string value(attr->value());
 		if(name == "type") type = value;
 		else _bl->out.printWarning("Warning: Unknown attribute for \"generic\": " + name);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		_bl->out.printWarning("Warning: Unknown node in \"generic\": " + std::string(subNode->name()));
 	}

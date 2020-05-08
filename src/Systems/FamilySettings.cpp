@@ -139,7 +139,7 @@ std::vector<char> FamilySettings::getBinary(std::string name)
     return std::vector<char>();
 }
 
-void FamilySettings::set(std::string name, std::string& value)
+void FamilySettings::set(std::string name, const std::string& value)
 {
     try
     {
@@ -219,7 +219,7 @@ void FamilySettings::set(std::string name, int32_t value)
     }
 }
 
-void FamilySettings::set(std::string name, std::vector<char>& value)
+void FamilySettings::set(std::string name, const std::vector<char>& value)
 {
     try
     {

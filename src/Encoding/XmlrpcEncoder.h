@@ -37,7 +37,6 @@
 #include "../Exception.h"
 #include "../Output/Output.h"
 #include "../Variable.h"
-#include "RapidXml/rapidxml_print.hpp"
 
 using namespace rapidxml;
 
@@ -62,9 +61,9 @@ public:
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 
-	void encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
-	void encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
-	void encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable);
+	void encodeVariable(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable);
+	void encodeStruct(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable);
+	void encodeArray(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable);
 };
 
 }

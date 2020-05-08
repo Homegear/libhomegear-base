@@ -31,11 +31,15 @@
 #ifndef DEVICEPARAMETERLOGICAL_H_
 #define DEVICEPARAMETERLOGICAL_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -78,7 +82,7 @@ public:
 
 	EnumerationValue() {}
 	EnumerationValue(std::string id, int32_t index) { this->id = id; this->index = index; indexDefined = true; }
-	EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~EnumerationValue() {}
 };
 
@@ -91,7 +95,7 @@ public:
 	};
 
 	ILogical(BaseLib::SharedObjects* baseLib);
-	ILogical(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	ILogical(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~ILogical() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing() = 0;
 	virtual std::shared_ptr<Variable> getDefaultValue() = 0;
@@ -114,7 +118,7 @@ public:
 	std::unordered_map<int32_t, std::string> specialValuesIntegerMap;
 
 	LogicalInteger(BaseLib::SharedObjects* baseLib);
-	LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalInteger() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -131,7 +135,7 @@ public:
 	std::unordered_map<int64_t, std::string> specialValuesIntegerMap;
 
 	LogicalInteger64(BaseLib::SharedObjects* baseLib);
-	LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalInteger64() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -148,7 +152,7 @@ public:
 	std::unordered_map<double, std::string> specialValuesFloatMap;
 
 	LogicalDecimal(BaseLib::SharedObjects* baseLib);
-	LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalDecimal() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -163,7 +167,7 @@ public:
 	int32_t setToValueOnPairing = 0;
 
 	LogicalEnumeration(BaseLib::SharedObjects* baseLib);
-	LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalEnumeration() {}
 	std::vector<EnumerationValue> values;
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
@@ -177,7 +181,7 @@ public:
 	bool setToValueOnPairing = false;
 
 	LogicalBoolean(BaseLib::SharedObjects* baseLib);
-	LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalBoolean() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -190,7 +194,7 @@ public:
 	std::string setToValueOnPairing;
 
 	LogicalString(BaseLib::SharedObjects* baseLib);
-	LogicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalString(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalString() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -203,7 +207,7 @@ public:
 	bool setToValueOnPairing = false;
 
 	LogicalAction(BaseLib::SharedObjects* baseLib);
-	LogicalAction(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalAction(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalAction() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -213,7 +217,7 @@ class LogicalArray : public ILogical
 {
 public:
 	LogicalArray(BaseLib::SharedObjects* baseLib);
-	LogicalArray(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalArray(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalArray() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();
@@ -223,7 +227,7 @@ class LogicalStruct : public ILogical
 {
 public:
 	LogicalStruct(BaseLib::SharedObjects* baseLib);
-	LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~LogicalStruct() {}
 	virtual std::shared_ptr<Variable> getSetToValueOnPairing();
 	virtual std::shared_ptr<Variable> getDefaultValue();

@@ -336,7 +336,7 @@ public:
 	 */
 	static std::string stripNonPrintable(const std::string& s);
 
-	static PVariable xml2variable(xml_node<>* node);
+	static PVariable xml2variable(xml_node* node);
 
 	/**
 	 * Returns the endianess of the system.

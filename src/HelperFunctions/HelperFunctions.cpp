@@ -149,12 +149,12 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
-PVariable HelperFunctions::xml2variable(xml_node<>* node)
+PVariable HelperFunctions::xml2variable(xml_node* node)
 {
     auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
 
     bool hasElements = false;
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string attributeName(attr->name());
         std::string attributeValue(attr->value());
@@ -162,7 +162,7 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
         nodeVariable->structValue->emplace("@" + attributeName, std::make_shared<Variable>(attributeValue));
     }
 
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         if(nodeName.empty()) continue;

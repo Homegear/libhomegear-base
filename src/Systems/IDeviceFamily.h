@@ -96,11 +96,11 @@ public:
     virtual bool locked();
 
     virtual int32_t getFamily();
-    virtual FamilySettings::PFamilySetting getFamilySetting(std::string& name);
-    virtual void setFamilySetting(std::string& name, std::string& value);
-    virtual void setFamilySetting(std::string& name, int32_t value);
-    virtual void setFamilySetting(std::string& name, std::vector<char>& value);
-    virtual void deleteFamilySettingFromDatabase(std::string& name);
+    virtual FamilySettings::PFamilySetting getFamilySetting(const std::string& name);
+    virtual void setFamilySetting(const std::string& name, const std::string& value);
+    virtual void setFamilySetting(const std::string& name, int32_t value);
+    virtual void setFamilySetting(const std::string& name, const std::vector<char>& value);
+    virtual void deleteFamilySettingFromDatabase(const std::string& name);
     virtual void load() = 0;
     virtual void save(bool full) = 0;
     virtual std::string getName();

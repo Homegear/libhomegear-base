@@ -41,9 +41,9 @@ Scenario::Scenario(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-Scenario::Scenario(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Scenario(baseLib)
+Scenario::Scenario(BaseLib::SharedObjects* baseLib, xml_node* node) : Scenario(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -53,13 +53,13 @@ Scenario::Scenario(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Scenario
 		}
 		else _bl->out.printWarning("Warning: Unknown attribute for \"scenario\": " + attributeName);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		std::string parameterId;
 		if(nodeName == "parameter")
 		{
-			for(xml_attribute<>* attr = subNode->first_attribute(); attr; attr = attr->next_attribute())
+			for(xml_attribute* attr = subNode->first_attribute(); attr; attr = attr->next_attribute())
 			{
 				std::string attributeName(attr->name());
 				if(attributeName == "id") parameterId = std::string(attr->value());

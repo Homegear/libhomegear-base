@@ -42,9 +42,9 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiControl(baseLib)
+UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node* node) : UiControl(baseLib)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string attributeName(attr->name());
         std::string attributeValue(attr->value());
@@ -54,7 +54,7 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
         }
         else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());
@@ -64,7 +64,7 @@ UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiCont
         else if(name == "rows") rows = Math::getNumber(value);
         else if(name == "metadata")
         {
-            for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
+            for(xml_node* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
             {
                 std::string metadataNodeName(metadataNode->name());
                 metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode));
