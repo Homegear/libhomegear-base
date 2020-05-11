@@ -76,6 +76,7 @@ public:
 	std::string port;
 	std::string port2;
 	std::string port3;
+	std::string port4;
 	std::string portKeepAlive;
 	uint32_t address = 0;
 	std::string listenIp;
