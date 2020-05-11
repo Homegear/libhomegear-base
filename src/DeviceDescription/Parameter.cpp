@@ -64,9 +64,7 @@ Parameter::Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& par
 	physical.reset(new PhysicalInteger(baseLib));
 }
 
-Parameter::~Parameter()
-{
-}
+Parameter::~Parameter() = default;
 
 void Parameter::parseXml(xml_node* node)
 {
@@ -168,7 +166,7 @@ void Parameter::parseXml(xml_node* node)
                             }
 
                             role.id = Math::getUnsignedNumber64(roleValue);
-                            if(!role.id != 0) roles.emplace(role.id, role);
+                            if(role.id != 0) roles.emplace(role.id, role);
                         }
                         else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
                     }
@@ -201,7 +199,7 @@ void Parameter::parseXml(xml_node* node)
                     {
                         std::string attributeName(attr->name());
                         if(attributeName == "id") packet->id = std::string(attr->value());
-                        else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\": " + std::string(attr->name()));
+                        else _bl->out.printWarning(R"(Warning: Unknown attribute for "parameter\packets\packet": )" + std::string(attr->name()));
                     }
                     for(xml_node* packetNode = packetsNode->first_node(); packetNode; packetNode = packetNode->next_sibling())
                     {
@@ -210,7 +208,7 @@ void Parameter::parseXml(xml_node* node)
                         {
                             for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
-                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\type\": " + std::string(attr->name()));
+                                _bl->out.printWarning(R"(Warning: Unknown attribute for "parameter\packets\packet\type": )" + std::string(attr->name()));
                             }
                             std::string value(packetNode->value());
                             if(value == "get")
@@ -228,13 +226,13 @@ void Parameter::parseXml(xml_node* node)
                                 packet->type = Packet::Type::Enum::event;
                                 eventPackets.push_back(packet);
                             }
-                            else _bl->out.printWarning("Warning: Unknown value for \"parameter\\packets\\packet\\type\": " + value);
+                            else _bl->out.printWarning(R"(Warning: Unknown value for "parameter\packets\packet\type": )" + value);
                         }
                         else if(packetNodeName == "responseId")
                         {
                             for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
-                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\response\": " + std::string(attr->name()));
+                                _bl->out.printWarning(R"(Warning: Unknown attribute for "parameter\packets\packet\response": )" + std::string(attr->name()));
                             }
                             packet->responseId = std::string(packetNode->value());
                         }
@@ -242,7 +240,7 @@ void Parameter::parseXml(xml_node* node)
                         {
                             for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
-                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\autoReset\": " + std::string(attr->name()));
+                                _bl->out.printWarning(R"(Warning: Unknown attribute for "parameter\packets\packet\autoReset": )" + std::string(attr->name()));
                             }
                             for(xml_node* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
                             {
@@ -250,14 +248,14 @@ void Parameter::parseXml(xml_node* node)
                                 std::string autoResetNodeValue(autoResetNode->value());
                                 if(autoResetNodeValue.empty()) continue;
                                 if(autoResetNodeName == "parameterId") packet->autoReset.push_back(autoResetNodeValue);
-                                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\autoReset\": " + packetsNodeName);
+                                else _bl->out.printWarning(R"(Warning: Unknown subnode for "parameter\packets\packet\autoReset": )" + packetsNodeName);
                             }
                         }
                         else if(packetNodeName == "delayedAutoReset")
                         {
                             for(xml_attribute* attr = packetNode->first_attribute(); attr; attr = attr->next_attribute())
                             {
-                                _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\packets\\packet\\delayedAutoReset\": " + std::string(attr->name()));
+                                _bl->out.printWarning(R"(Warning: Unknown attribute for "parameter\packets\packet\delayedAutoReset": )" + std::string(attr->name()));
                             }
                             for(xml_node* autoResetNode = packetNode->first_node(); autoResetNode; autoResetNode = autoResetNode->next_sibling())
                             {
@@ -266,7 +264,7 @@ void Parameter::parseXml(xml_node* node)
                                 if(autoResetNodeValue.empty()) continue;
                                 if(autoResetNodeName == "resetDelayParameterId") packet->delayedAutoReset.first = autoResetNodeValue;
                                 else if(autoResetNodeName == "resetTo") packet->delayedAutoReset.second = Math::getNumber(autoResetNodeValue);
-                                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\\delayedAutoReset\": " + packetsNodeName);
+                                else _bl->out.printWarning(R"(Warning: Unknown subnode for "parameter\packets\packet\delayedAutoReset": )" + packetsNodeName);
                                 hasDelayedAutoResetParameters = true;
                             }
                         }
@@ -279,7 +277,7 @@ void Parameter::parseXml(xml_node* node)
                             else if(value == "l") packet->conditionOperator = Packet::ConditionOperator::Enum::l;
                             else if(value == "ge") packet->conditionOperator = Packet::ConditionOperator::Enum::ge;
                             else if(value == "le") packet->conditionOperator = Packet::ConditionOperator::Enum::le;
-                            else _bl->out.printWarning("Warning: Unknown attribute value for \"cond\" in node \"setEx\": " + value);
+                            else _bl->out.printWarning(R"(Warning: Unknown attribute value for "cond" in node "setEx": )" + value);
                         }
                         else if(packetNodeName == "conditionValue")
                         {
@@ -291,49 +289,54 @@ void Parameter::parseXml(xml_node* node)
                             std::string value(packetNode->value());
                             packet->delay = Math::getNumber(value);
                         }
-                        else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\\packet\": " + packetsNodeName);
+                        else _bl->out.printWarning(R"(Warning: Unknown subnode for "parameter\packets\packet": )" + packetsNodeName);
                     }
                 }
-                else _bl->out.printWarning("Warning: Unknown subnode for \"parameter\\packets\": " + packetsNodeName);
+                else _bl->out.printWarning(R"(Warning: Unknown subnode for "parameter\packets": )" + packetsNodeName);
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"parameter\": " + nodeName);
     }
     if(logical->type == ILogical::Type::Enum::tFloat)
     {
-        LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
+        auto* parameter = (LogicalDecimal*)logical.get();
         if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
     }
     else if(logical->type == ILogical::Type::Enum::tInteger)
     {
-        LogicalInteger* parameter = (LogicalInteger*)logical.get();
+        auto* parameter = (LogicalInteger*)logical.get();
         if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
     }
 }
 
-PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
+PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool invert, bool isEvent)
 {
 	try
 	{
 		std::vector<uint8_t> reversedData;
-		std::vector<uint8_t>* value = nullptr;
+		const std::vector<uint8_t>* value;
 		if(physical->endianess == IPhysical::Endianess::Enum::little)
 		{
-			value = &reversedData;
-			reverseData(data, *value);
+			reverseData(data, reversedData);
+            value = &reversedData;
 		}
 		else value = &data;
 		if(logical->type == ILogical::Type::Enum::tEnum && casts.empty())
 		{
 			int32_t integerValue = 0;
-			_bl->hf.memcpyBigEndian(integerValue, *value);
-			return std::shared_ptr<Variable>(new Variable(integerValue));
+			BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
+            if(invert)
+            {
+                auto* parameter = (LogicalEnumeration*)logical.get();
+                integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (integerValue - parameter->minimumValue));
+            }
+			return std::make_shared<Variable>(integerValue);
 		}
 		else if(logical->type == ILogical::Type::Enum::tBoolean && casts.empty())
 		{
 			int32_t integerValue = 0;
-			_bl->hf.memcpyBigEndian(integerValue, *value);
-			return PVariable(new Variable((bool)integerValue));
+			BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
+			return std::make_shared<Variable>(invert == !(bool)integerValue);
 		}
 		else if(logical->type == ILogical::Type::Enum::tString && casts.empty())
 		{
@@ -341,19 +344,18 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 			{
 				int32_t size = value->back() == 0 ? value->size() - 1 : value->size();
 				std::string string((char*)&value->at(0), size);
-				return PVariable(new Variable(string));
+				return std::make_shared<Variable>(string);
 			}
-			return PVariable(new Variable(VariableType::tString));
+			return std::make_shared<Variable>(VariableType::tString);
 		}
 		else if(logical->type == ILogical::Type::Enum::tAction)
 		{
-			if(isEvent) return PVariable(new Variable(true));
-			else return PVariable(new Variable(false));
+            return std::make_shared<Variable>(isEvent);
 		}
 		else if(id == "RSSI_DEVICE")
 		{
 			int32_t integerValue;
-			_bl->hf.memcpyBigEndian(integerValue, *value);
+			BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
 			std::shared_ptr<Variable> variable(new Variable(integerValue * -1));
 			return variable;
 		}
@@ -368,7 +370,7 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 			else if(value->size() <= 4)
 			{
 				int32_t integerValue;
-				_bl->hf.memcpyBigEndian(integerValue, *value);
+				BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
 				variable.reset(new Variable(integerValue));
 				if(isSigned && !value->empty() && value->size() <= 4)
 				{
@@ -388,11 +390,62 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
 				}
 			}
 			if(!variable) variable.reset(new Variable(VariableType::tBinary));
-			for(std::vector<PICast>::reverse_iterator i = casts.rbegin(); i != casts.rend(); ++i)
+
+			for(auto i = casts.rbegin(); i != casts.rend(); ++i)
 			{
 				if((*i)->needsBinaryPacketData() && variable->binaryValue.empty()) variable->binaryValue = *value;
 				(*i)->fromPacket(variable);
 			}
+
+			//{{{ Control boundaries and invert value
+            if(logical->type == ILogical::Type::Enum::tEnum)
+            {
+                auto* parameter = (LogicalEnumeration*)logical.get();
+                if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
+                if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+                if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+            }
+            else if(logical->type == ILogical::Type::Enum::tFloat)
+            {
+                auto* parameter = (LogicalDecimal*)logical.get();
+                bool specialValue = (variable->floatValue == parameter->defaultValue);
+                if(!specialValue) specialValue = parameter->specialValuesFloatMap.find(variable->floatValue) != parameter->specialValuesFloatMap.end();
+                if(!specialValue)
+                {
+                    if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
+                    else if(variable->floatValue < parameter->minimumValue) variable->floatValue = parameter->minimumValue;
+                    if(invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
+                }
+            }
+            else if(logical->type == ILogical::Type::Enum::tInteger)
+            {
+                auto* parameter = (LogicalInteger*)logical.get();
+                bool specialValue = (variable->integerValue == parameter->defaultValue);
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
+                if(!specialValue)
+                {
+                    if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
+                    else if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+                    if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                }
+            }
+            else if(logical->type == ILogical::Type::Enum::tInteger64)
+            {
+                auto* parameter = (LogicalInteger64*)logical.get();
+                bool specialValue = (variable->integerValue64 == parameter->defaultValue);
+                if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
+                if(!specialValue)
+                {
+                    if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
+                    else if(variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
+                    if(invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+                }
+            }
+            else if(logical->type == ILogical::Type::Enum::tBoolean)
+            {
+                if(invert) variable->booleanValue = !variable->booleanValue;
+            }
+            //}}}
 			return variable;
 		}
 	}
@@ -404,10 +457,10 @@ PVariable Parameter::convertFromPacket(std::vector<uint8_t>& data, bool isEvent)
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    return PVariable(new Variable(VariableType::tInteger));
+    return std::make_shared<BaseLib::Variable>();
 }
 
-void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const std::string& value, bool invert, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -419,16 +472,16 @@ void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& 
 			if(Math::isNumber(value)) rpcValue.reset(new Variable(Math::getNumber(value)));
 			else //value is id of enum element
 			{
-				LogicalEnumeration* parameter = (LogicalEnumeration*)logical.get();
-				for(std::vector<EnumerationValue>::iterator i = parameter->values.begin(); i != parameter->values.end(); ++i)
+				auto* parameter = (LogicalEnumeration*)logical.get();
+				for(auto& element : parameter->values)
 				{
-					if(i->id == value)
+					if(element.id == value)
 					{
-						rpcValue.reset(new Variable(i->index));
+						rpcValue.reset(new Variable(element.index));
 						break;
 					}
 				}
-				if(!rpcValue) rpcValue.reset(new Variable(0));
+				if(!rpcValue) rpcValue = std::make_shared<Variable>(0);
 			}
 		}
 		else if(logical->type == ILogical::Type::Enum::tBoolean || logical->type == ILogical::Type::Enum::tAction)
@@ -444,7 +497,7 @@ void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& 
 			_bl->out.printWarning("Warning: Could not convert parameter " + id + " from String.");
 			return;
 		}
-		return convertToPacket(rpcValue, convertedValue);
+		return convertToPacket(rpcValue, invert, convertedValue);
 	}
 	catch(const std::exception& ex)
     {
@@ -456,7 +509,7 @@ void Parameter::convertToPacket(const std::string& value, std::vector<uint8_t>& 
     }
 }
 
-void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -470,7 +523,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 		}
 		else if(logical->type == ILogical::Type::Enum::tString && casts.empty())
 		{
-			if(variable->stringValue.size() > 0)
+			if(!variable->stringValue.empty())
 			{
 				convertedValue.insert(convertedValue.end(), variable->stringValue.begin(), variable->stringValue.end());
 			}
@@ -480,9 +533,10 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 		{
 			if(logical->type == ILogical::Type::Enum::tEnum)
 			{
-				LogicalEnumeration* parameter = (LogicalEnumeration*)logical.get();
+				auto* parameter = (LogicalEnumeration*)logical.get();
 				if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
 				if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+				if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
 			}
 			else if(logical->type == ILogical::Type::Enum::tFloat)
 			{
@@ -492,13 +546,14 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 					else if(variable->integerValue64 != 0) variable->floatValue = variable->integerValue64;
 					else if(!variable->stringValue.empty()) variable->floatValue = Math::getDouble(variable->stringValue);
 				}
-				LogicalDecimal* parameter = (LogicalDecimal*)logical.get();
+				auto* parameter = (LogicalDecimal*)logical.get();
 				bool specialValue = (variable->floatValue == parameter->defaultValue);
 				if(!specialValue) specialValue = parameter->specialValuesFloatMap.find(variable->floatValue) != parameter->specialValuesFloatMap.end();
 				if(!specialValue)
 				{
 					if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
 					else if(variable->floatValue < parameter->minimumValue) variable->floatValue = parameter->minimumValue;
+                    if(invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tInteger)
@@ -509,13 +564,14 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 					//else if(variable->integerValue64 != 0) variable->integerValue = (int32_t)variable->integerValue64; //Dangerous
 					else if(!variable->stringValue.empty()) variable->integerValue = Math::getNumber(variable->stringValue);
 				}
-				LogicalInteger* parameter = (LogicalInteger*)logical.get();
+				auto* parameter = (LogicalInteger*)logical.get();
 				bool specialValue = (variable->integerValue == parameter->defaultValue);
                 if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
 					else if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
+                    if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tInteger64)
@@ -526,34 +582,38 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 					//if(variable->integerValue != 0) variable->integerValue64 = variable->integerValue;
 					else if(!variable->stringValue.empty()) variable->integerValue64 = Math::getNumber(variable->stringValue);
 				}
-				LogicalInteger64* parameter = (LogicalInteger64*)logical.get();
+				auto* parameter = (LogicalInteger64*)logical.get();
 				bool specialValue = (variable->integerValue64 == parameter->defaultValue);
                 if(!specialValue) specialValue = parameter->specialValuesIntegerMap.find(variable->floatValue) != parameter->specialValuesIntegerMap.end();
 				if(!specialValue)
 				{
 					if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
 					else if(variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
+                    if(invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tBoolean)
 			{
-				if(variable->booleanValue == false && variable->integerValue != 0) variable->booleanValue = true;
-				else if(variable->booleanValue == false && variable->floatValue != 0) variable->booleanValue = true;
-				else if(variable->booleanValue == false && variable->stringValue == "true") variable->booleanValue = true;
+				if(!variable->booleanValue &&
+				    (variable->integerValue != 0 || variable->floatValue != 0 || variable->stringValue == "true"))
+                {
+                    variable->booleanValue = true;
+                }
+				if(invert) variable->booleanValue = !variable->booleanValue;
 			}
 			if(casts.empty())
 			{
 				if(logical->type == ILogical::Type::Enum::tBoolean)
 				{
-					if(variable->stringValue.size() > 0 && variable->stringValue == "true") variable->integerValue = 1;
+					if(!variable->stringValue.empty() && variable->stringValue == "true") variable->integerValue = 1;
 					else variable->integerValue = (int32_t)variable->booleanValue;
 				}
 			}
 			else
 			{
-				for(std::vector<PICast>::iterator i = casts.begin(); i != casts.end(); ++i)
+				for(auto& cast : casts)
 				{
-					(*i)->toPacket(variable);
+					cast->toPacket(variable);
 				}
 			}
 		}
@@ -576,7 +636,7 @@ void Parameter::convertToPacket(const PVariable& value, std::vector<uint8_t>& co
 				int32_t valueMask = 0xFFFFFFFF >> (((4 - byteSize) * 8) - bitSize);
 				variable->integerValue &= valueMask;
 			}
-			_bl->hf.memcpyBigEndian(convertedValue, variable->integerValue);
+			HelperFunctions::memcpyBigEndian(convertedValue, variable->integerValue);
 
 			if(physical->endianess == IPhysical::Endianess::Enum::little)
 			{
@@ -631,7 +691,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
 	{
 		if(data.size() > 4 || data.empty() || logical->type == ILogical::Type::Enum::tString) return;
 		int32_t value = 0;
-		_bl->hf.memcpyBigEndian(value, data);
+		BaseLib::HelperFunctions::memcpyBigEndian(value, data);
 		if(physical->size < 0)
 		{
 			_bl->out.printError("Error: Negative size not allowed.");
@@ -656,8 +716,8 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
 			uint32_t bytesMissing = (int32_t)physical->size - data.size();
 			std::vector<uint8_t> oldData = data;
 			data.clear();
-			for(uint32_t i = 0; i < bytesMissing; i++) data.push_back(0);
-			for(uint32_t i = 0; i < oldData.size(); i++) data.push_back(oldData.at(i));
+			for(uint32_t j = 0; j < bytesMissing; j++) data.push_back(0);
+			for(auto element : oldData) data.push_back(element);
 		}
 	}
 	catch(const std::exception& ex)
@@ -670,7 +730,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t>& data)
     }
 }
 
-const PParameterGroup Parameter::parent()
+PParameterGroup Parameter::parent()
 {
 	return _parent.lock();
 }

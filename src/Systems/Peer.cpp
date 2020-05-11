@@ -53,6 +53,7 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
     _room = rhs._room;
     _categories = rhs._categories;
     _roles = rhs._roles;
+    _invert = rhs._invert;
 }
 
 RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
@@ -67,6 +68,7 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
     _room = rhs._room;
     _categories = rhs._categories;
     _roles = rhs._roles;
+    _invert = rhs._invert;
     return *this;
 }
 
@@ -156,6 +158,26 @@ bool RpcConfigurationParameter::equals(std::vector<uint8_t>& value) noexcept
 {
     std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
     return value == _binaryData;
+}
+
+void RpcConfigurationParameter::addRole(const Role& role)
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    _roles.emplace(role.id, role);
+    if(role.invert) _invert = true;
+}
+
+void RpcConfigurationParameter::addRole(uint64_t id, RoleDirection direction, bool invert)
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    _roles.emplace(id, std::move(Role(id, direction, invert)));
+    if(invert) _invert = true;
+}
+
+bool RpcConfigurationParameter::invert()
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    return _invert;
 }
 
 ConfigDataBlock::ConfigDataBlock(ConfigDataBlock const& rhs)
@@ -642,7 +664,7 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
                 {
                     if(!parameterIterator->second.rpcParameter) return _rxModes;
                     std::vector<uint8_t> data = parameterIterator->second.getBinaryData();
-                    if(parameterIterator->second.rpcParameter->convertFromPacket(data)->booleanValue)
+                    if(parameterIterator->second.rpcParameter->convertFromPacket(data, false, false)->booleanValue)
                     {
                         _rxModes = (HomegearDevice::ReceiveModes::Enum)(_rxModes | HomegearDevice::ReceiveModes::Enum::wakeOnRadio);
                     }
@@ -674,7 +696,7 @@ void Peer::setLastPacketReceived()
         if(parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter)
         {
             std::vector<uint8_t> parameterData;
-            parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), parameterData);
+            parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), false, parameterData);
             parameterIterator->second.setBinaryData(parameterData);
             if(parameterIterator->second.databaseId > 0) saveParameter(parameterIterator->second.databaseId, parameterData);
             else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterData);
@@ -969,7 +991,7 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
     try
     {
         std::vector<uint8_t> parameterData;
-        if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+        if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
         parameter.setBinaryData(parameterData);
     }
     catch(const std::exception& ex)
@@ -1694,7 +1716,7 @@ void Peer::loadConfig()
                 if(parameterGroupType == ParameterGroup::Type::Enum::config && parameterInfo->function->parameterGroupSelector && !parameterInfo->function->alternativeFunctions.empty() && parameterInfo->parameterName == parameterInfo->function->parameterGroupSelector->id)
                 {
                     std::vector<uint8_t> parameterData = parameterInfo->parameter.getBinaryData();
-                    int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterData)->integerValue;
+                    int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterData, false, false)->integerValue;
                     if(parameterInfo->function->parameterGroupSelector->logical->type != ILogical::Type::Enum::tBoolean && index > (signed)parameterInfo->function->alternativeFunctions.size())
                     {
                         _bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterData.back()) + "). Peer: " + std::to_string(_peerID) + ".");
@@ -1713,7 +1735,7 @@ void Peer::loadConfig()
             if(parameterGroupSelector && parameter->function->parameterGroupSelector && !parameter->function->alternativeFunctions.empty())
             {
                 std::vector<uint8_t> parameterData = parameterGroupSelector->parameter.getBinaryData();
-                int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->integerValue;
+                int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData, false, false)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData, false, false)->integerValue;
                 if(index == 0)
                 {
                     if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
@@ -1830,7 +1852,7 @@ void Peer::loadConfig()
                     if(parameter->parameter.rpcParameter->resetAfterRestart)
                     {
                         std::vector<uint8_t> parameterData;
-                        parameter->parameter.rpcParameter->convertToPacket(parameter->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+                        parameter->parameter.rpcParameter->convertToPacket(parameter->parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
                         parameter->parameter.setBinaryData(parameterData);
                     }
                     valuesCentral[parameter->channel][parameter->parameterName] = parameter->parameter;
@@ -2342,7 +2364,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
                 if(parameter.rpcParameter->readable)
                 {
                     std::vector<uint8_t> parameterData = parameter.getBinaryData();
-                    if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
+                    if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                     if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) value.reset(new Variable(value->type));
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2554,7 +2576,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                     if((parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) || parameterData.empty()) value.reset(new Variable(parameter.rpcParameter->logical->type));
                     else
                     {
-                        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
+                        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                     }
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2730,7 +2752,7 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
         if(!parameterIterator->second.rpcParameter->readable) return Variable::createError(-6, "Parameter is not readable.");
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
         PVariable variable;
-        if(!convertFromPacketHook(parameterIterator->second.rpcParameter, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData);
+        if(!convertFromPacketHook(parameterIterator->second.rpcParameter, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameterIterator->second.invert(), false);
         if(parameterIterator->second.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -3047,8 +3069,9 @@ PVariable Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, b
             {
                 if(valuesCentral.find(0) != valuesCentral.end() && valuesCentral.at(0).find("RSSI_DEVICE") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter)
                 {
-                    std::vector<uint8_t> parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
-                    info->structValue->insert(StructElement("RSSI", valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData)));
+                    auto& parameter = valuesCentral.at(0).at("RSSI_DEVICE");
+                    std::vector<uint8_t> parameterData = parameter.getBinaryData();
+                    info->structValue->insert(StructElement("RSSI", parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false)));
                 }
             }
         }
@@ -3520,7 +3543,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(getParamsetHook2(clientInfo, parameter.rpcParameter, channel, variables)) continue;
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3552,7 +3575,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3593,7 +3616,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3801,7 +3824,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
         }
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
-        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData);
+        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
         if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -4260,8 +4283,9 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
         PVariable element;
         if(valuesCentral.at(0).find("RSSI_PEER") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_PEER").rpcParameter)
         {
-            parameterData = valuesCentral.at(0).at("RSSI_PEER").getBinaryData();
-            element = valuesCentral.at(0).at("RSSI_PEER").rpcParameter->convertFromPacket(parameterData);
+            auto& parameter = valuesCentral.at(0).at("RSSI_PEER");
+            parameterData = parameter.getBinaryData();
+            element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
             if(element->integerValue == 0) element->integerValue = 65536;
             rpcArray->arrayValue->push_back(element);
         }
@@ -4271,10 +4295,13 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
             rpcArray->arrayValue->push_back(element);
         }
 
-        parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
-        element = valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData);
-        if(element->integerValue == 0) element->integerValue = 65536;
-        rpcArray->arrayValue->push_back(element);
+        {
+            auto& parameter = valuesCentral.at(0).at("RSSI_DEVICE");
+            parameterData = parameter.getBinaryData();
+            element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+            if(element->integerValue == 0) element->integerValue = 65536;
+            rpcArray->arrayValue->push_back(element);
+        }
 
         std::shared_ptr<ICentral> central = getCentral();
         if(!central) return Variable::createError(-32500, "Central is nullptr.");
@@ -4426,7 +4453,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
+            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
             if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
             {
                 std::string numberPart = value->stringValue.substr(2);
@@ -4470,7 +4497,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
+            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
             if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
             {
                 value->booleanValue = !currentValue->booleanValue;

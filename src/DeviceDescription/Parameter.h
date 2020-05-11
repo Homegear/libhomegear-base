@@ -136,31 +136,34 @@ public:
 	/**
 	 * Converts binary data of a packet received by a physical interface to a RPC variable.
 	 *
-	 * @param[in] data The data to convert. It is not modified, even though there is no "const".
-	 * @param isEvent (default false) Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
+	 * @param data The data to convert.
+	 * @param invert Invert value after conversion.
+	 * @param isEvent Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
 	 * @return Returns the RPC variable.
 	 */
-	PVariable convertFromPacket(std::vector<uint8_t>& data, bool isEvent = false);
+	PVariable convertFromPacket(const std::vector<uint8_t>& data, bool invert, bool isEvent);
 
 	/**
 	 * Converts a RPC variable to binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
+	 * @param[in] invert Invert value before any casts are applied.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const PVariable& value, bool invert, std::vector<uint8_t>& convertedValue);
 
 	/**
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
+	 * @param[in] invert Invert value before any casts are applied.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const std::string& value, bool invert, std::vector<uint8_t>& convertedValue);
 
 	void adjustBitPosition(std::vector<uint8_t>& data);
 
-	const PParameterGroup parent();
+	PParameterGroup parent();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 

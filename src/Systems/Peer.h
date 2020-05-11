@@ -145,13 +145,14 @@ public:
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
-    void addRole(const Role& role) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(role.id, role); }
-	void addRole(uint64_t id, RoleDirection direction, bool invert) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id, std::move(Role(id, direction, invert))); }
+    void addRole(const Role& role);
+	void addRole(uint64_t id, RoleDirection direction, bool invert);
 	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
     Role getRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); auto rolesIterator = _roles.find(id); if(rolesIterator != _roles.end()) return rolesIterator->second; else return Role(); }
     std::unordered_map<uint64_t, Role> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
 	std::string getRoleString();
 	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
+	bool invert();
 
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
     void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
@@ -179,6 +180,11 @@ private:
     std::mutex _categoriesMutex;
 	std::set<uint64_t> _categories;
 	std::mutex _rolesMutex;
+
+	/**
+	 * Set to true if at least one role has invert set.
+	 */
+	bool _invert = false;
 	std::unordered_map<uint64_t, Role> _roles;
     std::mutex _roomMutex;
     uint64_t _room = 0;
