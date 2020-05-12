@@ -991,7 +991,8 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
     try
     {
         std::vector<uint8_t> parameterData;
-        if(!convertToPacketHook(parameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
+        auto defaultValue = parameter.rpcParameter->logical->getDefaultValue();
+        if(!convertToPacketHook(parameter, defaultValue, parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
         parameter.setBinaryData(parameterData);
     }
     catch(const std::exception& ex)
