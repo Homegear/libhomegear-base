@@ -991,7 +991,7 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
     try
     {
         std::vector<uint8_t> parameterData;
-        if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
+        if(!convertToPacketHook(parameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), false, parameterData);
         parameter.setBinaryData(parameterData);
     }
     catch(const std::exception& ex)
@@ -2364,7 +2364,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
                 if(parameter.rpcParameter->readable)
                 {
                     std::vector<uint8_t> parameterData = parameter.getBinaryData();
-                    if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+                    if(!convertFromPacketHook(parameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                     if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) value.reset(new Variable(value->type));
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2576,7 +2576,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                     if((parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) || parameterData.empty()) value.reset(new Variable(parameter.rpcParameter->logical->type));
                     else
                     {
-                        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+                        if(!convertFromPacketHook(parameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                     }
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2752,7 +2752,7 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
         if(!parameterIterator->second.rpcParameter->readable) return Variable::createError(-6, "Parameter is not readable.");
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
         PVariable variable;
-        if(!convertFromPacketHook(parameterIterator->second.rpcParameter, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameterIterator->second.invert(), false);
+        if(!convertFromPacketHook(parameterIterator->second, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameterIterator->second.invert(), false);
         if(parameterIterator->second.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -3543,7 +3543,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(getParamsetHook2(clientInfo, parameter.rpcParameter, channel, variables)) continue;
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3575,7 +3575,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3616,7 +3616,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3824,7 +3824,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
         }
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
-        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+        if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
         if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -4453,7 +4453,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+            if(!convertFromPacketHook(parameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
             if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
             {
                 std::string numberPart = value->stringValue.substr(2);
@@ -4497,7 +4497,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
+            if(!convertFromPacketHook(parameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? false : parameter.invert(), false);
             if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
             {
                 value->booleanValue = !currentValue->booleanValue;
