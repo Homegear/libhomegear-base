@@ -649,7 +649,7 @@ protected:
 		 * @param result The conversion result.
 		 * @return "true" means the function converted the parameter.
 		 */
-		virtual bool convertFromPacketHook(const RpcConfigurationParameter& parameter, const std::vector<uint8_t>& data, PVariable& result) { return false; }
+		virtual bool convertFromPacketHook(RpcConfigurationParameter& parameter, const std::vector<uint8_t>& data, PVariable& result) { return false; }
 
 		/*
 		 * This hook is executed every time "convertToPacket" is called in case custom conversions are used.
@@ -659,7 +659,7 @@ protected:
 		 * @param result The conversion result.
 		 * @return "true" means the function converted the parameter.
 		 */
-		virtual bool convertToPacketHook(const RpcConfigurationParameter& parameter, const PVariable data, std::vector<uint8_t>& result) { return false; }
+		virtual bool convertToPacketHook(RpcConfigurationParameter& parameter, const PVariable data, std::vector<uint8_t>& result) { return false; }
 	// }}}
 };
 
