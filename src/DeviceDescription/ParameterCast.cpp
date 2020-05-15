@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -95,6 +95,47 @@ void DecimalIntegerScale::toPacket(PVariable& value)
 	value->type = VariableType::tInteger;
 	value->floatValue = 0;
 }
+
+
+DecimalIntegerInverseScale::DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
+{
+}
+
+DecimalIntegerInverseScale::DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter) : ICast(baseLib, node, parameter)
+{
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	{
+		_bl->out.printWarning("Warning: Unknown attribute for \"decimalIntegerInverseScale\": " + std::string(attr->name()));
+	}
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	{
+		std::string name(subNode->name());
+		std::string value(subNode->value());
+		if(name == "factor")
+		{
+			factor = Math::getDouble(value);
+			if(factor == 0) factor = 1;
+		}
+		else _bl->out.printWarning("Warning: Unknown node in \"decimalIntegerInverseScale\": " + name);
+	}
+}
+
+void DecimalIntegerInverseScale::fromPacket(PVariable& value)
+{
+	if(!value) return;
+	value->type = VariableType::tFloat;
+	value->floatValue = ((double)factor / value->integerValue);
+	value->integerValue = 0;
+}
+
+void DecimalIntegerInverseScale::toPacket(PVariable& value)
+{
+	if(!value) return;
+	value->integerValue = std::lround(factor / value->floatValue);
+	value->type = VariableType::tInteger;
+	value->floatValue = 0;
+}
+
 
 DecimalStringScale::DecimalStringScale(BaseLib::SharedObjects* baseLib) : ICast(baseLib)
 {

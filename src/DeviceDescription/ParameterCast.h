@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -83,6 +83,22 @@ public:
 	double factor = 1.0;
 	double offset = 0;
 };
+
+
+class DecimalIntegerInverseScale : public ICast
+{
+public:
+    explicit DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib);
+    explicit DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
+	~DecimalIntegerInverseScale() override = default;
+
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
+
+	//Elements
+	double factor = 1.0;
+};
+
 
 class DecimalStringScale : public ICast
 {
@@ -459,6 +475,7 @@ typedef std::shared_ptr<CcrtdnParty> PCcrtdnParty;
 typedef std::shared_ptr<Cfm> PCfm;
 typedef std::shared_ptr<DecimalConfigTime> PDecimalConfigTime;
 typedef std::shared_ptr<DecimalIntegerScale> PDecimalIntegerScale;
+typedef std::shared_ptr<DecimalIntegerInverseScale> PDecimalIntegerInverseScale;
 typedef std::shared_ptr<DecimalStringScale> PDecimalStringScale;
 typedef std::shared_ptr<IntegerIntegerMap> PIntegerIntegerMap;
 typedef std::shared_ptr<IntegerIntegerScale> PIntegerIntegerScale;
