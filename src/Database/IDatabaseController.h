@@ -100,6 +100,20 @@ public:
     virtual BaseLib::PVariable setUiElementMetadata(uint64_t databaseId, const BaseLib::PVariable& metadata) = 0;
 	// }}}
 
+    // {{{ Buildings
+    virtual BaseLib::PVariable addStoryToBuilding(uint64_t buildingId, uint64_t storyId) = 0;
+    virtual BaseLib::PVariable createBuilding(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable deleteBuilding(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable getStoriesInBuilding(PRpcClientInfo clientInfo, uint64_t buildingId, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getBuildingMetadata(uint64_t buildingId) = 0;
+    virtual BaseLib::PVariable getBuildings(std::string languageCode) = 0;
+    virtual BaseLib::PVariable removeStoryFromBuildings(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable removeStoryFromBuilding(uint64_t buildingId, uint64_t storyId) = 0;
+    virtual bool buildingExists(uint64_t buildingId) = 0;
+    virtual BaseLib::PVariable setBuildingMetadata(uint64_t buildingId, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable updateBuilding(uint64_t buildingId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    // }}}
+
     // {{{ Stories
     virtual BaseLib::PVariable addRoomToStory(uint64_t storyId, uint64_t roomId) = 0;
     virtual BaseLib::PVariable createStory(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
