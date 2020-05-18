@@ -6,16 +6,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -117,6 +117,7 @@ void Parameter::parseXml(xml_node* node)
                     {
                         std::string castName(castNode->name());
                         if(castName == "decimalIntegerScale") casts.push_back(std::make_shared<DecimalIntegerScale>(_bl, castNode, shared_from_this()));
+                        else if(castName == "decimalIntegerInverseScale") casts.push_back(std::make_shared<DecimalIntegerInverseScale>(_bl, castNode, shared_from_this()));
                         else if(castName == "integerIntegerScale") casts.push_back(std::make_shared<IntegerIntegerScale>(_bl, castNode, shared_from_this()));
                         else if(castName == "integerOffset") casts.push_back(std::make_shared<IntegerOffset>(_bl, castNode, shared_from_this()));
                         else if(castName == "decimalOffset") casts.push_back(std::make_shared<DecimalOffset>(_bl, castNode, shared_from_this()));

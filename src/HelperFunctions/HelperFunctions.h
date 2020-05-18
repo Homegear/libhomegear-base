@@ -197,7 +197,7 @@ public:
 	static inline size_t utf8StringSize(const std::string& s)
 	{
 		if(s.empty()) return 0;
-		const char* pS = s.c_str();
+		const unsigned char* pS = (const unsigned char*)s.c_str();
 		size_t len = 0;
 		while (*pS) len += (*pS++ & 0xc0) != 0x80;
 		return len;
