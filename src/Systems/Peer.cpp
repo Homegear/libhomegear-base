@@ -961,15 +961,15 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
                 parameterStruct.rpcParameter = parameter.second;
                 setDefaultValue(parameterStruct);
 
+                std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                parameterStruct.databaseId = createParameter(ParameterGroup::Type::variables, channel, parameter.second->id, data);
+                channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
+
                 //Add roles
                 for(auto& role : parameter.second->roles)
                 {
                     addRoleToVariable(channel, parameter.second->id, role.second.id, role.second.direction, role.second.invert);
                 }
-
-                std::vector<uint8_t> data = parameterStruct.getBinaryData();
-                parameterStruct.databaseId = createParameter(ParameterGroup::Type::variables, channel, parameter.second->id, data);
-                channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
             }
         }
     }
