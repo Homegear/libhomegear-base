@@ -34,7 +34,7 @@
 namespace BaseLib
 {
 
-SerialReaderWriter::SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority)
+SerialReaderWriter::SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority, bool writeOnly)
 {
 	_fileDescriptor = std::shared_ptr<FileDescriptor>(new FileDescriptor());
 	_bl = baseLib;
@@ -46,7 +46,14 @@ SerialReaderWriter::SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::str
 	_createLockFile = createLockFile;
 	_readThreadPriority = readThreadPriority;
 	_stopReadThread = false;
+	_writeOnly = writeOnly;
 	memset(&_termios, 0, sizeof(termios));
+
+    if(writeOnly)
+    {
+        _flags &= ~O_RDWR;
+        _flags |= O_WRONLY;
+    }
 }
 
 SerialReaderWriter::~SerialReaderWriter()
@@ -186,7 +193,7 @@ void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, Ch
 	}
 
 	_stopReadThread = false;
-	if(events)
+	if(events && !_writeOnly)
 	{
 		_readThreadMutex.lock();
 		_bl->threadManager.join(_readThread);
@@ -243,7 +250,8 @@ void SerialReaderWriter::createLockFile()
 
 int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 {
-	int32_t i;
+    if(_writeOnly) return -1;
+	int32_t i = 0;
 	fd_set readFileDescriptor;
 	while(!_stopReadThread)
 	{
@@ -258,7 +266,7 @@ int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 		timeval timeval{};
 		timeval.tv_sec = timeout / 1000000;
 		timeval.tv_usec = timeout % 1000000;
-		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);
+		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, nullptr, nullptr, &timeval);
 		switch(i)
 		{
 			case 0: //Timeout
@@ -284,8 +292,9 @@ int32_t SerialReaderWriter::readChar(char& data, uint32_t timeout)
 
 int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout, char splitChar)
 {
+    if(_writeOnly) return -1;
 	data.clear();
-	int32_t i;
+	int32_t i = 0;
 	char localBuffer[1];
 	fd_set readFileDescriptor;
 	while(!_stopReadThread)
@@ -301,7 +310,7 @@ int32_t SerialReaderWriter::readLine(std::string& data, uint32_t timeout, char s
 		timeval timeval{};
 		timeval.tv_sec = timeout / 1000000;
 		timeval.tv_usec = timeout % 1000000;
-		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, NULL, NULL, &timeval);
+		i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, nullptr, nullptr, &timeval);
 		switch(i)
 		{
 			case 0: //Timeout

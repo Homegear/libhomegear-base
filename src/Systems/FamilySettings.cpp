@@ -443,7 +443,7 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         }
         else if(name == "default")
         {
-            if(value == "true") settings->isDefault = true;
+            settings->isDefault = (value == "true");
             _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
         }
         else if(name == "devicetype")
@@ -462,6 +462,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         {
             settings->baudrate = BaseLib::Math::getNumber(value);
             _bl->out.printDebug("Debug: baudrate set to " + std::to_string(settings->baudrate));
+        }
+        else if(name == "openwriteonly")
+        {
+            settings->openWriteonly = (value == "true");
+            _bl->out.printDebug("Debug: openWriteonly set to " + std::to_string(settings->openWriteonly));
         }
         else if(name == "responsedelay")
         {
@@ -772,7 +777,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 
         if(name == "default")
         {
-            if(value->integerValue) settings->isDefault = true;
+            settings->isDefault = (bool)value->integerValue;
             _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
         }
         else if(name == "devicetype")
@@ -786,6 +791,16 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         {
             settings->device = value->stringValue;
             _bl->out.printDebug("Debug: device set to " + settings->device);
+        }
+        else if(name == "baudrate")
+        {
+            settings->baudrate = value->integerValue;
+            _bl->out.printDebug("Debug: baudrate set to " + std::to_string(settings->baudrate));
+        }
+        else if(name == "openwriteonly")
+        {
+            settings->openWriteonly = (bool)value->integerValue;
+            _bl->out.printDebug("Debug: openWriteonly set to " + std::to_string(settings->openWriteonly));
         }
         else if(name == "responsedelay")
         {
@@ -806,7 +821,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         }
         else if(name == "oneway")
         {
-            settings->oneWay = value->integerValue;
+            settings->oneWay = (bool)value->integerValue;
             _bl->out.printDebug("Debug: oneWay set to " + std::to_string(settings->oneWay));
         }
         else if(name == "enablerxvalue")
@@ -823,7 +838,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         }
         else if(name == "fastsending")
         {
-            settings->fastSending = value->integerValue;
+            settings->fastSending = (bool)value->integerValue;
             _bl->out.printDebug("Debug: fastSending set to " + std::to_string(settings->fastSending));
         }
         else if(name == "waitforbus")

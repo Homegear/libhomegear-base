@@ -35,7 +35,6 @@
 #include "Peer.h"
 #include "ServiceMessages.h"
 #include "../BaseLib.h"
-#include "../Security/Acls.h"
 
 namespace BaseLib
 {
@@ -931,12 +930,6 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
                 parameterStruct.rpcParameter = parameter.second;
                 setDefaultValue(parameterStruct);
 
-                //Add roles
-                for(auto& role : parameter.second->roles)
-                {
-                    parameterStruct.addRole(role.second);
-                }
-
                 std::vector<uint8_t> data = parameterStruct.getBinaryData();
                 parameterStruct.databaseId = createParameter(ParameterGroup::Type::config, channel, parameter.second->id, data);
                 channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
@@ -971,7 +964,7 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
                 //Add roles
                 for(auto& role : parameter.second->roles)
                 {
-                    parameterStruct.addRole(role.second);
+                    addRoleToVariable(channel, parameter.second->id, role.second.id, role.second.direction, role.second.invert);
                 }
 
                 std::vector<uint8_t> data = parameterStruct.getBinaryData();
@@ -1860,12 +1853,27 @@ void Peer::loadConfig()
                 }
                 else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[parameter->channel][parameter->remoteAddress][parameter->remoteChannel].emplace(parameter->parameterName, parameter->parameter);
 
-                //Add roles from XML
+                //Add roles from XML - only if parameter has no roles
                 if(!parameter->parameter.hasRoles() && !parameter->parameter.rpcParameter->roles.empty())
                 {
                     for(auto& role : parameter->parameter.rpcParameter->roles)
                     {
-                        parameter->parameter.addRole(role.second);
+                        uint64_t middleGroupRoleId = 0;
+                        uint64_t mainGroupRoleId = 0;
+
+                        //{{{ Get parent roles
+                        {
+                            uint64_t hexRoleId = BaseLib::Math::getNumber64(std::to_string(role.second.id), true);
+                            middleGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FFFF00, 6));
+                            mainGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FF0000, 6));
+                            if(middleGroupRoleId == mainGroupRoleId || middleGroupRoleId == role.second.id || !_bl->db->roleExists(middleGroupRoleId)) middleGroupRoleId = 0;
+                            if(mainGroupRoleId == role.second.id || !_bl->db->roleExists(mainGroupRoleId)) mainGroupRoleId = 0;
+                        }
+                        //}}}
+
+                        addRoleToVariable(parameter->channel, parameter->parameterName, role.second.id, role.second.direction, role.second.invert);
+                        if(middleGroupRoleId != 0) addRoleToVariable(parameter->channel, parameter->parameterName, middleGroupRoleId, role.second.direction, role.second.invert);
+                        if(mainGroupRoleId != 0) addRoleToVariable(parameter->channel, parameter->parameterName, mainGroupRoleId, role.second.direction, role.second.invert);
                     }
                 }
             }
@@ -2611,6 +2619,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     element->structValue->insert(StructElement("ROLES", rolesArray));
@@ -3428,6 +3437,7 @@ PVariable Peer::getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls)
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     variables->structValue->emplace(variableIterator.first, rolesArray);
@@ -3482,6 +3492,7 @@ PVariable Peer::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool 
                             roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                             roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                             if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                            roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                             rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                         }
                         variables->structValue->emplace(variableIterator.first, rolesArray);
@@ -4080,6 +4091,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     description->structValue->emplace("ROLES", rolesArray);
@@ -4203,6 +4215,7 @@ PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, b
                     auto role = variableIterator.second.getRole(roleId);
                     entry->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.direction));
                     if(role.invert) entry->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.invert));
+                    entry->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.id / 10000) * 10000 == role.id ? 0 : ((role.id / 100) * 100 == role.id ? 1 : 2)));
                     variables->structValue->emplace(variableIterator.first, entry);
                 }
             }

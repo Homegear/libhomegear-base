@@ -79,8 +79,9 @@ public:
 	 * @param flags Flags passed to the C function "open". 0 should be fine for most cases. "O_NDELAY" is always added by the constructor. By default "O_RDWR | O_NOCTTY | O_NDELAY" is used.
 	 * @param createLockFile Set to "true" to create a lock file.
 	 * @param readThreadPriority The priority of the read thread between 0 and 99. Set to -1 to not prioritize the thread. Only relevent when "events" are enabled in "openDevice()".
+	 * @param writeOnly Open the device for writing only.
 	 */
-	SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority);
+	SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority, bool writeOnly = false);
 
     /**
      * Destructor.
@@ -150,6 +151,7 @@ protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::shared_ptr<FileDescriptor> _fileDescriptor;
 	std::string _device;
+	bool _writeOnly = false;
 	struct termios _termios;
 	int32_t _baudrate = 0;
 	int32_t _flags = 0;
