@@ -2131,6 +2131,23 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
         if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
         if(variableIterator->second.hasRole(roleId)) return false;
 
+        if(direction == RoleDirection::undefined)
+        {
+            if(variableIterator->second.rpcParameter->readable && variableIterator->second.rpcParameter->writeable)
+            {
+                direction = RoleDirection::both;
+            }
+            else if(variableIterator->second.rpcParameter->readable)
+            {
+                direction = RoleDirection::input;
+            }
+            else if(variableIterator->second.rpcParameter->writeable)
+            {
+                direction = RoleDirection::output;
+            }
+            else return false;
+        }
+
         variableIterator->second.addRole(roleId, direction, invert);
 
         {

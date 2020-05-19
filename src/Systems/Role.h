@@ -12,6 +12,7 @@ namespace BaseLib
 
 enum class RoleDirection
 {
+    undefined = -1,
     input = 0,
     output = 1,
     both = 2
