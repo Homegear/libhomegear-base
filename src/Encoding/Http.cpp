@@ -528,12 +528,12 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
-	if(headerSize >= 5 && !strncmp(headerBuffer, "HTTP/", 5))
+	if(_rawHeader.size() > 10 && !strncmp(headerBuffer, "HTTP/", 5))
 	{
 		_type = Type::Enum::response;
 		_header.responseCode = strtol(headerBuffer + 9, nullptr, 10);
 	}
-	else if(headerSize >= 10)
+	else if(_rawHeader.size() > 10)
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
 		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (1).");
