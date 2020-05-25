@@ -4479,8 +4479,7 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         value->setType(rpcParameter->logical->type);
 
         //Perform operation on value
-        if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
-           && (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
+        if(value->stringValue.size() > 2 && value->stringValue.at(1) == '=' && (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
@@ -4533,6 +4532,24 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             {
                 value->booleanValue = !currentValue->booleanValue;
                 value->type = VariableType::tBoolean;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
+            {
+                value->floatValue = !currentValue->floatValue;
+                value->type = VariableType::tFloat;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
+            {
+                value->integerValue = !currentValue->integerValue;
+                value->type = VariableType::tInteger;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger64)
+            {
+                value->integerValue64 = !currentValue->integerValue64;
+                value->type = VariableType::tInteger64;
                 value->stringValue.clear();
             }
         }
