@@ -1854,10 +1854,31 @@ void HomegearDevice::saveParameter(xml_document* doc, xml_node* parentNode, PPar
                         attr = doc->allocate_attribute("direction", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
                         roleNode->append_attribute(attr);
                     }
-                    else if(role.second.invert)
+                    if(role.second.invert)
                     {
                         tempString = "true";
                         attr = doc->allocate_attribute("invert", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+                    }
+                    if(role.second.scale)
+                    {
+                        if(role.second.scaleInfo.valueSet)
+                        {
+                            tempString = std::to_string(role.second.scaleInfo.valueMin);
+                            attr = doc->allocate_attribute("valueMin", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                            roleNode->append_attribute(attr);
+
+                            tempString = std::to_string(role.second.scaleInfo.valueMax);
+                            attr = doc->allocate_attribute("valueMax", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                            roleNode->append_attribute(attr);
+                        }
+
+                        tempString = std::to_string(role.second.scaleInfo.scaleMin);
+                        attr = doc->allocate_attribute("scaleMin", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                        roleNode->append_attribute(attr);
+
+                        tempString = std::to_string(role.second.scaleInfo.scaleMax);
+                        attr = doc->allocate_attribute("scaleMax", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
                         roleNode->append_attribute(attr);
                     }
 				}

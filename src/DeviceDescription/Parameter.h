@@ -137,29 +137,29 @@ public:
 	 * Converts binary data of a packet received by a physical interface to a RPC variable.
 	 *
 	 * @param data The data to convert.
-	 * @param invert Invert value after conversion.
+	 * @param role The associated role of the value.
 	 * @param isEvent Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
 	 * @return Returns the RPC variable.
 	 */
-	PVariable convertFromPacket(const std::vector<uint8_t>& data, bool invert, bool isEvent);
+	PVariable convertFromPacket(const std::vector<uint8_t>& data, const Role& role, bool isEvent);
 
 	/**
 	 * Converts a RPC variable to binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
-	 * @param[in] invert Invert value before any casts are applied.
+	 * @param[in] role The associated role of the value.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const PVariable& value, bool invert, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const PVariable& value, const Role& role, std::vector<uint8_t>& convertedValue);
 
 	/**
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
-	 * @param[in] invert Invert value before any casts are applied.
+	 * @param[in] role The associated role of the value.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const std::string& value, bool invert, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const std::string& value, const Role& role, std::vector<uint8_t>& convertedValue);
 
 	void adjustBitPosition(std::vector<uint8_t>& data);
 

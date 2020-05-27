@@ -163,6 +163,15 @@ void Parameter::parseXml(xml_node* node)
                                 std::string attributeName(attr->name());
                                 if(attributeName == "direction") role.direction = (RoleDirection)Math::getNumber(std::string(attr->value()));
                                 else if(attributeName == "invert") role.invert = std::string(attr->value()) == "true";
+                                else if(attributeName == "valueMin" || attributeName == "valueMax" || attributeName == "scaleMin" || attributeName == "scaleMax")
+                                {
+                                    role.scale = true;
+                                    if(attributeName == "valueMin" || attributeName == "valueMax") role.scaleInfo.valueSet = true;
+                                    if(attributeName == "valueMin") role.scaleInfo.valueMin = BaseLib::Math::getDouble(std::string(attr->value()));
+                                    if(attributeName == "valueMax") role.scaleInfo.valueMax = BaseLib::Math::getDouble(std::string(attr->value()));
+                                    if(attributeName == "scaleMin") role.scaleInfo.scaleMin = BaseLib::Math::getDouble(std::string(attr->value()));
+                                    if(attributeName == "scaleMax") role.scaleInfo.scaleMax = BaseLib::Math::getDouble(std::string(attr->value()));
+                                }
                                 else _bl->out.printWarning("Warning: Unknown attribute for \"role\": " + std::string(attr->name()));
                             }
 
@@ -300,17 +309,47 @@ void Parameter::parseXml(xml_node* node)
     }
     if(logical->type == ILogical::Type::Enum::tFloat)
     {
-        auto* parameter = (LogicalDecimal*)logical.get();
-        if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
+        auto parameter = std::dynamic_pointer_cast<LogicalDecimal>(logical);
+        if(parameter && parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<double>::min() && (!isSignedSet || isSigned)) isSigned = true;
     }
     else if(logical->type == ILogical::Type::Enum::tInteger)
     {
-        auto* parameter = (LogicalInteger*)logical.get();
-        if(parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
+        auto parameter = std::dynamic_pointer_cast<LogicalInteger>(logical);
+        if(parameter && parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int32_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
     }
+    else if(logical->type == ILogical::Type::Enum::tInteger64)
+    {
+        auto parameter = std::dynamic_pointer_cast<LogicalInteger64>(logical);
+        if(parameter && parameter->minimumValue < 0 && parameter->minimumValue != std::numeric_limits<int64_t>::min() && (!isSignedSet || isSigned)) isSigned = true;
+    }
+
+    // {{{ Set role.scaleInfo.valueMin and role.scaleInfo.valueMax if not specified in XML
+    for(auto& role : roles)
+    {
+        if(!role.second.scale || role.second.scaleInfo.valueSet) continue;
+        if(logical->type == ILogical::Type::Enum::tFloat)
+        {
+            auto parameter = std::dynamic_pointer_cast<LogicalDecimal>(logical);
+            role.second.scaleInfo.valueMin = parameter->minimumValue;
+            role.second.scaleInfo.valueMin = parameter->maximumValue;
+        }
+        else if(logical->type == ILogical::Type::Enum::tInteger)
+        {
+            auto parameter = std::dynamic_pointer_cast<LogicalInteger>(logical);
+            role.second.scaleInfo.valueMin = parameter->minimumValue;
+            role.second.scaleInfo.valueMin = parameter->maximumValue;
+        }
+        else if(logical->type == ILogical::Type::Enum::tInteger64)
+        {
+            auto parameter = std::dynamic_pointer_cast<LogicalInteger64>(logical);
+            role.second.scaleInfo.valueMin = parameter->minimumValue;
+            role.second.scaleInfo.valueMin = parameter->maximumValue;
+        }
+    }
+    // }}}
 }
 
-PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool invert, bool isEvent)
+PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, const Role& role, bool isEvent)
 {
 	try
 	{
@@ -326,18 +365,19 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
 		{
 			int32_t integerValue = 0;
 			BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
-            if(invert)
+            if(role.invert)
             {
                 auto* parameter = (LogicalEnumeration*)logical.get();
                 integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (integerValue - parameter->minimumValue));
             }
+            if(role.scale) integerValue = std::lround(Math::scale((double)integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
 			return std::make_shared<Variable>(integerValue);
 		}
 		else if(logical->type == ILogical::Type::Enum::tBoolean && casts.empty())
 		{
 			int32_t integerValue = 0;
 			BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
-			return std::make_shared<Variable>(invert == !(bool)integerValue);
+			return std::make_shared<Variable>(role.invert == !(bool)integerValue);
 		}
 		else if(logical->type == ILogical::Type::Enum::tString && casts.empty())
 		{
@@ -404,7 +444,8 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
                 auto* parameter = (LogicalEnumeration*)logical.get();
                 if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
                 if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-                if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                if(role.invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                if(role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
             }
             else if(logical->type == ILogical::Type::Enum::tFloat)
             {
@@ -415,7 +456,8 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
                 {
                     if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
                     else if(variable->floatValue < parameter->minimumValue) variable->floatValue = parameter->minimumValue;
-                    if(invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
+                    if(role.invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
+                    if(role.scale) variable->floatValue = Math::scale(variable->floatValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax);
                 }
             }
             else if(logical->type == ILogical::Type::Enum::tInteger)
@@ -427,7 +469,8 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
                 {
                     if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
                     else if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-                    if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                    if(role.invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                    if(role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
                 }
             }
             else if(logical->type == ILogical::Type::Enum::tInteger64)
@@ -439,12 +482,13 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
                 {
                     if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
                     else if(variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
-                    if(invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+                    if(role.invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+                    if(role.scale) variable->integerValue64 = std::llround(Math::scale((double)variable->integerValue64, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
                 }
             }
             else if(logical->type == ILogical::Type::Enum::tBoolean)
             {
-                if(invert) variable->booleanValue = !variable->booleanValue;
+                if(role.invert) variable->booleanValue = !variable->booleanValue;
             }
             //}}}
 			return variable;
@@ -461,7 +505,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t>& data, bool in
     return std::make_shared<BaseLib::Variable>();
 }
 
-void Parameter::convertToPacket(const std::string& value, bool invert, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const std::string& value, const Role& role, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -498,7 +542,7 @@ void Parameter::convertToPacket(const std::string& value, bool invert, std::vect
 			_bl->out.printWarning("Warning: Could not convert parameter " + id + " from String.");
 			return;
 		}
-		return convertToPacket(rpcValue, invert, convertedValue);
+		return convertToPacket(rpcValue, role, convertedValue);
 	}
 	catch(const std::exception& ex)
     {
@@ -510,7 +554,7 @@ void Parameter::convertToPacket(const std::string& value, bool invert, std::vect
     }
 }
 
-void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector<uint8_t>& convertedValue)
+void Parameter::convertToPacket(const PVariable& value, const Role& role, std::vector<uint8_t>& convertedValue)
 {
 	try
 	{
@@ -537,7 +581,8 @@ void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector
 				auto* parameter = (LogicalEnumeration*)logical.get();
 				if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
 				if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-				if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                if(role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax, role.scaleInfo.valueMin, role.scaleInfo.valueMax));
+				if(role.invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
 			}
 			else if(logical->type == ILogical::Type::Enum::tFloat)
 			{
@@ -554,7 +599,8 @@ void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector
 				{
 					if(variable->floatValue > parameter->maximumValue) variable->floatValue = parameter->maximumValue;
 					else if(variable->floatValue < parameter->minimumValue) variable->floatValue = parameter->minimumValue;
-                    if(invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
+                    if(role.scale) variable->floatValue = Math::scale(variable->floatValue, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax, role.scaleInfo.valueMin, role.scaleInfo.valueMax);
+                    if(role.invert) variable->floatValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->floatValue - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tInteger)
@@ -572,7 +618,8 @@ void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector
 				{
 					if(variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
 					else if(variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-                    if(invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+                    if(role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax, role.scaleInfo.valueMin, role.scaleInfo.valueMax));
+                    if(role.invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tInteger64)
@@ -590,7 +637,8 @@ void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector
 				{
 					if(variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
 					else if(variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
-                    if(invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+                    if(role.scale) variable->integerValue64 = std::llround(Math::scale((double)variable->integerValue64, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax, role.scaleInfo.valueMin, role.scaleInfo.valueMax));
+                    if(role.invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
 				}
 			}
 			else if(logical->type == ILogical::Type::Enum::tBoolean)
@@ -600,7 +648,7 @@ void Parameter::convertToPacket(const PVariable& value, bool invert, std::vector
                 {
                     variable->booleanValue = true;
                 }
-				if(invert) variable->booleanValue = !variable->booleanValue;
+				if(role.invert) variable->booleanValue = !variable->booleanValue;
 			}
 			if(casts.empty())
 			{
