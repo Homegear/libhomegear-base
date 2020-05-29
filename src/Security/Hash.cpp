@@ -59,6 +59,16 @@ template<typename Data> bool Hash::sha256(const Data& in, Data& out)
 template bool Hash::sha256<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
 template bool Hash::sha256<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
 
+template<typename Data> bool Hash::sha512(const Data& in, Data& out)
+{
+	out.clear();
+	out.resize(gcry_md_get_algo_dlen(GCRY_MD_SHA512));
+	gcry_md_hash_buffer(GCRY_MD_SHA512, out.data(), in.data(), in.size());
+	return true;
+}
+template bool Hash::sha512<std::vector<char>>(const std::vector<char>& in, std::vector<char>& out);
+template bool Hash::sha512<std::vector<uint8_t>>(const std::vector<uint8_t>& in, std::vector<uint8_t>& out);
+
 template<typename Data> bool Hash::md5(const Data& in, Data& out)
 {
 	out.clear();
