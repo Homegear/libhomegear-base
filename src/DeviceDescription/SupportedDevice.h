@@ -67,12 +67,12 @@ public:
 	std::string description;
 	std::string longDescription;
 	std::string serialPrefix;
-	uint32_t typeNumber = 0;
+	uint64_t typeNumber = 0;
 	uint32_t minFirmwareVersion = 0;
 	uint32_t maxFirmwareVersion = 0;
 
 	bool matches(const std::string& typeId);
-	bool matches(uint32_t typeNumber, uint32_t firmwareVersion);
+	bool matches(uint64_t typeNumber, uint32_t firmwareVersion);
 
 	/**
 	 * Checks if a firmware version matches this device description.

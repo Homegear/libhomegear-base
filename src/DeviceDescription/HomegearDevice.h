@@ -96,6 +96,7 @@ public:
 	SupportedDevices supportedDevices;
 	PRunProgram runProgram;
 	Functions functions;
+	PVariable metadata;
 	PacketsByMessageType packetsByMessageType;
 	PacketsById packetsById;
 	PacketsByFunction packetsByFunction1;
@@ -111,8 +112,8 @@ public:
     std::string getFilename();
 	int32_t getDynamicChannelCount();
 	void setDynamicChannelCount(int32_t value);
-	PSupportedDevice getType(uint32_t typeNumber);
-	PSupportedDevice getType(uint32_t typeNumber, int32_t firmwareVersion);
+	PSupportedDevice getType(uint64_t typeNumber);
+	PSupportedDevice getType(uint64_t typeNumber, int32_t firmwareVersion);
 	void save(std::string& filename);
 	// }}}
 protected:

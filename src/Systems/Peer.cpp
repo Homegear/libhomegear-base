@@ -1195,10 +1195,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<Database::DataTable>
                     break;
                 case 1002:
                     _deviceType = row->second.at(3)->intValue;
-                    if(_deviceType == (uint32_t)0xFFFFFFFF)
-                    {
-                        _bl->out.printError("Error loading peer " + std::to_string(_peerID) + ": Device type unknown: 0x" + HelperFunctions::getHexString(row->second.at(3)->intValue) + " Firmware version: " + std::to_string(_firmwareVersion));
-                    }
                     break;
                 case 1003:
                     _firmwareVersionString = row->second.at(4)->textValue;
@@ -1259,7 +1255,7 @@ void Peer::saveVariables()
     {
         if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
         saveVariable(1001, _firmwareVersion);
-        saveVariable(1002, (int32_t)_deviceType);
+        saveVariable(1002, (int64_t)_deviceType);
         saveVariable(1003, _firmwareVersionString);
         saveVariable(1004, _ip);
         saveVariable(1005, _idString);

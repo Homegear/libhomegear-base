@@ -149,7 +149,7 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
-PVariable HelperFunctions::xml2variable(xml_node* node)
+PVariable HelperFunctions::xml2variable(const xml_node* node)
 {
     auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
 
@@ -204,6 +204,48 @@ PVariable HelperFunctions::xml2variable(xml_node* node)
         }
     }
     else return nodeVariable;
+}
+
+void HelperFunctions::variable2xml(xml_document* doc, xml_node* parentNode, const PVariable& variable)
+{
+    std::string tempString;
+
+    for(auto& structElement : *variable->structValue)
+    {
+        if(structElement.first.empty()) continue;
+        else if(structElement.first == "@@value") //Value when node has attributes
+        {
+            tempString = structElement.second->toString();
+            parentNode->value(doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+        }
+        else if(structElement.first.front() == '@' && structElement.first.size() > 1) //Attribute
+        {
+            tempString = structElement.second->toString();
+            auto* attr = doc->allocate_attribute(structElement.first.c_str() + 1, doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+            parentNode->append_attribute(attr);
+        }
+        else //Element
+        {
+            if(structElement.second->type == VariableType::tStruct)
+            {
+                auto* node = doc->allocate_node(node_element, structElement.first.c_str());
+                parentNode->append_node(node);
+                variable2xml(doc, node, structElement.second);
+            }
+            else if(structElement.second->type == VariableType::tArray)
+            {
+                auto* node = doc->allocate_node(node_element, "element");
+                parentNode->append_node(node);
+                variable2xml(doc, node, structElement.second);
+            }
+            else
+            {
+                tempString = structElement.second->toString();
+                auto* node = doc->allocate_node(node_element, structElement.first.c_str(), doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                parentNode->append_node(node);
+            }
+        }
+    }
 }
 
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)

@@ -365,7 +365,7 @@ void HomegearDevice::saveDevice(xml_document* doc, xml_node* parentNode, Homegea
 				subnode->append_node(deviceNode);
 			}
 
-			if((*i)->typeNumber != (uint32_t)-1)
+			if((*i)->typeNumber != (uint64_t)-1)
 			{
 				std::string typeNumber = "0x" + BaseLib::HelperFunctions::getHexString((*i)->typeNumber);
 				char* pTypeNumber = doc->allocate_string(typeNumber.c_str(), typeNumber.size() + 1);
@@ -565,6 +565,15 @@ void HomegearDevice::saveDevice(xml_document* doc, xml_node* parentNode, Homegea
 			node->append_node(subnode);
 			saveFunction(doc, subnode, i->second, configParameters, variables, linkParameters);
 		}
+
+		// {{{ Metadata
+		if(metadata)
+        {
+            node = doc->allocate_node(node_element, "metadata");
+            parentNode->append_node(node);
+            HelperFunctions::variable2xml(doc, node, metadata);
+        }
+		// }}}
 
 		// {{{ Packets
 		node = doc->allocate_node(node_element, "packets");
@@ -2644,6 +2653,10 @@ void HomegearDevice::parseXML(xml_node* node)
 					}
 				}
 			}
+			else if(nodeName == "metadata")
+            {
+			    metadata = HelperFunctions::xml2variable(subNode);
+            }
 			else if(nodeName == "parameterGroups")
 			{
 				for(xml_node* parameterGroupNode = subNode->first_node(); parameterGroupNode; parameterGroupNode = parameterGroupNode->next_sibling())
@@ -2784,7 +2797,7 @@ void HomegearDevice::postProcessFunction(PFunction& function, std::map<std::stri
     }
 }
 
-PSupportedDevice HomegearDevice::getType(uint32_t typeNumber)
+PSupportedDevice HomegearDevice::getType(uint64_t typeNumber)
 {
 	try
 	{
@@ -2804,7 +2817,7 @@ PSupportedDevice HomegearDevice::getType(uint32_t typeNumber)
 	return PSupportedDevice();
 }
 
-PSupportedDevice HomegearDevice::getType(uint32_t typeNumber, int32_t firmwareVersion)
+PSupportedDevice HomegearDevice::getType(uint64_t typeNumber, int32_t firmwareVersion)
 {
 	try
 	{
