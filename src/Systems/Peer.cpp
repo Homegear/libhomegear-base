@@ -1749,6 +1749,7 @@ void Peer::loadConfig()
             }
         }
 
+        std::unordered_set<std::shared_ptr<ParameterInfo>> roleParameters;
         for(auto& parameter : parameters)
         {
             PParameterGroup currentParameterGroup;
@@ -1835,6 +1836,7 @@ void Peer::loadConfig()
 
                     if(variableInfoIterator != roleInfoIterator->second->structValue->end() && variableBaseNameIterator != roleInfoIterator->second->structValue->end())
                     {
+                        roleParameters.emplace(parameter);
                         parameter->parameter.rpcParameter = createRoleRpcParameter(variableInfoIterator->second, variableBaseNameIterator->second->stringValue, currentParameterGroup);
                     }
                 }
@@ -1904,6 +1906,47 @@ void Peer::loadConfig()
                 }
             }
         }
+
+        //{{{ Delete role parameters when variable does not exist anymore
+        for(auto& roleParameter : roleParameters)
+        {
+            bool deleteParameter = false;
+            auto channelIterator = valuesCentral.find(roleParameter->channel);
+            if(channelIterator != valuesCentral.end())
+            {
+                auto roleInfoIterator = roleParameter->metadata->structValue->find("roleInfo");
+                if(roleInfoIterator != roleParameter->metadata->structValue->end())
+                {
+                    auto variableBaseNameIterator = roleInfoIterator->second->structValue->find("variableBaseName");
+                    if(variableBaseNameIterator != roleInfoIterator->second->structValue->end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableBaseNameIterator->second->stringValue);
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            auto roleIdIterator = roleInfoIterator->second->structValue->find("roleId");
+                            if(roleIdIterator != roleInfoIterator->second->structValue->end())
+                            {
+                                if(!variableIterator->second.hasRole(roleIdIterator->second->integerValue64))
+                                {
+                                    deleteParameter = true;
+                                }
+                            }
+                            //Don't delete parameter when key roleId doesn't exist, because the parameter is missing in
+                            //older Homegear versions (up to 0.8.0-3009 or 0.7.45).
+                        }
+                        else deleteParameter = true;
+                    }
+                    else deleteParameter = true;
+                }
+                else deleteParameter = true;
+            }
+            else deleteParameter = true;
+
+            if(deleteParameter)
+            {
+                valuesCentral[roleParameter->channel].erase(roleParameter->parameterName);
+            }
+        }
     }
     catch(const std::exception& ex)
     {
@@ -1945,17 +1988,17 @@ bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t 
         auto variableIterator = channelIterator->second.find(variableName);
         if(variableIterator == channelIterator->second.end())
         {
-            _bl->out.printWarning("Warning: Could not add variable to room: Variable not found.");
+            _bl->out.printWarning("Warning: Could not add variable " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + " to room " + std::to_string(roomId) + ": Variable not found.");
             return false;
         }
         if(!variableIterator->second.rpcParameter)
         {
-            _bl->out.printWarning("Warning: Could not add variable to room: Variable has no associated RPC parameter. Try to restart Homegear.");
+            _bl->out.printWarning("Warning: Could not add variable to room " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated RPC parameter. Try to restart Homegear.");
             return false;
         }
         if(variableIterator->second.databaseId == 0)
         {
-            _bl->out.printWarning("Warning: Could not add variable to room: Variable has no associated database ID. Try to restart Homegear.");
+            _bl->out.printWarning("Warning: Could not add variable to room " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated database ID. Try to restart Homegear.");
             return false;
         }
         variableIterator->second.setRoom(roomId);
@@ -2201,6 +2244,7 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
                     auto roleInfo = std::make_shared<Variable>(VariableType::tStruct);
                     metadata->structValue->emplace("roleInfo", roleInfo);
                     roleInfo->structValue->emplace("variableInfo", variableInfo);
+                    roleInfo->structValue->emplace("roleId", std::make_shared<Variable>(roleId));
                     roleInfo->structValue->emplace("variableBaseName", std::make_shared<Variable>(variableIterator->first));
 
                     auto rolesIterator = variableInfo->structValue->find("roles");
