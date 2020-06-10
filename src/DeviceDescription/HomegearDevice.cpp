@@ -2655,7 +2655,8 @@ void HomegearDevice::parseXML(xml_node* node)
 			}
 			else if(nodeName == "metadata")
             {
-			    metadata = HelperFunctions::xml2variable(subNode);
+                bool isDataNode = false;
+			    metadata = HelperFunctions::xml2variable(subNode, isDataNode);
             }
 			else if(nodeName == "parameterGroups")
 			{

@@ -4554,44 +4554,46 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
             if(!convertFromPacketHook(parameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
+
+            std::string numberPart = value->stringValue.substr(2);
+            double factor = Math::getDouble(numberPart);
+            if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
+
             if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                double factor = Math::getDouble(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->floatValue = currentValue->floatValue + factor;
                 else if(value->stringValue.at(0) == '-') value->floatValue = currentValue->floatValue - factor;
                 else if(value->stringValue.at(0) == '*') value->floatValue = currentValue->floatValue * factor;
                 else if(value->stringValue.at(0) == '/') value->floatValue = currentValue->floatValue / factor;
                 value->type = VariableType::tFloat;
-                value->stringValue.clear();
             }
             else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                int32_t factor = Math::getNumber(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->integerValue = currentValue->integerValue + factor;
                 else if(value->stringValue.at(0) == '-') value->integerValue = currentValue->integerValue - factor;
                 else if(value->stringValue.at(0) == '*') value->integerValue = currentValue->integerValue * factor;
                 else if(value->stringValue.at(0) == '/') value->integerValue = currentValue->integerValue / factor;
                 value->integerValue64 = value->integerValue;
                 value->type = VariableType::tInteger;
-                value->stringValue.clear();
             }
             else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger64)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                int32_t factor = Math::getNumber(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->integerValue64 = currentValue->integerValue64 + factor;
                 else if(value->stringValue.at(0) == '-') value->integerValue64 = currentValue->integerValue64 - factor;
                 else if(value->stringValue.at(0) == '*') value->integerValue64 = currentValue->integerValue64 * factor;
                 else if(value->stringValue.at(0) == '/') value->integerValue64 = currentValue->integerValue64 / factor;
                 value->integerValue = value->integerValue64;
                 value->type = VariableType::tInteger64;
-                value->stringValue.clear();
             }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
+            {
+                if(value->stringValue.at(0) == '+') value->booleanValue = true;
+                else if(value->stringValue.at(0) == '-') value->booleanValue = false;
+                else if(value->stringValue.at(0) == '*') value->booleanValue = true;
+                else if(value->stringValue.at(0) == '/') value->booleanValue = false;
+                value->type = VariableType::tBoolean;
+            }
+            value->stringValue.clear();
         }
         else if(value->stringValue == "!") // Toggle boolean
         {

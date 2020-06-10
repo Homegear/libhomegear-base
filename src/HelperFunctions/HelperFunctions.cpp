@@ -149,8 +149,9 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
-PVariable HelperFunctions::xml2variable(const xml_node* node)
+PVariable HelperFunctions::xml2variable(const xml_node* node, bool& isDataNode)
 {
+    isDataNode = false;
     auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
 
     bool hasElements = false;
@@ -170,16 +171,26 @@ PVariable HelperFunctions::xml2variable(const xml_node* node)
 
         hasElements = true;
 
+        bool isDataNode = false;
+        auto subNodeVariable = xml2variable(subNode, isDataNode);
+
         auto variableIterator = nodeVariable->structValue->find(nodeName);
         if(variableIterator == nodeVariable->structValue->end())
         {
-            variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
-            variableIterator->second->arrayValue->reserve(100);
+            if(isDataNode)
+            {
+                nodeVariable->structValue->emplace(nodeName, subNodeVariable).first;
+                continue;
+            }
+            else
+            {
+                variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
+                variableIterator->second->arrayValue->reserve(100);
+            }
         }
 
         if(variableIterator->second->arrayValue->size() == variableIterator->second->arrayValue->capacity()) variableIterator->second->arrayValue->reserve(variableIterator->second->arrayValue->size() + 100);
 
-        auto subNodeVariable = xml2variable(subNode);
         if(!subNodeVariable->errorStruct) variableIterator->second->arrayValue->emplace_back(subNodeVariable);
     }
 
@@ -196,6 +207,7 @@ PVariable HelperFunctions::xml2variable(const xml_node* node)
             jsonNodeValue = std::make_shared<Variable>(nodeValue);
         }
 
+        isDataNode = true;
         if(nodeVariable->structValue->empty()) return jsonNodeValue;
         else
         {
