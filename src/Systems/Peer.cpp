@@ -53,6 +53,8 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
     _categories = rhs._categories;
     _roles = rhs._roles;
     _invert = rhs._invert;
+    _scale = rhs._scale;
+    _mainRole = rhs._mainRole;
 }
 
 RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
@@ -68,6 +70,8 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
     _categories = rhs._categories;
     _roles = rhs._roles;
     _invert = rhs._invert;
+    _scale = rhs._scale;
+    _mainRole = rhs._mainRole;
     return *this;
 }
 
