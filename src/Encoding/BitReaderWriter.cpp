@@ -417,7 +417,7 @@ void BitReaderWriter::setPositionBE(uint32_t position, uint32_t size, std::vecto
     uint32_t targetByteCount = relativeEndPosition / 8 + ((relativeEndPosition & 7) != 0 ? 1 : 0);
     uint32_t endIndex = bytePosition + (targetByteCount - 1);
     uint32_t sourceByteCount = size / 8 + ((size & 7) != 0 ? 1 : 0);
-    uint32_t sourceByteOffset = (source.size() > sourceByteCount) ? source.size() - sourceByteCount : 0;
+    int32_t sourceByteOffset = source.size() - sourceByteCount;
     uint32_t requiredSize = bytePosition + targetByteCount;
     if(target.size() < requiredSize) target.resize(requiredSize, 0);
 
@@ -432,7 +432,7 @@ void BitReaderWriter::setPositionBE(uint32_t position, uint32_t size, std::vecto
         target.at(endIndex) &= _bitMaskSetTargetEnd[relativeEndPosition & 7];
     }
 
-    uint8_t firstByte = source.size() <= sourceByteOffset ? 0 : source.at(sourceByteOffset) & _bitMaskSetSource[size & 7];
+    uint8_t firstByte = (sourceByteOffset < 0 || source.size() <= (unsigned)sourceByteOffset) ? 0 : source.at(sourceByteOffset) & _bitMaskSetSource[size & 7];
 
     int32_t leftShiftCount = 8 - (size & 7) - bitPosition;
     bool rightShiftFirst =  (size & 7) == 0 || (leftShiftCount & 0x80000000);
@@ -453,9 +453,14 @@ void BitReaderWriter::setPositionBE(uint32_t position, uint32_t size, std::vecto
     }
     else target.at(targetBytePosition) |= firstByte << leftShiftCount;
 
-    for(int32_t i = 1; i < sourceByteCount; i++)
+    for(int32_t i = 1; (unsigned)i < sourceByteCount; i++)
     {
-        if((unsigned)i + sourceByteOffset < source.size())
+        if(i + sourceByteOffset < 0)
+        {
+            targetBytePosition++;
+            continue;
+        }
+        else if((unsigned)(i + sourceByteOffset) < source.size())
         {
             target.at(targetBytePosition) |= source.at(i + sourceByteOffset) >> rightShiftCount;
             targetBytePosition++;
@@ -476,22 +481,22 @@ void BitReaderWriter::setPositionBE(uint32_t position, uint32_t size, std::vecto
     uint32_t targetByteCount = relativeEndPosition / 8 + ((relativeEndPosition & 7) != 0 ? 1 : 0);
     uint32_t endIndex = bytePosition + (targetByteCount - 1);
     uint32_t sourceByteCount = size / 8 + ((size & 7) != 0 ? 1 : 0);
-    uint32_t sourceByteOffset = (source.size() > sourceByteCount) ? source.size() - sourceByteCount : 0;
+    int32_t sourceByteOffset = source.size() - sourceByteCount;
     uint32_t requiredSize = bytePosition + targetByteCount;
     if(target.size() < requiredSize) target.resize(requiredSize, 0);
 
-    if(endIndex == bytePosition) target.at(bytePosition) &= (_bitMaskSetTargetStart[bitPosition] | _bitMaskSetTargetEnd[relativeEndPosition & 7]);
+    if(endIndex == bytePosition) target.at(bytePosition) &= (char)(_bitMaskSetTargetStart[bitPosition] | _bitMaskSetTargetEnd[relativeEndPosition & 7]);
     else
     {
-        target.at(bytePosition) &= _bitMaskSetTargetStart[bitPosition];
+        target.at(bytePosition) &= (char)_bitMaskSetTargetStart[bitPosition];
         for(uint32_t i = bytePosition + 1; i < endIndex; i++)
         {
             target.at(i) = 0;
         }
-        target.at(endIndex) &= _bitMaskSetTargetEnd[relativeEndPosition & 7];
+        target.at(endIndex) &= (char)_bitMaskSetTargetEnd[relativeEndPosition & 7];
     }
 
-    uint8_t firstByte = source.size() <= sourceByteOffset ? 0 : source.at(sourceByteOffset) & _bitMaskSetSource[size & 7];
+    uint8_t firstByte = (sourceByteOffset < 0 || source.size() <= (unsigned)sourceByteOffset) ? 0 : source.at(sourceByteOffset) & _bitMaskSetSource[size & 7];
 
     int32_t leftShiftCount = 8 - (size & 7) - bitPosition;
     bool rightShiftFirst =  (size & 7) == 0 || (leftShiftCount & 0x80000000);
@@ -506,19 +511,24 @@ void BitReaderWriter::setPositionBE(uint32_t position, uint32_t size, std::vecto
 
     if(rightShiftFirst)
     {
-        target.at(targetBytePosition) |= firstByte >> rightShiftCount;
+        target.at(targetBytePosition) |= (char)(firstByte >> rightShiftCount);
         targetBytePosition++;
-        if(rightShiftCount > 0) target.at(targetBytePosition) |= firstByte << leftShiftCount;
+        if(rightShiftCount > 0) target.at(targetBytePosition) |= (char)(firstByte << leftShiftCount);
     }
-    else target.at(targetBytePosition) |= firstByte << leftShiftCount;
+    else target.at(targetBytePosition) |= (char)(firstByte << leftShiftCount);
 
-    for(int32_t i = 1; i < sourceByteCount; i++)
+    for(int32_t i = 1; (unsigned)i < sourceByteCount; i++)
     {
-        if((unsigned)i + sourceByteOffset < source.size())
+        if(i + sourceByteOffset < 0)
         {
-            target.at(targetBytePosition) |= source.at(i + sourceByteOffset) >> rightShiftCount;
             targetBytePosition++;
-            if(rightShiftCount > 0) target.at(targetBytePosition) |= source.at(i + sourceByteOffset) << leftShiftCount;
+            continue;
+        }
+        else if((unsigned)(i + sourceByteOffset) < source.size())
+        {
+            target.at(targetBytePosition) |= (char)(source.at(i + sourceByteOffset) >> rightShiftCount);
+            targetBytePosition++;
+            if(rightShiftCount > 0) target.at(targetBytePosition) |= (char)(source.at(i + sourceByteOffset) << leftShiftCount);
         }
         else break;
     }
