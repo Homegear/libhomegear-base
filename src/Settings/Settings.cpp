@@ -865,9 +865,11 @@ void Settings::load(std::string filename, std::string executablePath)
 				}
 				else if(name == "replaceclientserveraddress")
 				{
+				    //Todo: Remove setting.
+				    _bl->out.printWarning("Setting replaceClientServerAddress is deprecated and will be removed by end of 2020.");
 					if(!value.empty())
 					{
-						std::pair<std::string, std::string> addresses = _bl->hf.splitLast(HelperFunctions::toLower(value), ' ');
+						std::pair<std::string, std::string> addresses = BaseLib::HelperFunctions::splitLast(HelperFunctions::toLower(value), ' ');
 						if(!value.empty()) _clientAddressesToReplace[addresses.first] = addresses.second;
 						_bl->out.printDebug("Debug: Added replaceClientServerAddress " + addresses.first + " " + addresses.second);
 					}

@@ -46,7 +46,7 @@ UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort)
     _listenPort = Math::getUnsignedNumber(listenPort);
 }
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : UdpSocket(baseLib, hostname, port, 0)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : UdpSocket(baseLib, hostname, port, "")
 {
 }
 

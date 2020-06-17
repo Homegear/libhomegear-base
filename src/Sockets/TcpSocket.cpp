@@ -1740,6 +1740,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 30;
+		//Set number of seconds a connection needs to be idle before sending keep-alive probes
 		//Don't use SOL_TCP, as this constant doesn't exists in BSD. Also don't use getprotobyname() as this returns a nullptr on some systems.
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
@@ -1748,6 +1749,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 4;
+		//Set the maximum number of keep-alive probes before giving up and closing the connection
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPCNT, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
@@ -1755,6 +1757,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 15;
+		//Set number of seconds between keep-alive probes
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPINTVL, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
@@ -1772,7 +1775,7 @@ void TcpSocket::getConnection()
 			}
 		}
 
-		int32_t connectResult;
+		int32_t connectResult = 0;
 		if((connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen)) == -1 && errno != EINPROGRESS)
 		{
 			if(i < _connectionRetries - 1)
@@ -1800,7 +1803,7 @@ void TcpSocket::getConnection()
 				(short)0
 			};
 
-			int32_t pollResult = poll(&pollstruct, 1, _readTimeout / 1000);
+			int32_t pollResult = poll(&pollstruct, 1, (int)(_readTimeout / 1000));
 			if(pollResult < 0 || (pollstruct.revents & POLLERR))
 			{
 				if(i < _connectionRetries - 1)
