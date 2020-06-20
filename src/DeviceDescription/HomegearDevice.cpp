@@ -2506,10 +2506,16 @@ void HomegearDevice::saveFunction(xml_document* doc, xml_node* parentNode, PFunc
 				propertiesNode->append_node(propertyNode);
 			}
 
-			if(function->linkSenderFunctionTypes.size() > 0)
+			if(!function->linkSenderFunctionTypes.empty())
 			{
 				xml_node* propertyNode = doc->allocate_node(node_element, "linkSenderFunctionTypes");
 				propertiesNode->append_node(propertyNode);
+
+				for(auto& linkSenderAttribute : function->linkSenderAttributes)
+                {
+				    auto tempString2 = linkSenderAttribute.second->toString();
+                    propertyNode->append_attribute(doc->allocate_attribute(linkSenderAttribute.first.c_str(), doc->allocate_string(tempString2.c_str(), tempString2.size() + 1)));
+                }
 
 				for(LinkFunctionTypes::iterator j = function->linkSenderFunctionTypes.begin(); j != function->linkSenderFunctionTypes.end(); ++j)
 				{
@@ -2518,10 +2524,16 @@ void HomegearDevice::saveFunction(xml_document* doc, xml_node* parentNode, PFunc
 				}
 			}
 
-			if(function->linkReceiverFunctionTypes.size() > 0)
+			if(!function->linkReceiverFunctionTypes.empty())
 			{
 				xml_node* propertyNode = doc->allocate_node(node_element, "linkReceiverFunctionTypes");
 				propertiesNode->append_node(propertyNode);
+
+                for(auto& linkReceiverAttribute : function->linkReceiverAttributes)
+                {
+                    auto tempString2 = linkReceiverAttribute.second->toString();
+                    propertyNode->append_attribute(doc->allocate_attribute(linkReceiverAttribute.first.c_str(), doc->allocate_string(tempString2.c_str(), tempString2.size() + 1)));
+                }
 
 				for(LinkFunctionTypes::iterator j = function->linkReceiverFunctionTypes.begin(); j != function->linkReceiverFunctionTypes.end(); ++j)
 				{

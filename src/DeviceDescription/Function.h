@@ -83,6 +83,8 @@ public:
 	std::string defaultGroupedLinkScenarioElementId2;
 	bool hasGroup = false;
 	std::string groupId;
+	std::unordered_map<std::string, BaseLib::PVariable> linkSenderAttributes;
+    std::unordered_map<std::string, BaseLib::PVariable> linkReceiverAttributes;
 	LinkFunctionTypes linkSenderFunctionTypes;
 	LinkFunctionTypes linkReceiverFunctionTypes;
 

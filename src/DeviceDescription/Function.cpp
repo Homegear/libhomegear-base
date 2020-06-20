@@ -96,6 +96,10 @@ Function::Function(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& ch
 				else if(propertyName == "groupId") groupId = propertyValue;
 				else if(propertyName == "linkSenderFunctionTypes")
 				{
+                    for(xml_attribute* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    {
+                        linkSenderAttributes.emplace(std::string(attr->name()), Rpc::JsonDecoder::decode(std::string(attr->value())));
+                    }
 					for(xml_node* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
 					{
 						std::string functionTypeValue(functionTypeNode->value());
@@ -105,6 +109,10 @@ Function::Function(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& ch
 				}
 				else if(propertyName == "linkReceiverFunctionTypes")
 				{
+                    for(xml_attribute* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())
+                    {
+                        linkReceiverAttributes.emplace(std::string(attr->name()), Rpc::JsonDecoder::decode(std::string(attr->value())));
+                    }
 					for(xml_node* functionTypeNode = propertyNode->first_node("type"); functionTypeNode; functionTypeNode = functionTypeNode->next_sibling())
 					{
 						std::string functionTypeValue(functionTypeNode->value());
