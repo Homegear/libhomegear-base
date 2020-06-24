@@ -60,7 +60,7 @@ void HomegearUiElements::load(std::string xmlFilename)
         std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
         if(fileStream)
         {
-            uint32_t length;
+            uint32_t length = 0;
             fileStream.seekg(0, std::ios::end);
             length = fileStream.tellg();
             fileStream.seekg(0, std::ios::beg);

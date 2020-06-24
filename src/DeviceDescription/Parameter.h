@@ -96,7 +96,12 @@ public:
 	bool readable = true;
 	bool writeable = true;
 	bool transmitted = true;
+
+	/**
+	 * Makes readonly variables writeable for addons (i. e. from device source code)
+	 */
 	bool addonWriteable = true;
+
 	bool password = false;
 	bool visible = true;
 	bool internal = false;
@@ -106,14 +111,32 @@ public:
 	bool transform = false;
 	bool isSignedSet = false;
 	bool isSigned = false;
+
+	/**
+	 * UI control to use for displaying this parameter.
+	 */
 	std::string control;
+
+	/**
+	 * The unit of the variable like "°C" or "km/h".
+	 */
 	std::string unit;
 	bool mandatory = false;
 	std::string formFieldType;
 	int32_t formPosition = -1;
 	std::string metadata;
 	bool resetAfterRestart = false;
+
+	/**
+	 * Deprecated. Remove beginning of 2021.
+	 * Visible on the HomeMatic CCU2.
+	 */
 	bool ccu2Visible = true;
+
+	/**
+	 * When parameters are linked together, logical changes of one parameter change the other to the same value.
+	 */
+	std::string linkedParameter;
 	Casts casts;
 	ParameterRoles roles;
 

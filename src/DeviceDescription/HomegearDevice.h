@@ -59,13 +59,13 @@ public:
 		enum Enum { none = 0, always = 1, wakeOnRadio = 2, config = 4, wakeUp = 8, lazyConfig = 16, wakeUp2 = 32 };
 	};
 
-	HomegearDevice(BaseLib::SharedObjects* baseLib);
+	explicit HomegearDevice(BaseLib::SharedObjects* baseLib);
 	HomegearDevice(BaseLib::SharedObjects* baseLib, xml_node* node);
 	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, bool& oldFormat);
 	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, std::vector<char>& xml);
 	virtual ~HomegearDevice();
 
-	bool loaded() { return _loaded; }
+	bool loaded() const { return _loaded; }
 
 	// {{{ Shortcuts
 	int32_t dynamicChannelCountIndex = -1;

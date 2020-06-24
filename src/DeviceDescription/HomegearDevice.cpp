@@ -2614,19 +2614,26 @@ void HomegearDevice::parseXML(xml_node* node)
 			}
 			else if(nodeName == "properties")
 			{
+			    bool receiveModeSet = false;
 				for(xml_node* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
 				{
 					std::string propertyName(propertyNode->name());
 					std::string propertyValue(propertyNode->value());
 					if(propertyName == "receiveMode")
 					{
-						if(propertyValue == "always") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::always);
+                        receiveModeSet = true;
+                        if(propertyValue == "none") receiveModes = ReceiveModes::Enum::none;
+						else if(propertyValue == "always") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::always);
 						else if(propertyValue == "wakeOnRadio") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::wakeOnRadio);
 						else if(propertyValue == "config") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::config);
 						else if(propertyValue == "wakeUp") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::wakeUp);
 						else if(propertyValue == "wakeUp2") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::wakeUp2);
 						else if(propertyValue == "lazyConfig") receiveModes = (ReceiveModes::Enum)(receiveModes | ReceiveModes::Enum::lazyConfig);
-						else _bl->out.printWarning("Warning: Unknown receiveMode: " + propertyValue);
+						else
+                        {
+                            receiveModeSet = false;
+						    _bl->out.printWarning("Warning: Unknown receiveMode: " + propertyValue);
+						}
 					}
 					else if(propertyName == "encryption") { if(propertyValue == "true") encryption = true; }
 					else if(propertyName == "timeout") timeout = Math::getUnsignedNumber(propertyValue);
@@ -2642,7 +2649,7 @@ void HomegearDevice::parseXML(xml_node* node)
                     else if(propertyName == "interface") interface = propertyValue;
 					else _bl->out.printWarning("Warning: Unknown device property: " + propertyName);
 				}
-				if(receiveModes == ReceiveModes::Enum::none) receiveModes = ReceiveModes::Enum::always;
+				if(!receiveModeSet) receiveModes = ReceiveModes::Enum::always;
 			}
 			else if(nodeName == "functions")
 			{

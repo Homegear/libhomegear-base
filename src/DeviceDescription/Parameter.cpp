@@ -90,23 +90,24 @@ void Parameter::parseXml(xml_node* node)
                 if(propertyName == "readable") readable = propertyValue == "true";
                 else if(propertyName == "writeable") writeable = propertyValue == "true";
                 else if(propertyName == "transmitted") transmitted = propertyValue == "true";
-                else if(propertyName == "addonWriteable") { if(propertyValue == "false") addonWriteable = false; }
-                else if(propertyName == "password") { if(propertyValue == "true") password = true; }
-                else if(propertyName == "visible") { if(propertyValue == "false") visible = false; }
-                else if(propertyName == "internal") { if(propertyValue == "true") internal = true; }
-                else if(propertyName == "parameterGroupSelector") { if(propertyValue == "true") parameterGroupSelector = true; }
-                else if(propertyName == "service") { if(propertyValue == "true") service = true; }
-                else if(propertyName == "sticky") { if(propertyValue == "true") sticky = true; }
-                else if(propertyName == "transform") { if(propertyValue == "true") transform = true; }
-                else if(propertyName == "signed") { isSignedSet = true; isSigned = propertyValue == "true"; }
+                else if(propertyName == "addonWriteable") { addonWriteable = (propertyValue == "true"); }
+                else if(propertyName == "password") { password = (propertyValue == "true"); }
+                else if(propertyName == "visible") { visible = (propertyValue == "true"); }
+                else if(propertyName == "internal") { internal = (propertyValue == "true"); }
+                else if(propertyName == "parameterGroupSelector") { parameterGroupSelector = (propertyValue == "true"); }
+                else if(propertyName == "service") { service = (propertyValue == "true"); }
+                else if(propertyName == "sticky") { sticky = (propertyValue == "true"); }
+                else if(propertyName == "transform") { transform = (propertyValue == "true"); }
+                else if(propertyName == "signed") { isSignedSet = true; isSigned = (propertyValue == "true"); }
                 else if(propertyName == "control") control = propertyValue;
                 else if(propertyName == "unit") unit = propertyValue;
                 else if(propertyName == "mandatory") mandatory = (propertyValue == "true");
                 else if(propertyName == "formFieldType") formFieldType = propertyValue;
                 else if(propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
                 else if(propertyName == "metadata") metadata = propertyValue;
-                else if(propertyName == "resetAfterRestart") { resetAfterRestart = propertyValue == "true"; }
-                else if(propertyName == "ccu2Visible") { if(propertyValue == "false") ccu2Visible = false; }
+                else if(propertyName == "resetAfterRestart") { resetAfterRestart = (propertyValue == "true"); }
+                else if(propertyName == "ccu2Visible") { ccu2Visible = (propertyValue == "true"); }
+                else if(propertyName == "linkedParameter") { linkedParameter = propertyValue; }
                 else if(propertyName == "casts")
                 {
                     for(xml_attribute* attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute())

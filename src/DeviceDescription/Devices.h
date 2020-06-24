@@ -64,19 +64,19 @@ public:
 	// }}}
 
 	Devices(BaseLib::SharedObjects* baseLib, IDevicesEventSink* eventHandler, int32_t family);
-	virtual ~Devices() {}
+	~Devices() override = default;
 	bool empty() { return _devices.empty(); }
 	void clear();
 	void load();
 	void load(std::string& xmlPath);
 	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
-	uint32_t getTypeNumberFromTypeId(const std::string& typeId);
-	std::shared_ptr<HomegearDevice> find(uint32_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
-	std::unordered_map<std::string, uint32_t> getIdTypeNumberMap();
-	std::unordered_set<uint32_t> getKnownTypeNumbers();
+	uint64_t getTypeNumberFromTypeId(const std::string& typeId);
+	std::shared_ptr<HomegearDevice> find(uint64_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
+	std::unordered_map<std::string, uint64_t> getIdTypeNumberMap();
+	std::unordered_set<uint64_t> getKnownTypeNumbers();
 
 	// {{{ RPC
-	std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
+	std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, uint64_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
 	PVariable listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_ptr<HomegearDevice>& device, PSupportedDevice deviceType, int32_t channel, std::set<std::string>& fields);
 	PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields);
 	// }}}

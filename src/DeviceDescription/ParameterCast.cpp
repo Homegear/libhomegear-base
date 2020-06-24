@@ -199,7 +199,7 @@ IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_no
 		{
 			if(value == "division") operation = Operation::Enum::division;
 			else if(value == "multiplication") operation = Operation::Enum::multiplication;
-			else _bl->out.printWarning("Warning: Unknown value for \"integerIntegerScale\\operation\": " + value);
+			else _bl->out.printWarning(R"(Warning: Unknown value for "integerIntegerScale\operation": )" + value);
 		}
 		else if(name == "offset") offset = Math::getNumber(value);
 		else _bl->out.printWarning("Warning: Unknown node in \"integerIntegerScale\": " + name);
@@ -324,7 +324,7 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node* 
 		{
 			for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 			{
-				_bl->out.printWarning("Warning: Unknown attribute for \"integerIntegerMap\\value\": " + std::string(attr->name()));
+				_bl->out.printWarning(R"(Warning: Unknown attribute for "integerIntegerMap\value": )" + std::string(attr->name()));
 			}
 			int32_t physicalValue = 0;
 			int32_t logicalValue = 0;
@@ -334,7 +334,7 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node* 
 				std::string valueValue(valueNode->value());
 				if(valueName == "physical") physicalValue = Math::getNumber(valueValue);
 				else if(valueName == "logical") logicalValue = Math::getNumber(valueValue);
-				else _bl->out.printWarning("Warning: Unknown element in \"integerIntegerMap\\value\": " + valueName);
+				else _bl->out.printWarning(R"(Warning: Unknown element in "integerIntegerMap\value": )" + valueName);
 			}
 			integerValueMapFromDevice[physicalValue] = logicalValue;
 			integerValueMapToDevice[logicalValue] = physicalValue;
@@ -344,7 +344,7 @@ IntegerIntegerMap::IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node* 
 			if(value == "fromDevice") direction = Direction::Enum::fromDevice;
 			else if(value == "toDevice") direction = Direction::Enum::toDevice;
 			else if(value == "both") direction = Direction::Enum::both;
-			else _bl->out.printWarning("Warning: Unknown value for \"integerIntegerMap\\direction\": " + value);
+			else _bl->out.printWarning(R"(Warning: Unknown value for "integerIntegerMap\direction": )" + value);
 		}
 		else _bl->out.printWarning("Warning: Unknown node in \"integerIntegerMap\": " + name);
 	}
@@ -1148,7 +1148,7 @@ HexStringByteArray::HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node
 void HexStringByteArray::fromPacket(PVariable& value)
 {
 	if(!value) return;
-	value->stringValue = _bl->hf.getHexString(value->stringValue);
+	value->stringValue = BaseLib::HelperFunctions::getHexString(value->stringValue);
 }
 
 void HexStringByteArray::toPacket(PVariable& value)
@@ -1156,12 +1156,12 @@ void HexStringByteArray::toPacket(PVariable& value)
 	if(!value) return;
 	if(value->stringValue.find(',') != std::string::npos)
 	{
-		std::vector<std::string> bytes = _bl->hf.splitAll(value->stringValue, ',');
+		std::vector<std::string> bytes = BaseLib::HelperFunctions::splitAll(value->stringValue, ',');
 		value->stringValue = "";
 		value->stringValue.reserve(bytes.size() * 2);
 		for(auto byte : bytes)
 		{
-			_bl->hf.trim(byte);
+			BaseLib::HelperFunctions::trim(byte);
 			if(byte.size() > 2) byte = byte.substr(2);
 			if(byte.size() > 2) byte = byte.substr(0, 2);
 			if(byte.size() == 1) value->stringValue.append("0" + byte);
