@@ -405,8 +405,8 @@ void BooleanInteger::fromPacket(PVariable& value)
 	}
 	else
 	{
+        if(value->integerValue == trueValue || value->integerValue >= threshold) value->booleanValue = true;
 		if(value->integerValue == falseValue) value->booleanValue = false;
-		if(value->integerValue == trueValue || value->integerValue >= threshold) value->booleanValue = true;
 	}
 	if(invert) value->booleanValue = !value->booleanValue;
 	value->integerValue = 0;
