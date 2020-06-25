@@ -71,6 +71,7 @@ public:
 	void load(std::string& xmlPath);
 	std::shared_ptr<HomegearDevice> loadFile(std::string& filepath);
 	uint64_t getTypeNumberFromTypeId(const std::string& typeId);
+    uint64_t getTypeNumberFromProductId(const std::string& productId);
 	std::shared_ptr<HomegearDevice> find(uint64_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo = -1);
 	std::unordered_map<std::string, uint64_t> getIdTypeNumberMap();
 	std::unordered_set<uint64_t> getKnownTypeNumbers();

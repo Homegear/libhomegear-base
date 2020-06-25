@@ -51,6 +51,10 @@ SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node* node
 		{
 			id = attributeValue;
 		}
+		else if(attributeName == "productId")
+        {
+		    productId = attributeValue;
+        }
 		else _bl->out.printWarning("Warning: Unknown attribute for \"supportedDevice\": " + attributeName);
 	}
 	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
@@ -93,10 +97,6 @@ bool SupportedDevice::matches(const std::string& typeId)
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
     return false;
 }

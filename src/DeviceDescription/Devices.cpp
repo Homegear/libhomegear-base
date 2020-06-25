@@ -1224,22 +1224,38 @@ uint64_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
 {
 	try
 	{
-		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
-		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
-			{
-				if((*j)->matches(typeId)) return (*j)->typeNumber;
-			}
-		}
+        std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
+        for(auto& device : _devices)
+        {
+            for(auto& supportedDevice : device->supportedDevices)
+            {
+                if(supportedDevice->matches(typeId)) return supportedDevice->typeNumber;
+            }
+        }
 	}
 	catch(const std::exception& ex)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(...)
+    return 0;
+}
+
+uint64_t Devices::getTypeNumberFromProductId(const std::string& productId)
+{
+    try
     {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
+        for(auto& device : _devices)
+        {
+            for(auto& supportedDevice : device->supportedDevices)
+            {
+                if(supportedDevice->productId == productId) return supportedDevice->typeNumber;
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     return 0;
 }

@@ -350,6 +350,12 @@ void HomegearDevice::saveDevice(xml_document* doc, xml_node* parentNode, Homegea
 			xml_attribute* attr = doc->allocate_attribute("id", doc->allocate_string((*i)->id.c_str(), (*i)->id.size() + 1));
 			subnode->append_attribute(attr);
 
+			if(!(*i)->productId.empty())
+            {
+                attr = doc->allocate_attribute("productId", doc->allocate_string((*i)->productId.c_str(), (*i)->productId.size() + 1));
+                subnode->append_attribute(attr);
+            }
+
 			xml_node* deviceNode = doc->allocate_node(node_element, "description", doc->allocate_string((*i)->description.c_str(), (*i)->description.size() + 1));
 			subnode->append_node(deviceNode);
 

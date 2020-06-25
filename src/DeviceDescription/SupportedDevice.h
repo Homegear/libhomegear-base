@@ -64,6 +64,7 @@ public:
 	virtual ~SupportedDevice() = default;
 
 	std::string id;
+	std::string productId;
 	std::string description;
 	std::string longDescription;
 	std::string serialPrefix;
