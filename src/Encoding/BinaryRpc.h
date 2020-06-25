@@ -45,7 +45,7 @@ namespace Rpc
 class BinaryRpcException : public BaseLib::Exception
 {
 public:
-	BinaryRpcException(std::string message) : BaseLib::Exception(message) {}
+	explicit BinaryRpcException(const std::string& message) : BaseLib::Exception(message) {}
 };
 
 class BinaryRpc
@@ -58,8 +58,13 @@ public:
 		response
 	};
 
-	BinaryRpc(BaseLib::SharedObjects* bl);
-	virtual ~BinaryRpc();
+    BinaryRpc();
+
+    /**
+     * Deprecated old constructor.
+     */
+	explicit BinaryRpc(BaseLib::SharedObjects* bl);
+	~BinaryRpc() = default;
 
 	size_t getMaxHeaderSize() { return _maxHeaderSize; }
 	void setMaxHeaderSize(size_t value) { _maxHeaderSize = value; }

@@ -35,7 +35,6 @@
 #include "UiIcon.h"
 #include "UiText.h"
 #include "UiGrid.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../Variable.h"
 
 #include <string>
@@ -87,7 +86,7 @@ public:
     std::list<PUiControl> controls;
 
     HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node* node);
     HomegearUiElement(HomegearUiElement const& rhs);
     virtual ~HomegearUiElement() = default;
 

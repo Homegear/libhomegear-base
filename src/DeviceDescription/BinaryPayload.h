@@ -31,10 +31,14 @@
 #ifndef BINARYPAYLOAD_H_
 #define BINARYPAYLOAD_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <vector>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -65,7 +69,7 @@ class BinaryPayload
 {
 public:
 	BinaryPayload(BaseLib::SharedObjects* baseLib);
-	BinaryPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	BinaryPayload(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~BinaryPayload() {}
 
 	double index = 0;

@@ -156,7 +156,7 @@ public:
 	std::string firmwarePath() { return _firmwarePath; }
 	std::string tempPath() { return _tempPath; }
 	std::string lockFilePath() { return _lockFilePath; }
-	void setLockFilePath(std::string value) { _lockFilePath = value; }
+	void setLockFilePath(const std::string& value) { _lockFilePath = value; }
 	uint32_t lockFilePathPermissions() { return _lockFilePathPermissions; }
 	std::string lockFilePathUser() { return _lockFilePathUser; }
 	std::string lockFilePathGroup() { return _lockFilePathGroup; }
@@ -165,10 +165,11 @@ public:
 	std::map<std::string, std::string>& clientAddressesToReplace() { return _clientAddressesToReplace; }
 	std::string gpioPath() { return _gpioPath; }
 	std::vector<uint32_t> exportGpios() { return _exportGpios; }
-    std::string oauthCertPath() { return _oauthCertPath; };
-    std::string oauthKeyPath() { return _oauthKeyPath; };
-    int32_t oauthTokenLifetime() { return _oauthTokenLifetime; };
-    int32_t oauthRefreshTokenLifetime() { return _oauthRefreshTokenLifetime; };
+    std::string oauthCertPath() { return _oauthCertPath; }
+    std::string oauthKeyPath() { return _oauthKeyPath; }
+    int32_t oauthTokenLifetime() { return _oauthTokenLifetime; }
+    int32_t oauthRefreshTokenLifetime() { return _oauthRefreshTokenLifetime; }
+    uint32_t maxWaitForPhysicalInterfaces() { return _maxWaitForPhysicalInterfaces; }
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 	std::string _executablePath;
@@ -293,6 +294,7 @@ private:
 	std::map<std::string, std::string> _clientAddressesToReplace;
 	std::string _gpioPath;
 	std::vector<uint32_t> _exportGpios;
+    uint32_t _maxWaitForPhysicalInterfaces = 180;
 
     // {{{ OAuth
         std::string _oauthCertPath;

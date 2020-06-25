@@ -33,6 +33,7 @@
 
 #include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
+#include "../IQueue.h"
 
 #include <thread>
 #include <string>
@@ -63,6 +64,7 @@
 
 #include <gnutls/x509.h>
 #include <gnutls/gnutls.h>
+#include <queue>
 
 namespace BaseLib
 {
@@ -153,7 +155,7 @@ class SharedObjects;
  *     }
  *
  */
-class TcpSocket
+class TcpSocket : public IQueue
 {
 public:
 	typedef std::vector<uint8_t> TcpPacket;
@@ -165,6 +167,12 @@ public:
 		std::vector<uint8_t> buffer;
 		std::shared_ptr<TcpSocket> socket;
         std::string clientCertDn;
+        /**
+         * Mutex for `busy` and `backlog`
+         */
+        std::mutex backlogMutex;
+        bool busy = false;
+        std::queue<std::shared_ptr<TcpPacket>> backlog;
 
 		TcpClientData()
 		{
@@ -172,6 +180,21 @@ public:
 		}
 	};
 	typedef std::shared_ptr<TcpClientData> PTcpClientData;
+
+    class QueueEntry : public BaseLib::IQueueEntry
+    {
+    public:
+        QueueEntry() = default;
+
+        explicit QueueEntry(const PTcpClientData& clientData)
+        {
+            this->clientData = clientData;
+        }
+
+        ~QueueEntry() override = default;
+
+        PTcpClientData clientData;
+    };
 
     struct CertificateInfo
     {
@@ -187,6 +210,7 @@ public:
 	struct TcpServerInfo
 	{
 		bool useSsl = false;
+        uint32_t connectionBacklogSize = 100;
 		uint32_t maxConnections = 10;
 		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, PCertificateInfo> certificates;
@@ -195,6 +219,7 @@ public:
 		bool requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
 		std::function<void(int32_t clientId)> connectionClosedCallback;
+        std::function<void(int32_t clientId, int32_t errorCode, const std::string& errorString)> connectionClosedCallbackEx;
 		std::function<void(int32_t clientId, TcpPacket& packet)> packetReceivedCallback;
 	};
 
@@ -304,7 +329,7 @@ public:
 
 	virtual ~TcpSocket();
 
-	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort);
+	static PFileDescriptor bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, const std::string& address, const std::string& port, uint32_t connectionBacklogSize, std::string& listenAddress, int32_t& listenPort);
 
 	PFileDescriptor getFileDescriptor();
 	std::string getIpAddress();
@@ -373,7 +398,7 @@ public:
      * @throws SocketTimeOutException Thrown when writing times out.
      * @throws SocketClosedException Thrown when socket is closed.
      */
-	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
+	int32_t proofwrite(const std::shared_ptr<std::vector<char>>& data);
 
     /**
      * Writes data to a socket.
@@ -433,8 +458,9 @@ public:
 		 * @see bindServerSocket
 		 *
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startPreboundServer(std::string& listenAddress);
+		void startPreboundServer(std::string& listenAddress, size_t processingThreads = 0);
 
 		/**
 		 * Starts listening.
@@ -442,8 +468,9 @@ public:
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
 		 * @param port The port number to bind the server to.
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startServer(std::string address, std::string port, std::string& listenAddress);
+		void startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 0);
 
 		/**
 		 * Starts listening on a dynamically assigned port.
@@ -451,8 +478,9 @@ public:
 		 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
 		 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 		 * @param[out] listenPort The port the server was bound to (e. g. `45735`).
+		 * @param processingThreads The number of processing threads to start. By default no threads are started.
 		 */
-		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort);
+		void startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads = 0);
 
 		/**
 		 * Starts stopping the server and returns immediately.
@@ -471,7 +499,7 @@ public:
 		 * @param packet The data to send.
 		 * @param closeConnection Close the connection after sending the packet.
 		 */
-		void sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection = false);
+        bool sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection = false);
 
         /**
          * Sends a response to a TCP client connected to the server.
@@ -480,7 +508,7 @@ public:
          * @param packet The data to send.
          * @param closeConnection Close the connection after sending the packet.
          */
-        void sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
+        bool sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection = false);
 
         /**
          * Closes the connection to a connected client.
@@ -523,12 +551,14 @@ protected:
 
 	// {{{ For server only
 		bool _isServer = false;
+		uint32_t _backlogSize = 100;
 		uint32_t _maxConnections = 10;
 		std::string _dhParamFile;
 		std::string _dhParamData;
 		bool _requireClientCert = false;
 		std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
 		std::function<void(int32_t clientId)> _connectionClosedCallback;
+        std::function<void(int32_t clientId, int32_t errorCode, const std::string& errorString)> _connectionClosedCallbackEx;
 		std::function<void(int32_t clientId, TcpPacket& packet)> _packetReceivedCallback;
 
 		std::string _listenAddress;
@@ -567,6 +597,7 @@ protected:
 		void bindSocket();
 
 		void serverThread();
+		void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry) override;
 		void collectGarbage();
 		void collectGarbage(std::map<int32_t, PTcpClientData>& clients);
 		void initClientSsl(PTcpClientData& clientData);

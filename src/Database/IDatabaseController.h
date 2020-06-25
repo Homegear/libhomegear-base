@@ -61,7 +61,7 @@ class IDatabaseController
 public:
 	struct HomegearVariables
 	{
-		enum Enum { version = 0, upnpusn = 1 };
+		enum Enum { version = 0, upnpusn = 1, uniqueid = 2 };
 	};
 
 	IDatabaseController() {}
@@ -93,10 +93,26 @@ public:
 	// }}}
 
 	// {{{ UI
-	virtual uint64_t addUiElement(std::string& elementId, BaseLib::PVariable data) = 0;
+	virtual uint64_t addUiElement(const std::string& elementStringId, const BaseLib::PVariable& data, const BaseLib::PVariable& metadata) = 0;
     virtual std::shared_ptr<DataTable> getUiElements() = 0;
+    virtual BaseLib::PVariable getUiElementMetadata(uint64_t databaseId) = 0;
 	virtual void removeUiElement(uint64_t databaseId) = 0;
+    virtual BaseLib::PVariable setUiElementMetadata(uint64_t databaseId, const BaseLib::PVariable& metadata) = 0;
 	// }}}
+
+    // {{{ Buildings
+    virtual BaseLib::PVariable addStoryToBuilding(uint64_t buildingId, uint64_t storyId) = 0;
+    virtual BaseLib::PVariable createBuilding(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable deleteBuilding(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable getStoriesInBuilding(PRpcClientInfo clientInfo, uint64_t buildingId, bool checkAcls) = 0;
+    virtual BaseLib::PVariable getBuildingMetadata(uint64_t buildingId) = 0;
+    virtual BaseLib::PVariable getBuildings(std::string languageCode) = 0;
+    virtual BaseLib::PVariable removeStoryFromBuildings(uint64_t storyId) = 0;
+    virtual BaseLib::PVariable removeStoryFromBuilding(uint64_t buildingId, uint64_t storyId) = 0;
+    virtual bool buildingExists(uint64_t buildingId) = 0;
+    virtual BaseLib::PVariable setBuildingMetadata(uint64_t buildingId, BaseLib::PVariable metadata) = 0;
+    virtual BaseLib::PVariable updateBuilding(uint64_t buildingId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+    // }}}
 
     // {{{ Stories
     virtual BaseLib::PVariable addRoomToStory(uint64_t storyId, uint64_t roomId) = 0;
@@ -232,6 +248,7 @@ public:
 	//Peer
 	virtual void deletePeer(uint64_t id) = 0;
 	virtual uint64_t savePeer(uint64_t id, uint32_t parentID, int32_t address, std::string& serialNumber, uint32_t type) = 0;
+    virtual uint64_t savePeerParameterSynchronous(DataRow& data) = 0;
 	virtual void savePeerParameterAsynchronous(DataRow& data) = 0;
     virtual void saveSpecialPeerParameterAsynchronous(DataRow& data) = 0;
 	virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow& data) = 0;
@@ -266,6 +283,13 @@ public:
 	virtual std::shared_ptr<DataTable> getLicenseVariables(int32_t moduleId) = 0;
 	virtual void saveLicenseVariable(int32_t moduleId, DataRow& data) = 0;
 	virtual void deleteLicenseVariable(int32_t moduleId, uint64_t mapKey) = 0;
+	// }}}
+
+	// {{{ Variable profiles
+    virtual uint64_t addVariableProfile(const BaseLib::PVariable& translations, const BaseLib::PVariable& profile) = 0;
+    virtual void deleteVariableProfile(uint64_t profileId) = 0;
+    virtual std::shared_ptr<BaseLib::Database::DataTable> getVariableProfiles() = 0;
+    virtual bool updateVariableProfile(uint64_t profileId, const BaseLib::PVariable& translations, const BaseLib::PVariable& profile) = 0;
 	// }}}
 };
 

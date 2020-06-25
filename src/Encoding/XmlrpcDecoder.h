@@ -32,7 +32,7 @@
 #define XMLRPCDECODER_H_
 
 #include "../Variable.h"
-#include "RapidXml/rapidxml.hpp"
+#include "RapidXml/rapidxml.h"
 
 #include <memory>
 #include <vector>
@@ -58,10 +58,10 @@ public:
 private:
 	BaseLib::SharedObjects* _bl = nullptr;
 
-	std::shared_ptr<Variable> decodeParameter(xml_node<>* valueNode);
-	std::shared_ptr<Variable> decodeArray(xml_node<>* dataNode);
-	std::shared_ptr<Variable> decodeStruct(xml_node<>* structNode);
-	std::shared_ptr<Variable> decodeResponse(xml_document<>* doc);
+	std::shared_ptr<Variable> decodeParameter(xml_node* valueNode);
+	std::shared_ptr<Variable> decodeArray(xml_node* dataNode);
+	std::shared_ptr<Variable> decodeStruct(xml_node* structNode);
+	std::shared_ptr<Variable> decodeResponse(xml_document* doc);
 };
 
 } /* namespace Rpc */

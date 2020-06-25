@@ -40,6 +40,7 @@ HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverIn
 
 	TcpSocket::TcpServerInfo tcpServerInfo;
 	tcpServerInfo.useSsl = serverInfo.useSsl;
+	tcpServerInfo.connectionBacklogSize = serverInfo.connectionBacklogSize;
 	tcpServerInfo.maxConnections = serverInfo.maxConnections;
     tcpServerInfo.serverThreads = serverInfo.serverThreads;
 	tcpServerInfo.certificates = serverInfo.certificates;
@@ -67,14 +68,14 @@ void HttpServer::bind(std::string address, std::string port, std::string& listen
 	_socket->bindServerSocket(address, port, listenAddress);
 }
 
-void HttpServer::startPrebound(std::string& listenAddress)
+void HttpServer::startPrebound(std::string& listenAddress, size_t processingThreads)
 {
-	_socket->startPreboundServer(listenAddress);
+	_socket->startPreboundServer(listenAddress, processingThreads);
 }
 
-void HttpServer::start(std::string address, std::string port, std::string& listenAddress)
+void HttpServer::start(std::string address, std::string port, std::string& listenAddress, size_t processingThreads)
 {
-	_socket->startServer(address, port, listenAddress);
+	_socket->startServer(address, port, listenAddress, processingThreads);
 }
 
 void HttpServer::stop()
@@ -161,6 +162,11 @@ void HttpServer::send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool
 void HttpServer::send(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
 {
     _socket->sendToClient(clientId, packet, closeConnection);
+}
+
+std::string HttpServer::getClientCertDn(int32_t clientId)
+{
+    return _socket ? _socket->getClientCertDn(clientId) : "";
 }
 
 }

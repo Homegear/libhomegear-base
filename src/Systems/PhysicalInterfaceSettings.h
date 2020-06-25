@@ -68,6 +68,7 @@ public:
 	uint32_t responseDelay = 95;
 	std::map<uint32_t, GPIOSetting> gpio;
 	int32_t baudrate = -1;
+	bool openWriteonly = false;
 	int32_t oscillatorFrequency = -1;
 	int32_t txPowerSetting = -1;
 	int32_t interruptPin = -1;
@@ -76,6 +77,7 @@ public:
 	std::string port;
 	std::string port2;
 	std::string port3;
+	std::string port4;
 	std::string portKeepAlive;
 	uint32_t address = 0;
 	std::string listenIp;

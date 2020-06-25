@@ -33,7 +33,6 @@
 
 #include "UiIcon.h"
 #include "UiText.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <list>
 #include <unordered_map>
@@ -57,7 +56,7 @@ class UiCondition
 {
 public:
     UiCondition(BaseLib::SharedObjects* baseLib);
-    UiCondition(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiCondition(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiCondition(UiCondition const& rhs);
     virtual ~UiCondition() = default;
 

@@ -31,7 +31,6 @@
 #ifndef UICONTROL_H_
 #define UICONTROL_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include "../../Variable.h"
 #include <string>
 #include <unordered_map>
@@ -56,7 +55,7 @@ class UiControl
 {
 public:
     UiControl(BaseLib::SharedObjects* baseLib);
-    UiControl(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiControl(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiControl(UiControl const& rhs);
     virtual ~UiControl() = default;
 

@@ -41,9 +41,9 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>* node) : HomegearUiElement(baseLib)
+HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node* node) : HomegearUiElement(baseLib)
 {
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         std::string value(subNode->value());
@@ -58,7 +58,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         else if(nodeName == "role") role = Math::getUnsignedNumber64(value);
         else if(nodeName == "icons")
         {
-            for(xml_node<>* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
+            for(xml_node* iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon"))
             {
                 auto icon = std::make_shared<UiIcon>(baseLib, iconNode);
                 if(!icon->id.empty()) icons.emplace(icon->id, std::move(icon));
@@ -66,7 +66,7 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         }
         else if(nodeName == "texts")
         {
-            for(xml_node<>* textNode = subNode->first_node("text"); textNode; textNode = textNode->next_sibling("text"))
+            for(xml_node* textNode = subNode->first_node("text"); textNode; textNode = textNode->next_sibling("text"))
             {
                 auto text = std::make_shared<UiText>(baseLib, textNode);
                 if(!text->id.empty()) texts.emplace(text->id, std::move(text));
@@ -74,14 +74,14 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         }
         else if(nodeName == "variableInputs")
         {
-            for(xml_node<>* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
+            for(xml_node* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
             {
                 variableInputs.push_back(std::make_shared<UiVariable>(baseLib, variableNode));
             }
         }
         else if(nodeName == "variableOutputs")
         {
-            for(xml_node<>* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
+            for(xml_node* variableNode = subNode->first_node("variable"); variableNode; variableNode = variableNode->next_sibling("variable"))
             {
                 variableOutputs.push_back(std::make_shared<UiVariable>(baseLib, variableNode));
             }
@@ -92,17 +92,18 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node<>
         }
         else if(nodeName == "controls")
         {
-            for(xml_node<>* controlNode = subNode->first_node("control"); controlNode; controlNode = controlNode->next_sibling("control"))
+            for(xml_node* controlNode = subNode->first_node("control"); controlNode; controlNode = controlNode->next_sibling("control"))
             {
                 controls.push_back(std::make_shared<UiControl>(baseLib, controlNode));
             }
         }
         else if(nodeName == "metadata")
         {
-            for(xml_node<>* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
+            for(xml_node* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
             {
                 std::string metadataNodeName(metadataNode->name());
-                metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode));
+                bool isDataNode = false;
+                metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode, isDataNode));
             }
         }
         else _bl->out.printWarning("Warning: Unknown node in \"homegearUiElement\": " + nodeName);
@@ -381,7 +382,7 @@ PVariable HomegearUiElement::getElementInfo()
             {
                 metadataElement->structValue->emplace(entry.first, entry.second);
             }
-            controlElement->structValue->emplace("metadata", metadataElement);
+            controlElement->structValue->emplace("controlMetadata", metadataElement);
 
             controlElements->arrayValue->emplace_back(controlElement);
         }

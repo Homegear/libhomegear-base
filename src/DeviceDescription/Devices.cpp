@@ -1220,31 +1220,47 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string& filepath)
     return std::shared_ptr<HomegearDevice>();
 }
 
-uint32_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
+uint64_t Devices::getTypeNumberFromTypeId(const std::string& typeId)
 {
 	try
 	{
-		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
-		for(std::vector<std::shared_ptr<HomegearDevice>>::iterator i = _devices.begin(); i != _devices.end(); ++i)
-		{
-			for(SupportedDevices::iterator j = (*i)->supportedDevices.begin(); j != (*i)->supportedDevices.end(); ++j)
-			{
-				if((*j)->matches(typeId)) return (*j)->typeNumber;
-			}
-		}
+        std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
+        for(auto& device : _devices)
+        {
+            for(auto& supportedDevice : device->supportedDevices)
+            {
+                if(supportedDevice->matches(typeId)) return supportedDevice->typeNumber;
+            }
+        }
 	}
 	catch(const std::exception& ex)
     {
      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(...)
+    return 0;
+}
+
+uint64_t Devices::getTypeNumberFromProductId(const std::string& productId)
+{
+    try
     {
-     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
+        for(auto& device : _devices)
+        {
+            for(auto& supportedDevice : device->supportedDevices)
+            {
+                if(supportedDevice->productId == productId) return supportedDevice->typeNumber;
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
     return 0;
 }
 
-std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo)
+std::shared_ptr<HomegearDevice> Devices::find(uint64_t typeNumber, uint32_t firmwareVersion, int32_t countFromSysinfo)
 {
 	try
 	{
@@ -1288,9 +1304,9 @@ std::shared_ptr<HomegearDevice> Devices::find(uint32_t typeNumber, uint32_t firm
     return nullptr;
 }
 
-std::unordered_map<std::string, uint32_t> Devices::getIdTypeNumberMap()
+std::unordered_map<std::string, uint64_t> Devices::getIdTypeNumberMap()
 {
-	std::unordered_map<std::string, uint32_t> idTypeMap;
+	std::unordered_map<std::string, uint64_t> idTypeMap;
 	try
 	{
 		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
@@ -1313,9 +1329,9 @@ std::unordered_map<std::string, uint32_t> Devices::getIdTypeNumberMap()
     return idTypeMap;
 }
 
-std::unordered_set<uint32_t> Devices::getKnownTypeNumbers()
+std::unordered_set<uint64_t> Devices::getKnownTypeNumbers()
 {
-	std::unordered_set<uint32_t> typeNumbers;
+	std::unordered_set<uint64_t> typeNumbers;
 	try
 	{
 		std::lock_guard<std::mutex> devicesGuard(_devicesMutex);
@@ -1339,7 +1355,7 @@ std::unordered_set<uint32_t> Devices::getKnownTypeNumbers()
 }
 
 // {{{ RPC
-std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type)
+std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientInfo, uint64_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type)
 {
 	try
 	{

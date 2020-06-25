@@ -139,7 +139,7 @@ std::vector<char> FamilySettings::getBinary(std::string name)
     return std::vector<char>();
 }
 
-void FamilySettings::set(std::string name, std::string& value)
+void FamilySettings::set(std::string name, const std::string& value)
 {
     try
     {
@@ -219,7 +219,7 @@ void FamilySettings::set(std::string name, int32_t value)
     }
 }
 
-void FamilySettings::set(std::string name, std::vector<char>& value)
+void FamilySettings::set(std::string name, const std::vector<char>& value)
 {
     try
     {
@@ -443,7 +443,7 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         }
         else if(name == "default")
         {
-            if(value == "true") settings->isDefault = true;
+            settings->isDefault = (value == "true");
             _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
         }
         else if(name == "devicetype")
@@ -462,6 +462,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         {
             settings->baudrate = BaseLib::Math::getNumber(value);
             _bl->out.printDebug("Debug: baudrate set to " + std::to_string(settings->baudrate));
+        }
+        else if(name == "openwriteonly")
+        {
+            settings->openWriteonly = (value == "true");
+            _bl->out.printDebug("Debug: openWriteonly set to " + std::to_string(settings->openWriteonly));
         }
         else if(name == "responsedelay")
         {
@@ -599,6 +604,11 @@ void FamilySettings::processStringSetting(std::string& name, std::string& value,
         {
             settings->port3 = value;
             _bl->out.printDebug("Debug: port3 set to " + settings->port3);
+        }
+        else if(name == "port4")
+        {
+            settings->port4 = value;
+            _bl->out.printDebug("Debug: port4 set to " + settings->port4);
         }
         else if(name == "listenip")
         {
@@ -767,7 +777,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
 
         if(name == "default")
         {
-            if(value->integerValue) settings->isDefault = true;
+            settings->isDefault = (bool)value->integerValue;
             _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
         }
         else if(name == "devicetype")
@@ -781,6 +791,16 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         {
             settings->device = value->stringValue;
             _bl->out.printDebug("Debug: device set to " + settings->device);
+        }
+        else if(name == "baudrate")
+        {
+            settings->baudrate = value->integerValue;
+            _bl->out.printDebug("Debug: baudrate set to " + std::to_string(settings->baudrate));
+        }
+        else if(name == "openwriteonly")
+        {
+            settings->openWriteonly = (bool)value->integerValue;
+            _bl->out.printDebug("Debug: openWriteonly set to " + std::to_string(settings->openWriteonly));
         }
         else if(name == "responsedelay")
         {
@@ -801,7 +821,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         }
         else if(name == "oneway")
         {
-            settings->oneWay = value->integerValue;
+            settings->oneWay = (bool)value->integerValue;
             _bl->out.printDebug("Debug: oneWay set to " + std::to_string(settings->oneWay));
         }
         else if(name == "enablerxvalue")
@@ -818,7 +838,7 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         }
         else if(name == "fastsending")
         {
-            settings->fastSending = value->integerValue;
+            settings->fastSending = (bool)value->integerValue;
             _bl->out.printDebug("Debug: fastSending set to " + std::to_string(settings->fastSending));
         }
         else if(name == "waitforbus")
@@ -915,6 +935,11 @@ void FamilySettings::processDatabaseSetting(std::string& name, PFamilySetting& v
         {
             settings->port3 = value->stringValue;
             _bl->out.printDebug("Debug: port3 set to " + settings->port3);
+        }
+        else if(name == "port4")
+        {
+            settings->port4 = value->stringValue;
+            _bl->out.printDebug("Debug: port4 set to " + settings->port4);
         }
         else if(name == "listenip")
         {

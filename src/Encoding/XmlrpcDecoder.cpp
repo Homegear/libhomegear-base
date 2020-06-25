@@ -43,17 +43,17 @@ XmlrpcDecoder::XmlrpcDecoder(BaseLib::SharedObjects* baseLib)
 
 std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeRequest(const std::vector<char>& packet, std::string& methodName)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-        doc.parse<0>((char*)packet.data()); //Dirty, but there is no modification of the data
-		xml_node<>* node = doc.first_node();
+        doc.parse<parse_no_entity_translation>((char*)packet.data()); //Dirty, but there is no modification of the data
+		xml_node* node = doc.first_node();
 		if(node == nullptr || std::string(doc.first_node()->name()) != "methodCall")
 		{
 			doc.clear();
 			return std::shared_ptr<std::vector<std::shared_ptr<Variable>>>(new std::vector<std::shared_ptr<Variable>>{Variable::createError(-32700, "Parse error. First root node has to be \"methodCall\".")});
 		}
-		xml_node<>* subNode = node->first_node("methodName");
+		xml_node* subNode = node->first_node("methodName");
 		if(subNode == nullptr || std::string(subNode->name()) != "methodName")
 		{
 			doc.clear();
@@ -74,9 +74,9 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeReq
 		}
 
 		std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters(new std::vector<std::shared_ptr<Variable>>());
-		for(xml_node<>* paramNode = subNode->first_node(); paramNode; paramNode = paramNode->next_sibling())
+		for(xml_node* paramNode = subNode->first_node(); paramNode; paramNode = paramNode->next_sibling())
 		{
-			xml_node<>* valueNode = paramNode->first_node("value");
+			xml_node* valueNode = paramNode->first_node("value");
 			if(valueNode == nullptr) continue;
 			parameters->push_back(decodeParameter(valueNode));
 		}
@@ -95,10 +95,10 @@ std::shared_ptr<std::vector<std::shared_ptr<Variable>>> XmlrpcDecoder::decodeReq
 
 std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::string& packet)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-		doc.parse<0>((char*)packet.data()); //Dirty, but there is no modification of the data
+		doc.parse<parse_no_entity_translation>((char*)packet.data()); //Dirty, but there is no modification of the data
 		std::shared_ptr<Variable> response = decodeResponse(&doc);
 		doc.clear();
 		return response;
@@ -114,7 +114,7 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::string& packe
 
 std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::vector<char>& packet)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
 		int32_t startPos = 0;
@@ -130,7 +130,7 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::vector<char>&
 			}
 		}
 		if(startPos >= (signed)packet.size()) return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed: Could not find \"<\"."));
-		doc.parse<0>((char*)packet.data() + startPos); //Dirty, but there is no modification of the data
+		doc.parse<parse_no_entity_translation>((char*)packet.data() + startPos); //Dirty, but there is no modification of the data
 		std::shared_ptr<Variable> response = decodeResponse(&doc);
 		doc.clear();
 		return response;
@@ -144,11 +144,11 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(const std::vector<char>&
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document<>* doc)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document* doc)
 {
 	try
 	{
-		xml_node<>* node = doc->first_node();
+		xml_node* node = doc->first_node();
 		if(node == nullptr || std::string(doc->first_node()->name()) != "methodResponse")
 		{
 			doc->clear();
@@ -156,7 +156,7 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document<>* doc)
 		}
 
 		bool errorStruct = false;
-		xml_node<>* subNode = node->first_node("params");
+		xml_node* subNode = node->first_node("params");
 		if(subNode == nullptr)
 		{
 			subNode = node->first_node("fault");
@@ -193,12 +193,12 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeResponse(xml_document<>* doc)
     return std::shared_ptr<Variable>(Variable::createError(-32700, "Parse error. Not well formed."));
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeParameter(xml_node<>* valueNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeParameter(xml_node* valueNode)
 {
 	try
 	{
 		if(valueNode == nullptr) return std::shared_ptr<Variable>(new Variable(VariableType::tVoid));
-		xml_node<>* subNode = valueNode->first_node();
+		xml_node* subNode = valueNode->first_node();
 		if(subNode == nullptr) return std::shared_ptr<Variable>(new Variable(VariableType::tString));
 
 		std::string type(subNode->name());
@@ -255,16 +255,16 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeParameter(xml_node<>* valueNode)
     return std::shared_ptr<Variable>(new Variable(0));
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeStruct(xml_node<>* structNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeStruct(xml_node* structNode)
 {
 	std::shared_ptr<Variable> rpcStruct(new Variable(VariableType::tStruct));
 	try
 	{
 		if(structNode == nullptr) return rpcStruct;
 
-		for(xml_node<>* memberNode = structNode->first_node(); memberNode; memberNode = memberNode->next_sibling())
+		for(xml_node* memberNode = structNode->first_node(); memberNode; memberNode = memberNode->next_sibling())
 		{
-			xml_node<>* subNode = memberNode->first_node("name");
+			xml_node* subNode = memberNode->first_node("name");
 			if(subNode == nullptr) continue;
 			std::string name(subNode->value());
 			if(name.empty()) continue;
@@ -281,17 +281,17 @@ std::shared_ptr<Variable> XmlrpcDecoder::decodeStruct(xml_node<>* structNode)
 	return rpcStruct;
 }
 
-std::shared_ptr<Variable> XmlrpcDecoder::decodeArray(xml_node<>* arrayNode)
+std::shared_ptr<Variable> XmlrpcDecoder::decodeArray(xml_node* arrayNode)
 {
 	std::shared_ptr<Variable> rpcArray(new Variable(VariableType::tArray));
 	try
 	{
 		if(arrayNode == nullptr) return rpcArray;
 
-		xml_node<>* dataNode = arrayNode->first_node("data");
+		xml_node* dataNode = arrayNode->first_node("data");
 		if(dataNode == nullptr) return rpcArray;
 
-		for(xml_node<>* valueNode = dataNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
+		for(xml_node* valueNode = dataNode->first_node(); valueNode; valueNode = valueNode->next_sibling())
 		{
 			rpcArray->arrayValue->push_back(decodeParameter(valueNode));
 		}

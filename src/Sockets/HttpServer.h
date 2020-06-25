@@ -127,6 +127,7 @@ public:
 	struct HttpServerInfo
 	{
 		bool useSsl = false;
+        uint32_t connectionBacklogSize = 100;
 		uint32_t maxConnections = 10;
 		uint32_t serverThreads = 1;
 		std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
@@ -162,14 +163,16 @@ public:
 	 *
 	 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
 	 */
-	void startPrebound(std::string& listenAddress);
+	void startPrebound(std::string& listenAddress, size_t processingThreads = 0);
 
-	void start(std::string address, std::string port, std::string& listenAddress);
+	void start(std::string address, std::string port, std::string& listenAddress, size_t processingThreads = 0);
 	void stop();
 	void waitForStop();
 
 	void send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection = true);
 	void send(int32_t clientId, const std::vector<char>& packet, bool closeConnection = true);
+
+	std::string getClientCertDn(int32_t clientId);
 protected:
 	struct HttpClientInfo
 	{

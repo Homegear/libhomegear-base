@@ -4,16 +4,16 @@
  * modify it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * libhomegear-base is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with libhomegear-base.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
+ *
  * In addition, as a special exception, the copyright holders give
  * permission to link the code of portions of this program with the
  * OpenSSL library under certain conditions as described in each
@@ -32,7 +32,6 @@
 #define DEVICEPARAMETERCAST_H_
 
 #include "../Variable.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 
 using namespace rapidxml;
@@ -59,7 +58,7 @@ class ICast
 {
 public:
 	explicit ICast(BaseLib::SharedObjects* baseLib);
-	explicit ICast(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+	explicit ICast(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	virtual ~ICast() = default;
 
 	virtual bool needsBinaryPacketData() { return false; }
@@ -74,7 +73,7 @@ class DecimalIntegerScale : public ICast
 {
 public:
     explicit DecimalIntegerScale(BaseLib::SharedObjects* baseLib);
-    explicit DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit DecimalIntegerScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~DecimalIntegerScale() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -85,11 +84,27 @@ public:
 	double offset = 0;
 };
 
+
+class DecimalIntegerInverseScale : public ICast
+{
+public:
+    explicit DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib);
+    explicit DecimalIntegerInverseScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
+	~DecimalIntegerInverseScale() override = default;
+
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
+
+	//Elements
+	double factor = 1.0;
+};
+
+
 class DecimalStringScale : public ICast
 {
 public:
     explicit DecimalStringScale(BaseLib::SharedObjects* baseLib);
-    explicit DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit DecimalStringScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
     ~DecimalStringScale() override = default;
 
     void fromPacket(PVariable& value) override;
@@ -108,7 +123,7 @@ public:
 	};
 
     explicit IntegerIntegerScale(BaseLib::SharedObjects* baseLib);
-    explicit IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit IntegerIntegerScale(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~IntegerIntegerScale() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -124,7 +139,7 @@ class IntegerOffset : public ICast
 {
 public:
     explicit IntegerOffset(BaseLib::SharedObjects* baseLib);
-    explicit IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit IntegerOffset(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~IntegerOffset() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -140,7 +155,7 @@ class DecimalOffset : public ICast
 {
 public:
     explicit DecimalOffset(BaseLib::SharedObjects* baseLib);
-    explicit DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit DecimalOffset(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~DecimalOffset() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -161,7 +176,7 @@ public:
 	};
 
     explicit IntegerIntegerMap(BaseLib::SharedObjects* baseLib);
-    explicit IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit IntegerIntegerMap(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~IntegerIntegerMap() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -177,7 +192,7 @@ class BooleanInteger : public ICast
 {
 public:
     explicit BooleanInteger(BaseLib::SharedObjects* baseLib);
-    explicit BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit BooleanInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~BooleanInteger() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -190,11 +205,28 @@ public:
 	int32_t threshold = 1;
 };
 
+class BooleanDecimal : public ICast
+{
+public:
+    explicit BooleanDecimal(BaseLib::SharedObjects* baseLib);
+    explicit BooleanDecimal(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
+	~BooleanDecimal() override = default;
+
+	void fromPacket(PVariable& value) override;
+	void toPacket(PVariable& value) override;
+
+	//Elements
+	double trueValue = 0;
+	double falseValue = 0;
+	bool invert = false;
+	double threshold = 1;
+};
+
 class BooleanString : public ICast
 {
 public:
     explicit BooleanString(BaseLib::SharedObjects* baseLib);
-    explicit BooleanString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit BooleanString(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~BooleanString() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -210,7 +242,7 @@ class DecimalConfigTime : public ICast
 {
 public:
     explicit DecimalConfigTime(BaseLib::SharedObjects* baseLib);
-    explicit DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit DecimalConfigTime(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~DecimalConfigTime() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -225,7 +257,7 @@ class IntegerTinyFloat : public ICast
 {
 public:
     explicit IntegerTinyFloat(BaseLib::SharedObjects* baseLib);
-    explicit IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit IntegerTinyFloat(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~IntegerTinyFloat() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -242,7 +274,7 @@ class StringUnsignedInteger : public ICast
 {
 public:
     explicit StringUnsignedInteger(BaseLib::SharedObjects* baseLib);
-    explicit StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit StringUnsignedInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~StringUnsignedInteger() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -253,7 +285,7 @@ class BlindTest : public ICast
 {
 public:
     explicit BlindTest(BaseLib::SharedObjects* baseLib);
-    explicit BlindTest(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit BlindTest(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~BlindTest() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -267,7 +299,7 @@ class OptionString : public ICast
 {
 public:
     explicit OptionString(BaseLib::SharedObjects* baseLib);
-    explicit OptionString(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit OptionString(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~OptionString() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -278,7 +310,7 @@ class OptionInteger : public ICast
 {
 public:
     explicit OptionInteger(BaseLib::SharedObjects* baseLib);
-    explicit OptionInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit OptionInteger(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~OptionInteger() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -293,7 +325,7 @@ class StringJsonArrayDecimal : public ICast
 {
 public:
     explicit StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib);
-    explicit StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit StringJsonArrayDecimal(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~StringJsonArrayDecimal() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -304,7 +336,7 @@ class RpcBinary : public ICast
 {
 public:
     explicit RpcBinary(BaseLib::SharedObjects* baseLib);
-    explicit RpcBinary(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit RpcBinary(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~RpcBinary() override = default;
 
 	bool needsBinaryPacketData() override { return true; }
@@ -320,7 +352,7 @@ class Toggle : public ICast
 {
 public:
     explicit Toggle(BaseLib::SharedObjects* baseLib);
-    explicit Toggle(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit Toggle(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~Toggle() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -336,7 +368,7 @@ class CcrtdnParty : public ICast
 {
 public:
     explicit CcrtdnParty(BaseLib::SharedObjects* baseLib);
-    explicit CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit CcrtdnParty(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~CcrtdnParty() override = default;
 
 	bool needsBinaryPacketData() override { return true; }
@@ -348,7 +380,7 @@ class Cfm : public ICast
 {
 public:
     explicit Cfm(BaseLib::SharedObjects* baseLib);
-    explicit Cfm(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit Cfm(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~Cfm() override = default;
 
 	bool needsBinaryPacketData() override { return true; }
@@ -360,7 +392,7 @@ class StringReplace : public ICast
 {
 public:
     explicit StringReplace(BaseLib::SharedObjects* baseLib);
-    explicit StringReplace(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit StringReplace(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~StringReplace() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -375,7 +407,7 @@ class HexStringByteArray : public ICast
 {
 public:
     explicit HexStringByteArray(BaseLib::SharedObjects* baseLib);
-    explicit HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit HexStringByteArray(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~HexStringByteArray() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -386,7 +418,7 @@ class TimeStringSeconds : public ICast
 {
 public:
     explicit TimeStringSeconds(BaseLib::SharedObjects* baseLib);
-    explicit TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit TimeStringSeconds(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~TimeStringSeconds() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -397,7 +429,7 @@ class Invert : public ICast
 {
 public:
     explicit Invert(BaseLib::SharedObjects* baseLib);
-    explicit Invert(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit Invert(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~Invert() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -408,7 +440,7 @@ class Round : public ICast
 {
 public:
     explicit Round(BaseLib::SharedObjects* baseLib);
-    explicit Round(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit Round(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~Round() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -423,7 +455,7 @@ class Generic : public ICast
 {
 public:
     explicit Generic(BaseLib::SharedObjects* baseLib);
-    explicit Generic(BaseLib::SharedObjects* baseLib, xml_node<>* node, const PParameter& parameter);
+    explicit Generic(BaseLib::SharedObjects* baseLib, xml_node* node, const PParameter& parameter);
 	~Generic() override = default;
 
 	void fromPacket(PVariable& value) override;
@@ -437,11 +469,13 @@ typedef std::shared_ptr<ICast> PICast;
 typedef std::vector<PICast> Casts;
 typedef std::shared_ptr<BlindTest> PBlindTest;
 typedef std::shared_ptr<BooleanInteger> PBooleanInteger;
+typedef std::shared_ptr<BooleanDecimal> PBooleanDecimal;
 typedef std::shared_ptr<BooleanString> PBooleanString;
 typedef std::shared_ptr<CcrtdnParty> PCcrtdnParty;
 typedef std::shared_ptr<Cfm> PCfm;
 typedef std::shared_ptr<DecimalConfigTime> PDecimalConfigTime;
 typedef std::shared_ptr<DecimalIntegerScale> PDecimalIntegerScale;
+typedef std::shared_ptr<DecimalIntegerInverseScale> PDecimalIntegerInverseScale;
 typedef std::shared_ptr<DecimalStringScale> PDecimalStringScale;
 typedef std::shared_ptr<IntegerIntegerMap> PIntegerIntegerMap;
 typedef std::shared_ptr<IntegerIntegerScale> PIntegerIntegerScale;

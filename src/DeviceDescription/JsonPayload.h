@@ -31,10 +31,14 @@
 #ifndef JSONPAYLOAD_H_
 #define JSONPAYLOAD_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <vector>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -65,7 +69,7 @@ class JsonPayload
 {
 public:
 	JsonPayload(BaseLib::SharedObjects* baseLib);
-	JsonPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	JsonPayload(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~JsonPayload() {}
 
 	std::string key;

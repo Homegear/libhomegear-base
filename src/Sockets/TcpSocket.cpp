@@ -35,7 +35,7 @@
 
 namespace BaseLib
 {
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -44,7 +44,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib)
 	_socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescriptor> socketDescriptor) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -54,7 +54,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::shared_ptr<FileDescri
 	else _socketDescriptor.reset(new FileDescriptor);
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_stopServer = false;
@@ -144,7 +144,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std:
     if(_useSsl) initSsl();
 }
 
-TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
+TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo) : IQueue(baseLib, 1, 10000)
 {
 	_bl = baseLib;
 	_connecting = false;
@@ -152,6 +152,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_stopServer = false;
 	_isServer = true;
 	_useSsl = serverInfo.useSsl;
+    if(serverInfo.connectionBacklogSize > 0) _backlogSize = serverInfo.connectionBacklogSize;
 	_maxConnections = serverInfo.maxConnections;
 	_certificates = serverInfo.certificates;
 	_dhParamFile = serverInfo.dhParamFile;
@@ -159,6 +160,7 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects* baseLib, TcpServerInfo& serverInfo)
 	_requireClientCert = serverInfo.requireClientCert;
 	_newConnectionCallback.swap(serverInfo.newConnectionCallback);
     _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
+    _connectionClosedCallbackEx.swap(serverInfo.connectionClosedCallbackEx);
 	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
     _serverThreads.resize(serverInfo.serverThreads);
@@ -202,45 +204,51 @@ std::string TcpSocket::getIpAddress()
 
         if(_useSsl) initSsl();
 
-		_listenAddress = address;
-		_listenPort = port;
+		_listenAddress = std::move(address);
+		_listenPort = std::move(port);
 		bindSocket();
 		listenAddress = _ipAddress;
 	}
 
 	void TcpSocket::bindSocket()
 	{
-		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _ipAddress, _boundListenPort);
+		_socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _backlogSize, _ipAddress, _boundListenPort);
 	}
 
-	void TcpSocket::startPreboundServer(std::string& listenAddress)
+	void TcpSocket::startPreboundServer(std::string& listenAddress, size_t processingThreads)
 	{
 		_stopServer = false;
 		listenAddress = _ipAddress;
+
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
 		for(auto& serverThread : _serverThreads)
 		{
 			_bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
 		}
 	}
 
-	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress)
+	void TcpSocket::startServer(std::string address, std::string port, std::string& listenAddress, size_t processingThreads)
 	{
 		waitForServerStopped();
 
 		if(_useSsl) initSsl();
 
 		_stopServer = false;
-		_listenAddress = address;
-		_listenPort = port;
+		_listenAddress = std::move(address);
+		_listenPort = std::move(port);
 		bindSocket();
 		listenAddress = _ipAddress;
+
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
         for(auto& serverThread : _serverThreads)
         {
             _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
         }
 	}
 
-	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort)
+	void TcpSocket::startServer(std::string address, std::string& listenAddress, int32_t& listenPort, size_t processingThreads)
 	{
 		waitForServerStopped();
 
@@ -252,6 +260,9 @@ std::string TcpSocket::getIpAddress()
 		bindSocket();
 		listenAddress = _ipAddress;
 		listenPort = _boundListenPort;
+
+        if(processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
+
         for(auto& serverThread : _serverThreads)
         {
             _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
@@ -265,6 +276,8 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::waitForServerStopped()
 	{
+        stopQueue(0);
+
 		_stopServer = true;
         for(auto& serverThread : _serverThreads)
         {
@@ -433,18 +446,48 @@ std::string TcpSocket::getIpAddress()
 
 				if(bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
 
-				std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
-				if(_packetReceivedCallback) _packetReceivedCallback(clientData->id, bytesReceived);
+                if(_packetReceivedCallback)
+                {
+                    if(queueIsStarted(0))
+                    {
+                        auto bytesReceived = std::make_shared<std::vector<uint8_t>>(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+                        std::lock_guard<std::mutex> backlogGuard(clientData->backlogMutex);
+                        clientData->backlog.push(std::move(bytesReceived));
+                        if(clientData->backlog.size() > 10000)
+                        {
+                            while(!clientData->backlog.empty())
+                            {
+                                clientData->backlog.pop();
+                            }
+                            _bl->fileDescriptorManager.close(clientData->fileDescriptor);
+                            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -200, "Error reading from client: Backlog is full.");
+                            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                            return;
+                        }
+                        if(!clientData->busy)
+                        {
+                            clientData->busy = true;
+                            std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(clientData);
+                            enqueue(0, queueEntry);
+                        }
+                    }
+                    else
+                    {
+                        std::vector<uint8_t> bytesReceived(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
+                        _packetReceivedCallback(clientData->id, bytesReceived);
+                    }
+                }
 			}
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-            if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -201, std::string("Error reading from client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
+	bool TcpSocket::sendToClient(int32_t clientId, const TcpPacket& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -452,7 +495,7 @@ std::string TcpSocket::getIpAddress()
 			{
 				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 				auto clientIterator = _clients.find(clientId);
-				if(clientIterator == _clients.end()) return;
+				if(clientIterator == _clients.end()) return false;
 				clientData = clientIterator->second;
 			}
 
@@ -460,17 +503,21 @@ std::string TcpSocket::getIpAddress()
 			if(closeConnection)
 			{
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
+                else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
+			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -300, std::string("Error sending data to client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
+        return false;
 	}
 
-	void TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
+	bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
 	{
 		PTcpClientData clientData;
 		try
@@ -478,7 +525,7 @@ std::string TcpSocket::getIpAddress()
 			{
 				std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
 				auto clientIterator = _clients.find(clientId);
-				if(clientIterator == _clients.end()) return;
+				if(clientIterator == _clients.end()) return false;
 				clientData = clientIterator->second;
 			}
 
@@ -486,14 +533,18 @@ std::string TcpSocket::getIpAddress()
 			if(closeConnection)
 			{
 				_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-				if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+                if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
+                else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 			}
+			return true;
 		}
 		catch(const std::exception& ex)
 		{
 			_bl->fileDescriptorManager.close(clientData->fileDescriptor);
-			if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
+            if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, -300, std::string("Error sending data to client: ") + ex.what());
+            else if(_connectionClosedCallback) _connectionClosedCallback(clientData->id);
 		}
+		return false;
 	}
 
 	void TcpSocket::closeClientConnection(int32_t clientId)
@@ -504,7 +555,8 @@ std::string TcpSocket::getIpAddress()
             if(clientIterator != _clients.end()) clientIterator->second->socket->close();
         }
 
-        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+        if(_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientId, 0, "");
+        else if(_connectionClosedCallback) _connectionClosedCallback(clientId);
 	}
 
     int32_t TcpSocket::clientCount()
@@ -523,6 +575,14 @@ std::string TcpSocket::getIpAddress()
 
 	void TcpSocket::serverThread()
 	{
+        sigset_t signalSet{};
+        sigemptyset(&signalSet);
+        sigaddset(&signalSet, SIGPIPE);
+        if (pthread_sigmask(SIG_BLOCK, &signalSet, nullptr) != 0)
+        {
+            _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
+        }
+
 		int32_t result = 0;
         int32_t socketDescriptor = -1;
         std::map<int32_t, PTcpClientData> clients;
@@ -616,8 +676,6 @@ std::string TcpSocket::getIpAddress()
 							}
 						}
 
-						int32_t currentClientId = 0;
-
                         if(_stopServer)
                         {
                             _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
@@ -632,9 +690,14 @@ std::string TcpSocket::getIpAddress()
 
                         if(_useSsl) initClientSsl(clientData);
 
+                        int32_t currentClientId = 0;
+
 						{
                             std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-							currentClientId = _currentClientId++;
+							while(currentClientId == 0)
+                            {
+                                currentClientId = _currentClientId++;
+                            }
 							clientData->id = currentClientId;
 							_clients[currentClientId] = clientData;
 						}
@@ -680,6 +743,39 @@ std::string TcpSocket::getIpAddress()
 		_bl->fileDescriptorManager.close(_socketDescriptor);
 	}
 
+    void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry)
+    {
+        try
+        {
+            std::shared_ptr<QueueEntry> queueEntry;
+            queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
+            if(!queueEntry) return;
+
+            std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
+            bool more = !queueEntry->clientData->backlog.empty();
+            backlogGuard.unlock();
+
+            while(more)
+            {
+                backlogGuard.lock();
+                auto packet = queueEntry->clientData->backlog.front();
+                queueEntry->clientData->backlog.pop();
+                backlogGuard.unlock();
+
+                if(_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
+
+                backlogGuard.lock();
+                more = !queueEntry->clientData->backlog.empty();
+                if(!more) queueEntry->clientData->busy = false;
+                backlogGuard.unlock();
+            }
+        }
+        catch(const std::exception& ex)
+        {
+            _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        }
+    }
+
 	void TcpSocket::collectGarbage()
 	{
 		_lastGarbageCollection = BaseLib::HelperFunctions::getTime();
@@ -714,20 +810,20 @@ std::string TcpSocket::getIpAddress()
     }
 // }}}
 
-PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, std::string address, std::string port, std::string& listenAddress, int32_t& listenPort)
+PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescriptorManager, const std::string& address, const std::string& port, uint32_t connectionBacklogSize, std::string& listenAddress, int32_t& listenPort)
 {
 	PFileDescriptor socketDescriptor;
-	addrinfo hostInfo;
-	addrinfo *serverInfo = nullptr;
+	addrinfo hostInfo{};
+	addrinfo* serverInfo = nullptr;
 
-	int32_t yes = 1;
+	static constexpr int32_t yes = 1;
 
 	memset(&hostInfo, 0, sizeof(hostInfo));
 
 	hostInfo.ai_family = AF_UNSPEC;
 	hostInfo.ai_socktype = SOCK_STREAM;
 	hostInfo.ai_flags = AI_PASSIVE;
-	char buffer[100];
+	std::array<char, 101> buffer{};
 	int32_t result;
 	if((result = getaddrinfo(address.c_str(), port.c_str(), &hostInfo, &serverInfo)) != 0)
 	{
@@ -754,12 +850,14 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
 		switch (info->ai_family)
 		{
 			case AF_INET:
-				inet_ntop (info->ai_family, &((struct sockaddr_in *) info->ai_addr)->sin_addr, buffer, 100);
-				listenAddress = std::string(buffer);
+				inet_ntop (info->ai_family, &((struct sockaddr_in *) info->ai_addr)->sin_addr, buffer.data(), buffer.size() - 1);
+				buffer.back() = '\0';
+				listenAddress = std::string(buffer.data());
 				break;
 			case AF_INET6:
-				inet_ntop (info->ai_family, &((struct sockaddr_in6 *) info->ai_addr)->sin6_addr, buffer, 100);
-				listenAddress = std::string(buffer);
+				inet_ntop (info->ai_family, &((struct sockaddr_in6 *) info->ai_addr)->sin6_addr, buffer.data(), buffer.size() - 1);
+                buffer.back() = '\0';
+				listenAddress = std::string(buffer.data());
 				break;
 		}
 		bound = true;
@@ -773,14 +871,14 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager& fileDescri
         if(errno == EADDRINUSE) throw SocketAddressInUseException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 		else throw SocketBindException("Error: Could not start listening on port " + port + ": " + std::string(strerror(error)));
 	}
-	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, 100) == -1)
+	else if(socketDescriptor->descriptor == -1 || listen(socketDescriptor->descriptor, connectionBacklogSize) == -1)
 	{
 		fileDescriptorManager.shutdown(socketDescriptor);
 		socketDescriptor.reset();
 		throw SocketOperationException("Error: Server could not start listening on port " + port + ": " + std::string(strerror(errno)));
 	}
 
-	struct sockaddr_in addressInfo;
+	struct sockaddr_in addressInfo{};
 	socklen_t addressInfoLength = sizeof(addressInfo);
 	if (getsockname(socketDescriptor->descriptor, (struct sockaddr*)&addressInfo, &addressInfoLength) == -1)
 	{
@@ -1175,7 +1273,7 @@ int32_t TcpSocket::proofread(char* buffer, int32_t bufferSize, bool& moreData)
 	return bytesRead;
 }
 
-int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>> data)
+int32_t TcpSocket::proofwrite(const std::shared_ptr<std::vector<char>>& data)
 {
 	{
 		std::unique_lock<std::mutex> writeGuard(_writeMutex);
@@ -1229,7 +1327,7 @@ int32_t TcpSocket::proofwrite(const std::vector<char>& data)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1316,7 +1414,7 @@ int32_t TcpSocket::proofwrite(const char* buffer, int32_t bytesToWrite)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1403,7 +1501,7 @@ int32_t TcpSocket::proofwrite(const std::string& data)
 		}
 		FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
 		fileDescriptorGuard.unlock();
-		int32_t readyFds = select(nfds, NULL, &writeFileDescriptor, NULL, &timeout);
+		int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
 		if(readyFds == 0)
 		{
 			throw SocketTimeOutException("Writing to socket timed out.");
@@ -1504,7 +1602,7 @@ void TcpSocket::getSsl()
 		throw SocketSslException("Could not initialize TLS session: " + std::string(gnutls_strerror(result)));
 	}
 	if(!_socketDescriptor->tlsSession) throw SocketSslException("Could not initialize TLS session.");
-	if((result = gnutls_priority_set_direct(_socketDescriptor->tlsSession, "NORMAL", NULL)) != GNUTLS_E_SUCCESS)
+	if((result = gnutls_priority_set_direct(_socketDescriptor->tlsSession, "NORMAL", nullptr)) != GNUTLS_E_SUCCESS)
 	{
 		_bl->fileDescriptorManager.shutdown(_socketDescriptor);
 		throw SocketSslException("Could not set cipher priorities: " + std::string(gnutls_strerror(result)));
@@ -1586,7 +1684,6 @@ void TcpSocket::getSsl()
         }
 		gnutls_x509_crt_deinit(serverCert);
 	}
-	_bl->out.printInfo("Info: SSL handshake with client " + std::to_string(_socketDescriptor->id) + " completed successfully.");
 }
 
 void TcpSocket::getConnection()
@@ -1615,15 +1712,19 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not get address information: " + std::string(gai_strerror(result)));
 		}
 
-		char ipStringBuffer[INET6_ADDRSTRLEN];
-		if (serverInfo->ai_family == AF_INET) {
-			struct sockaddr_in *s = (struct sockaddr_in *)serverInfo->ai_addr;
-			inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
-		} else { // AF_INET6
-			struct sockaddr_in6 *s = (struct sockaddr_in6 *)serverInfo->ai_addr;
-			inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
-		}
-		_ipAddress = std::string(&ipStringBuffer[0]);
+        char ipStringBuffer[INET6_ADDRSTRLEN + 1];
+        if (serverInfo->ai_family == AF_INET)
+        {
+            auto s = (struct sockaddr_in *)serverInfo->ai_addr;
+            inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
+        }
+        else
+        { // AF_INET6
+            auto s = (struct sockaddr_in6 *)serverInfo->ai_addr;
+            inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
+        }
+        ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
+		_ipAddress = std::string(ipStringBuffer);
 
 		_socketDescriptor = _bl->fileDescriptorManager.add(socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol));
 		if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
@@ -1639,6 +1740,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 30;
+		//Set number of seconds a connection needs to be idle before sending keep-alive probes
 		//Don't use SOL_TCP, as this constant doesn't exists in BSD. Also don't use getprotobyname() as this returns a nullptr on some systems.
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
@@ -1647,6 +1749,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 4;
+		//Set the maximum number of keep-alive probes before giving up and closing the connection
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPCNT, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
@@ -1654,6 +1757,7 @@ void TcpSocket::getConnection()
 			throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
 		}
 		optValue = 15;
+		//Set number of seconds between keep-alive probes
 		if(setsockopt(_socketDescriptor->descriptor, IPPROTO_TCP, TCP_KEEPINTVL, (void*)&optValue, sizeof(int32_t)) == -1)
 		{
 			freeaddrinfo(serverInfo);
@@ -1671,7 +1775,7 @@ void TcpSocket::getConnection()
 			}
 		}
 
-		int32_t connectResult;
+		int32_t connectResult = 0;
 		if((connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen)) == -1 && errno != EINPROGRESS)
 		{
 			if(i < _connectionRetries - 1)
@@ -1699,7 +1803,7 @@ void TcpSocket::getConnection()
 				(short)0
 			};
 
-			int32_t pollResult = poll(&pollstruct, 1, _readTimeout / 1000);
+			int32_t pollResult = poll(&pollstruct, 1, (int)(_readTimeout / 1000));
 			if(pollResult < 0 || (pollstruct.revents & POLLERR))
 			{
 				if(i < _connectionRetries - 1)

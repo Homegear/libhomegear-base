@@ -35,7 +35,6 @@
 #include "Peer.h"
 #include "ServiceMessages.h"
 #include "../BaseLib.h"
-#include "../Security/Acls.h"
 
 namespace BaseLib
 {
@@ -53,6 +52,9 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
     _room = rhs._room;
     _categories = rhs._categories;
     _roles = rhs._roles;
+    _invert = rhs._invert;
+    _scale = rhs._scale;
+    _mainRole = rhs._mainRole;
 }
 
 RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigurationParameter& rhs)
@@ -67,6 +69,9 @@ RpcConfigurationParameter& RpcConfigurationParameter::operator=(const RpcConfigu
     _room = rhs._room;
     _categories = rhs._categories;
     _roles = rhs._roles;
+    _invert = rhs._invert;
+    _scale = rhs._scale;
+    _mainRole = rhs._mainRole;
     return *this;
 }
 
@@ -87,7 +92,7 @@ std::string RpcConfigurationParameter::getRoleString()
     std::ostringstream roles;
     for(auto role : _roles)
     {
-        roles << std::to_string(role.first) << "-" << std::to_string((int32_t)role.second.direction) << "-" << std::to_string((int32_t)role.second.invert) << ",";
+        roles << std::to_string(role.first) << "-" << std::to_string((int32_t)role.second.direction) << "-" << std::to_string((int32_t)role.second.invert)  << "-" << std::to_string((int32_t)role.second.scaleInfo.valueSet) << "-" << std::to_string((int32_t)role.second.scaleInfo.valueMin) << "-" << std::to_string((int32_t)role.second.scaleInfo.valueMax) << "-" << std::to_string((int32_t)role.second.scaleInfo.scaleMin) << "-" << std::to_string((int32_t)role.second.scaleInfo.scaleMax) << ",";
     }
     return roles.str();
 }
@@ -156,6 +161,43 @@ bool RpcConfigurationParameter::equals(std::vector<uint8_t>& value) noexcept
 {
     std::lock_guard<std::mutex> dataGuard(_binaryDataMutex);
     return value == _binaryData;
+}
+
+void RpcConfigurationParameter::addRole(const Role& role)
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    _roles.emplace(role.id, role);
+    if(role.invert) _invert = true;
+    if(role.scale) _scale = true;
+    if(role.level == RoleLevel::role && !_mainRole.scale && !_mainRole.invert) _mainRole = role;
+}
+
+void RpcConfigurationParameter::addRole(uint64_t id, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo)
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    auto role = Role(id, direction, invert, scale, scaleInfo);
+    _roles.emplace(id, role);
+    if(invert) _invert = true;
+    if(scale) _scale = true;
+    if(role.level == RoleLevel::role && !_mainRole.scale && !_mainRole.invert) _mainRole = role;
+}
+
+bool RpcConfigurationParameter::invert()
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    return _invert;
+}
+
+bool RpcConfigurationParameter::scale()
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    return _scale;
+}
+
+Role RpcConfigurationParameter::mainRole()
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    return _mainRole;
 }
 
 ConfigDataBlock::ConfigDataBlock(ConfigDataBlock const& rhs)
@@ -642,7 +684,7 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes()
                 {
                     if(!parameterIterator->second.rpcParameter) return _rxModes;
                     std::vector<uint8_t> data = parameterIterator->second.getBinaryData();
-                    if(parameterIterator->second.rpcParameter->convertFromPacket(data)->booleanValue)
+                    if(parameterIterator->second.rpcParameter->convertFromPacket(data, Role(), false)->booleanValue)
                     {
                         _rxModes = (HomegearDevice::ReceiveModes::Enum)(_rxModes | HomegearDevice::ReceiveModes::Enum::wakeOnRadio);
                     }
@@ -674,7 +716,7 @@ void Peer::setLastPacketReceived()
         if(parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter)
         {
             std::vector<uint8_t> parameterData;
-            parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), parameterData);
+            parameterIterator->second.rpcParameter->convertToPacket(std::make_shared<Variable>(_lastPacketReceived), parameterIterator->second.mainRole(), parameterData);
             parameterIterator->second.setBinaryData(parameterData);
             if(parameterIterator->second.databaseId > 0) saveParameter(parameterIterator->second.databaseId, parameterData);
             else saveParameter(0, ParameterGroup::Type::Enum::variables, 0, "LAST_PACKET_RECEIVED", parameterData);
@@ -909,15 +951,9 @@ void Peer::initializeMasterSet(int32_t channel, PConfigParameters masterSet)
                 parameterStruct.rpcParameter = parameter.second;
                 setDefaultValue(parameterStruct);
 
-                //Add roles
-                for(auto& role : parameter.second->roles)
-                {
-                    parameterStruct.addRole(role.second);
-                }
-
                 std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                parameterStruct.databaseId = createParameter(ParameterGroup::Type::config, channel, parameter.second->id, data);
                 channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
-                saveParameter(0, ParameterGroup::Type::config, channel, parameter.second->id, data);
             }
         }
     }
@@ -946,15 +982,15 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet)
                 parameterStruct.rpcParameter = parameter.second;
                 setDefaultValue(parameterStruct);
 
+                std::vector<uint8_t> data = parameterStruct.getBinaryData();
+                parameterStruct.databaseId = createParameter(ParameterGroup::Type::variables, channel, parameter.second->id, data);
+                channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
+
                 //Add roles
                 for(auto& role : parameter.second->roles)
                 {
-                    parameterStruct.addRole(role.second);
+                    addRoleToVariable(channel, parameter.second->id, role.second.id, role.second.direction, role.second.invert, role.second.scale, role.second.scaleInfo);
                 }
-
-                std::vector<uint8_t> data = parameterStruct.getBinaryData();
-                channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
-                saveParameter(0, ParameterGroup::Type::variables, channel, parameter.second->id, data);
             }
         }
     }
@@ -969,7 +1005,8 @@ void Peer::setDefaultValue(RpcConfigurationParameter& parameter)
     try
     {
         std::vector<uint8_t> parameterData;
-        if(!convertToPacketHook(parameter.rpcParameter, parameter.rpcParameter->logical->getDefaultValue(), parameterData))	parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+        auto defaultValue = parameter.rpcParameter->logical->getDefaultValue();
+        if(!convertToPacketHook(parameter, defaultValue, parameterData)) parameter.rpcParameter->convertToPacket(parameter.rpcParameter->logical->getDefaultValue(), Role(), parameterData);
         parameter.setBinaryData(parameterData);
     }
     catch(const std::exception& ex)
@@ -1046,6 +1083,29 @@ void Peer::saveParameter(uint32_t parameterID, uint32_t address, std::vector<uin
     {
         _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
+}
+
+uint64_t Peer::createParameter(ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
+{
+    try
+    {
+        if(_peerID == 0 || (isTeam() && !_saveTeam)) return 0;
+        //Creates a new entry for parameter in database
+        Database::DataRow data;
+        data.push_back(std::make_shared<Database::DataColumn>(_peerID));
+        data.push_back(std::make_shared<Database::DataColumn>((uint32_t)parameterSetType));
+        data.push_back(std::make_shared<Database::DataColumn>(channel));
+        data.push_back(std::make_shared<Database::DataColumn>(remoteAddress));
+        data.push_back(std::make_shared<Database::DataColumn>(remoteChannel));
+        data.push_back(std::make_shared<Database::DataColumn>(parameterName));
+        data.push_back(std::make_shared<Database::DataColumn>(value));
+        return _bl->db->savePeerParameterSynchronous(data);
+    }
+    catch(const std::exception& ex)
+    {
+        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return 0;
 }
 
 void Peer::saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress, uint32_t remoteChannel)
@@ -1139,10 +1199,6 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<Database::DataTable>
                     break;
                 case 1002:
                     _deviceType = row->second.at(3)->intValue;
-                    if(_deviceType == (uint32_t)0xFFFFFFFF)
-                    {
-                        _bl->out.printError("Error loading peer " + std::to_string(_peerID) + ": Device type unknown: 0x" + HelperFunctions::getHexString(row->second.at(3)->intValue) + " Firmware version: " + std::to_string(_firmwareVersion));
-                    }
                     break;
                 case 1003:
                     _firmwareVersionString = row->second.at(4)->textValue;
@@ -1203,7 +1259,7 @@ void Peer::saveVariables()
     {
         if(_peerID == 0 || (isTeam() && !_saveTeam)) return;
         saveVariable(1001, _firmwareVersion);
-        saveVariable(1002, (int32_t)_deviceType);
+        saveVariable(1002, (int64_t)_deviceType);
         saveVariable(1003, _firmwareVersionString);
         saveVariable(1004, _ip);
         saveVariable(1005, _idString);
@@ -1643,9 +1699,22 @@ void Peer::loadConfig()
                         if(roleString.empty()) continue;
                         auto parts = HelperFunctions::splitAll(roleString, '-');
                         uint64_t roleId = Math::getUnsignedNumber64(parts.at(0));
-                        RoleDirection direction = parts.size() > 1 ? (RoleDirection)Math::getNumber(parts.at(1)) : RoleDirection::both;
-                        bool invert = parts.size() > 2 ? (bool)Math::getNumber(parts.at(2)) : false;
-                        if(roleId != 0) parameterInfo->parameter.addRole(roleId, direction, invert);
+                        RoleDirection direction = parts.size() >= 2 ? (RoleDirection)Math::getNumber(parts.at(1)) : RoleDirection::both;
+                        bool invert = parts.size() >= 3 ? (bool)Math::getNumber(parts.at(2)) : false;
+                        bool scale = parts.size() >= 8 ? (bool)Math::getNumber(parts.at(3)) : false;
+                        RoleScaleInfo scaleInfo;
+                        if(scale)
+                        {
+                            scaleInfo.valueSet = (bool)Math::getNumber(parts.at(4));
+                            if(scaleInfo.valueSet)
+                            {
+                                scaleInfo.valueMin = Math::getDouble(parts.at(5));
+                                scaleInfo.valueMax = Math::getDouble(parts.at(6));
+                            }
+                            scaleInfo.scaleMin = Math::getDouble(parts.at(7));
+                            scaleInfo.scaleMax = Math::getDouble(parts.at(8));
+                        }
+                        if(roleId != 0) parameterInfo->parameter.addRole(roleId, direction, invert, scale, scaleInfo);
                     }
                 }
 
@@ -1671,7 +1740,7 @@ void Peer::loadConfig()
                 if(parameterGroupType == ParameterGroup::Type::Enum::config && parameterInfo->function->parameterGroupSelector && !parameterInfo->function->alternativeFunctions.empty() && parameterInfo->parameterName == parameterInfo->function->parameterGroupSelector->id)
                 {
                     std::vector<uint8_t> parameterData = parameterInfo->parameter.getBinaryData();
-                    int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterData)->integerValue;
+                    int32_t index = parameterInfo->function->parameterGroupSelector->convertFromPacket(parameterData, Role(), false)->integerValue;
                     if(parameterInfo->function->parameterGroupSelector->logical->type != ILogical::Type::Enum::tBoolean && index > (signed)parameterInfo->function->alternativeFunctions.size())
                     {
                         _bl->out.printError("Error: Parameter group selector \"" + parameterInfo->parameterName + "\" has invalid value (" + std::to_string(parameterData.back()) + "). Peer: " + std::to_string(_peerID) + ".");
@@ -1684,13 +1753,14 @@ void Peer::loadConfig()
             }
         }
 
+        std::unordered_set<std::shared_ptr<ParameterInfo>> roleParameters;
         for(auto& parameter : parameters)
         {
             PParameterGroup currentParameterGroup;
             if(parameterGroupSelector && parameter->function->parameterGroupSelector && !parameter->function->alternativeFunctions.empty())
             {
                 std::vector<uint8_t> parameterData = parameterGroupSelector->parameter.getBinaryData();
-                int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData)->integerValue;
+                int32_t index = parameterGroupSelector->parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean ? (int32_t)parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData, Role(), false)->booleanValue : parameterGroupSelector->parameter.rpcParameter->convertFromPacket(parameterData, Role(), false)->integerValue;
                 if(index == 0)
                 {
                     if(parameter->parameterGroupType == ParameterGroup::Type::Enum::config)
@@ -1770,6 +1840,7 @@ void Peer::loadConfig()
 
                     if(variableInfoIterator != roleInfoIterator->second->structValue->end() && variableBaseNameIterator != roleInfoIterator->second->structValue->end())
                     {
+                        roleParameters.emplace(parameter);
                         parameter->parameter.rpcParameter = createRoleRpcParameter(variableInfoIterator->second, variableBaseNameIterator->second->stringValue, currentParameterGroup);
                     }
                 }
@@ -1807,21 +1878,77 @@ void Peer::loadConfig()
                     if(parameter->parameter.rpcParameter->resetAfterRestart)
                     {
                         std::vector<uint8_t> parameterData;
-                        parameter->parameter.rpcParameter->convertToPacket(parameter->parameter.rpcParameter->logical->getDefaultValue(), parameterData);
+                        parameter->parameter.rpcParameter->convertToPacket(parameter->parameter.rpcParameter->logical->getDefaultValue(), Role(), parameterData);
                         parameter->parameter.setBinaryData(parameterData);
                     }
                     valuesCentral[parameter->channel][parameter->parameterName] = parameter->parameter;
                 }
                 else if(parameter->parameterGroupType == ParameterGroup::Type::Enum::link) linksCentral[parameter->channel][parameter->remoteAddress][parameter->remoteChannel].emplace(parameter->parameterName, parameter->parameter);
 
-                //Add roles from XML
+                //Add roles from XML - only if parameter has no roles
                 if(!parameter->parameter.hasRoles() && !parameter->parameter.rpcParameter->roles.empty())
                 {
                     for(auto& role : parameter->parameter.rpcParameter->roles)
                     {
-                        parameter->parameter.addRole(role.second);
+                        uint64_t middleGroupRoleId = 0;
+                        uint64_t mainGroupRoleId = 0;
+
+                        //{{{ Get parent roles
+                        {
+                            uint64_t hexRoleId = BaseLib::Math::getNumber64(std::to_string(role.second.id), true);
+                            middleGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FFFF00, 6));
+                            mainGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FF0000, 6));
+                            if(middleGroupRoleId == mainGroupRoleId || middleGroupRoleId == role.second.id || !_bl->db->roleExists(middleGroupRoleId)) middleGroupRoleId = 0;
+                            if(mainGroupRoleId == role.second.id || !_bl->db->roleExists(mainGroupRoleId)) mainGroupRoleId = 0;
+                        }
+                        //}}}
+
+                        addRoleToVariable(parameter->channel, parameter->parameterName, role.second.id, role.second.direction, role.second.invert, role.second.scale, role.second.scaleInfo);
+                        if(middleGroupRoleId != 0) addRoleToVariable(parameter->channel, parameter->parameterName, middleGroupRoleId, role.second.direction, role.second.invert, false, RoleScaleInfo());
+                        if(mainGroupRoleId != 0) addRoleToVariable(parameter->channel, parameter->parameterName, mainGroupRoleId, role.second.direction, role.second.invert, false, RoleScaleInfo());
                     }
                 }
+            }
+        }
+
+        //{{{ Delete role parameters when variable does not exist anymore
+        for(auto& roleParameter : roleParameters)
+        {
+            bool deleteParameter = false;
+            auto channelIterator = valuesCentral.find(roleParameter->channel);
+            if(channelIterator != valuesCentral.end())
+            {
+                auto roleInfoIterator = roleParameter->metadata->structValue->find("roleInfo");
+                if(roleInfoIterator != roleParameter->metadata->structValue->end())
+                {
+                    auto variableBaseNameIterator = roleInfoIterator->second->structValue->find("variableBaseName");
+                    if(variableBaseNameIterator != roleInfoIterator->second->structValue->end())
+                    {
+                        auto variableIterator = channelIterator->second.find(variableBaseNameIterator->second->stringValue);
+                        if(variableIterator != channelIterator->second.end())
+                        {
+                            auto roleIdIterator = roleInfoIterator->second->structValue->find("roleId");
+                            if(roleIdIterator != roleInfoIterator->second->structValue->end())
+                            {
+                                if(!variableIterator->second.hasRole(roleIdIterator->second->integerValue64))
+                                {
+                                    deleteParameter = true;
+                                }
+                            }
+                            //Don't delete parameter when key roleId doesn't exist, because the parameter is missing in
+                            //older Homegear versions (up to 0.8.0-3009 or 0.7.45).
+                        }
+                        else deleteParameter = true;
+                    }
+                    else deleteParameter = true;
+                }
+                else deleteParameter = true;
+            }
+            else deleteParameter = true;
+
+            if(deleteParameter)
+            {
+                valuesCentral[roleParameter->channel].erase(roleParameter->parameterName);
             }
         }
     }
@@ -1857,9 +1984,27 @@ bool Peer::setVariableRoom(int32_t channel, std::string& variableName, uint64_t 
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) return false;
+        if(channelIterator == valuesCentral.end())
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room: Channel not found.");
+            return false;
+        }
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
+        if(variableIterator == channelIterator->second.end())
+        {
+            _bl->out.printWarning("Warning: Could not add variable " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + " to room " + std::to_string(roomId) + ": Variable not found.");
+            return false;
+        }
+        if(!variableIterator->second.rpcParameter)
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated RPC parameter. Try to restart Homegear.");
+            return false;
+        }
+        if(variableIterator->second.databaseId == 0)
+        {
+            _bl->out.printWarning("Warning: Could not add variable to room " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated database ID. Try to restart Homegear.");
+            return false;
+        }
         variableIterator->second.setRoom(roomId);
 
         Database::DataRow data;
@@ -2000,9 +2145,9 @@ std::set<uint64_t> Peer::getVariableCategories(int32_t channel, std::string& var
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        if(channelIterator == valuesCentral.end()) return std::set<uint64_t>();
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return std::set<uint64_t>();
 
         return variableIterator->second.getCategories();
     }
@@ -2049,7 +2194,7 @@ bool Peer::variableHasCategories(int32_t channel, const std::string& variableNam
     return false;
 }
 
-bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId, RoleDirection direction, bool invert)
+bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo)
 {
     try
     {
@@ -2059,7 +2204,24 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
         if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return false;
         if(variableIterator->second.hasRole(roleId)) return false;
 
-        variableIterator->second.addRole(roleId, direction, invert);
+        if(direction == RoleDirection::undefined)
+        {
+            if(variableIterator->second.rpcParameter->readable && variableIterator->second.rpcParameter->writeable)
+            {
+                direction = RoleDirection::both;
+            }
+            else if(variableIterator->second.rpcParameter->readable)
+            {
+                direction = RoleDirection::input;
+            }
+            else if(variableIterator->second.rpcParameter->writeable)
+            {
+                direction = RoleDirection::output;
+            }
+            else return false;
+        }
+
+        variableIterator->second.addRole(roleId, direction, invert, scale, scaleInfo);
 
         {
             Database::DataRow data;
@@ -2086,6 +2248,7 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
                     auto roleInfo = std::make_shared<Variable>(VariableType::tStruct);
                     metadata->structValue->emplace("roleInfo", roleInfo);
                     roleInfo->structValue->emplace("variableInfo", variableInfo);
+                    roleInfo->structValue->emplace("roleId", std::make_shared<Variable>(roleId));
                     roleInfo->structValue->emplace("variableBaseName", std::make_shared<Variable>(variableIterator->first));
 
                     auto rolesIterator = variableInfo->structValue->find("roles");
@@ -2093,7 +2256,7 @@ bool Peer::addRoleToVariable(int32_t channel, std::string& variableName, uint64_
                     {
                         for(auto& role : *rolesIterator->second->arrayValue)
                         {
-                            if(role->integerValue64 != 0) parameterStruct.addRole(role->integerValue64, RoleDirection::both, false);
+                            if(role->integerValue64 != 0) parameterStruct.addRole(role->integerValue64, RoleDirection::both, false, false, RoleScaleInfo());
                         }
                     }
 
@@ -2187,9 +2350,9 @@ std::unordered_map<uint64_t, Role> Peer::getVariableRoles(int32_t channel, std::
     try
     {
         auto channelIterator = valuesCentral.find(channel);
-        if(channelIterator == valuesCentral.end()) std::set<uint64_t>();
+        if(channelIterator == valuesCentral.end()) return std::unordered_map<uint64_t, Role>();
         auto variableIterator = channelIterator->second.find(variableName);
-        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) std::set<uint64_t>();
+        if(variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return std::unordered_map<uint64_t, Role>();
 
         return variableIterator->second.getRoles();
     }
@@ -2271,7 +2434,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
 
             auto configIterator = configCentral.find(i->first);
             if(configIterator == configCentral.end()) continue;
-            
+
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::config);
             if(!parameterGroup) continue;
 
@@ -2301,7 +2464,7 @@ PVariable Peer::getAllConfig(PRpcClientInfo clientInfo)
                 if(parameter.rpcParameter->readable)
                 {
                     std::vector<uint8_t> parameterData = parameter.getBinaryData();
-                    if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
+                    if(!convertFromPacketHook(parameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
                     if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) value.reset(new Variable(value->type));
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2476,7 +2639,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
 
             PParameterGroup parameterGroup = getParameterSet(i->first, ParameterGroup::Type::variables);
             if(!parameterGroup) continue;
-            
+
             auto valuesIterator = valuesCentral.find(i->first);
             if(valuesIterator == valuesCentral.end()) continue;
 
@@ -2513,7 +2676,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                     if((parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) || parameterData.empty()) value.reset(new Variable(parameter.rpcParameter->logical->type));
                     else
                     {
-                        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData);
+                        if(!convertFromPacketHook(parameter, parameterData, value)) value = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
                     }
                     if(!value) continue;
                     element->structValue->insert(StructElement("VALUE", value));
@@ -2547,6 +2710,7 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     element->structValue->insert(StructElement("ROLES", rolesArray));
@@ -2689,7 +2853,7 @@ PVariable Peer::getConfigParameter(PRpcClientInfo clientInfo, uint32_t channel, 
         if(!parameterIterator->second.rpcParameter->readable) return Variable::createError(-6, "Parameter is not readable.");
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
         PVariable variable;
-        if(!convertFromPacketHook(parameterIterator->second.rpcParameter, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData);
+        if(!convertFromPacketHook(parameterIterator->second, parameterData, variable)) variable = parameterIterator->second.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameterIterator->second.mainRole(), false);
         if(parameterIterator->second.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -3006,8 +3170,9 @@ PVariable Peer::getDeviceInfo(PRpcClientInfo clientInfo, std::map<std::string, b
             {
                 if(valuesCentral.find(0) != valuesCentral.end() && valuesCentral.at(0).find("RSSI_DEVICE") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter)
                 {
-                    std::vector<uint8_t> parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
-                    info->structValue->insert(StructElement("RSSI", valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData)));
+                    auto& parameter = valuesCentral.at(0).at("RSSI_DEVICE");
+                    std::vector<uint8_t> parameterData = parameter.getBinaryData();
+                    info->structValue->insert(StructElement("RSSI", parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false)));
                 }
             }
         }
@@ -3041,15 +3206,16 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
             if(!rpcFunction->linkSenderFunctionTypes.empty()) isSender = true;
             else if(rpcFunction->linkReceiverFunctionTypes.empty()) return array;
             //Return if no peers are paired to the channel
-            _peersMutex.lock();
-            std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
-            if(peersIterator == _peers.end() || peersIterator->second.empty())
+            std::vector<std::shared_ptr<BasicPeer>> peers;
             {
-                _peersMutex.unlock();
-                return array;
+                std::lock_guard<std::mutex> peersGuard(_peersMutex);
+                std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator peersIterator = _peers.find(channel);
+                if(peersIterator == _peers.end() || peersIterator->second.empty())
+                {
+                    return array;
+                }
+                peers = peersIterator->second;
             }
-            std::vector<std::shared_ptr<BasicPeer>> peers = peersIterator->second;
-            _peersMutex.unlock();
             for(std::vector<std::shared_ptr<BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
             {
                 if((*i)->isVirtual) continue;
@@ -3069,7 +3235,9 @@ PVariable Peer::getLink(PRpcClientInfo clientInfo, int32_t channel, int32_t flag
                 if(remotePeer->getPeer((*i)->channel, _peerID, channel)) peerKnowsMe = true;
 
                 //Don't continue if peer is sender and exists in central's peer array to avoid generation of duplicate results when requesting all links (only generate results when we are sender)
-                if(!isSender && peerKnowsMe && avoidDuplicates && peerID != _peerID) return array;
+                //Previously there was the following check: peerID != _peerID. It needed to be removed, because otherwise duplicate links were returned
+                //when a device was linked to itself.
+                if(!isSender && peerKnowsMe && avoidDuplicates) return array;
                 //If we are receiver this point is only reached, when the sender is not paired to this central
 
                 std::string peerSerialNumber = remotePeer->getSerialNumber();
@@ -3360,6 +3528,7 @@ PVariable Peer::getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls)
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     variables->structValue->emplace(variableIterator.first, rolesArray);
@@ -3414,6 +3583,7 @@ PVariable Peer::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool 
                             roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                             roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                             if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                            roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                             rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                         }
                         variables->structValue->emplace(variableIterator.first, rolesArray);
@@ -3476,7 +3646,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
                 if(getParamsetHook2(clientInfo, parameter.rpcParameter, channel, variables)) continue;
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3508,7 +3678,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3549,7 +3719,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
 #endif
                 std::vector<uint8_t> parameterData = parameter.getBinaryData();
                 PVariable element;
-                if(!convertFromPacketHook(parameter.rpcParameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData);
+                if(!convertFromPacketHook(parameter, parameterData, element)) element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
                 if(!element) continue;
                 if(element->type == VariableType::tVoid) continue;
                 if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) element.reset(new Variable(element->type));
@@ -3660,7 +3830,7 @@ PVariable Peer::getParamsetDescription(PRpcClientInfo clientInfo, int32_t channe
                 descriptions->structValue->insert(StructElement(parameter.second->id, description));
             }
         }
-        
+
         return descriptions;
     }
     catch(const std::exception& ex)
@@ -3757,7 +3927,7 @@ PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
             if((!asynchronous && variable->type != VariableType::tVoid) || variable->errorStruct) return variable;
         }
         std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
-        if(!convertFromPacketHook(parameter.rpcParameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData);
+        if(!convertFromPacketHook(parameter, parameterData, variable)) variable = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
         if(parameter.rpcParameter->password && (!clientInfo || !clientInfo->scriptEngineServer)) variable.reset(new Variable(variable->type));
         return variable;
     }
@@ -4012,6 +4182,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
                         roleStruct->structValue->emplace("id", std::make_shared<BaseLib::Variable>(role.second.id));
                         roleStruct->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.second.direction));
                         if(role.second.invert) roleStruct->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.second.invert));
+                        roleStruct->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.second.id / 10000) * 10000 == role.second.id ? 0 : ((role.second.id / 100) * 100 == role.second.id ? 1 : 2)));
                         rolesArray->arrayValue->emplace_back(std::move(roleStruct));
                     }
                     description->structValue->emplace("ROLES", rolesArray);
@@ -4135,6 +4306,7 @@ PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, b
                     auto role = variableIterator.second.getRole(roleId);
                     entry->structValue->emplace("direction", std::make_shared<BaseLib::Variable>((int32_t)role.direction));
                     if(role.invert) entry->structValue->emplace("invert", std::make_shared<BaseLib::Variable>(role.invert));
+                    entry->structValue->emplace("level", std::make_shared<BaseLib::Variable>((role.id / 10000) * 10000 == role.id ? 0 : ((role.id / 100) * 100 == role.id ? 1 : 2)));
                     variables->structValue->emplace(variableIterator.first, entry);
                 }
             }
@@ -4216,8 +4388,9 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
         PVariable element;
         if(valuesCentral.at(0).find("RSSI_PEER") != valuesCentral.at(0).end() && valuesCentral.at(0).at("RSSI_PEER").rpcParameter)
         {
-            parameterData = valuesCentral.at(0).at("RSSI_PEER").getBinaryData();
-            element = valuesCentral.at(0).at("RSSI_PEER").rpcParameter->convertFromPacket(parameterData);
+            auto& parameter = valuesCentral.at(0).at("RSSI_PEER");
+            parameterData = parameter.getBinaryData();
+            element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
             if(element->integerValue == 0) element->integerValue = 65536;
             rpcArray->arrayValue->push_back(element);
         }
@@ -4227,10 +4400,13 @@ PVariable Peer::rssiInfo(PRpcClientInfo clientInfo)
             rpcArray->arrayValue->push_back(element);
         }
 
-        parameterData = valuesCentral.at(0).at("RSSI_DEVICE").getBinaryData();
-        element = valuesCentral.at(0).at("RSSI_DEVICE").rpcParameter->convertFromPacket(parameterData);
-        if(element->integerValue == 0) element->integerValue = 65536;
-        rpcArray->arrayValue->push_back(element);
+        {
+            auto& parameter = valuesCentral.at(0).at("RSSI_DEVICE");
+            parameterData = parameter.getBinaryData();
+            element = parameter.rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
+            if(element->integerValue == 0) element->integerValue = 65536;
+            rpcArray->arrayValue->push_back(element);
+        }
 
         std::shared_ptr<ICentral> central = getCentral();
         if(!central) return Variable::createError(-32500, "Central is nullptr.");
@@ -4377,60 +4553,79 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
         value->setType(rpcParameter->logical->type);
 
         //Perform operation on value
-        if(value->stringValue.size() > 2 && value->stringValue.at(1) == '='
-           && (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
+        if(value->stringValue.size() > 2 && value->stringValue.at(1) == '=' && (value->stringValue.at(0) == '+' || value->stringValue.at(0) == '-' || value->stringValue.at(0) == '*' || value->stringValue.at(0) == '/'))
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
+            if(!convertFromPacketHook(parameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
+
+            std::string numberPart = value->stringValue.substr(2);
+            double factor = Math::getDouble(numberPart);
+            if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
+
             if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                double factor = Math::getDouble(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->floatValue = currentValue->floatValue + factor;
                 else if(value->stringValue.at(0) == '-') value->floatValue = currentValue->floatValue - factor;
                 else if(value->stringValue.at(0) == '*') value->floatValue = currentValue->floatValue * factor;
                 else if(value->stringValue.at(0) == '/') value->floatValue = currentValue->floatValue / factor;
                 value->type = VariableType::tFloat;
-                value->stringValue.clear();
             }
             else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                int32_t factor = Math::getNumber(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->integerValue = currentValue->integerValue + factor;
                 else if(value->stringValue.at(0) == '-') value->integerValue = currentValue->integerValue - factor;
                 else if(value->stringValue.at(0) == '*') value->integerValue = currentValue->integerValue * factor;
                 else if(value->stringValue.at(0) == '/') value->integerValue = currentValue->integerValue / factor;
                 value->integerValue64 = value->integerValue;
                 value->type = VariableType::tInteger;
-                value->stringValue.clear();
             }
             else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger64)
             {
-                std::string numberPart = value->stringValue.substr(2);
-                int32_t factor = Math::getNumber(numberPart);
-                if(factor == 0) return Variable::createError(-1, "Factor is \"0\" or no valid number.");
                 if(value->stringValue.at(0) == '+') value->integerValue64 = currentValue->integerValue64 + factor;
                 else if(value->stringValue.at(0) == '-') value->integerValue64 = currentValue->integerValue64 - factor;
                 else if(value->stringValue.at(0) == '*') value->integerValue64 = currentValue->integerValue64 * factor;
                 else if(value->stringValue.at(0) == '/') value->integerValue64 = currentValue->integerValue64 / factor;
                 value->integerValue = value->integerValue64;
                 value->type = VariableType::tInteger64;
-                value->stringValue.clear();
             }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
+            {
+                if(value->stringValue.at(0) == '+') value->booleanValue = true;
+                else if(value->stringValue.at(0) == '-') value->booleanValue = false;
+                else if(value->stringValue.at(0) == '*') value->booleanValue = true;
+                else if(value->stringValue.at(0) == '/') value->booleanValue = false;
+                value->type = VariableType::tBoolean;
+            }
+            value->stringValue.clear();
         }
         else if(value->stringValue == "!") // Toggle boolean
         {
             std::vector<uint8_t> parameterData = parameter.getBinaryData();
             PVariable currentValue;
-            if(!convertFromPacketHook(rpcParameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData);
+            if(!convertFromPacketHook(parameter, parameterData, currentValue)) currentValue = rpcParameter->convertFromPacket(parameterData, clientInfo->addon && clientInfo->peerId == _peerID ? Role() : parameter.mainRole(), false);
             if(rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
             {
                 value->booleanValue = !currentValue->booleanValue;
                 value->type = VariableType::tBoolean;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tFloat)
+            {
+                value->floatValue = !currentValue->floatValue;
+                value->type = VariableType::tFloat;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger)
+            {
+                value->integerValue = !currentValue->integerValue;
+                value->type = VariableType::tInteger;
+                value->stringValue.clear();
+            }
+            else if(rpcParameter->logical->type == ILogical::Type::Enum::tInteger64)
+            {
+                value->integerValue64 = !currentValue->integerValue64;
+                value->type = VariableType::tInteger64;
                 value->stringValue.clear();
             }
         }

@@ -115,8 +115,8 @@ std::string HelperFunctions::getTimeString(std::string format, int64_t time)
 std::string HelperFunctions::getTimeUuid(int64_t time)
 {
     std::string uuid;
-    uuid.reserve(54);
     uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
+    uuid.reserve(53);
     uuid.push_back('-');
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
     uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
@@ -149,12 +149,13 @@ std::string HelperFunctions::stripNonPrintable(const std::string& s)
     return strippedString;
 }
 
-PVariable HelperFunctions::xml2variable(xml_node<>* node)
+PVariable HelperFunctions::xml2variable(const xml_node* node, bool& isDataNode)
 {
+    isDataNode = false;
     auto nodeVariable = std::make_shared<Variable>(VariableType::tStruct);
 
     bool hasElements = false;
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string attributeName(attr->name());
         std::string attributeValue(attr->value());
@@ -162,7 +163,7 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
         nodeVariable->structValue->emplace("@" + attributeName, std::make_shared<Variable>(attributeValue));
     }
 
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         if(nodeName.empty()) continue;
@@ -170,16 +171,26 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
 
         hasElements = true;
 
+        bool isDataNode = false;
+        auto subNodeVariable = xml2variable(subNode, isDataNode);
+
         auto variableIterator = nodeVariable->structValue->find(nodeName);
         if(variableIterator == nodeVariable->structValue->end())
         {
-            variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
-            variableIterator->second->arrayValue->reserve(100);
+            if(isDataNode)
+            {
+                nodeVariable->structValue->emplace(nodeName, subNodeVariable).first;
+                continue;
+            }
+            else
+            {
+                variableIterator = nodeVariable->structValue->emplace(nodeName, std::make_shared<Variable>(VariableType::tArray)).first;
+                variableIterator->second->arrayValue->reserve(100);
+            }
         }
 
         if(variableIterator->second->arrayValue->size() == variableIterator->second->arrayValue->capacity()) variableIterator->second->arrayValue->reserve(variableIterator->second->arrayValue->size() + 100);
 
-        auto subNodeVariable = xml2variable(subNode);
         if(!subNodeVariable->errorStruct) variableIterator->second->arrayValue->emplace_back(subNodeVariable);
     }
 
@@ -196,6 +207,7 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
             jsonNodeValue = std::make_shared<Variable>(nodeValue);
         }
 
+        isDataNode = true;
         if(nodeVariable->structValue->empty()) return jsonNodeValue;
         else
         {
@@ -204,6 +216,48 @@ PVariable HelperFunctions::xml2variable(xml_node<>* node)
         }
     }
     else return nodeVariable;
+}
+
+void HelperFunctions::variable2xml(xml_document* doc, xml_node* parentNode, const PVariable& variable)
+{
+    std::string tempString;
+
+    for(auto& structElement : *variable->structValue)
+    {
+        if(structElement.first.empty()) continue;
+        else if(structElement.first == "@@value") //Value when node has attributes
+        {
+            tempString = structElement.second->toString();
+            parentNode->value(doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+        }
+        else if(structElement.first.front() == '@' && structElement.first.size() > 1) //Attribute
+        {
+            tempString = structElement.second->toString();
+            auto* attr = doc->allocate_attribute(structElement.first.c_str() + 1, doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+            parentNode->append_attribute(attr);
+        }
+        else //Element
+        {
+            if(structElement.second->type == VariableType::tStruct)
+            {
+                auto* node = doc->allocate_node(node_element, structElement.first.c_str());
+                parentNode->append_node(node);
+                variable2xml(doc, node, structElement.second);
+            }
+            else if(structElement.second->type == VariableType::tArray)
+            {
+                auto* node = doc->allocate_node(node_element, "element");
+                parentNode->append_node(node);
+                variable2xml(doc, node, structElement.second);
+            }
+            else
+            {
+                tempString = structElement.second->toString();
+                auto* node = doc->allocate_node(node_element, structElement.first.c_str(), doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+                parentNode->append_node(node);
+            }
+        }
+    }
 }
 
 int32_t HelperFunctions::getRandomNumber(int32_t min, int32_t max)

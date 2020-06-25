@@ -197,7 +197,7 @@ public:
 	static inline size_t utf8StringSize(const std::string& s)
 	{
 		if(s.empty()) return 0;
-		const char* pS = s.c_str();
+		const unsigned char* pS = (const unsigned char*)s.c_str();
 		size_t len = 0;
 		while (*pS) len += (*pS++ & 0xc0) != 0x80;
 		return len;
@@ -336,7 +336,9 @@ public:
 	 */
 	static std::string stripNonPrintable(const std::string& s);
 
-	static PVariable xml2variable(xml_node<>* node);
+	static PVariable xml2variable(const xml_node* node, bool& isDataNode);
+
+	static void variable2xml(xml_document* doc, xml_node* parentNode, const PVariable& variable);
 
 	/**
 	 * Returns the endianess of the system.
@@ -389,7 +391,8 @@ public:
     static void memcpyBigEndian(int32_t& to, const std::vector<uint8_t>& from);
 
 	/**
-	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian.
+	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian. Note
+	 * that leading zero bytes are trimmed, so 0x0000FFFF becomes {0xFF, 0xFF}.
 	 *
 	 * @param[out] to The destination array.
 	 * @param[in] from The source integer.
@@ -405,7 +408,8 @@ public:
     static void memcpyBigEndian(int64_t& to, const std::vector<uint8_t>& from);
 
 	/**
-	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian.
+	 * Copies binary values from an integer to a vector reversing the byte order when the system is little endian. Note
+	 * that leading zero bytes are trimmed, so 0x0000000000FFFFFF becomes {0xFF, 0xFF, 0xFF}.
 	 *
 	 * @param[out] to The destination array.
 	 * @param[in] from The source integer.

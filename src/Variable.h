@@ -31,7 +31,7 @@
 #ifndef VARIABLE_H_
 #define VARIABLE_H_
 
-#include "Encoding/RapidXml/rapidxml.hpp"
+#include "Encoding/RapidXml/rapidxml.h"
 #include "DeviceDescription/Logical.h"
 #include "DeviceDescription/Physical.h"
 
@@ -88,7 +88,7 @@ private:
 	/**
 	 * Converts a XML node to a struct. Important: Multiple usage of the same name on the same level is not possible.
 	 */
-	void parseXmlNode(const xml_node<>* node, PStruct& xmlStruct);
+	void parseXmlNode(const xml_node* node, PStruct& xmlStruct);
 public:
 	bool errorStruct = false;
 	VariableType type;
@@ -122,7 +122,7 @@ public:
     explicit Variable(const char* binaryVal, size_t binaryValSize);
 
 	explicit Variable(DeviceDescription::ILogical::Type::Enum variableType);
-	explicit Variable(const xml_node<>* node);
+	explicit Variable(const xml_node* node);
 	virtual ~Variable();
 	static PVariable createError(int32_t faultCode, std::string faultString);
 	std::string print(bool stdout = false, bool stderr = false, bool oneLine = false);

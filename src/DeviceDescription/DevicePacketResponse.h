@@ -31,10 +31,14 @@
 #ifndef DEVICEPACKETRESPONSE_H_
 #define DEVICEPACKETRESPONSE_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <memory>
 #include <vector>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -65,7 +69,7 @@ public:
     };
 
     DevicePacketResponse(BaseLib::SharedObjects* baseLib);
-    DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    DevicePacketResponse(BaseLib::SharedObjects* baseLib, xml_node* node);
     virtual ~DevicePacketResponse() = default;
 
     bool checkCondition(int32_t value);

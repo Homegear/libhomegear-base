@@ -30,7 +30,6 @@
 
 #include "HomegearDeviceTranslation.h"
 #include "../BaseLib.h"
-#include "../Encoding/RapidXml/rapidxml_print.hpp"
 
 namespace BaseLib
 {
@@ -59,7 +58,7 @@ HomegearDeviceTranslation::~HomegearDeviceTranslation() {
 
 void HomegearDeviceTranslation::load(std::string xmlFilename)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
 		std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
@@ -97,11 +96,11 @@ void HomegearDeviceTranslation::load(std::string xmlFilename)
     doc.clear();
 }
 
-void HomegearDeviceTranslation::parseXML(xml_node<>* node)
+void HomegearDeviceTranslation::parseXML(xml_node* node)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			std::string attributeName(attr->name());
 			std::string attributeValue(attr->value());
@@ -109,18 +108,18 @@ void HomegearDeviceTranslation::parseXML(xml_node<>* node)
 			else if(attributeName == "xmlns") {}
 			else _bl->out.printWarning("Warning: Unknown attribute for \"homegearDeviceTranslation\": " + attributeName);
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			if(nodeName == "supportedDevices")
 			{
-				for(xml_node<>* typeNode = subNode->first_node("device"); typeNode; typeNode = typeNode->next_sibling("device"))
+				for(xml_node* typeNode = subNode->first_node("device"); typeNode; typeNode = typeNode->next_sibling("device"))
 				{
-                    xml_attribute<>* idAttr = typeNode->first_attribute("id");
+                    xml_attribute* idAttr = typeNode->first_attribute("id");
                     if(!idAttr) continue;
                     std::string deviceId(idAttr->value());
 
-                    xml_node<>* descriptionNode = typeNode->first_node("description");
+                    xml_node* descriptionNode = typeNode->first_node("description");
                     if(descriptionNode) typeDescriptions.emplace(deviceId, std::string(descriptionNode->value()));
 
                     descriptionNode = typeNode->first_node("longDescription");
@@ -129,16 +128,16 @@ void HomegearDeviceTranslation::parseXML(xml_node<>* node)
 			}
 			else if(nodeName == "parameterGroups")
 			{
-				for(xml_node<>* parameterGroupNode = subNode->first_node(); parameterGroupNode; parameterGroupNode = parameterGroupNode->next_sibling())
+				for(xml_node* parameterGroupNode = subNode->first_node(); parameterGroupNode; parameterGroupNode = parameterGroupNode->next_sibling())
 				{
                     std::string parameterGroupName(parameterGroupNode->name());
                     if(parameterGroupName != "configParameters" && parameterGroupName != "variables" && parameterGroupName != "linkParameters") _bl->out.printWarning("Warning: Unknown parameter group: " + parameterGroupName);
 
-                    xml_attribute<>* idAttr = parameterGroupNode->first_attribute("id");
+                    xml_attribute* idAttr = parameterGroupNode->first_attribute("id");
                     if(!idAttr) continue;
                     std::string parameterGroupId(idAttr->value());
 
-                    for(xml_node<>* parameterNode = parameterGroupNode->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
+                    for(xml_node* parameterNode = parameterGroupNode->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
                     {
                         idAttr = parameterNode->first_attribute("id");
                         if(!idAttr) continue;
@@ -146,11 +145,11 @@ void HomegearDeviceTranslation::parseXML(xml_node<>* node)
 
                         ParameterTranslation parameterTranslation;
 
-                        xml_node<>* labelNode = parameterNode->first_node("label");
+                        xml_node* labelNode = parameterNode->first_node("label");
                         if(!labelNode) continue;
                         parameterTranslation.label = std::string(labelNode->value());
 
-                        xml_node<>* descriptionNode = parameterNode->first_node("description");
+                        xml_node* descriptionNode = parameterNode->first_node("description");
                         if(!descriptionNode) continue;
                         parameterTranslation.description = std::string(descriptionNode->value());
 

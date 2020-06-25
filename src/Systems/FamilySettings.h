@@ -68,9 +68,9 @@ public:
 	std::string getString(std::string name);
 	int32_t getNumber(std::string name);
 	std::vector<char> getBinary(std::string name);
-	void set(std::string name, std::string& value);
+	void set(std::string name, const std::string& value);
 	void set(std::string name, int32_t value);
-	void set(std::string name, std::vector<char>& value);
+	void set(std::string name, const std::vector<char>& value);
 	void deleteFromDatabase(std::string name);
 	std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
 private:

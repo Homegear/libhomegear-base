@@ -34,19 +34,29 @@
 namespace BaseLib
 {
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib) : UdpSocket(baseLib, "")
 {
-	_bl = baseLib;
-	_autoConnect = false;
-	_socketDescriptor.reset(new FileDescriptor);
 }
 
-UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port)
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort)
 {
-	_bl = baseLib;
-	_socketDescriptor.reset(new FileDescriptor);
-	_hostname = hostname;
-	_port = port;
+    _bl = baseLib;
+    _autoConnect = false;
+    _socketDescriptor.reset(new FileDescriptor);
+    _listenPort = Math::getUnsignedNumber(listenPort);
+}
+
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port) : UdpSocket(baseLib, hostname, port, "")
+{
+}
+
+UdpSocket::UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, std::string listenPort)
+{
+    _bl = baseLib;
+    _socketDescriptor.reset(new FileDescriptor);
+    _hostname = hostname;
+    _port = port;
+    _listenPort = Math::getUnsignedNumber(listenPort);
 }
 
 UdpSocket::~UdpSocket()
@@ -93,7 +103,7 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& send
 		if(!isOpen()) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
 		_readMutex.lock();
 	}
-	timeval timeout;
+	timeval timeout{};
 	int32_t seconds = _readTimeout / 1000000;
 	timeout.tv_sec = seconds;
 	timeout.tv_usec = _readTimeout - (1000000 * seconds);
@@ -110,7 +120,7 @@ int32_t UdpSocket::proofread(char* buffer, int32_t bufferSize, std::string& send
 	}
 	FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
 	fileDescriptorGuard.unlock();
-	int32_t bytesRead = select(nfds, &readFileDescriptor, NULL, NULL, &timeout);
+	int32_t bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
 	if(bytesRead == 0)
 	{
 		_readMutex.unlock();
@@ -180,7 +190,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char>& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
+		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, data.data() + totalBytesWritten, data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
 		{
 			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
@@ -258,8 +268,7 @@ int32_t UdpSocket::proofwrite(const std::string& data)
 	int32_t totalBytesWritten = 0;
 	while (totalBytesWritten < (signed)data.size())
 	{
-		int32_t bytesToSend = data.size() - totalBytesWritten;
-		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, &data.at(totalBytesWritten), bytesToSend, 0, _serverInfo->ai_addr, sizeof(sockaddr));
+		int32_t bytesWritten = sendto(_socketDescriptor->descriptor, data.data() + totalBytesWritten, data.size() - totalBytesWritten, 0, _serverInfo->ai_addr, sizeof(sockaddr));
 		if(bytesWritten <= 0)
 		{
 			if(bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
@@ -320,9 +329,8 @@ void UdpSocket::getConnection()
 		freeaddrinfo(_serverInfo);
 		_serverInfo = nullptr;
 	}
-	struct addrinfo hostInfo;
-	memset(&hostInfo, 0, sizeof(hostInfo));
 
+	struct addrinfo hostInfo{};
 	hostInfo.ai_family = AF_UNSPEC;
 	hostInfo.ai_socktype = SOCK_DGRAM;
 
@@ -333,15 +341,19 @@ void UdpSocket::getConnection()
 		throw SocketOperationException("Could not get address information: " + std::string(strerror(errno)));
 	}
 
-	char ipStringBuffer[INET6_ADDRSTRLEN];
-	if (_serverInfo->ai_family == AF_INET) {
-		struct sockaddr_in *s = (struct sockaddr_in*)_serverInfo->ai_addr;
+	char ipStringBuffer[INET6_ADDRSTRLEN + 1];
+	if (_serverInfo->ai_family == AF_INET)
+	{
+		auto s = (struct sockaddr_in*)_serverInfo->ai_addr;
 		inet_ntop(AF_INET, &s->sin_addr, ipStringBuffer, sizeof(ipStringBuffer));
-	} else { // AF_INET6
-		struct sockaddr_in6 *s = (struct sockaddr_in6*)_serverInfo->ai_addr;
+	}
+	else
+    { // AF_INET6
+		auto s = (struct sockaddr_in6*)_serverInfo->ai_addr;
 		inet_ntop(AF_INET6, &s->sin6_addr, ipStringBuffer, sizeof(ipStringBuffer));
 	}
-	_clientIp = std::string(&ipStringBuffer[0]);
+	ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
+	_clientIp = std::string(ipStringBuffer);
 
 	_socketDescriptor = _bl->fileDescriptorManager.add(socket(_serverInfo->ai_family, _serverInfo->ai_socktype, _serverInfo->ai_protocol));
 	if(!_socketDescriptor || _socketDescriptor->descriptor == -1)
@@ -364,11 +376,10 @@ void UdpSocket::getConnection()
 
 	if(_serverInfo->ai_family == AF_INET)
 	{
-		struct sockaddr_in clientInfo;
-		memset(&clientInfo, 0, sizeof(clientInfo));
+		struct sockaddr_in clientInfo{};
 		clientInfo.sin_family = _serverInfo->ai_family;
 		clientInfo.sin_addr.s_addr = INADDR_ANY;
-		clientInfo.sin_port = htons(0);
+		clientInfo.sin_port = htons(_listenPort);
 		if(bind(_socketDescriptor->descriptor.load(), (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
 		{
 			freeaddrinfo(_serverInfo);
@@ -386,18 +397,17 @@ void UdpSocket::getConnection()
 			throw SocketOperationException("Could not get listen ip and port: " + std::string(strerror(errno)));
 		}
 
-		struct sockaddr_in* s = (struct sockaddr_in*)&(clientInfo.sin_addr);
+		auto s = (struct sockaddr_in*)&(clientInfo.sin_addr);
 		inet_ntop(AF_INET, s, ipStringBuffer, sizeof(ipStringBuffer));
+        ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
 		_listenIp = std::string(ipStringBuffer);
-		_listenPort = ntohs(clientInfo.sin_port);
 	}
 	else //AF_INET6
 	{
-		struct sockaddr_in6 clientInfo;
-		memset(&clientInfo, 0, sizeof(clientInfo));
+		struct sockaddr_in6 clientInfo{};
 		clientInfo.sin6_family = _serverInfo->ai_family;
 		clientInfo.sin6_addr = in6addr_any;
-		clientInfo.sin6_port = htons(0);
+		clientInfo.sin6_port = htons(_listenPort);
 		if(bind(_socketDescriptor->descriptor.load(), (struct sockaddr*)&clientInfo, sizeof(clientInfo)) == -1)
 		{
 			freeaddrinfo(_serverInfo);
@@ -415,10 +425,10 @@ void UdpSocket::getConnection()
 			throw SocketOperationException("Could not get listen ip and port: " + std::string(strerror(errno)));
 		}
 
-		struct sockaddr_in6* s = (struct sockaddr_in6*)&(clientInfo.sin6_addr);
+		auto s = (struct sockaddr_in6*)&(clientInfo.sin6_addr);
 		inet_ntop(AF_INET6, s, ipStringBuffer, sizeof(ipStringBuffer));
+        ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
 		_listenIp = std::string(ipStringBuffer);
-		_listenPort = ntohs(clientInfo.sin6_port);
 	}
 	if(_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Opened UDP socket to host " + _hostname + " on port " + _port + ". Client number is: " + std::to_string(_socketDescriptor->id));
 }

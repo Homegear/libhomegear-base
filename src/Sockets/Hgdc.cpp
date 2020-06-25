@@ -68,7 +68,7 @@ void Hgdc::start()
 
         _tcpSocket.reset(new BaseLib::TcpSocket(_bl, "localhost", std::to_string(_port)));
         _tcpSocket->setConnectionRetries(1);
-        _tcpSocket->setReadTimeout(5000000);
+        _tcpSocket->setReadTimeout(1000000);
         _tcpSocket->setWriteTimeout(5000000);
 
         try
@@ -291,12 +291,44 @@ void Hgdc::listen()
                                 _rpcEncoder->encodeResponse(response, data);
                                 _tcpSocket->proofwrite(data);
                             }
-                            else if(_binaryRpc->getType() == BaseLib::Rpc::BinaryRpc::Type::response && _waitForResponse)
+                            else if(_binaryRpc->getType() == BaseLib::Rpc::BinaryRpc::Type::response)
                             {
-                                std::unique_lock<std::mutex> requestLock(_requestMutex);
-                                _rpcResponse = _rpcDecoder->decodeResponse(_binaryRpc->getData());
-                                requestLock.unlock();
-                                _requestConditionVariable.notify_all();
+                                auto response = _rpcDecoder->decodeResponse(_binaryRpc->getData());
+
+                                if(response->arrayValue->size() < 3)
+                                {
+                                    _out.printError("Error: Response has wrong array size.");
+                                }
+                                else
+                                {
+                                    pthread_t threadId = response->arrayValue->at(0)->integerValue64;
+                                    int32_t packetId = response->arrayValue->at(1)->integerValue;
+
+                                    std::lock_guard<std::mutex> requestInfoGuard(_requestInfoMutex);
+                                    auto requestIterator = _requestInfo.find(threadId);
+                                    if(requestIterator != _requestInfo.end())
+                                    {
+                                        std::unique_lock<std::mutex> waitLock(requestIterator->second->waitMutex);
+
+                                        {
+                                            std::lock_guard<std::mutex> responseGuard(_rpcResponsesMutex);
+                                            auto responseIterator = _rpcResponses[threadId].find(packetId);
+                                            if(responseIterator != _rpcResponses[threadId].end())
+                                            {
+                                                PRpcResponse element = responseIterator->second;
+                                                if(element)
+                                                {
+                                                    element->response = response;
+                                                    element->packetId = packetId;
+                                                    element->finished = true;
+                                                }
+                                            }
+                                        }
+
+                                        waitLock.unlock();
+                                        requestIterator->second->conditionVariable.notify_all();
+                                    }
+                                }
                             }
                             _binaryRpc->reset();
                         }
@@ -321,18 +353,39 @@ void Hgdc::listen()
     }
 }
 
-PVariable Hgdc::invoke(const std::string& methodName, const PArray& parameters)
+PVariable Hgdc::invoke(const std::string& methodName, const PArray& parameters, int32_t timeout)
 {
     try
     {
-        std::lock_guard<std::mutex> invokeGuard(_invokeMutex);
+        auto threadId = pthread_self();
+        std::unique_lock<std::mutex> requestInfoGuard(_requestInfoMutex);
+        PRequestInfo requestInfo = _requestInfo.emplace(std::piecewise_construct, std::make_tuple(threadId), std::make_tuple(std::make_shared<RequestInfo>())).first->second;
+        requestInfoGuard.unlock();
 
-        std::unique_lock<std::mutex> requestLock(_requestMutex);
-        _rpcResponse.reset();
-        _waitForResponse = true;
-
+        int32_t packetId;
+        {
+            std::lock_guard<std::mutex> packetIdGuard(_packetIdMutex);
+            packetId = _currentPacketId++;
+        }
+        auto array = std::make_shared<BaseLib::Array>();
+        array->reserve(3);
+        array->emplace_back(std::move(std::make_shared<BaseLib::Variable>((int64_t)threadId)));
+        array->emplace_back(std::move(std::make_shared<BaseLib::Variable>(packetId)));
+        array->emplace_back(std::move(std::make_shared<BaseLib::Variable>(parameters)));
         std::vector<char> encodedPacket;
-        _rpcEncoder->encodeRequest(methodName, parameters, encodedPacket);
+        _rpcEncoder->encodeRequest(methodName, array, encodedPacket);
+
+        PRpcResponse response;
+        {
+            std::lock_guard<std::mutex> responseGuard(_rpcResponsesMutex);
+            auto result = _rpcResponses[threadId].emplace(packetId, std::make_shared<RpcResponse>());
+            if(result.second) response = result.first->second;
+        }
+        if(!response)
+        {
+            _out.printError("Critical: Could not insert response struct into map.");
+            return BaseLib::Variable::createError(-32500, "Unknown application error.");
+        }
 
         int32_t i = 0;
         for(i = 0; i < 5; i++)
@@ -345,20 +398,43 @@ PVariable Hgdc::invoke(const std::string& methodName, const PArray& parameters)
             catch(const BaseLib::SocketOperationException& ex)
             {
                 _out.printError("Error: " + std::string(ex.what()));
-                if(i == 5) return BaseLib::Variable::createError(-32500, ex.what());
+                if(i == 5)
+                {
+                    std::lock_guard<std::mutex> responseGuard(_rpcResponsesMutex);
+                    _rpcResponses[threadId].erase(packetId);
+                    if (_rpcResponses[threadId].empty()) _rpcResponses.erase(threadId);
+                    return BaseLib::Variable::createError(-32500, ex.what());
+                }
             }
         }
 
-        i = 0;
-        while(!_requestConditionVariable.wait_for(requestLock, std::chrono::milliseconds(1000), [&]
+        auto startTime = BaseLib::HelperFunctions::getTime();
+        std::unique_lock<std::mutex> waitLock(requestInfo->waitMutex);
+        while (!requestInfo->conditionVariable.wait_for(waitLock, std::chrono::milliseconds(1000), [&]
         {
-            i++;
-            return _rpcResponse || _stopped || i == 10;
+            return response->finished || _stopped || (timeout > 0 && BaseLib::HelperFunctions::getTime() - startTime > timeout);
         }));
-        _waitForResponse = false;
-        if(i == 10 || !_rpcResponse) return BaseLib::Variable::createError(-32500, "No RPC response received.");
 
-        return _rpcResponse;
+        BaseLib::PVariable result;
+        if(!response->finished || response->response->arrayValue->size() != 3 || response->packetId != packetId)
+        {
+            _out.printError("Error: No response received to RPC request. Method: " + methodName);
+            result = BaseLib::Variable::createError(-1, "No response received.");
+        }
+        else result = response->response->arrayValue->at(2);
+
+        {
+            std::lock_guard<std::mutex> responseGuard(_rpcResponsesMutex);
+            _rpcResponses[threadId].erase(packetId);
+            if (_rpcResponses[threadId].empty()) _rpcResponses.erase(threadId);
+        }
+
+        {
+            requestInfoGuard.lock();
+            _requestInfo.erase(threadId);
+        }
+
+        return result;
     }
     catch(const std::exception& ex)
     {
@@ -409,6 +485,33 @@ bool Hgdc::sendPacket(const std::string& serialNumber, const std::vector<char>& 
         if(result->errorStruct)
         {
             _out.printError("Error sending packet " + BaseLib::HelperFunctions::getHexString(packet) + ": " + result->structValue->at("faultString")->stringValue);
+            return false;
+        }
+
+        return true;
+    }
+    catch(const std::exception& ex)
+    {
+        _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    return false;
+}
+
+bool Hgdc::setMode(const std::string& serialNumber, uint8_t mode)
+{
+    try
+    {
+        if(!_tcpSocket || !_tcpSocket->connected()) return false;
+
+        BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
+        parameters->reserve(2);
+        parameters->push_back(std::make_shared<BaseLib::Variable>(serialNumber));
+        parameters->push_back(std::make_shared<BaseLib::Variable>((int64_t)mode));
+
+        auto result = invoke("moduleSetMode", parameters);
+        if(result->errorStruct)
+        {
+            _out.printError("Error setting mode: " + result->structValue->at("faultString")->stringValue);
             return false;
         }
 

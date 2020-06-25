@@ -41,16 +41,16 @@ UiText::UiText(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-UiText::UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiText(baseLib)
+UiText::UiText(BaseLib::SharedObjects* baseLib, xml_node* node) : UiText(baseLib)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string name(attr->name());
         std::string value(attr->value());
         if(name == "id") id = value;
         else _bl->out.printWarning("Warning: Unknown attribute for \"text\": " + std::string(attr->name()));
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());

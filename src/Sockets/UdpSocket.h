@@ -43,7 +43,9 @@ class UdpSocket
 {
 public:
 	UdpSocket(BaseLib::SharedObjects* baseLib);
+    UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort);
 	UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
+    UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, std::string listenPort);
 	virtual ~UdpSocket();
 
 	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
@@ -52,7 +54,7 @@ public:
 	void setPort(std::string port) { close(); _port = port; }
 	std::string getClientIp() { return _clientIp; }
 	std::string getListenIp() { return _listenIp; }
-	int32_t getListenPort() { return _listenPort; }
+	uint16_t getListenPort() { return _listenPort; }
 
 	bool isOpen();
 
@@ -83,7 +85,7 @@ protected:
 	std::string _clientIp;
 	std::string _port;
 	std::string _listenIp;
-	int32_t _listenPort = -1;
+	uint16_t _listenPort = 0;
 	struct addrinfo* _serverInfo = nullptr;
 	std::mutex _readMutex;
 	std::mutex _writeMutex;

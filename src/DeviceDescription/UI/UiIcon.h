@@ -31,10 +31,14 @@
 #ifndef UIICON_H_
 #define UIICON_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -54,7 +58,7 @@ class UiIcon
 {
 public:
     UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiIcon(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiIcon(UiIcon const& rhs);
     virtual ~UiIcon() = default;
 

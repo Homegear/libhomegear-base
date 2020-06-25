@@ -41,13 +41,13 @@ UiGrid::UiGrid(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-UiGrid::UiGrid(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiGrid(baseLib)
+UiGrid::UiGrid(BaseLib::SharedObjects* baseLib, xml_node* node) : UiGrid(baseLib)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         _bl->out.printWarning("Warning: Unknown attribute for \"condition\": " + std::string(attr->name()));
     }
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string name(subNode->name());
         std::string value(subNode->value());

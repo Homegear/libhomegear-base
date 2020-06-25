@@ -34,7 +34,6 @@
 #include "ParameterCast.h"
 #include "Logical.h"
 #include "Physical.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include "../Systems/Role.h"
 #include <string>
 #include <set>
@@ -97,7 +96,12 @@ public:
 	bool readable = true;
 	bool writeable = true;
 	bool transmitted = true;
+
+	/**
+	 * Makes readonly variables writeable for addons (i. e. from device source code)
+	 */
 	bool addonWriteable = true;
+
 	bool password = false;
 	bool visible = true;
 	bool internal = false;
@@ -107,14 +111,32 @@ public:
 	bool transform = false;
 	bool isSignedSet = false;
 	bool isSigned = false;
+
+	/**
+	 * UI control to use for displaying this parameter.
+	 */
 	std::string control;
+
+	/**
+	 * The unit of the variable like "°C" or "km/h".
+	 */
 	std::string unit;
 	bool mandatory = false;
 	std::string formFieldType;
 	int32_t formPosition = -1;
 	std::string metadata;
 	bool resetAfterRestart = false;
+
+	/**
+	 * Deprecated. Remove beginning of 2021.
+	 * Visible on the HomeMatic CCU2.
+	 */
 	bool ccu2Visible = true;
+
+	/**
+	 * When parameters are linked together, logical changes of one parameter change the other to the same value.
+	 */
+	std::string linkedParameter;
 	Casts casts;
 	ParameterRoles roles;
 
@@ -131,37 +153,40 @@ public:
 	explicit Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent);
 	virtual ~Parameter();
 
-	void parseXml(xml_node<>* node);
+	void parseXml(xml_node* node);
 
 	//Helpers
 	/**
 	 * Converts binary data of a packet received by a physical interface to a RPC variable.
 	 *
-	 * @param[in] data The data to convert. It is not modified, even though there is no "const".
-	 * @param isEvent (default false) Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
+	 * @param data The data to convert.
+	 * @param role The associated role of the value.
+	 * @param isEvent Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
 	 * @return Returns the RPC variable.
 	 */
-	PVariable convertFromPacket(std::vector<uint8_t>& data, bool isEvent = false);
+	PVariable convertFromPacket(const std::vector<uint8_t>& data, const Role& role, bool isEvent);
 
 	/**
 	 * Converts a RPC variable to binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
+	 * @param[in] role The associated role of the value.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const PVariable& value, const Role& role, std::vector<uint8_t>& convertedValue);
 
 	/**
 	 * Tries to convert a string value to a binary data to send it over a physical interface.
 	 *
 	 * @param[in] value The value to convert.
+	 * @param[in] role The associated role of the value.
 	 * @param[out] convertedValue The converted binary data.
 	 */
-	void convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue);
+	void convertToPacket(const std::string& value, const Role& role, std::vector<uint8_t>& convertedValue);
 
 	void adjustBitPosition(std::vector<uint8_t>& data);
 
-	const PParameterGroup parent();
+	PParameterGroup parent();
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 

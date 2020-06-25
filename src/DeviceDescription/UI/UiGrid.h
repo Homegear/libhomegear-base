@@ -34,13 +34,10 @@
 #include "UiIcon.h"
 #include "UiText.h"
 #include "UiControl.h"
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <list>
 #include <unordered_map>
 #include <memory>
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -58,7 +55,7 @@ class UiGrid
 {
 public:
     UiGrid(BaseLib::SharedObjects* baseLib);
-    UiGrid(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiGrid(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiGrid(UiGrid const& rhs);
     virtual ~UiGrid() = default;
 

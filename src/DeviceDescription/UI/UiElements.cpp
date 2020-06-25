@@ -150,7 +150,11 @@ PHomegearUiElement UiElements::getUiElement(const std::string& language, const s
     try
     {
         auto uiElement = getUiElement(language, id);
-        if(!uiElement) return uiElement;
+        if(!uiElement)
+        {
+            _bl->out.printWarning("Warning: Could not find a UI element with ID \"" + id + "\" for language \"" + language + "\".");
+            return uiElement;
+        }
 
         auto uiElementCopy = std::make_shared<HomegearUiElement>(_bl);
         *uiElementCopy = *uiElement;

@@ -145,13 +145,16 @@ public:
 	bool hasCategories() { std::lock_guard<std::mutex> categoriesGuard(_categoriesMutex); return !_categories.empty(); }
 
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
-    void addRole(const Role& role) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(role.id, role); }
-	void addRole(uint64_t id, RoleDirection direction, bool invert) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.emplace(id, std::move(Role(id, direction, invert))); }
+    void addRole(const Role& role);
+	void addRole(uint64_t id, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo);
 	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
     Role getRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); auto rolesIterator = _roles.find(id); if(rolesIterator != _roles.end()) return rolesIterator->second; else return Role(); }
     std::unordered_map<uint64_t, Role> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
 	std::string getRoleString();
 	bool hasRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return !_roles.empty(); }
+	bool invert();
+	bool scale();
+	Role mainRole();
 
     uint64_t getRoom() { std::lock_guard<std::mutex> roomGuard(_roomMutex); return _room; }
     void setRoom(uint64_t id) { std::lock_guard<std::mutex> roomGuard(_roomMutex); _room = id; }
@@ -179,6 +182,13 @@ private:
     std::mutex _categoriesMutex;
 	std::set<uint64_t> _categories;
 	std::mutex _rolesMutex;
+
+	/**
+	 * Set to true if at least one role has invert set.
+	 */
+	bool _invert = false;
+	bool _scale = false;
+	Role _mainRole;
 	std::unordered_map<uint64_t, Role> _roles;
     std::mutex _roomMutex;
     uint64_t _room = 0;
@@ -317,8 +327,8 @@ public:
 	virtual void setFirmwareVersion(int32_t value) { _firmwareVersion = value; saveVariable(1001, value); }
 	virtual std::string getFirmwareVersionString() { return _firmwareVersionString; }
 	virtual void setFirmwareVersionString(std::string value) { _firmwareVersionString = value; saveVariable(1003, value); }
-	virtual uint32_t getDeviceType() { return _deviceType; }
-	virtual void setDeviceType(uint32_t value) { _deviceType = value; saveVariable(1002, (int32_t)_deviceType); initializeTypeString(); }
+	virtual uint64_t getDeviceType() { return _deviceType; }
+	virtual void setDeviceType(uint64_t value) { _deviceType = value; saveVariable(1002, (int64_t)_deviceType); initializeTypeString(); }
     virtual std::string getName() { return getName(-1); }
 	virtual std::string getName(int32_t channel);
 	virtual void setName(std::string value) { setName(-1, value); }
@@ -368,7 +378,7 @@ public:
     virtual std::set<uint64_t> getVariableCategories(int32_t channel, std::string& variableName);
     virtual bool variableHasCategory(int32_t channel, const std::string& variableName, uint64_t categoryId);
 	virtual bool variableHasCategories(int32_t channel, const std::string& variableName);
-	virtual bool addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId, RoleDirection direction, bool invert);
+	virtual bool addRoleToVariable(int32_t channel, std::string& variableName, uint64_t roleId, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo);
 	virtual bool removeRoleFromVariable(int32_t channel, std::string& variableName, uint64_t roleId);
 	virtual void removeRoleFromVariables(uint64_t roleId);
 	virtual std::unordered_map<uint64_t, Role> getVariableRoles(int32_t channel, std::string& variableName);
@@ -379,6 +389,19 @@ public:
 	virtual void save(bool savePeer, bool saveVariables, bool saveCentralConfig);
 	virtual void loadConfig();
     virtual void saveConfig();
+
+    /**
+     * In contrast to saveParameter() this method waits for the parameter to be created and returns it's database ID.
+     *
+     * @param parameterSetType
+     * @param channel
+     * @param parameterName
+     * @param value
+     * @param remoteAddress
+     * @param remoteChannel
+     * @return
+     */
+    virtual uint64_t createParameter(ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
 	virtual void saveParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t remoteAddress = 0, uint32_t remoteChannel = 0);
     virtual void saveSpecialTypeParameter(uint32_t parameterID, ParameterGroup::Type::Enum parameterSetType, uint32_t channel, const std::string& parameterName, std::vector<uint8_t>& value, int32_t specialType, const BaseLib::PVariable& metadata, const std::string& roles);
 	virtual void saveParameter(uint32_t parameterID, uint32_t address, std::vector<uint8_t>& value);
@@ -475,7 +498,7 @@ protected:
 	//In table variables:
 	int32_t _firmwareVersion = 0;
 	std::string _firmwareVersionString;
-	uint32_t _deviceType = 0;
+	uint64_t _deviceType = 0;
 	std::mutex _peersMutex;
 	std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>> _peers;
 	std::mutex _namesMutex;
@@ -630,7 +653,7 @@ protected:
 		 * @param result The conversion result.
 		 * @return "true" means the function converted the parameter.
 		 */
-		virtual bool convertFromPacketHook(PParameter parameter, std::vector<uint8_t>& data, PVariable& result) { return false; }
+		virtual bool convertFromPacketHook(RpcConfigurationParameter& parameter, std::vector<uint8_t>& data, PVariable& result) { return false; }
 
 		/*
 		 * This hook is executed every time "convertToPacket" is called in case custom conversions are used.
@@ -640,7 +663,7 @@ protected:
 		 * @param result The conversion result.
 		 * @return "true" means the function converted the parameter.
 		 */
-		virtual bool convertToPacketHook(PParameter parameter, PVariable data, std::vector<uint8_t>& result) { return false; }
+		virtual bool convertToPacketHook(RpcConfigurationParameter& parameter, PVariable& data, std::vector<uint8_t>& result) { return false; }
 	// }}}
 };
 

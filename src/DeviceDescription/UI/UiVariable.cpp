@@ -41,9 +41,9 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
     _bl = baseLib;
 }
 
-UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVariable(baseLib)
+UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node* node) : UiVariable(baseLib)
 {
-    for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
     {
         std::string nodeName(subNode->name());
         std::string nodeValue(subNode->value());
@@ -87,7 +87,7 @@ UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node<>* node) : UiVa
         }
         else if(nodeName == "rendering")
         {
-            for(xml_node<>* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
+            for(xml_node* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
             {
                 rendering.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
             }
