@@ -127,6 +127,7 @@ public:
 	std::string clientSettingsPath() { return _clientSettingsPath; }
 	std::string serverSettingsPath() { return _serverSettingsPath; }
 	std::string mqttSettingsPath() { return _mqttSettingsPath; }
+    std::string cloudUserMapPath() { return _cloudUserMapPath; }
 	std::string modulePath() { return _modulePath; }
 	std::string scriptPath() { return _scriptPath; }
 	uint32_t scriptPathPermissions() { return _scriptPathPermissions; }
@@ -257,6 +258,7 @@ private:
 	std::string _clientSettingsPath;
 	std::string _serverSettingsPath;
 	std::string _mqttSettingsPath;
+    std::string _cloudUserMapPath;
 	std::string _modulePath;
 	std::string _scriptPath;
 	uint32_t _scriptPathPermissions = 360;

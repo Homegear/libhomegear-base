@@ -121,6 +121,7 @@ void Settings::reset()
 	_clientSettingsPath = "/etc/homegear/rpcclients.conf";
 	_serverSettingsPath = "/etc/homegear/rpcservers.conf";
 	_mqttSettingsPath = "/etc/homegear/mqtt.conf";
+	_cloudUserMapPath = "/etc/homegear/cloudusermap.json";
 	_modulePath = "/var/lib/homegear/modules/";
 	_scriptPath = "/var/lib/homegear/scripts/";
 	_scriptPathPermissions = 360;
@@ -690,6 +691,12 @@ void Settings::load(std::string filename, std::string executablePath)
 					if(_mqttSettingsPath.empty()) _mqttSettingsPath = "/etc/homegear/mqtt.conf";
 					_bl->out.printDebug("Debug: mqttSettingsPath set to " + _mqttSettingsPath);
 				}
+                else if(name == "cloudusermappath")
+                {
+                    _cloudUserMapPath = value;
+                    if(_cloudUserMapPath.empty()) _cloudUserMapPath = "/etc/homegear/cloudusermap.json";
+                    _bl->out.printDebug("Debug: cloudUserMapPath set to " + _cloudUserMapPath);
+                }
 				else if(name == "modulepath")
 				{
 					_modulePath = value;
