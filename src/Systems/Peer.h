@@ -147,7 +147,7 @@ public:
 	bool hasRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles.find(id) != _roles.end(); }
     void addRole(const Role& role);
 	void addRole(uint64_t id, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo);
-	void removeRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); _roles.erase(id); }
+	void removeRole(uint64_t id);
     Role getRole(uint64_t id) { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); auto rolesIterator = _roles.find(id); if(rolesIterator != _roles.end()) return rolesIterator->second; else return Role(); }
     std::unordered_map<uint64_t, Role> getRoles() { std::lock_guard<std::mutex> rolesGuard(_rolesMutex); return _roles; }
 	std::string getRoleString();

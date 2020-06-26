@@ -177,9 +177,24 @@ void RpcConfigurationParameter::addRole(uint64_t id, RoleDirection direction, bo
     std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
     auto role = Role(id, direction, invert, scale, scaleInfo);
     _roles.emplace(id, role);
-    if(invert) _invert = true;
-    if(scale) _scale = true;
-    if(role.level == RoleLevel::role && !_mainRole.scale && !_mainRole.invert) _mainRole = role;
+    if(role.level == RoleLevel::role && !_mainRole.scale && !_mainRole.invert)
+    {
+        _invert = true;
+        _scale = true;
+        _mainRole = role;
+    }
+}
+
+void RpcConfigurationParameter::removeRole(uint64_t id)
+{
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    _roles.erase(id);
+    if(id == _mainRole.id)
+    {
+        _mainRole = Role();
+        _invert = false;
+        _scale = false;
+    }
 }
 
 bool RpcConfigurationParameter::invert()
