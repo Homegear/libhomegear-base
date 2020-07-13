@@ -261,6 +261,7 @@ bool Acls::fromUser(std::string& userName)
     try
     {
         uint64_t userId = _bl->db->getUserId(userName);
+        if(userId == 0) return false;
         auto groups = _bl->db->getUsersGroups(userId);
         if(groups.empty()) return false;
         return fromGroups(groups);

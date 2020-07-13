@@ -1213,7 +1213,13 @@ void Peer::loadVariables(ICentral* central, std::shared_ptr<Database::DataTable>
                     _firmwareVersion = row->second.at(3)->intValue;
                     break;
                 case 1002:
-                    _deviceType = row->second.at(3)->intValue;
+                    _deviceType = (uint64_t)row->second.at(3)->intValue;
+                    if((_deviceType & 0xFFFFFFFF00000000ull) == 0xFFFFFFFF00000000ull)
+                    {
+                        _bl->out.printWarning("Warning: Converting 32 bit device type to 64 bit.");
+                        _deviceType = _deviceType & 0x00000000FFFFFFFFull;
+                        saveVariable(1002, (int64_t)_deviceType);
+                    }
                     break;
                 case 1003:
                     _firmwareVersionString = row->second.at(4)->textValue;
