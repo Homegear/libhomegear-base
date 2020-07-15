@@ -4364,7 +4364,13 @@ PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
             for(auto& variableIterator : channelIterator.second)
             {
                 if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
-                if(variableIterator.second.getRoom() == roomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+                if(variableIterator.second.getRoom() == 0)
+                {
+                  auto channelRoomId = getRoom(channelIterator.first);
+                  if(channelRoomId == 0) channelRoomId = getRoom(-1);
+                  if(roomId == channelRoomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+                }
+                else if(variableIterator.second.getRoom() == roomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
             }
             if(!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
         }
