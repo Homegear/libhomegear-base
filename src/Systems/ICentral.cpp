@@ -1445,7 +1445,7 @@ PVariable ICentral::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleI
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls)
+PVariable ICentral::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categoryId, bool returnDeviceAssigned, bool checkDeviceAcls, bool checkVariableAcls)
 {
     try
     {
@@ -1457,7 +1457,7 @@ PVariable ICentral::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t categ
         {
             if(checkDeviceAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-            auto result = peer->getVariablesInRoom(clientInfo, categoryId, checkVariableAcls);
+            auto result = peer->getVariablesInRoom(clientInfo, categoryId, returnDeviceAssigned, checkVariableAcls);
             if(!result->structValue->empty()) variables->structValue->emplace(std::to_string(peer->getID()), result);
         }
 

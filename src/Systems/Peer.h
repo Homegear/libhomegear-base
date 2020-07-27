@@ -466,7 +466,7 @@ public:
     virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string>& fields);
     virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
 	virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls);
-    virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
+    virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool returnDeviceAssigned, bool checkAcls);
     virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing = false) = 0;
     virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
     virtual PVariable rssiInfo(PRpcClientInfo clientInfo);

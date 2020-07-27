@@ -4343,7 +4343,7 @@ PVariable Peer::getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, b
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls)
+PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool returnDeviceAssigned, bool checkAcls)
 {
     try
     {
@@ -4366,9 +4366,11 @@ PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
                 if(checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
                 if(variableIterator.second.getRoom() == 0)
                 {
-                  auto channelRoomId = getRoom(channelIterator.first);
-                  if(channelRoomId == 0) channelRoomId = getRoom(-1);
-                  if(roomId == channelRoomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+                  if(returnDeviceAssigned) {
+                    auto channelRoomId = getRoom(channelIterator.first);
+                    if (channelRoomId == 0) channelRoomId = getRoom(-1);
+                    if (roomId == channelRoomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+                  }
                 }
                 else if(variableIterator.second.getRoom() == roomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
             }

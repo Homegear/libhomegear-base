@@ -278,7 +278,7 @@ void Parameter::parseXml(xml_node *node) {
 PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const Role &role, bool isEvent) {
   try {
     std::vector<uint8_t> reversedData;
-    const std::vector<uint8_t> *value;
+    const std::vector<uint8_t> *value = nullptr;
     if (physical->endianess == IPhysical::Endianess::Enum::little) {
       reverseData(data, reversedData);
       value = &reversedData;
@@ -306,7 +306,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
     } else if (logical->type == ILogical::Type::Enum::tAction) {
       return std::make_shared<Variable>(isEvent);
     } else if (id == "RSSI_DEVICE") {
-      int32_t integerValue;
+      int32_t integerValue = 0;
       BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
       std::shared_ptr<Variable> variable(new Variable(integerValue * -1));
       return variable;
@@ -316,7 +316,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
         variable.reset(new Variable(VariableType::tString));
         variable->stringValue.insert(variable->stringValue.end(), value->begin(), value->end());
       } else if (value->size() <= 4) {
-        int32_t integerValue;
+        int32_t integerValue = 0;
         BaseLib::HelperFunctions::memcpyBigEndian(integerValue, *value);
         variable.reset(new Variable(integerValue));
         if (isSigned && !value->empty() && value->size() <= 4) {
