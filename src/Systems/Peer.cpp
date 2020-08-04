@@ -2990,7 +2990,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
             if(fields.find("WIRELESS") != fields.end()) description->structValue->insert(StructElement("WIRELESS", PVariable(new Variable(wireless()))));
 
             auto room = getRoom(-1);
-            if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
+            if((fields.empty() || fields.find("ROOM") != fields.end()) && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
 
             if(fields.find("ROOMNAME") != fields.end() && room != 0)
             {
@@ -3116,7 +3116,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
             if(fields.empty() || fields.find("VERSION") != fields.end()) description->structValue->insert(StructElement("VERSION", PVariable(new Variable(_rpcDevice->version))));
 
             auto room = getRoom(channel);
-            if(fields.find("ROOM") != fields.end() && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
+            if((fields.empty() || fields.find("ROOM") != fields.end()) && room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
 
             if(fields.find("ROOMNAME") != fields.end() && room != 0)
             {
