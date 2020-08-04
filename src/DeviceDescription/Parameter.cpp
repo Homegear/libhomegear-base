@@ -364,7 +364,10 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
         if (!specialValue) {
           if (variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
           else if (variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
-          if (role.invert) variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+          if (role.invert) {
+            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue = !((bool)variable->integerValue);
+            else variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
+          }
           if (role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
         }
       } else if (logical->type == ILogical::Type::Enum::tInteger64) {
@@ -374,7 +377,10 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
         if (!specialValue) {
           if (variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
           else if (variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
-          if (role.invert) variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+          if (role.invert) {
+            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue64 = !((bool)variable->integerValue64);
+            else variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
+          }
           if (role.scale) variable->integerValue64 = std::llround(Math::scale((double)variable->integerValue64, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
         }
       } else if (logical->type == ILogical::Type::Enum::tBoolean) {

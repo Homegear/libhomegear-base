@@ -35,25 +35,22 @@
 #include <map>
 #include <string>
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 
-class UpdateInfo
-{
-public:
-	UpdateInfo();
-	virtual ~UpdateInfo();
-	void reset();
+class UpdateInfo {
+ public:
+  UpdateInfo();
+  virtual ~UpdateInfo();
+  void reset();
 
-	std::mutex updateMutex;
-	int32_t devicesToUpdate = -1;
-	int32_t currentUpdate = -1;
-	uint64_t currentDevice = 0;
-	int32_t currentDeviceProgress = -1;
+  std::mutex updateMutex;
+  int32_t devicesToUpdate = -1;
+  int32_t currentUpdate = -1;
+  uint64_t currentDevice = 0;
+  int32_t currentDeviceProgress = -1;
 
-	std::map<uint64_t, std::pair<int32_t, std::string>> results;
+  std::map<uint64_t, std::pair<int32_t, std::string>> results;
 };
 
 }

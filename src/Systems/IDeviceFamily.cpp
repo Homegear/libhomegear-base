@@ -31,203 +31,167 @@
 #include "IDeviceFamily.h"
 #include "../BaseLib.h"
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 FamilyType IDeviceFamily::type() { return _type; }
-int32_t IDeviceFamily::getFamily(){ return _family; }
+int32_t IDeviceFamily::getFamily() { return _family; }
 std::string IDeviceFamily::getName() { return _name; }
 
-IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name, FamilyType type)
-{
-    _bl = bl;
-    _eventHandler = eventHandler;
-    _family = id;
-    _name = name;
-    _type = type;
-    if(_eventHandler) setEventHandler(_eventHandler);
-    std::string filename = getName();
-    HelperFunctions::toLower(filename);
-    filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
-    _settings.reset(new FamilySettings(bl, id));
-    _bl->out.printInfo("Info: Loading settings from " + filename);
-    _settings->load(filename);
+IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *eventHandler, int32_t id, std::string name, FamilyType type) {
+  _bl = bl;
+  _eventHandler = eventHandler;
+  _family = id;
+  _name = name;
+  _type = type;
+  if (_eventHandler) setEventHandler(_eventHandler);
+  std::string filename = getName();
+  HelperFunctions::toLower(filename);
+  filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
+  _settings.reset(new FamilySettings(bl, id));
+  _bl->out.printInfo("Info: Loading settings from " + filename);
+  _settings->load(filename);
 }
 
-IDeviceFamily::~IDeviceFamily()
-{
-    dispose();
+IDeviceFamily::~IDeviceFamily() {
+  dispose();
 }
 
-bool IDeviceFamily::enabled()
-{
-    std::string settingName = "moduleenabled";
-    FamilySettings::PFamilySetting setting = _settings->get(settingName);
-    if(!setting) return true;
-    return setting->integerValue != 0;
+bool IDeviceFamily::enabled() {
+  std::string settingName = "moduleenabled";
+  FamilySettings::PFamilySetting setting = _settings->get(settingName);
+  if (!setting) return true;
+  return setting->integerValue != 0;
 }
 
-FamilySettings::PFamilySetting IDeviceFamily::getFamilySetting(const std::string& name)
-{
-    return _settings->get(name);
+FamilySettings::PFamilySetting IDeviceFamily::getFamilySetting(const std::string &name) {
+  return _settings->get(name);
 }
 
-void IDeviceFamily::setFamilySetting(const std::string& name, const std::string& value)
-{
-    _settings->set(name, value);
+void IDeviceFamily::setFamilySetting(const std::string &name, const std::string &value) {
+  _settings->set(name, value);
 }
 
-void IDeviceFamily::setFamilySetting(const std::string& name, int32_t value)
-{
-    _settings->set(name, value);
+void IDeviceFamily::setFamilySetting(const std::string &name, int32_t value) {
+  _settings->set(name, value);
 }
 
-void IDeviceFamily::setFamilySetting(const std::string& name, const std::vector<char>& value)
-{
-    _settings->set(name, value);
+void IDeviceFamily::setFamilySetting(const std::string &name, const std::vector<char> &value) {
+  _settings->set(name, value);
 }
 
-void IDeviceFamily::deleteFamilySettingFromDatabase(const std::string& name)
-{
-    _settings->deleteFromDatabase(name);
+void IDeviceFamily::deleteFamilySettingFromDatabase(const std::string &name) {
+  _settings->deleteFromDatabase(name);
 }
 
 //Event handling
-void IDeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onAddWebserverEventHandler(eventHandler, eventHandlers);
+void IDeviceFamily::raiseAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink *eventHandler, std::map<int32_t, PEventHandler> &eventHandlers) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onAddWebserverEventHandler(eventHandler, eventHandlers);
 }
 
-void IDeviceFamily::raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRemoveWebserverEventHandler(eventHandlers);
+void IDeviceFamily::raiseRemoveWebserverEventHandler(std::map<int32_t, PEventHandler> &eventHandlers) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRemoveWebserverEventHandler(eventHandlers);
 }
 
-void IDeviceFamily::raiseRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
+void IDeviceFamily::raiseRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 }
 
-void IDeviceFamily::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
+void IDeviceFamily::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
 }
 
-void IDeviceFamily::raiseRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCNewDevices(ids, deviceDescriptions);
+void IDeviceFamily::raiseRPCNewDevices(std::vector<uint64_t> &ids, PVariable deviceDescriptions) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRPCNewDevices(ids, deviceDescriptions);
 }
 
-void IDeviceFamily::raiseRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
+void IDeviceFamily::raiseRPCDeleteDevices(std::vector<uint64_t> &ids, PVariable deviceAddresses, PVariable deviceInfo) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
-void IDeviceFamily::raiseEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onEvent(source, peerID, channel, variables, values);
+void IDeviceFamily::raiseEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onEvent(source, peerID, channel, variables, values);
 }
 
-void IDeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
-{
-    if(_eventHandler) ((IFamilyEventSink*)_eventHandler)->onRunScript(scriptInfo, wait);
+void IDeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRunScript(scriptInfo, wait);
 }
 
-BaseLib::PVariable IDeviceFamily::raiseInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
-{
-    if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onInvokeRpc(methodName, parameters);
-    else return std::make_shared<BaseLib::Variable>();
+BaseLib::PVariable IDeviceFamily::raiseInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) {
+  if (_eventHandler) return ((IFamilyEventSink *)_eventHandler)->onInvokeRpc(methodName, parameters);
+  else return std::make_shared<BaseLib::Variable>();
 }
 
-int32_t IDeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string& licenseKey)
-{
-    if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onCheckLicense(moduleId, familyId, deviceId, licenseKey);
-    return -1;
+int32_t IDeviceFamily::raiseCheckLicense(int32_t moduleId, int32_t familyId, int32_t deviceId, const std::string &licenseKey) {
+  if (_eventHandler) return ((IFamilyEventSink *)_eventHandler)->onCheckLicense(moduleId, familyId, deviceId, licenseKey);
+  return -1;
 }
 
-uint64_t IDeviceFamily::raiseGetRoomIdByName(std::string& name)
-{
-    if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onGetRoomIdByName(name);
-    return 0;
+uint64_t IDeviceFamily::raiseGetRoomIdByName(std::string &name) {
+  if (_eventHandler) return ((IFamilyEventSink *)_eventHandler)->onGetRoomIdByName(name);
+  return 0;
 }
 
-void IDeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
-{
-    if(_eventHandler) return ((IFamilyEventSink*)_eventHandler)->onDecryptDeviceDescription(moduleId, input, output);
+void IDeviceFamily::raiseDecryptDeviceDescription(int32_t moduleId, const std::vector<char> &input, std::vector<char> &output) {
+  if (_eventHandler) return ((IFamilyEventSink *)_eventHandler)->onDecryptDeviceDescription(moduleId, input, output);
 }
 //End event handling
 
 //Device event handling
-void IDeviceFamily::onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink* eventHandler, std::map<int32_t, PEventHandler>& eventHandlers)
-{
-    raiseAddWebserverEventHandler(eventHandler, eventHandlers);
+void IDeviceFamily::onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink *eventHandler, std::map<int32_t, PEventHandler> &eventHandlers) {
+  raiseAddWebserverEventHandler(eventHandler, eventHandlers);
 }
 
-void IDeviceFamily::onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler>& eventHandlers)
-{
-    raiseRemoveWebserverEventHandler(eventHandlers);
+void IDeviceFamily::onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler> &eventHandlers) {
+  raiseRemoveWebserverEventHandler(eventHandlers);
 }
 
-void IDeviceFamily::onRPCEvent(std::string& source, uint64_t id, int32_t channel, std::string& deviceAddress, std::shared_ptr<std::vector<std::string>>& valueKeys, std::shared_ptr<std::vector<PVariable>>& values)
-{
-    raiseRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
+void IDeviceFamily::onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) {
+  raiseRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
 }
 
-void IDeviceFamily::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint)
-{
-    raiseRPCUpdateDevice(id, channel, address, hint);
+void IDeviceFamily::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) {
+  raiseRPCUpdateDevice(id, channel, address, hint);
 }
 
-void IDeviceFamily::onRPCNewDevices(std::vector<uint64_t>& ids, PVariable deviceDescriptions)
-{
-    raiseRPCNewDevices(ids, deviceDescriptions);
+void IDeviceFamily::onRPCNewDevices(std::vector<uint64_t> &ids, PVariable deviceDescriptions) {
+  raiseRPCNewDevices(ids, deviceDescriptions);
 }
 
-void IDeviceFamily::onRPCDeleteDevices(std::vector<uint64_t>& ids, PVariable deviceAddresses, PVariable deviceInfo)
-{
-    raiseRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
+void IDeviceFamily::onRPCDeleteDevices(std::vector<uint64_t> &ids, PVariable deviceAddresses, PVariable deviceInfo) {
+  raiseRPCDeleteDevices(ids, deviceAddresses, deviceInfo);
 }
 
-void IDeviceFamily::onEvent(std::string& source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>>& variables, std::shared_ptr<std::vector<PVariable>>& values)
-{
-    raiseEvent(source, peerID, channel, variables, values);
+void IDeviceFamily::onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) {
+  raiseEvent(source, peerID, channel, variables, values);
 }
 
-void IDeviceFamily::onRunScript(ScriptEngine::PScriptInfo& scriptInfo, bool wait)
-{
-    raiseRunScript(scriptInfo, wait);
+void IDeviceFamily::onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
+  raiseRunScript(scriptInfo, wait);
 }
 
-BaseLib::PVariable IDeviceFamily::onInvokeRpc(std::string& methodName, BaseLib::PArray& parameters)
-{
-    return raiseInvokeRpc(methodName, parameters);
+BaseLib::PVariable IDeviceFamily::onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) {
+  return raiseInvokeRpc(methodName, parameters);
 }
 
-void IDeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char>& input, std::vector<char>& output)
-{
-    raiseDecryptDeviceDescription(moduleId, input, output);
+void IDeviceFamily::onDecryptDeviceDescription(int32_t moduleId, const std::vector<char> &input, std::vector<char> &output) {
+  raiseDecryptDeviceDescription(moduleId, input, output);
 }
 
-uint64_t IDeviceFamily::onGetRoomIdByName(std::string& name)
-{
-    return raiseGetRoomIdByName(name);
+uint64_t IDeviceFamily::onGetRoomIdByName(std::string &name) {
+  return raiseGetRoomIdByName(name);
 }
 //End Device event handling
 
-void IDeviceFamily::lock()
-{
-    _locked = true;
+void IDeviceFamily::lock() {
+  _locked = true;
 }
 
-void IDeviceFamily::unlock()
-{
-    _locked = false;
+void IDeviceFamily::unlock() {
+  _locked = false;
 }
 
-bool IDeviceFamily::locked()
-{
-    return _locked;
+bool IDeviceFamily::locked() {
+  return _locked;
 }
 
 }
