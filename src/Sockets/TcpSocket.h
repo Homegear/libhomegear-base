@@ -167,6 +167,7 @@ public:
 		std::vector<uint8_t> buffer;
 		std::shared_ptr<TcpSocket> socket;
         std::string clientCertDn;
+        int64_t clientCertExpiration = -1;
         /**
          * Mutex for `busy` and `backlog`
          */

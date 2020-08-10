@@ -428,6 +428,8 @@ std::string TcpSocket::getIpAddress()
 						}
 					}
 					else clientData->clientCertDn = std::string((char*)distinguishedName.data, distinguishedName.size);
+
+					clientData->clientCertExpiration = gnutls_x509_crt_get_expiration_time(clientCertificates);
 				}
 			}
 		}
