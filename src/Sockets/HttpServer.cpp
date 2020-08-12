@@ -169,4 +169,12 @@ std::string HttpServer::getClientCertDn(int32_t clientId)
     return _socket ? _socket->getClientCertDn(clientId) : "";
 }
 
+std::string HttpServer::getClientCertSerial(int32_t clientId) {
+  return _socket ? _socket->getClientCertSerial(clientId) : "";
+}
+
+int64_t HttpServer::getClientCertExpiration(int32_t clientId) {
+  return _socket ? _socket->getClientCertExpiration(clientId) : 0;
+}
+
 }
