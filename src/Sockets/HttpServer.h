@@ -165,6 +165,7 @@ class HttpServer {
   void start(std::string address, std::string port, std::string &listenAddress, size_t processingThreads = 0);
   void stop();
   void waitForStop();
+  void reload();
 
   void send(int32_t clientId, const TcpSocket::TcpPacket &packet, bool closeConnection = true);
   void send(int32_t clientId, const std::vector<char> &packet, bool closeConnection = true);

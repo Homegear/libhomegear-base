@@ -156,6 +156,17 @@ class SharedObjects;
  */
 class TcpSocket : public IQueue {
  public:
+  class CertificateCredentials {
+   private:
+    gnutls_certificate_credentials_t _credentials = nullptr;
+    //"Note that only a pointer to the parameters are stored in the certificate handle, so you must not deallocate the parameters before the certificate is deallocated."
+    gnutls_dh_params_t _dhParams = nullptr;
+   public:
+    CertificateCredentials(gnutls_certificate_credentials_t credentials, gnutls_datum_t dhParams);
+    ~CertificateCredentials();
+    gnutls_certificate_credentials_t get();
+  };
+
   typedef std::vector<uint8_t> TcpPacket;
 
   struct TcpClientData {
@@ -163,6 +174,7 @@ class TcpSocket : public IQueue {
     PFileDescriptor fileDescriptor;
     std::vector<uint8_t> buffer;
     std::shared_ptr<TcpSocket> socket;
+    std::unordered_map<std::string, std::shared_ptr<CertificateCredentials>> certificateCredentials;
     std::string clientCertDn;
     std::string clientCertSerial;
     int64_t clientCertExpiration = -1;
@@ -352,14 +364,14 @@ class TcpSocket : public IQueue {
     _port = port;
   }
   void setUseSSL(bool useSsl) {
-    close();
-    _useSsl = useSsl;
-    if (_useSsl) initSsl();
+    if (!_isServer) {
+      close();
+      _useSsl = useSsl;
+      if (_useSsl) initSsl();
+    }
   }
-  void setCertificates(std::unordered_map<std::string, PCertificateInfo> &certificates) {
-    close();
-    _certificates = certificates;
-  }
+  void setCertificates(std::unordered_map<std::string, PCertificateInfo> &certificates);
+  void reloadCertificates();
   void setVerifyCertificate(bool verifyCertificate) {
     close();
     _verifyCertificate = verifyCertificate;
@@ -377,7 +389,7 @@ class TcpSocket : public IQueue {
     close();
     _verificationHostname = hostname;
   }
-  std::unordered_map<std::string, gnutls_certificate_credentials_t> &getCredentials() { return _x509Credentials; }
+  std::unordered_map<std::string, std::shared_ptr<CertificateCredentials>> getCredentials() { return _certificateCredentials; }
 
   /**
    * Tests in this order and returns false if one of the tests fails:
@@ -595,7 +607,6 @@ class TcpSocket : public IQueue {
   std::string _listenPort;
   int32_t _boundListenPort = -1;
 
-  gnutls_dh_params_t _dhParams = nullptr;
   gnutls_priority_t _tlsPriorityCache = nullptr;
 
   std::atomic_bool _stopServer;
@@ -614,14 +625,22 @@ class TcpSocket : public IQueue {
   std::mutex _socketDescriptorMutex;
   PFileDescriptor _socketDescriptor;
   bool _useSsl = false;
-  std::unordered_map<std::string, gnutls_certificate_credentials_t> _x509Credentials;
+  std::mutex _certificateCredentialsMutex;
+  /**
+   * Contains a copy of the current credentials in case the credentials are replaced while the connection is open.
+   */
+  std::shared_ptr<CertificateCredentials> _currentClientCertificateCredentials;
+  /**
+   * Stores the certificate credentials so that they can be replaced at any time.
+   */
+  std::unordered_map<std::string, std::shared_ptr<CertificateCredentials>> _certificateCredentials;
 
   void getSocketDescriptor();
   void getConnection();
   void getSsl();
   void initSsl();
+  void initTlsPriorityCache();
   void autoConnect();
-  void freeCredentials();
 
   // {{{ For server only
   void bindSocket();
