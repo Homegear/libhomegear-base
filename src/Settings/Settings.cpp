@@ -82,6 +82,7 @@ void Settings::reset() {
   _logfilePath = "/var/log/homegear/";
   _waitForCorrectTime = true;
   _prioritizeThreads = true;
+  _maxTotalThreadCount = 0;
   _secureMemorySize = 65536;
   _workerThreadWindow = 3000;
   _scriptEngineThreadCount = 10;
@@ -358,6 +359,9 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "prioritizethreads") {
           if (HelperFunctions::toLower(value) == "false") _prioritizeThreads = false;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: prioritizeThreads set to " + std::to_string(_prioritizeThreads));
+        } else if (name == "maxtotalthreadcount") {
+          _maxTotalThreadCount = Math::getUnsignedNumber(value);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maxTotalThreadCount set to " + std::to_string(_maxTotalThreadCount));
         } else if (name == "securememorysize") {
           _secureMemorySize = Math::getNumber(value);
           //Allow 0 => disable secure memory. 16384 is minimum size. Values smaller than 16384 are set to 16384 by gcrypt: https://gnupg.org/documentation/manuals/gcrypt-devel/Controlling-the-library.html

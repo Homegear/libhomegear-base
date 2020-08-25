@@ -87,6 +87,7 @@ class Settings {
   std::string logfilePath() { return _logfilePath; }
   bool waitForCorrectTime() { return _waitForCorrectTime; }
   bool prioritizeThreads() { return _prioritizeThreads; }
+  uint32_t maxTotalThreadCount() { return _maxTotalThreadCount; }
   void setPrioritizeThreads(bool value) { _prioritizeThreads = value; }
   uint32_t secureMemorySize() { return _secureMemorySize; }
   uint32_t workerThreadWindow() { return _workerThreadWindow; }
@@ -219,6 +220,7 @@ class Settings {
   std::string _logfilePath;
   bool _waitForCorrectTime = true;
   bool _prioritizeThreads = true;
+  uint32_t _maxTotalThreadCount = 0;
   uint32_t _secureMemorySize = 65536;
   uint32_t _workerThreadWindow = 3000;
   uint32_t _scriptEngineThreadCount = 10;
