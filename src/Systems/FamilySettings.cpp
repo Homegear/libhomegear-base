@@ -292,7 +292,7 @@ void FamilySettings::load(std::string filename) {
         ptr++;
       }
       if (found) {
-        std::string name(input);
+        std::string name(input.data());
         BaseLib::HelperFunctions::toLower(name);
         BaseLib::HelperFunctions::trim(name);
         std::string value(&input[ptr]);
@@ -304,7 +304,7 @@ void FamilySettings::load(std::string filename) {
           setting->stringValue = value;
           if (value == "true" || value == "false") setting->integerValue = (int32_t)(value == "true");
           else setting->integerValue = Math::getNumber(value);
-          setting->binaryValue = _bl->hf.getBinary(value);
+          setting->binaryValue = BaseLib::HelperFunctions::getBinary(value);
           HelperFunctions::toLower(value);
           _settings[name] = std::move(setting);
           _bl->out.printDebug("Debug: Family setting " + name + " set to " + value);
