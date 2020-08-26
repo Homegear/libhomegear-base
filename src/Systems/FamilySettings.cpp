@@ -242,9 +242,9 @@ void FamilySettings::load(std::string filename) {
   try {
     std::unique_lock<std::mutex> settingsGuard(_settingsMutex);
     _settings.clear();
-    char input[1024];
-    FILE *fin;
-    int32_t len, ptr;
+    std::array<char, 1024> input{};
+    FILE *fin = nullptr;
+    int32_t len = 0, ptr = 0;
     bool found = false;
     bool generalSettings = false;
 
@@ -254,11 +254,12 @@ void FamilySettings::load(std::string filename) {
     }
 
     auto settings = std::make_shared<BaseLib::Systems::PhysicalInterfaceSettings>();
-    while (fgets(input, 1024, fin)) {
+    std::string title;
+    while (fgets(input.data(), input.size(), fin)) {
       if (input[0] == '#' || input[0] == '-' || input[0] == '_') continue;
-      len = strlen(input);
+      len = strnlen(input.data(), input.size());
       if (len < 2) continue;
-      if (input[len - 1] == '\n') input[len - 1] = '\0';
+      if (input.at(len - 1) == '\n') input.at(len - 1) = '\0';
       ptr = 0;
       if (input[0] == '[') {
         while (ptr < len) {
@@ -267,9 +268,11 @@ void FamilySettings::load(std::string filename) {
             if (!settings->type.empty()) {
               if (settings->id.empty()) settings->id = settings->type;
               _physicalInterfaceSettings[settings->id] = settings;
+            } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+              _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
             }
-            settings.reset(new BaseLib::Systems::PhysicalInterfaceSettings());
-            std::string title(&input[1]);
+            settings = std::make_shared<BaseLib::Systems::PhysicalInterfaceSettings>();
+            title = std::string(&input[1]);
             _bl->out.printDebug("Debug: Loading section \"" + title + "\"");
             BaseLib::HelperFunctions::toLower(title);
             generalSettings = (title == "general");
@@ -311,6 +314,8 @@ void FamilySettings::load(std::string filename) {
     if (!settings->type.empty()) {
       if (settings->id.empty()) settings->id = settings->type;
       _physicalInterfaceSettings[settings->id] = settings;
+    } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+      _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
     }
 
     fclose(fin);
@@ -328,18 +333,18 @@ void FamilySettings::loadFromDatabase() {
     std::lock_guard<std::mutex> settingsGuard(_settingsMutex);
     std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getFamilyVariables(_familyId);
     if (!rows) return;
-    for (Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row) {
+    for (auto &row : *rows) {
       PFamilySetting setting(new FamilySetting());
-      setting->integerValue = row->second.at(4)->intValue;
-      setting->stringValue = std::move(row->second.at(5)->textValue);
-      setting->binaryValue = std::move(*(row->second.at(6)->binaryValue));
+      setting->integerValue = row.second.at(4)->intValue;
+      setting->stringValue = std::move(row.second.at(5)->textValue);
+      setting->binaryValue = std::move(*(row.second.at(6)->binaryValue));
 
-      std::pair<std::string, std::string> interfacePair = HelperFunctions::splitFirst(row->second.at(3)->textValue, '.');
+      std::pair<std::string, std::string> interfacePair = HelperFunctions::splitFirst(row.second.at(3)->textValue, '.');
       if (interfacePair.second.empty()) {
         std::string &name = BaseLib::HelperFunctions::toLower(interfacePair.first);
         _settings[name] = std::move(setting);
       } else {
-        _settings[row->second.at(3)->textValue] = setting;
+        _settings[row.second.at(3)->textValue] = setting;
         auto settingsIterator = _physicalInterfaceSettings.find(interfacePair.first);
         PPhysicalInterfaceSettings settings;
         if (settingsIterator != _physicalInterfaceSettings.end()) settings = settingsIterator->second;
