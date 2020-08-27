@@ -29,6 +29,7 @@
 */
 
 #include "Physical.h"
+#include "../Encoding/RapidXml/rapidxml.h"
 #include "../BaseLib.h"
 
 namespace BaseLib
@@ -42,17 +43,17 @@ IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type)
 	this->type = type;
 }
 
-IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node<>* node) : IPhysical(baseLib, type)
+IPhysical::IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node* node) : IPhysical(baseLib, type)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			std::string attributeName(attr->name());
 			if(attributeName == "groupId") groupId = std::string(attr->value());
 			else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\\physical*\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -116,7 +117,7 @@ PhysicalNone::Physical(BaseLib::SharedObjects* baseLib) : IPhysical(baseLib, Typ
 
 }
 
-PhysicalNone::Physical(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::none, node)
+PhysicalNone::Physical(BaseLib::SharedObjects* baseLib, xml_node* node) : IPhysical(baseLib, Type::Enum::none, node)
 {
 
 }
@@ -126,7 +127,7 @@ PhysicalInteger::PhysicalInteger(BaseLib::SharedObjects* baseLib) : IPhysical(ba
 
 }
 
-PhysicalInteger::PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tInteger, node)
+PhysicalInteger::PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node* node) : IPhysical(baseLib, Type::Enum::tInteger, node)
 {
 
 }
@@ -136,7 +137,7 @@ PhysicalBoolean::PhysicalBoolean(BaseLib::SharedObjects* baseLib) : IPhysical(ba
 
 }
 
-PhysicalBoolean::PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tBoolean, node)
+PhysicalBoolean::PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node* node) : IPhysical(baseLib, Type::Enum::tBoolean, node)
 {
 
 }
@@ -146,7 +147,7 @@ PhysicalString::PhysicalString(BaseLib::SharedObjects* baseLib) : IPhysical(base
 
 }
 
-PhysicalString::PhysicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) : IPhysical(baseLib, Type::Enum::tString, node)
+PhysicalString::PhysicalString(BaseLib::SharedObjects* baseLib, xml_node* node) : IPhysical(baseLib, Type::Enum::tString, node)
 {
 
 }

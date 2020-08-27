@@ -54,13 +54,13 @@ HomegearUiElements::HomegearUiElements(BaseLib::SharedObjects* baseLib, std::str
 
 void HomegearUiElements::load(std::string xmlFilename)
 {
-    xml_document<> doc;
+    xml_document doc;
     try
     {
         std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
         if(fileStream)
         {
-            uint32_t length;
+            uint32_t length = 0;
             fileStream.seekg(0, std::ios::end);
             length = fileStream.tellg();
             fileStream.seekg(0, std::ios::beg);
@@ -92,11 +92,11 @@ void HomegearUiElements::load(std::string xmlFilename)
     doc.clear();
 }
 
-void HomegearUiElements::parseXML(xml_node<>* node)
+void HomegearUiElements::parseXML(xml_node* node)
 {
     try
     {
-        for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+        for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
         {
             std::string attributeName(attr->name());
             std::string attributeValue(attr->value());
@@ -104,7 +104,7 @@ void HomegearUiElements::parseXML(xml_node<>* node)
             else if(attributeName == "xmlns") {}
             else _bl->out.printWarning("Warning: Unknown attribute for \"homegearUiElements\": " + attributeName);
         }
-        for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+        for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
         {
             std::string nodeName(subNode->name());
             if(nodeName == "homegearUiElement")

@@ -31,136 +31,132 @@
 #include "../BaseLib.h"
 #include "HttpServer.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-HttpServer::HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverInfo)
-{
-	_bl = baseLib;
+HttpServer::HttpServer(BaseLib::SharedObjects *baseLib, HttpServerInfo &serverInfo) {
+  _bl = baseLib;
 
-	TcpSocket::TcpServerInfo tcpServerInfo;
-	tcpServerInfo.useSsl = serverInfo.useSsl;
-	tcpServerInfo.maxConnections = serverInfo.maxConnections;
-    tcpServerInfo.serverThreads = serverInfo.serverThreads;
-	tcpServerInfo.certificates = serverInfo.certificates;
-	tcpServerInfo.dhParamFile = serverInfo.dhParamFile;
-	tcpServerInfo.dhParamData = serverInfo.dhParamData;
-	tcpServerInfo.requireClientCert = serverInfo.requireClientCert;
-    tcpServerInfo.newConnectionCallback = std::bind(&HttpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    tcpServerInfo.connectionClosedCallback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1);
-	tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
+  TcpSocket::TcpServerInfo tcpServerInfo;
+  tcpServerInfo.useSsl = serverInfo.useSsl;
+  tcpServerInfo.connectionBacklogSize = serverInfo.connectionBacklogSize;
+  tcpServerInfo.maxConnections = serverInfo.maxConnections;
+  tcpServerInfo.serverThreads = serverInfo.serverThreads;
+  tcpServerInfo.certificates = serverInfo.certificates;
+  tcpServerInfo.dhParamFile = serverInfo.dhParamFile;
+  tcpServerInfo.dhParamData = serverInfo.dhParamData;
+  tcpServerInfo.requireClientCert = serverInfo.requireClientCert;
+  tcpServerInfo.newConnectionCallback = std::bind(&HttpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+  tcpServerInfo.connectionClosedCallback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1);
+  tcpServerInfo.packetReceivedCallback = std::bind(&HttpServer::packetReceived, this, std::placeholders::_1, std::placeholders::_2);
 
-    _newConnectionCallback.swap(serverInfo.newConnectionCallback);
-    _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
-	_packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
+  _newConnectionCallback.swap(serverInfo.newConnectionCallback);
+  _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
+  _packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
-	_socket = std::make_shared<TcpSocket>(baseLib, tcpServerInfo);
+  _socket = std::make_shared<TcpSocket>(baseLib, tcpServerInfo);
 }
 
-HttpServer::~HttpServer()
-{
-	stop();
+HttpServer::~HttpServer() {
+  stop();
 }
 
-void HttpServer::bind(std::string address, std::string port, std::string& listenAddress)
-{
-	_socket->bindServerSocket(address, port, listenAddress);
+void HttpServer::bind(std::string address, std::string port, std::string &listenAddress) {
+  _socket->bindServerSocket(address, port, listenAddress);
 }
 
-void HttpServer::startPrebound(std::string& listenAddress)
-{
-	_socket->startPreboundServer(listenAddress);
+void HttpServer::startPrebound(std::string &listenAddress, size_t processingThreads) {
+  _socket->startPreboundServer(listenAddress, processingThreads);
 }
 
-void HttpServer::start(std::string address, std::string port, std::string& listenAddress)
-{
-	_socket->startServer(address, port, listenAddress);
+void HttpServer::start(std::string address, std::string port, std::string &listenAddress, size_t processingThreads) {
+  _socket->startServer(address, port, listenAddress, processingThreads);
 }
 
-void HttpServer::stop()
-{
-	_socket->stopServer();
+void HttpServer::stop() {
+  _socket->stopServer();
 }
 
-void HttpServer::waitForStop()
-{
-	_socket->waitForServerStopped();
+void HttpServer::waitForStop() {
+  _socket->waitForServerStopped();
 }
 
-void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t port)
-{
-	try
-	{
-		HttpClientInfo clientInfo;
-		clientInfo.http = std::make_shared<BaseLib::Http>();
-
-        {
-            std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
-            _httpClientInfo[clientId] = std::move(clientInfo);
-        }
-
-        if(_newConnectionCallback) _newConnectionCallback(clientId, address, port);
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
+void HttpServer::reload() {
+  _socket->reloadCertificates();
 }
 
-void HttpServer::connectionClosed(int32_t clientId)
-{
-	try
-	{
-        if(_connectionClosedCallback) _connectionClosedCallback(clientId);
+void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t port) {
+  try {
+    HttpClientInfo clientInfo;
+    clientInfo.http = std::make_shared<BaseLib::Http>();
 
-		std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
-		_httpClientInfo.erase(clientId);
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
+    {
+      std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+      _httpClientInfo[clientId] = std::move(clientInfo);
+    }
+
+    if (_newConnectionCallback) _newConnectionCallback(clientId, address, port);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket& packet)
-{
-	std::shared_ptr<BaseLib::Http> http;
-	try
-	{
-		{
-			std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
-			auto clientIterator = _httpClientInfo.find(clientId);
-			if(clientIterator == _httpClientInfo.end()) return;
-			http = clientIterator->second.http;
-		}
+void HttpServer::connectionClosed(int32_t clientId) {
+  try {
+    if (_connectionClosedCallback) _connectionClosedCallback(clientId);
 
-		uint32_t processedBytes = 0;
-		while(processedBytes < packet.size())
-		{
-			processedBytes = http->process((char*)(packet.data() + processedBytes), packet.size() - processedBytes);
-			if(http->isFinished())
-			{
-				if(_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
-				http->reset();
-			}
-		}
-		return;
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	http->reset();
+    std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+    _httpClientInfo.erase(clientId);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void HttpServer::send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection)
-{
-	_socket->sendToClient(clientId, packet, closeConnection);
+void HttpServer::packetReceived(int32_t clientId, TcpSocket::TcpPacket &packet) {
+  std::shared_ptr<BaseLib::Http> http;
+  try {
+    {
+      std::lock_guard<std::mutex> httpClientInfoGuard(_httpClientInfoMutex);
+      auto clientIterator = _httpClientInfo.find(clientId);
+      if (clientIterator == _httpClientInfo.end()) return;
+      http = clientIterator->second.http;
+    }
+
+    uint32_t processedBytes = 0;
+    while (processedBytes < packet.size()) {
+      processedBytes = http->process((char *)(packet.data() + processedBytes), packet.size() - processedBytes);
+      if (http->isFinished()) {
+        if (_packetReceivedCallback) _packetReceivedCallback(clientId, *http);
+        http->reset();
+      }
+    }
+    return;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  http->reset();
 }
 
-void HttpServer::send(int32_t clientId, const std::vector<char>& packet, bool closeConnection)
-{
-    _socket->sendToClient(clientId, packet, closeConnection);
+void HttpServer::send(int32_t clientId, const TcpSocket::TcpPacket &packet, bool closeConnection) {
+  _socket->sendToClient(clientId, packet, closeConnection);
+}
+
+void HttpServer::send(int32_t clientId, const std::vector<char> &packet, bool closeConnection) {
+  _socket->sendToClient(clientId, packet, closeConnection);
+}
+
+std::string HttpServer::getClientCertDn(int32_t clientId) {
+  return _socket ? _socket->getClientCertDn(clientId) : "";
+}
+
+std::string HttpServer::getClientCertSerial(int32_t clientId) {
+  return _socket ? _socket->getClientCertSerial(clientId) : "";
+}
+
+int64_t HttpServer::getClientCertExpiration(int32_t clientId) {
+  return _socket ? _socket->getClientCertExpiration(clientId) : 0;
 }
 
 }

@@ -42,7 +42,7 @@ void* threadCountTest(void*)
     {
     	std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    return 0;
+    return nullptr;
 }
 
 ThreadManager::ThreadManager()
@@ -66,12 +66,12 @@ void ThreadManager::testMaxThreadCount()
 	while(true)
 	{
 		pthread_t thread;
-		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
+		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0 || _maxThreadCount > 10000)
 		{
 			_stopThreadCountTest = true;
-			for(std::vector<pthread_t>::iterator i = threads.begin(); i != threads.end(); ++i)
+			for(auto i : threads)
 			{
-				pthread_join(*i, nullptr);
+				pthread_join(i, nullptr);
 			}
 			_maxThreadCount = _maxThreadCount * 90 / 100;
 			return;
@@ -109,8 +109,8 @@ bool ThreadManager::checkThreadCount(bool highPriority)
 	if(_maxThreadCount == 0) return true;
 	if(highPriority && _currentThreadCount < (signed)_maxThreadCount) return true;
 	else if(_currentThreadCount < (signed)_maxThreadCount * 90 / 100) return true;
-	if(highPriority) _bl->out.printCritical("Critical: Can't start more threads. Thread limit reached.");
-	else _bl->out.printCritical("Critical: Can't start more low priority threads. 90% of thread limit reached.");
+	if(highPriority) _bl->out.printCritical("Critical: Can't start more threads. Thread limit reached (" + std::to_string(_maxThreadCount) + " threads).");
+	else _bl->out.printCritical("Critical: Can't start more low priority threads. 90% of thread limit reached (" + std::to_string(_currentThreadCount) + " of " + std::to_string(_maxThreadCount) + ").");
 	return false;
 }
 

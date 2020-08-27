@@ -41,9 +41,9 @@ SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node) : SupportedDevice(baseLib)
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node* node) : SupportedDevice(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -51,23 +51,27 @@ SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node<>* no
 		{
 			id = attributeValue;
 		}
+		else if(attributeName == "productId")
+        {
+		    productId = attributeValue;
+        }
 		else _bl->out.printWarning("Warning: Unknown attribute for \"supportedDevice\": " + attributeName);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		std::string value(subNode->value());
 		if(nodeName == "longDescription") longDescription = value;
 		else if(nodeName == "serialPrefix") serialPrefix = value;
 		else if(nodeName == "description") description = value;
-		else if(nodeName == "typeNumber") typeNumber = Math::getUnsignedNumber(value);
+		else if(nodeName == "typeNumber") typeNumber = Math::getUnsignedNumber64(value);
 		else if(nodeName == "minFirmwareVersion") minFirmwareVersion = Math::getUnsignedNumber(value);
 		else if(nodeName == "maxFirmwareVersion") maxFirmwareVersion = Math::getUnsignedNumber(value);
 		else _bl->out.printWarning("Warning: Unknown node in \"supportedDevice\": " + nodeName);
 	}
 }
 
-bool SupportedDevice::matches(uint32_t typeNumber, uint32_t firmwareVersion)
+bool SupportedDevice::matches(uint64_t typeNumber, uint32_t firmwareVersion)
 {
 	try
 	{
@@ -93,10 +97,6 @@ bool SupportedDevice::matches(const std::string& typeId)
 	catch(const std::exception& ex)
 	{
 		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
     return false;
 }

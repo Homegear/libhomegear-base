@@ -36,8 +36,6 @@
 #include "RunProgram.h"
 #include "Function.h"
 
-using namespace rapidxml;
-
 namespace BaseLib
 {
 namespace DeviceDescription
@@ -61,13 +59,13 @@ public:
 		enum Enum { none = 0, always = 1, wakeOnRadio = 2, config = 4, wakeUp = 8, lazyConfig = 16, wakeUp2 = 32 };
 	};
 
-	HomegearDevice(BaseLib::SharedObjects* baseLib);
-	HomegearDevice(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	explicit HomegearDevice(BaseLib::SharedObjects* baseLib);
+	HomegearDevice(BaseLib::SharedObjects* baseLib, xml_node* node);
 	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, bool& oldFormat);
 	HomegearDevice(BaseLib::SharedObjects* baseLib, std::string xmlFilename, std::vector<char>& xml);
 	virtual ~HomegearDevice();
 
-	bool loaded() { return _loaded; }
+	bool loaded() const { return _loaded; }
 
 	// {{{ Shortcuts
 	int32_t dynamicChannelCountIndex = -1;
@@ -91,12 +89,14 @@ public:
 	bool hasBattery = false;
 	uint32_t addressSize = 0;
 	std::string pairingMethod;
+	std::string interface;
 	// }}}
 
 	// {{{ Elements
 	SupportedDevices supportedDevices;
 	PRunProgram runProgram;
 	Functions functions;
+	PVariable metadata;
 	PacketsByMessageType packetsByMessageType;
 	PacketsById packetsById;
 	PacketsByFunction packetsByFunction1;
@@ -112,8 +112,8 @@ public:
     std::string getFilename();
 	int32_t getDynamicChannelCount();
 	void setDynamicChannelCount(int32_t value);
-	PSupportedDevice getType(uint32_t typeNumber);
-	PSupportedDevice getType(uint32_t typeNumber, int32_t firmwareVersion);
+	PSupportedDevice getType(uint64_t typeNumber);
+	PSupportedDevice getType(uint64_t typeNumber, int32_t firmwareVersion);
 	void save(std::string& filename);
 	// }}}
 protected:
@@ -129,15 +129,15 @@ protected:
 	void load(std::string xmlFilename, bool& oldFormat);
 	void load(std::string xmlFilename, std::vector<char>& xml);
 	void postProcessFunction(PFunction& function, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters);
-	void parseXML(xml_node<>* node);
+	void parseXML(xml_node* node);
 	void postLoad();
 
 	// {{{ Helpers
-	void saveDevice(xml_document<>* doc, xml_node<>* parentNode, HomegearDevice* device);
-	void saveFunction(xml_document<>* doc, xml_node<>* parentNode, PFunction& function, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters);
-	void saveParameter(xml_document<>* doc, xml_node<>* parentNode, PParameter& parameter);
-	void saveScenario(xml_document<>* doc, xml_node<>* parentNode, PScenario& scenario);
-	void saveParameterPacket(xml_document<>* doc, xml_node<>* parentNode, std::shared_ptr<Parameter::Packet>& packet);
+	void saveDevice(xml_document* doc, xml_node* parentNode, HomegearDevice* device);
+	void saveFunction(xml_document* doc, xml_node* parentNode, PFunction& function, std::map<std::string, PConfigParameters>& configParameters, std::map<std::string, PVariables>& variables, std::map<std::string, PLinkParameters>& linkParameters);
+	void saveParameter(xml_document* doc, xml_node* parentNode, PParameter& parameter);
+	void saveScenario(xml_document* doc, xml_node* parentNode, PScenario& scenario);
+	void saveParameterPacket(xml_document* doc, xml_node* parentNode, std::shared_ptr<Parameter::Packet>& packet);
 	// }}}
 };
 }

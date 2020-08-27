@@ -31,172 +31,139 @@
 #include "DeviceFamily.h"
 #include "../BaseLib.h"
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 std::shared_ptr<DeviceDescription::Devices> DeviceFamily::getRpcDevices() { return _rpcDevices; }
 std::shared_ptr<ICentral> DeviceFamily::getCentral() { return _central; }
 bool DeviceFamily::hasPhysicalInterface() { return true; }
 std::shared_ptr<PhysicalInterfaces> DeviceFamily::physicalInterfaces() { return _physicalInterfaces; }
 
-DeviceFamily::DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name) : IDeviceFamily(bl, eventHandler, id, name, FamilyType::sharedObject)
-{
-	_physicalInterfaces.reset(new PhysicalInterfaces(bl, id, std::map<std::string, PPhysicalInterfaceSettings>()));
-	_rpcDevices.reset(new DeviceDescription::Devices(bl, this, id));
+DeviceFamily::DeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *eventHandler, int32_t id, std::string name) : IDeviceFamily(bl, eventHandler, id, name, FamilyType::sharedObject) {
+  _physicalInterfaces.reset(new PhysicalInterfaces(bl, id, std::map<std::string, PPhysicalInterfaceSettings>()));
+  _rpcDevices.reset(new DeviceDescription::Devices(bl, this, id));
 }
 
-bool DeviceFamily::init()
-{
-	_bl->out.printInfo("Loading XML RPC devices...");
-	_rpcDevices->load();
-	if(_rpcDevices->empty()) return false;
-	return true;
+bool DeviceFamily::init() {
+  _bl->out.printInfo("Loading XML RPC devices...");
+  _rpcDevices->load();
+  if (_rpcDevices->empty()) return false;
+  return true;
 }
 
-bool DeviceFamily::lifetick()
-{
-	if(_physicalInterfaces) return _physicalInterfaces->lifetick();
-	return true;
+bool DeviceFamily::lifetick() {
+  if (_physicalInterfaces) return _physicalInterfaces->lifetick();
+  return true;
 }
 
-void DeviceFamily::load()
-{
-	try
-	{
-		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getDevices((uint32_t)getFamily());
-		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
-		{
-			uint32_t deviceId = row->second.at(0)->intValue;
-			_bl->out.printMessage("Loading device " + std::to_string(deviceId));
-			int32_t address = row->second.at(1)->intValue;
-			std::string serialNumber = row->second.at(2)->textValue;
-			uint32_t deviceType = row->second.at(3)->intValue;
+void DeviceFamily::load() {
+  try {
+    std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getDevices((uint32_t)getFamily());
+    for (BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row) {
+      uint32_t deviceId = row->second.at(0)->intValue;
+      _bl->out.printMessage("Loading device " + std::to_string(deviceId));
+      int32_t address = row->second.at(1)->intValue;
+      std::string serialNumber = row->second.at(2)->textValue;
+      uint32_t deviceType = row->second.at(3)->intValue;
 
-			if(deviceType == 0xFFFFFFFD)
-			{
-				_central = initializeCentral(deviceId, address, serialNumber);
-				_central->load();
-			}
-		}
-		if(!_central)
-		{
-			createCentral();
-			_central->save(true);
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+      if (deviceType == 0xFFFFFFFD) {
+        _central = initializeCentral(deviceId, address, serialNumber);
+        _central->load();
+      }
     }
+    if (!_central) {
+      createCentral();
+      _central->save(true);
+    }
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void DeviceFamily::save(bool full)
-{
-	try
-	{
-		_bl->out.printMessage("(Shutdown) => Saving devices");
-		if(_central)
-		{
-			_bl->out.printMessage("(Shutdown) => Saving " + getName() + " central...");
-			_central->save(full);
-		}
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+void DeviceFamily::save(bool full) {
+  try {
+    _bl->out.printMessage("(Shutdown) => Saving devices");
+    if (_central) {
+      _bl->out.printMessage("(Shutdown) => Saving " + getName() + " central...");
+      _central->save(full);
     }
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void DeviceFamily::dispose()
-{
-	try
-	{
-		if(_disposed) return;
-		_disposed = true;
+void DeviceFamily::dispose() {
+  try {
+    if (_disposed) return;
+    _disposed = true;
 
-		_physicalInterfaces->dispose();
+    _physicalInterfaces->dispose();
 
-		_bl->out.printDebug("Debug: Disposing central...");
-		if(_central) _central->dispose(false);
+    _bl->out.printDebug("Debug: Disposing central...");
+    if (_central) _central->dispose(false);
 
-		_physicalInterfaces.reset();
-		_settings->dispose();
-		_settings.reset();
+    _physicalInterfaces.reset();
+    _settings->dispose();
+    _settings.reset();
 
-		_central.reset();
-		_rpcDevices.reset();
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+    _central.reset();
+    _rpcDevices.reset();
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void DeviceFamily::homegearStarted()
-{
-	try
-	{
-		if(_central) _central->homegearStarted();
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+void DeviceFamily::homegearStarted() {
+  try {
+    if (_central) _central->homegearStarted();
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-void DeviceFamily::homegearShuttingDown()
-{
-	try
-	{
-		if(_central) _central->homegearShuttingDown();
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+void DeviceFamily::homegearShuttingDown() {
+  try {
+    if (_central) _central->homegearShuttingDown();
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
 }
 
-std::string DeviceFamily::handleCliCommand(std::string& command)
-{
-	try
-	{
-		std::ostringstream stringStream;
-		if(!_central) return "Error: No central exists.\n";
-		return _central->handleCliCommand(command);
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    return "Error executing command. See log file for more details.\n";
+std::string DeviceFamily::handleCliCommand(std::string &command) {
+  try {
+    std::ostringstream stringStream;
+    if (!_central) return "Error: No central exists.\n";
+    return _central->handleCliCommand(command);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return "Error executing command. See log file for more details.\n";
 }
 
 // {{{ RPC
-std::shared_ptr<Variable> DeviceFamily::getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type)
-{
-	try
-	{
-		if(_rpcDevices) return _rpcDevices->getParamsetDescription(clientInfo, deviceId, firmwareVersion, channel, type);
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    return Variable::createError(-32500, "Unknown application error.");
+std::shared_ptr<Variable> DeviceFamily::getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type) {
+  try {
+    if (_rpcDevices) return _rpcDevices->getParamsetDescription(clientInfo, deviceId, firmwareVersion, channel, type);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields)
-{
-	try
-	{
-		if(_rpcDevices) return _rpcDevices->listKnownDeviceTypes(clientInfo, channels, fields);
-	}
-	catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    return Variable::createError(-32500, "Unknown application error.");
+PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string> &fields) {
+  try {
+    if (_rpcDevices) return _rpcDevices->listKnownDeviceTypes(clientInfo, channels, fields);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return Variable::createError(-32500, "Unknown application error.");
 }
 // }}}
 

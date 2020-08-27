@@ -33,7 +33,6 @@
 
 #include "Parameter.h"
 #include "Scenario.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 
 using namespace rapidxml;
@@ -67,7 +66,7 @@ public:
 	explicit ParameterGroup(BaseLib::SharedObjects* baseLib);
 	virtual ~ParameterGroup();
 
-	virtual void parseXml(xml_node<>* node);
+	virtual void parseXml(xml_node* node);
 
 	//Attributes
 	std::string id;
@@ -90,8 +89,8 @@ public:
 protected:
 	BaseLib::SharedObjects* _bl = nullptr;
 
-	void parseAttributes(xml_node<>* node);
-	void parseElements(xml_node<>* node);
+	void parseAttributes(xml_node* node);
+	void parseElements(xml_node* node);
 };
 
 class ConfigParameters : public ParameterGroup
@@ -120,7 +119,7 @@ public:
 	explicit LinkParameters(BaseLib::SharedObjects* baseLib);
 	~LinkParameters() override = default;
 
-    void parseXml(xml_node<>* node) override;
+    void parseXml(xml_node* node) override;
 
 	//Helpers
 	Type::Enum type() const override { return Type::Enum::link; };

@@ -61,11 +61,6 @@ std::string SharedObjects::version()
 	return VERSION;
 }
 
-void SharedObjects::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
-{
-	out.setErrorCallback(errorCallback);
-}
-
 int64_t SharedObjects::getStartTime()
 {
     return _startTime;

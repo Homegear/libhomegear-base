@@ -38,18 +38,16 @@
 
 #include <atomic>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 /**
  * Exception class for the HTTP server.
  *
  * @see HttpServer
  */
-class HttpServerException : public Exception
-{
-public:
-	HttpServerException(std::string message) : Exception(message) {}
+class HttpServerException : public Exception {
+ public:
+  HttpServerException(std::string message) : Exception(message) {}
 };
 
 /**
@@ -123,72 +121,76 @@ public:
  *
  */
 class HttpServer {
-public:
-	struct HttpServerInfo
-	{
-		bool useSsl = false;
-		uint32_t maxConnections = 10;
-		uint32_t serverThreads = 1;
-		std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
-		std::string dhParamFile;
-		std::string dhParamData;
-		bool requireClientCert = false;
+ public:
+  struct HttpServerInfo {
+    bool useSsl = false;
+    uint32_t connectionBacklogSize = 100;
+    uint32_t maxConnections = 10;
+    uint32_t serverThreads = 1;
+    std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
+    std::string dhParamFile;
+    std::string dhParamData;
+    bool requireClientCert = false;
 
-        std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
-        std::function<void(int32_t clientId)> connectionClosedCallback;
-		std::function<void(int32_t clientId, Http& http)> packetReceivedCallback;
-	};
+    std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
+    std::function<void(int32_t clientId)> connectionClosedCallback;
+    std::function<void(int32_t clientId, Http &http)> packetReceivedCallback;
+  };
 
-	HttpServer(BaseLib::SharedObjects* baseLib, HttpServerInfo& serverInfo);
-	virtual ~HttpServer();
+  HttpServer(BaseLib::SharedObjects *baseLib, HttpServerInfo &serverInfo);
+  virtual ~HttpServer();
 
-	/**
-	 * Binds a socket to an IP address and a port. This splits up the start process to be able to listen on ports lower
-	 * than 1024 and do a privilege drop. Call startPrebound() to start listening. Don't call start() when using
-	 * pre-binding as this recreates the socket.
-	 *
-	 * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
-     * @param port The port number to bind the server to.
-	 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
-	 */
-	void bind(std::string address, std::string port, std::string& listenAddress);
+  /**
+   * Binds a socket to an IP address and a port. This splits up the start process to be able to listen on ports lower
+   * than 1024 and do a privilege drop. Call startPrebound() to start listening. Don't call start() when using
+   * pre-binding as this recreates the socket.
+   *
+   * @param address The address to bind the server to (e. g. `::` or `0.0.0.0`).
+   * @param port The port number to bind the server to.
+   * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+   */
+  void bind(std::string address, std::string port, std::string &listenAddress);
 
-	/**
-	 * Starts listening on the already bound socket (created with bind()). This splits up the start process to be able
-	 * to listen on ports lower than 1024 and do a privilege drop. Don't call startServer() when using pre-binding as
-	 * this recreates the socket.
-	 *
-	 * @see bind
-	 *
-	 * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
-	 */
-	void startPrebound(std::string& listenAddress);
+  /**
+   * Starts listening on the already bound socket (created with bind()). This splits up the start process to be able
+   * to listen on ports lower than 1024 and do a privilege drop. Don't call startServer() when using pre-binding as
+   * this recreates the socket.
+   *
+   * @see bind
+   *
+   * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
+   */
+  void startPrebound(std::string &listenAddress, size_t processingThreads = 0);
 
-	void start(std::string address, std::string port, std::string& listenAddress);
-	void stop();
-	void waitForStop();
+  void start(std::string address, std::string port, std::string &listenAddress, size_t processingThreads = 0);
+  void stop();
+  void waitForStop();
+  void reload();
 
-	void send(int32_t clientId, const TcpSocket::TcpPacket& packet, bool closeConnection = true);
-	void send(int32_t clientId, const std::vector<char>& packet, bool closeConnection = true);
-protected:
-	struct HttpClientInfo
-	{
-		std::shared_ptr<Http> http;
-	};
+  void send(int32_t clientId, const TcpSocket::TcpPacket &packet, bool closeConnection = true);
+  void send(int32_t clientId, const std::vector<char> &packet, bool closeConnection = true);
 
-	BaseLib::SharedObjects* _bl = nullptr;
-	std::shared_ptr<TcpSocket> _socket;
+  std::string getClientCertDn(int32_t clientId);
+  std::string getClientCertSerial(int32_t clientId);
+  int64_t getClientCertExpiration(int32_t clientId);
+ protected:
+  struct HttpClientInfo {
+    std::shared_ptr<Http> http;
+  };
 
-	std::mutex _httpClientInfoMutex;
-	std::unordered_map<int32_t, HttpClientInfo> _httpClientInfo;
+  BaseLib::SharedObjects *_bl = nullptr;
+  std::shared_ptr<TcpSocket> _socket;
 
-    std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
-    std::function<void(int32_t clientId)> _connectionClosedCallback;
-	std::function<void(int32_t clientId, Http& http)> _packetReceivedCallback;
+  std::mutex _httpClientInfoMutex;
+  std::unordered_map<int32_t, HttpClientInfo> _httpClientInfo;
 
-	void newConnection(int32_t clientId, std::string address, uint16_t port);
-	void connectionClosed(int32_t clientId);
-	void packetReceived(int32_t clientId, TcpSocket::TcpPacket& packet);
+  std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
+  std::function<void(int32_t clientId)> _connectionClosedCallback;
+  std::function<void(int32_t clientId, Http &http)> _packetReceivedCallback;
+
+  void newConnection(int32_t clientId, std::string address, uint16_t port);
+  void connectionClosed(int32_t clientId);
+  void packetReceived(int32_t clientId, TcpSocket::TcpPacket &packet);
 };
 
 }

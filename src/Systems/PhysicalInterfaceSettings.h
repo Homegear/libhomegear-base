@@ -36,79 +36,77 @@
 #include <unordered_map>
 #include <memory>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class Variable;
 typedef std::shared_ptr<Variable> PVariable;
 
-namespace Systems
-{
+namespace Systems {
 
-class GPIOSetting
-{
-public:
-	GPIOSetting() {}
-	virtual ~GPIOSetting() {}
+class GPIOSetting {
+ public:
+  GPIOSetting() {}
+  virtual ~GPIOSetting() {}
 
-	int32_t number = -1;
-	std::string path;
+  int32_t number = -1;
+  std::string path;
 };
 
-class PhysicalInterfaceSettings
-{
-public:
-	PhysicalInterfaceSettings() = default;
-	virtual ~PhysicalInterfaceSettings() = default;
-    std::unordered_map<std::string, PVariable> all;
-	std::string id;
-	bool isDefault = false;
-	std::string device;
-	std::string type;
-	uint32_t responseDelay = 95;
-	std::map<uint32_t, GPIOSetting> gpio;
-	int32_t baudrate = -1;
-	int32_t oscillatorFrequency = -1;
-	int32_t txPowerSetting = -1;
-	int32_t interruptPin = -1;
-	uint32_t stackPosition = 0;
-	std::string host;
-	std::string port;
-	std::string port2;
-	std::string port3;
-	std::string portKeepAlive;
-	uint32_t address = 0;
-	std::string listenIp;
-	std::string listenPort;
-	std::string lanKey;
-	bool ssl = false;
-	std::string caFile;
-	std::string certFile;
-	std::string keyFile;
-	bool verifyCertificate = true;
-	bool useIdForHostnameVerification = false;
-	bool oneWay = false;
-	bool fastSending = false;
-	bool sendFix = false;
-	uint32_t timeout = 10;
-	uint32_t interval = 100;
-	uint32_t waitForBus = 100;
-	uint32_t watchdogTimeout = 1000;
-	int32_t enableRXValue = -1;
-	int32_t enableTXValue = -1;
-	int32_t listenThreadPriority = -1;
-	int32_t listenThreadPolicy = SCHED_OTHER;
-	std::string ttsProgram;
-	std::string dataPath;
-	std::string user;
-	std::string password;
-	std::string passwordS21;
-	std::string passwordS22;
-	std::string passwordS23;
-	std::string additionalCommands;
-	std::string mode;
-    std::string serialNumber;
-	std::string uuid;
+class PhysicalInterfaceSettings {
+ public:
+  PhysicalInterfaceSettings() = default;
+  virtual ~PhysicalInterfaceSettings() = default;
+  std::unordered_map<std::string, PVariable> all;
+  std::string id;
+  bool isDefault = false;
+  std::string device;
+  std::string type;
+  uint32_t responseDelay = 95;
+  std::map<uint32_t, GPIOSetting> gpio;
+  int32_t baudrate = -1;
+  bool openWriteonly = false;
+  int32_t oscillatorFrequency = -1;
+  int32_t txPowerSetting = -1;
+  int32_t interruptPin = -1;
+  uint32_t stackPosition = 0;
+  std::string host;
+  std::string port;
+  std::string port2;
+  std::string port3;
+  std::string port4;
+  std::string portKeepAlive;
+  uint32_t address = 0;
+  std::string listenIp;
+  std::string listenPort;
+  std::string lanKey;
+  bool ssl = false;
+  std::string caFile;
+  std::string certFile;
+  std::string keyFile;
+  bool verifyCertificate = true;
+  bool useIdForHostnameVerification = false;
+  bool oneWay = false;
+  bool fastSending = false;
+  bool sendFix = false;
+  uint32_t timeout = 10;
+  uint32_t interval = 100;
+  uint32_t waitForBus = 100;
+  uint32_t watchdogTimeout = 1000;
+  int32_t enableRXValue = -1;
+  int32_t enableTXValue = -1;
+  int32_t listenThreadPriority = -1;
+  int32_t listenThreadPolicy = SCHED_OTHER;
+  std::string ttsProgram;
+  std::string dataPath;
+  std::string user;
+  std::string password;
+  std::string passwordS21;
+  std::string passwordS22;
+  std::string passwordS23;
+  std::string additionalCommands;
+  std::string mode;
+  std::string serialNumber;
+  std::string uuid;
 };
 
 typedef std::shared_ptr<PhysicalInterfaceSettings> PPhysicalInterfaceSettings;

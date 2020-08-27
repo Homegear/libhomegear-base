@@ -205,9 +205,9 @@ public:
 	/**
 	 * Main constructor.
 	 *
-	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time.
+	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time. This is only relevant when using the thread manager.
 	 */
-	SharedObjects(bool testMaxThreadCount = false);
+	explicit SharedObjects(bool testMaxThreadCount = false);
 
 	/**
 	 * Destructor.
@@ -219,11 +219,6 @@ public:
 	 * @return The Homegear version string.
 	 */
 	static std::string version();
-
-	/**
-	 * Sets a callback function which will be called for all error messages. First parameter is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
-	 */
-	void setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback);
 private:
 	int64_t _startTime = 0;
 };

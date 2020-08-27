@@ -31,10 +31,14 @@
 #ifndef UITEXT_H_
 #define UITEXT_H_
 
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <map>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -54,7 +58,7 @@ class UiText
 {
 public:
     UiText(BaseLib::SharedObjects* baseLib);
-    UiText(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+    UiText(BaseLib::SharedObjects* baseLib, xml_node* node);
     UiText(UiText const& rhs);
     virtual ~UiText() = default;
 

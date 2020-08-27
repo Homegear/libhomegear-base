@@ -32,11 +32,8 @@
 #define DEVICEFUNCTION_H_
 
 #include "ParameterGroup.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <set>
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -61,7 +58,7 @@ public:
 	};
 
 	Function(BaseLib::SharedObjects* baseLib);
-	Function(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& channel);
+	Function(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& channel);
 	virtual ~Function() {}
 
 	//Attributes
@@ -86,6 +83,8 @@ public:
 	std::string defaultGroupedLinkScenarioElementId2;
 	bool hasGroup = false;
 	std::string groupId;
+	std::unordered_map<std::string, BaseLib::PVariable> linkSenderAttributes;
+    std::unordered_map<std::string, BaseLib::PVariable> linkReceiverAttributes;
 	LinkFunctionTypes linkSenderFunctionTypes;
 	LinkFunctionTypes linkReceiverFunctionTypes;
 

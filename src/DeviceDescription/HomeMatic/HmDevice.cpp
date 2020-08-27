@@ -38,9 +38,9 @@ namespace BaseLib
 namespace HmDeviceDescription
 {
 
-DescriptionField::DescriptionField(xml_node<>* node)
+DescriptionField::DescriptionField(xml_node* node)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -48,15 +48,15 @@ DescriptionField::DescriptionField(xml_node<>* node)
 		else if(attributeName == "value") value = attributeValue;
 		else std::cerr << "Warning: Unknown attribute for \"field\": " << attributeName << std::endl;
 	}
-	for(xml_node<>* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
+	for(xml_node* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
 	{
 		std::cerr << "Warning: Unknown node in \"field\": " + std::string(subnode->name()) << std::endl;
 	}
 }
 
-ParameterDescription::ParameterDescription(xml_node<>* node)
+ParameterDescription::ParameterDescription(xml_node* node)
 {
-	for(xml_node<>* descriptionNode = node->first_node(); descriptionNode; descriptionNode = descriptionNode->next_sibling())
+	for(xml_node* descriptionNode = node->first_node(); descriptionNode; descriptionNode = descriptionNode->next_sibling())
 	{
 		std::string nodeName(descriptionNode->name());
 		if(nodeName == "field")
@@ -73,9 +73,9 @@ DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceFrame(baseLib)
+DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node* node) : DeviceFrame(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -143,7 +143,7 @@ DeviceFrame::DeviceFrame(BaseLib::SharedObjects* baseLib, xml_node<>* node) : De
 		else if(attributeName == "metastring2") metaString2 = attributeValue;
 		else _bl->out.printWarning("Warning: Unknown attribute for \"frame\": " + attributeName);
 	}
-	for(xml_node<>* frameNode = node->first_node(); frameNode; frameNode = frameNode->next_sibling())
+	for(xml_node* frameNode = node->first_node(); frameNode; frameNode = frameNode->next_sibling())
 	{
 		std::string nodeName(frameNode->name());
 		if(nodeName == "parameter")
@@ -160,24 +160,24 @@ DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceProgram(baseLib)
+DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node* node) : DeviceProgram(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		_bl->out.printWarning("Warning: Unknown attribute for \"run_program\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* programNode = node->first_node(); programNode; programNode = programNode->next_sibling())
+	for(xml_node* programNode = node->first_node(); programNode; programNode = programNode->next_sibling())
 	{
 		std::string nodeName(programNode->name());
 		if(nodeName == "path")
 		{
-			for(xml_attribute<>* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"path\": " + std::string(attr->name()));
+			for(xml_attribute* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"path\": " + std::string(attr->name()));
 			path = std::string(programNode->value());
 		}
 		else if(nodeName == "arguments")
 		{
-			for(xml_attribute<>* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"arguments\": " + std::string(attr->name()));
-			for(xml_node<>* argumentNode = programNode->first_node(); argumentNode; argumentNode = argumentNode->next_sibling())
+			for(xml_attribute* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"arguments\": " + std::string(attr->name()));
+			for(xml_node* argumentNode = programNode->first_node(); argumentNode; argumentNode = argumentNode->next_sibling())
 			{
 				if(std::string(argumentNode->name()) == "argument") arguments.push_back(std::string(argumentNode->value()));
 				else _bl->out.printWarning("Warning: Unknown node for \"arguments\": " + std::string(argumentNode->name()));
@@ -185,7 +185,7 @@ DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 		}
 		else if(nodeName == "start_type")
 		{
-			for(xml_attribute<>* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"startType\": " + std::string(attr->name()));
+			for(xml_attribute* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"startType\": " + std::string(attr->name()));
 			std::string value(programNode->value());
 			_bl->hf.toLower(value);
 			if(value == "once") startType = StartType::Enum::once;
@@ -195,7 +195,7 @@ DeviceProgram::DeviceProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 		}
 		else if(nodeName == "interval")
 		{
-			for(xml_attribute<>* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"interval\": " + std::string(attr->name()));
+			for(xml_attribute* attr = programNode->first_attribute(); attr; attr = attr->next_attribute()) _bl->out.printWarning("Warning: Unknown attribute for \"interval\": " + std::string(attr->name()));
 			std::string value(programNode->value());
 			interval = Math::getUnsignedNumber(value);
 		}
@@ -235,6 +235,21 @@ void ParameterConversion::fromPacket(PVariable value)
 			{
 				if(value->integerValue == valueFalse) value->booleanValue = false;
 				if(value->integerValue == valueTrue || value->integerValue >= threshold) value->booleanValue = true;
+			}
+			if(invert) value->booleanValue = !value->booleanValue;
+		}
+		else if(type == Type::Enum::booleanDecimal)
+		{
+			value->type = VariableType::tBoolean;
+			if(valueTrue == 0 && valueFalse == 0)
+			{
+				if(value->floatValue >= threshold) value->booleanValue = true;
+				else value->booleanValue = false;
+			}
+			else
+			{
+				if(value->floatValue == valueFalse) value->booleanValue = false;
+				if(value->floatValue == valueTrue || value->floatValue >= threshold) value->booleanValue = true;
 			}
 			if(invert) value->booleanValue = !value->booleanValue;
 		}
@@ -396,6 +411,15 @@ void ParameterConversion::toPacket(PVariable value)
 			else value->integerValue = valueFalse;
 			value->type = VariableType::tInteger;
 		}
+		else if(type == Type::Enum::booleanDecimal)
+		{
+			if(value->stringValue.size() > 0 && value->stringValue == "true") value->booleanValue = true;
+			if(invert) value->booleanValue = !value->booleanValue;
+			if(valueTrue == 0 && valueFalse == 0) value->floatValue = (double)value->booleanValue;
+			else if(value->booleanValue) value->floatValue = valueTrue;
+			else value->floatValue = valueFalse;
+			value->type = VariableType::tFloat;
+		}
 		else if(type == Type::Enum::booleanString)
 		{
 			if(value->stringValue.size() > 0 && value->stringValue == "true") value->booleanValue = true;
@@ -519,9 +543,9 @@ ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMa
 	_parameter = parameter;
 }
 
-ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter, xml_node<>* node) : ParameterConversion(baseLib, parameter)
+ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMaticParameter* parameter, xml_node* node) : ParameterConversion(baseLib, parameter)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -532,6 +556,7 @@ ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMa
 			else if(attributeValue == "float_uint8_string_scale") type = Type::Enum::floatUint8StringScale;
 			else if(attributeValue == "integer_integer_map") type = Type::Enum::integerIntegerMap;
 			else if(attributeValue == "boolean_integer") type = Type::Enum::booleanInteger;
+			else if(attributeValue == "boolean_decimal") type = Type::Enum::booleanDecimal;
 			else if(attributeValue == "boolean_string") type = Type::Enum::booleanString;
 			else if(attributeValue == "float_configtime") type = Type::Enum::floatConfigTime;
 			else if(attributeValue == "option_integer") type = Type::Enum::optionInteger;
@@ -592,14 +617,14 @@ ParameterConversion::ParameterConversion(BaseLib::SharedObjects* baseLib, HomeMa
 		else if(attributeName == "invert") { if(attributeValue == "true") invert = true; }
 		else _bl->out.printWarning("Warning: Unknown attribute for \"conversion\": " + attributeName);
 	}
-	for(xml_node<>* conversionNode = node->first_node(); conversionNode; conversionNode = conversionNode->next_sibling())
+	for(xml_node* conversionNode = node->first_node(); conversionNode; conversionNode = conversionNode->next_sibling())
 	{
 		std::string nodeName(conversionNode->name());
 		if(nodeName == "value_map" && (type == Type::Enum::integerIntegerMap || type == Type::Enum::optionInteger))
 		{
 			int32_t deviceValue = 0;
 			int32_t parameterValue = 0;
-			for(xml_attribute<>* valueMapAttr = conversionNode->first_attribute(); valueMapAttr; valueMapAttr = valueMapAttr->next_attribute())
+			for(xml_attribute* valueMapAttr = conversionNode->first_attribute(); valueMapAttr; valueMapAttr = valueMapAttr->next_attribute())
 			{
 				std::string valueMapAttributeName(valueMapAttr->name());
 				std::string valueMapAttributeValue(valueMapAttr->value());
@@ -1057,9 +1082,9 @@ HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib)
 	physicalParameter = std::shared_ptr<PhysicalParameter>(new PhysicalParameter());
 }
 
-HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node, bool checkForID) : HomeMaticParameter(baseLib)
+HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node* node, bool checkForID) : HomeMaticParameter(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -1151,7 +1176,7 @@ HomeMaticParameter::HomeMaticParameter(BaseLib::SharedObjects* baseLib, xml_node
 		else _bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + attributeName);
 	}
 	if(checkForID && id.empty()) _bl->out.printError("Error: Parameter has no id. Index: " + std::to_string(index));
-	for(xml_node<>* parameterNode = node->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
+	for(xml_node* parameterNode = node->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
 	{
 		std::string nodeName(parameterNode->name());
 		if(nodeName == "logical")
@@ -1338,9 +1363,9 @@ DeviceType::DeviceType(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-DeviceType::DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* node) : DeviceType(baseLib)
+DeviceType::DeviceType(BaseLib::SharedObjects* baseLib, xml_node* node) : DeviceType(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -1350,7 +1375,7 @@ DeviceType::DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Devi
 		else if(attributeName == "updatable") { if(attributeValue == "true") updatable = true; }
 		else _bl->out.printWarning("Warning: Unknown attribute for \"type\": " + attributeName);
 	}
-	for(xml_node<>* typeNode = node->first_node(); typeNode; typeNode = typeNode->next_sibling())
+	for(xml_node* typeNode = node->first_node(); typeNode; typeNode = typeNode->next_sibling())
 	{
 		std::string nodeName(typeNode->name());
 		if(nodeName == "parameter")
@@ -1365,7 +1390,7 @@ DeviceType::DeviceType(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Devi
 		}
 		else if(nodeName == "firmware")
 		{
-			for(xml_attribute<>* attr = typeNode->first_attribute(); attr; attr = attr->next_attribute())
+			for(xml_attribute* attr = typeNode->first_attribute(); attr; attr = attr->next_attribute())
 			{
 				std::string attributeName(attr->name());
 				std::string attributeValue(attr->value());
@@ -1393,7 +1418,7 @@ ParameterSet::ParameterSet(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-ParameterSet::ParameterSet(BaseLib::SharedObjects* baseLib, xml_node<>* parameterSetNode) : ParameterSet(baseLib)
+ParameterSet::ParameterSet(BaseLib::SharedObjects* baseLib, xml_node* parameterSetNode) : ParameterSet(baseLib)
 {
 	init(parameterSetNode);
 }
@@ -1509,9 +1534,9 @@ std::shared_ptr<HomeMaticParameter> ParameterSet::getParameter(std::string id)
 	return std::shared_ptr<HomeMaticParameter>();
 }
 
-void ParameterSet::init(xml_node<>* parameterSetNode)
+void ParameterSet::init(xml_node* parameterSetNode)
 {
-	for(xml_attribute<>* attr = parameterSetNode->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = parameterSetNode->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -1534,27 +1559,27 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 		else _bl->out.printWarning("Warning: Unknown attribute for \"paramset\": " + attributeName);
 	}
 	std::vector<std::pair<std::string, std::string>> enforce;
-	for(xml_node<>* parameterNode = parameterSetNode->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
+	for(xml_node* parameterNode = parameterSetNode->first_node(); parameterNode; parameterNode = parameterNode->next_sibling())
 	{
 		std::string nodeName(parameterNode->name());
 		if(nodeName == "parameter")
 		{
 			if(!peerParam.empty() || !channelParam.empty())
 			{
-				xml_attribute<>* attr = parameterNode->first_attribute("id");
+				xml_attribute* attr = parameterNode->first_attribute("id");
 				if(attr)
 				{
 					std::string id(attr->value());
 					if(id == peerParam)
 					{
-						xml_node<>* peerParamElement = parameterNode->first_node("physical");
+						xml_node* peerParamElement = parameterNode->first_node("physical");
 						if(peerParamElement)
 						{
 							peerParamElement = peerParamElement->first_node("physical");
 							if(peerParamElement)
 							{
-								xml_attribute<>* attr1 = peerParamElement->first_attribute("type");
-								xml_attribute<>* attr2 = peerParamElement->first_attribute("size");
+								xml_attribute* attr1 = peerParamElement->first_attribute("type");
+								xml_attribute* attr2 = peerParamElement->first_attribute("size");
 								if(attr1 && attr2)
 								{
 									std::string addressSize(attr2->value());
@@ -1564,7 +1589,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 									}
 									else
 									{
-										xml_node<>* address = peerParamElement->first_node("address");
+										xml_node* address = peerParamElement->first_node("address");
 										if(address)
 										{
 											attr = address->first_attribute("index");
@@ -1587,8 +1612,8 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 							if(peerParamElement) peerParamElement = peerParamElement->next_sibling("physical");
 							if(peerParamElement)
 							{
-								xml_attribute<>* attr1 = peerParamElement->first_attribute("type");
-								xml_attribute<>* attr2 = peerParamElement->first_attribute("size");
+								xml_attribute* attr1 = peerParamElement->first_attribute("type");
+								xml_attribute* attr2 = peerParamElement->first_attribute("size");
 								if(attr1 && attr2)
 								{
 									std::string addressSize(attr2->value());
@@ -1598,7 +1623,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 									}
 									else
 									{
-										xml_node<>* address = peerParamElement->first_node("address");
+										xml_node* address = peerParamElement->first_node("address");
 										if(address)
 										{
 											attr = address->first_attribute("index");
@@ -1632,11 +1657,11 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 					}
 					else if(id == channelParam)
 					{
-						xml_node<>* peerParamElement = parameterNode->first_node("physical");
+						xml_node* peerParamElement = parameterNode->first_node("physical");
 						if(peerParamElement)
 						{
-							xml_attribute<>* attr1 = peerParamElement->first_attribute("type");
-							xml_attribute<>* attr2 = peerParamElement->first_attribute("size");
+							xml_attribute* attr1 = peerParamElement->first_attribute("type");
+							xml_attribute* attr2 = peerParamElement->first_attribute("size");
 							if(attr1 && attr2)
 							{
 								std::string addressSize(attr2->value());
@@ -1646,7 +1671,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 								}
 								else
 								{
-									xml_node<>* address = peerParamElement->first_node("address");
+									xml_node* address = peerParamElement->first_node("address");
 									if(address)
 									{
 										attr = address->first_attribute("index");
@@ -1686,8 +1711,8 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 		}
 		else if(nodeName == "enforce")
 		{
-			xml_attribute<>* attr1 = parameterNode->first_attribute("id");
-			xml_attribute<>* attr2 = parameterNode->first_attribute("value");
+			xml_attribute* attr1 = parameterNode->first_attribute("id");
+			xml_attribute* attr2 = parameterNode->first_attribute("value");
 			if(!attr1 || !attr2)
 			{
 				_bl->out.printWarning("Warning: Could not parse \"enforce\". Attribute id or value not set.");
@@ -1697,7 +1722,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 		}
 		else if(nodeName == "subset")
 		{
-			xml_attribute<>* attr = parameterNode->first_attribute("ref");
+			xml_attribute* attr = parameterNode->first_attribute("ref");
 			if(!attr)
 			{
 				_bl->out.printWarning("Warning: Could not parse \"subset\". Attribute ref not set.");
@@ -1707,7 +1732,7 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 		}
 		else if(nodeName == "default_values")
 		{
-			xml_attribute<>* attr = parameterNode->first_attribute("function");
+			xml_attribute* attr = parameterNode->first_attribute("function");
 			if(!attr)
 			{
 				_bl->out.printWarning("Warning: Could not parse \"subset\". Attribute function not set.");
@@ -1715,13 +1740,13 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 			}
 			std::string function = std::string(attr->value());
 			if(function.empty()) continue;
-			for(xml_node<>* defaultValueNode = parameterNode->first_node(); defaultValueNode; defaultValueNode = defaultValueNode->next_sibling())
+			for(xml_node* defaultValueNode = parameterNode->first_node(); defaultValueNode; defaultValueNode = defaultValueNode->next_sibling())
 			{
 				std::string nodeName(defaultValueNode->name());
 				if(nodeName == "value")
 				{
-					xml_attribute<>* attr1 = defaultValueNode->first_attribute("id");
-					xml_attribute<>* attr2 = defaultValueNode->first_attribute("value");
+					xml_attribute* attr1 = defaultValueNode->first_attribute("id");
+					xml_attribute* attr2 = defaultValueNode->first_attribute("value");
 					if(!attr1 || !attr2)
 					{
 						_bl->out.printWarning("Warning: Could not parse \"value\" (in default_values). Attribute id or value not set.");
@@ -1773,23 +1798,23 @@ void ParameterSet::init(xml_node<>* parameterSetNode)
 	}
 }
 
-LinkRole::LinkRole(BaseLib::SharedObjects* baseLib, xml_node<>* node)
+LinkRole::LinkRole(BaseLib::SharedObjects* baseLib, xml_node* node)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		baseLib->out.printWarning("Warning: Unknown attribute for \"link_roles\": " + std::string(attr->name()));
 	}
-	for(xml_node<>* linkRoleNode = node->first_node(); linkRoleNode; linkRoleNode = linkRoleNode->next_sibling())
+	for(xml_node* linkRoleNode = node->first_node(); linkRoleNode; linkRoleNode = linkRoleNode->next_sibling())
 	{
 		std::string nodeName(linkRoleNode->name());
 		if(nodeName == "target")
 		{
-			xml_attribute<>* attr = linkRoleNode->first_attribute("name");
+			xml_attribute* attr = linkRoleNode->first_attribute("name");
 			if(attr != nullptr) targetNames.push_back(attr->value());
 		}
 		else if(nodeName == "source")
 		{
-			xml_attribute<>* attr = linkRoleNode->first_attribute("name");
+			xml_attribute* attr = linkRoleNode->first_attribute("name");
 			if(attr != nullptr) sourceNames.push_back(attr->value());
 		}
 		else baseLib->out.printWarning("Warning: Unknown node name for \"link_roles\": " + nodeName);
@@ -1801,9 +1826,9 @@ EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib, xml_node<>* node) : EnforceLink(baseLib)
+EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib, xml_node* node) : EnforceLink(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -1811,7 +1836,7 @@ EnforceLink::EnforceLink(BaseLib::SharedObjects* baseLib, xml_node<>* node) : En
 		else if(attributeName == "value") value = attributeValue;
 		else baseLib->out.printWarning("Warning: Unknown attribute for \"enforce_link - value\": " + attributeName);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		baseLib->out.printWarning("Warning: Unknown subnode for \"enforce_link - value\": " + std::string(subNode->name()));
 	}
@@ -1864,9 +1889,9 @@ DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node<>* node, uint32_t& index) : DeviceChannel(baseLib)
+DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node* node, uint32_t& index) : DeviceChannel(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -1936,7 +1961,7 @@ DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 		else if(attributeName == "count_from_variable") countFromVariable = attributeValue;
 		else _bl->out.printWarning("Warning: Unknown attribute for \"channel\": " + attributeName);
 	}
-	for(xml_node<>* channelNode = node->first_node(); channelNode; channelNode = channelNode->next_sibling())
+	for(xml_node* channelNode = node->first_node(); channelNode; channelNode = channelNode->next_sibling())
 	{
 		std::string nodeName(channelNode->name());
 		if(nodeName == "parameters" || nodeName == "paramset")
@@ -1964,7 +1989,7 @@ DeviceChannel::DeviceChannel(BaseLib::SharedObjects* baseLib, xml_node<>* node, 
 		}
 		else if(nodeName == "enforce_link")
 		{
-			for(xml_node<>* enforceLinkNode = channelNode->first_node("value"); enforceLinkNode; enforceLinkNode = enforceLinkNode->next_sibling("value"))
+			for(xml_node* enforceLinkNode = channelNode->first_node("value"); enforceLinkNode; enforceLinkNode = enforceLinkNode->next_sibling("value"))
 			{
 				enforceLinks.push_back(std::shared_ptr<EnforceLink>(new EnforceLink(baseLib, enforceLinkNode)));
 			}
@@ -2060,7 +2085,7 @@ Device::~Device() {
 
 void Device::load(std::string xmlFilename)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
 		std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
@@ -2096,11 +2121,11 @@ void Device::load(std::string xmlFilename)
     doc.clear();
 }
 
-void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
+void Device::parseXML(xml_node* node, std::string& xmlFilename)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			std::string attributeName(attr->name());
 			std::string attributeValue(attr->value());
@@ -2154,7 +2179,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 			std::string nodeName(node->name());
 			if(nodeName == "types" || nodeName == "supported_types")
 			{
-				for(xml_node<>* typeNode = node->first_node("type"); typeNode; typeNode = typeNode->next_sibling())
+				for(xml_node* typeNode = node->first_node("type"); typeNode; typeNode = typeNode->next_sibling())
 				{
 					std::shared_ptr<DeviceType> deviceType(new DeviceType(_bl, typeNode));
 					deviceType->device = this;
@@ -2163,7 +2188,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 			}
 			else if(nodeName == "paramset" || nodeName == "parameters")
 			{
-				for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+				for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 				{
 					std::string attributeName(attr->name());
 					std::string attributeValue(attr->value());
@@ -2180,13 +2205,13 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 			}
 			else if(nodeName == "paramset_defs")
 			{
-				for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+				for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 				{
 					std::string attributeName(attr->name());
 					_bl->out.printWarning("Warning: Unknown attribute for \"paramset_defs\": " + attributeName);
 				}
 
-				for(xml_node<>* paramsetNode = node->first_node(); paramsetNode; paramsetNode = paramsetNode->next_sibling())
+				for(xml_node* paramsetNode = node->first_node(); paramsetNode; paramsetNode = paramsetNode->next_sibling())
 				{
 					std::string nodeName(paramsetNode->name());
 					if(nodeName == "paramset" || nodeName == "parameters")
@@ -2199,7 +2224,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 			}
 			else if(nodeName == "channels")
 			{
-				for(xml_node<>* channelNode = node->first_node("channel"); channelNode; channelNode = channelNode->next_sibling())
+				for(xml_node* channelNode = node->first_node("channel"); channelNode; channelNode = channelNode->next_sibling())
 				{
 					uint32_t index = 0;
 					std::shared_ptr<DeviceChannel> channel(new DeviceChannel(_bl, channelNode, index));
@@ -2226,7 +2251,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 			}
 			else if(nodeName == "packets" || nodeName == "frames")
 			{
-				for(xml_node<>* frameNode = node->first_node("frame"); frameNode; frameNode = frameNode->next_sibling("frame"))
+				for(xml_node* frameNode = node->first_node("frame"); frameNode; frameNode = frameNode->next_sibling("frame"))
 				{
 					std::shared_ptr<DeviceFrame> frame(new DeviceFrame(_bl, frameNode));
 					framesByMessageType.insert(std::pair<uint32_t, std::shared_ptr<DeviceFrame>>(frame->type, frame));
@@ -2241,7 +2266,7 @@ void Device::parseXML(xml_node<>* node, std::string& xmlFilename)
 					}
 					framesByID[frame->id] = frame;
 				}
-				for(xml_node<>* frameNode = node->first_node("packet"); frameNode; frameNode = frameNode->next_sibling("packet"))
+				for(xml_node* frameNode = node->first_node("packet"); frameNode; frameNode = frameNode->next_sibling("packet"))
 				{
 					std::shared_ptr<DeviceFrame> frame(new DeviceFrame(_bl, frameNode));
 					framesByMessageType.insert(std::pair<uint32_t, std::shared_ptr<DeviceFrame>>(frame->type, frame));

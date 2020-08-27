@@ -29,6 +29,8 @@
 */
 
 #include "Logical.h"
+
+#include <memory>
 #include "../BaseLib.h"
 
 namespace BaseLib
@@ -36,13 +38,13 @@ namespace BaseLib
 namespace DeviceDescription
 {
 
-EnumerationValue::EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node<>* node)
+EnumerationValue::EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node* node)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
-		baseLib->out.printWarning("Warning: Unknown attribute for \"logicalEnumeration\\value\": " + std::string(attr->name()));
+		baseLib->out.printWarning(R"(Warning: Unknown attribute for "logicalEnumeration\value": )" + std::string(attr->name()));
 	}
-	for(xml_node<>* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
+	for(xml_node* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
 	{
 		std::string nodeName(subnode->name());
 		std::string nodeValue(subnode->value());
@@ -52,7 +54,7 @@ EnumerationValue::EnumerationValue(BaseLib::SharedObjects* baseLib, xml_node<>* 
 			indexDefined = true;
 			index = Math::getNumber(nodeValue);
 		}
-		else baseLib->out.printWarning("Warning: Unknown node in \"logicalEnumeration\\value\": " + std::string(subnode->name(), subnode->name_size()));
+		else baseLib->out.printWarning(R"(Warning: Unknown node in "logicalEnumeration\value": )" + std::string(subnode->name(), subnode->name_size()));
 	}
 }
 
@@ -61,7 +63,7 @@ ILogical::ILogical(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-ILogical::ILogical(BaseLib::SharedObjects* baseLib, xml_node<>* node) : ILogical(baseLib)
+ILogical::ILogical(BaseLib::SharedObjects* baseLib, xml_node* node) : ILogical(baseLib)
 {
 
 }
@@ -71,17 +73,17 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib) : ILogic
 	type = Type::Enum::tEnum;
 }
 
-LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalEnumeration(baseLib)
+LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalEnumeration(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"parameter\": " + std::string(attr->name()));
 		}
 		int32_t offset = 0;
 		int32_t index = 0;
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -95,7 +97,11 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node
 						offset = value.index;
 						minimumValue = offset;
 					}
-					while(value.index > (signed)values.size() - offset) values.push_back(EnumerationValue());
+					if(value.index > (signed)values.size() - offset)
+                    {
+					    values.reserve(((signed)value.index - offset) + 1);
+                        while(value.index > (signed)values.size() - offset) values.emplace_back(EnumerationValue());
+                    }
 					index = value.index;
 				}
 				else value.index = index;
@@ -120,20 +126,16 @@ LogicalEnumeration::LogicalEnumeration(BaseLib::SharedObjects* baseLib, xml_node
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 std::shared_ptr<Variable> LogicalEnumeration::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalEnumeration::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -141,15 +143,15 @@ LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib) : ILogical(baseL
 	type = Type::Enum::tInteger;
 }
 
-LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalInteger(baseLib)
+LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalInteger(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -167,26 +169,26 @@ LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node
 			}
 			else if(nodeName == "specialValues")
 			{
-				for(xml_node<>* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
+				for(xml_node* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
 				{
 					std::string specialValueName(specialValueNode->name());
 					std::string specialValueString(specialValueNode->value());
 					if(specialValueName == "specialValue")
 					{
 						std::string id;
-						for(xml_attribute<>* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
+						for(xml_attribute* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
 						{
 							std::string attributeName(attr->name());
 							if(attributeName == "id") id = std::string(attr->value());
-							else _bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger\\specialValues\\specialValue\": " + std::string(attr->name()));
+							else _bl->out.printWarning(R"(Warning: Unknown attribute for "logicalInteger\specialValues\specialValue": )" + std::string(attr->name()));
 						}
 
-						if(id.empty()) _bl->out.printWarning("Warning: No id set for \"logicalInteger\\specialValues\\specialValue\"");
+						if(id.empty()) _bl->out.printWarning(R"(Warning: No id set for "logicalInteger\specialValues\specialValue")");
 						int32_t specialValue = Math::getNumber(specialValueString);
 						specialValuesStringMap[id] = specialValue;
 						specialValuesIntegerMap[specialValue] = id;
 					}
-					else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger\\specialValues\": " + nodeName);
+					else _bl->out.printWarning(R"(Warning: Unknown node in "logicalInteger\specialValues": )" + nodeName);
 				}
 			}
 			else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger\": " + nodeName);
@@ -196,20 +198,16 @@ LogicalInteger::LogicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node
     {
     	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 std::shared_ptr<Variable> LogicalInteger::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalInteger::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -217,15 +215,15 @@ LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib) : ILogical(b
 	type = Type::Enum::tInteger64;
 }
 
-LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalInteger64(baseLib)
+LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalInteger64(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger64\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -243,26 +241,26 @@ LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* 
 			}
 			else if(nodeName == "specialValues")
 			{
-				for(xml_node<>* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
+				for(xml_node* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
 				{
 					std::string specialValueName(specialValueNode->name());
 					std::string specialValueString(specialValueNode->value());
 					if(specialValueName == "specialValue")
 					{
 						std::string id;
-						for(xml_attribute<>* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
+						for(xml_attribute* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
 						{
 							std::string attributeName(attr->name());
 							if(attributeName == "id") id = std::string(attr->value());
-							else _bl->out.printWarning("Warning: Unknown attribute for \"logicalInteger64\\specialValues\\specialValue\": " + std::string(attr->name()));
+							else _bl->out.printWarning(R"(Warning: Unknown attribute for "logicalInteger64\specialValues\specialValue": )" + std::string(attr->name()));
 						}
 
-						if(id.empty()) _bl->out.printWarning("Warning: No id set for \"logicalInteger64\\specialValues\\specialValue\"");
+						if(id.empty()) _bl->out.printWarning(R"(Warning: No id set for "logicalInteger64\specialValues\specialValue")");
 						int64_t specialValue = Math::getNumber64(specialValueString);
 						specialValuesStringMap[id] = specialValue;
 						specialValuesIntegerMap[specialValue] = id;
 					}
-					else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger64\\specialValues\": " + nodeName);
+					else _bl->out.printWarning(R"(Warning: Unknown node in "logicalInteger64\specialValues": )" + nodeName);
 				}
 			}
 			else _bl->out.printWarning("Warning: Unknown node in \"logicalInteger64\": " + nodeName);
@@ -280,12 +278,12 @@ LogicalInteger64::LogicalInteger64(BaseLib::SharedObjects* baseLib, xml_node<>* 
 
 std::shared_ptr<Variable> LogicalInteger64::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalInteger64::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -293,15 +291,15 @@ LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib) : ILogical(baseL
 	type = Type::Enum::tFloat;
 }
 
-LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalDecimal(baseLib)
+LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalDecimal(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalDecimal\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -319,26 +317,26 @@ LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node
 			}
 			else if(nodeName == "specialValues")
 			{
-				for(xml_node<>* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
+				for(xml_node* specialValueNode = subNode->first_node(); specialValueNode; specialValueNode = specialValueNode->next_sibling())
 				{
 					std::string specialValueName(specialValueNode->name());
 					std::string specialValueString(specialValueNode->value());
 					if(specialValueName == "specialValue")
 					{
 						std::string id;
-						for(xml_attribute<>* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
+						for(xml_attribute* attr = specialValueNode->first_attribute(); attr; attr = attr->next_attribute())
 						{
 							std::string attributeName(attr->name());
 							if(attributeName == "id") id = std::string(attr->value());
-							else _bl->out.printWarning("Warning: Unknown attribute for \"logicalDecimal\\specialValues\\specialValue\": " + std::string(attr->name()));
+							else _bl->out.printWarning(R"(Warning: Unknown attribute for "logicalDecimal\specialValues\specialValue": )" + std::string(attr->name()));
 						}
 
-						if(id.empty()) _bl->out.printWarning("Warning: No id set for \"logicalDecimal\\specialValues\\specialValue\"");
+						if(id.empty()) _bl->out.printWarning(R"(Warning: No id set for "logicalDecimal\specialValues\specialValue")");
 						double specialValue = Math::getDouble(specialValueString);
 						specialValuesStringMap[id] = specialValue;
 						specialValuesFloatMap[specialValue] = id;
 					}
-					else _bl->out.printWarning("Warning: Unknown node in \"logicalDecimal\\specialValues\": " + nodeName);
+					else _bl->out.printWarning(R"(Warning: Unknown node in "logicalDecimal\specialValues": )" + nodeName);
 				}
 			}
 			else _bl->out.printWarning("Warning: Unknown node in \"logicalDecimal\": " + nodeName);
@@ -356,12 +354,12 @@ LogicalDecimal::LogicalDecimal(BaseLib::SharedObjects* baseLib, xml_node<>* node
 
 std::shared_ptr<Variable> LogicalDecimal::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalDecimal::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -369,15 +367,15 @@ LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib) : ILogical(baseL
 	type = Type::Enum::tBoolean;
 }
 
-LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalBoolean(baseLib)
+LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalBoolean(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalBoolean\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -406,12 +404,12 @@ LogicalBoolean::LogicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node
 
 std::shared_ptr<Variable> LogicalBoolean::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalBoolean::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalString::LogicalString(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -419,15 +417,15 @@ LogicalString::LogicalString(BaseLib::SharedObjects* baseLib) : ILogical(baseLib
 	type = Type::Enum::tString;
 }
 
-LogicalString::LogicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalString(baseLib)
+LogicalString::LogicalString(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalString(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalString\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -456,12 +454,12 @@ LogicalString::LogicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 
 std::shared_ptr<Variable> LogicalString::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalString::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -469,15 +467,15 @@ LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib) : ILogical(baseLib
 	type = Type::Enum::tAction;
 }
 
-LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalAction(baseLib)
+LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalAction(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalAction\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			std::string nodeName(subNode->name());
 			std::string nodeValue(subNode->value());
@@ -506,12 +504,12 @@ LogicalAction::LogicalAction(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 
 std::shared_ptr<Variable> LogicalAction::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable(setToValueOnPairing));
+	return std::make_shared<Variable>(setToValueOnPairing);
 }
 
 std::shared_ptr<Variable> LogicalAction::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable(defaultValue));
+	return std::make_shared<Variable>(defaultValue);
 }
 
 LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -519,15 +517,15 @@ LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
 	type = Type::Enum::tArray;
 }
 
-LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalArray(baseLib)
+LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalArray(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalArray\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* logicalNode = node->first_node(); logicalNode; logicalNode = logicalNode->next_sibling())
+		for(xml_node* logicalNode = node->first_node(); logicalNode; logicalNode = logicalNode->next_sibling())
 		{
 			_bl->out.printWarning("Warning: Unknown node in \"logicalArray\": " + std::string(logicalNode->name()));
 		}
@@ -544,12 +542,12 @@ LogicalArray::LogicalArray(BaseLib::SharedObjects* baseLib, xml_node<>* node) : 
 
 std::shared_ptr<Variable> LogicalArray::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::make_shared<Variable>();
 }
 
 std::shared_ptr<Variable> LogicalArray::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::make_shared<Variable>();
 }
 
 LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib) : ILogical(baseLib)
@@ -557,15 +555,15 @@ LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib) : ILogical(baseLib
 	type = Type::Enum::tStruct;
 }
 
-LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node<>* node) : LogicalStruct(baseLib)
+LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node* node) : LogicalStruct(baseLib)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			_bl->out.printWarning("Warning: Unknown attribute for \"logicalStruct\": " + std::string(attr->name()));
 		}
-		for(xml_node<>* logicalNode = node->first_node(); logicalNode; logicalNode = logicalNode->next_sibling())
+		for(xml_node* logicalNode = node->first_node(); logicalNode; logicalNode = logicalNode->next_sibling())
 		{
 			_bl->out.printWarning("Warning: Unknown node in \"logicalStruct\": " + std::string(logicalNode->name()));
 		}
@@ -582,12 +580,12 @@ LogicalStruct::LogicalStruct(BaseLib::SharedObjects* baseLib, xml_node<>* node) 
 
 std::shared_ptr<Variable> LogicalStruct::getSetToValueOnPairing()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::make_shared<Variable>();
 }
 
 std::shared_ptr<Variable> LogicalStruct::getDefaultValue()
 {
-	return std::shared_ptr<Variable>(new Variable());
+	return std::make_shared<Variable>();
 }
 
 }

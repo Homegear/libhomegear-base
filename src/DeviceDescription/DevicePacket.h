@@ -36,14 +36,11 @@
 #include "HttpPayload.h"
 #include "Parameter.h"
 #include "DevicePacketResponse.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 
 #include <string>
 #include <memory>
 #include <vector>
 #include <map>
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -92,7 +89,7 @@ public:
 	};
 
 	Packet(BaseLib::SharedObjects* baseLib);
-	Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	Packet(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~Packet() {}
 
 	//Attributes

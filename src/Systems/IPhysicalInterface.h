@@ -44,121 +44,113 @@
 
 #include <dirent.h>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Systems
-{
+namespace Systems {
 
 class Packet;
 
-class IPhysicalInterface : public IEventsEx
-{
-public:
-	struct GPIODirection
-	{
-			enum Enum
-			{
-					IN,
-					OUT
-			};
-	};
+class IPhysicalInterface : public IEventsEx {
+ public:
+  struct GPIODirection {
+    enum Enum {
+      IN,
+      OUT
+    };
+  };
 
-	struct GPIOEdge
-	{
-			enum Enum
-			{
-					RISING,
-					FALLING,
-					BOTH
-			};
-	};
+  struct GPIOEdge {
+    enum Enum {
+      RISING,
+      FALLING,
+      BOTH
+    };
+  };
 
-	//Event handling
-	class IPhysicalInterfaceEventSink : public IEventSinkBase
-	{
-	public:
-		virtual bool onPacketReceived(std::string& senderID, std::shared_ptr<Packet> packet) = 0;
-	};
-	//End event handling
+  //Event handling
+  class IPhysicalInterfaceEventSink : public IEventSinkBase {
+   public:
+    virtual bool onPacketReceived(std::string &senderID, std::shared_ptr<Packet> packet) = 0;
+  };
+  //End event handling
 
-	IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId);
-	IPhysicalInterface(BaseLib::SharedObjects* baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings);
+  IPhysicalInterface(BaseLib::SharedObjects *baseLib, int32_t familyId);
+  IPhysicalInterface(BaseLib::SharedObjects *baseLib, int32_t familyId, std::shared_ptr<PhysicalInterfaceSettings> settings);
 
-	virtual ~IPhysicalInterface();
+  virtual ~IPhysicalInterface();
 
-	virtual void startListening();
-	virtual void stopListening();
-	virtual void enableUpdateMode();
-	virtual void disableUpdateMode();
-	virtual void sendPacket(std::shared_ptr<Packet> packet) = 0;
-	virtual bool lifetick();
-	virtual bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
-	virtual uint32_t responseDelay() { return _settings->responseDelay; }
-	virtual int64_t lastPacketSent() { return _lastPacketSent; }
-	virtual int64_t lastPacketReceived() { return _lastPacketReceived; }
-	virtual void setup(int32_t userID, int32_t groupID, bool setPermissions) {}
-	virtual std::string getType() { return _settings->type; }
-	virtual std::string getID() { return _settings->id; }
-	virtual bool isDefault() { return _settings->isDefault; }
-	virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
-	virtual int32_t getAddress() { return _myAddress; }
-	virtual std::string getIpAddress() { return _ipAddress; }
-	virtual std::string getHostname() { return _hostname; }
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
-	int32_t _familyId = -1;
-	std::shared_ptr<PhysicalInterfaceSettings> _settings;
-	std::thread _listenThread;
-	std::thread _callbackThread;
-	std::atomic_bool _stopCallbackThread;
-	static const int32_t _packetBufferSize = 1000;
-	int32_t _packetBufferHead = 0;
-	int32_t _packetBufferTail = 0;
-	std::shared_ptr<Packet> _packetBuffer[_packetBufferSize];
-	std::mutex _packetProcessingThreadMutex;
-	std::thread _packetProcessingThread;
-	bool _packetProcessingPacketAvailable = false;
-	std::condition_variable _packetProcessingConditionVariable;
-	std::atomic_bool _stopPacketProcessingThread;
-	std::string _lockfile;
-	std::mutex _sendMutex;
-	std::atomic_bool _stopped;
-	std::shared_ptr<FileDescriptor> _fileDescriptor;
-	std::map<uint32_t, std::shared_ptr<FileDescriptor>> _gpioDescriptors;
-	int64_t _lastPacketSent = -1;
-	int64_t _lastPacketReceived = -1;
-	int64_t _maxPacketProcessingTime = 1000;
-    std::atomic_bool _updateMode{false};
-	std::atomic<int64_t> _lifetickTime{0};
-    std::atomic_bool _lifetickState{true};
+  virtual void startListening();
+  virtual void stopListening();
+  virtual void enableUpdateMode();
+  virtual void disableUpdateMode();
+  virtual void sendPacket(std::shared_ptr<Packet> packet) = 0;
+  virtual bool lifetick();
+  virtual bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
+  virtual uint32_t responseDelay() { return _settings->responseDelay; }
+  virtual int64_t lastPacketSent() { return _lastPacketSent; }
+  virtual int64_t lastPacketReceived() { return _lastPacketReceived; }
+  virtual void setup(int32_t userID, int32_t groupID, bool setPermissions) {}
+  virtual std::string getType() { return _settings->type; }
+  virtual std::string getID() { return _settings->id; }
+  virtual bool isDefault() { return _settings->isDefault; }
+  virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
+  virtual int32_t getAddress() { return _myAddress; }
+  virtual std::string getIpAddress() { return _ipAddress; }
+  virtual std::string getHostname() { return _hostname; }
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  int32_t _familyId = -1;
+  std::shared_ptr<PhysicalInterfaceSettings> _settings;
+  std::thread _listenThread;
+  std::thread _callbackThread;
+  std::atomic_bool _stopCallbackThread;
+  static const int32_t _packetBufferSize = 1000;
+  int32_t _packetBufferHead = 0;
+  int32_t _packetBufferTail = 0;
+  std::shared_ptr<Packet> _packetBuffer[_packetBufferSize];
+  std::mutex _packetProcessingThreadMutex;
+  std::thread _packetProcessingThread;
+  bool _packetProcessingPacketAvailable = false;
+  std::condition_variable _packetProcessingConditionVariable;
+  std::atomic_bool _stopPacketProcessingThread;
+  std::string _lockfile;
+  std::mutex _sendMutex;
+  std::atomic_bool _stopped;
+  std::shared_ptr<FileDescriptor> _fileDescriptor;
+  std::map<uint32_t, std::shared_ptr<FileDescriptor>> _gpioDescriptors;
+  int64_t _lastPacketSent = -1;
+  int64_t _lastPacketReceived = -1;
+  int64_t _maxPacketProcessingTime = 1000;
+  std::atomic_bool _updateMode{false};
+  std::atomic<int64_t> _lifetickTime{0};
+  std::atomic_bool _lifetickState{true};
 
-	int32_t _myAddress = 0;
-	std::string _hostname;
-	std::string _ipAddress;
+  int32_t _myAddress = 0;
+  std::string _hostname;
+  std::string _ipAddress;
 
-	//Event handling
-	virtual void raisePacketReceived(std::shared_ptr<Packet> packet);
-	//End event handling
-	void processPackets();
-	virtual void setDevicePermission(int32_t userID, int32_t groupID);
-	virtual void openGPIO(uint32_t index, bool readOnly);
-	virtual void getGPIOPath(uint32_t index);
-	virtual void closeGPIO(uint32_t index);
-	virtual bool getGPIO(uint32_t index);
-	virtual void setGPIO(uint32_t index, bool value);
-	virtual void setGPIOPermission(uint32_t index, int32_t userID, int32_t groupID, bool readOnly);
-	virtual void exportGPIO(uint32_t index);
-	virtual bool setGPIODirection(uint32_t index, GPIODirection::Enum direction);
-	virtual bool setGPIOEdge(uint32_t index, GPIOEdge::Enum edge);
-	virtual bool gpioDefined(uint32_t);
-	virtual bool gpioOpen(uint32_t);
+  //Event handling
+  virtual void raisePacketReceived(std::shared_ptr<Packet> packet);
+  //End event handling
+  void processPackets();
+  virtual void setDevicePermission(int32_t userID, int32_t groupID);
+  virtual void openGPIO(uint32_t index, bool readOnly);
+  virtual void getGPIOPath(uint32_t index);
+  virtual void closeGPIO(uint32_t index);
+  virtual bool getGPIO(uint32_t index);
+  virtual void setGPIO(uint32_t index, bool value);
+  virtual void setGPIOPermission(uint32_t index, int32_t userID, int32_t groupID, bool readOnly);
+  virtual void exportGPIO(uint32_t index);
+  virtual bool setGPIODirection(uint32_t index, GPIODirection::Enum direction);
+  virtual bool setGPIOEdge(uint32_t index, GPIOEdge::Enum edge);
+  virtual bool gpioDefined(uint32_t);
+  virtual bool gpioOpen(uint32_t);
 
-	virtual void saveSettingToDatabase(std::string setting, std::string& value);
-	virtual void saveSettingToDatabase(std::string setting, int32_t value);
-	virtual void saveSettingToDatabase(std::string setting, std::vector<char>& value);
+  virtual void saveSettingToDatabase(std::string setting, std::string &value);
+  virtual void saveSettingToDatabase(std::string setting, int32_t value);
+  virtual void saveSettingToDatabase(std::string setting, std::vector<char> &value);
 };
 
 }

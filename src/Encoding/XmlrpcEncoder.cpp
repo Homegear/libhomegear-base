@@ -31,6 +31,8 @@
 #include "XmlrpcEncoder.h"
 #include "../BaseLib.h"
 
+#include "RapidXml/rapidxml_print.hpp"
+
 namespace BaseLib
 {
 namespace Rpc
@@ -43,19 +45,19 @@ XmlrpcEncoder::XmlrpcEncoder(BaseLib::SharedObjects* baseLib)
 
 void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-		xml_node<> *node = doc.allocate_node(node_element, "methodCall");
+		xml_node *node = doc.allocate_node(node_element, "methodCall");
 		doc.append_node(node);
-		xml_node<> *nameNode = doc.allocate_node(node_element, "methodName", methodName.c_str());
+		xml_node *nameNode = doc.allocate_node(node_element, "methodName", methodName.c_str());
 		node->append_node(nameNode);
-		xml_node<> *paramsNode = doc.allocate_node(node_element, "params");
+		xml_node *paramsNode = doc.allocate_node(node_element, "params");
 		node->append_node(paramsNode);
 
 		for(std::list<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i)
 		{
-			xml_node<> *paramNode = doc.allocate_node(node_element, "param");
+			xml_node *paramNode = doc.allocate_node(node_element, "param");
 			paramsNode->append_node(paramNode);
 			encodeVariable(&doc, paramNode, *i);
 		}
@@ -74,19 +76,19 @@ void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::l
 
 void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> parameters, std::vector<char>& encodedData)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-		xml_node<> *node = doc.allocate_node(node_element, "methodCall");
+		xml_node *node = doc.allocate_node(node_element, "methodCall");
 		doc.append_node(node);
-		xml_node<> *nameNode = doc.allocate_node(node_element, "methodName", methodName.c_str());
+		xml_node *nameNode = doc.allocate_node(node_element, "methodName", methodName.c_str());
 		node->append_node(nameNode);
-		xml_node<> *paramsNode = doc.allocate_node(node_element, "params");
+		xml_node *paramsNode = doc.allocate_node(node_element, "params");
 		node->append_node(paramsNode);
 
 		for(std::vector<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i)
 		{
-			xml_node<> *paramNode = doc.allocate_node(node_element, "param");
+			xml_node *paramNode = doc.allocate_node(node_element, "param");
 			paramsNode->append_node(paramNode);
 			encodeVariable(&doc, paramNode, *i);
 		}
@@ -104,22 +106,22 @@ void XmlrpcEncoder::encodeRequest(std::string methodName, std::shared_ptr<std::v
 
 void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<char>& encodedData)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-		xml_node<> *node = doc.allocate_node(node_element, "methodResponse");
+		xml_node *node = doc.allocate_node(node_element, "methodResponse");
 		doc.append_node(node);
 		if(variable->errorStruct)
 		{
-			xml_node<> *faultNode = doc.allocate_node(node_element, "fault");
+			xml_node *faultNode = doc.allocate_node(node_element, "fault");
 			node->append_node(faultNode);
 			encodeVariable(&doc, faultNode, variable);
 		}
 		else
 		{
-			xml_node<> *paramsNode = doc.allocate_node(node_element, "params");
+			xml_node *paramsNode = doc.allocate_node(node_element, "params");
 			node->append_node(paramsNode);
-			xml_node<> *paramNode = doc.allocate_node(node_element, "param");
+			xml_node *paramNode = doc.allocate_node(node_element, "param");
 			paramsNode->append_node(paramNode);
 			encodeVariable(&doc, paramNode, variable);
 		}
@@ -135,22 +137,22 @@ void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vect
 
 void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vector<uint8_t>& encodedData)
 {
-	xml_document<> doc;
+	xml_document doc;
 	try
 	{
-		xml_node<> *node = doc.allocate_node(node_element, "methodResponse");
+		xml_node *node = doc.allocate_node(node_element, "methodResponse");
 		doc.append_node(node);
 		if(variable->errorStruct)
 		{
-			xml_node<> *faultNode = doc.allocate_node(node_element, "fault");
+			xml_node *faultNode = doc.allocate_node(node_element, "fault");
 			node->append_node(faultNode);
 			encodeVariable(&doc, faultNode, variable);
 		}
 		else
 		{
-			xml_node<> *paramsNode = doc.allocate_node(node_element, "params");
+			xml_node *paramsNode = doc.allocate_node(node_element, "params");
 			node->append_node(paramsNode);
-			xml_node<> *paramNode = doc.allocate_node(node_element, "param");
+			xml_node *paramNode = doc.allocate_node(node_element, "param");
 			paramsNode->append_node(paramNode);
 			encodeVariable(&doc, paramNode, variable);
 		}
@@ -164,11 +166,11 @@ void XmlrpcEncoder::encodeResponse(std::shared_ptr<Variable> variable, std::vect
 	doc.clear();
 }
 
-void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeVariable(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{
-		xml_node<> *valueNode = doc->allocate_node(node_element, "value");
+		xml_node *valueNode = doc->allocate_node(node_element, "value");
 		node->append_node(valueNode);
 		if(!variable || variable->type == VariableType::tVoid)
 		{
@@ -176,28 +178,28 @@ void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::s
 		}
 		else if(variable->type == VariableType::tInteger)
 		{
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "i4", doc->allocate_string(std::to_string(variable->integerValue).c_str()));
+			xml_node *valueNode2 = doc->allocate_node(node_element, "i4", doc->allocate_string(std::to_string(variable->integerValue).c_str()));
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tInteger64)
 		{
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "i8", doc->allocate_string(std::to_string(variable->integerValue64).c_str()));
+			xml_node *valueNode2 = doc->allocate_node(node_element, "i8", doc->allocate_string(std::to_string(variable->integerValue64).c_str()));
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tFloat)
 		{
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "double", doc->allocate_string(Math::toString(variable->floatValue).c_str()));
+			xml_node *valueNode2 = doc->allocate_node(node_element, "double", doc->allocate_string(Math::toString(variable->floatValue).c_str()));
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tBoolean)
 		{
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "boolean", doc->allocate_string(std::to_string(variable->booleanValue).c_str()));
+			xml_node *valueNode2 = doc->allocate_node(node_element, "boolean", doc->allocate_string(std::to_string(variable->booleanValue).c_str()));
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tString)
 		{
 			//Don't allocate string. It is unnecessary, because variable->stringvalue exists until the encoding is done.
-			//xml_node<> *valueNode2 = doc->allocate_node(node_element, "string", variable->stringValue.c_str());
+			//xml_node *valueNode2 = doc->allocate_node(node_element, "string", variable->stringValue.c_str());
 			//valueNode->append_node(valueNode2);
 			//Some servers/clients don't understand strings in string tags - don't ask me why, so just print the value
 			valueNode->value(variable->stringValue.c_str());
@@ -205,7 +207,7 @@ void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::s
 		else if(variable->type == VariableType::tBase64)
 		{
 			//Don't allocate string. It is unnecessary, because variable->stringvalue exists until the encoding is done.
-			xml_node<> *valueNode2 = doc->allocate_node(node_element, "base64", variable->stringValue.c_str());
+			xml_node *valueNode2 = doc->allocate_node(node_element, "base64", variable->stringValue.c_str());
 			valueNode->append_node(valueNode2);
 		}
 		else if(variable->type == VariableType::tStruct)
@@ -223,19 +225,19 @@ void XmlrpcEncoder::encodeVariable(xml_document<>* doc, xml_node<>* node, std::s
     }
 }
 
-void XmlrpcEncoder::encodeStruct(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeStruct(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{
-		xml_node<> *structNode = doc->allocate_node(node_element, "struct");
+		xml_node *structNode = doc->allocate_node(node_element, "struct");
 		node->append_node(structNode);
 
 		for(Struct::iterator i = variable->structValue->begin(); i != variable->structValue->end(); ++i)
 		{
 			if(i->first.empty() || !i->second) continue;
-			xml_node<> *memberNode = doc->allocate_node(node_element, "member");
+			xml_node *memberNode = doc->allocate_node(node_element, "member");
 			structNode->append_node(memberNode);
-			xml_node<> *nameNode = doc->allocate_node(node_element, "name", i->first.c_str());
+			xml_node *nameNode = doc->allocate_node(node_element, "name", i->first.c_str());
 			memberNode->append_node(nameNode);
 			encodeVariable(doc, memberNode, i->second);
 		}
@@ -246,14 +248,14 @@ void XmlrpcEncoder::encodeStruct(xml_document<>* doc, xml_node<>* node, std::sha
     }
 }
 
-void XmlrpcEncoder::encodeArray(xml_document<>* doc, xml_node<>* node, std::shared_ptr<Variable> variable)
+void XmlrpcEncoder::encodeArray(xml_document* doc, xml_node* node, std::shared_ptr<Variable> variable)
 {
 	try
 	{
-		xml_node<> *arrayNode = doc->allocate_node(node_element, "array");
+		xml_node *arrayNode = doc->allocate_node(node_element, "array");
 		node->append_node(arrayNode);
 
-		xml_node<> *dataNode = doc->allocate_node(node_element, "data");
+		xml_node *dataNode = doc->allocate_node(node_element, "data");
 		arrayNode->append_node(dataNode);
 
 		for(std::vector<std::shared_ptr<Variable>>::iterator i = variable->arrayValue->begin(); i != variable->arrayValue->end(); ++i)

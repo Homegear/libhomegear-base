@@ -81,6 +81,11 @@ public:
 	void stopQueue(int32_t index);
 
 	/**
+	 * Checks if the specified queue has been started.
+	 */
+	bool queueIsStarted(int32_t index);
+
+	/**
 	 * Enqueues an item.
 	 *
 	 * @param index The index of the queue to enqueue the item into.

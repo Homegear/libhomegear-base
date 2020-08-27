@@ -49,15 +49,15 @@ ParameterGroup::~ParameterGroup()
 	lists.clear();
 }
 
-void ParameterGroup::parseXml(xml_node<>* node)
+void ParameterGroup::parseXml(xml_node* node)
 {
     parseAttributes(node);
     parseElements(node);
 }
 
-void ParameterGroup::parseAttributes(xml_node<>* node)
+void ParameterGroup::parseAttributes(xml_node* node)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -71,9 +71,9 @@ void ParameterGroup::parseAttributes(xml_node<>* node)
 	}
 }
 
-void ParameterGroup::parseElements(xml_node<>* node)
+void ParameterGroup::parseElements(xml_node* node)
 {
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		if(nodeName == "parameter")
@@ -148,9 +148,9 @@ LinkParameters::LinkParameters(BaseLib::SharedObjects* baseLib) : ParameterGroup
 {
 }
 
-void LinkParameters::parseXml(xml_node<>* node)
+void LinkParameters::parseXml(xml_node* node)
 {
-    for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         std::string attributeName(attr->name());
         std::string attributeValue(attr->value());

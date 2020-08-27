@@ -34,27 +34,24 @@
 #include <string>
 #include <vector>
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 
-class Packet
-{
-public:
-	Packet() = default;
-	virtual ~Packet() = default;
+class Packet {
+ public:
+  Packet() = default;
+  virtual ~Packet() = default;
 
-	virtual int32_t getTag() { return _tag; };
-	virtual void setTag(int32_t tag) { _tag = tag; }
-	virtual int64_t getTimeReceived() { return _timeReceived; }
-	virtual int64_t getTimeSending() { return _timeSending; }
-	virtual void setTimeReceived(int64_t time) { _timeReceived = time; }
-	virtual void setTimeSending(int64_t time) { _timeSending = time; }
-protected:
-    int32_t _tag = 0;
-	int64_t _timeReceived = 0;
-    int64_t _timeSending = 0;
+  virtual int32_t getTag() { return _tag; };
+  virtual void setTag(int32_t tag) { _tag = tag; }
+  virtual int64_t getTimeReceived() { return _timeReceived; }
+  virtual int64_t getTimeSending() { return _timeSending; }
+  virtual void setTimeReceived(int64_t time) { _timeReceived = time; }
+  virtual void setTimeSending(int64_t time) { _timeSending = time; }
+ protected:
+  int32_t _tag = 0;
+  int64_t _timeReceived = 0;
+  int64_t _timeSending = 0;
 };
 
 }

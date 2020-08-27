@@ -35,11 +35,11 @@ namespace BaseLib
 {
 namespace HmDeviceDescription
 {
-SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<>* node)
+SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node* node)
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			std::string attributeName(attr->name());
 			std::string attributeValue(attr->value());
@@ -57,7 +57,7 @@ SetRequestEx::SetRequestEx(SharedObjects* baseLib, xml_node<>* node)
 			else if(attributeName == "packet") frame = attributeValue;
 			else baseLib->out.printWarning("Warning: Unknown attribute for \"setEx\": " + attributeName);
 		}
-		for(xml_node<>* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
+		for(xml_node* subnode = node->first_node(); subnode; subnode = subnode->next_sibling())
 		{
 			baseLib->out.printWarning("Warning: Unknown node in \"setEx\": " + std::string(subnode->name(), subnode->name_size()));
 		}
@@ -91,11 +91,11 @@ PhysicalParameter::PhysicalParameter()
 {
 }
 
-PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>* node) : PhysicalParameter()
+PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node* node) : PhysicalParameter()
 {
 	try
 	{
-		for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+		for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 		{
 			std::string attributeName(attr->name());
 			std::string attributeValue(attr->value());
@@ -162,10 +162,10 @@ PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>
 		int32_t intDiff = std::lround(std::floor(size)) - 1;
 		if(intDiff < 0) intDiff = 0;
 		endIndex = startIndex + intDiff;
-		for(xml_node<>* physicalNode = node->first_node(); physicalNode; physicalNode = physicalNode->next_sibling())
+		for(xml_node* physicalNode = node->first_node(); physicalNode; physicalNode = physicalNode->next_sibling())
 		{
 			std::string nodeName(physicalNode->name());
-			xml_attribute<>* attr;
+			xml_attribute* attr;
 			if(nodeName == "set")
 			{
 				attr = physicalNode->first_attribute("request");
@@ -185,15 +185,15 @@ PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>
 				if(!attr) continue;
 				std::shared_ptr<PhysicalParameterEvent> event(new PhysicalParameterEvent());
 				event->frame = std::string(attr->value());
-				for(xml_node<>* eventNode = physicalNode->first_node(); eventNode; eventNode = eventNode->next_sibling())
+				for(xml_node* eventNode = physicalNode->first_node(); eventNode; eventNode = eventNode->next_sibling())
 				{
 					std::string eventNodeName(eventNode->name());
 					if(eventNodeName == "domino_event")
 					{
 						if(type == Type::Enum::typeInteger)
 						{
-							xml_attribute<>* attr1 = eventNode->first_attribute("value");
-							xml_attribute<>* attr2 = eventNode->first_attribute("delay_id");
+							xml_attribute* attr1 = eventNode->first_attribute("value");
+							xml_attribute* attr2 = eventNode->first_attribute("delay_id");
 							if(!attr1 || !attr2) continue;
 							event->dominoEvent = true;
 							std::string eventValue = std::string(attr1->value());
@@ -213,7 +213,7 @@ PhysicalParameter::PhysicalParameter(BaseLib::SharedObjects* baseLib, xml_node<>
 			}
 			else if(nodeName == "address")
 			{
-				for(xml_attribute<>* addressAttr = physicalNode->first_attribute(); addressAttr; addressAttr = addressAttr->next_attribute())
+				for(xml_attribute* addressAttr = physicalNode->first_attribute(); addressAttr; addressAttr = addressAttr->next_attribute())
 				{
 					std::string attributeName(addressAttr->name());
 					std::string attributeValue(addressAttr->value());

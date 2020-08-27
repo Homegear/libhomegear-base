@@ -6,7 +6,7 @@
 // Revision $DateTime: 2009/05/13 01:46:17 $
 //! \file rapidxml_print.hpp This file contains rapidxml printer implementation
 
-#include "rapidxml.hpp"
+#include "rapidxml.h"
 
 // Only include streams if not disabled
 #ifndef RAPIDXML_NO_STREAMS
@@ -33,8 +33,8 @@ namespace rapidxml
         // Internal character operations
     
         // Copy characters from given range to given output iterator
-        template<class OutIt, class Ch>
-        inline OutIt copy_chars(const Ch *begin, const Ch *end, OutIt out)
+        template<class OutIt>
+        inline OutIt copy_chars(const char *begin, const char *end, OutIt out)
         {
             while (begin != end)
                 *out++ = *begin++;
@@ -43,8 +43,8 @@ namespace rapidxml
         
         // Copy characters from given range to given output iterator and expand
         // characters into references (&lt; &gt; &apos; &quot; &amp;)
-        template<class OutIt, class Ch>
-        inline OutIt copy_and_expand_chars(const Ch *begin, const Ch *end, Ch noexpand, OutIt out)
+        template<class OutIt>
+        inline OutIt copy_and_expand_chars(const char *begin, const char *end, char noexpand, OutIt out)
         {
             while (begin != end)
             {
@@ -56,20 +56,20 @@ namespace rapidxml
                 {
                     switch (*begin)
                     {
-                    case Ch('<'):
-                        *out++ = Ch('&'); *out++ = Ch('l'); *out++ = Ch('t'); *out++ = Ch(';');
+                    case '<':
+                        *out++ = '&'; *out++ = 'l'; *out++ = 't'; *out++ = ';';
                         break;
-                    case Ch('>'): 
-                        *out++ = Ch('&'); *out++ = Ch('g'); *out++ = Ch('t'); *out++ = Ch(';');
+                    case '>':
+                        *out++ = '&'; *out++ = 'g'; *out++ = 't'; *out++ = ';';
                         break;
-                    case Ch('\''): 
-                        *out++ = Ch('&'); *out++ = Ch('a'); *out++ = Ch('p'); *out++ = Ch('o'); *out++ = Ch('s'); *out++ = Ch(';');
+                    case '\'':
+                        *out++ = '&'; *out++ = 'a'; *out++ = 'p'; *out++ = 'o'; *out++ = 's'; *out++ = ';';
                         break;
-                    case Ch('"'): 
-                        *out++ = Ch('&'); *out++ = Ch('q'); *out++ = Ch('u'); *out++ = Ch('o'); *out++ = Ch('t'); *out++ = Ch(';');
+                    case '"':
+                        *out++ = '&'; *out++ = 'q'; *out++ = 'u'; *out++ = 'o'; *out++ = 't'; *out++ = ';';
                         break;
-                    case Ch('&'): 
-                        *out++ = Ch('&'); *out++ = Ch('a'); *out++ = Ch('m'); *out++ = Ch('p'); *out++ = Ch(';'); 
+                    case '&':
+                        *out++ = '&'; *out++ = 'a'; *out++ = 'm'; *out++ = 'p'; *out++ = ';';
                         break;
                     default:
                         *out++ = *begin;    // No expansion, copy character
@@ -81,8 +81,8 @@ namespace rapidxml
         }
 
         // Fill given output iterator with repetitions of the same character
-        template<class OutIt, class Ch>
-        inline OutIt fill_chars(OutIt out, int n, Ch ch)
+        template<class OutIt>
+        inline OutIt fill_chars(OutIt out, int n, char ch)
         {
             for (int i = 0; i < n; ++i)
                 *out++ = ch;
@@ -90,8 +90,8 @@ namespace rapidxml
         }
 
         // Find character
-        template<class Ch, Ch ch>
-        inline bool find_char(const Ch *begin, const Ch *end)
+        template<char ch>
+        inline bool find_char(const char *begin, const char *end)
         {
             while (begin != end)
                 if (*begin++ == ch)
@@ -102,36 +102,36 @@ namespace rapidxml
         ///////////////////////////////////////////////////////////////////////////
         // Internal printing operations
     
-        template<class OutIt, class Ch>
-		inline OutIt print_children(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+        template<class OutIt>
+		inline OutIt print_children(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_attributes(OutIt out, const xml_node<Ch> *node, int flags);
+		template<class OutIt>
+		inline OutIt print_attributes(OutIt out, const xml_node *node, int flags);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_data_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_data_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_cdata_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_cdata_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_element_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_element_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_declaration_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_declaration_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_comment_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_comment_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_doctype_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_doctype_node(OutIt out, const xml_node *node, int flags, int indent);
 
-		template<class OutIt, class Ch>
-		inline OutIt print_pi_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
+		template<class OutIt>
+		inline OutIt print_pi_node(OutIt out, const xml_node *node, int flags, int indent);
 
         // Print node
-        template<class OutIt, class Ch>
-        inline OutIt print_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             // Print proper node type
             switch (node->type())
@@ -185,45 +185,45 @@ namespace rapidxml
             
             // If indenting not disabled, add line break after node
             if (!(flags & print_no_indenting))
-                *out = Ch('\n'), ++out;
+                *out = '\n', ++out;
 
             // Return modified iterator
             return out;
         }
         
         // Print children of the node                               
-        template<class OutIt, class Ch>
-        inline OutIt print_children(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_children(OutIt out, const xml_node *node, int flags, int indent)
         {
-            for (xml_node<Ch> *child = node->first_node(); child; child = child->next_sibling())
+            for (xml_node *child = node->first_node(); child; child = child->next_sibling())
                 out = print_node(out, child, flags, indent);
             return out;
         }
 
         // Print attributes of the node
-        template<class OutIt, class Ch>
-        inline OutIt print_attributes(OutIt out, const xml_node<Ch> *node, int flags)
+        template<class OutIt>
+        inline OutIt print_attributes(OutIt out, const xml_node *node, int flags)
         {
-            for (xml_attribute<Ch> *attribute = node->first_attribute(); attribute; attribute = attribute->next_attribute())
+            for (xml_attribute *attribute = node->first_attribute(); attribute; attribute = attribute->next_attribute())
             {
                 if (attribute->name() && attribute->value())
                 {
                     // Print attribute name
-                    *out = Ch(' '), ++out;
+                    *out = ' ', ++out;
                     out = copy_chars(attribute->name(), attribute->name() + attribute->name_size(), out);
-                    *out = Ch('='), ++out;
+                    *out = '=', ++out;
                     // Print attribute value using appropriate quote type
-                    if (find_char<Ch, Ch('"')>(attribute->value(), attribute->value() + attribute->value_size()))
+                    if (find_char<'"'>(attribute->value(), attribute->value() + attribute->value_size()))
                     {
-                        *out = Ch('\''), ++out;
-                        out = copy_and_expand_chars(attribute->value(), attribute->value() + attribute->value_size(), Ch('"'), out);
-                        *out = Ch('\''), ++out;
+                        *out = '\'', ++out;
+                        out = copy_and_expand_chars(attribute->value(), attribute->value() + attribute->value_size(), '"', out);
+                        *out = '\'', ++out;
                     }
                     else
                     {
-                        *out = Ch('"'), ++out;
-                        out = copy_and_expand_chars(attribute->value(), attribute->value() + attribute->value_size(), Ch('\''), out);
-                        *out = Ch('"'), ++out;
+                        *out = '"', ++out;
+                        out = copy_and_expand_chars(attribute->value(), attribute->value() + attribute->value_size(), '\'', out);
+                        *out = '"', ++out;
                     }
                 }
             }
@@ -231,49 +231,49 @@ namespace rapidxml
         }
 
         // Print data node
-        template<class OutIt, class Ch>
-        inline OutIt print_data_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_data_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_data);
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), Ch(0), out);
+                out = fill_chars(out, indent, '\t');
+            out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), 0, out);
             return out;
         }
 
         // Print data node
-        template<class OutIt, class Ch>
-        inline OutIt print_cdata_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_cdata_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_cdata);
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'); ++out;
-            *out = Ch('!'); ++out;
-            *out = Ch('['); ++out;
-            *out = Ch('C'); ++out;
-            *out = Ch('D'); ++out;
-            *out = Ch('A'); ++out;
-            *out = Ch('T'); ++out;
-            *out = Ch('A'); ++out;
-            *out = Ch('['); ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<'; ++out;
+            *out = '!'; ++out;
+            *out = '['; ++out;
+            *out = 'C'; ++out;
+            *out = 'D'; ++out;
+            *out = 'A'; ++out;
+            *out = 'T'; ++out;
+            *out = 'A'; ++out;
+            *out = '['; ++out;
             out = copy_chars(node->value(), node->value() + node->value_size(), out);
-            *out = Ch(']'); ++out;
-            *out = Ch(']'); ++out;
-            *out = Ch('>'); ++out;
+            *out = ']'; ++out;
+            *out = ']'; ++out;
+            *out = '>'; ++out;
             return out;
         }
 
         // Print element node
-        template<class OutIt, class Ch>
-        inline OutIt print_element_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_element_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_element);
 
             // Print element name and attributes, if any
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'), ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<', ++out;
             out = copy_chars(node->name(), node->name() + node->name_size(), out);
             out = print_attributes(out, node, flags);
             
@@ -281,122 +281,122 @@ namespace rapidxml
             if (node->value_size() == 0 && !node->first_node())
             {
                 // Print childless node tag ending
-                *out = Ch('/'), ++out;
-                *out = Ch('>'), ++out;
+                *out = '/', ++out;
+                *out = '>', ++out;
             }
             else
             {
                 // Print normal node tag ending
-                *out = Ch('>'), ++out;
+                *out = '>', ++out;
 
                 // Test if node contains a single data node only (and no other nodes)
-                xml_node<Ch> *child = node->first_node();
+                xml_node *child = node->first_node();
                 if (!child)
                 {
                     // If node has no children, only print its value without indenting
-                    out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), Ch(0), out);
+                    out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), 0, out);
                 }
                 else if (child->next_sibling() == 0 && child->type() == node_data)
                 {
                     // If node has a sole data child, only print its value without indenting
-                    out = copy_and_expand_chars(child->value(), child->value() + child->value_size(), Ch(0), out);
+                    out = copy_and_expand_chars(child->value(), child->value() + child->value_size(), 0, out);
                 }
                 else
                 {
                     // Print all children with full indenting
                     if (!(flags & print_no_indenting))
-                        *out = Ch('\n'), ++out;
+                        *out = '\n', ++out;
                     out = print_children(out, node, flags, indent + 1);
                     if (!(flags & print_no_indenting))
-                        out = fill_chars(out, indent, Ch('\t'));
+                        out = fill_chars(out, indent, '\t');
                 }
 
                 // Print node end
-                *out = Ch('<'), ++out;
-                *out = Ch('/'), ++out;
+                *out = '<', ++out;
+                *out = '/', ++out;
                 out = copy_chars(node->name(), node->name() + node->name_size(), out);
-                *out = Ch('>'), ++out;
+                *out = '>', ++out;
             }
             return out;
         }
 
         // Print declaration node
-        template<class OutIt, class Ch>
-        inline OutIt print_declaration_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_declaration_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             // Print declaration start
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'), ++out;
-            *out = Ch('?'), ++out;
-            *out = Ch('x'), ++out;
-            *out = Ch('m'), ++out;
-            *out = Ch('l'), ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<', ++out;
+            *out = '?', ++out;
+            *out = 'x', ++out;
+            *out = 'm', ++out;
+            *out = 'l', ++out;
 
             // Print attributes
             out = print_attributes(out, node, flags);
             
             // Print declaration end
-            *out = Ch('?'), ++out;
-            *out = Ch('>'), ++out;
+            *out = '?', ++out;
+            *out = '>', ++out;
             
             return out;
         }
 
         // Print comment node
-        template<class OutIt, class Ch>
-        inline OutIt print_comment_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_comment_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_comment);
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'), ++out;
-            *out = Ch('!'), ++out;
-            *out = Ch('-'), ++out;
-            *out = Ch('-'), ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<', ++out;
+            *out = '!', ++out;
+            *out = '-', ++out;
+            *out = '-', ++out;
             out = copy_chars(node->value(), node->value() + node->value_size(), out);
-            *out = Ch('-'), ++out;
-            *out = Ch('-'), ++out;
-            *out = Ch('>'), ++out;
+            *out = '-', ++out;
+            *out = '-', ++out;
+            *out = '>', ++out;
             return out;
         }
 
         // Print doctype node
-        template<class OutIt, class Ch>
-        inline OutIt print_doctype_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_doctype_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_doctype);
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'), ++out;
-            *out = Ch('!'), ++out;
-            *out = Ch('D'), ++out;
-            *out = Ch('O'), ++out;
-            *out = Ch('C'), ++out;
-            *out = Ch('T'), ++out;
-            *out = Ch('Y'), ++out;
-            *out = Ch('P'), ++out;
-            *out = Ch('E'), ++out;
-            *out = Ch(' '), ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<', ++out;
+            *out = '!', ++out;
+            *out = 'D', ++out;
+            *out = 'O', ++out;
+            *out = 'C', ++out;
+            *out = 'T', ++out;
+            *out = 'Y', ++out;
+            *out = 'P', ++out;
+            *out = 'E', ++out;
+            *out = ' ', ++out;
             out = copy_chars(node->value(), node->value() + node->value_size(), out);
-            *out = Ch('>'), ++out;
+            *out = '>', ++out;
             return out;
         }
 
         // Print pi node
-        template<class OutIt, class Ch>
-        inline OutIt print_pi_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
+        template<class OutIt>
+        inline OutIt print_pi_node(OutIt out, const xml_node *node, int flags, int indent)
         {
             assert(node->type() == node_pi);
             if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
-            *out = Ch('<'), ++out;
-            *out = Ch('?'), ++out;
+                out = fill_chars(out, indent, '\t');
+            *out = '<', ++out;
+            *out = '?', ++out;
             out = copy_chars(node->name(), node->name() + node->name_size(), out);
-            *out = Ch(' '), ++out;
+            *out = ' ', ++out;
             out = copy_chars(node->value(), node->value() + node->value_size(), out);
-            *out = Ch('?'), ++out;
-            *out = Ch('>'), ++out;
+            *out = '?', ++out;
+            *out = '>', ++out;
             return out;
         }
 
@@ -411,8 +411,8 @@ namespace rapidxml
     //! \param node Node to be printed. Pass xml_document to print entire document.
     //! \param flags Flags controlling how XML is printed.
     //! \return Output iterator pointing to position immediately after last character of printed text.
-    template<class OutIt, class Ch> 
-    inline OutIt print(OutIt out, const xml_node<Ch> &node, int flags = 0)
+    template<class OutIt>
+    inline OutIt print(OutIt out, const xml_node &node, int flags = 0)
     {
         return internal::print_node(out, &node, flags, 0);
     }
@@ -424,10 +424,9 @@ namespace rapidxml
     //! \param node Node to be printed. Pass xml_document to print entire document.
     //! \param flags Flags controlling how XML is printed.
     //! \return Output stream.
-    template<class Ch> 
-    inline std::basic_ostream<Ch> &print(std::basic_ostream<Ch> &out, const xml_node<Ch> &node, int flags = 0)
+    inline std::basic_ostream<char> &print(std::basic_ostream<char> &out, const xml_node &node, int flags = 0)
     {
-        print(std::ostream_iterator<Ch>(out), node, flags);
+        print(std::ostream_iterator<char>(out), node, flags);
         return out;
     }
 
@@ -435,8 +434,7 @@ namespace rapidxml
     //! \param out Output stream to print to.
     //! \param node Node to be printed.
     //! \return Output stream.
-    template<class Ch> 
-    inline std::basic_ostream<Ch> &operator <<(std::basic_ostream<Ch> &out, const xml_node<Ch> &node)
+    inline std::basic_ostream<char> &operator <<(std::basic_ostream<char> &out, const xml_node &node)
     {
         return print(out, node);
     }

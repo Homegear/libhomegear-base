@@ -31,10 +31,14 @@
 #ifndef HTTPPAYLOAD_H_
 #define HTTPPAYLOAD_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <vector>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -65,7 +69,7 @@ class HttpPayload
 {
 public:
 	HttpPayload(BaseLib::SharedObjects* baseLib);
-	HttpPayload(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	HttpPayload(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~HttpPayload() {}
 
 	std::string key;

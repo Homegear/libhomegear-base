@@ -39,28 +39,38 @@ namespace BaseLib
 {
 std::mutex Output::_outputMutex;
 
-std::function<void(int32_t, std::string)>* Output::getErrorCallback()
+std::string Output::getPrefix()
 {
-	return _errorCallback;
+    return _prefix;
 }
 
-void Output::setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback)
+void Output::setPrefix(const std::string& prefix)
 {
-	_errorCallback = errorCallback;
+    _prefix = prefix;
 }
 
-Output::Output()
+void Output::enableStdOutput()
 {
+    _stdOutput = true;
 }
 
-Output::~Output()
+void Output::disableStdOutput()
 {
+    _stdOutput = false;
 }
+
+void Output::setOutputCallback(std::function<void(int32_t, const std::string&)> value)
+{
+	_outputCallback.swap(value);
+}
+
+Output::Output() = default;
+
+Output::~Output() = default;
 
 void Output::init(SharedObjects* baseLib)
 {
 	_bl = baseLib;
-	_errorCallback = baseLib->out.getErrorCallback();
 }
 
 std::string Output::getTimeString(int64_t time)
@@ -80,7 +90,7 @@ std::string Output::getTimeString(int64_t time)
 		milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
 	}
 	char timeString[50];
-	std::tm localTime;
+	std::tm localTime{};
 	localtime_r(&t, &localTime);
 	strftime(&timeString[0], 50, &timeFormat[0], &localTime);
 	std::ostringstream timeStream;
@@ -88,168 +98,134 @@ std::string Output::getTimeString(int64_t time)
 	return timeStream.str();
 }
 
-void Output::printThreadPriority()
-{
-	try
-	{
-		int32_t policy, error;
-		sched_param param;
-		if((error = pthread_getschedparam(pthread_self(), &policy, &param)) != 0) printError("Could not get thread priority. Error: " + std::to_string(error));
-
-		printMessage("Thread policy: " + std::to_string(policy) + " Thread priority: " + std::to_string(param.sched_priority));
-	}
-	catch(const std::exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-}
-
-void Output::printBinary(std::vector<unsigned char>& data)
-{
-	try
-	{
-		if(data.empty()) return;
-		std::ostringstream stringstream;
-		stringstream << std::hex << std::setfill('0') << std::uppercase;
-		for(std::vector<unsigned char>::iterator i = data.begin(); i != data.end(); ++i)
-		{
-			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-		}
-		stringstream << std::dec;
-		std::lock_guard<std::mutex> outputGuard(_outputMutex);
-		std::cout << stringstream.str() << std::endl;
-	}
-	catch(const std::exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-}
-
-void Output::printBinary(std::shared_ptr<std::vector<char>> data)
-{
-	try
-	{
-		if(!data || data->empty()) return;
-		std::ostringstream stringstream;
-		stringstream << std::hex << std::setfill('0') << std::uppercase;
-		for(std::vector<char>::iterator i = data->begin(); i != data->end(); ++i)
-		{
-			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-		}
-		stringstream << std::dec;
-		std::lock_guard<std::mutex> outputGuard(_outputMutex);
-		std::cout << stringstream.str() << std::endl;
-	}
-	catch(const std::exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-}
-
-void Output::printBinary(std::vector<char>& data)
-{
-	try
-	{
-		if(data.empty()) return;
-		std::ostringstream stringstream;
-		stringstream << std::hex << std::setfill('0') << std::uppercase;
-		for(std::vector<char>::iterator i = data.begin(); i != data.end(); ++i)
-		{
-			stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
-		}
-		stringstream << std::dec;
-		std::lock_guard<std::mutex> outputGuard(_outputMutex);
-		std::cout << stringstream.str() << std::endl;
-	}
-	catch(const std::exception& ex)
-    {
-    	printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-}
-
-void Output::printEx(std::string file, uint32_t line, std::string function, std::string what)
+void Output::printEx(const std::string& file, uint32_t line, const std::string& function, const std::string& what)
 {
 	if(_bl && _bl->debugLevel < 2) return;
 	std::string error;
 	if(!what.empty())
 	{
 		error = _prefix + "Error in file " + file + " line " + std::to_string(line) + " in function " + function + ": " + what;
-		std::lock_guard<std::mutex> outputGuard(_outputMutex);
-		std::cout << getTimeString() << " " << error << std::endl;
-		std::cerr << getTimeString() << " " << error << std::endl;
+        if(_stdOutput)
+        {
+            std::lock_guard<std::mutex> outputGuard(_outputMutex);
+            std::cout << getTimeString() << " " << error << std::endl;
+            std::cerr << getTimeString() << " " << error << std::endl;
+        }
 	}
 	else
 	{
 		error = _prefix + "Unknown error in file " + file + " line " + std::to_string(line) + " in function " + function + ".";
-		std::lock_guard<std::mutex> outputGuard(_outputMutex);
-		std::cout << getTimeString() << " " << error << std::endl;
-		std::cerr << getTimeString() << " " << error << std::endl;
+        if(_stdOutput)
+        {
+            std::lock_guard<std::mutex> outputGuard(_outputMutex);
+            std::cout << getTimeString() << " " << error << std::endl;
+            std::cerr << getTimeString() << " " << error << std::endl;
+        }
 	}
-	if(_errorCallback && *_errorCallback) (*_errorCallback)(2, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(2, error);
+    }
 }
 
-void Output::printCritical(std::string errorString, bool errorCallback)
+void Output::printCritical(const std::string& message)
 {
 	if(_bl && _bl->debugLevel < 1) return;
-	std::string error = _prefix + errorString;
+	std::string error = _prefix + message;
+    if(_stdOutput)
 	{
     	std::lock_guard<std::mutex> outputGuard(_outputMutex);
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-	if(_errorCallback && *_errorCallback && errorCallback) (*_errorCallback)(1, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(1, error);
+    }
 }
 
-void Output::printError(std::string errorString)
+void Output::printError(const std::string& errorString)
 {
 	if(_bl && _bl->debugLevel < 2) return;
 	std::string error = _prefix + errorString;
+	if(_stdOutput)
 	{
     	std::lock_guard<std::mutex> outputGuard(_outputMutex);
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-	if(_errorCallback && *_errorCallback) (*_errorCallback)(2, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(2, error);
+    }
 }
 
-void Output::printWarning(std::string errorString)
+void Output::printWarning(const std::string& errorString)
 {
 	if(_bl && _bl->debugLevel < 3) return;
 	std::string error = _prefix + errorString;
+	if(_stdOutput)
 	{
 	    std::lock_guard<std::mutex> outputGuard(_outputMutex);
     	std::cout << getTimeString() << " " << error << std::endl;
     	std::cerr << getTimeString() << " " << error << std::endl;
 	}
-	if(_errorCallback && *_errorCallback) (*_errorCallback)(3, error);
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(3, error);
+    }
 }
 
-void Output::printInfo(std::string message)
+void Output::printInfo(const std::string& message)
 {
 	if(_bl && _bl->debugLevel < 4) return;
-	std::lock_guard<std::mutex> outputGuard(_outputMutex);
-	std::cout << getTimeString() << " " << _prefix << message << std::endl;
+    if(_stdOutput)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        std::cout << getTimeString() << " " << _prefix << message << std::endl;
+    }
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(4, message);
+    }
 }
 
-void Output::printDebug(std::string message, int32_t minDebugLevel)
+void Output::printDebug(const std::string& message, int32_t minDebugLevel)
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
-	std::lock_guard<std::mutex> outputGuard(_outputMutex);
-	std::cout << getTimeString() << " " << _prefix << message << std::endl;
+    if(_stdOutput)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        std::cout << getTimeString() << " " << _prefix << message << std::endl;
+    }
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(minDebugLevel, message);
+    }
 }
 
-void Output::printMessage(std::string message, int32_t minDebugLevel, bool errorLog)
+void Output::printMessage(const std::string& message, int32_t minDebugLevel, bool errorLog)
 {
 	if(_bl && _bl->debugLevel < minDebugLevel) return;
-	message = _prefix + message;
-	std::unique_lock<std::mutex> outputGuard(_outputMutex);
-	std::cout << getTimeString() << " " << message << std::endl;
-	if(minDebugLevel <= 3 && errorLog)
-	{
-		std::cerr << getTimeString() << " " << message << std::endl;
-		outputGuard.unlock();
-		if(_errorCallback && *_errorCallback) (*_errorCallback)(3, message);
-	}
+	std::string prefixedMessage = _prefix + message;
+
+	if(_stdOutput)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        std::cout << getTimeString() << " " << prefixedMessage << std::endl;
+        if(minDebugLevel <= 3 && errorLog) std::cerr << getTimeString() << " " << prefixedMessage << std::endl;
+    }
+    if(_outputCallback)
+    {
+        std::lock_guard<std::mutex> outputGuard(_outputMutex);
+        _outputCallback(minDebugLevel, prefixedMessage);
+    }
 }
 
 }

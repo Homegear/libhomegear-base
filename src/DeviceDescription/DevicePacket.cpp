@@ -41,9 +41,9 @@ Packet::Packet(BaseLib::SharedObjects* baseLib)
 	_bl = baseLib;
 }
 
-Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseLib)
+Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node* node) : Packet(baseLib)
 {
-	for(xml_attribute<>* attr = node->first_attribute(); attr; attr = attr->next_attribute())
+	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
 	{
 		std::string attributeName(attr->name());
 		std::string attributeValue(attr->value());
@@ -53,7 +53,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		}
 		else _bl->out.printWarning("Warning: Unknown attribute for \"packet\": " + attributeName);
 	}
-	for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 	{
 		std::string nodeName(subNode->name());
 		std::string value(subNode->value());
@@ -81,7 +81,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		else if(nodeName == "responseTypeId") responseTypeId = value;
 		else if(nodeName == "responses")
 		{
-			for(xml_node<>* responsesNode = subNode->first_node(); responsesNode; responsesNode = responsesNode->next_sibling())
+			for(xml_node* responsesNode = subNode->first_node(); responsesNode; responsesNode = responsesNode->next_sibling())
 			{
 				std::string packetsNodeName(responsesNode->name());
 				if(packetsNodeName == "response")
@@ -107,7 +107,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		else if(nodeName == "maxPackets") maxPackets = Math::getNumber(value);
 		else if(nodeName == "binaryPayload")
 		{
-			for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+			for(xml_node* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
 			{
 				PBinaryPayload payload(new BinaryPayload(_bl, payloadNode));
 				binaryPayloads.push_back(payload);
@@ -115,7 +115,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		}
 		else if(nodeName == "jsonPayload")
 		{
-			for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+			for(xml_node* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
 			{
 				PJsonPayload payload(new JsonPayload(_bl, payloadNode));
 				jsonPayloads.push_back(payload);
@@ -123,7 +123,7 @@ Packet::Packet(BaseLib::SharedObjects* baseLib, xml_node<>* node) : Packet(baseL
 		}
 		else if(nodeName == "httpPayload")
 		{
-			for(xml_node<>* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
+			for(xml_node* payloadNode = subNode->first_node("element"); payloadNode; payloadNode = payloadNode->next_sibling("element"))
 			{
 				PHttpPayload payload(new HttpPayload(_bl, payloadNode));
 				httpPayloads.push_back(payload);

@@ -41,6 +41,7 @@
 #include <ctime>
 #include <mutex>
 #include <functional>
+#include <atomic>
 
 namespace BaseLib
 {
@@ -78,60 +79,35 @@ public:
 	 * @see setPrefix()
 	 * @return Returns the prefix previously defined with setPrefix.
 	 */
-	std::string getPrefix() { return _prefix; }
+	std::string getPrefix();
 
 	/**
 	 * Sets a string, which will be used to prefix all output.
 	 * @see getPrefix()
 	 * @param prefix The new prefix.
 	 */
-	void setPrefix(std::string prefix) { _prefix = prefix; }
+	void setPrefix(const std::string& prefix);
 
 	/**
-	 * Returns the error callback function provided with init.
-	 * @see setErrorCallback()
-	 * @return Returns the error callback function.
+	 * Enables standard output and standard error.
 	 */
-	std::function<void(int32_t, std::string)>* getErrorCallback();
+    void enableStdOutput();
+
+    /**
+     * Disables standard output and standard error.
+     */
+	void disableStdOutput();
 
 	/**
-	 * Sets a callback function which will be called for all error messages. First parameter of the function is the error level (1 = critical, 2 = error, 3 = warning), second parameter is the error string.
-	 * @see getErrorCallback()
-	 * @return Returns the error callback function.
+	 * Sets a callback function which will be called for all messages. First parameter of the function is the debug level (1 = critical, 2 = error, 3 = warning, 4 = info, >= 5 = debug ), second parameter is the message string.
 	 */
-	void setErrorCallback(std::function<void(int32_t, std::string)>* errorCallback);
-
-	/**
-	 * Prints the policy and priority of the thread executing this method.
-	 */
-	void printThreadPriority();
+	void setOutputCallback(std::function<void(int32_t, const std::string&)> value);
 
 	/**
 	 * Returns a time string like "08/27/14 14:13:53.471".
 	 * @return Returns a time string like "08/27/14 14:13:53.471".
 	 */
 	static std::string getTimeString(int64_t time = 0);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::vector<unsigned char>& data);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::shared_ptr<std::vector<char>> data);
-
-	/**
-	 * Prints the provided binary data as a hexadecimal string.
-	 *
-	 * @param data The binary data to print.
-	 */
-	void printBinary(std::vector<char>& data);
 
 	/**
 	 * Prints an error message with filename, line number and function name.
@@ -141,7 +117,7 @@ public:
 	 * @param function The function name where the error occured.
 	 * @param what The error message.
 	 */
-	void printEx(std::string file, uint32_t line, std::string function, std::string what = "");
+	void printEx(const std::string& file, uint32_t line, const std::string& function, const std::string& what = "");
 
 	/**
 	 * Prints a critical error message (debug level < 1).
@@ -151,10 +127,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The error message.
-	 * @param errorCallback If set to false, the error will not be send to RPC event servers (default true)
+	 * @param message The error message.
 	 */
-	void printCritical(std::string errorString, bool errorCallback = true);
+	void printCritical(const std::string& message);
 
 	/**
 	 * Prints an error message (debug level < 2).
@@ -164,9 +139,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The error message.
+	 * @param message The error message.
 	 */
-	void printError(std::string errorString);
+	void printError(const std::string& message);
 
 	/**
 	 * Prints a warning message (debug level < 3).
@@ -176,9 +151,9 @@ public:
 	 * @see printInfo()
 	 * @see printDebug()
 	 * @see printMessage()
-	 * @param errorString The warning message.
+	 * @param message The warning message.
 	 */
-	void printWarning(std::string errorString);
+	void printWarning(const std::string& message);
 
 	/**
 	 * Prints a info message (debug level < 4).
@@ -190,7 +165,7 @@ public:
 	 * @see printMessage()
 	 * @param message The message.
 	 */
-	void printInfo(std::string message);
+	void printInfo(const std::string& message);
 
 	/**
 	 * Prints a debug message (debug level < 5).
@@ -203,7 +178,7 @@ public:
 	 * @param message The message.
 	 * @param minDebugLevel The minimal debug level (default 5).
 	 */
-	void printDebug(std::string message, int32_t minDebugLevel = 5);
+	void printDebug(const std::string& message, int32_t minDebugLevel = 5);
 
 	/**
 	 * Prints a message regardless of the current debug level.
@@ -217,7 +192,7 @@ public:
 	 * @param minDebugLevel The minimal debug level (default 0).
 	 * @param errorLog If set to true and minDebugLevel is at least "warning", the message is written to the error log, too (default false).
 	 */
-	void printMessage(std::string message, int32_t minDebugLevel = 0, bool errorLog = false);
+	void printMessage(const std::string& message, int32_t minDebugLevel = 0, bool errorLog = false);
 
 	/**
 	 * Calls the error callback function registered with the constructor.
@@ -235,14 +210,19 @@ private:
 	std::string _prefix;
 
 	/**
+	 * Defines if output is printed to standard output / standard error
+	 */
+	std::atomic_bool _stdOutput{ true };
+
+	/**
 	 * Mutex to only print one output at a time.
 	 */
 	static std::mutex _outputMutex;
 
 	/**
-	 * Pointer to an optional callback function, which will be called whenever printEx, printWarning, printCritical or printError are called.
+	 * Pointer to an optional callback function, which will be called whenever printDebug, printInfo, printEx, printWarning, printCritical or printError are called.
 	 */
-	std::function<void(int32_t, std::string)>* _errorCallback = nullptr;
+	std::function<void(int32_t, const std::string&)> _outputCallback;
 
 	Output(const Output&);
 	Output& operator=(const Output&);

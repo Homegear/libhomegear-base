@@ -36,7 +36,6 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "../../Encoding/RapidXml/rapidxml.hpp"
 
 using namespace rapidxml;
 
@@ -77,7 +76,7 @@ protected:
     std::unordered_map<std::string, PHomegearUiElement> _uiElements;
 
     void load(std::string xmlFilename);
-    void parseXML(xml_node<>* node);
+    void parseXML(xml_node* node);
 };
 }
 }

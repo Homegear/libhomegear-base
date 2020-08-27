@@ -30,7 +30,7 @@
 
 #include "Ssdp.h"
 #include "../BaseLib.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
+#include "../Encoding/RapidXml/rapidxml.h"
 #include <ifaddrs.h>
 
 namespace BaseLib
@@ -440,9 +440,9 @@ void Ssdp::getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<Ssdp
 			PVariable infoStruct;
 			if(!xml.empty())
 			{
-				xml_document<> doc;
+				xml_document doc;
 				doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-				xml_node<>* node = doc.first_node("root");
+				xml_node* node = doc.first_node("root");
 				if(node)
 				{
 					node = node->first_node("device");

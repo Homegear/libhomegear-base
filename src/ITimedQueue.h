@@ -57,6 +57,7 @@ class ITimedQueue : public IQueueBase
 public:
 	ITimedQueue(SharedObjects* baseLib, uint32_t queueCount);
 	virtual ~ITimedQueue();
+
 	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
 	void stopQueue(int32_t index);
 	bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry, int64_t& id);

@@ -34,13 +34,10 @@
 #include "JsonPayload.h"
 #include "BinaryPayload.h"
 #include "Parameter.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <memory>
 #include <vector>
 #include <map>
-
-using namespace rapidxml;
 
 namespace BaseLib
 {
@@ -63,7 +60,7 @@ public:
 	};
 
 	RunProgram(BaseLib::SharedObjects* baseLib);
-	RunProgram(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	RunProgram(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~RunProgram() {}
 
 	//Elements

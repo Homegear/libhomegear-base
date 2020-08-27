@@ -34,7 +34,6 @@
 #include "ParameterCast.h"
 #include "Logical.h"
 #include "Physical.h"
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include "../Systems/Role.h"
 #include <string>
 #include <set>
@@ -42,13 +41,11 @@
 using namespace rapidxml;
 using namespace BaseLib::DeviceDescription::ParameterCast;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class Parameter;
 class ParameterGroup;
@@ -59,122 +56,144 @@ typedef std::map<std::string, PParameter> Parameters;
 typedef std::string ParameterRole;
 typedef std::unordered_map<uint64_t, Role> ParameterRoles;
 
-class Parameter : public std::enable_shared_from_this<Parameter>
-{
-public:
-	class Packet
-	{
-	public:
-		struct ConditionOperator
-		{
-			enum Enum { none, e, g, l, ge, le };
-		};
+class Parameter : public std::enable_shared_from_this<Parameter> {
+ public:
+  class Packet {
+   public:
+    struct ConditionOperator {
+      enum Enum { none, e, g, l, ge, le };
+    };
 
-		struct Type
-		{
-			enum Enum { none = 0, get = 1, set = 2, event = 3 };
-		};
+    struct Type {
+      enum Enum { none = 0, get = 1, set = 2, event = 3 };
+    };
 
-		std::string id;
-		Type::Enum type = Type::none;
-		std::vector<std::string> autoReset;
-		std::pair<std::string, int32_t> delayedAutoReset;
-		std::string responseId;
-		ConditionOperator::Enum conditionOperator = ConditionOperator::none;
-		int32_t conditionValue = -1;
-		int32_t delay = -1;
+    std::string id;
+    Type::Enum type = Type::none;
+    std::vector<std::string> autoReset;
+    std::pair<std::string, int32_t> delayedAutoReset;
+    std::string responseId;
+    ConditionOperator::Enum conditionOperator = ConditionOperator::none;
+    int32_t conditionValue = -1;
+    int32_t delay = -1;
 
-		Packet() = default;
-		virtual ~Packet() = default;
+    Packet() = default;
+    virtual ~Packet() = default;
 
-		bool checkCondition(int32_t value);
-	};
+    bool checkCondition(int32_t value);
+  };
 
-	//Attributes
-	std::string id;
+  //Attributes
+  std::string id;
 
-	//Properties
-	bool readable = true;
-	bool writeable = true;
-	bool transmitted = true;
-	bool addonWriteable = true;
-	bool password = false;
-	bool visible = true;
-	bool internal = false;
-	bool parameterGroupSelector = false;
-	bool service = false;
-	bool sticky = false;
-	bool transform = false;
-	bool isSignedSet = false;
-	bool isSigned = false;
-	std::string control;
-	std::string unit;
-	bool mandatory = false;
-	std::string formFieldType;
-	int32_t formPosition = -1;
-	std::string metadata;
-	bool resetAfterRestart = false;
-	bool ccu2Visible = true;
-	Casts casts;
-	ParameterRoles roles;
+  //Properties
+  bool readable = true;
+  bool writeable = true;
+  bool transmitted = true;
 
-	//Elements
-	std::shared_ptr<ILogical> logical;
-	std::shared_ptr<IPhysical> physical;
-	std::vector<std::shared_ptr<Packet>> getPackets;
-	std::vector<std::shared_ptr<Packet>> setPackets;
-	std::vector<std::shared_ptr<Packet>> eventPackets;
+  /**
+   * Makes readonly variables writeable for addons (i. e. from device source code)
+   */
+  bool addonWriteable = true;
 
-	//Helpers
-	bool hasDelayedAutoResetParameters = false;
+  bool password = false;
+  bool visible = true;
+  bool internal = false;
+  bool parameterGroupSelector = false;
+  bool service = false;
+  bool sticky = false;
+  bool transform = false;
+  bool isSignedSet = false;
+  bool isSigned = false;
 
-	explicit Parameter(BaseLib::SharedObjects* baseLib, const PParameterGroup& parent);
-	virtual ~Parameter();
+  /**
+   * UI control to use for displaying this parameter.
+   */
+  std::string control;
 
-	void parseXml(xml_node<>* node);
+  /**
+   * The unit of the variable like "°C" or "km/h".
+   */
+  std::string unit;
+  bool mandatory = false;
+  std::string formFieldType;
+  int32_t formPosition = -1;
+  std::string metadata;
+  bool resetAfterRestart = false;
 
-	//Helpers
-	/**
-	 * Converts binary data of a packet received by a physical interface to a RPC variable.
-	 *
-	 * @param[in] data The data to convert. It is not modified, even though there is no "const".
-	 * @param isEvent (default false) Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
-	 * @return Returns the RPC variable.
-	 */
-	PVariable convertFromPacket(std::vector<uint8_t>& data, bool isEvent = false);
+  /**
+   * Deprecated. Remove beginning of 2021.
+   * Visible on the HomeMatic CCU2.
+   */
+  bool ccu2Visible = true;
 
-	/**
-	 * Converts a RPC variable to binary data to send it over a physical interface.
-	 *
-	 * @param[in] value The value to convert.
-	 * @param[out] convertedValue The converted binary data.
-	 */
-	void convertToPacket(const PVariable& value, std::vector<uint8_t>& convertedValue);
+  /**
+   * When parameters are linked together, logical changes of one parameter change the other to the same value.
+   */
+  std::string linkedParameter;
+  Casts casts;
+  ParameterRoles roles;
 
-	/**
-	 * Tries to convert a string value to a binary data to send it over a physical interface.
-	 *
-	 * @param[in] value The value to convert.
-	 * @param[out] convertedValue The converted binary data.
-	 */
-	void convertToPacket(const std::string& value, std::vector<uint8_t>& convertedValue);
+  //Elements
+  std::shared_ptr<ILogical> logical;
+  std::shared_ptr<IPhysical> physical;
+  std::vector<std::shared_ptr<Packet>> getPackets;
+  std::vector<std::shared_ptr<Packet>> setPackets;
+  std::vector<std::shared_ptr<Packet>> eventPackets;
 
-	void adjustBitPosition(std::vector<uint8_t>& data);
+  //Helpers
+  bool hasDelayedAutoResetParameters = false;
 
-	const PParameterGroup parent();
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
+  explicit Parameter(BaseLib::SharedObjects *baseLib, const PParameterGroup &parent);
+  virtual ~Parameter();
 
-	//Helpers
-	std::weak_ptr<ParameterGroup> _parent;
+  void parseXml(xml_node *node);
 
-	/**
-	 * Reverses a binary array.
-	 *
-	 * @param[in] data The array to reverse.
-	 * @param[out] reversedData The reversed array.
-	 */
-	void reverseData(const std::vector<uint8_t>& data, std::vector<uint8_t>& reversedData);
+  //Helpers
+  /**
+   * Converts binary data of a packet received by a physical interface to a RPC variable.
+   *
+   * @param data The data to convert.
+   * @param role The associated role of the value.
+   * @param isEvent Set to "true" if packet is an event packet. Necessary to set value of "Action" correctly.
+   * @return Returns the RPC variable.
+   */
+  PVariable convertFromPacket(const std::vector<uint8_t> &data, const Role &role, bool isEvent);
+
+  /**
+   * Converts a RPC variable to binary data to send it over a physical interface.
+   *
+   * @param[in] value The value to convert.
+   * @param[in] role The associated role of the value.
+   * @param[out] convertedValue The converted binary data.
+   */
+  void convertToPacket(const PVariable &value, const Role &role, std::vector<uint8_t> &convertedValue);
+
+  /**
+   * Tries to convert a string value to a binary data to send it over a physical interface.
+   *
+   * @param[in] value The value to convert.
+   * @param[in] role The associated role of the value.
+   * @param[out] convertedValue The converted binary data.
+   */
+  void convertToPacket(const std::string &value, const Role &role, std::vector<uint8_t> &convertedValue);
+
+  void adjustBitPosition(std::vector<uint8_t> &data);
+
+  PParameterGroup parent();
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+
+  //Helpers
+  std::weak_ptr<ParameterGroup> _parent;
+
+  /**
+   * Reverses a binary array.
+   *
+   * @param[in] data The array to reverse.
+   * @param[out] reversedData The reversed array.
+   */
+  void reverseData(const std::vector<uint8_t> &data, std::vector<uint8_t> &reversedData);
 };
 
 }

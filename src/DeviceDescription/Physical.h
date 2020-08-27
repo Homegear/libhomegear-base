@@ -31,9 +31,13 @@
 #ifndef DEVICEPARAMETERPHYSICAL_H_
 #define DEVICEPARAMETERPHYSICAL_H_
 
-#include "../Encoding/RapidXml/rapidxml.hpp"
 #include <string>
 #include <memory>
+
+namespace rapidxml
+{
+class xml_node;
+}
 
 using namespace rapidxml;
 
@@ -97,7 +101,7 @@ public:
 	double memoryChannelStep = 0;
 
 	IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type);
-	IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node<>* node);
+	IPhysical(BaseLib::SharedObjects* baseLib, Type::Enum type, xml_node* node);
 	virtual ~IPhysical() {}
 
 	//Helpers
@@ -111,7 +115,7 @@ class Physical : public IPhysical
 {
 public:
 	Physical(BaseLib::SharedObjects* baseLib);
-	Physical(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	Physical(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~Physical() {}
 };
 
@@ -119,7 +123,7 @@ class PhysicalInteger : public IPhysical
 {
 public:
 	PhysicalInteger(BaseLib::SharedObjects* baseLib);
-	PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	PhysicalInteger(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~PhysicalInteger() {}
 };
 
@@ -127,7 +131,7 @@ class PhysicalBoolean : public IPhysical
 {
 public:
 	PhysicalBoolean(BaseLib::SharedObjects* baseLib);
-	PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	PhysicalBoolean(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~PhysicalBoolean() {}
 };
 
@@ -135,7 +139,7 @@ class PhysicalString : public IPhysical
 {
 public:
 	PhysicalString(BaseLib::SharedObjects* baseLib);
-	PhysicalString(BaseLib::SharedObjects* baseLib, xml_node<>* node);
+	PhysicalString(BaseLib::SharedObjects* baseLib, xml_node* node);
 	virtual ~PhysicalString() {}
 };
 

@@ -111,6 +111,11 @@ void IQueue::stopQueue(int32_t index)
 
 }
 
+bool IQueue::queueIsStarted(int32_t index)
+{
+    return _stopProcessingThread[index] == false;
+}
+
 bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry>& entry, bool waitWhenFull)
 {
 	try

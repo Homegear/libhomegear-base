@@ -528,12 +528,12 @@ int32_t Http::processHeader(char** buffer, int32_t& bufferLength)
 	*buffer += headerSize;
 	bufferLength -= headerSize;
 
-	if(headerSize >= 5 && !strncmp(headerBuffer, "HTTP/", 5))
+	if(_rawHeader.size() > 10 && !strncmp(headerBuffer, "HTTP/", 5))
 	{
 		_type = Type::Enum::response;
-		_header.responseCode = strtol(headerBuffer + 9, NULL, 10);
+		_header.responseCode = strtol(headerBuffer + 9, nullptr, 10);
 	}
-	else if(headerSize >= 10)
+	else if(_rawHeader.size() > 10)
 	{
 		char* endPos = (char*)memchr(headerBuffer, ' ', 10);
 		if(!endPos) throw HttpException("Your client sent a request that this server could not understand (1).");
@@ -617,7 +617,7 @@ void Http::processHeaderField(char* name, uint32_t nameSize, char* value, uint32
 		if(_header.transferEncoding == TransferEncoding::Enum::none)
 		{
 			_contentLengthSet = true;
-			_header.contentLength = strtol(value, NULL, 10);
+			_header.contentLength = strtol(value, nullptr, 10);
 		}
 	}
 	else if(nameSize == 4 && !strnaicmp(name, "host", nameSize))

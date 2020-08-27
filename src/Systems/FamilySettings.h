@@ -40,49 +40,45 @@
 #include <cstring>
 #include <vector>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Systems
-{
+namespace Systems {
 
-class FamilySettings
-{
-public:
-	struct FamilySetting
-	{
-		std::string stringValue;
-		int32_t integerValue;
-		std::vector<char> binaryValue;
-	};
-	typedef std::shared_ptr<FamilySetting> PFamilySetting;
+class FamilySettings {
+ public:
+  struct FamilySetting {
+    std::string stringValue;
+    int32_t integerValue;
+    std::vector<char> binaryValue;
+  };
+  typedef std::shared_ptr<FamilySetting> PFamilySetting;
 
-	FamilySettings(BaseLib::SharedObjects* bl, int32_t familyId);
-	virtual ~FamilySettings();
-	void dispose();
-	void load(std::string filename);
-	bool changed();
-	PFamilySetting get(std::string name);
-	std::string getString(std::string name);
-	int32_t getNumber(std::string name);
-	std::vector<char> getBinary(std::string name);
-	void set(std::string name, std::string& value);
-	void set(std::string name, int32_t value);
-	void set(std::string name, std::vector<char>& value);
-	void deleteFromDatabase(std::string name);
-	std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
-private:
-	BaseLib::SharedObjects* _bl = nullptr;
-	int32_t _familyId = -1;
-	std::mutex _settingsMutex;
-	std::map<std::string, PFamilySetting> _settings;
-	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
+  FamilySettings(BaseLib::SharedObjects *bl, int32_t familyId);
+  virtual ~FamilySettings();
+  void dispose();
+  void load(std::string filename);
+  bool changed();
+  PFamilySetting get(std::string name);
+  std::string getString(std::string name);
+  int32_t getNumber(std::string name);
+  std::vector<char> getBinary(std::string name);
+  void set(std::string name, const std::string &value);
+  void set(std::string name, int32_t value);
+  void set(std::string name, const std::vector<char> &value);
+  void deleteFromDatabase(std::string name);
+  std::map<std::string, PPhysicalInterfaceSettings> getPhysicalInterfaceSettings();
+ private:
+  BaseLib::SharedObjects *_bl = nullptr;
+  int32_t _familyId = -1;
+  std::mutex _settingsMutex;
+  std::map<std::string, PFamilySetting> _settings;
+  std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
 
-	void loadFromDatabase();
-	void processStringSetting(std::string& name, std::string& value, PPhysicalInterfaceSettings& settings);
-	void processDatabaseSetting(std::string& name, PFamilySetting& value, PPhysicalInterfaceSettings& settings);
+  void loadFromDatabase();
+  void processStringSetting(std::string &name, std::string &value, PPhysicalInterfaceSettings &settings);
+  void processDatabaseSetting(std::string &name, PFamilySetting &value, PPhysicalInterfaceSettings &settings);
 };
 
 }
