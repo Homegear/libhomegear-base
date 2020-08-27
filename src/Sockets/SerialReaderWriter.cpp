@@ -198,13 +198,14 @@ int32_t SerialReaderWriter::readChar(char &data, uint32_t timeout) {
         return 1;
       case 1: break;
       default:
+        if (errno == EINTR) return 1;
         //Error
         _bl->fileDescriptorManager.close(_fileDescriptor);
         return -1;
     }
     i = read(_fileDescriptor->descriptor, &data, 1);
     if (i == -1 || i == 0) {
-      if (i == -1 && errno == EAGAIN) continue;
+      if (i == -1 && (errno == EAGAIN || errno == EINTR)) continue;
       _bl->fileDescriptorManager.close(_fileDescriptor);
       return -1;
     }
