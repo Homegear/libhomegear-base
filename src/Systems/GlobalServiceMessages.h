@@ -38,52 +38,48 @@
 
 #include <mutex>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Systems
-{
-class GlobalServiceMessages
-{
-public:
-    GlobalServiceMessages();
-    virtual ~GlobalServiceMessages();
+namespace Systems {
+class GlobalServiceMessages {
+ public:
+  GlobalServiceMessages();
+  virtual ~GlobalServiceMessages();
 
-    void init(BaseLib::SharedObjects* baseLib);
-    void load();
+  void init(BaseLib::SharedObjects *baseLib);
+  void load();
 
-    void set(int32_t familyId, int32_t messageId, std::string messageSubId, int32_t timestamp, std::string message, std::list<std::string> variables, PVariable data = PVariable(), int64_t value = 0);
-    void unset(int32_t familyId, int32_t messageId, std::string messageSubId, std::string message);
+  void set(int32_t familyId, int32_t messageId, std::string messageSubId, int32_t timestamp, std::string message, std::list<std::string> variables, PVariable data = PVariable(), int64_t value = 0);
+  void unset(int32_t familyId, int32_t messageId, std::string messageSubId, std::string message);
 
-    std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
-protected:
-    struct ServiceMessage
-    {
-        uint64_t databaseId = 0;
-        int32_t familyId = 0;
-        int32_t messageId = 0;
-        std::string messageSubId;
-        int32_t timestamp = 0;
-        std::string message;
-        std::list<std::string> variables;
-        int64_t value = 0;
-        PVariable data;
-    };
-    typedef std::shared_ptr<ServiceMessage> PServiceMessage;
-    typedef int32_t FamilyId;
-    typedef int32_t MessageId;
-    typedef std::string MessageSubId;
-    typedef std::string MessageType;
+  std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
+ protected:
+  struct ServiceMessage {
+    uint64_t databaseId = 0;
+    int32_t familyId = 0;
+    int32_t messageId = 0;
+    std::string messageSubId;
+    int32_t timestamp = 0;
+    std::string message;
+    std::list<std::string> variables;
+    int64_t value = 0;
+    PVariable data;
+  };
+  typedef std::shared_ptr<ServiceMessage> PServiceMessage;
+  typedef int32_t FamilyId;
+  typedef int32_t MessageId;
+  typedef std::string MessageSubId;
+  typedef std::string MessageType;
 
-    BaseLib::SharedObjects* _bl = nullptr;
+  BaseLib::SharedObjects *_bl = nullptr;
 
-    std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
-    std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
+  std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
+  std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
 
-    std::mutex _serviceMessagesMutex;
-    std::unordered_map<FamilyId, std::unordered_map<MessageId, std::unordered_map<MessageSubId, std::unordered_map<MessageType, PServiceMessage>>>> _serviceMessages;
+  std::mutex _serviceMessagesMutex;
+  std::unordered_map<FamilyId, std::unordered_map<MessageId, std::unordered_map<MessageSubId, std::unordered_map<MessageType, PServiceMessage>>>> _serviceMessages;
 };
 
 }

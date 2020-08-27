@@ -35,18 +35,15 @@
 
 #include <memory>
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 
-class SystemFactory
-{
-public:
-	SystemFactory() {}
-	virtual ~SystemFactory() {}
+class SystemFactory {
+ public:
+  SystemFactory() {}
+  virtual ~SystemFactory() {}
 
-	virtual DeviceFamily* createDeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler) = 0;
+  virtual DeviceFamily *createDeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *eventHandler) = 0;
 };
 
 }

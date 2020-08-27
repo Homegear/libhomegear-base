@@ -41,39 +41,36 @@
 #include <vector>
 #include <atomic>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Systems
-{
+namespace Systems {
 
 class IPhysicalInterface;
 
-class PhysicalInterfaces
-{
-public:
-	PhysicalInterfaces(BaseLib::SharedObjects* bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
-	virtual ~PhysicalInterfaces();
-	void dispose();
+class PhysicalInterfaces {
+ public:
+  PhysicalInterfaces(BaseLib::SharedObjects *bl, int32_t familyId, std::map<std::string, PPhysicalInterfaceSettings> physicalInterfaceSettings);
+  virtual ~PhysicalInterfaces();
+  void dispose();
 
-	uint32_t count();
-	void clear();
-	virtual void stopListening();
-	virtual void startListening();
-	bool lifetick();
-	bool isOpen();
-	void setup(int32_t userID, int32_t groupID, bool setPermissions);
-	PVariable listInterfaces();
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
-	int32_t _familyId = -1;
-	std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
-	std::mutex _physicalInterfacesMutex;
-	std::map<std::string, std::shared_ptr<IPhysicalInterface>> _physicalInterfaces;
+  uint32_t count();
+  void clear();
+  virtual void stopListening();
+  virtual void startListening();
+  bool lifetick();
+  bool isOpen();
+  void setup(int32_t userID, int32_t groupID, bool setPermissions);
+  PVariable listInterfaces();
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  int32_t _familyId = -1;
+  std::map<std::string, PPhysicalInterfaceSettings> _physicalInterfaceSettings;
+  std::mutex _physicalInterfacesMutex;
+  std::map<std::string, std::shared_ptr<IPhysicalInterface>> _physicalInterfaces;
 
-	virtual void create() {};
+  virtual void create() {};
 };
 
 }

@@ -43,132 +43,124 @@
 #include <termios.h>
 #include <signal.h>
 
-namespace BaseLib
-{
-class SerialReaderWriterException : public Exception
-{
-public:
-	SerialReaderWriterException(std::string message) : Exception(message) {}
+namespace BaseLib {
+class SerialReaderWriterException : public Exception {
+ public:
+  SerialReaderWriterException(std::string message) : Exception(message) {}
 };
 
-class SerialReaderWriter : public IEventsEx
-{
-public:
-	enum class CharacterSize : tcflag_t
-	{
-		Five = CS5,
-		Six = CS6,
-		Seven = CS7,
-		Eight = CS8
-	};
+class SerialReaderWriter : public IEventsEx {
+ public:
+  enum class CharacterSize : tcflag_t {
+    Five = CS5,
+    Six = CS6,
+    Seven = CS7,
+    Eight = CS8
+  };
 
-	// {{{ Event handling
-	class ISerialReaderWriterEventSink : public IEventSinkBase
-	{
-	public:
-		virtual void lineReceived(const std::string& data) = 0;
-	};
-	// }}}
+  // {{{ Event handling
+  class ISerialReaderWriterEventSink : public IEventSinkBase {
+   public:
+    virtual void lineReceived(const std::string &data) = 0;
+  };
+  // }}}
 
-	/**
-	 * Constructor.
-	 *
-	 * @param baseLib The base library object.
-	 * @param device The device to use (e. g. "/dev/ttyUSB0")
-	 * @param baudrate The baudrate (e. g. 115200)
-	 * @param flags Flags passed to the C function "open". 0 should be fine for most cases. "O_NDELAY" is always added by the constructor. By default "O_RDWR | O_NOCTTY | O_NDELAY" is used.
-	 * @param createLockFile Set to "true" to create a lock file.
-	 * @param readThreadPriority The priority of the read thread between 0 and 99. Set to -1 to not prioritize the thread. Only relevent when "events" are enabled in "openDevice()".
-	 * @param writeOnly Open the device for writing only.
-	 */
-	SerialReaderWriter(BaseLib::SharedObjects* baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority, bool writeOnly = false);
+  /**
+   * Constructor.
+   *
+   * @param baseLib The base library object.
+   * @param device The device to use (e. g. "/dev/ttyUSB0")
+   * @param baudrate The baudrate (e. g. 115200)
+   * @param flags Flags passed to the C function "open". 0 should be fine for most cases. "O_NDELAY" is always added by the constructor. By default "O_RDWR | O_NOCTTY | O_NDELAY" is used.
+   * @param createLockFile Dummy parameter for compatibility.
+   * @param readThreadPriority The priority of the read thread between 0 and 99. Set to -1 to not prioritize the thread. Only relevent when "events" are enabled in "openDevice()".
+   * @param writeOnly Open the device for writing only.
+   */
+  SerialReaderWriter(BaseLib::SharedObjects *baseLib, std::string device, int32_t baudrate, int32_t flags, bool createLockFile, int32_t readThreadPriority, bool writeOnly = false);
 
-    /**
-     * Destructor.
-     */
-	virtual ~SerialReaderWriter();
+  /**
+   * Destructor.
+   */
+  virtual ~SerialReaderWriter();
 
-	bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
-	std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
+  bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
+  std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
 
-    /**
-     * Opens the serial device.
-     *
-     * @param evenParity Enable parity checking using an even parity bit.
-     * @param oddParity Enable parity checking using an odd parity bit. "evenParity" and "oddParity" are mutually exclusive.
-     * @param events Enable events. This starts a thread which calls "lineReceived()" in a derived class for each received packet.
-     * @param characterSize Set the character Size.
-     * @param twoStopBits Enable two stop bits instead of one.
-     */
-	void openDevice(bool parity, bool oddParity, bool events = true, CharacterSize characterSize = CharacterSize::Eight, bool twoStopBits = false);
+  /**
+   * Opens the serial device.
+   *
+   * @param evenParity Enable parity checking using an even parity bit.
+   * @param oddParity Enable parity checking using an odd parity bit. "evenParity" and "oddParity" are mutually exclusive.
+   * @param events Enable events. This starts a thread which calls "lineReceived()" in a derived class for each received packet.
+   * @param characterSize Set the character Size.
+   * @param twoStopBits Enable two stop bits instead of one.
+   */
+  void openDevice(bool parity, bool oddParity, bool events = true, CharacterSize characterSize = CharacterSize::Eight, bool twoStopBits = false);
 
-    /**
-     * Closes the serial device.
-     */
-	void closeDevice();
+  /**
+   * Closes the serial device.
+   */
+  void closeDevice();
 
-	/**
-	 * SerialReaderWriter can either be used through events (by implementing ISerialReaderWriterEventSink and usage of addEventHandler) or by polling using this method.
-	 * @param data The variable to write the returned line into.
-	 * @param timeout The maximum amount of time to wait in microseconds before the function returns (default: 500000).
-	 * @param splitChar The character to split at (default: '\n')
-	 * @return Returns "0" on success, "1" on timeout or "-1" on error.
-	 */
-	int32_t readLine(std::string& data, uint32_t timeout = 500000, char splitChar = '\n');
+  /**
+   * SerialReaderWriter can either be used through events (by implementing ISerialReaderWriterEventSink and usage of addEventHandler) or by polling using this method.
+   * @param data The variable to write the returned line into.
+   * @param timeout The maximum amount of time to wait in microseconds before the function returns (default: 500000).
+   * @param splitChar The character to split at (default: '\n')
+   * @return Returns "0" on success, "1" on timeout or "-1" on error.
+   */
+  int32_t readLine(std::string &data, uint32_t timeout = 500000, char splitChar = '\n');
 
-	/**
-	 * SerialReaderWriter can either be used through events (by implementing ISerialReaderWriterEventSink and usage of addEventHandler) or by polling using this method.
-	 * @param data The variable to write the returned character into.
-	 * @param timeout The maximum amount of time to wait in microseconds before the function returns (default: 500000).
-	 * @return Returns "0" on success, "1" on timeout or "-1" on error.
-	 */
-	int32_t readChar(char& data, uint32_t timeout = 500000);
+  /**
+   * SerialReaderWriter can either be used through events (by implementing ISerialReaderWriterEventSink and usage of addEventHandler) or by polling using this method.
+   * @param data The variable to write the returned character into.
+   * @param timeout The maximum amount of time to wait in microseconds before the function returns (default: 500000).
+   * @return Returns "0" on success, "1" on timeout or "-1" on error.
+   */
+  int32_t readChar(char &data, uint32_t timeout = 500000);
 
-	/**
-	 * Writes one line of data.
-	 * @param data The data to write. If data is not terminated by a new line character, it is appended.
-	 */
-	void writeLine(std::string& data);
+  /**
+   * Writes one line of data.
+   * @param data The data to write. If data is not terminated by a new line character, it is appended.
+   */
+  void writeLine(std::string &data);
 
-	/**
-	 * Writes binary data to the serial device.
-	 * @param data The data to write. It is written as is without any modification.
-	 */
-	void writeData(const std::vector<char>& data);
+  /**
+   * Writes binary data to the serial device.
+   * @param data The data to write. It is written as is without any modification.
+   */
+  void writeData(const std::vector<char> &data);
 
-	/**
-	 * Writes binary data to the serial device.
-	 * @param data The data to write. It is written as is without any modification.
-	 */
-	void writeData(const std::vector<uint8_t>& data);
+  /**
+   * Writes binary data to the serial device.
+   * @param data The data to write. It is written as is without any modification.
+   */
+  void writeData(const std::vector<uint8_t> &data);
 
-	/**
-	 * Writes one character to the serial device.
-	 * @param data The (binary) character to write.
-	 */
-	void writeChar(char data);
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
-	std::shared_ptr<FileDescriptor> _fileDescriptor;
-	std::string _device;
-	bool _writeOnly = false;
-	struct termios _termios;
-	int32_t _baudrate = 0;
-	int32_t _flags = 0;
-	bool _createLockFile;
-	std::string _lockfile;
-	int32_t _readThreadPriority = 0;
-	int32_t _handles = 0;
+  /**
+   * Writes one character to the serial device.
+   * @param data The (binary) character to write.
+   */
+  void writeChar(char data);
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  std::shared_ptr<FileDescriptor> _fileDescriptor;
+  std::string _device;
+  bool _writeOnly = false;
+  struct termios _termios;
+  int32_t _baudrate = 0;
+  int32_t _flags = 0;
+  int32_t _readThreadPriority = 0;
+  int32_t _handles = 0;
 
-	std::atomic_bool _stopReadThread;
-	std::mutex _readThreadMutex;
-	std::thread _readThread;
-	std::mutex _sendMutex;
-	std::mutex _openDeviceThreadMutex;
-	std::thread _openDeviceThread;
+  std::atomic_bool _stopReadThread;
+  std::mutex _readThreadMutex;
+  std::thread _readThread;
+  std::mutex _sendMutex;
+  std::mutex _openDeviceThreadMutex;
+  std::thread _openDeviceThread;
 
-	void createLockFile();
-	void readThread(bool parity, bool oddParity, CharacterSize characterSize, bool twoStopBits);
+  void readThread(bool parity, bool oddParity, CharacterSize characterSize, bool twoStopBits);
 };
 
 }

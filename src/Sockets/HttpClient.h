@@ -36,23 +36,21 @@
 #include "../Encoding/Http.h"
 #include "TcpSocket.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 /**
  * Exception class for the HTTP client.
  *
  * @see HttpClient
  * @see HttpClientTimeOutException
  */
-class HttpClientException : public Exception
-{
-private:
-	int32_t _responseCode = -1;
-public:
-	explicit HttpClientException(const std::string& message) : Exception(message) {}
-	HttpClientException(const std::string& message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
+class HttpClientException : public Exception {
+ private:
+  int32_t _responseCode = -1;
+ public:
+  explicit HttpClientException(const std::string &message) : Exception(message) {}
+  HttpClientException(const std::string &message, int32_t responseCode) : Exception(message), _responseCode(responseCode) {}
 
-	int32_t responseCode() const { return _responseCode; }
+  int32_t responseCode() const { return _responseCode; }
 };
 
 /**
@@ -61,10 +59,9 @@ public:
  * @see HttpClient
  * @see HTTPClientException
  */
-class HttpClientTimeOutException : public HttpClientException
-{
-public:
-	explicit HttpClientTimeOutException(const std::string& message) : HttpClientException(message) {}
+class HttpClientTimeOutException : public HttpClientException {
+ public:
+  explicit HttpClientTimeOutException(const std::string &message) : HttpClientException(message) {}
 };
 
 /**
@@ -73,10 +70,9 @@ public:
  * @see HttpClient
  * @see HTTPClientException
  */
-class HttpClientSocketClosedException : public HttpClientException
-{
-public:
-    explicit HttpClientSocketClosedException(const std::string& message) : HttpClientException(message) {}
+class HttpClientSocketClosedException : public HttpClientException {
+ public:
+  explicit HttpClientSocketClosedException(const std::string &message) : HttpClientException(message) {}
 };
 
 /**
@@ -84,179 +80,191 @@ public:
  *
  * @see HTTPClientException
  */
-class HttpClient
-{
-public:
-	/**
-	 * Constructor
-	 *
-	 * @param baseLib The common base library object.
-	 * @param hostname The hostname of the client to connect to without "http://".
-	 * @param port (default 80) The port to connect to.
-	 * @param keepAlive (default true) Keep the socket open after each request.
-	 * @param useSSL (default false) Set to "true" to use "https".
-	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
-	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
-	 * @param certPath (default "") Path to the PEM encoded client certificate
-	 * @param keyPath (default "") Path to the PEM encoded client keyfile
-	 */
-	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true, std::string certPath = "", std::string keyPath = "");
+class HttpClient {
+ public:
+  /**
+   * Constructor
+   *
+   * @param baseLib The common base library object.
+   * @param hostname The hostname of the client to connect to without "http://".
+   * @param port (default 80) The port to connect to.
+   * @param keepAlive (default true) Keep the socket open after each request.
+   * @param useSSL (default false) Set to "true" to use "https".
+   * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
+   * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
+   * @param certPath (default "") Path to the PEM encoded client certificate
+   * @param keyPath (default "") Path to the PEM encoded client keyfile
+   */
+  HttpClient(BaseLib::SharedObjects *baseLib, std::string hostname, int32_t port = 80, bool keepAlive = true, bool useSSL = false, std::string caFile = "", bool verifyCertificate = true, std::string certPath = "", std::string keyPath = "");
 
-	/**
-	 * Constructor. ...Data or ...File are chosen automatically. Just leave the one you don't want to use empty.
-	 *
-	 * @param baseLib The common base library object.
-	 * @param hostname The hostname of the client to connect to without "http://".
-	 * @param port (default 80) The port to connect to.
-	 * @param keepAlive (default true) Keep the socket open after each request.
-	 * @param useSSL (default false) Set to "true" to use "https".
-	 * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
-	 * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
-	 * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
-	 * @param certPath (default "") Path to the PEM encoded client certificate
-	 * @param clientCertData The PEM-encoded client certificate (not the path).
-	 * @param keyPath (default "") Path to the PEM encoded client keyfile
-	 * @param keyData The PEM-encoded client key (not the path).
-	 */
-	HttpClient(BaseLib::SharedObjects* baseLib, std::string hostname, int32_t port, bool keepAlive, bool useSSL, bool verifyCertificate, std::string caFile, std::string caData, std::string certPath, std::string certData, std::string keyPath, const std::shared_ptr<Security::SecureVector<uint8_t>>& keyData);
+  /**
+   * Constructor. ...Data or ...File are chosen automatically. Just leave the one you don't want to use empty.
+   *
+   * @param baseLib The common base library object.
+   * @param hostname The hostname of the client to connect to without "http://".
+   * @param port (default 80) The port to connect to.
+   * @param keepAlive (default true) Keep the socket open after each request.
+   * @param useSSL (default false) Set to "true" to use "https".
+   * @param verifyCertificate (default true) Set to "true" to verify the server certificate (highly recommended).
+   * @param caFile (default "") Path to the certificate authority file of the certificate authority which signed the server certificate.
+   * @param caData The PEM-encoded CA certificate (not the path) used to sign the server certificate.
+   * @param certPath (default "") Path to the PEM encoded client certificate
+   * @param clientCertData The PEM-encoded client certificate (not the path).
+   * @param keyPath (default "") Path to the PEM encoded client keyfile
+   * @param keyData The PEM-encoded client key (not the path).
+   */
+  HttpClient(BaseLib::SharedObjects *baseLib,
+             std::string hostname,
+             int32_t port,
+             bool keepAlive,
+             bool useSSL,
+             bool verifyCertificate,
+             std::string caFile,
+             std::string caData,
+             std::string certPath,
+             std::string certData,
+             std::string keyPath,
+             const std::shared_ptr<Security::SecureVector<uint8_t>> &keyData);
 
-	/**
-	 * Destructor
-	 */
-	virtual ~HttpClient();
+  /**
+   * Destructor
+   */
+  virtual ~HttpClient();
 
-	/**
-	 * Returns the underlying TcpSocket.
-	 * @return Returns the underlying TcpSocket.
-	 */
-	std::shared_ptr<TcpSocket> getSocket() { return _socket; }
+  /**
+   * Returns the underlying TcpSocket.
+   * @return Returns the underlying TcpSocket.
+   */
+  std::shared_ptr<TcpSocket> getSocket() { return _socket; }
 
-	/**
-	 * Sets the socket timeout.
-	 * @param value The timeout in milliseconds.
-	 */
-	void setTimeout(uint32_t value);
+  /**
+   * Sets the socket timeout.
+   * @param value The timeout in milliseconds.
+   */
+  void setTimeout(uint32_t value);
 
-	/**
-	 * Returns "true" if the socket is connected, otherwise "false".
-	 * @return "true" if the socket is connected, otherwise "false".
-	 */
-	bool connected() { return _socket && _socket->connected(); }
+  void setVerifyHostname(bool value);
 
-	/**
-	 * Closes the socket.
-	 */
-	void disconnect() { if(_socket) _socket->close(); }
+  /**
+   * Returns "true" if the socket is connected, otherwise "false".
+   * @return "true" if the socket is connected, otherwise "false".
+   */
+  bool connected() { return _socket && _socket->connected(); }
 
-	/**
-	 * Enables storage of raw content. The raw content can be retrieved with getRawContent().
-	 * @param value Set to true to enable.
-	 */
-	void enableRawContent(bool value) { _keepRawContent = value; }
+  /**
+   * Closes the socket.
+   */
+  void disconnect() { if (_socket) _socket->close(); }
 
-	/**
-	 * Returns the raw content. Only available when enableRawContent() was set to true.
-	 * @return The raw respones as received from the HTTP server.
-	 */
-	std::vector<char>& getRawContent() { return _rawContent; }
+  /**
+   * Enables storage of raw content. The raw content can be retrieved with getRawContent().
+   * @param value Set to true to enable.
+   */
+  void enableRawContent(bool value) { _keepRawContent = value; }
 
-	/**
-	 * Returns the IP address of the HTTP server.
-	 * @return The IP address.
-	 */
-	std::string getIpAddress() { return _socket ? _socket->getIpAddress() : ""; }
+  /**
+   * Returns the raw content. Only available when enableRawContent() was set to true.
+   * @return The raw respones as received from the HTTP server.
+   */
+  std::vector<char> &getRawContent() { return _rawContent; }
 
-	/*
-	 * Sends an HTTP request and returns the response.
-	 *
-	 * @param[in] request The HTTP request including the full header.
-	 * @param[out] response The HTTP response without the header.
-	 */
-	void sendRequest(const std::string& request, std::string& response, bool responseIsHeaderOnly = false);
+  /**
+   * Returns the IP address of the HTTP server.
+   * @return The IP address.
+   */
+  std::string getIpAddress() { return _socket ? _socket->getIpAddress() : ""; }
 
-	/*
-	 * Sends an HTTP request and returns the http object.
-	 *
-	 * @param[in] request The HTTP request including the full header.
-	 * @param[out] response The HTTP response.
-	 */
-	void sendRequest(const std::string& request, Http& response, bool responseIsHeaderOnly = false);
+  /*
+   * Sends an HTTP request and returns the response.
+   *
+   * @param[in] request The HTTP request including the full header.
+   * @param[out] response The HTTP response without the header.
+   */
+  void sendRequest(const std::string &request, std::string &response, bool responseIsHeaderOnly = false);
 
-	/*
-	 * Sends an HTTP GET request and returns the response. This method can be used to download files.
-	 *
-	 * @param[in] url The path of the file to get.
-	 * @param[out] data The data returned.
-	 */
-	void get(const std::string& path, std::string& data);
+  /*
+   * Sends an HTTP request and returns the http object.
+   *
+   * @param[in] request The HTTP request including the full header.
+   * @param[out] response The HTTP response.
+   */
+  void sendRequest(const std::string &request, Http &response, bool responseIsHeaderOnly = false);
 
-	/*
-	 * Sends an HTTP GET request and returns the response. This method can be used to download files.
-	 *
-	 * @param[in] url The path of the file to get.
-	 * @param[out] data The data returned.
-	 */
-	void get(const std::string& path, Http& data);
+  /*
+   * Sends an HTTP GET request and returns the response. This method can be used to download files.
+   *
+   * @param[in] url The path of the file to get.
+   * @param[out] data The data returned.
+   */
+  void get(const std::string &path, std::string &data);
 
-	/*
-	 * Sends an HTTP POST request and returns the response.
-	 *
-	 * @param[in] url The path to post to.
-	 * @param[in] dataIn The POST data.
-	 * @param[out] dataOut The data returned.
-	 */
-	void post(const std::string& path, std::string& dataIn, std::string& dataOut);
+  /*
+   * Sends an HTTP GET request and returns the response. This method can be used to download files.
+   *
+   * @param[in] url The path of the file to get.
+   * @param[out] data The data returned.
+   */
+  void get(const std::string &path, Http &data);
 
-	/*
-	 * Sends an HTTP POST request and returns the response.
-	 *
-	 * @param[in] url The path to post to.
-	 * @param[in] dataIn The POST data.
-	 * @param[out] dataOut The data returned.
-	 */
-	void post(const std::string& path, std::string& dataIn, Http& dataOut);
-protected:
-	/**
-	 * The common base library object.
-	 */
-	BaseLib::SharedObjects* _bl = nullptr;
+  /*
+   * Sends an HTTP POST request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void post(const std::string &path, std::string &dataIn, std::string &dataOut);
 
-	/**
-	 * Protects _socket to only allow one operation at a time.
-	 *
-	 * @see _socket
-	 */
-	std::mutex _socketMutex;
+  /*
+   * Sends an HTTP POST request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void post(const std::string &path, std::string &dataIn, Http &dataOut);
+ protected:
+  /**
+   * The common base library object.
+   */
+  BaseLib::SharedObjects *_bl = nullptr;
 
-	/**
-	 * The socket object.
-	 */
-	std::shared_ptr<TcpSocket> _socket;
+  /**
+   * Protects _socket to only allow one operation at a time.
+   *
+   * @see _socket
+   */
+  std::mutex _socketMutex;
 
-	/**
-	 * The hostname of the HTTP server.
-	 */
-	std::string _hostname = "";
+  /**
+   * The socket object.
+   */
+  std::shared_ptr<TcpSocket> _socket;
 
-	/**
-	 * The port the HTTP server listens on.
-	 */
-	int32_t _port = 80;
+  /**
+   * The hostname of the HTTP server.
+   */
+  std::string _hostname = "";
 
-	/**
-	 * Stores the information if the socket connection should be kept open after each request.
-	 */
-	bool _keepAlive = true;
+  /**
+   * The port the HTTP server listens on.
+   */
+  int32_t _port = 80;
 
-	/**
-	 * When true, the raw content is stored
-	 */
-	bool _keepRawContent = false;
+  /**
+   * Stores the information if the socket connection should be kept open after each request.
+   */
+  bool _keepAlive = true;
 
-	/**
-	 * Stores the raw response
-	 */
-	std::vector<char> _rawContent;
+  /**
+   * When true, the raw content is stored
+   */
+  bool _keepRawContent = false;
+
+  /**
+   * Stores the raw response
+   */
+  std::vector<char> _rawContent;
 };
 
 }

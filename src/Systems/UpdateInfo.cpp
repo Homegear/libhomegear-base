@@ -30,25 +30,20 @@
 
 #include "UpdateInfo.h"
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 
-UpdateInfo::UpdateInfo()
-{
+UpdateInfo::UpdateInfo() {
 }
 
-UpdateInfo::~UpdateInfo()
-{
+UpdateInfo::~UpdateInfo() {
 }
 
-void UpdateInfo::reset()
-{
-	devicesToUpdate = -1;
-	currentUpdate = -1;
-	currentDevice = 0;
-	currentDeviceProgress = -1;
+void UpdateInfo::reset() {
+  devicesToUpdate = -1;
+  currentUpdate = -1;
+  currentDevice = 0;
+  currentDeviceProgress = -1;
 }
 
 }

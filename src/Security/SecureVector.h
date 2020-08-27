@@ -34,80 +34,71 @@
 #include <cstdint>
 #include <vector>
 
-namespace BaseLib
-{
-namespace Security
-{
+namespace BaseLib {
+namespace Security {
 
 /**
  * The class only makes sure that the vector is not copyable and the data is zeroed on destruction. Once created, only
  * use methods prepended with the word "secure". You can safely use the methods secureAppend() and securePrepend().
  */
 template<typename T>
-class SecureVector : public std::vector<T>
-{
-public:
-    SecureVector() : std::vector<T>() {};
-    explicit SecureVector(size_t count) : std::vector<T>(count) {}
-    explicit SecureVector(size_t count, const T& value) : std::vector<T>(count, value) {}
-    SecureVector(const SecureVector&) = delete; //Copy constructor
-    SecureVector(SecureVector&&) noexcept = default; //Move constructor
-    SecureVector& operator=(const SecureVector&) = delete; //Copy assignment operator
+class SecureVector : public std::vector<T> {
+ public:
+  SecureVector() : std::vector<T>() {};
+  explicit SecureVector(size_t count) : std::vector<T>(count) {}
+  explicit SecureVector(size_t count, const T &value) : std::vector<T>(count, value) {}
+  template<class InputIt> SecureVector(InputIt first, InputIt last) : std::vector<T>(first, last) {}
+  SecureVector(const SecureVector &) = delete; //Copy constructor
+  SecureVector(SecureVector &&) noexcept = default; //Move constructor
+  SecureVector &operator=(const SecureVector &) = delete; //Copy assignment operator
 
-    ~SecureVector()
-    {
-        std::fill(this->begin(), this->end(), 0);
+  ~SecureVector() {
+    std::fill(this->begin(), this->end(), 0);
+  }
+
+  void secureResize(size_t count) {
+    if (count <= this->capacity()) {
+      this->resize(count);
+      return;
     }
 
-    void secureResize(size_t count)
-    {
-        if(count <= this->capacity())
-        {
-            this->resize(count);
-            return;
-        }
+    std::vector<uint8_t> newVector;
+    newVector.resize(count);
+    std::copy(this->begin(), this->end(), newVector.begin());
+    this->swap(newVector);
+    std::fill(newVector.begin(), newVector.end(), 0);
+  }
 
-        std::vector<uint8_t> newVector;
-        newVector.resize(count);
-        std::copy(this->begin(), this->end(), newVector.begin());
-        this->swap(newVector);
-        std::fill(newVector.begin(), newVector.end(), 0);
+  void secureResize(size_t count, const T &value) {
+    if (count <= this->capacity()) {
+      this->resize(count, value);
+      return;
     }
 
-    void secureResize(size_t count, const T& value)
-    {
-        if(count <= this->capacity())
-        {
-            this->resize(count, value);
-            return;
-        }
+    std::vector<uint8_t> newVector;
+    newVector.resize(count, value);
+    std::copy(this->begin(), this->end(), newVector.begin());
+    this->swap(newVector);
+    std::fill(newVector.begin(), newVector.end(), 0);
+  }
 
-        std::vector<uint8_t> newVector;
-        newVector.resize(count, value);
-        std::copy(this->begin(), this->end(), newVector.begin());
-        this->swap(newVector);
-        std::fill(newVector.begin(), newVector.end(), 0);
-    }
+  void securePrepend(const SecureVector &other) {
+    std::vector<uint8_t> newVector;
+    newVector.resize(this->size() + other.size());
+    std::copy(other.begin(), other.end(), newVector.begin());
+    std::copy(this->begin(), this->end(), newVector.begin() + other.size());
+    this->swap(newVector);
+    std::fill(newVector.begin(), newVector.end(), 0);
+  }
 
-    void securePrepend(const SecureVector& other)
-    {
-        std::vector<uint8_t> newVector;
-        newVector.resize(this->size() + other.size());
-        std::copy(other.begin(), other.end(), newVector.begin());
-        std::copy(this->begin(), this->end(), newVector.begin() + other.size());
-        this->swap(newVector);
-        std::fill(newVector.begin(), newVector.end(), 0);
-    }
-
-    void secureAppend(const SecureVector& other)
-    {
-        std::vector<uint8_t> newVector;
-        newVector.resize(this->size() + other.size());
-        std::copy(this->begin(), this->end(), newVector.begin());
-        std::copy(other.begin(), other.end(), newVector.begin() + this->size());
-        this->swap(newVector);
-        std::fill(newVector.begin(), newVector.end(), 0);
-    }
+  void secureAppend(const SecureVector &other) {
+    std::vector<uint8_t> newVector;
+    newVector.resize(this->size() + other.size());
+    std::copy(this->begin(), this->end(), newVector.begin());
+    std::copy(other.begin(), other.end(), newVector.begin() + this->size());
+    this->swap(newVector);
+    std::fill(newVector.begin(), newVector.end(), 0);
+  }
 };
 
 }

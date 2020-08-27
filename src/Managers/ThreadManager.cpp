@@ -66,7 +66,7 @@ void ThreadManager::testMaxThreadCount()
 	while(true)
 	{
 		pthread_t thread;
-		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0)
+		if(pthread_create(&thread, nullptr, threadCountTest, nullptr) != 0 || _maxThreadCount > 10000)
 		{
 			_stopThreadCountTest = true;
 			for(auto i : threads)

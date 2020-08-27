@@ -33,55 +33,52 @@
 
 #include "IDeviceFamily.h"
 
-namespace BaseLib
-{
-namespace Systems
-{
+namespace BaseLib {
+namespace Systems {
 
-class DeviceFamily : public IDeviceFamily
-{
-public:
-	DeviceFamily(BaseLib::SharedObjects* bl, IFamilyEventSink* eventHandler, int32_t id, std::string name);
+class DeviceFamily : public IDeviceFamily {
+ public:
+  DeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *eventHandler, int32_t id, std::string name);
 
-	virtual bool init();
-	virtual void dispose();
+  virtual bool init();
+  virtual void dispose();
 
-	virtual bool lifetick();
+  virtual bool lifetick();
 
-	virtual std::shared_ptr<DeviceDescription::Devices> getRpcDevices();
-	virtual void load();
-	virtual void save(bool full);
-	virtual std::shared_ptr<ICentral> getCentral();
-	virtual std::string handleCliCommand(std::string& command);
-	virtual bool hasPhysicalInterface();
-	virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces();
+  virtual std::shared_ptr<DeviceDescription::Devices> getRpcDevices();
+  virtual void load();
+  virtual void save(bool full);
+  virtual std::shared_ptr<ICentral> getCentral();
+  virtual std::string handleCliCommand(std::string &command);
+  virtual bool hasPhysicalInterface();
+  virtual std::shared_ptr<PhysicalInterfaces> physicalInterfaces();
 
-	/*
-     * Executed when Homegear is fully started.
-     */
-    virtual void homegearStarted();
+  /*
+   * Executed when Homegear is fully started.
+   */
+  virtual void homegearStarted();
 
-	/*
-     * Executed before Homegear starts shutting down.
-     */
-    virtual void homegearShuttingDown();
+  /*
+   * Executed before Homegear starts shutting down.
+   */
+  virtual void homegearShuttingDown();
 
-    // {{{ RPC
-    virtual std::shared_ptr<Variable> getPairingInfo() = 0;
-    virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
-    virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string>& fields);
-    // }}}
-protected:
-	std::shared_ptr<ICentral> _central;
-	std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
+  // {{{ RPC
+  virtual std::shared_ptr<Variable> getPairingInfo() = 0;
+  virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type);
+  virtual PVariable listKnownDeviceTypes(PRpcClientInfo clientInfo, bool channels, std::set<std::string> &fields);
+  // }}}
+ protected:
+  std::shared_ptr<ICentral> _central;
+  std::shared_ptr<PhysicalInterfaces> _physicalInterfaces;
 
-	std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
+  std::shared_ptr<DeviceDescription::Devices> _rpcDevices;
 
-	virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
-	virtual void createCentral() = 0;
-private:
-	DeviceFamily(const DeviceFamily&) = delete;
-	DeviceFamily& operator=(const DeviceFamily&) = delete;
+  virtual std::shared_ptr<ICentral> initializeCentral(uint32_t deviceId, int32_t address, std::string serialNumber) = 0;
+  virtual void createCentral() = 0;
+ private:
+  DeviceFamily(const DeviceFamily &) = delete;
+  DeviceFamily &operator=(const DeviceFamily &) = delete;
 };
 
 }

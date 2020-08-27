@@ -34,16 +34,14 @@
 #include <string>
 #include <stdexcept>
 
-namespace BaseLib
-{
+namespace BaseLib {
 /**
  * Base class for all exceptions defined in Homegear
  */
-class Exception : public std::runtime_error
-{
-public:
-    explicit Exception(const std::string& message) : std::runtime_error(message) {};
-    ~Exception() override = default;
+class Exception : public std::runtime_error {
+ public:
+  explicit Exception(const std::string &message) : std::runtime_error(message) {};
+  ~Exception() override = default;
 };
 }
 #endif // EXCEPTION_H
