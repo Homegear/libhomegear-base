@@ -559,13 +559,13 @@ void FamilySettings::processStringSetting(std::string &name, std::string &value,
     } else if (name == "password") {
       settings->password = value;
       _bl->out.printDebug("Debug: password set");
-    } else if (name == "passwordS21") {
+    } else if (name == "passwords21") {
       settings->passwordS21 = value;
       _bl->out.printDebug("Debug: password S2 1 set");
-    } else if (name == "passwordS22") {
+    } else if (name == "passwords22") {
       settings->passwordS22 = value;
       _bl->out.printDebug("Debug: password S2 2 set");
-    } else if (name == "passwordS23") {
+    } else if (name == "passwords23") {
       settings->passwordS23 = value;
       _bl->out.printDebug("Debug: password S2 3 set");
     } else if (name == "additionalcommands") {
