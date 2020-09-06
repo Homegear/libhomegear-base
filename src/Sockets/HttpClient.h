@@ -146,6 +146,12 @@ class HttpClient {
   void setVerifyHostname(bool value);
 
   /**
+   * By default the header "User-Agent" is set to "Homegear". To change the user agent string, call this method.
+   * @param value The new user agent.
+   */
+  void setUserAgent(const std::string &value);
+
+  /**
    * Returns "true" if the socket is connected, otherwise "false".
    * @return "true" if the socket is connected, otherwise "false".
    */
@@ -312,6 +318,8 @@ class HttpClient {
    * When true, the raw content is stored
    */
   bool _keepRawContent = false;
+
+  std::string _userAgent = "Homegear";
 
   /**
    * Stores the raw response
