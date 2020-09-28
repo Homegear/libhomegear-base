@@ -268,7 +268,7 @@ void FamilySettings::load(std::string filename) {
             if (!settings->type.empty()) {
               if (settings->id.empty()) settings->id = settings->type;
               _physicalInterfaceSettings[settings->id] = settings;
-            } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+            } else if (!title.empty() && !generalSettings && (settings->type.empty() || settings->id.empty())) {
               _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
             }
             settings = std::make_shared<BaseLib::Systems::PhysicalInterfaceSettings>();
@@ -314,7 +314,7 @@ void FamilySettings::load(std::string filename) {
     if (!settings->type.empty()) {
       if (settings->id.empty()) settings->id = settings->type;
       _physicalInterfaceSettings[settings->id] = settings;
-    } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+    } else if (!title.empty() && !generalSettings && (settings->type.empty() || settings->id.empty())) {
       _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
     }
 
