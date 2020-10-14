@@ -146,6 +146,12 @@ class HttpClient {
   void setVerifyHostname(bool value);
 
   /**
+   * By default the header "User-Agent" is set to "Homegear". To change the user agent string, call this method.
+   * @param value The new user agent.
+   */
+  void setUserAgent(const std::string &value);
+
+  /**
    * Returns "true" if the socket is connected, otherwise "false".
    * @return "true" if the socket is connected, otherwise "false".
    */
@@ -196,7 +202,23 @@ class HttpClient {
    * @param[in] url The path of the file to get.
    * @param[out] data The data returned.
    */
-  void get(const std::string &path, std::string &data);
+  void delete_(const std::string &path, std::string &data, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP DELETE request and returns the response. This method can be used to download files.
+   *
+   * @param[in] url The path of the file to get.
+   * @param[out] data The data returned.
+   */
+  void delete_(const std::string &path, Http &data, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP DELETE request and returns the response. This method can be used to download files.
+   *
+   * @param[in] url The path of the file to get.
+   * @param[out] data The data returned.
+   */
+  void get(const std::string &path, std::string &data, const std::string &additionalHeaders = "");
 
   /*
    * Sends an HTTP GET request and returns the response. This method can be used to download files.
@@ -204,7 +226,25 @@ class HttpClient {
    * @param[in] url The path of the file to get.
    * @param[out] data The data returned.
    */
-  void get(const std::string &path, Http &data);
+  void get(const std::string &path, Http &data, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP PATCH request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void patch(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP PATCH request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void patch(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders = "");
 
   /*
    * Sends an HTTP POST request and returns the response.
@@ -213,7 +253,7 @@ class HttpClient {
    * @param[in] dataIn The POST data.
    * @param[out] dataOut The data returned.
    */
-  void post(const std::string &path, std::string &dataIn, std::string &dataOut);
+  void post(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders = "");
 
   /*
    * Sends an HTTP POST request and returns the response.
@@ -222,7 +262,25 @@ class HttpClient {
    * @param[in] dataIn The POST data.
    * @param[out] dataOut The data returned.
    */
-  void post(const std::string &path, std::string &dataIn, Http &dataOut);
+  void post(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP PUT request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void put(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders = "");
+
+  /*
+   * Sends an HTTP PUT request and returns the response.
+   *
+   * @param[in] url The path to post to.
+   * @param[in] dataIn The POST data.
+   * @param[out] dataOut The data returned.
+   */
+  void put(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders = "");
  protected:
   /**
    * The common base library object.
@@ -260,6 +318,8 @@ class HttpClient {
    * When true, the raw content is stored
    */
   bool _keepRawContent = false;
+
+  std::string _userAgent = "Homegear";
 
   /**
    * Stores the raw response

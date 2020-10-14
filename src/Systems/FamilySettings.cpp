@@ -268,7 +268,7 @@ void FamilySettings::load(std::string filename) {
             if (!settings->type.empty()) {
               if (settings->id.empty()) settings->id = settings->type;
               _physicalInterfaceSettings[settings->id] = settings;
-            } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+            } else if (!title.empty() && !generalSettings && (settings->type.empty() || settings->id.empty())) {
               _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
             }
             settings = std::make_shared<BaseLib::Systems::PhysicalInterfaceSettings>();
@@ -314,7 +314,7 @@ void FamilySettings::load(std::string filename) {
     if (!settings->type.empty()) {
       if (settings->id.empty()) settings->id = settings->type;
       _physicalInterfaceSettings[settings->id] = settings;
-    } else if (!title.empty() && (settings->type.empty() || settings->id.empty())) {
+    } else if (!title.empty() && !generalSettings && (settings->type.empty() || settings->id.empty())) {
       _bl->out.printError("Error: Physical interface with title \"" + title + "\" has no type or id set. Please control your settings in \"" + filename + "\".");
     }
 
@@ -559,13 +559,13 @@ void FamilySettings::processStringSetting(std::string &name, std::string &value,
     } else if (name == "password") {
       settings->password = value;
       _bl->out.printDebug("Debug: password set");
-    } else if (name == "passwordS21") {
+    } else if (name == "passwords21") {
       settings->passwordS21 = value;
       _bl->out.printDebug("Debug: password S2 1 set");
-    } else if (name == "passwordS22") {
+    } else if (name == "passwords22") {
       settings->passwordS22 = value;
       _bl->out.printDebug("Debug: password S2 2 set");
-    } else if (name == "passwordS23") {
+    } else if (name == "passwords23") {
       settings->passwordS23 = value;
       _bl->out.printDebug("Debug: password S2 3 set");
     } else if (name == "additionalcommands") {
