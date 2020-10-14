@@ -85,40 +85,94 @@ void HttpClient::setVerifyHostname(bool value) {
   _socket->setVerifyHostname(value);
 }
 
-void HttpClient::get(const std::string &path, std::string &data) {
+void HttpClient::setUserAgent(const std::string &value) {
+  if (!value.empty()) _userAgent = value;
+}
+
+void HttpClient::delete_(const std::string &path, std::string &data, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
-  std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n\r\n";
+  std::string deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + deleteRequest);
+  sendRequest(deleteRequest, data);
+}
+
+void HttpClient::delete_(const std::string &path, Http &http, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + deleteRequest);
+  sendRequest(deleteRequest, http);
+}
+
+void HttpClient::get(const std::string &path, std::string &data, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + getRequest);
   sendRequest(getRequest, data);
 }
 
-void HttpClient::get(const std::string &path, Http &http) {
+void HttpClient::get(const std::string &path, Http &http, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
-  std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n\r\n";
+  std::string getRequest = "GET " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + getRequest);
   sendRequest(getRequest, http);
 }
 
-void HttpClient::post(const std::string &path, std::string &dataIn, std::string &dataOut) {
+void HttpClient::patch(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string patchRequest =
+      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + patchRequest);
+  sendRequest(patchRequest, dataOut);
+}
+
+void HttpClient::patch(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string patchRequest =
+      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + patchRequest);
+  sendRequest(patchRequest, dataOut);
+}
+
+void HttpClient::post(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string postRequest =
-      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n\r\n"
-          + dataIn + "\r\n";
+      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
   sendRequest(postRequest, dataOut);
 }
 
-void HttpClient::post(const std::string &path, std::string &dataIn, Http &dataOut) {
+void HttpClient::post(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string postRequest =
-      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: Homegear\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n\r\n"
-          + dataIn + "\r\n";
+      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
   sendRequest(postRequest, dataOut);
+}
+
+void HttpClient::put(const std::string &path, std::string &dataIn, std::string &dataOut, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string putRequest =
+      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + putRequest);
+  sendRequest(putRequest, dataOut);
+}
+
+void HttpClient::put(const std::string &path, std::string &dataIn, Http &dataOut, const std::string &additionalHeaders) {
+  std::string fixedPath = path;
+  if (fixedPath.empty()) fixedPath = "/";
+  std::string putRequest =
+      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + putRequest);
+  sendRequest(putRequest, dataOut);
 }
 
 void HttpClient::sendRequest(const std::string &request, std::string &response, bool responseIsHeaderOnly) {
