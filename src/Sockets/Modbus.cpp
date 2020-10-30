@@ -119,7 +119,7 @@ std::vector<char> Modbus::getResponse(std::vector<char>& packet)
     while(true)
     {
         bytesread += _socket->proofread(_readBuffer->data() + bytesread, _readBuffer->size() - bytesread);
-        if(bytesread == _readBuffer->size()) _readBuffer->resize(_readBuffer->size() + 1024);
+        if(_readBuffer->size() == _readBuffer->capacity()) _readBuffer->resize(_readBuffer->size() + 1024);
         if(bytesread < 6) continue;
         if(size == 0) size = ((((uint16_t)(uint8_t)_readBuffer->operator[](4)) << 8) | _readBuffer->operator[](5)) + 6;
         if(bytesread > size) bytesread = size;
