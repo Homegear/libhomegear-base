@@ -39,30 +39,28 @@
 #include <thread>
 #include <vector>
 
-namespace BaseLib
-{
+namespace BaseLib {
 class SharedObjects;
 
-class IQueueBase
-{
-public:
-	IQueueBase(SharedObjects* baseLib, uint32_t queueCount);
-	virtual ~IQueueBase() {}
+class IQueueBase {
+ public:
+  IQueueBase(SharedObjects *baseLib, uint32_t queueCount);
+  virtual ~IQueueBase() {}
 
-	/**
-	 * Prints a rate limited (1 output per 10 seconds) error message and keeps count of error messages.
-	 *
-	 * @param out The output object.
-	 * @param message The message to print.
-	 */
-	void printQueueFullError(BaseLib::Output& out, std::string message);
-protected:
-	SharedObjects* _bl = nullptr;
-	int32_t _queueCount = 2;
-	std::unique_ptr<std::atomic_bool[]> _stopProcessingThread;
+  /**
+   * Prints a rate limited (1 output per 10 seconds) error message and keeps count of error messages.
+   *
+   * @param out The output object.
+   * @param message The message to print.
+   */
+  void printQueueFullError(BaseLib::Output &out, const std::string& message);
+ protected:
+  SharedObjects *_bl = nullptr;
+  int32_t _queueCount = 2;
+  std::unique_ptr<std::atomic_bool[]> _stopProcessingThread;
 
-    std::atomic<uint32_t> _droppedEntries{0};
-    std::atomic<int64_t> _lastQueueFullError{0};
+  std::atomic<uint32_t> _droppedEntries{0};
+  std::atomic<int64_t> _lastQueueFullError{0};
 };
 
 }

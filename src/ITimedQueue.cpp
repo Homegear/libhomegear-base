@@ -138,7 +138,11 @@ void ITimedQueue::process(int32_t index)
 				next = _buffer[index].empty() ? 0 : _buffer[index].begin()->first;
 				_bufferMutex[index].unlock();
 				if(next > 0) _processingConditionVariable[index].wait_until(lock, std::chrono::time_point<std::chrono::high_resolution_clock>(std::chrono::milliseconds(next)), [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return _buffer[index].empty() || _buffer[index].begin()->first <= _bl->hf.getTime() || _firstPositionChanged[index] || _stopProcessingThread[index]; });
-				else _processingConditionVariable[index].wait(lock, [&]{ std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return !_buffer[index].empty() || _stopProcessingThread[index]; });
+				else {
+                  while (!_processingConditionVariable[index].wait_for(lock, std::chrono::milliseconds(1000), [&]{
+                    std::lock_guard<std::mutex> bufferGuard(_bufferMutex[index]); return !_buffer[index].empty() || _stopProcessingThread[index];
+                  }));
+				}
 				if(_firstPositionChanged[index]) _firstPositionChanged[index] = false;
 			}
 			else _bufferMutex[index].unlock();

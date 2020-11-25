@@ -124,7 +124,9 @@ void IPhysicalInterface::processPackets() {
     std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
     try {
       if (_packetBufferHead == _packetBufferTail) {
-        _packetProcessingConditionVariable.wait(lock, [&] { return _packetProcessingPacketAvailable; });
+        while (!_packetProcessingConditionVariable.wait_for(lock, std::chrono::milliseconds(1000), [&] {
+          return _packetProcessingPacketAvailable || _stopPacketProcessingThread;
+        }));
       }
       if (_stopPacketProcessingThread) return;
 
