@@ -77,7 +77,7 @@ void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t processingThr
   _bufferCount[index] = 0;
   _waitWhenFull[index] = waitWhenFull;
   for (uint32_t i = 0; i < processingThreadCount; i++) {
-    std::shared_ptr<std::thread> thread(new std::thread());
+    std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
     _bl->threadManager.start(*thread, true, threadPriority, threadPolicy, &IQueue::process, this, index);
     _processingThread[index].push_back(thread);
   }
