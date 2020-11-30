@@ -31,57 +31,49 @@
 #include "UiText.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-UiText::UiText(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
+UiText::UiText(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-UiText::UiText(BaseLib::SharedObjects* baseLib, xml_node* node) : UiText(baseLib)
-{
-    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        std::string name(attr->name());
-        std::string value(attr->value());
-        if(name == "id") id = value;
-        else _bl->out.printWarning("Warning: Unknown attribute for \"text\": " + std::string(attr->name()));
-    }
-    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "content") content = value;
-        else if(name == "color") color = value;
-        else _bl->out.printWarning("Warning: Unknown node in \"text\": " + name);
-    }
+UiText::UiText(BaseLib::SharedObjects *baseLib, xml_node *node) : UiText(baseLib) {
+  for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+    std::string name(attr->name());
+    std::string value(attr->value());
+    if (name == "id") id = value;
+    else _bl->out.printWarning("Warning: Unknown attribute for \"text\": " + std::string(attr->name()));
+  }
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string name(subNode->name());
+    std::string value(subNode->value());
+    if (name == "content") content = value;
+    else if (name == "color") color = value;
+    else _bl->out.printWarning("Warning: Unknown node in \"text\": " + name);
+  }
 }
 
-UiText::UiText(UiText const& rhs)
-{
-    _bl = rhs._bl;
+UiText::UiText(UiText const &rhs) {
+  _bl = rhs._bl;
 
-    id = rhs.id;
+  id = rhs.id;
 
-    content = rhs.content;
-    color = rhs.color;
+  content = rhs.content;
+  color = rhs.color;
 }
 
-UiText& UiText::operator=(const UiText& rhs)
-{
-    if(&rhs == this) return *this;
+UiText &UiText::operator=(const UiText &rhs) {
+  if (&rhs == this) return *this;
 
-    _bl = rhs._bl;
+  _bl = rhs._bl;
 
-    id = rhs.id;
+  id = rhs.id;
 
-    content = rhs.content;
-    color = rhs.color;
+  content = rhs.content;
+  color = rhs.color;
 
-    return *this;
+  return *this;
 }
 
 }

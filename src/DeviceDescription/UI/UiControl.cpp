@@ -32,87 +32,72 @@
 #include "HomegearUiElement.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
+UiControl::UiControl(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-UiControl::UiControl(BaseLib::SharedObjects* baseLib, xml_node* node) : UiControl(baseLib)
-{
-    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        std::string attributeName(attr->name());
-        std::string attributeValue(attr->value());
-        if(attributeName == "id")
-        {
-            id = attributeValue;
-        }
-        else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
-    }
-    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "x") x = Math::getNumber(value);
-        else if(name == "y") y = Math::getNumber(value);
-        else if(name == "columns") columns = Math::getNumber(value);
-        else if(name == "rows") rows = Math::getNumber(value);
-        else if(name == "metadata")
-        {
-            for(xml_node* metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling())
-            {
-                std::string metadataNodeName(metadataNode->name());
-                bool isDataNode = false;
-                metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode, isDataNode));
-            }
-        }
-        else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
-    }
+UiControl::UiControl(BaseLib::SharedObjects *baseLib, xml_node *node) : UiControl(baseLib) {
+  for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+    std::string attributeName(attr->name());
+    std::string attributeValue(attr->value());
+    if (attributeName == "id") {
+      id = attributeValue;
+    } else _bl->out.printWarning("Warning: Unknown attribute for \"control\": " + attributeName);
+  }
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string name(subNode->name());
+    std::string value(subNode->value());
+    if (name == "x") x = Math::getNumber(value);
+    else if (name == "y") y = Math::getNumber(value);
+    else if (name == "columns") columns = Math::getNumber(value);
+    else if (name == "rows") rows = Math::getNumber(value);
+    else if (name == "metadata") {
+      for (xml_node *metadataNode = subNode->first_node(); metadataNode; metadataNode = metadataNode->next_sibling()) {
+        std::string metadataNodeName(metadataNode->name());
+        bool isDataNode = false;
+        metadata.emplace(metadataNodeName, HelperFunctions::xml2variable(metadataNode, isDataNode));
+      }
+    } else _bl->out.printWarning("Warning: Unknown node in \"control\": " + name);
+  }
 }
 
-UiControl::UiControl(UiControl const& rhs)
-{
-    _bl = rhs._bl;
+UiControl::UiControl(UiControl const &rhs) {
+  _bl = rhs._bl;
 
-    id = rhs.id;
-    x = rhs.x;
-    y = rhs.y;
-    columns = rhs.columns;
-    rows = rhs.rows;
-    metadata = rhs.metadata;
+  id = rhs.id;
+  x = rhs.x;
+  y = rhs.y;
+  columns = rhs.columns;
+  rows = rhs.rows;
+  metadata = rhs.metadata;
 
-    if(rhs.uiElement)
-    {
-        uiElement = std::make_shared<HomegearUiElement>(_bl);
-        *uiElement = *rhs.uiElement;
-    }
+  if (rhs.uiElement) {
+    uiElement = std::make_shared<HomegearUiElement>(_bl);
+    *uiElement = *rhs.uiElement;
+  }
 }
 
-UiControl& UiControl::operator=(const UiControl& rhs)
-{
-    if(&rhs == this) return *this;
+UiControl &UiControl::operator=(const UiControl &rhs) {
+  if (&rhs == this) return *this;
 
-    _bl = rhs._bl;
+  _bl = rhs._bl;
 
-    id = rhs.id;
-    x = rhs.x;
-    y = rhs.y;
-    columns = rhs.columns;
-    rows = rhs.rows;
-    metadata = rhs.metadata;
+  id = rhs.id;
+  x = rhs.x;
+  y = rhs.y;
+  columns = rhs.columns;
+  rows = rhs.rows;
+  metadata = rhs.metadata;
 
-    if(rhs.uiElement)
-    {
-        uiElement = std::make_shared<HomegearUiElement>(_bl);
-        *uiElement = *rhs.uiElement;
-    }
+  if (rhs.uiElement) {
+    uiElement = std::make_shared<HomegearUiElement>(_bl);
+    *uiElement = *rhs.uiElement;
+  }
 
-    return *this;
+  return *this;
 }
 
 }

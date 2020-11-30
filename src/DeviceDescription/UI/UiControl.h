@@ -38,43 +38,40 @@
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiControl;
 class HomegearUiElement;
 
 typedef std::shared_ptr<UiControl> PUiControl;
 
-class UiControl
-{
-public:
-    UiControl(BaseLib::SharedObjects* baseLib);
-    UiControl(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiControl(UiControl const& rhs);
-    virtual ~UiControl() = default;
+class UiControl {
+ public:
+  UiControl(BaseLib::SharedObjects *baseLib);
+  UiControl(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiControl(UiControl const &rhs);
+  virtual ~UiControl() = default;
 
-    UiControl& operator=(const UiControl& rhs);
+  UiControl &operator=(const UiControl &rhs);
 
-    //Attributes
-    std::string id;
+  //Attributes
+  std::string id;
 
-    //Elements
-    int32_t x = -1;
-    int32_t y = -1;
-    int32_t columns = 1;
-    int32_t rows = 1;
-    std::unordered_map<std::string, PVariable> metadata;
+  //Elements
+  int32_t x = -1;
+  int32_t y = -1;
+  int32_t columns = 1;
+  int32_t rows = 1;
+  std::unordered_map<std::string, PVariable> metadata;
 
-    //Helpers
-    std::shared_ptr<HomegearUiElement> uiElement;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Helpers
+  std::shared_ptr<HomegearUiElement> uiElement;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

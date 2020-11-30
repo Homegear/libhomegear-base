@@ -35,43 +35,39 @@
 #include <map>
 #include <memory>
 
-namespace rapidxml
-{
+namespace rapidxml {
 class xml_node;
 }
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiText;
 
 typedef std::shared_ptr<UiText> PUiText;
 
-class UiText
-{
-public:
-    UiText(BaseLib::SharedObjects* baseLib);
-    UiText(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiText(UiText const& rhs);
-    virtual ~UiText() = default;
+class UiText {
+ public:
+  UiText(BaseLib::SharedObjects *baseLib);
+  UiText(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiText(UiText const &rhs);
+  virtual ~UiText() = default;
 
-    UiText& operator=(const UiText& rhs);
+  UiText &operator=(const UiText &rhs);
 
-    //Attributes
-    std::string id;
+  //Attributes
+  std::string id;
 
-    //Elements
-    std::string content;
-    std::string color;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Elements
+  std::string content;
+  std::string color;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

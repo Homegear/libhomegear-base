@@ -44,13 +44,11 @@
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class HomegearUiElement;
 
@@ -62,39 +60,37 @@ typedef std::shared_ptr<HomegearUiElement> PHomegearUiElement;
 /**
  * Class defining a physical packet.
  */
-class HomegearUiElement
-{
-public:
-    enum class Type
-    {
-        undefined,
-        simple,
-        complex
-    };
+class HomegearUiElement {
+ public:
+  enum class Type {
+    undefined,
+    simple,
+    complex
+  };
 
-    //Elements
-    std::string id;
-    Type type = Type::undefined;
-    std::string control;
-    uint64_t role = 0;
-    std::unordered_map<std::string, PUiIcon> icons;
-    std::unordered_map<std::string, PUiText> texts;
-    std::list<PUiVariable> variableInputs;
-    std::list<PUiVariable> variableOutputs;
-    std::unordered_map<std::string, PVariable> metadata;
-    PUiGrid grid;
-    std::list<PUiControl> controls;
+  //Elements
+  std::string id;
+  Type type = Type::undefined;
+  std::string control;
+  uint64_t role = 0;
+  std::unordered_map<std::string, PUiIcon> icons;
+  std::unordered_map<std::string, PUiText> texts;
+  std::list<PUiVariable> variableInputs;
+  std::list<PUiVariable> variableOutputs;
+  std::unordered_map<std::string, PVariable> metadata;
+  PUiGrid grid;
+  std::list<PUiControl> controls;
 
-    HomegearUiElement(BaseLib::SharedObjects* baseLib);
-    HomegearUiElement(BaseLib::SharedObjects* baseLib, xml_node* node);
-    HomegearUiElement(HomegearUiElement const& rhs);
-    virtual ~HomegearUiElement() = default;
+  HomegearUiElement(BaseLib::SharedObjects *baseLib);
+  HomegearUiElement(BaseLib::SharedObjects *baseLib, xml_node *node);
+  HomegearUiElement(HomegearUiElement const &rhs);
+  virtual ~HomegearUiElement() = default;
 
-    HomegearUiElement& operator=(const HomegearUiElement& rhs);
+  HomegearUiElement &operator=(const HomegearUiElement &rhs);
 
-    PVariable getElementInfo();
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  PVariable getElementInfo();
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 }
 }

@@ -39,13 +39,11 @@
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class HomegearUiElements;
 
@@ -57,26 +55,25 @@ typedef std::shared_ptr<HomegearUiElements> PHomegearUiElements;
 /**
  * Class defining a Homegear device translation. It is a direct representation of the translation XML file.
  */
-class HomegearUiElements
-{
-public:
-    HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename);
-    virtual ~HomegearUiElements() = default;
+class HomegearUiElements {
+ public:
+  HomegearUiElements(BaseLib::SharedObjects *baseLib, std::string xmlFilename);
+  virtual ~HomegearUiElements() = default;
 
-    std::unordered_map<std::string, PHomegearUiElement>& getUiElements() { return _uiElements; };
+  std::unordered_map<std::string, PHomegearUiElement> &getUiElements() { return _uiElements; };
 
-    //{{{ XML entries
-    std::string lang;
-    //}}}
+  //{{{ XML entries
+  std::string lang;
+  //}}}
 
-    bool loaded() { return _loaded; }
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-    bool _loaded = false;
-    std::unordered_map<std::string, PHomegearUiElement> _uiElements;
+  bool loaded() { return _loaded; }
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  bool _loaded = false;
+  std::unordered_map<std::string, PHomegearUiElement> _uiElements;
 
-    void load(std::string xmlFilename);
-    void parseXML(xml_node* node);
+  void load(std::string xmlFilename);
+  void parseXML(xml_node *node);
 };
 }
 }

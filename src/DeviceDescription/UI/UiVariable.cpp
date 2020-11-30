@@ -31,163 +31,140 @@
 #include "UiVariable.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-UiVariable::UiVariable(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
+UiVariable::UiVariable(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-UiVariable::UiVariable(BaseLib::SharedObjects* baseLib, xml_node* node) : UiVariable(baseLib)
-{
-    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string nodeName(subNode->name());
-        std::string nodeValue(subNode->value());
-        if(nodeName == "family")
-        {
-            if(nodeValue != "*") familyId = Math::getNumber(nodeValue);
-        }
-        else if(nodeName == "deviceTypeId")
-        {
-            if(nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
-        }
-        else if(nodeName == "channel")
-        {
-            if(nodeValue != "*") channel = Math::getNumber(nodeValue);
-        }
-        else if(nodeName == "name")
-        {
-            if(nodeValue != "*") name = nodeValue;
-        }
-        else if(nodeName == "visualizeInOverview") visualizeInOverview = (nodeValue == "true");
-        else if(nodeName == "unit") unit = nodeValue;
-        else if(nodeName == "minimumValue")
-        {
-            if(nodeValue.find('.') != std::string::npos) minimumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
-            else minimumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
-        }
-        else if(nodeName == "maximumValue")
-        {
-            if(nodeValue.find('.') != std::string::npos) maximumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
-            else maximumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
-        }
-        else if(nodeName == "minimumValueScaled")
-        {
-            if(nodeValue.find('.') != std::string::npos) minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
-            else minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
-        }
-        else if(nodeName == "maximumValueScaled")
-        {
-            if(nodeValue.find('.') != std::string::npos) maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
-            else maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
-        }
-        else if(nodeName == "rendering")
-        {
-            for(xml_node* conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition"))
-            {
-                rendering.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
-            }
-        }
-        else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
-    }
+UiVariable::UiVariable(BaseLib::SharedObjects *baseLib, xml_node *node) : UiVariable(baseLib) {
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string nodeName(subNode->name());
+    std::string nodeValue(subNode->value());
+    if (nodeName == "family") {
+      if (nodeValue != "*") familyId = Math::getNumber(nodeValue);
+    } else if (nodeName == "deviceTypeId") {
+      if (nodeValue != "*") deviceTypeId = Math::getNumber(nodeValue);
+    } else if (nodeName == "channel") {
+      if (nodeValue != "*") channel = Math::getNumber(nodeValue);
+    } else if (nodeName == "name") {
+      if (nodeValue != "*") name = nodeValue;
+    } else if (nodeName == "visualizeInOverview") {
+      visualizeInOverview = (nodeValue == "true");
+    } else if (nodeName == "unit") {
+      unit = nodeValue;
+    } else if (nodeName == "minimumValue") {
+      if (nodeValue.find('.') != std::string::npos) minimumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+      else minimumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+    } else if (nodeName == "maximumValue") {
+      if (nodeValue.find('.') != std::string::npos) maximumValue = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+      else maximumValue = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+    } else if (nodeName == "minimumValueScaled") {
+      if (nodeValue.find('.') != std::string::npos) minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+      else minimumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+    } else if (nodeName == "maximumValueScaled") {
+      if (nodeValue.find('.') != std::string::npos) maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getDouble(nodeValue));
+      else maximumValueScaled = std::make_shared<BaseLib::Variable>(Math::getNumber64(nodeValue));
+    } else if (nodeName == "rendering") {
+      for (xml_node *conditionNode = subNode->first_node("condition"); conditionNode; conditionNode = conditionNode->next_sibling("condition")) {
+        rendering.emplace_back(std::make_shared<UiCondition>(baseLib, conditionNode));
+      }
+    } else if (nodeName == "automationInfo") {
+      bool isDataNode = false;
+      automationInfo = HelperFunctions::xml2variable(subNode, isDataNode);
+    } else _bl->out.printWarning("Warning: Unknown node in \"UiVariable\": " + nodeName);
+  }
 }
 
-UiVariable::UiVariable(UiVariable const& rhs)
-{
-    _bl = rhs._bl;
+UiVariable::UiVariable(UiVariable const &rhs) {
+  _bl = rhs._bl;
 
-    familyId = rhs.familyId;
-    deviceTypeId = rhs.deviceTypeId;
-    channel = rhs.channel;
-    name = rhs.name;
-    if(rhs.value)
-    {
-        value = std::make_shared<Variable>();
-        *value = *rhs.value;
-    }
-    visualizeInOverview = rhs.visualizeInOverview;
-    unit = rhs.unit;
-    if(rhs.minimumValue)
-    {
-        minimumValue = std::make_shared<Variable>();
-        *minimumValue = *rhs.minimumValue;
-    }
-    if(rhs.maximumValue)
-    {
-        maximumValue = std::make_shared<Variable>();
-        *maximumValue = *rhs.maximumValue;
-    }
-    if(rhs.minimumValueScaled)
-    {
-        minimumValueScaled = std::make_shared<Variable>();
-        *minimumValueScaled = *rhs.minimumValueScaled;
-    }
-    if(rhs.maximumValueScaled)
-    {
-        maximumValueScaled = std::make_shared<Variable>();
-        *maximumValueScaled = *rhs.maximumValueScaled;
-    }
-    peerId = rhs.peerId;
+  familyId = rhs.familyId;
+  deviceTypeId = rhs.deviceTypeId;
+  channel = rhs.channel;
+  name = rhs.name;
+  if (rhs.value) {
+    value = std::make_shared<Variable>();
+    *value = *rhs.value;
+  }
+  visualizeInOverview = rhs.visualizeInOverview;
+  unit = rhs.unit;
+  if (rhs.minimumValue) {
+    minimumValue = std::make_shared<Variable>();
+    *minimumValue = *rhs.minimumValue;
+  }
+  if (rhs.maximumValue) {
+    maximumValue = std::make_shared<Variable>();
+    *maximumValue = *rhs.maximumValue;
+  }
+  if (rhs.minimumValueScaled) {
+    minimumValueScaled = std::make_shared<Variable>();
+    *minimumValueScaled = *rhs.minimumValueScaled;
+  }
+  if (rhs.maximumValueScaled) {
+    maximumValueScaled = std::make_shared<Variable>();
+    *maximumValueScaled = *rhs.maximumValueScaled;
+  }
+  peerId = rhs.peerId;
 
-    for(auto& rhsCondition : rhs.rendering)
-    {
-        auto condition = std::make_shared<UiCondition>(_bl);
-        *condition = *rhsCondition;
-        rendering.emplace_back(condition);
-    }
+  for (auto &rhsCondition : rhs.rendering) {
+    auto condition = std::make_shared<UiCondition>(_bl);
+    *condition = *rhsCondition;
+    rendering.emplace_back(condition);
+  }
+
+  if (rhs.automationInfo) {
+    automationInfo = std::make_shared<Variable>();
+    *automationInfo = *rhs.automationInfo;
+  }
 }
 
-UiVariable& UiVariable::operator=(const UiVariable& rhs)
-{
-    if(&rhs == this) return *this;
+UiVariable &UiVariable::operator=(const UiVariable &rhs) {
+  if (&rhs == this) return *this;
 
-    _bl = rhs._bl;
+  _bl = rhs._bl;
 
-    familyId = rhs.familyId;
-    deviceTypeId = rhs.deviceTypeId;
-    channel = rhs.channel;
-    name = rhs.name;
-    if(rhs.value)
-    {
-        value = std::make_shared<Variable>();
-        *value = *rhs.value;
-    }
-    visualizeInOverview = rhs.visualizeInOverview;
-    unit = rhs.unit;
-    if(rhs.minimumValue)
-    {
-        minimumValue = std::make_shared<Variable>();
-        *minimumValue = *rhs.minimumValue;
-    }
-    if(rhs.maximumValue)
-    {
-        maximumValue = std::make_shared<Variable>();
-        *maximumValue = *rhs.maximumValue;
-    }
-    if(rhs.minimumValueScaled)
-    {
-        minimumValueScaled = std::make_shared<Variable>();
-        *minimumValueScaled = *rhs.minimumValueScaled;
-    }
-    if(rhs.maximumValueScaled)
-    {
-        maximumValueScaled = std::make_shared<Variable>();
-        *maximumValueScaled = *rhs.maximumValueScaled;
-    }
-    peerId = rhs.peerId;
+  familyId = rhs.familyId;
+  deviceTypeId = rhs.deviceTypeId;
+  channel = rhs.channel;
+  name = rhs.name;
+  if (rhs.value) {
+    value = std::make_shared<Variable>();
+    *value = *rhs.value;
+  }
+  visualizeInOverview = rhs.visualizeInOverview;
+  unit = rhs.unit;
+  if (rhs.minimumValue) {
+    minimumValue = std::make_shared<Variable>();
+    *minimumValue = *rhs.minimumValue;
+  }
+  if (rhs.maximumValue) {
+    maximumValue = std::make_shared<Variable>();
+    *maximumValue = *rhs.maximumValue;
+  }
+  if (rhs.minimumValueScaled) {
+    minimumValueScaled = std::make_shared<Variable>();
+    *minimumValueScaled = *rhs.minimumValueScaled;
+  }
+  if (rhs.maximumValueScaled) {
+    maximumValueScaled = std::make_shared<Variable>();
+    *maximumValueScaled = *rhs.maximumValueScaled;
+  }
+  peerId = rhs.peerId;
 
-    for(auto& rhsCondition : rhs.rendering)
-    {
-        auto condition = std::make_shared<UiCondition>(_bl);
-        *condition = *rhsCondition;
-        rendering.emplace_back(condition);
-    }
+  for (auto &rhsCondition : rhs.rendering) {
+    auto condition = std::make_shared<UiCondition>(_bl);
+    *condition = *rhsCondition;
+    rendering.emplace_back(condition);
+  }
 
-    return *this;
+  if (rhs.automationInfo) {
+    automationInfo = std::make_shared<Variable>();
+    *automationInfo = *rhs.automationInfo;
+  }
+
+  return *this;
 }
 
 }

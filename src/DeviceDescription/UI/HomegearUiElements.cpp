@@ -31,98 +31,77 @@
 #include "HomegearUiElements.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
-HomegearUiElements::HomegearUiElements(BaseLib::SharedObjects* baseLib, std::string xmlFilename)
-{
-    try
-    {
-        _bl = baseLib;
-        load(xmlFilename);
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+namespace BaseLib {
+namespace DeviceDescription {
+HomegearUiElements::HomegearUiElements(BaseLib::SharedObjects *baseLib, std::string xmlFilename) {
+  try {
+    _bl = baseLib;
+    load(xmlFilename);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
 }
 
-void HomegearUiElements::load(std::string xmlFilename)
-{
-    xml_document doc;
-    try
-    {
-        std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
-        if(fileStream)
-        {
-            uint32_t length = 0;
-            fileStream.seekg(0, std::ios::end);
-            length = fileStream.tellg();
-            fileStream.seekg(0, std::ios::beg);
-            std::vector<char> buffer(length + 1);
-            fileStream.read(&buffer[0], length);
-            fileStream.close();
-            buffer[length] = '\0';
-            doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(buffer.data());
-            if(!doc.first_node("homegearUiElements"))
-            {
-                _bl->out.printError("Error: UI XML file \"" + xmlFilename + "\" does not start with \"homegearUiElements\".");
-                doc.clear();
-                return;
-            }
-            parseXML(doc.first_node("homegearUiElements"));
-        }
-        else _bl->out.printError("Error reading file " + xmlFilename + ": " + strerror(errno));
+void HomegearUiElements::load(std::string xmlFilename) {
+  xml_document doc;
+  try {
+    std::ifstream fileStream(xmlFilename, std::ios::in | std::ios::binary);
+    if (fileStream) {
+      uint32_t length = 0;
+      fileStream.seekg(0, std::ios::end);
+      length = fileStream.tellg();
+      fileStream.seekg(0, std::ios::beg);
+      std::vector<char> buffer(length + 1);
+      fileStream.read(&buffer[0], length);
+      fileStream.close();
+      buffer[length] = '\0';
+      doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(buffer.data());
+      if (!doc.first_node("homegearUiElements")) {
+        _bl->out.printError("Error: UI XML file \"" + xmlFilename + "\" does not start with \"homegearUiElements\".");
+        doc.clear();
+        return;
+      }
+      parseXML(doc.first_node("homegearUiElements"));
+    } else _bl->out.printError("Error reading file " + xmlFilename + ": " + strerror(errno));
 
-        _loaded = true;
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    doc.clear();
+    _loaded = true;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printError("Error: Could not parse file \"" + xmlFilename + "\": " + ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  doc.clear();
 }
 
-void HomegearUiElements::parseXML(xml_node* node)
-{
-    try
-    {
-        for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-        {
-            std::string attributeName(attr->name());
-            std::string attributeValue(attr->value());
-            if(attributeName == "lang") lang = attributeValue;
-            else if(attributeName == "xmlns") {}
-            else _bl->out.printWarning("Warning: Unknown attribute for \"homegearUiElements\": " + attributeName);
-        }
-        for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-        {
-            std::string nodeName(subNode->name());
-            if(nodeName == "homegearUiElement")
-            {
-                auto element = std::make_shared<HomegearUiElement>(_bl, subNode);
-                _uiElements.emplace(element->id, element);
-            }
-            else _bl->out.printWarning("Warning: Unknown node name for \"homegearUiElements\": " + nodeName);
-        }
+void HomegearUiElements::parseXML(xml_node *node) {
+  try {
+    for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+      std::string attributeName(attr->name());
+      std::string attributeValue(attr->value());
+      if (attributeName == "lang") lang = attributeValue;
+      else if (attributeName == "xmlns") {}
+      else _bl->out.printWarning("Warning: Unknown attribute for \"homegearUiElements\": " + attributeName);
     }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+      std::string nodeName(subNode->name());
+      if (nodeName == "homegearUiElement") {
+        auto element = std::make_shared<HomegearUiElement>(_bl, subNode);
+        _uiElements.emplace(element->id, element);
+      } else _bl->out.printWarning("Warning: Unknown node name for \"homegearUiElements\": " + nodeName);
     }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
 }
 
 }
