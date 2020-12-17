@@ -240,7 +240,7 @@ public:
 	 * @param file The file to delete.
 	 * @return Returns true on success.
 	 */
-	static bool deleteFile(const std::string& file);
+	static bool deleteFile(const std::string& file) noexcept;
 
 	/**
 	 * Write locks a file using fcntl as defined in the Single Unix Specification. Note that the file stays locked until
