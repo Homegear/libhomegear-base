@@ -197,7 +197,7 @@ public:
 	 * @param recursive Also return files of subdirectories. The files are prefixed with the subdirectory.
 	 * @return Returns an array of all file names within path.
 	 */
-	std::vector<std::string> getFiles(const std::string& path, bool recursive = false);
+	static std::vector<std::string> getFiles(const std::string& path, bool recursive = false);
 
 	/**
 	 * Returns an array of all directories within a path. The directories are not prefixed with "path".
@@ -206,7 +206,7 @@ public:
 	 * @param recursive Also return directories within subdirectories. The directories are prefixed with the subdirectory.
 	 * @return Returns an array of all directory names within path.
 	 */
-	std::vector<std::string> getDirectories(const std::string& path, bool recursive = false);
+	static std::vector<std::string> getDirectories(const std::string& path, bool recursive = false);
 
 	/**
 	 * Gets the last modified time of a file.

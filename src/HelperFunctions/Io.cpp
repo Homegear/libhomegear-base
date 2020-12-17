@@ -226,11 +226,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 		{
 			std::string name(entry->d_name);
 			if(name == "." || name == "..") continue;
-			if(stat((fixedPath + name).c_str(), &statStruct) == -1)
-			{
-				_bl->out.printWarning("Warning: Could not stat file \"" + fixedPath + name + "\": " + std::string(strerror(errno)));
-				continue;
-			}
+			if(stat((fixedPath + name).c_str(), &statStruct) == -1) continue;
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
 			//Thanks to telkamp (https://github.com/Homegear/Homegear/issues/223)
 			if(S_ISREG(statStruct.st_mode))
@@ -270,11 +266,8 @@ std::vector<std::string> Io::getDirectories(const std::string& path, bool recurs
 		{
 			std::string name(entry->d_name);
 			if(name == "." || name == "..") continue;
-			if(stat((fixedPath + name).c_str(), &statStruct) == -1)
-			{
-				_bl->out.printWarning("Warning: Could not stat file \"" + fixedPath + name + "\": " + std::string(strerror(errno)));
-				continue;
-			}
+			if(stat((fixedPath + name).c_str(), &statStruct) == -1) continue;
+
 			//Don't use dirent::d_type as it is not supported on all file systems. See http://nerdfortress.com/2008/09/19/linux-xfs-does-not-support-direntd_type/
 			//Thanks to telkamp (https://github.com/Homegear/Homegear/issues/223)
 			if(S_ISDIR(statStruct.st_mode))
@@ -356,7 +349,7 @@ bool Io::moveFile(const std::string& source, const std::string& dest)
     return false;
 }
 
-bool Io::deleteFile(const std::string& file)
+bool Io::deleteFile(const std::string& file) noexcept
 {
 	if(remove(file.c_str()) == 0) return true;
 	return false;
