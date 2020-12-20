@@ -114,11 +114,11 @@ std::string HelperFunctions::getTimeUuid(int64_t time) {
   return uuid;
 }
 
-std::string HelperFunctions::stripNonAlphaNumeric(const std::string &s) {
+std::string HelperFunctions::stripNonAlphaNumeric(const std::string &s, const std::unordered_set<char> &whitelist) {
   std::string strippedString;
   strippedString.reserve(s.size());
   for (std::string::const_iterator i = s.begin(); i != s.end(); ++i) {
-    if (isalpha(*i) || isdigit(*i) || (*i == '_') || (*i == '-')) strippedString.push_back(*i);
+    if (isalpha(*i) || isdigit(*i) || (*i == '_') || (*i == '-') || whitelist.find(*i) != whitelist.end()) strippedString.push_back(*i);
   }
   return strippedString;
 }
@@ -331,8 +331,8 @@ void HelperFunctions::memcpyBigEndian(std::vector<uint8_t> &to, const int64_t &f
   else if (from <= 0xFFFFFFFFFFFFll) length = 6;
   else if (from <= 0xFFFFFFFFFFFFFFll) length = 7;
   to.resize(length, 0);
-  if (bigEndian) memcpyBigEndian(&to.at(0), (uint8_t *)&from + (8 - length), length);
-  else memcpyBigEndian(&to.at(0), (uint8_t *)&from, length);
+  if (bigEndian) memcpyBigEndian(to.data(), (uint8_t *)&from + (8 - length), length);
+  else memcpyBigEndian(to.data(), (uint8_t *)&from, length);
 }
 
 std::string &HelperFunctions::stringReplace(std::string &haystack, const std::string &search, const std::string &replace) {

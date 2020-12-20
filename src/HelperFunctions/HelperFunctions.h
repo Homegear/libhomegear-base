@@ -312,9 +312,10 @@ class HelperFunctions {
    * @see isNotAlphaNumeric()
    * @see isAlphaNumeric()
    * @param s The string to strip.
+   * @param whitelist A list of characters not to be stripped.
    * @return Returns the stripped string.
    */
-  static std::string stripNonAlphaNumeric(const std::string &s);
+  static std::string stripNonAlphaNumeric(const std::string &s, const std::unordered_set<char> &whitelist = std::unordered_set<char>());
 
   /**
    * Strips all non printable characters from a string.

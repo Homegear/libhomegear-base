@@ -60,8 +60,7 @@ bool Io::fileExists(const std::string& filename)
 bool Io::directoryExists(const std::string& path)
 {
 	struct stat s{};
-	if(stat(path.c_str(), &s) == 0 && (s.st_mode & S_IFDIR)) return true;
-	return false;
+	return stat(path.c_str(), &s) == 0 && (s.st_mode & S_IFDIR);
 }
 
 int32_t Io::isDirectory(const std::string& path, bool& result)
@@ -74,6 +73,11 @@ int32_t Io::isDirectory(const std::string& path, bool& result)
 		return 0;
 	}
 	return -1;
+}
+
+bool Io::linkExists(const std::string &path) {
+  struct stat s{};
+  return lstat(path.c_str(), &s) == 0;
 }
 
 bool Io::createDirectory(const std::string& path, uint32_t /* Don't change to mode_t as that doesn't work on BSD systems */ mode)
