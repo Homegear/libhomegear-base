@@ -95,6 +95,8 @@ void Settings::reset() {
   _nodeBlueServerMaxConnections = 20;
   _maxNodeThreadsPerProcess = 80;
   _nodeBlueWatchdogTimeout = -1;
+  _nodeBlueManualClientStart = false;
+  _nodeRedJsPath = "";
   _ipcThreadCount = 10;
   _ipcServerMaxConnections = 20;
   _cliServerMaxConnections = 50;
@@ -422,7 +424,10 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "flowsmanualclientstart" || name == "nodebluemanualclientstart") {
           _nodeBlueManualClientStart = HelperFunctions::toLower(value) == "true";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueManualClientStart set to " + std::to_string(_nodeBlueManualClientStart));
-        } else if (name == "ipcthreadcount") {
+        } else if (name == "noderedjspath") {
+          _nodeRedJsPath = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedJsPath set to " + _nodeRedJsPath);
+        }else if (name == "ipcthreadcount") {
           _ipcThreadCount = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: ipcThreadCount set to " + std::to_string(_ipcThreadCount));
         } else if (name == "ipcservermaxconnections") {
