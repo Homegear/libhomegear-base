@@ -97,6 +97,7 @@ void Settings::reset() {
   _nodeBlueWatchdogTimeout = -1;
   _nodeBlueManualClientStart = false;
   _nodeRedJsPath = "";
+  _nodeRedPort = 1999;
   _ipcThreadCount = 10;
   _ipcServerMaxConnections = 20;
   _cliServerMaxConnections = 50;
@@ -427,7 +428,10 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "noderedjspath") {
           _nodeRedJsPath = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedJsPath set to " + _nodeRedJsPath);
-        }else if (name == "ipcthreadcount") {
+        } else if (name == "noderedport") {
+          _nodeRedPort = Math::getUnsignedNumber(value);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedPort set to " + _nodeRedPort);
+        } else if (name == "ipcthreadcount") {
           _ipcThreadCount = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: ipcThreadCount set to " + std::to_string(_ipcThreadCount));
         } else if (name == "ipcservermaxconnections") {

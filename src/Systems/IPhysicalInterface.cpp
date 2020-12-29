@@ -197,7 +197,8 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet) {
 void IPhysicalInterface::setDevicePermission(int32_t userID, int32_t groupID) {
   try {
     if (_settings->device.empty()) {
-      _bl->out.printError("Could not setup device " + _settings->type + " the device path is empty.");
+      //Only output error for non-network clients.
+      if (_settings->host.empty()) _bl->out.printError("Could not setup device " + _settings->type + " the device path is empty.");
       return;
     }
     int32_t result = chown(_settings->device.c_str(), userID, groupID);

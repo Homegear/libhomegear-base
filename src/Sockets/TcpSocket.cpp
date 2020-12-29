@@ -368,7 +368,6 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
     clientData->certificateCredentials = _certificateCredentials;
   }
 
-
   int32_t result = 0;
   if ((result = gnutls_init(&clientData->fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS) {
     clientData->fileDescriptor->tlsSession = nullptr;
@@ -636,22 +635,22 @@ void TcpSocket::serverThread() {
           getpeername(clientFileDescriptor->descriptor, (struct sockaddr *)&clientInfo, &addressSize);
 
           uint16_t port = 0;
-          char ipString[INET6_ADDRSTRLEN];
+          std::array<char, INET6_ADDRSTRLEN> ipString{};
           if (clientInfo.ss_family == AF_INET) {
             auto *s = (struct sockaddr_in *)&clientInfo;
             port = ntohs(s->sin_port);
-            inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
+            inet_ntop(AF_INET, &s->sin_addr, ipString.data(), ipString.size());
           } else { // AF_INET6
             auto *s = (struct sockaddr_in6 *)&clientInfo;
             port = ntohs(s->sin6_port);
-            inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
+            inet_ntop(AF_INET6, &s->sin6_addr, ipString.data(), ipString.size());
           }
-          std::string address = std::string(ipString);
+          std::string address = std::string(ipString.data());
 
           if (_clients.size() > _maxConnections) {
             collectGarbage();
             if (_clients.size() > _maxConnections) {
-              _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString);
+              _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString.data());
               _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
               continue;
             }
@@ -696,18 +695,12 @@ void TcpSocket::serverThread() {
         continue;
       }
 
-      PTcpClientData clientData;
-      {
-        for (auto &client : clients) {
-          if (client.second->fileDescriptor->descriptor == -1) continue;
-          if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
-            clientData = client.second;
-            break;
-          }
+      for (auto &client : clients) {
+        if (client.second->fileDescriptor->descriptor == -1) continue;
+        if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
+          readClient(client.second);
         }
       }
-
-      if (clientData) readClient(clientData);
     }
     catch (const std::exception &ex) {
       _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -747,7 +740,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
 }
 
 void TcpSocket::collectGarbage() {
-  _lastGarbageCollection = BaseLib::HelperFunctions::getTime();
+  _lastGarbageCollection = HelperFunctions::getTime();
 
   std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
   std::vector<int32_t> clientsToRemove;
@@ -763,10 +756,8 @@ void TcpSocket::collectGarbage() {
 
 void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients) {
   std::vector<int32_t> clientsToRemove;
-  {
-    for (auto &client : clients) {
-      if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
-    }
+  for (auto &client : clients) {
+    if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
   }
   for (auto &client : clientsToRemove) {
     clients.erase(client);

@@ -104,6 +104,7 @@ class Settings {
   int32_t nodeBlueWatchdogTimeout() { return _nodeBlueWatchdogTimeout; }
   bool nodeBlueManualClientStart() { return _nodeBlueManualClientStart; }
   std::string nodeRedJsPath() { return _nodeRedJsPath; }
+  uint16_t nodeRedPort() { return _nodeRedPort; }
   uint32_t ipcThreadCount() { return _ipcThreadCount; }
   uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
   uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -237,6 +238,7 @@ class Settings {
   int32_t _nodeBlueWatchdogTimeout = -1;
   bool _nodeBlueManualClientStart = false;
   std::string _nodeRedJsPath;
+  uint16_t _nodeRedPort = 1999;
   uint32_t _ipcThreadCount = 10;
   uint32_t _ipcServerMaxConnections = 20;
   uint32_t _cliServerMaxConnections = 50;
