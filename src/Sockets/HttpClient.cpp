@@ -187,116 +187,112 @@ void HttpClient::sendRequest(const std::string &request, std::string &response, 
 
 void HttpClient::sendRequest(const std::string &request, Http &http, bool responseIsHeaderOnly) {
   _rawContent.clear();
+  http.reset();
   if (request.empty()) throw HttpClientException("Request is empty.");
 
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
-  try {
-    if (!_socket->connected()) _socket->open();
-  }
-  catch (const BaseLib::SocketTimeOutException &ex) {
-    throw HttpClientTimeOutException(std::string(ex.what()));
-  }
-  catch (const BaseLib::SocketOperationException &ex) {
-    throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
-  }
-
-  try {
-    if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Sending packet to HTTP server \"" + _hostname + "\": " + request);
-    _socket->proofwrite(request);
-  }
-  catch (const BaseLib::SocketDataLimitException &ex) {
-    if (!_keepAlive) _socket->close();
-    throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
-  }
-  catch (const BaseLib::SocketOperationException &ex) {
-    if (!_keepAlive) _socket->close();
-    throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
-  }
-
-  ssize_t receivedBytes;
-
-  int32_t bufferPos = 0;
-  const int32_t bufferMax = 4096;
-  std::array<char, bufferMax + 1> buffer{};
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
-
-  bool firstLoop = true;
-  while (true) {
-    if (!firstLoop && !_socket->connected()) {
-      if (http.getContentSize() == 0 || http.getHeader().responseCode == -1) {
-        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Connection closed.");
-      } else {
-        http.setFinished();
-        break;
-      }
-    }
-    firstLoop = false;
-
+  for (uint32_t i = 0; i < 2; i++) {
     try {
-      if (bufferPos > bufferMax - 1) {
-        bufferPos = 0;
-        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
-      }
-      receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
-
-      //Some clients send only one byte in the first packet
-      if (receivedBytes < 13 && bufferPos == 0 && !http.headerIsFinished()) receivedBytes += _socket->proofread(buffer.data() + bufferPos + 1, bufferMax - bufferPos - 1);
+      if (!_socket->connected()) _socket->open();
     }
     catch (const BaseLib::SocketTimeOutException &ex) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
+      throw HttpClientTimeOutException(std::string(ex.what()));
+    }
+    catch (const BaseLib::SocketOperationException &ex) {
+      throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
+    }
+
+    try {
+      if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Sending packet to HTTP server \"" + _hostname + "\": " + request);
+      _socket->proofwrite(request);
     }
     catch (const BaseLib::SocketClosedException &ex) {
-      http.setFinished();
-      break;
+      _socket->close();
+      if (i == 1) http.setFinished();
+    }
+    catch (const BaseLib::SocketDataLimitException &ex) {
+      if (!_keepAlive) _socket->close();
+      throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
     }
     catch (const BaseLib::SocketOperationException &ex) {
       if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
+      throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
     }
 
-    if (bufferPos + receivedBytes > bufferMax) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
-    }
+    ssize_t receivedBytes;
 
-    if (_keepRawContent) {
-      if (_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
-      _rawContent.insert(_rawContent.end(), buffer.begin(), buffer.begin() + receivedBytes);
-    }
+    int32_t bufferPos = 0;
+    const int32_t bufferMax = 4096;
+    std::array<char, bufferMax + 1> buffer{};
 
-    //We are using string functions to process the buffer. So just to make sure,
-    //they don't do something in the memory after buffer, we add '\0'
-    buffer.at(bufferPos + receivedBytes) = '\0';
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
 
-    if (!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
-    {
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
-    }
-    receivedBytes = bufferPos + receivedBytes;
-    bufferPos = 0;
-
-    try {
-      if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Received packet from HTTP server \"" + _hostname + "\": " + std::string(buffer.begin(), buffer.begin() + receivedBytes));
-      http.process(buffer.data(), receivedBytes);
-      if (http.headerIsFinished() && responseIsHeaderOnly) {
-        http.setFinished();
+    while (true) {
+      try {
+        if (bufferPos > bufferMax - 1) {
+          bufferPos = 0;
+          throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
+        }
+        receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
+      }
+      catch (const BaseLib::SocketTimeOutException &ex) {
+        if (!_keepAlive) _socket->close();
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
+      }
+      catch (const BaseLib::SocketClosedException &ex) {
+        _socket->close();
+        if (i == 1) http.setFinished();
         break;
       }
-    }
-    catch (HttpException &ex) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what(), ex.responseCode());
-    }
-    if (http.getContentSize() > 104857600 || http.getHeader().contentLength > 104857600) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
-    }
+      catch (const BaseLib::SocketOperationException &ex) {
+        if (!_keepAlive) _socket->close();
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
+      }
 
+      if (bufferPos + receivedBytes > bufferMax) {
+        if (!_keepAlive) _socket->close();
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
+      }
+
+      if (_keepRawContent) {
+        if (_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
+        _rawContent.insert(_rawContent.end(), buffer.begin(), buffer.begin() + receivedBytes);
+      }
+
+      //We are using string functions to process the buffer. So just to make sure,
+      //they don't do something in the memory after buffer, we add '\0'
+      buffer.at(bufferPos + receivedBytes) = '\0';
+
+      if (!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
+      {
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
+      }
+      receivedBytes = bufferPos + receivedBytes;
+      bufferPos = 0;
+
+      try {
+        if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Received packet from HTTP server \"" + _hostname + "\": " + std::string(buffer.begin(), buffer.begin() + receivedBytes));
+        http.process(buffer.data(), receivedBytes);
+        if (http.headerIsFinished() && responseIsHeaderOnly) {
+          http.setFinished();
+          break;
+        }
+      }
+      catch (HttpException &ex) {
+        if (!_keepAlive) _socket->close();
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what(), ex.responseCode());
+      }
+      if (http.getContentSize() > 104857600 || http.getHeader().contentLength > 104857600) {
+        if (!_keepAlive) _socket->close();
+        throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
+      }
+
+      if (http.isFinished()) break;
+    }
+    if (!_keepAlive) _socket->close();
     if (http.isFinished()) break;
+    else http.reset();
   }
-  if (!_keepAlive) _socket->close();
 }
 
 }
