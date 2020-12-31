@@ -191,6 +191,7 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
   if (request.empty()) throw HttpClientException("Request is empty.");
 
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
+  //The loop is implemented to resend a request in case we get an EOF on first read.
   for (uint32_t i = 0; i < 2; i++) {
     try {
       if (!_socket->connected()) _socket->open();

@@ -223,12 +223,6 @@ class IDatabaseController {
   virtual BaseLib::PVariable updateGroup(uint64_t groupId, BaseLib::PVariable translations, BaseLib::PVariable acl) = 0;
   //End groups
 
-  //Events
-  virtual std::shared_ptr<DataTable> getEvents() = 0;
-  virtual void saveEventAsynchronous(DataRow &event) = 0;
-  virtual void deleteEvent(std::string &name) = 0;
-  //End events
-
   //Family
   virtual void deleteFamily(int32_t familyId) = 0;
   virtual void saveFamilyVariableAsynchronous(int32_t familyId, BaseLib::Database::DataRow &data) = 0;
