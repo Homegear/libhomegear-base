@@ -687,6 +687,7 @@ int32_t Http::processChunkedContent(char *buffer, int32_t bufferLength) {
     if (_content.size() + bufferLength > _maxContentSize) throw HttpException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
     if (_chunkSize == -1) {
       if (_chunkNewLineMissing) {
+        _chunkNewLineMissing = false;
         if (*buffer == '\r' && bufferLength > 0) {
           buffer++;
           bufferLength--;

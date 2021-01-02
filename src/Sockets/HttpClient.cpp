@@ -186,13 +186,13 @@ void HttpClient::sendRequest(const std::string &request, std::string &response, 
 }
 
 void HttpClient::sendRequest(const std::string &request, Http &http, bool responseIsHeaderOnly) {
-  _rawContent.clear();
-  http.reset();
   if (request.empty()) throw HttpClientException("Request is empty.");
 
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
   //The loop is implemented to resend a request in case we get an EOF on first read.
   for (uint32_t i = 0; i < 2; i++) {
+    _rawContent.clear();
+    http.reset();
     try {
       if (!_socket->connected()) _socket->open();
     }
@@ -292,7 +292,6 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     }
     if (!_keepAlive) _socket->close();
     if (http.isFinished()) break;
-    else http.reset();
   }
 }
 
