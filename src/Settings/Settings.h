@@ -43,10 +43,8 @@ class Settings {
   Settings();
   virtual ~Settings() {}
   void init(BaseLib::SharedObjects *baseLib);
-  void load(const std::string &filename, const std::string &executablePath, bool hideOutput = false, bool nodeBlue = false);
+  void load(const std::string &filename, const std::string &executablePath, bool hideOutput = false);
   bool changed();
-
-  bool nodeBlue() { return _nodeBlue; }
 
   std::string runAsUser() { return _runAsUser; }
   std::string runAsGroup() { return _runAsGroup; }
@@ -176,7 +174,6 @@ class Settings {
   uint32_t maxWaitForPhysicalInterfaces() { return _maxWaitForPhysicalInterfaces; }
  private:
   BaseLib::SharedObjects *_bl = nullptr;
-  bool _nodeBlue = false;
   std::string _executablePath;
   std::string _path;
   int32_t _lastModified = -1;

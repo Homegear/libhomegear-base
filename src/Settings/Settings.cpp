@@ -79,7 +79,7 @@ void Settings::reset() {
   _databasePath = "";
   _databaseBackupPath = "";
   _databaseMaxBackups = 10;
-  _logfilePath = _nodeBlue ? "/var/log/node-blue/" : "/var/log/homegear/";
+  _logfilePath = "/var/log/homegear/";
   _waitForCorrectTime = true;
   _prioritizeThreads = true;
   _maxTotalThreadCount = 0;
@@ -116,22 +116,22 @@ void Settings::reset() {
   _eventThreadCount = 5;
   _eventThreadPriority = 0;
   _eventThreadPolicy = SCHED_OTHER;
-  _familyConfigPath = _nodeBlue ? "/etc/node-blue/families/" : "/etc/homegear/families/";
-  _deviceDescriptionPath = _nodeBlue ? "/etc/node-blue/devices/" : "/etc/homegear/devices/";
-  _clientSettingsPath = _nodeBlue ? "/etc/node-blue/rpcclients.conf" : "/etc/homegear/rpcclients.conf";
-  _serverSettingsPath = _nodeBlue ? "/etc/node-blue/servers.conf" : "/etc/homegear/rpcservers.conf";
-  _mqttSettingsPath = _nodeBlue ? "/etc/node-blue/mqtt.conf" : "/etc/homegear/mqtt.conf";
-  _cloudUserMapPath = _nodeBlue ? "/etc/node-blue/cloudusermap.json" : "/etc/homegear/cloudusermap.json";
-  _modulePath = _nodeBlue ? "/var/lib/node-blue/modules/" : "/var/lib/homegear/modules/";
-  _scriptPath = _nodeBlue ? "/var/lib/node-blue/scripts/" : "/var/lib/homegear/scripts/";
+  _familyConfigPath = "/etc/homegear/families/";
+  _deviceDescriptionPath = "/etc/homegear/devices/";
+  _clientSettingsPath = "/etc/homegear/rpcclients.conf";
+  _serverSettingsPath = "/etc/homegear/rpcservers.conf";
+  _mqttSettingsPath = "/etc/homegear/mqtt.conf";
+  _cloudUserMapPath = "/etc/homegear/cloudusermap.json";
+  _modulePath = "/var/lib/homegear/modules/";
+  _scriptPath = "/var/lib/homegear/scripts/";
   _scriptPathPermissions = 360;
   _scriptPathUser = "";
   _scriptPathGroup = "";
-  _nodeBluePath = _nodeBlue ? "/var/lib/node-blue/node-blue/" : "/var/lib/homegear/node-blue/";
+  _nodeBluePath = "/var/lib/homegear/node-blue/";
   _nodeBluePathPermissions = 504;
   _nodeBluePathUser = "";
   _nodeBluePathGroup = "";
-  _nodeBlueDataPath = _nodeBlue ? "/var/lib/node-blue/node-blue/data/" : "/var/lib/homegear/node-blue/data/";
+  _nodeBlueDataPath = "/var/lib/homegear/node-blue/data/";
   _nodeBlueDataPathPermissions = 504;
   _nodeBlueDataPathUser = "";
   _nodeBlueDataPathGroup = "";
@@ -139,21 +139,21 @@ void Settings::reset() {
   _nodeBlueEventLimit1 = 100;
   _nodeBlueEventLimit2 = 300;
   _nodeBlueEventLimit3 = 400;
-  _adminUiPath = _nodeBlue ? "/var/lib/node-blue/admin-ui/" : "/var/lib/homegear/admin-ui/";
+  _adminUiPath = "/var/lib/homegear/admin-ui/";
   _adminUiPathPermissions = 504;
   _adminUiPathUser = "";
   _adminUiPathGroup = "";
-  _uiPath = _nodeBlue ? "/var/lib/node-blue/ui/" : "/var/lib/homegear/ui/";
+  _uiPath = "/var/lib/homegear/ui/";
   _uiPathPermissions = 504;
   _uiPathUser = "";
   _uiPathGroup = "";
-  _firmwarePath = _nodeBlue ? "/usr/share/node-blue/firmware/" : "/usr/share/homegear/firmware/";
-  _tempPath = _nodeBlue ? "/var/lib/node-blue/tmp/" : "/var/lib/homegear/tmp/";
-  _lockFilePath = _nodeBlue ? "/var/lock/" : "/var/lock/";
+  _firmwarePath = "/usr/share/homegear/firmware/";
+  _tempPath = "/var/lib/homegear/tmp/";
+  _lockFilePath = "/var/lock/";
   _lockFilePathPermissions = 0;
   _lockFilePathUser = "";
   _lockFilePathGroup = "";
-  _phpIniPath = _nodeBlue ? "/etc/node-blue/php.ini" : "/etc/homegear/php.ini";
+  _phpIniPath = "/etc/homegear/php.ini";
   _tunnelClients.clear();
   _clientAddressesToReplace.clear();
   _gpioPath = "/sys/class/gpio/";
@@ -174,11 +174,10 @@ bool Settings::changed() {
   return false;
 }
 
-void Settings::load(const std::string &filename, const std::string &executablePath, bool hideOutput, bool nodeBlue) {
+void Settings::load(const std::string &filename, const std::string &executablePath, bool hideOutput) {
   try {
     _executablePath = executablePath;
     if (_executablePath.back() != '/') _executablePath.push_back('/');
-    _nodeBlue = nodeBlue;
     reset();
     _path = filename;
     char input[1024];
@@ -354,7 +353,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databaseMaxBackups set to " + std::to_string(_databaseMaxBackups));
         } else if (name == "logfilepath") {
           _logfilePath = value;
-          if (_logfilePath.empty()) _logfilePath = _nodeBlue ? "/var/log/node-blue" : "/var/log/homegear/";
+          if (_logfilePath.empty()) _logfilePath = "/var/log/homegear/";
           if (_logfilePath.back() != '/') _logfilePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: logfilePath set to " + _logfilePath);
         } else if (name == "waitforcorrecttime") {
@@ -506,38 +505,38 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadPolicy set to " + std::to_string(_eventThreadPolicy));
         } else if (name == "familyconfigpath") {
           _familyConfigPath = value;
-          if (_familyConfigPath.empty()) _familyConfigPath = _nodeBlue ? "/etc/node-blue/families" : "/etc/homegear/families";
+          if (_familyConfigPath.empty()) _familyConfigPath = "/etc/homegear/families";
           if (_familyConfigPath.back() != '/') _familyConfigPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyConfigPath set to " + _familyConfigPath);
         } else if (name == "devicedescriptionpath") {
           _deviceDescriptionPath = value;
-          if (_deviceDescriptionPath.empty()) _deviceDescriptionPath = _nodeBlue ? "/etc/node-blue/devices" : "/etc/homegear/devices";
+          if (_deviceDescriptionPath.empty()) _deviceDescriptionPath = "/etc/homegear/devices";
           if (_deviceDescriptionPath.back() != '/') _deviceDescriptionPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: deviceDescriptionPath set to " + _deviceDescriptionPath);
         } else if (name == "serversettingspath") {
           _serverSettingsPath = value;
-          if (_serverSettingsPath.empty()) _serverSettingsPath = _nodeBlue ? "/etc/node-blue/rpcservers.conf" : "/etc/homegear/rpcservers.conf";
+          if (_serverSettingsPath.empty()) _serverSettingsPath = "/etc/homegear/rpcservers.conf";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: serverSettingsPath set to " + _serverSettingsPath);
         } else if (name == "clientsettingspath") {
           _clientSettingsPath = value;
-          if (_clientSettingsPath.empty()) _clientSettingsPath = _nodeBlue ? "/etc/node-blue/rpcclients.conf" : "/etc/homegear/rpcclients.conf";
+          if (_clientSettingsPath.empty()) _clientSettingsPath = "/etc/homegear/rpcclients.conf";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: clientSettingsPath set to " + _clientSettingsPath);
         } else if (name == "mqttsettingspath") {
           _mqttSettingsPath = value;
-          if (_mqttSettingsPath.empty()) _mqttSettingsPath = _nodeBlue ? "/etc/node-blue/mqtt.conf" : "/etc/homegear/mqtt.conf";
+          if (_mqttSettingsPath.empty()) _mqttSettingsPath = "/etc/homegear/mqtt.conf";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: mqttSettingsPath set to " + _mqttSettingsPath);
         } else if (name == "cloudusermappath") {
           _cloudUserMapPath = value;
-          if (_cloudUserMapPath.empty()) _cloudUserMapPath = _nodeBlue ? "/etc/node-blue/cloudusermap.json" : "/etc/homegear/cloudusermap.json";
+          if (_cloudUserMapPath.empty()) _cloudUserMapPath = "/etc/homegear/cloudusermap.json";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: cloudUserMapPath set to " + _cloudUserMapPath);
         } else if (name == "modulepath") {
           _modulePath = value;
-          if (_modulePath.empty()) _modulePath = _nodeBlue ? "/var/lib/node-blue/modules/" : "/var/lib/homegear/modules/";
+          if (_modulePath.empty()) _modulePath = "/var/lib/homegear/modules/";
           if (_modulePath.back() != '/') _modulePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: libraryPath set to " + _modulePath);
         } else if (name == "scriptpath") {
           _scriptPath = value;
-          if (_scriptPath.empty()) _scriptPath = _nodeBlue ? "/var/lib/node-blue/scripts/" : "/var/lib/homegear/scripts/";
+          if (_scriptPath.empty()) _scriptPath = "/var/lib/homegear/scripts/";
           if (_scriptPath.back() != '/') _scriptPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPath set to " + _scriptPath);
         } else if (name == "scriptpathpermissions") {
@@ -552,7 +551,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathGroup set to " + _scriptPathGroup);
         } else if (name == "flowspath" || name == "nodebluepath") {
           _nodeBluePath = value;
-          if (_nodeBluePath.empty()) _nodeBluePath = _nodeBlue ? "/var/lib/node-blue/node-blue/" : "/var/lib/homegear/node-blue/";
+          if (_nodeBluePath.empty()) _nodeBluePath = "/var/lib/homegear/node-blue/";
           if (_nodeBluePath.back() != '/') _nodeBluePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBluePath set to " + _nodeBluePath);
         } else if (name == "flowspathpermissions" || name == "nodebluepathpermissions") {
@@ -567,7 +566,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBluePathGroup set to " + _nodeBluePathGroup);
         } else if (name == "flowsdatapath" || name == "nodebluedatapath") {
           _nodeBlueDataPath = value;
-          if (_nodeBlueDataPath.empty()) _nodeBlueDataPath = _nodeBlue ? "/var/lib/node-blue/node-blue/data/" : "/var/lib/homegear/node-blue/data/";
+          if (_nodeBlueDataPath.empty()) _nodeBlueDataPath = "/var/lib/homegear/node-blue/data/";
           if (_nodeBlueDataPath.back() != '/') _nodeBlueDataPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueDataPath set to " + _nodeBlueDataPath);
         } else if (name == "flowsdatapathpermissions" || name == "nodebluedatapathpermissions") {
@@ -582,7 +581,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueDataPathGroup set to " + _nodeBlueDataPathGroup);
         } else if (name == "adminuipath") {
           _adminUiPath = value;
-          if (_adminUiPath.empty()) _adminUiPath = _nodeBlue ? "/var/lib/node-blue/admin-ui/" : "/var/lib/homegear/admin-ui/";
+          if (_adminUiPath.empty()) _adminUiPath = "/var/lib/homegear/admin-ui/";
           if (_adminUiPath.back() != '/') _adminUiPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPath set to " + _adminUiPath);
         } else if (name == "adminuipathpermissions") {
@@ -597,7 +596,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathGroup set to " + _adminUiPathGroup);
         } else if (name == "uipath") {
           _uiPath = value;
-          if (_uiPath.empty()) _uiPath = _nodeBlue ? "/var/lib/node-blue/ui/" : "/var/lib/homegear/ui/";
+          if (_uiPath.empty()) _uiPath = "/var/lib/homegear/ui/";
           if (_uiPath.back() != '/') _uiPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPath set to " + _uiPath);
         } else if (name == "uipathpermissions") {
@@ -615,12 +614,12 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));
         } else if (name == "firmwarepath") {
           _firmwarePath = value;
-          if (_firmwarePath.empty()) _firmwarePath = _nodeBlue ? "/usr/share/node-blue/firmware/" : "/usr/share/homegear/firmware/";
+          if (_firmwarePath.empty()) _firmwarePath = "/usr/share/homegear/firmware/";
           if (_firmwarePath.back() != '/') _firmwarePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: firmwarePath set to " + _firmwarePath);
         } else if (name == "temppath") {
           _tempPath = value;
-          if (_tempPath.empty()) _tempPath = _nodeBlue ? "/var/lib/node-blue/tmp/" : "/var/lib/homegear/tmp/";
+          if (_tempPath.empty()) _tempPath = "/var/lib/homegear/tmp/";
           if (_tempPath.back() != '/') _tempPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: tempPath set to " + _tempPath);
         } else if (name == "lockfilepath") {
@@ -639,7 +638,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: lockFilePathGroup set to " + _lockFilePathGroup);
         } else if (name == "phpinipath") {
           _phpIniPath = value;
-          if (_phpIniPath.empty()) _phpIniPath = _nodeBlue ? "/etc/node-blue/php.ini" : "/etc/homegear/php.ini";
+          if (_phpIniPath.empty()) _phpIniPath = "/etc/homegear/php.ini";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: phpIniPath set to " + _phpIniPath);
         } else if (name == "redirecttosshtunnel") {
           if (!value.empty()) _tunnelClients[HelperFunctions::toLower(value)] = true;
