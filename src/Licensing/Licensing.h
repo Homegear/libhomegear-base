@@ -55,11 +55,12 @@ public:
 		int32_t deviceId = -1;
 		bool state = false;
 		std::string licenseKey;
-	};
+	} __attribute__((aligned(64))) __attribute__((packed));
+
 	typedef std::shared_ptr<DeviceInfo> PDeviceInfo;
 	typedef std::map<int32_t, std::map<int32_t, PDeviceInfo>> DeviceStates;
 
-	Licensing(BaseLib::SharedObjects* bl);
+	explicit Licensing(BaseLib::SharedObjects* bl);
 	virtual ~Licensing();
 
 	virtual bool init() = 0;
@@ -125,7 +126,7 @@ protected:
 	{
 		std::string licenseKey;
 		std::string activationKey;
-	};
+	} __attribute__((aligned(64)));
 
 	BaseLib::SharedObjects* _bl = nullptr;
 	bool _disposed = false;
