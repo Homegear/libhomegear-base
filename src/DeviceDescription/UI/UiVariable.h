@@ -69,6 +69,7 @@ class UiVariable {
   //Properties
   std::string label;
   std::string description;
+  std::string types;
   bool visualizeInOverview = true;
   std::string unit;
   PVariable minimumValue;
