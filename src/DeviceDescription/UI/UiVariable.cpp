@@ -50,6 +50,10 @@ UiVariable::UiVariable(BaseLib::SharedObjects *baseLib, xml_node *node) : UiVari
       if (nodeValue != "*") channel = Math::getNumber(nodeValue);
     } else if (nodeName == "name") {
       if (nodeValue != "*") name = nodeValue;
+    } else if (nodeName == "label") {
+      label = nodeValue;
+    } else if (nodeName == "description") {
+      description = nodeValue;
     } else if (nodeName == "visualizeInOverview") {
       visualizeInOverview = (nodeValue == "true");
     } else if (nodeName == "unit") {
@@ -88,6 +92,8 @@ UiVariable::UiVariable(UiVariable const &rhs) {
     value = std::make_shared<Variable>();
     *value = *rhs.value;
   }
+  label = rhs.label;
+  description = rhs.description;
   visualizeInOverview = rhs.visualizeInOverview;
   unit = rhs.unit;
   if (rhs.minimumValue) {
@@ -133,6 +139,8 @@ UiVariable &UiVariable::operator=(const UiVariable &rhs) {
     value = std::make_shared<Variable>();
     *value = *rhs.value;
   }
+  label = rhs.label;
+  description = rhs.description;
   visualizeInOverview = rhs.visualizeInOverview;
   unit = rhs.unit;
   if (rhs.minimumValue) {

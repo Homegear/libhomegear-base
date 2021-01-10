@@ -220,6 +220,8 @@ PVariable HomegearUiElement::getElementInfo() {
       input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
 
       auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+      if (!variableInput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableInput->label));
+      if (!variableInput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableInput->description));
       variableProperties->structValue->emplace("visualizeInOverview", std::make_shared<BaseLib::Variable>(variableInput->visualizeInOverview));
       if (!variableInput->unit.empty()) variableProperties->structValue->emplace("unit", std::make_shared<BaseLib::Variable>(variableInput->unit));
       if (variableInput->minimumValue) variableProperties->structValue->emplace("minimum", variableInput->minimumValue);
@@ -290,6 +292,8 @@ PVariable HomegearUiElement::getElementInfo() {
       if (variableOutput->value) output->structValue->emplace("value", variableOutput->value);
 
       auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+      if (!variableOutput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableOutput->label));
+      if (!variableOutput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableOutput->description));
       if (variableOutput->minimumValue) variableProperties->structValue->emplace("minimum", variableOutput->minimumValue);
       if (variableOutput->maximumValue) variableProperties->structValue->emplace("maximum", variableOutput->maximumValue);
       if (variableOutput->minimumValueScaled) variableProperties->structValue->emplace("minimumScaled", variableOutput->minimumValueScaled);

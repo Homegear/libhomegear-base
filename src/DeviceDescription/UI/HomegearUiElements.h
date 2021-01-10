@@ -66,7 +66,7 @@ class HomegearUiElements {
   std::string lang;
   //}}}
 
-  bool loaded() { return _loaded; }
+  bool loaded() const { return _loaded; }
  protected:
   BaseLib::SharedObjects *_bl = nullptr;
   bool _loaded = false;

@@ -58,7 +58,7 @@ class UiElements {
     PVariable maximumValue;
     PVariable minimumValueScaled;
     PVariable maximumValueScaled;
-  };
+  } __attribute__((aligned(128)));
   typedef std::shared_ptr<UiVariableInfo> PUiVariableInfo;
 
   struct UiPeerInfo {
@@ -67,7 +67,7 @@ class UiElements {
   };
   typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
 
-  UiElements(BaseLib::SharedObjects *baseLib);
+  explicit UiElements(BaseLib::SharedObjects *baseLib);
   virtual ~UiElements() = default;
   void clear();
 
