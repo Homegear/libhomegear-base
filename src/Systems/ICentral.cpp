@@ -1374,7 +1374,7 @@ PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_
     raiseRPCNewDevices(newIds, deviceDescriptions);
     // }}}
 
-    return PVariable(new Variable(VariableType::tVoid));
+    return std::make_shared<Variable>(VariableType::tVoid);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());

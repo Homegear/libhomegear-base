@@ -55,7 +55,7 @@ public:
 		int32_t deviceId = -1;
 		bool state = false;
 		std::string licenseKey;
-	} __attribute__((aligned(64))) __attribute__((packed));
+	} __attribute__((aligned(64)));
 
 	typedef std::shared_ptr<DeviceInfo> PDeviceInfo;
 	typedef std::map<int32_t, std::map<int32_t, PDeviceInfo>> DeviceStates;

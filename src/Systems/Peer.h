@@ -58,6 +58,21 @@ class Peer;
 
 class RpcConfigurationParameter {
  public:
+  /**
+   * The id of this parameter in the database.
+   */
+  uint64_t databaseId = 0;
+
+  /**
+   * The special type of the parameter (0 = none, 1 = roles).
+   */
+  int32_t specialType = 0;
+
+  /**
+   * The RPC parameter as defined in the XML file.
+   */
+  DeviceDescription::PParameter rpcParameter;
+
   RpcConfigurationParameter() {}
   RpcConfigurationParameter(RpcConfigurationParameter const &rhs);
   virtual ~RpcConfigurationParameter() {}
@@ -188,21 +203,6 @@ class RpcConfigurationParameter {
     std::lock_guard<std::mutex> roomGuard(_roomMutex);
     _room = id;
   }
-
-  /**
-   * The id of this parameter in the database.
-   */
-  uint64_t databaseId = 0;
-
-  /**
-   * The special type of the parameter (0 = none, 1 = roles).
-   */
-  int32_t specialType = 0;
-
-  /**
-   * The RPC parameter as defined in the XML file.
-   */
-  DeviceDescription::PParameter rpcParameter;
  private:
   std::mutex _logicalDataMutex;
   BaseLib::PVariable _logicalData;
@@ -321,6 +321,10 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
     virtual BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) = 0;
   };
   //End event handling
+
+  static const uint64_t kMaximumPeerId = 0x3FFFFFFF;
+  static constexpr std::pair<uint64_t, uint64_t> kVirtualPeerIdRange{0x40000000, 0x4FFFFFFF};
+  static constexpr std::pair<uint64_t, uint64_t> kUiPeerIdRange{0x50000000, 0x5FFFFFFF};
 
   std::atomic_bool deleting; //Needed, so the peer gets not saved in central's worker thread while being deleted
 
