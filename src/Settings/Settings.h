@@ -146,6 +146,7 @@ class Settings {
   uint32_t nodeBlueEventLimit1() { return _nodeBlueEventLimit1; }
   uint32_t nodeBlueEventLimit2() { return _nodeBlueEventLimit2; }
   uint32_t nodeBlueEventLimit3() { return _nodeBlueEventLimit3; }
+  std::string nodeBlueUriPathsExcludedFromLogin() { return _nodeBlueUriPathsExcludedFromLogin; }
   std::string adminUiPath() { return _adminUiPath; }
   uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
   std::string adminUiPathUser() { return _adminUiPathUser; }
@@ -280,6 +281,7 @@ class Settings {
   uint32_t _nodeBlueEventLimit1 = 100;
   uint32_t _nodeBlueEventLimit2 = 300;
   uint32_t _nodeBlueEventLimit3 = 400;
+  std::string _nodeBlueUriPathsExcludedFromLogin;
   std::string _adminUiPath;
   uint32_t _adminUiPathPermissions = 504;
   std::string _adminUiPathUser;
