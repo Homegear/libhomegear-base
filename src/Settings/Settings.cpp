@@ -435,6 +435,9 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "noderedport") {
           _nodeRedPort = Math::getUnsignedNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedPort set to " + _nodeRedPort);
+        } else if (name == "nodeoptions") {
+          _nodeOptions = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeOptions set to " + _nodeOptions);
         } else if (name == "ipcthreadcount") {
           _ipcThreadCount = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: ipcThreadCount set to " + std::to_string(_ipcThreadCount));
