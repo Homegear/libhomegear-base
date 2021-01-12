@@ -951,13 +951,13 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
     if (filterType == 1) //Serial number
     {
       std::shared_ptr<Peer> peer = getPeer(filterValue);
-      if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+      if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
     } else if (filterType == 2) //Physical address
     {
       int32_t address = Math::getNumber(filterValue);
       if (address != 0) {
         std::shared_ptr<Peer> peer = getPeer(address);
-        if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 3) //Type id
     {
@@ -967,7 +967,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getDeviceType() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getDeviceType() == type) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 4) //Type string
     {
@@ -976,7 +976,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getTypeString() == filterValue) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getRpcTypeString() == filterValue) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 5) //Name
     {
@@ -985,7 +985,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getName().find(filterValue) != std::string::npos) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getName().find(filterValue) != std::string::npos) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 6) //Pending config
     {
@@ -994,7 +994,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getConfigPending()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getConfigPending()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 7) //Unreachable
     {
@@ -1003,7 +1003,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 8) //Reachable
     {
@@ -1012,7 +1012,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (!peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (!peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 9) //Low battery
     {
@@ -1021,7 +1021,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getLowbat()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getLowbat()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     }
     return ids;
