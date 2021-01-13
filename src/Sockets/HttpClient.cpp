@@ -210,14 +210,16 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     catch (const BaseLib::SocketClosedException &ex) {
       _socket->close();
       if (i == 1) http.setFinished();
+      else continue;
     }
     catch (const BaseLib::SocketDataLimitException &ex) {
       if (!_keepAlive) _socket->close();
       throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
     }
     catch (const BaseLib::SocketOperationException &ex) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
+      _socket->close();
+      if (i == 1) throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
+      continue;
     }
 
     ssize_t receivedBytes;
