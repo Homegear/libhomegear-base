@@ -88,7 +88,7 @@ class HomegearUiElement {
 
   HomegearUiElement &operator=(const HomegearUiElement &rhs);
 
-  PVariable getElementInfo();
+  PVariable getElementInfo(bool addHelpInfo = false);
  protected:
   BaseLib::SharedObjects *_bl = nullptr;
 };

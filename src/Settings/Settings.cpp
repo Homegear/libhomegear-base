@@ -156,7 +156,6 @@ void Settings::reset() {
   _lockFilePathGroup = "";
   _phpIniPath = "/etc/homegear/php.ini";
   _tunnelClients.clear();
-  _clientAddressesToReplace.clear();
   _gpioPath = "/sys/class/gpio/";
   _exportGpios.clear();
   _oauthCertPath = "";
@@ -649,14 +648,6 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: phpIniPath set to " + _phpIniPath);
         } else if (name == "redirecttosshtunnel") {
           if (!value.empty()) _tunnelClients[HelperFunctions::toLower(value)] = true;
-        } else if (name == "replaceclientserveraddress") {
-          //Todo: Remove setting.
-          if (!hideOutput) _bl->out.printWarning("Setting replaceClientServerAddress is deprecated and will be removed by end of 2020.");
-          if (!value.empty()) {
-            std::pair<std::string, std::string> addresses = BaseLib::HelperFunctions::splitLast(HelperFunctions::toLower(value), ' ');
-            if (!value.empty()) _clientAddressesToReplace[addresses.first] = addresses.second;
-            if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: Added replaceClientServerAddress " + addresses.first + " " + addresses.second);
-          }
         } else if (name == "gpiopath") {
           _gpioPath = value;
           if (_gpioPath.empty()) _gpioPath = "/sys/class/gpio/";

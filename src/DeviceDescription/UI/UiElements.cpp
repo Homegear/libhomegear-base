@@ -220,7 +220,7 @@ PVariable UiElements::getUiElements(const std::string &language) {
     auto uiElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
 
     for (auto &element : uiInfo) {
-      uiElements->structValue->emplace(element.first, element.second->getElementInfo());
+      uiElements->structValue->emplace(element.first, element.second->getElementInfo(true));
     }
 
     return uiElements;

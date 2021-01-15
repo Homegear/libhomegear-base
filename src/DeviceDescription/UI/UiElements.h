@@ -64,7 +64,7 @@ class UiElements {
   struct UiPeerInfo {
     std::vector<std::vector<PUiVariableInfo>> inputPeers;
     std::vector<std::vector<PUiVariableInfo>> outputPeers;
-  };
+  } __attribute__((aligned(64)));
   typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
 
   explicit UiElements(BaseLib::SharedObjects *baseLib);

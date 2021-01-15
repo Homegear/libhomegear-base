@@ -166,7 +166,7 @@ class IDatabaseController {
   virtual BaseLib::PVariable setNodeData(const std::string &node, const std::string &key, const BaseLib::PVariable &value) = 0;
   virtual BaseLib::PVariable getNodeData(const std::string &node, const std::string &key, bool requestFromTrustedServer = false) = 0;
   virtual std::set<std::string> getAllNodeDataNodes() = 0;
-  virtual BaseLib::PVariable deleteNodeData(std::string &node, std::string &key) = 0;
+  virtual BaseLib::PVariable deleteNodeData(const std::string &node, const std::string &key) = 0;
   // }}}
 
   //Metadata

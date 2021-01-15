@@ -187,7 +187,7 @@ HomegearUiElement &HomegearUiElement::operator=(const HomegearUiElement &rhs) {
   return *this;
 }
 
-PVariable HomegearUiElement::getElementInfo() {
+PVariable HomegearUiElement::getElementInfo(bool addHelpInfo) {
   auto uiElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
   uiElement->structValue->emplace("uniqueUiElementId", std::make_shared<BaseLib::Variable>(id));
   uiElement->structValue->emplace("type", std::make_shared<BaseLib::Variable>(type == Type::complex ? "complex" : "simple"));
@@ -220,9 +220,9 @@ PVariable HomegearUiElement::getElementInfo() {
       input->structValue->emplace("name", std::make_shared<BaseLib::Variable>(variableInput->name));
 
       auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-      if (!variableInput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableInput->label));
-      if (!variableInput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableInput->description));
-      if (!variableInput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableInput->types));
+      if (addHelpInfo && !variableInput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableInput->label));
+      if (addHelpInfo && !variableInput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableInput->description));
+      if (addHelpInfo && !variableInput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableInput->types));
       variableProperties->structValue->emplace("visualizeInOverview", std::make_shared<BaseLib::Variable>(variableInput->visualizeInOverview));
       if (!variableInput->unit.empty()) variableProperties->structValue->emplace("unit", std::make_shared<BaseLib::Variable>(variableInput->unit));
       if (variableInput->minimumValue) variableProperties->structValue->emplace("minimum", variableInput->minimumValue);
@@ -293,9 +293,9 @@ PVariable HomegearUiElement::getElementInfo() {
       if (variableOutput->value) output->structValue->emplace("value", variableOutput->value);
 
       auto variableProperties = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-      if (!variableOutput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableOutput->label));
-      if (!variableOutput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableOutput->description));
-      if (!variableOutput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableOutput->types));
+      if (addHelpInfo && !variableOutput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableOutput->label));
+      if (addHelpInfo && !variableOutput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableOutput->description));
+      if (addHelpInfo && !variableOutput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableOutput->types));
       if (variableOutput->minimumValue) variableProperties->structValue->emplace("minimum", variableOutput->minimumValue);
       if (variableOutput->maximumValue) variableProperties->structValue->emplace("maximum", variableOutput->maximumValue);
       if (variableOutput->minimumValueScaled) variableProperties->structValue->emplace("minimumScaled", variableOutput->minimumValueScaled);
@@ -323,7 +323,7 @@ PVariable HomegearUiElement::getElementInfo() {
     controlElements->arrayValue->reserve(controls.size());
     for (auto &control : controls) {
       if (!control->uiElement) continue;
-      auto controlElement = control->uiElement->getElementInfo();
+      auto controlElement = control->uiElement->getElementInfo(addHelpInfo);
 
       auto cellElement = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
       cellElement->structValue->emplace("x", std::make_shared<BaseLib::Variable>(control->x));

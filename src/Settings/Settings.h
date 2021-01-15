@@ -166,7 +166,6 @@ class Settings {
   std::string lockFilePathGroup() { return _lockFilePathGroup; }
   std::string phpIniPath() { return _phpIniPath; }
   std::map<std::string, bool> &tunnelClients() { return _tunnelClients; }
-  std::map<std::string, std::string> &clientAddressesToReplace() { return _clientAddressesToReplace; }
   std::string gpioPath() { return _gpioPath; }
   std::vector<uint32_t> exportGpios() { return _exportGpios; }
   std::string oauthCertPath() { return _oauthCertPath; }
@@ -301,7 +300,6 @@ class Settings {
   std::string _lockFilePathGroup;
   std::string _phpIniPath;
   std::map<std::string, bool> _tunnelClients;
-  std::map<std::string, std::string> _clientAddressesToReplace;
   std::string _gpioPath;
   std::vector<uint32_t> _exportGpios;
   uint32_t _maxWaitForPhysicalInterfaces = 180;
