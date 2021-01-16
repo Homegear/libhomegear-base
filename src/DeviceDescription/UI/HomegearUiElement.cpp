@@ -49,8 +49,8 @@ HomegearUiElement::HomegearUiElement(BaseLib::SharedObjects *baseLib, xml_node *
       else _bl->out.printWarning("Warning: Unknown value for homegearUiElement\\type: " + value);
     } else if (nodeName == "control") {
       control = value;
-    } else if (nodeName == "role") {
-      role = Math::getUnsignedNumber64(value);
+    } else if (nodeName == "description") {
+      description = value;
     } else if (nodeName == "icons") {
       for (xml_node *iconNode = subNode->first_node("icon"); iconNode; iconNode = iconNode->next_sibling("icon")) {
         auto icon = std::make_shared<UiIcon>(baseLib, iconNode);
@@ -91,7 +91,7 @@ HomegearUiElement::HomegearUiElement(HomegearUiElement const &rhs) {
   id = rhs.id;
   type = rhs.type;
   control = rhs.control;
-  role = rhs.role;
+  description = rhs.description;
 
   for (auto &icon : rhs.icons) {
     auto uiIcon = std::make_shared<UiIcon>(_bl);
@@ -142,7 +142,7 @@ HomegearUiElement &HomegearUiElement::operator=(const HomegearUiElement &rhs) {
   id = rhs.id;
   type = rhs.type;
   control = rhs.control;
-  role = rhs.role;
+  description = rhs.description;
 
   for (auto &icon : rhs.icons) {
     auto uiIcon = std::make_shared<UiIcon>(_bl);
@@ -207,7 +207,7 @@ PVariable HomegearUiElement::getElementInfo(bool addHelpInfo) {
 
   if (type == Type::simple) {
     uiElement->structValue->emplace("control", std::make_shared<BaseLib::Variable>(control));
-    uiElement->structValue->emplace("role", std::make_shared<BaseLib::Variable>(role));
+    if (addHelpInfo && !description.empty()) uiElement->structValue->emplace("description", std::make_shared<BaseLib::Variable>(description));
 
     auto inputs = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
     inputs->arrayValue->reserve(variableInputs.size());
@@ -317,7 +317,7 @@ PVariable HomegearUiElement::getElementInfo(bool addHelpInfo) {
       uiElement->structValue->emplace("grid", gridElement);
     }
 
-    uiElement->structValue->emplace("role", std::make_shared<BaseLib::Variable>(role));
+    if (addHelpInfo && !description.empty()) uiElement->structValue->emplace("description", std::make_shared<BaseLib::Variable>(description));
 
     auto controlElements = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
     controlElements->arrayValue->reserve(controls.size());

@@ -86,7 +86,7 @@ public:
 	int32_t port = 0;
 	std::string initUrl;
 	std::string initInterfaceId;
-	std::string language = "en-US";
+	std::string language = "en";
 	std::string user;
 	bool authenticated = false;
 	bool hasClientCertificate = false;

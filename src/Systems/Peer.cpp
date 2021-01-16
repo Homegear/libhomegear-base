@@ -2412,7 +2412,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 
       std::shared_ptr<ICentral> central = getCentral();
       if (!central) return description;
-      std::string language = clientInfo ? clientInfo->language : "en-US";
+      std::string language = clientInfo ? clientInfo->language : "en";
       std::string filename = _rpcDevice->getFilename();
 
       if (fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
@@ -3553,7 +3553,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     if (fields.empty() || fields.find("LABEL") != fields.end() || fields.find("DESCRIPTION") != fields.end()) {
       std::shared_ptr<ICentral> central = getCentral();
       if (!central) return description;
-      std::string language = clientInfo ? clientInfo->language : "en-US";
+      std::string language = clientInfo ? clientInfo->language : "en";
       std::string filename = _rpcDevice->getFilename();
       if (parameter->parent()) {
         auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);

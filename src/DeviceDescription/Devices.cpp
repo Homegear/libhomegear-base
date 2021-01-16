@@ -1297,7 +1297,7 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
       if (!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::shared_ptr<Variable>(new Variable(i->second->formFieldType))));
       if (i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::shared_ptr<Variable>(new Variable(i->second->formPosition))));
 
-      std::string language = clientInfo ? clientInfo->language : "en-US";
+      std::string language = clientInfo ? clientInfo->language : "en";
       std::string filename = device->getFilename();
       auto parameterTranslations = _translations->getParameterTranslations(filename, language, type, parameterGroup->id, i->second->id);
 
@@ -1327,7 +1327,7 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
       if (!deviceType->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", std::make_shared<Variable>(deviceType->serialPrefix)));
 
       std::string filename = device->getFilename();
-      std::string language = clientInfo ? clientInfo->language : "en-US";
+      std::string language = clientInfo ? clientInfo->language : "en";
       std::string descriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
       if (!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", std::make_shared<Variable>(descriptionText)));
       std::string longDescriptionText = _translations->getTypeDescription(filename, language, deviceType->id);

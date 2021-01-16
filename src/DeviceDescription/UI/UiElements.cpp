@@ -48,7 +48,7 @@ void UiElements::load(const std::string &language) {
   try {
     std::lock_guard<std::mutex> uiInfoGuard(_uiInfoMutex);
     auto &uiInfo = _uiInfo[language];
-    auto &uiInfoEnglish = _uiInfo["en-US"];
+    auto &uiInfoEnglish = _uiInfo["en"];
 
     Io io;
     auto familyDirectories = io.getDirectories(_bl->settings.deviceDescriptionPath());
@@ -58,7 +58,7 @@ void UiElements::load(const std::string &language) {
       if (directory == "uiBase/") path = _bl->settings.deviceDescriptionPath() + directory + language + '/';
       else path = _bl->settings.deviceDescriptionPath() + directory + "ui/" + language + '/';
       if (!io.directoryExists(path)) {
-        path = _bl->settings.deviceDescriptionPath() + directory + "ui/en-US/";
+        path = _bl->settings.deviceDescriptionPath() + directory + "ui/en/";
         if (!io.directoryExists(path)) continue;
       }
       auto files = io.getFiles(path, false);

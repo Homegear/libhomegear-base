@@ -55,7 +55,7 @@ std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::s
         std::string filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/" + language + '/' + filename;
 		if(!Io::fileExists(filepath))
 		{
-            filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/en-US/" + filename;
+            filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/en/" + filename;
             if(!Io::fileExists(filepath))
             {
                 _bl->out.printDebug("Not loading XML RPC device translation " + filepath + ": Translation not found.");
@@ -85,7 +85,7 @@ PHomegearDeviceTranslation DeviceTranslations::getTranslation(const std::string&
 {
     try
     {
-        if(language.empty()) language = "en-US";
+        if(language.empty()) language = "en";
         std::lock_guard<std::mutex> deviceTranslationsGuard(_deviceTranslationsMutex);
         auto languageIterator = _deviceTranslations.find(language);
         if(languageIterator == _deviceTranslations.end())
@@ -164,7 +164,7 @@ std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations
 {
     try
     {
-        if(language.empty()) language = "en-US";
+        if(language.empty()) language = "en";
         PHomegearDeviceTranslation translation = getTranslation(filename, language);
         if(!translation) return std::make_pair("", "");
 
