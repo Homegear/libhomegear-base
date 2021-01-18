@@ -137,6 +137,7 @@ PHomegearUiElement UiElements::getUiElement(const std::string &language, const s
         variableInput->peerId = peerInfo->inputPeers.at(0).at(i)->peerId;
         variableInput->channel = peerInfo->inputPeers.at(0).at(i)->channel;
         if (!peerInfo->inputPeers.at(0).at(i)->name.empty()) variableInput->name = peerInfo->inputPeers.at(0).at(i)->name;
+        if (!peerInfo->inputPeers.at(0).at(i)->unit.empty()) variableInput->unit = peerInfo->inputPeers.at(0).at(i)->unit;
         if (peerInfo->inputPeers.at(0).at(i)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(0).at(i)->minimumValue;
         if (peerInfo->inputPeers.at(0).at(i)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(0).at(i)->maximumValue;
         if (peerInfo->inputPeers.at(0).at(i)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(0).at(i)->minimumValueScaled;
@@ -171,6 +172,7 @@ PHomegearUiElement UiElements::getUiElement(const std::string &language, const s
             variableInput->peerId = peerInfo->inputPeers.at(i).at(j)->peerId;
             variableInput->channel = peerInfo->inputPeers.at(i).at(j)->channel;
             if (!peerInfo->inputPeers.at(i).at(j)->name.empty()) variableInput->name = peerInfo->inputPeers.at(i).at(j)->name;
+            if (!peerInfo->inputPeers.at(i).at(j)->unit.empty()) variableInput->unit = peerInfo->inputPeers.at(i).at(j)->unit;
             if (peerInfo->inputPeers.at(i).at(j)->minimumValue) variableInput->minimumValue = peerInfo->inputPeers.at(i).at(j)->minimumValue;
             if (peerInfo->inputPeers.at(i).at(j)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(i).at(j)->maximumValue;
             if (peerInfo->inputPeers.at(i).at(j)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(i).at(j)->minimumValueScaled;

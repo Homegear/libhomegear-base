@@ -54,6 +54,7 @@ class UiElements {
     int32_t channel = -1;
     std::string name;
     PVariable value;
+    std::string unit;
     PVariable minimumValue;
     PVariable maximumValue;
     PVariable minimumValueScaled;
