@@ -141,6 +141,7 @@ PHomegearUiElement UiElements::getUiElement(const std::string &language, const s
         if (peerInfo->inputPeers.at(0).at(i)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(0).at(i)->maximumValue;
         if (peerInfo->inputPeers.at(0).at(i)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(0).at(i)->minimumValueScaled;
         if (peerInfo->inputPeers.at(0).at(i)->maximumValueScaled) variableInput->maximumValueScaled = peerInfo->inputPeers.at(0).at(i)->maximumValueScaled;
+        if (peerInfo->inputPeers.at(0).at(i)->rendering) variableInput->rendering = UiCondition::fromJson(_bl, peerInfo->inputPeers.at(0).at(i)->rendering);
         i++;
       }
 
@@ -174,6 +175,7 @@ PHomegearUiElement UiElements::getUiElement(const std::string &language, const s
             if (peerInfo->inputPeers.at(i).at(j)->maximumValue) variableInput->maximumValue = peerInfo->inputPeers.at(i).at(j)->maximumValue;
             if (peerInfo->inputPeers.at(i).at(j)->minimumValueScaled) variableInput->minimumValueScaled = peerInfo->inputPeers.at(i).at(j)->minimumValueScaled;
             if (peerInfo->inputPeers.at(i).at(j)->maximumValueScaled) variableInput->maximumValueScaled = peerInfo->inputPeers.at(i).at(j)->maximumValueScaled;
+            if (peerInfo->inputPeers.at(i).at(j)->rendering) variableInput->rendering = UiCondition::fromJson(_bl, peerInfo->inputPeers.at(i).at(j)->rendering);
             j++;
           }
         }

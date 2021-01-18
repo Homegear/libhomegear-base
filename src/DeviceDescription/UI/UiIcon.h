@@ -31,6 +31,8 @@
 #ifndef UIICON_H_
 #define UIICON_H_
 
+#include "../../Variable.h"
+
 #include <string>
 #include <map>
 #include <memory>
@@ -59,6 +61,8 @@ class UiIcon {
   virtual ~UiIcon() = default;
 
   UiIcon &operator=(const UiIcon &rhs);
+
+  static PUiIcon fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json);
 
   //Attributes
   std::string id;

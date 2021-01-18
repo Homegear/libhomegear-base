@@ -58,6 +58,7 @@ class UiElements {
     PVariable maximumValue;
     PVariable minimumValueScaled;
     PVariable maximumValueScaled;
+    PVariable rendering;
   } __attribute__((aligned(128)));
   typedef std::shared_ptr<UiVariableInfo> PUiVariableInfo;
 

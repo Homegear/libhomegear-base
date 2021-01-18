@@ -31,6 +31,8 @@
 #ifndef UITEXT_H_
 #define UITEXT_H_
 
+#include "../../Variable.h"
+
 #include <string>
 #include <map>
 #include <memory>
@@ -59,6 +61,8 @@ class UiText {
   virtual ~UiText() = default;
 
   UiText &operator=(const UiText &rhs);
+
+  static PUiText fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json);
 
   //Attributes
   std::string id;

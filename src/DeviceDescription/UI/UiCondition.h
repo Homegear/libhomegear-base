@@ -33,6 +33,7 @@
 
 #include "UiIcon.h"
 #include "UiText.h"
+#include "../../Variable.h"
 #include <string>
 #include <list>
 #include <unordered_map>
@@ -58,6 +59,8 @@ class UiCondition {
   virtual ~UiCondition() = default;
 
   UiCondition &operator=(const UiCondition &rhs);
+
+  static std::list<PUiCondition> fromJson(BaseLib::SharedObjects *baseLib, const PVariable &json);
 
   //Attributes
   std::string conditionOperator;

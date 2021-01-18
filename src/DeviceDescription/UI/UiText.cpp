@@ -54,6 +54,19 @@ UiText::UiText(BaseLib::SharedObjects *baseLib, xml_node *node) : UiText(baseLib
   }
 }
 
+PUiText UiText::fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json) {
+  auto text = std::make_shared<UiText>(baseLib);
+  text->id = id;
+
+  auto iterator = json->structValue->find("color");
+  if (iterator != json->structValue->end()) text->color = iterator->second->stringValue;
+
+  iterator = json->structValue->find("content");
+  if (iterator != json->structValue->end()) text->content = iterator->second->stringValue;
+
+  return text;
+}
+
 UiText::UiText(UiText const &rhs) {
   _bl = rhs._bl;
 

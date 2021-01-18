@@ -63,6 +63,41 @@ UiCondition::UiCondition(BaseLib::SharedObjects *baseLib, xml_node *node) : UiCo
   }
 }
 
+std::list<PUiCondition> UiCondition::fromJson(BaseLib::SharedObjects *baseLib, const PVariable &json) {
+  std::list<PUiCondition> uiConditions;
+  for (auto &element : *json->arrayValue) {
+    auto uiCondition = std::make_shared<UiCondition>(baseLib);
+    auto conditionIterator = element->structValue->find("condition");
+    if (conditionIterator != element->structValue->end()) {
+      auto iterator = conditionIterator->second->structValue->find("operator");
+      if (iterator != conditionIterator->second->structValue->end()) uiCondition->conditionOperator = iterator->second->stringValue;
+
+      iterator = conditionIterator->second->structValue->find("value");
+      if (iterator != conditionIterator->second->structValue->end()) uiCondition->conditionValue = iterator->second->stringValue;
+    }
+
+    conditionIterator = element->structValue->find("definitions");
+    if (conditionIterator != element->structValue->end()) {
+      auto iterator = conditionIterator->second->structValue->find("icons");
+      if (iterator != conditionIterator->second->structValue->end()) {
+        for (auto &iconElement : *iterator->second->structValue) {
+          auto icon = UiIcon::fromJson(baseLib, iconElement.first, iconElement.second);
+          if (icon) uiCondition->icons.emplace(icon->id, std::move(icon));
+        }
+      }
+      iterator = conditionIterator->second->structValue->find("texts");
+      if (iterator != conditionIterator->second->structValue->end()) {
+        for (auto &textElement : *iterator->second->structValue) {
+          auto text = UiText::fromJson(baseLib, textElement.first, textElement.second);
+          if (text) uiCondition->texts.emplace(text->id, std::move(text));
+        }
+      }
+    }
+    uiConditions.emplace_back(std::move(uiCondition));
+  }
+  return uiConditions;
+}
+
 UiCondition::UiCondition(UiCondition const &rhs) {
   _bl = rhs._bl;
 

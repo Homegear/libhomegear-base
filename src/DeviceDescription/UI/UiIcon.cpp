@@ -63,6 +63,19 @@ UiIcon::UiIcon(UiIcon const &rhs) {
   color = rhs.color;
 }
 
+PUiIcon UiIcon::fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json) {
+  auto icon = std::make_shared<UiIcon>(baseLib);
+  icon->id = id;
+
+  auto iterator = json->structValue->find("color");
+  if (iterator != json->structValue->end()) icon->color = iterator->second->stringValue;
+
+  iterator = json->structValue->find("name");
+  if (iterator != json->structValue->end()) icon->name = iterator->second->stringValue;
+
+  return icon;
+}
+
 UiIcon &UiIcon::operator=(const UiIcon &rhs) {
   if (&rhs == this) return *this;
 
