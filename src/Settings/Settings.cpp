@@ -113,9 +113,6 @@ void Settings::reset() {
   _packetQueueThreadPolicy = SCHED_FIFO;
   _packetReceivedThreadPriority = 0;
   _packetReceivedThreadPolicy = SCHED_OTHER;
-  _eventThreadCount = 5;
-  _eventThreadPriority = 0;
-  _eventThreadPolicy = SCHED_OTHER;
   _familyConfigPath = "/etc/homegear/families/";
   _deviceDescriptionPath = "/etc/homegear/devices/";
   _clientSettingsPath = "/etc/homegear/rpcclients.conf";
@@ -497,18 +494,6 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _packetReceivedThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
           _packetReceivedThreadPriority = ThreadManager::parseThreadPriority(_packetReceivedThreadPriority, _packetReceivedThreadPolicy);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: packetReceivedThreadPolicy set to " + std::to_string(_packetReceivedThreadPolicy));
-        } else if (name == "eventthreadcount") {
-          _eventThreadCount = Math::getNumber(value);
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadCount set to " + std::to_string(_eventThreadCount));
-        } else if (name == "eventthreadpriority") {
-          _eventThreadPriority = Math::getNumber(value);
-          if (_eventThreadPriority > 99) _eventThreadPriority = 99;
-          if (_eventThreadPriority < 0) _eventThreadPriority = 0;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadPriority set to " + std::to_string(_eventThreadPriority));
-        } else if (name == "eventthreadpolicy") {
-          _eventThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
-          _eventThreadPriority = ThreadManager::parseThreadPriority(_eventThreadPriority, _eventThreadPolicy);
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadPolicy set to " + std::to_string(_eventThreadPolicy));
         } else if (name == "familyconfigpath") {
           _familyConfigPath = value;
           if (_familyConfigPath.empty()) _familyConfigPath = "/etc/homegear/families";

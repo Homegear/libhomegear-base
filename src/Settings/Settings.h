@@ -121,9 +121,6 @@ class Settings {
   int32_t packetQueueThreadPolicy() { return _packetQueueThreadPolicy; }
   int32_t packetReceivedThreadPriority() { return _packetReceivedThreadPriority; }
   int32_t packetReceivedThreadPolicy() { return _packetReceivedThreadPolicy; }
-  uint32_t eventThreadCount() { return _eventThreadCount; }
-  int32_t eventThreadPriority() { return _eventThreadPriority; }
-  int32_t eventThreadPolicy() { return _eventThreadPolicy; }
   std::string familyConfigPath() { return _familyConfigPath; }
   std::string deviceDescriptionPath() { return _deviceDescriptionPath; }
   std::string clientSettingsPath() { return _clientSettingsPath; }
@@ -256,9 +253,6 @@ class Settings {
   int32_t _packetQueueThreadPolicy = SCHED_FIFO;
   int32_t _packetReceivedThreadPriority = 0;
   int32_t _packetReceivedThreadPolicy = SCHED_OTHER;
-  uint32_t _eventThreadCount = 5;
-  int32_t _eventThreadPriority = 0;
-  int32_t _eventThreadPolicy = SCHED_OTHER;
   std::string _familyConfigPath;
   std::string _deviceDescriptionPath;
   std::string _clientSettingsPath;
