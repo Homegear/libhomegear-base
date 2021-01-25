@@ -31,11 +31,9 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
-#include <string>
-#include <vector>
+#include "../Variable.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 
 class Packet {
  public:
@@ -48,13 +46,18 @@ class Packet {
   virtual int64_t getTimeSending() { return _timeSending; }
   virtual void setTimeReceived(int64_t time) { _timeReceived = time; }
   virtual void setTimeSending(int64_t time) { _timeSending = time; }
+
+  /**
+   * Required by raw packet events. Should return a good representation of the packet.
+   * For binary packets return a hex string.
+   */
+  virtual BaseLib::PVariable toVariable() { return std::make_shared<BaseLib::Variable>(); }
  protected:
   int32_t _tag = 0;
   int64_t _timeReceived = 0;
   int64_t _timeSending = 0;
 };
 
-}
 }
 
 #endif /* PACKET_H_ */

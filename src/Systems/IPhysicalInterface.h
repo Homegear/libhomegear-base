@@ -99,6 +99,8 @@ class IPhysicalInterface : public IEventsEx {
   virtual int32_t getAddress() { return _myAddress; }
   virtual std::string getIpAddress() { return _ipAddress; }
   virtual std::string getHostname() { return _hostname; }
+
+  void setRawPacketEvent(std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> value) { _rawPacketEvent.swap(value); }
  protected:
   BaseLib::SharedObjects *_bl = nullptr;
   int32_t _familyId = -1;
@@ -130,6 +132,8 @@ class IPhysicalInterface : public IEventsEx {
   int32_t _myAddress = 0;
   std::string _hostname;
   std::string _ipAddress;
+
+  std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> _rawPacketEvent;
 
   //Event handling
   virtual void raisePacketReceived(std::shared_ptr<Packet> packet);

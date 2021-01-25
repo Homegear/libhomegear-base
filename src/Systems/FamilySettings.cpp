@@ -378,6 +378,9 @@ void FamilySettings::processStringSetting(std::string &name, std::string &value,
     } else if (name == "default") {
       settings->isDefault = (value == "true");
       _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
+    } else if (name == "rawpacketevents") {
+      settings->rawPacketEvents = (value == "true");
+      _bl->out.printDebug("Debug: rawPacketEvents set to " + std::to_string(settings->rawPacketEvents));
     } else if (name == "devicetype") {
       if (settings->type.length() > 0)
         _bl->out.printWarning("Warning: deviceType for \"" + settings->id + "\" in family with ID \"" + std::to_string(_familyId) + "\" is set multiple times within one device block. Is the interface header missing (e. g. \"[My Interface]\")?");
@@ -598,6 +601,9 @@ void FamilySettings::processDatabaseSetting(std::string &name, PFamilySetting &v
     if (name == "default") {
       settings->isDefault = (bool)value->integerValue;
       _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
+    } else if (name == "rawpacketevents") {
+      settings->rawPacketEvents = (bool)value->integerValue;
+      _bl->out.printDebug("Debug: rawPacketEvents set to " + std::to_string(settings->rawPacketEvents));
     } else if (name == "devicetype") {
       if (settings->type.length() > 0)
         _bl->out.printWarning("Warning: deviceType for \"" + settings->id + "\" in family with ID \"" + std::to_string(_familyId) + "\" is set multiple times within one device block. Is the interface header missing (e. g. \"[My Interface]\")?");

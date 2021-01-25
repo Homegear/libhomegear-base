@@ -60,6 +60,9 @@ IPhysicalInterface::~IPhysicalInterface() {
   lock.unlock();
   _packetProcessingConditionVariable.notify_one();
   _bl->threadManager.join(_packetProcessingThread);
+
+  //Function pointers need to be cleaned up before unloading the module
+  _rawPacketEvent = std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>();
 }
 
 bool IPhysicalInterface::lifetick() {
@@ -154,6 +157,8 @@ void IPhysicalInterface::processPackets() {
             if (i->second->handler()) ((IPhysicalInterfaceEventSink *)i->second->handler())->onPacketReceived(_settings->id, packet);
             i->second->unlock();
           }
+
+          if (_rawPacketEvent) _rawPacketEvent(_familyId, _settings->id, packet->toVariable());
         } else _bl->out.printWarning("Warning (" + _settings->id + "): Packet was nullptr.");
         processingTime = HelperFunctions::getTime() - processingTime;
         if (processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");

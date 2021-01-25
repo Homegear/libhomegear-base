@@ -54,6 +54,9 @@ void PhysicalInterfaces::dispose() {
   _physicalInterfaceSettings.clear();
   _physicalInterfaces.clear();
   _physicalInterfacesMutex.unlock();
+
+  //Function pointers need to be cleaned up before unloading the module
+  _rawPacketEvent = std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>();
 }
 
 bool PhysicalInterfaces::lifetick() {
@@ -102,6 +105,7 @@ void PhysicalInterfaces::startListening() {
   try {
     std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
     for (std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j) {
+      j->second->setRawPacketEvent(std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>(std::bind(&PhysicalInterfaces::rawPacketEvent, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
       j->second->startListening();
     }
   }
@@ -165,6 +169,10 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces() {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
   return BaseLib::Variable::createError(-32500, "Unknown application error.");
+}
+
+void PhysicalInterfaces::rawPacketEvent(int32_t familyId, const std::string &interfaceId, const PVariable &packet) {
+  if (_rawPacketEvent) _rawPacketEvent(familyId, interfaceId, packet);
 }
 
 }
