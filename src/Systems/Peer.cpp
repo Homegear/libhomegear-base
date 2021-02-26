@@ -2481,12 +2481,15 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
       if (!_ip.empty() && (fields.empty() || fields.find("IP_ADDRESS") != fields.end())) description->structValue->insert(StructElement("IP_ADDRESS", PVariable(new Variable(_ip))));
 
       if (fields.empty() || fields.find("PHYSICAL_ADDRESS") != fields.end()) {
-        if (_address > 2147483647) description->structValue->emplace("PHYSICAL_ADDRESS", std::make_shared<BaseLib::Variable>((int64_t)(uint32_t)_address));
+        if ((uint32_t)_address > 2147483647) description->structValue->emplace("PHYSICAL_ADDRESS", std::make_shared<BaseLib::Variable>((int64_t)(uint32_t)_address));
         else description->structValue->emplace("PHYSICAL_ADDRESS", std::make_shared<BaseLib::Variable>(_address));
       }
 
       //Compatibility
-      if (fields.empty() || fields.find("RF_ADDRESS") != fields.end()) description->structValue->insert(StructElement("RF_ADDRESS", PVariable(new Variable(_address))));
+      if (fields.empty() || fields.find("RF_ADDRESS") != fields.end()) {
+        if ((uint32_t)_address > 2147483647) description->structValue->emplace("RF_ADDRESS", std::make_shared<BaseLib::Variable>((int64_t)(uint32_t)_address));
+        else description->structValue->emplace("RF_ADDRESS", std::make_shared<BaseLib::Variable>(_address));
+      }
       //Compatibility
       if (fields.empty() || fields.find("ROAMING") != fields.end()) description->structValue->insert(StructElement("ROAMING", PVariable(new Variable((int32_t)0))));
 
