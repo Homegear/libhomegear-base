@@ -66,7 +66,7 @@ class Http {
     enum Enum { none = 0, gzip = 8 };
   };
   struct TransferEncoding {
-    enum Enum { none = 0, chunked = 1, compress = 2, deflate = 4, gzip = 8, identity = 16 };
+    enum Enum { none = 0, chunked = 1, compress = 2, deflate = 4, gzip = 8, identity = 16, trailers = 32 };
   };
   struct Connection {
     enum Enum { none = 0, keepAlive = 1, close = 2, upgrade = 4 };

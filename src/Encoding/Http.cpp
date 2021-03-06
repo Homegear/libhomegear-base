@@ -602,6 +602,7 @@ void Http::processHeaderField(char *name, uint32_t nameSize, char *value, uint32
       else if (te == "deflate") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::deflate | TransferEncoding::Enum::chunked);
       else if (te == "gzip") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::gzip | TransferEncoding::Enum::chunked);
       else if (te == "identity") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::identity);
+      else if (te == "trailers") _header.transferEncoding = (TransferEncoding::Enum)(_header.transferEncoding | TransferEncoding::Enum::trailers);
       else throw HttpException("Unknown value for HTTP header \"Transfer-Encoding\": " + std::string(value, valueSize));
       if (pos == (signed)std::string::npos) s.clear(); else s.erase(0, pos + 1);
     }
