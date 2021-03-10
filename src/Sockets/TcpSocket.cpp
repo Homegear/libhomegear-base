@@ -612,7 +612,9 @@ void TcpSocket::serverThread() {
         }
       }
 
-      result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
+      do {
+        result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
+      } while (result == -1 && errno == EINTR);
       if (result == 0) {
         if (HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) {
           collectGarbage();
@@ -620,7 +622,6 @@ void TcpSocket::serverThread() {
         }
         continue;
       } else if (result == -1) {
-        if (errno == EINTR) continue;
         _bl->out.printError("Error: select returned -1: " + std::string(strerror(errno)));
         continue;
       }
@@ -1078,11 +1079,13 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData) {
   }
   FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
   fileDescriptorGuard.unlock();
-  bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
+  do {
+    bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
+  } while (bytesRead == -1 && errno == EINTR);
   if (bytesRead == 0) {
     throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
   }
-  if (bytesRead != 1) {
+  if (bytesRead == -1) {
     readGuard.unlock();
     close();
     throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
@@ -1162,7 +1165,10 @@ int32_t TcpSocket::proofwrite(const std::vector<char> &data) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }
@@ -1232,7 +1238,10 @@ int32_t TcpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }
@@ -1302,7 +1311,10 @@ int32_t TcpSocket::proofwrite(const std::string &data) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }

@@ -31,156 +31,126 @@
 #include "IEvents.h"
 #include <thread>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-EventHandler::EventHandler(int32_t id)
-{
-	_id = id;
-	_useCount = 0;
+EventHandler::EventHandler(int32_t id) {
+  _id = id;
+  _useCount = 0;
 }
 
-EventHandler::EventHandler(int32_t id, IEventSinkBase* handler)
-{
-	_id = id;
-	_handler = handler;
-	_useCount = 0;
+EventHandler::EventHandler(int32_t id, IEventSinkBase *handler) {
+  _id = id;
+  _handler = handler;
+  _useCount = 0;
 }
 
-EventHandler::~EventHandler()
-{
+EventHandler::~EventHandler() {
 }
 
-int32_t EventHandler::id()
-{
-	return _id;
+int32_t EventHandler::id() {
+  return _id;
 }
 
-int32_t EventHandler::useCount()
-{
-	return _useCount;
+int32_t EventHandler::useCount() {
+  return _useCount;
 }
 
-IEventSinkBase* EventHandler::handler()
-{
-	return _handler;
+IEventSinkBase *EventHandler::handler() {
+  return _handler;
 }
 
-void EventHandler::lock()
-{
-	_useCount++;
+void EventHandler::lock() {
+  _useCount++;
 }
 
-void EventHandler::unlock()
-{
-	_useCount--;
+void EventHandler::unlock() {
+  _useCount--;
 }
 
-void EventHandler::invalidate()
-{
-	//We don't lock mutex here. Make sure it is locked before calling this method.
-	_handler = nullptr;
+void EventHandler::invalidate() {
+  //We don't lock mutex here. Make sure it is locked before calling this method.
+  _handler = nullptr;
 }
 
-IEvents::IEvents()
-{
-
+IEvents::IEvents() {
 
 }
 
-IEvents::~IEvents()
-{
+IEvents::~IEvents() {
 
 }
 
-void IEvents::setEventHandler(IEventSinkBase* eventHandler)
-{
-	if(!eventHandler) return;
-	_eventHandler = eventHandler;
+void IEvents::setEventHandler(IEventSinkBase *eventHandler) {
+  if (!eventHandler) return;
+  _eventHandler = eventHandler;
 }
 
-void IEvents::resetEventHandler()
-{
-	_eventHandler = nullptr;
+void IEvents::resetEventHandler() {
+  _eventHandler = nullptr;
 }
 
-IEventSinkBase* IEvents::getEventHandler()
-{
-    return _eventHandler;
+IEventSinkBase *IEvents::getEventHandler() {
+  return _eventHandler;
 }
 
-IEventsEx::IEventsEx()
-{
-
+IEventsEx::IEventsEx() {
 
 }
 
-IEventsEx::~IEventsEx()
-{
+IEventsEx::~IEventsEx() {
 
 }
 
-PEventHandler IEventsEx::addEventHandler(IEventSinkBase* eventHandler)
-{
-	PEventHandler handler;
-	if(!eventHandler) return handler;
-	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
-	for(EventHandlers::iterator i = _eventHandlers.begin(); i != _eventHandlers.end(); ++i)
-	{
-		if(i->first == eventHandler)
-		{
-			handler = i->second;
-			return handler;
-		}
-	}
-	handler.reset(new EventHandler(_currentId++, eventHandler));
-	_eventHandlers[eventHandler] = handler;
-    return handler;
+PEventHandler IEventsEx::addEventHandler(IEventSinkBase *eventHandler) {
+  PEventHandler handler;
+  if (!eventHandler) return handler;
+  std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
+  for (EventHandlers::iterator i = _eventHandlers.begin(); i != _eventHandlers.end(); ++i) {
+    if (i->first == eventHandler) {
+      handler = i->second;
+      return handler;
+    }
+  }
+  handler.reset(new EventHandler(_currentId++, eventHandler));
+  _eventHandlers[eventHandler] = handler;
+  return handler;
 }
 
-std::vector<PEventHandler> IEventsEx::addEventHandlers(EventHandlers eventHandlers)
-{
-	std::vector<PEventHandler> newHandlers;
-	if(eventHandlers.empty()) return newHandlers;
-	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
-	for(EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i)
-	{
-		EventHandlers::iterator handlerIterator = _eventHandlers.find(i->first);
-		if(handlerIterator == _eventHandlers.end())
-		{
-			_eventHandlers[i->first] = i->second;
-			newHandlers.push_back(i->second);
-		}
-		else newHandlers.push_back(handlerIterator->second);
-	}
-    return newHandlers;
+std::vector<PEventHandler> IEventsEx::addEventHandlers(EventHandlers eventHandlers) {
+  std::vector<PEventHandler> newHandlers;
+  if (eventHandlers.empty()) return newHandlers;
+  std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
+  for (EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i) {
+    EventHandlers::iterator handlerIterator = _eventHandlers.find(i->first);
+    if (handlerIterator == _eventHandlers.end()) {
+      _eventHandlers[i->first] = i->second;
+      newHandlers.push_back(i->second);
+    } else newHandlers.push_back(handlerIterator->second);
+  }
+  return newHandlers;
 }
 
-void IEventsEx::removeEventHandler(PEventHandler eventHandler)
-{
-	if(!eventHandler) return;
+void IEventsEx::removeEventHandler(PEventHandler eventHandler) {
+  if (!eventHandler) return;
 
-	std::unique_ptr<std::lock_guard<std::mutex>> eventHandlerGuard(new std::lock_guard<std::mutex>(_eventHandlerMutex));
-	while(eventHandler->useCount() != 0)
-	{
-		eventHandlerGuard.reset();
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		eventHandlerGuard.reset(new std::lock_guard<std::mutex>(_eventHandlerMutex));
-	}
-	EventHandlers::iterator handlerIterator = _eventHandlers.find(eventHandler->handler());
-	if(handlerIterator != _eventHandlers.end())
-	{
-		_eventHandlers.erase(eventHandler->handler());
-		eventHandler->invalidate();
-	}
+  std::unique_ptr<std::lock_guard<std::mutex>> eventHandlerGuard(new std::lock_guard<std::mutex>(_eventHandlerMutex));
+  while (eventHandler->useCount() != 0) {
+    eventHandlerGuard.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    eventHandlerGuard.reset(new std::lock_guard<std::mutex>(_eventHandlerMutex));
+  }
+  EventHandlers::iterator handlerIterator = _eventHandlers.find(eventHandler->handler());
+  if (handlerIterator != _eventHandlers.end()) {
+    _eventHandlers.erase(eventHandler->handler());
+    eventHandler->invalidate();
+  }
 }
 
-EventHandlers IEventsEx::getEventHandlers()
-{
-	EventHandlers eventHandlers;
-	std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
-	eventHandlers = _eventHandlers;
-    return eventHandlers;
+EventHandlers IEventsEx::getEventHandlers() {
+  EventHandlers eventHandlers;
+  std::lock_guard<std::mutex> eventHandlerGuard(_eventHandlerMutex);
+  eventHandlers = _eventHandlers;
+  return eventHandlers;
 }
 
 }

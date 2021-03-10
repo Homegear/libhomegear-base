@@ -53,7 +53,7 @@ class IQueueBase {
    * @param out The output object.
    * @param message The message to print.
    */
-  void printQueueFullError(BaseLib::Output &out, const std::string& message);
+  void printQueueFullError(BaseLib::Output &out, const std::string &message);
  protected:
   SharedObjects *_bl = nullptr;
   int32_t _queueCount = 2;

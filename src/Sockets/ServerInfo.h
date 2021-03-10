@@ -81,7 +81,7 @@ public:
 		std::string contentPathGroup;
 		bool webServer = false;
 		bool webSocket = false;
-		AuthType websocketAuthType = AuthType::basic;
+		AuthType websocketAuthType = AuthType::session;
 		bool xmlrpcServer = true;
 		bool jsonrpcServer = true;
 		bool restServer = true;
