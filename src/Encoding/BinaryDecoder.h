@@ -39,51 +39,48 @@
 #include <vector>
 #include <string>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-class BinaryDecoderException : public BaseLib::Exception
-{
-public:
-    explicit BinaryDecoderException(std::string message) : BaseLib::Exception(message) {}
+class BinaryDecoderException : public BaseLib::Exception {
+ public:
+  explicit BinaryDecoderException(std::string message) : BaseLib::Exception(message) {}
 };
 
-class BinaryDecoder
-{
-public:
-    BinaryDecoder() = default;
-    explicit BinaryDecoder(bool ansi);
+class BinaryDecoder {
+ public:
+  BinaryDecoder() = default;
+  explicit BinaryDecoder(bool ansi);
 
-    /**
-     * Dummy constructor for backwards compatability.
-     */
-	explicit BinaryDecoder(BaseLib::SharedObjects* baseLib);
+  /**
+   * Dummy constructor for backwards compatability.
+   */
+  explicit BinaryDecoder(BaseLib::SharedObjects *baseLib);
 
-    /**
-     * Dummy constructor for backwards compatability.
-     */
-	BinaryDecoder(BaseLib::SharedObjects* baseLib, bool ansi);
-	~BinaryDecoder() = default;
+  /**
+   * Dummy constructor for backwards compatability.
+   */
+  BinaryDecoder(BaseLib::SharedObjects *baseLib, bool ansi);
+  ~BinaryDecoder() = default;
 
-	static int32_t decodeInteger(const std::vector<char>& encodedData, uint32_t& position);
-    static int32_t decodeInteger(const std::vector<uint8_t>& encodedData, uint32_t& position);
-    static int64_t decodeInteger64(const std::vector<char>& encodedData, uint32_t& position);
-    static int64_t decodeInteger64(const std::vector<uint8_t>& encodedData, uint32_t& position);
-    static uint8_t decodeByte(const std::vector<char>& encodedData, uint32_t& position);
-    static uint8_t decodeByte(const std::vector<uint8_t>& encodedData, uint32_t& position);
-	std::string decodeString(const std::vector<char>& encodedData, uint32_t& position);
-	std::string decodeString(const std::vector<uint8_t>& encodedData, uint32_t& position);
-    static std::vector<uint8_t> decodeBinary(const std::vector<char>& encodedData, uint32_t& position);
-    static std::vector<uint8_t> decodeBinary(const std::vector<uint8_t>& encodedData, uint32_t& position);
-    static bool decodeBoolean(const std::vector<char>& encodedData, uint32_t& position);
-    static bool decodeBoolean(const std::vector<uint8_t>& encodedData, uint32_t& position);
-    static double decodeFloat(const std::vector<char>& encodedData, uint32_t& position);
-    static double decodeFloat(const std::vector<uint8_t>& encodedData, uint32_t& position);
-protected:
-	bool _ansi = false;
-	std::shared_ptr<Ansi> _ansiConverter;
+  static int32_t decodeInteger(const std::vector<char> &encodedData, uint32_t &position);
+  static int32_t decodeInteger(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  static int64_t decodeInteger64(const std::vector<char> &encodedData, uint32_t &position);
+  static int64_t decodeInteger64(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  static uint8_t decodeByte(const std::vector<char> &encodedData, uint32_t &position);
+  static uint8_t decodeByte(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  std::string decodeString(const std::vector<char> &encodedData, uint32_t &position);
+  std::string decodeString(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  static std::vector<uint8_t> decodeBinary(const std::vector<char> &encodedData, uint32_t &position);
+  static std::vector<uint8_t> decodeBinary(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  static bool decodeBoolean(const std::vector<char> &encodedData, uint32_t &position);
+  static bool decodeBoolean(const std::vector<uint8_t> &encodedData, uint32_t &position);
+  static double decodeFloat(const std::vector<char> &encodedData, uint32_t &position);
+  static double decodeFloat(const std::vector<uint8_t> &encodedData, uint32_t &position);
+ protected:
+  bool _ansi = false;
+  std::shared_ptr<Ansi> _ansiConverter;
 };
 }
 #endif
