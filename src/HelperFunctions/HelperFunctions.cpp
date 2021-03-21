@@ -397,64 +397,60 @@ char HelperFunctions::getHexChar(int32_t nibble) {
 
 std::string HelperFunctions::getHexString(const uint8_t *buffer, uint32_t size) {
   if (!buffer) return "";
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (const uint8_t *i = buffer; i < buffer + size; ++i) {
-    stringstream << std::setw(2) << (int32_t)(*i);
+  std::string s(size * 2, ' ');
+  for (int32_t i = 0; i < size; ++i) {
+    s[2 * i] = _binaryToASCIITable[buffer[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[buffer[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(const char *buffer, uint32_t size) {
   if (!buffer) return "";
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (const char *i = buffer; i < buffer + size; ++i) {
-    stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+  std::string s(size * 2, ' ');
+  for (int32_t i = 0; i < size; ++i) {
+    s[2 * i] = _binaryToASCIITable[buffer[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[buffer[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(const std::vector<uint8_t> &data) {
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (std::vector<uint8_t>::const_iterator i = data.begin(); i != data.end(); ++i) {
-    stringstream << std::setw(2) << (int32_t)(*i);
+  std::string s(data.size() * 2, ' ');
+  for (int32_t i = 0; i < data.size(); ++i) {
+    s[2 * i] = _binaryToASCIITable[data[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[data[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(const std::vector<char> &data) {
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (std::vector<char>::const_iterator i = data.begin(); i != data.end(); ++i) {
-    stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+  std::string s(data.size() * 2, ' ');
+  for (int32_t i = 0; i < data.size(); ++i) {
+    s[2 * i] = _binaryToASCIITable[data[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[data[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(const std::vector<uint16_t> &data) {
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (std::vector<uint16_t>::const_iterator i = data.begin(); i != data.end(); ++i) {
-    stringstream << std::setw(2) << (int32_t)((*i) >> 8) << std::setw(2) << (int32_t)((*i) & 0xFF);
+  std::string s(data.size() * 4, ' ');
+  for (int32_t i = 0; i < data.size(); ++i) {
+    s[2 * i] = _binaryToASCIITable[data[i] >> 12];
+    s[2 * i + 1] = _binaryToASCIITable[(data[i] >> 8) & 0x0F];
+    s[2 * i + 2] = _binaryToASCIITable[(data[i] >> 4) & 0x0F];
+    s[2 * i + 3] = _binaryToASCIITable[data[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(const std::string &data) {
-  std::ostringstream stringstream;
-  stringstream << std::hex << std::setfill('0') << std::uppercase;
-  for (std::string::const_iterator i = data.begin(); i != data.end(); ++i) {
-    stringstream << std::setw(2) << (int32_t)((uint8_t)(*i));
+  std::string s(data.size() * 2, ' ');
+  for (int32_t i = 0; i < data.size(); ++i) {
+    s[2 * i] = _binaryToASCIITable[data[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[data[i] & 0x0F];
   }
-  stringstream << std::dec;
-  return stringstream.str();
+  return s;
 }
 
 std::string HelperFunctions::getHexString(int32_t number, int32_t width) {
