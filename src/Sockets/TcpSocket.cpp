@@ -1313,7 +1313,7 @@ int32_t TcpSocket::proofwrite(const std::string &data) {
     fileDescriptorGuard.unlock();
     int32_t readyFds = 0;
     do {
-      select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
     } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
