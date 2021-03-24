@@ -122,6 +122,11 @@ class SharedObjects {
   std::atomic_bool shuttingDown{false};
 
   /**
+   * True when Homegear runs in slave mode of a master/slave installation.
+   */
+  std::atomic_bool slaveMode{false};
+
+  /**
    * The FileDescriptorManager object where all file or socket descriptors should be registered.
    * This should be done to avoid errors as it can happen, that a closed file descriptor is reopened and suddenly valid again without the object using the old descriptor noticing it.
    */
