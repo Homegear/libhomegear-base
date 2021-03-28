@@ -127,6 +127,11 @@ class SharedObjects {
   std::atomic_bool slaveMode{false};
 
   /**
+   * True when maintenance mode is enabled.
+   */
+  std::atomic_bool maintenanceMode{false};
+
+  /**
    * The FileDescriptorManager object where all file or socket descriptors should be registered.
    * This should be done to avoid errors as it can happen, that a closed file descriptor is reopened and suddenly valid again without the object using the old descriptor noticing it.
    */

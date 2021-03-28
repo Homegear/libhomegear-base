@@ -77,6 +77,7 @@ void Settings::reset() {
   _databaseMemoryJournal = false;
   _databaseWALJournal = true;
   _databasePath = "";
+  _maintenanceDatabasePath = "";
   _databaseBackupPath = "";
   _databaseMaxBackups = 10;
   _logfilePath = "/var/log/homegear/";
@@ -282,15 +283,10 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (_dataPath.back() != '/') _dataPath.push_back('/');
           if (_writeableDataPath == _executablePath) _writeableDataPath = _dataPath;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPath set to " + _dataPath);
-        } else if (name == "databasepath" && _dataPath.empty() && !value.empty()) {
-          _dataPath = value.substr(0, value.find_last_of("/") + 1);;
-          if (_dataPath.empty()) _dataPath = _executablePath;
-          if (_dataPath.back() != '/') _dataPath.push_back('/');
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPath set to " + _dataPath);
         } else if (name == "datapathpermissions") {
           _dataPathPermissions = Math::getOctalNumber(value);
           if (_dataPathPermissions == 0) _dataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathPermissions set to " + _dataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathPermissions set to " + std::to_string(_dataPathPermissions));
         } else if (name == "datapathuser") {
           _dataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathUser set to " + _dataPathUser);
@@ -305,7 +301,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "writeabledatapathpermissions") {
           _writeableDataPathPermissions = Math::getOctalNumber(value);
           if (_writeableDataPathPermissions == 0) _writeableDataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathPermissions set to " + _writeableDataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathPermissions set to " + std::to_string(_writeableDataPathPermissions));
         } else if (name == "writeabledatapathuser") {
           _writeableDataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathUser set to " + _writeableDataPathUser);
@@ -320,7 +316,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "familydatapathpermissions") {
           _familyDataPathPermissions = Math::getOctalNumber(value);
           if (_familyDataPathPermissions == 0) _familyDataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathPermissions set to " + _familyDataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathPermissions set to " + std::to_string(_familyDataPathPermissions));
         } else if (name == "familydatapathuser") {
           _familyDataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathUser set to " + _familyDataPathUser);
@@ -340,10 +336,18 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _databasePath = value;
           if (!_databasePath.empty() && _databasePath.back() != '/') _databasePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databasePath set to " + _databasePath);
+        } else if (name == "maintenancedatabasepath") {
+          _maintenanceDatabasePath = value;
+          if (!_maintenanceDatabasePath.empty() && _maintenanceDatabasePath.back() != '/') _maintenanceDatabasePath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maintenanceDatabasePath set to " + _maintenanceDatabasePath);
         } else if (name == "databasebackuppath") {
           _databaseBackupPath = value;
           if (!_databaseBackupPath.empty() && _databaseBackupPath.back() != '/') _databaseBackupPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databaseBackupPath set to " + _databaseBackupPath);
+        } else if (name == "maintenancedatabasebackuppath") {
+          _maintenanceDatabaseBackupPath = value;
+          if (!_maintenanceDatabaseBackupPath.empty() && _maintenanceDatabaseBackupPath.back() != '/') _maintenanceDatabaseBackupPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maintenanceDatabaseBackupPath set to " + _maintenanceDatabaseBackupPath);
         } else if (name == "databasemaxbackups") {
           _databaseMaxBackups = Math::getNumber(value);
           if (_databaseMaxBackups > 10000) _databaseMaxBackups = 10000;
@@ -430,7 +434,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedJsPath set to " + _nodeRedJsPath);
         } else if (name == "noderedport") {
           _nodeRedPort = Math::getUnsignedNumber(value);
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedPort set to " + _nodeRedPort);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedPort set to " + std::to_string(_nodeRedPort));
         } else if (name == "nodeoptions") {
           _nodeOptions = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeOptions set to " + _nodeOptions);
@@ -533,7 +537,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "scriptpathpermissions") {
           _scriptPathPermissions = Math::getOctalNumber(value);
           if (_scriptPathPermissions == 0) _scriptPathPermissions = 360;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathPermissions set to " + _scriptPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathPermissions set to " + std::to_string(_scriptPathPermissions));
         } else if (name == "scriptpathuser") {
           _scriptPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathUser set to " + _scriptPathUser);
@@ -548,7 +552,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "flowspathpermissions" || name == "nodebluepathpermissions") {
           _nodeBluePathPermissions = Math::getOctalNumber(value);
           if (_nodeBluePathPermissions == 0) _nodeBluePathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodebluePathPermissions set to " + _nodeBluePathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodebluePathPermissions set to " + std::to_string(_nodeBluePathPermissions));
         } else if (name == "flowspathuser" || name == "nodebluepathuser") {
           _nodeBluePathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBluePathUser set to " + _nodeBluePathUser);
@@ -578,7 +582,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "adminuipathpermissions") {
           _adminUiPathPermissions = Math::getOctalNumber(value);
           if (_adminUiPathPermissions == 0) _adminUiPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathPermissions set to " + _adminUiPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathPermissions set to " + std::to_string(_adminUiPathPermissions));
         } else if (name == "adminuipathuser") {
           _adminUiPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathUser set to " + _adminUiPathUser);
@@ -593,7 +597,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "uipathpermissions") {
           _uiPathPermissions = Math::getOctalNumber(value);
           if (_uiPathPermissions == 0) _uiPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathPermissions set to " + _uiPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathPermissions set to " + std::to_string(_uiPathPermissions));
         } else if (name == "uipathuser") {
           _uiPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathUser set to " + _uiPathUser);
@@ -668,13 +672,13 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           // }}}
           //{{{ Deprecated settings
         else if (name == "capath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting caPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting caPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "certpath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting certPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting certPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "keypath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting keyPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting keyPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "dhparampath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting dhParamPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting dhParamPath has been moved from "main.conf" to "rpcservers.conf".)");
         }
           //}}}
         else {

@@ -64,11 +64,13 @@ class IDatabaseController {
   virtual void init() = 0;
 
   //General
-  virtual void open(std::string databasePath, std::string databaseFilename, bool databaseSynchronous, bool databaseMemoryJournal, bool databaseWALJournal, std::string backupPath, std::string backupFilename) = 0;
+  virtual void open(const std::string &databasePath, const std::string &databaseFilename, const std::string &maintenanceDatabasePath, bool databaseSynchronous, bool databaseMemoryJournal, bool databaseWALJournal, const std::string &backupPath, const std::string &maintenanceBackupPath, const std::string &backupFilename) = 0;
   virtual void hotBackup() = 0;
   virtual bool isOpen() = 0;
   virtual void initializeDatabase() = 0;
-  virtual bool convertDatabase() = 0;
+  virtual bool convertDatabase(const std::string &databasePath, const std::string &databaseFilename, const std::string &maintenanceDatabasePath, bool databaseSynchronous, bool databaseMemoryJournal, bool databaseWALJournal, const std::string &backupPath, const std::string &maintenanceBackupPath, const std::string &backupFilename) = 0;
+  virtual bool enableMaintenanceMode() = 0;
+  virtual bool disableMaintenanceMode() = 0;
   virtual void createSavepointSynchronous(std::string &name) = 0;
   virtual void releaseSavepointSynchronous(std::string &name) = 0;
   virtual void createSavepointAsynchronous(std::string &name) = 0;
