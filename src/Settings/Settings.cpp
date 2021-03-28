@@ -77,7 +77,7 @@ void Settings::reset() {
   _databaseMemoryJournal = false;
   _databaseWALJournal = true;
   _databasePath = "";
-  _maintenanceDatabasePath = "";
+  _factoryDatabasePath = "";
   _databaseBackupPath = "";
   _databaseMaxBackups = 10;
   _logfilePath = "/var/log/homegear/";
@@ -336,18 +336,18 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _databasePath = value;
           if (!_databasePath.empty() && _databasePath.back() != '/') _databasePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databasePath set to " + _databasePath);
-        } else if (name == "maintenancedatabasepath") {
-          _maintenanceDatabasePath = value;
-          if (!_maintenanceDatabasePath.empty() && _maintenanceDatabasePath.back() != '/') _maintenanceDatabasePath.push_back('/');
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maintenanceDatabasePath set to " + _maintenanceDatabasePath);
+        } else if (name == "factorydatabasepath") {
+          _factoryDatabasePath = value;
+          if (!_factoryDatabasePath.empty() && _factoryDatabasePath.back() != '/') _factoryDatabasePath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: factoryDatabasePath set to " + _factoryDatabasePath);
         } else if (name == "databasebackuppath") {
           _databaseBackupPath = value;
           if (!_databaseBackupPath.empty() && _databaseBackupPath.back() != '/') _databaseBackupPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databaseBackupPath set to " + _databaseBackupPath);
-        } else if (name == "maintenancedatabasebackuppath") {
-          _maintenanceDatabaseBackupPath = value;
-          if (!_maintenanceDatabaseBackupPath.empty() && _maintenanceDatabaseBackupPath.back() != '/') _maintenanceDatabaseBackupPath.push_back('/');
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maintenanceDatabaseBackupPath set to " + _maintenanceDatabaseBackupPath);
+        } else if (name == "factorydatabasebackuppath") {
+          _factoryDatabaseBackupPath = value;
+          if (!_factoryDatabaseBackupPath.empty() && _factoryDatabaseBackupPath.back() != '/') _factoryDatabaseBackupPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: factoryDatabaseBackupPath set to " + _factoryDatabaseBackupPath);
         } else if (name == "databasemaxbackups") {
           _databaseMaxBackups = Math::getNumber(value);
           if (_databaseMaxBackups > 10000) _databaseMaxBackups = 10000;

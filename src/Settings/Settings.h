@@ -82,9 +82,9 @@ class Settings {
   bool databaseMemoryJournal() { return _databaseMemoryJournal; }
   bool databaseWALJournal() { return _databaseWALJournal; }
   std::string databasePath() { return _databasePath; }
-  std::string maintenanceDatabasePath() { return _maintenanceDatabasePath; }
+  std::string factoryDatabasePath() { return _factoryDatabasePath; }
   std::string databaseBackupPath() { return _databaseBackupPath; }
-  std::string maintenanceDatabaseBackupPath() { return _maintenanceDatabaseBackupPath; }
+  std::string factoryDatabaseBackupPath() { return _factoryDatabaseBackupPath; }
   uint32_t databaseMaxBackups() { return _databaseMaxBackups; }
   std::string logfilePath() { return _logfilePath; }
   bool waitForCorrectTime() { return _waitForCorrectTime; }
@@ -217,9 +217,9 @@ class Settings {
   bool _databaseMemoryJournal = false;
   bool _databaseWALJournal = true;
   std::string _databasePath;
-  std::string _maintenanceDatabasePath;
+  std::string _factoryDatabasePath;
   std::string _databaseBackupPath;
-  std::string _maintenanceDatabaseBackupPath;
+  std::string _factoryDatabaseBackupPath;
   uint32_t _databaseMaxBackups = 10;
   std::string _logfilePath;
   bool _waitForCorrectTime = true;
