@@ -67,7 +67,7 @@ void Hgdc::start()
         startQueue(0, false, 2);
 
         _tcpSocket.reset(new BaseLib::TcpSocket(_bl, "localhost", std::to_string(_port)));
-        _tcpSocket->setConnectionRetries(1);
+        _tcpSocket->setConnectionRetries(2);
         _tcpSocket->setReadTimeout(1000000);
         _tcpSocket->setWriteTimeout(5000000);
 

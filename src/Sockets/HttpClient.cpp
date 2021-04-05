@@ -43,7 +43,7 @@ HttpClient::HttpClient(BaseLib::SharedObjects *baseLib, std::string hostname, in
   if (port > 0 && port < 65536) _port = port;
   _keepAlive = keepAlive;
   _socket = std::make_shared<BaseLib::TcpSocket>(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath);
-  _socket->setConnectionRetries(1);
+  _socket->setConnectionRetries(2);
 }
 
 HttpClient::HttpClient(BaseLib::SharedObjects *baseLib,
@@ -64,7 +64,7 @@ HttpClient::HttpClient(BaseLib::SharedObjects *baseLib,
   if (port > 0 && port < 65536) _port = port;
   _keepAlive = keepAlive;
   _socket = std::make_shared<BaseLib::TcpSocket>(_bl, hostname, std::to_string(port), useSSL, verifyCertificate, caFile, caData, certPath, certData, keyPath, keyData);
-  _socket->setConnectionRetries(1);
+  _socket->setConnectionRetries(2);
 }
 
 HttpClient::~HttpClient() {
