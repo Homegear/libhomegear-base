@@ -409,8 +409,8 @@ std::string HelperFunctions::getHexString(const char *buffer, uint32_t size) {
   if (!buffer) return "";
   std::string s(size * 2, ' ');
   for (uint32_t i = 0; i < size; ++i) {
-    s[2 * i] = _binaryToASCIITable[buffer[i] >> 4];
-    s[2 * i + 1] = _binaryToASCIITable[buffer[i] & 0x0F];
+    s[2 * i] = _binaryToASCIITable[(uint8_t)buffer[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[(uint8_t)buffer[i] & 0x0F];
   }
   return s;
 }
@@ -427,8 +427,8 @@ std::string HelperFunctions::getHexString(const std::vector<uint8_t> &data) {
 std::string HelperFunctions::getHexString(const std::vector<char> &data) {
   std::string s(data.size() * 2, ' ');
   for (uint32_t i = 0; i < data.size(); ++i) {
-    s[2 * i] = _binaryToASCIITable[data[i] >> 4];
-    s[2 * i + 1] = _binaryToASCIITable[data[i] & 0x0F];
+    s[2 * i] = _binaryToASCIITable[(uint8_t)data[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[(uint8_t)data[i] & 0x0F];
   }
   return s;
 }
@@ -447,8 +447,8 @@ std::string HelperFunctions::getHexString(const std::vector<uint16_t> &data) {
 std::string HelperFunctions::getHexString(const std::string &data) {
   std::string s(data.size() * 2, ' ');
   for (uint32_t i = 0; i < data.size(); ++i) {
-    s[2 * i] = _binaryToASCIITable[data[i] >> 4];
-    s[2 * i + 1] = _binaryToASCIITable[data[i] & 0x0F];
+    s[2 * i] = _binaryToASCIITable[(uint8_t)data[i] >> 4];
+    s[2 * i + 1] = _binaryToASCIITable[(uint8_t)data[i] & 0x0F];
   }
   return s;
 }
