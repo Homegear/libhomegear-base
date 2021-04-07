@@ -497,6 +497,30 @@ bool Hgdc::sendPacket(const std::string& serialNumber, const std::vector<char>& 
     return false;
 }
 
+bool Hgdc::moduleReset(const std::string& serialNumber) {
+  try
+  {
+    if(!_tcpSocket || !_tcpSocket->connected()) return false;
+
+    BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
+    parameters->push_back(std::make_shared<BaseLib::Variable>(serialNumber));
+
+    auto result = invoke("moduleModuleReset", parameters);
+    if(result->errorStruct)
+    {
+      _out.printError("Error setting mode: " + result->structValue->at("faultString")->stringValue);
+      return false;
+    }
+
+    return true;
+  }
+  catch(const std::exception& ex)
+  {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return false;
+}
+
 bool Hgdc::setMode(const std::string& serialNumber, uint8_t mode)
 {
     try
