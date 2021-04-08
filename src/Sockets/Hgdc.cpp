@@ -508,7 +508,7 @@ bool Hgdc::moduleReset(const std::string& serialNumber) {
     auto result = invoke("moduleModuleReset", parameters);
     if(result->errorStruct)
     {
-      _out.printError("Error setting mode: " + result->structValue->at("faultString")->stringValue);
+      _out.printError("Error resetting module: " + result->structValue->at("faultString")->stringValue);
       return false;
     }
 
