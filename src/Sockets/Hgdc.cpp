@@ -548,6 +548,23 @@ bool Hgdc::setMode(const std::string& serialNumber, uint8_t mode)
     return false;
 }
 
+bool Hgdc::isMaster()
+{
+  try
+  {
+    if(!_tcpSocket || !_tcpSocket->connected()) return false;
+
+    BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
+
+    return invoke("coreIsMaster", parameters)->booleanValue;
+  }
+  catch(const std::exception& ex)
+  {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return false;
+}
+
 PVariable Hgdc::getModules(int64_t familyId)
 {
     try
