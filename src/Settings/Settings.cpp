@@ -99,6 +99,7 @@ void Settings::reset() {
   _nodeBlueManualClientStart = false;
   _nodeRedJsPath = "";
   _nodeRedPort = 1999;
+  _nodeOptions = "--max_old_space_size=400";
   _ipcThreadCount = 10;
   _ipcServerMaxConnections = 20;
   _cliServerMaxConnections = 50;
