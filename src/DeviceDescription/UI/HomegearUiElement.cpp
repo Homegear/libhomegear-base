@@ -223,6 +223,7 @@ PVariable HomegearUiElement::getElementInfo(bool addHelpInfo) {
       if (addHelpInfo && !variableInput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableInput->label));
       if (addHelpInfo && !variableInput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableInput->description));
       if (addHelpInfo && !variableInput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableInput->types));
+      if (variableInput->role != 0) variableProperties->structValue->emplace("role", std::make_shared<BaseLib::Variable>(variableInput->role));
       variableProperties->structValue->emplace("visualizeInOverview", std::make_shared<BaseLib::Variable>(variableInput->visualizeInOverview));
       if (!variableInput->unit.empty()) variableProperties->structValue->emplace("unit", std::make_shared<BaseLib::Variable>(variableInput->unit));
       if (variableInput->minimumValue) variableProperties->structValue->emplace("minimum", variableInput->minimumValue);
@@ -296,6 +297,7 @@ PVariable HomegearUiElement::getElementInfo(bool addHelpInfo) {
       if (addHelpInfo && !variableOutput->label.empty()) variableProperties->structValue->emplace("label", std::make_shared<BaseLib::Variable>(variableOutput->label));
       if (addHelpInfo && !variableOutput->description.empty()) variableProperties->structValue->emplace("description", std::make_shared<BaseLib::Variable>(variableOutput->description));
       if (addHelpInfo && !variableOutput->types.empty()) variableProperties->structValue->emplace("types", std::make_shared<BaseLib::Variable>(variableOutput->types));
+      if (variableOutput->role != 0) variableProperties->structValue->emplace("role", std::make_shared<BaseLib::Variable>(variableOutput->role));
       if (variableOutput->minimumValue) variableProperties->structValue->emplace("minimum", variableOutput->minimumValue);
       if (variableOutput->maximumValue) variableProperties->structValue->emplace("maximum", variableOutput->maximumValue);
       if (variableOutput->minimumValueScaled) variableProperties->structValue->emplace("minimumScaled", variableOutput->minimumValueScaled);

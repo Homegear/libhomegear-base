@@ -56,6 +56,8 @@ UiVariable::UiVariable(BaseLib::SharedObjects *baseLib, xml_node *node) : UiVari
       description = nodeValue;
     } else if (nodeName == "types") {
       types = nodeValue;
+    } else if (nodeName == "role") {
+      role = Math::getUnsignedNumber(nodeValue);
     } else if (nodeName == "visualizeInOverview") {
       visualizeInOverview = (nodeValue == "true");
     } else if (nodeName == "unit") {
@@ -97,6 +99,7 @@ UiVariable::UiVariable(UiVariable const &rhs) {
   label = rhs.label;
   description = rhs.description;
   types = rhs.types;
+  role = rhs.role;
   visualizeInOverview = rhs.visualizeInOverview;
   unit = rhs.unit;
   if (rhs.minimumValue) {
@@ -145,6 +148,7 @@ UiVariable &UiVariable::operator=(const UiVariable &rhs) {
   label = rhs.label;
   description = rhs.description;
   types = rhs.types;
+  role = rhs.role;
   visualizeInOverview = rhs.visualizeInOverview;
   unit = rhs.unit;
   if (rhs.minimumValue) {

@@ -70,6 +70,7 @@ class UiVariable {
   std::string label;
   std::string description;
   std::string types;
+  uint32_t role = 0;
   bool visualizeInOverview = true;
   std::string unit;
   PVariable minimumValue;
