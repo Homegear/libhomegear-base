@@ -531,14 +531,9 @@ bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char> &packet, 
 }
 
 void TcpSocket::closeClientConnection(int32_t clientId) {
-  {
-    std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-    auto clientIterator = _clients.find(clientId);
-    if (clientIterator != _clients.end()) clientIterator->second->socket->close();
-  }
-
-  if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientId, 0, "");
-  else if (_connectionClosedCallback) _connectionClosedCallback(clientId);
+  std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+  auto clientIterator = _clients.find(clientId);
+  if (clientIterator != _clients.end()) clientIterator->second->socket->close();
 }
 
 int32_t TcpSocket::clientCount() {
