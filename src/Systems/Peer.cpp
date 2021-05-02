@@ -399,7 +399,7 @@ void Peer::setID(uint64_t id) {
 }
 
 void Peer::setSerialNumber(std::string serialNumber) {
-  if (serialNumber.length() > 24) return;
+  if (serialNumber.length() > 37) return;
   _serialNumber = serialNumber;
   if (serviceMessages) serviceMessages->setPeerSerial(serialNumber);
   if (_peerID > 0) save(true, false, false);
