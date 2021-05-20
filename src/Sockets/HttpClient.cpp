@@ -221,6 +221,10 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       if (i == 1) throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
       continue;
     }
+    catch (const BaseLib::SocketTimeOutException &ex) {
+      if (i == 1) throw HttpClientTimeOutException(std::string(ex.what()));
+      continue;
+    }
 
     ssize_t receivedBytes;
 
