@@ -216,13 +216,13 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       if (!_keepAlive) _socket->close();
       throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
     }
+    catch (const BaseLib::SocketTimeOutException &ex) {
+      if (i == 1) throw HttpClientTimeOutException(std::string(ex.what()));
+      continue;
+    }
     catch (const BaseLib::SocketOperationException &ex) {
       _socket->close();
       if (i == 1) throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
-      continue;
-    }
-    catch (const BaseLib::SocketTimeOutException &ex) {
-      if (i == 1) throw HttpClientTimeOutException(std::string(ex.what()));
       continue;
     }
 
