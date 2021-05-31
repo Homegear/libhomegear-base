@@ -413,16 +413,20 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
       if (gnutls_x509_crt_list_import(&clientCertificates, &certMax, derClientCertificates, GNUTLS_X509_FMT_DER, 0) < 1) {
         if (_requireClientCert) {
           _bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+          gnutls_x509_crt_deinit(clientCertificates);
           throw SocketSslException("Client certificate verification has failed: Error importing client certificate.");
         }
       } else {
-        gnutls_datum_t distinguishedName;
+        gnutls_datum_t distinguishedName{};
         if (gnutls_x509_crt_get_dn2(clientCertificates, &distinguishedName) != GNUTLS_E_SUCCESS) {
           if (_requireClientCert) {
             _bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+            gnutls_free(distinguishedName.data);
+            gnutls_x509_crt_deinit(clientCertificates);
             throw SocketSslException("Client certificate verification has failed: Error getting client certificate's distinguished name.");
           }
         } else clientData->clientCertDn = std::string((char *)distinguishedName.data, distinguishedName.size);
+        gnutls_free(distinguishedName.data);
 
         std::array<char, 40> certificateSerial{};
         size_t certificateSerialSize = certificateSerial.size();
@@ -431,6 +435,7 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
         clientData->clientCertSerial = HelperFunctions::getHexString(certificateSerial.data(), certificateSerialSize);
         clientData->clientCertExpiration = gnutls_x509_crt_get_expiration_time(clientCertificates);
       }
+      gnutls_x509_crt_deinit(clientCertificates);
     }
   }
 }
