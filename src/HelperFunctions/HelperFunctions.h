@@ -112,7 +112,7 @@ class HelperFunctions {
   static std::string getTimeString(std::string format, int64_t time = 0);
 
   /**
-   * Calculates a UUID including a time stamp in microseconds.
+   * Calculates a version 1 UUID (see RFC 4122) including a time stamp in 100-nanosecond intervals.
    *
    * @param time The time in microseconds to calculate the UUID for or "0" to use the current time.
    * @return Returns a time UUID.
