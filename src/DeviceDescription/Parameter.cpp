@@ -69,6 +69,7 @@ void Parameter::parseXml(xml_node *node) {
         std::string propertyValue(propertyNode->value());
         if (propertyName == "readable") readable = propertyValue == "true";
         else if (propertyName == "writeable") writeable = propertyValue == "true";
+        else if (propertyName == "readOnInit") readOnInit = propertyValue == "true";
         else if (propertyName == "transmitted") transmitted = propertyValue == "true";
         else if (propertyName == "addonWriteable") { addonWriteable = (propertyValue == "true"); }
         else if (propertyName == "password") { password = (propertyValue == "true"); }

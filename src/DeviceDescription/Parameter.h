@@ -89,6 +89,7 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   //Properties
   bool readable = true;
   bool writeable = true;
+  bool readOnInit = false;
   bool transmitted = true;
 
   /**
