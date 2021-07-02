@@ -82,7 +82,7 @@ public:
 	 *
 	 * @return Returns true if the string is an IP address.
 	 */
-	static bool isIp(std::string ipAddress);
+	static bool isIp(const std::string& ipAddress);
 
 	/**
 	 * Tries to automatically determine the computers IPv4 address.
@@ -90,7 +90,7 @@ public:
 	 * @param interfaceName If specified, the IP address of this interface is returned.
 	 * @return Returns the computers IPv4 address.
 	 */
-	static std::string getMyIpAddress(std::string interfaceName = "");
+	static std::string getMyIpAddress(const std::string& interfaceName = "");
 
 	/**
 	 * Tries to automatically determine the computers IPv6 address.
