@@ -50,11 +50,13 @@ Variable::Variable(Variable const &rhs) {
   floatValue = rhs.floatValue;
   booleanValue = rhs.booleanValue;
   binaryValue = rhs.binaryValue;
+  arrayValue = std::make_shared<Array>();
   for (Array::const_iterator i = rhs.arrayValue->begin(); i != rhs.arrayValue->end(); ++i) {
     PVariable lhs = std::make_shared<Variable>();
     *lhs = *(*i);
     arrayValue->push_back(lhs);
   }
+  structValue = std::make_shared<Struct>();
   for (Struct::const_iterator i = rhs.structValue->begin(); i != rhs.structValue->end(); ++i) {
     PVariable lhs = std::make_shared<Variable>();
     *lhs = *(i->second);
