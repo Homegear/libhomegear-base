@@ -65,12 +65,15 @@ uint32_t WebSocket::process(char* buffer, int32_t bufferLength)
         processedBytes += processHeader(&buffer, bufferLength);
         if(!_header.parsed) return processedBytes;
     }
-    if(_header.length == 0 || _header.rsv1 || _header.rsv2 || _header.rsv3 || (_header.opcode != Header::Opcode::continuation && _header.opcode != Header::Opcode::text  && _header.opcode != Header::Opcode::binary && _header.opcode != Header::Opcode::ping && _header.opcode != Header::Opcode::pong))
+    if(_header.length == 0 || _header.rsv1 || _header.rsv2 || _header.rsv3 || (_header.opcode != Header::Opcode::continuation && _header.opcode != Header::Opcode::text  && _header.opcode != Header::Opcode::binary && _header.opcode != Header::Opcode::close && _header.opcode != Header::Opcode::ping && _header.opcode != Header::Opcode::pong))
     {
         _header.close = true;
         _dataProcessingStarted = true;
-        setFinished();
-        return processedBytes;
+        if(_header.opcode != Header::Opcode::close)
+	    {
+            setFinished();
+            return processedBytes;
+        }
     }
     _dataProcessingStarted = true;
     processedBytes += processContent(buffer, bufferLength);
