@@ -147,6 +147,7 @@ void Settings::reset() {
   _uiPathPermissions = 504;
   _uiPathUser = "";
   _uiPathGroup = "";
+  _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
   _firmwarePath = "/usr/share/homegear/firmware/";
   _tempPath = "/var/lib/homegear/tmp/";
   _lockFilePath = "/var/lock/";
@@ -605,6 +606,11 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "uipathgroup") {
           _uiPathGroup = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathGroup set to " + _uiPathGroup);
+        } else if (name == "uitranslationpath") {
+          _uiTranslationPath = value;
+          if (_uiTranslationPath.empty()) _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
+          if (_uiTranslationPath.back() != '/') _uiTranslationPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiTranslationPath set to " + _uiTranslationPath);
         } else if (name == "reloadrolesonstartup") {
           _reloadRolesOnStartup = HelperFunctions::toLower(value) == "true";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));

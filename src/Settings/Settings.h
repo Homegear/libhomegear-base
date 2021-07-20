@@ -155,6 +155,7 @@ class Settings {
   uint32_t uiPathPermissions() { return _uiPathPermissions; }
   std::string uiPathUser() { return _uiPathUser; }
   std::string uiPathGroup() { return _uiPathGroup; }
+  std::string uiTranslationPath() { return _uiTranslationPath; }
   bool reloadRolesOnStartup() { return _reloadRolesOnStartup; }
   std::string firmwarePath() { return _firmwarePath; }
   std::string tempPath() { return _tempPath; }
@@ -289,6 +290,7 @@ class Settings {
   uint32_t _uiPathPermissions = 504;
   std::string _uiPathUser;
   std::string _uiPathGroup;
+  std::string _uiTranslationPath;
   bool _reloadRolesOnStartup = true;
   std::string _firmwarePath;
   std::string _tempPath;

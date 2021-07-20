@@ -122,6 +122,7 @@ class IDeviceFamily : public ICentral::ICentralEventSink, public DeviceDescripti
   std::shared_ptr<FamilySettings> _settings;
   std::atomic_bool _locked{false};
   bool _disposed = false;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _translations;
 
   // {{{ Event handling
   //Hooks

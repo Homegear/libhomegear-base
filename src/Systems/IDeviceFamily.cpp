@@ -30,6 +30,7 @@
 
 #include "IDeviceFamily.h"
 #include "../BaseLib.h"
+#include "../Settings/TranslationFileParser.h"
 
 namespace BaseLib {
 namespace Systems {
@@ -44,12 +45,18 @@ IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *event
   _name = name;
   _type = type;
   if (_eventHandler) setEventHandler(_eventHandler);
-  std::string filename = getName();
-  HelperFunctions::toLower(filename);
-  filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
+
+  std::string namePrefix = getName();
+  HelperFunctions::toLower(namePrefix);
+  namePrefix = HelperFunctions::stripNonAlphaNumeric(namePrefix);
+
+  auto settingsFilename = _bl->settings.familyConfigPath() + namePrefix + ".conf";
   _settings.reset(new FamilySettings(bl, id));
-  _bl->out.printInfo("Info: Loading settings from " + filename);
-  _settings->load(filename);
+  _bl->out.printInfo("Info: Loading settings from " + settingsFilename);
+  _settings->load(settingsFilename);
+
+  auto translationPath = _bl->settings.uiTranslationPath() + namePrefix + "/";
+  _translations = TranslationFileParser::parse(translationPath);
 }
 
 IDeviceFamily::~IDeviceFamily() {

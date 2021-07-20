@@ -1106,9 +1106,32 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
       propertiesNode->append_node(node);
     }
 
-    xml_node *node = nullptr;
+    if (parameter->priority != -1) {
+      tempString = std::to_string(parameter->priority);
+      xml_node *node = doc->allocate_node(node_element, "priority", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+      propertiesNode->append_node(node);
+    }
+
+    if (!parameter->ibsId.empty()) {
+      xml_node *node = doc->allocate_node(node_element, "ibsId", doc->allocate_string(parameter->ibsId.c_str(), parameter->ibsId.size() + 1));
+      propertiesNode->append_node(node);
+    }
+
+    if (!parameter->labels.empty()) {
+      xml_node *node = doc->allocate_node(node_element, "labels");
+      propertiesNode->append_node(node);
+      for (auto &label : parameter->labels) {
+        xml_node *labelNode = doc->allocate_node(node_element, "label", doc->allocate_string(label.second.c_str(), label.second.size() + 1));
+
+        xml_attribute *labelAttr = doc->allocate_attribute("lang", doc->allocate_string(label.first.c_str(), label.first.size() + 1));
+        labelNode->append_attribute(labelAttr);
+
+        node->append_node(labelNode);
+      }
+    }
+
     if (!parameter->casts.empty()) {
-      node = doc->allocate_node(node_element, "casts");
+      xml_node *node = doc->allocate_node(node_element, "casts");
       propertiesNode->append_node(node);
       for (Casts::iterator i = parameter->casts.begin(); i != parameter->casts.end(); ++i) {
         {
@@ -1605,7 +1628,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
     }
 
     if (!parameter->roles.empty()) {
-      node = doc->allocate_node(node_element, "roles");
+      xml_node *node = doc->allocate_node(node_element, "roles");
       propertiesNode->append_node(node);
       for (auto &role : parameter->roles) {
         tempString = std::to_string(role.first);
@@ -1647,7 +1670,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
 
     // {{{ Logical
     if (parameter->logical->type == ILogical::Type::Enum::tBoolean) {
-      node = doc->allocate_node(node_element, "logicalBoolean");
+      xml_node *node = doc->allocate_node(node_element, "logicalBoolean");
       parentNode->append_node(node);
 
       if (parameter->logical->defaultValueExists) {
@@ -1662,10 +1685,10 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         node->append_node(subnode);
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tAction) {
-      node = doc->allocate_node(node_element, "logicalAction");
+      xml_node *node = doc->allocate_node(node_element, "logicalAction");
       parentNode->append_node(node);
     } else if (parameter->logical->type == ILogical::Type::Enum::tInteger) {
-      node = doc->allocate_node(node_element, "logicalInteger");
+      xml_node *node = doc->allocate_node(node_element, "logicalInteger");
       parentNode->append_node(node);
 
       LogicalInteger *logical = (LogicalInteger *)parameter->logical.get();
@@ -1708,7 +1731,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         }
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tInteger64) {
-      node = doc->allocate_node(node_element, "logicalInteger64");
+      xml_node *node = doc->allocate_node(node_element, "logicalInteger64");
       parentNode->append_node(node);
 
       LogicalInteger64 *logical = (LogicalInteger64 *)parameter->logical.get();
@@ -1751,7 +1774,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         }
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tFloat) {
-      node = doc->allocate_node(node_element, "logicalFloat");
+      xml_node *node = doc->allocate_node(node_element, "logicalFloat");
       parentNode->append_node(node);
 
       LogicalDecimal *logical = (LogicalDecimal *)parameter->logical.get();
@@ -1794,7 +1817,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         }
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tString) {
-      node = doc->allocate_node(node_element, "logicalString");
+      xml_node *node = doc->allocate_node(node_element, "logicalString");
       parentNode->append_node(node);
 
       if (parameter->logical->defaultValueExists) {
@@ -1807,7 +1830,7 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         node->append_node(subnode);
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tEnum) {
-      node = doc->allocate_node(node_element, "logicalEnumeration");
+      xml_node *node = doc->allocate_node(node_element, "logicalEnumeration");
       parentNode->append_node(node);
 
       LogicalEnumeration *logical = (LogicalEnumeration *)parameter->logical.get();
@@ -1836,113 +1859,115 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
         subnode->append_node(valueNode);
       }
     } else if (parameter->logical->type == ILogical::Type::Enum::tArray) {
-      node = doc->allocate_node(node_element, "logicalArray");
+      xml_node *node = doc->allocate_node(node_element, "logicalArray");
       parentNode->append_node(node);
     } else if (parameter->logical->type == ILogical::Type::Enum::tStruct) {
-      node = doc->allocate_node(node_element, "logicalStruct");
+      xml_node *node = doc->allocate_node(node_element, "logicalStruct");
       parentNode->append_node(node);
     }
     // }}}
 
     // {{{ Physical
-    node = nullptr;
-    if (parameter->physical->type == IPhysical::Type::Enum::tInteger) {
-      node = doc->allocate_node(node_element, "physicalInteger");
-      parentNode->append_node(node);
-    } else if (parameter->physical->type == IPhysical::Type::Enum::tBoolean) {
-      node = doc->allocate_node(node_element, "physicalBoolean");
-      parentNode->append_node(node);
-    } else if (parameter->physical->type == IPhysical::Type::Enum::tString) {
-      node = doc->allocate_node(node_element, "physicalString");
-      parentNode->append_node(node);
-    } else if (parameter->physical->type == IPhysical::Type::Enum::none) {
-      node = doc->allocate_node(node_element, "physical");
-      parentNode->append_node(node);
-    }
-
-    if (node) {
-      if (!parameter->physical->groupId.empty()) {
-        attr = doc->allocate_attribute("groupId", doc->allocate_string(parameter->physical->groupId.c_str(), parameter->physical->groupId.size() + 1));
-        node->append_attribute(attr);
+    {
+      xml_node *node = nullptr;
+      if (parameter->physical->type == IPhysical::Type::Enum::tInteger) {
+        node = doc->allocate_node(node_element, "physicalInteger");
+        parentNode->append_node(node);
+      } else if (parameter->physical->type == IPhysical::Type::Enum::tBoolean) {
+        node = doc->allocate_node(node_element, "physicalBoolean");
+        parentNode->append_node(node);
+      } else if (parameter->physical->type == IPhysical::Type::Enum::tString) {
+        node = doc->allocate_node(node_element, "physicalString");
+        parentNode->append_node(node);
+      } else if (parameter->physical->type == IPhysical::Type::Enum::none) {
+        node = doc->allocate_node(node_element, "physical");
+        parentNode->append_node(node);
       }
 
-      if (parameter->physical->index != 0) {
-        tempString = Math::toString(parameter->physical->index, 1);
-        xml_node *subnode = doc->allocate_node(node_element, "index", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+      if (node) {
+        if (!parameter->physical->groupId.empty()) {
+          attr = doc->allocate_attribute("groupId", doc->allocate_string(parameter->physical->groupId.c_str(), parameter->physical->groupId.size() + 1));
+          node->append_attribute(attr);
+        }
 
-      if (parameter->physical->sizeDefined) {
-        tempString = Math::toString(parameter->physical->size, 1);
-        xml_node *subnode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->index != 0) {
+          tempString = Math::toString(parameter->physical->index, 1);
+          xml_node *subnode = doc->allocate_node(node_element, "index", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->bitSize >= 0) {
-        tempString = Math::toString(parameter->physical->bitSize);
-        xml_node *subnode = doc->allocate_node(node_element, "bitSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->sizeDefined) {
+          tempString = Math::toString(parameter->physical->size, 1);
+          xml_node *subnode = doc->allocate_node(node_element, "size", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->mask != -1) {
-        tempString = std::to_string(parameter->physical->mask);
-        xml_node *subnode = doc->allocate_node(node_element, "mask", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->bitSize >= 0) {
+          tempString = Math::toString(parameter->physical->bitSize);
+          xml_node *subnode = doc->allocate_node(node_element, "bitSize", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->list != -1) {
-        tempString = std::to_string(parameter->physical->list);
-        xml_node *subnode = doc->allocate_node(node_element, "list", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->mask != -1) {
+          tempString = std::to_string(parameter->physical->mask);
+          xml_node *subnode = doc->allocate_node(node_element, "mask", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->operationType != IPhysical::OperationType::Enum::none) {
-        if (parameter->physical->operationType == IPhysical::OperationType::Enum::command) tempString = "command";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::centralCommand) tempString = "centralCommand";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::internal) tempString = "internal";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::config) tempString = "config";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::configString) tempString = "configString";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::store) tempString = "store";
-        else if (parameter->physical->operationType == IPhysical::OperationType::Enum::memory) tempString = "memory";
-        xml_node *subnode = doc->allocate_node(node_element, "operationType", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->list != -1) {
+          tempString = std::to_string(parameter->physical->list);
+          xml_node *subnode = doc->allocate_node(node_element, "list", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->endianess != IPhysical::Endianess::Enum::big) {
-        tempString = "little";
-        xml_node *subnode = doc->allocate_node(node_element, "endianess", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->operationType != IPhysical::OperationType::Enum::none) {
+          if (parameter->physical->operationType == IPhysical::OperationType::Enum::command) tempString = "command";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::centralCommand) tempString = "centralCommand";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::internal) tempString = "internal";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::config) tempString = "config";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::configString) tempString = "configString";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::store) tempString = "store";
+          else if (parameter->physical->operationType == IPhysical::OperationType::Enum::memory) tempString = "memory";
+          xml_node *subnode = doc->allocate_node(node_element, "operationType", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->memoryIndex != 0) {
-        tempString = Math::toString(parameter->physical->memoryIndex, 1);
-        xml_node *subnode = doc->allocate_node(node_element, "memoryIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->endianess != IPhysical::Endianess::Enum::big) {
+          tempString = "little";
+          xml_node *subnode = doc->allocate_node(node_element, "endianess", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->memoryIndexOperation != IPhysical::MemoryIndexOperation::Enum::none) {
-        tempString = parameter->physical->memoryIndexOperation == IPhysical::MemoryIndexOperation::Enum::addition ? "addition" : "subtraction";
-        xml_node *subnode = doc->allocate_node(node_element, "memoryIndexOperation", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->memoryIndex != 0) {
+          tempString = Math::toString(parameter->physical->memoryIndex, 1);
+          xml_node *subnode = doc->allocate_node(node_element, "memoryIndex", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->memoryChannelStep != 0) {
-        tempString = Math::toString(parameter->physical->memoryChannelStep, 1);
-        xml_node *subnode = doc->allocate_node(node_element, "memoryChannelStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
-      }
+        if (parameter->physical->memoryIndexOperation != IPhysical::MemoryIndexOperation::Enum::none) {
+          tempString = parameter->physical->memoryIndexOperation == IPhysical::MemoryIndexOperation::Enum::addition ? "addition" : "subtraction";
+          xml_node *subnode = doc->allocate_node(node_element, "memoryIndexOperation", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
 
-      if (parameter->physical->address != 0) {
-        tempString = Math::toString(parameter->physical->address);
-        xml_node *subnode = doc->allocate_node(node_element, "address", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
-        node->append_node(subnode);
+        if (parameter->physical->memoryChannelStep != 0) {
+          tempString = Math::toString(parameter->physical->memoryChannelStep, 1);
+          xml_node *subnode = doc->allocate_node(node_element, "memoryChannelStep", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
+
+        if (parameter->physical->address != 0) {
+          tempString = Math::toString(parameter->physical->address);
+          xml_node *subnode = doc->allocate_node(node_element, "address", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+          node->append_node(subnode);
+        }
       }
     }
     //}}}
 
     // {{{ Packets
     if (!parameter->getPackets.empty() || !parameter->setPackets.empty() || !parameter->eventPackets.empty()) {
-      node = doc->allocate_node(node_element, "packets");
+      xml_node *node = doc->allocate_node(node_element, "packets");
       parentNode->append_node(node);
 
       for (std::vector<std::shared_ptr<Parameter::Packet>>::iterator i = parameter->getPackets.begin(); i != parameter->getPackets.end(); ++i) {

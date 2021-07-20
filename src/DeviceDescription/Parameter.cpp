@@ -82,8 +82,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "signed") {
           isSignedSet = true;
           isSigned = (propertyValue == "true");
-        }
-        else if (propertyName == "control") control = propertyValue;
+        } else if (propertyName == "control") control = propertyValue;
         else if (propertyName == "unit") unit = propertyValue;
         else if (propertyName == "mandatory") mandatory = (propertyValue == "true");
         else if (propertyName == "formFieldType") formFieldType = propertyValue;
@@ -92,7 +91,37 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "resetAfterRestart") { resetAfterRestart = (propertyValue == "true"); }
         else if (propertyName == "ccu2Visible") { ccu2Visible = (propertyValue == "true"); }
         else if (propertyName == "linkedParameter") { linkedParameter = propertyValue; }
-        else if (propertyName == "casts") {
+        else if (propertyName == "priority") { priority = Math::getNumber(propertyValue); }
+        else if (propertyName == "ibsId") { ibsId = propertyValue; }
+        else if (propertyName == "labels") {
+          for (xml_attribute *attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute()) {
+            _bl->out.printWarning("Warning: Unknown attribute for \"labels\": " + std::string(attr->name()));
+          }
+          for (xml_node *labelNode = propertyNode->first_node(); labelNode; labelNode = labelNode->next_sibling()) {
+            std::string labelName(labelNode->name());
+            std::string labelValue(labelNode->value());
+            if (labelName == "label") {
+              std::string language;
+
+              for (xml_attribute *attr = labelNode->first_attribute(); attr; attr = attr->next_attribute()) {
+                std::string attributeName(attr->name());
+                std::string attributeValue(attr->value());
+                if (attributeName == "lang") {
+                  language = attributeValue;
+                } else {
+                  _bl->out.printWarning("Warning: Unknown attribute for \"labels\": " + std::string(attr->name()));
+                }
+              }
+
+              if (language.empty()) {
+                _bl->out.printWarning("Warning: Attribute \"lang\" is missing for \"label\".");
+                continue;
+              }
+
+              labels.emplace(language, labelValue);
+            }
+          }
+        } else if (propertyName == "casts") {
           for (xml_attribute *attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute()) {
             _bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
           }
@@ -366,7 +395,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
           if (variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
           else if (variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
           if (role.invert) {
-            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue = !((bool)variable->integerValue);
+            if (parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue = !((bool)variable->integerValue);
             else variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
           }
           if (role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
@@ -379,7 +408,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
           if (variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
           else if (variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
           if (role.invert) {
-            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue64 = !((bool)variable->integerValue64);
+            if (parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue64 = !((bool)variable->integerValue64);
             else variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
           }
           if (role.scale) variable->integerValue64 = std::llround(Math::scale((double)variable->integerValue64, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));

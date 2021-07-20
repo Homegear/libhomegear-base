@@ -214,6 +214,6 @@ set(SOURCE_FILES
         src/Managers/Environment.h
         src/Sockets/Hgdc.cpp
         src/Sockets/Hgdc.h
-        src/Systems/Role.h)
+        src/Systems/Role.h src/Settings/TranslationFileParser.cpp src/Settings/TranslationFileParser.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})
