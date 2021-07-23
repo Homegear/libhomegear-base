@@ -30,10 +30,8 @@
 
 #include "IDeviceFamily.h"
 #include "../BaseLib.h"
-#include "../Settings/TranslationFileParser.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 FamilyType IDeviceFamily::type() { return _type; }
 int32_t IDeviceFamily::getFamily() { return _family; }
 std::string IDeviceFamily::getName() { return _name; }
@@ -56,7 +54,8 @@ IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *event
   _settings->load(settingsFilename);
 
   auto translationPath = _bl->settings.uiTranslationPath() + namePrefix + "/";
-  _translations = TranslationFileParser::parse(translationPath);
+  _bl->out.printInfo("Info: Loading translations from " + translationPath);
+  TranslationManager::load(translationPath);
 }
 
 IDeviceFamily::~IDeviceFamily() {
@@ -201,34 +200,4 @@ bool IDeviceFamily::locked() {
   return _locked;
 }
 
-std::string IDeviceFamily::getTranslation(const std::string &key, const std::string &language, const std::list<std::string> &variables) {
-  auto languageIterator = _translations.find(language);
-  if (languageIterator == _translations.end() && language.size() > 2) {
-    auto pair = HelperFunctions::splitFirst(language, '-');
-    languageIterator = _translations.find(pair.first);
-  }
-
-  if (languageIterator == _translations.end() && language != "en") {
-    languageIterator = _translations.find("en");
-  }
-
-  if (languageIterator == _translations.end()) {
-    return "";
-  }
-
-  auto translationIterator = languageIterator->second.find(key);
-  if (translationIterator == languageIterator->second.end()) {
-    return "";
-  }
-
-  auto translation = translationIterator->second;
-  uint32_t i = 0;
-  for (auto &variable : variables) {
-    HelperFunctions::stringReplace(translation, "%variable" + std::to_string(i++) + "%", variable);
-  }
-
-  return translation;
-}
-
-}
 }

@@ -48,6 +48,7 @@
 #include "Managers/SerialDeviceManager.h"
 #include "Managers/FileDescriptorManager.h"
 #include "Managers/ThreadManager.h"
+#include "Managers/TranslationManager.h"
 #include "HelperFunctions/HelperFunctions.h"
 #include "HelperFunctions/Color.h"
 #include "HelperFunctions/Math.h"

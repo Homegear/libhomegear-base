@@ -78,7 +78,7 @@ class ServiceMessages : public IEvents {
   virtual void save(int64_t timestamp, int32_t channel, std::string id, uint8_t value);
   virtual bool set(std::string id, bool value);
   virtual void set(std::string id, uint8_t value, uint32_t channel);
-  virtual std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, bool returnID);
+  virtual std::shared_ptr<Variable> get(const PRpcClientInfo &clientInfo, bool returnID);
 
   virtual void setConfigPending(bool value);
   virtual bool getConfigPending() { return _configPending; }

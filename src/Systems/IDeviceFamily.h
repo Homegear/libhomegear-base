@@ -111,16 +111,6 @@ class IDeviceFamily : public ICentral::ICentralEventSink, public DeviceDescripti
    */
   virtual void homegearShuttingDown() = 0;
 
-  /**
-   * Returns a translation from one of the global translation files.
-   *
-   * @param key The translation to lookup.
-   * @param language The language to return.
-   * @param variables Optional variables to replace in the translation string.
-   * @return The translation or an empty string if no translation was found.
-   */
-  std::string getTranslation(const std::string &key, const std::string &language, const std::list<std::string> &variables = std::list<std::string>());
-
   // {{{ RPC
   virtual std::shared_ptr<Variable> getPairingInfo() = 0;
   virtual std::shared_ptr<Variable> getParamsetDescription(PRpcClientInfo clientInfo, int32_t deviceId, int32_t firmwareVersion, int32_t channel, ParameterGroup::Type::Enum type) = 0;
@@ -132,7 +122,6 @@ class IDeviceFamily : public ICentral::ICentralEventSink, public DeviceDescripti
   std::shared_ptr<FamilySettings> _settings;
   std::atomic_bool _locked{false};
   bool _disposed = false;
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _translations;
 
   // {{{ Event handling
   //Hooks

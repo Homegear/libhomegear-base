@@ -3290,7 +3290,7 @@ PVariable Peer::getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, Param
     else if (type == ParameterGroup::Type::Enum::link) id = rpcFunction->linkParameters->id;
     int32_t pos = id.find_last_of("--");
     if (pos > 0) id = id.substr(0, pos - 1);
-    return PVariable(new Variable(id));
+    return std::make_shared<Variable>(id);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
