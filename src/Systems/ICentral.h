@@ -177,7 +177,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable getParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
   virtual PVariable getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
   virtual PVariable getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkDeviceAcls, bool checkVariableAcls);
-  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls);
+  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnId, const std::string &language, bool checkAcls);
   virtual PVariable getSniffedDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
   virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);

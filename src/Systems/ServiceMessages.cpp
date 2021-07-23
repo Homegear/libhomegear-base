@@ -342,20 +342,20 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel) {
   }
 }
 
-PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) {
+PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, const std::string &language) {
   try {
     PVariable serviceMessages(new Variable(VariableType::tArray));
-    if (returnID && _peerId == 0) return serviceMessages;
+    if (returnId && _peerId == 0) return serviceMessages;
     if (_unreach) {
-      if (returnID) {
+      if (returnId) {
         auto element = std::make_shared<Variable>(VariableType::tStruct);
         element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("UNREACH"));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
-        if (!clientInfo->language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("common.serviceMessage.unreach", clientInfo->language)));
-        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("common.serviceMessage.unreach"));
+        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.unreach", language)));
+        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.unreach"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
       } else {
@@ -368,15 +368,15 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) 
       }
     }
     if (_stickyUnreach) {
-      if (returnID) {
+      if (returnId) {
         auto element = std::make_shared<Variable>(VariableType::tStruct);
         element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("STICKY_UNREACH"));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
-        if (!clientInfo->language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("common.serviceMessage.stickyUnreach", clientInfo->language)));
-        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("common.serviceMessage.stickyUnreach"));
+        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.stickyUnreach", language)));
+        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.stickyUnreach"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
       } else {
@@ -389,15 +389,15 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) 
       }
     }
     if (_configPending) {
-      if (returnID) {
+      if (returnId) {
         auto element = std::make_shared<Variable>(VariableType::tStruct);
         element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("CONFIG_PENDING"));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
-        if (!clientInfo->language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("common.serviceMessage.configPending", clientInfo->language)));
-        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("common.serviceMessage.configPending"));
+        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.configPending", language)));
+        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.configPending"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
       } else {
@@ -410,15 +410,15 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) 
       }
     }
     if (_lowbat) {
-      if (returnID) {
+      if (returnId) {
         auto element = std::make_shared<Variable>(VariableType::tStruct);
         element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("LOWBAT"));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
-        if (!clientInfo->language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("common.serviceMessage.lowbat", clientInfo->language)));
-        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("common.serviceMessage.lowbat"));
+        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.lowbat", language)));
+        else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.lowbat"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
       } else {
@@ -435,7 +435,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) 
       for (auto &inner : error.second) {
         if (inner.second.value == 0) continue;
 
-        if (returnID) {
+        if (returnId) {
           auto element = std::make_shared<Variable>(VariableType::tStruct);
           element->structValue->emplace("TYPE", std::make_shared<Variable>(2));
           element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
@@ -443,8 +443,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnID) 
           element->structValue->emplace("VARIABLE", std::make_shared<Variable>(inner.first));
           element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(inner.second.timestamp));
           auto variableName = inner.first;
-          if (!clientInfo->language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("common.serviceMessage." + HelperFunctions::toLower(variableName), clientInfo->language)));
-          else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("common.serviceMessage." + HelperFunctions::toLower(variableName)));
+          if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName), language)));
+          else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName)));
           element->structValue->emplace("VALUE", std::make_shared<Variable>((uint32_t)inner.second.value));
           serviceMessages->arrayValue->push_back(element);
         } else {

@@ -3298,10 +3298,10 @@ PVariable Peer::getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, Param
   return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable Peer::getServiceMessages(PRpcClientInfo clientInfo, bool returnID) {
+PVariable Peer::getServiceMessages(PRpcClientInfo clientInfo, bool returnID, const std::string &language) {
   if (_disposing) return Variable::createError(-32500, "Peer is disposing.");
   if (!serviceMessages) return Variable::createError(-32500, "Service messages are not initialized.");
-  return serviceMessages->get(clientInfo, returnID);
+  return serviceMessages->get(clientInfo, returnID, language);
 }
 
 PVariable Peer::getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous) {

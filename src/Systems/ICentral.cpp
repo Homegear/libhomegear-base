@@ -1077,7 +1077,7 @@ PVariable ICentral::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
   return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls) {
+PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId, const std::string &language, bool checkAcls) {
   try {
     std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
@@ -1085,7 +1085,7 @@ PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId,
     for (auto &peer : peers) {
       if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-      PVariable messages = peer->getServiceMessages(clientInfo, returnId);
+      PVariable messages = peer->getServiceMessages(clientInfo, returnId, language);
       if (!messages->arrayValue->empty()) serviceMessages->arrayValue->insert(serviceMessages->arrayValue->end(), messages->arrayValue->begin(), messages->arrayValue->end());
     }
     return serviceMessages;
