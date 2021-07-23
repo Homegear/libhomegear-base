@@ -37,13 +37,7 @@
 #include "../IEvents.h"
 #include "../Database/DatabaseTypes.h"
 #include "../Sockets/RpcClientInfo.h"
-
-#include <string>
-#include <memory>
-#include <chrono>
-#include <map>
-#include <mutex>
-#include <vector>
+#include "ServiceMessage.h"
 
 namespace BaseLib {
 
@@ -59,6 +53,7 @@ class ServiceMessages : public IEvents {
 
     virtual void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values) = 0;
     virtual void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values) = 0;
+    virtual void onServiceMessageEvent(const PServiceMessage &serviceMessage) = 0;
     virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) = 0;
     virtual std::shared_ptr<Database::DataTable> onGetServiceMessages() = 0;
     virtual void onSaveServiceMessage(Database::DataRow &data) = 0;
@@ -121,6 +116,7 @@ class ServiceMessages : public IEvents {
 
   virtual void raiseEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values);
   virtual void raiseRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values);
+  virtual void raiseServiceMessageEvent(const PServiceMessage &serviceMessage);
   virtual void raiseSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data);
   virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages();
   virtual void raiseSaveServiceMessage(Database::DataRow &data);

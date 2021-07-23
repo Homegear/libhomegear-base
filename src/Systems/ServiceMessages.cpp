@@ -33,8 +33,7 @@
 #include <memory>
 #include "../BaseLib.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 
 ServiceMessages::ServiceMessages(BaseLib::SharedObjects *baseLib, uint64_t peerId, std::string peerSerial, IServiceEventSink *eventHandler) {
   _bl = baseLib;
@@ -59,6 +58,10 @@ void ServiceMessages::raiseEvent(std::string &source, uint64_t peerId, int32_t c
 
 void ServiceMessages::raiseRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) {
   if (_eventHandler) ((IServiceEventSink *)_eventHandler)->onRPCEvent(source, peerId, channel, deviceAddress, valueKeys, values);
+}
+
+void ServiceMessages::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_eventHandler) ((IServiceEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
 }
 
 void ServiceMessages::raiseSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) {
@@ -146,6 +149,7 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value) {
       } else {
         if (_peerId == 0) return;
         data.push_back(std::make_shared<Database::DataColumn>(-1)); //familyID
+        data.push_back(std::make_shared<Database::DataColumn>("")); //interface
         data.push_back(std::make_shared<Database::DataColumn>(_peerId)); //peerID
         data.push_back(std::make_shared<Database::DataColumn>(index)); //messageID
         data.push_back(std::make_shared<Database::DataColumn>(std::string())); //messageSubID
@@ -186,6 +190,7 @@ void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, u
       } else {
         if (_peerId == 0) return;
         data.push_back(std::make_shared<Database::DataColumn>(-1)); //familyID
+        data.push_back(std::make_shared<Database::DataColumn>("")); //interface
         data.push_back(std::make_shared<Database::DataColumn>(_peerId)); //peerID
         data.push_back(std::make_shared<Database::DataColumn>(index)); //messageID
         data.push_back(std::make_shared<Database::DataColumn>(std::string())); //messageSubID
@@ -209,6 +214,15 @@ void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, u
 bool ServiceMessages::set(std::string id, bool value) {
   try {
     if (_disposing) return false;
+
+    auto serviceMessage = std::make_shared<ServiceMessage>();
+    serviceMessage->type = ServiceMessageType::kDevice;
+    serviceMessage->timestamp = HelperFunctions::getTimeSeconds();
+    serviceMessage->peerId = _peerId;
+    serviceMessage->channel = 0;
+    serviceMessage->variable = id;
+    serviceMessage->value = value;
+
     if (id == "LOWBAT_REPORTING") id = "LOWBAT"; //HM-TC-IT-WM-W-EU
     if (id == "UNREACH") {
       if (value != _unreach) {
@@ -217,6 +231,8 @@ bool ServiceMessages::set(std::string id, bool value) {
         _unreachTime = HelperFunctions::getTimeSeconds();
         save(_unreachTime, 0, value);
       }
+      serviceMessage->message = "l10n.common.serviceMessage.unreach";
+      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.unreach");
     } else if (id == "STICKY_UNREACH") {
       if (value != _stickyUnreach) {
         if (value && (_bl->booting || _bl->shuttingDown)) return true;
@@ -224,6 +240,8 @@ bool ServiceMessages::set(std::string id, bool value) {
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
         save(_stickyUnreachTime, 1, value);
       }
+      serviceMessage->message = "l10n.common.serviceMessage.stickyUnreach";
+      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.stickyUnreach");
     } else if (id == "CONFIG_PENDING") {
       if (value != _configPending) {
         _configPending = value;
@@ -231,12 +249,16 @@ bool ServiceMessages::set(std::string id, bool value) {
         save(_configPendingTime, 2, value);
         if (_configPending) _configPendingSetTime = HelperFunctions::getTime();
       }
+      serviceMessage->message = "l10n.common.serviceMessage.configPending";
+      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.configPending");
     } else if (id == "LOWBAT") {
       if (value != _lowbat) {
         _lowbat = value;
         _lowbatTime = HelperFunctions::getTimeSeconds();
         save(_lowbatTime, 3, value);
       }
+      serviceMessage->message = "l10n.common.serviceMessage.lowbat";
+      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.lowbat");
     } else //false == 0, a little dirty, but it works
     {
       if (!value) {
@@ -261,6 +283,12 @@ bool ServiceMessages::set(std::string id, bool value) {
       save(HelperFunctions::getTimeSeconds(), 0, id, value);
       raiseSaveParameter(id, 0, data);
 
+      auto variableName = id;
+      HelperFunctions::toLower(variableName);
+      serviceMessage->message = "l10n.common.serviceMessage." + variableName;
+      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage." + variableName);
+      raiseServiceMessageEvent(serviceMessage);
+
       std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
       std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
       rpcValues->push_back(std::make_shared<Variable>((int32_t)0));
@@ -282,6 +310,11 @@ bool ServiceMessages::set(std::string id, bool value) {
             save(errorIterator->second.timestamp, error.first, id, value);
             raiseSaveParameter(id, error.first, data2);
 
+            auto serviceMessage2 = std::make_shared<ServiceMessage>();
+            *serviceMessage2 = *serviceMessage;
+            serviceMessage2->channel = error.first;
+            raiseServiceMessageEvent(serviceMessage2);
+
             std::shared_ptr<std::vector<std::string>> valueKeys2(new std::vector<std::string>({id}));
             std::shared_ptr<std::vector<PVariable>> rpcValues2(new std::vector<PVariable>());
             rpcValues2->push_back(std::make_shared<Variable>((int32_t)0));
@@ -297,6 +330,8 @@ bool ServiceMessages::set(std::string id, bool value) {
 
     std::vector<uint8_t> data = {(uint8_t)value};
     raiseSaveParameter(id, 0, data);
+
+    raiseServiceMessageEvent(serviceMessage);
 
     std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));
     std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
@@ -601,5 +636,4 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
   }
 }
 
-}
 }

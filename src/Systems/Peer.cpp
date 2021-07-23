@@ -312,6 +312,11 @@ void Peer::raiseRPCEvent(std::string &source, uint64_t peerId, int32_t channel, 
   if (_eventHandler) ((IPeerEventSink *)_eventHandler)->onRPCEvent(source, peerId, channel, deviceAddress, valueKeys, values);
 }
 
+void Peer::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_peerID == 0) return;
+  if (_eventHandler) ((IPeerEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
+}
+
 void Peer::raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) {
   if (_eventHandler) ((IPeerEventSink *)_eventHandler)->onRPCUpdateDevice(id, channel, address, hint);
 }
@@ -342,6 +347,10 @@ void Peer::onEvent(std::string &source, uint64_t peerId, int32_t channel, std::s
 
 void Peer::onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) {
   raiseRPCEvent(source, id, channel, deviceAddress, valueKeys, values);
+}
+
+void Peer::onServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  raiseServiceMessageEvent(serviceMessage);
 }
 
 void Peer::onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) {

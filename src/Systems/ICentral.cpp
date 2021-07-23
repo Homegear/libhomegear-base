@@ -113,6 +113,10 @@ void ICentral::raiseEvent(std::string &source, uint64_t peerId, int32_t channel,
   if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onEvent(source, peerId, channel, variables, values);
 }
 
+void ICentral::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
+}
+
 void ICentral::raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
   if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onRunScript(scriptInfo, wait);
 }
@@ -147,6 +151,10 @@ void ICentral::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string addre
 
 void ICentral::onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) {
   raiseEvent(source, peerId, channel, variables, values);
+}
+
+void ICentral::onServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  raiseServiceMessageEvent(serviceMessage);
 }
 
 void ICentral::onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {

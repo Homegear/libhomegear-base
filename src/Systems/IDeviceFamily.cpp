@@ -118,6 +118,10 @@ void IDeviceFamily::raiseEvent(std::string &source, uint64_t peerID, int32_t cha
   if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onEvent(source, peerID, channel, variables, values);
 }
 
+void IDeviceFamily::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
+}
+
 void IDeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
   if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRunScript(scriptInfo, wait);
 }
@@ -169,6 +173,10 @@ void IDeviceFamily::onRPCDeleteDevices(std::vector<uint64_t> &ids, PVariable dev
 
 void IDeviceFamily::onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) {
   raiseEvent(source, peerID, channel, variables, values);
+}
+
+void IDeviceFamily::onServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  raiseServiceMessageEvent(serviceMessage);
 }
 
 void IDeviceFamily::onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {

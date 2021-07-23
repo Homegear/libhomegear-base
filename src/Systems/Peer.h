@@ -317,6 +317,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
     virtual void onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) = 0;
     virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
     virtual void onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) = 0;
+    virtual void onServiceMessageEvent(const PServiceMessage &serviceMessage) = 0;
     virtual void onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) = 0;
     virtual BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) = 0;
   };
@@ -604,6 +605,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual void raiseRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values);
   virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
   virtual void raiseEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values);
+  void raiseServiceMessageEvent(const PServiceMessage &serviceMessage);
   virtual void raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait);
   virtual BaseLib::PVariable raiseInvokeRpc(std::string &methodName, BaseLib::PArray &parameters);
   // }}}
@@ -611,13 +613,14 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   //ServiceMessages event handling
   virtual void onConfigPending(bool configPending);
 
-  virtual void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values);
-  virtual void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values);
-  virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data);
-  virtual std::shared_ptr<Database::DataTable> onGetServiceMessages();
-  virtual void onSaveServiceMessage(Database::DataRow &data);
-  virtual void onDeleteServiceMessage(uint64_t databaseID);
-  virtual void onEnqueuePendingQueues();
+  void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) override;
+  void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) override;
+  void onServiceMessageEvent(const PServiceMessage &serviceMessage) override;
+  void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) override;
+  std::shared_ptr<Database::DataTable> onGetServiceMessages() override;
+  void onSaveServiceMessage(Database::DataRow &data) override;
+  void onDeleteServiceMessage(uint64_t databaseID) override;
+  void onEnqueuePendingQueues() override;
   //End ServiceMessages event handling
 
   /**

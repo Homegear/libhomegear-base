@@ -28,47 +28,38 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef GLOBALSERVICEMESSAGES_H_
-#define GLOBALSERVICEMESSAGES_H_
+#ifndef LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
+#define LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
 
 #include "../Variable.h"
-#include "../Sockets/RpcClientInfo.h"
-#include "../Encoding/RpcDecoder.h"
-#include "../Encoding/RpcEncoder.h"
-#include "ServiceMessage.h"
 
 namespace BaseLib {
 
-class SharedObjects;
-
-namespace Systems {
-class GlobalServiceMessages {
- public:
-  GlobalServiceMessages();
-  virtual ~GlobalServiceMessages();
-
-  void init(BaseLib::SharedObjects *baseLib);
-  void load();
-
-  void set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string& messageSubId, int32_t timestamp, const std::string& message, const std::list<std::string>& variables, const PVariable& data = PVariable(), int64_t value = 0);
-  void unset(int32_t familyId, int32_t messageId, std::string messageSubId, std::string message);
-
-  std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, const std::string &language);
- protected:
-  typedef int32_t FamilyId;
-  typedef int32_t MessageId;
-  typedef std::string MessageSubId;
-  typedef std::string MessageType;
-
-  BaseLib::SharedObjects *_bl = nullptr;
-
-  std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
-  std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
-
-  std::mutex _serviceMessagesMutex;
-  std::unordered_map<FamilyId, std::unordered_map<MessageId, std::unordered_map<MessageSubId, std::unordered_map<MessageType, PServiceMessage>>>> _serviceMessages;
+enum class ServiceMessageType {
+  kGlobal = 0,
+  kFamily = 1,
+  kDevice = 2
 };
 
+struct ServiceMessage {
+  uint64_t databaseId = 0;
+  ServiceMessageType type = ServiceMessageType::kGlobal;
+  int32_t familyId = 0;
+  uint64_t peerId = 0;
+  int32_t channel = -1;
+  std::string variable;
+  std::string interface;
+  int32_t messageId = 0;
+  std::string messageSubId;
+  int32_t timestamp = 0;
+  std::string message;
+  BaseLib::PVariable messageTranslations = std::make_shared<Variable>(VariableType::tStruct);
+  std::list<std::string> variables;
+  int64_t value = 0;
+  PVariable data;
+};
+typedef std::shared_ptr<ServiceMessage> PServiceMessage;
+
 }
-}
-#endif
+
+#endif //LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
