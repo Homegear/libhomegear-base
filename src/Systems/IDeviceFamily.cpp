@@ -201,5 +201,34 @@ bool IDeviceFamily::locked() {
   return _locked;
 }
 
+std::string IDeviceFamily::getTranslation(const std::string &key, const std::string &language, const std::list<std::string> &variables) {
+  auto languageIterator = _translations.find(language);
+  if (languageIterator == _translations.end() && language.size() > 2) {
+    auto pair = HelperFunctions::splitFirst(language, '-');
+    languageIterator = _translations.find(pair.first);
+  }
+
+  if (languageIterator == _translations.end() && language != "en") {
+    languageIterator = _translations.find("en");
+  }
+
+  if (languageIterator == _translations.end()) {
+    return "";
+  }
+
+  auto translationIterator = languageIterator->second.find(key);
+  if (translationIterator == languageIterator->second.end()) {
+    return "";
+  }
+
+  auto translation = translationIterator->second;
+  uint32_t i = 0;
+  for (auto &variable : variables) {
+    HelperFunctions::stringReplace(translation, "%variable" + std::to_string(i++) + "%", variable);
+  }
+
+  return translation;
+}
+
 }
 }

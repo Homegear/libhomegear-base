@@ -122,8 +122,6 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   std::string metadata;
   bool resetAfterRestart = false;
   int32_t priority = -1;
-  std::string ibsId;
-  std::unordered_map<std::string, std::string> labels;
 
   /**
    * Deprecated. Remove beginning of 2021.

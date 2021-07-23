@@ -74,8 +74,8 @@ class ServiceMessages : public IEvents {
   virtual void setPeerSerial(std::string peerSerial) { _peerSerial = peerSerial; }
 
   virtual void load();
-  virtual void save(int32_t timestamp, uint32_t index, bool value);
-  virtual void save(int32_t timestamp, int32_t channel, std::string id, uint8_t value);
+  virtual void save(int64_t timestamp, uint32_t index, bool value);
+  virtual void save(int64_t timestamp, int32_t channel, std::string id, uint8_t value);
   virtual bool set(std::string id, bool value);
   virtual void set(std::string id, uint8_t value, uint32_t channel);
   virtual std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, bool returnID);
@@ -87,7 +87,7 @@ class ServiceMessages : public IEvents {
 
   virtual void setUnreach(bool value, bool requeue);
   virtual bool getUnreach() { return _unreach; }
-  virtual void checkUnreach(int32_t cyclicTimeout, uint32_t lastPacketReceived);
+  virtual void checkUnreach(int32_t cyclicTimeout, int64_t lastPacketReceived);
   virtual void endUnreach();
 
   virtual bool getLowbat() { return _lowbat; }
@@ -103,15 +103,15 @@ class ServiceMessages : public IEvents {
   std::string _peerSerial;
   bool _disposing = false;
   bool _configPending = false;
-  int32_t _configPendingTime = 0;
+  int64_t _configPendingTime = 0;
   int64_t _configPendingSetTime = 0;
   int32_t _unreachResendCounter = 0;
   bool _unreach = false;
-  int32_t _unreachTime = 0;
+  int64_t _unreachTime = 0;
   bool _stickyUnreach = false;
-  int32_t _stickyUnreachTime = 0;
+  int64_t _stickyUnreachTime = 0;
   bool _lowbat = false;
-  int32_t _lowbatTime = 0;
+  int64_t _lowbatTime = 0;
 
   std::mutex _errorMutex;
   std::map<uint32_t, std::map<std::string, ErrorInfo>> _errors;

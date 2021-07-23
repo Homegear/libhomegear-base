@@ -31,175 +31,157 @@
 #include "DeviceTranslations.h"
 #include "../BaseLib.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
-DeviceTranslations::DeviceTranslations(BaseLib::SharedObjects* baseLib, int32_t family)
-{
-	_bl = baseLib;
-	_family = family;
+DeviceTranslations::DeviceTranslations(BaseLib::SharedObjects *baseLib, int32_t family) {
+  _bl = baseLib;
+  _family = family;
 }
 
-void DeviceTranslations::clear()
-{
-	_deviceTranslations.clear();
+void DeviceTranslations::clear() {
+  _deviceTranslations.clear();
 }
 
-std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::string& filename, std::string& language)
-{
-	try
-	{
-        std::string filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/" + language + '/' + filename;
-		if(!Io::fileExists(filepath))
-		{
-            filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/en/" + filename;
-            if(!Io::fileExists(filepath))
-            {
-                _bl->out.printDebug("Not loading XML RPC device translation " + filepath + ": Translation not found.");
-                return PHomegearDeviceTranslation();
-            }
-		}
-		if(filepath.size() < 5) return PHomegearDeviceTranslation();
-		std::string extension = filepath.substr(filepath.size() - 4, 4);
-		HelperFunctions::toLower(extension);
-		if(extension != ".xml") return PHomegearDeviceTranslation();
-		if(_bl->debugLevel >= 5) _bl->out.printDebug("Loading XML RPC device translation " + filepath);
-		PHomegearDeviceTranslation device = std::make_shared<HomegearDeviceTranslation>(_bl, filepath);
-		if(device->loaded()) return device;
-	}
-    catch(const std::exception& ex)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::string &filename, const std::string &language) {
+  try {
+    std::string filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/" + language + '/' + filename;
+    if (!Io::fileExists(filepath)) {
+      filepath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/en/" + filename;
+      if (!Io::fileExists(filepath)) {
+        _bl->out.printDebug("Not loading XML RPC device translation " + filepath + ": Translation not found.");
+        return PHomegearDeviceTranslation();
+      }
     }
-    catch(...)
-    {
-    	_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return PHomegearDeviceTranslation();
+    if (filepath.size() < 5) return PHomegearDeviceTranslation();
+    std::string extension = filepath.substr(filepath.size() - 4, 4);
+    HelperFunctions::toLower(extension);
+    if (extension != ".xml") return PHomegearDeviceTranslation();
+    if (_bl->debugLevel >= 5) _bl->out.printDebug("Loading XML RPC device translation " + filepath);
+    PHomegearDeviceTranslation device = std::make_shared<HomegearDeviceTranslation>(_bl, filepath);
+    if (device->loaded()) return device;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return PHomegearDeviceTranslation();
 }
 
-PHomegearDeviceTranslation DeviceTranslations::getTranslation(const std::string& filename, std::string& language)
-{
-    try
-    {
-        if(language.empty()) language = "en";
-        std::lock_guard<std::mutex> deviceTranslationsGuard(_deviceTranslationsMutex);
-        auto languageIterator = _deviceTranslations.find(language);
-        if(languageIterator == _deviceTranslations.end())
-        {
-            auto translation = load(filename, language);
-            if (!translation) return PHomegearDeviceTranslation();
-            _deviceTranslations[language].emplace(filename, translation);
+PHomegearDeviceTranslation DeviceTranslations::getTranslation(const std::string &filename, const std::string &language) {
+  try {
+    auto currentLanguage = language;
+    if (currentLanguage.empty()) currentLanguage = "en";
+    std::lock_guard<std::mutex> deviceTranslationsGuard(_deviceTranslationsMutex);
+    auto languageIterator = _deviceTranslations.find(currentLanguage);
+    if (languageIterator == _deviceTranslations.end()) {
+      auto translation = load(filename, currentLanguage);
+      if (!translation) {
+        if (currentLanguage != "en") {
+          currentLanguage = "en";
+          translation = load(filename, currentLanguage);
+          if (!translation) return PHomegearDeviceTranslation();
+        } else {
+          return PHomegearDeviceTranslation();
         }
-        else
-        {
-            auto translationIterator = languageIterator->second.find(filename);
-            if (translationIterator == languageIterator->second.end())
-            {
-                auto translation = load(filename, language);
-                if (!translation) return PHomegearDeviceTranslation();
-                languageIterator->second.emplace(filename, translation);
-                return translation;
-            }
-            else return translationIterator->second;
-        }
+      }
+      _deviceTranslations[currentLanguage].emplace(filename, translation);
+      languageIterator = _deviceTranslations.find(currentLanguage);
+      if (languageIterator == _deviceTranslations.end()) {
+        return PHomegearDeviceTranslation();
+      }
     }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return PHomegearDeviceTranslation();
+
+    auto translationIterator = languageIterator->second.find(filename);
+    if (translationIterator == languageIterator->second.end()) {
+      auto translation = load(filename, currentLanguage);
+      if (!translation) return PHomegearDeviceTranslation();
+      languageIterator->second.emplace(filename, translation);
+      return translation;
+    } else return translationIterator->second;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return PHomegearDeviceTranslation();
 }
 
-std::string DeviceTranslations::getTypeDescription(const std::string& filename, std::string& language, const std::string& deviceId)
-{
-    try
-    {
-        PHomegearDeviceTranslation translation = getTranslation(filename, language);
-        if(!translation) return "";
+std::string DeviceTranslations::getTypeDescription(const std::string &filename, const std::string &language, const std::string &deviceId) {
+  try {
+    PHomegearDeviceTranslation translation = getTranslation(filename, language);
+    if (!translation) return "";
 
-        auto idIterator = translation->typeDescriptions.find(deviceId);
-        if(idIterator != translation->typeDescriptions.end()) return idIterator->second;
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return "";
+    auto idIterator = translation->typeDescriptions.find(deviceId);
+    if (idIterator != translation->typeDescriptions.end()) return idIterator->second;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return "";
 }
 
-std::string DeviceTranslations::getTypeLongDescription(const std::string& filename, std::string& language, const std::string& deviceId)
-{
-    try
-    {
-        PHomegearDeviceTranslation translation = getTranslation(filename, language);
-        if(!translation) return "";
+std::string DeviceTranslations::getTypeLongDescription(const std::string &filename, const std::string &language, const std::string &deviceId) {
+  try {
+    PHomegearDeviceTranslation translation = getTranslation(filename, language);
+    if (!translation) return "";
 
-        auto idIterator = translation->typeLongDescriptions.find(deviceId);
-        if(idIterator != translation->typeLongDescriptions.end()) return idIterator->second;
-    }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return "";
+    auto idIterator = translation->typeLongDescriptions.find(deviceId);
+    if (idIterator != translation->typeLongDescriptions.end()) return idIterator->second;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return "";
 }
 
-std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations(const std::string& filename, std::string& language, ParameterGroup::Type::Enum parameterGroupType, const std::string& parameterGroupId, const std::string& parameterId)
-{
-    try
-    {
-        if(language.empty()) language = "en";
-        PHomegearDeviceTranslation translation = getTranslation(filename, language);
-        if(!translation) return std::make_pair("", "");
+std::pair<std::string, std::string> DeviceTranslations::getParameterTranslations(const std::string &filename,
+                                                                                 const std::string &language,
+                                                                                 ParameterGroup::Type::Enum parameterGroupType,
+                                                                                 const std::string &parameterGroupId,
+                                                                                 const std::string &parameterId) {
+  try {
+    auto currentLanguage = language;
+    if (currentLanguage.empty()) currentLanguage = "en";
+    PHomegearDeviceTranslation translation = getTranslation(filename, currentLanguage);
+    if (!translation) return std::make_pair("", "");
 
-        std::unordered_map<std::string, std::unordered_map<std::string, HomegearDeviceTranslation::ParameterTranslation>>::iterator parameterGroupIterator;
+    std::unordered_map<std::string, std::unordered_map<std::string, HomegearDeviceTranslation::ParameterTranslation>>::iterator parameterGroupIterator;
 
-        if(parameterGroupType == ParameterGroup::Type::Enum::config)
-        {
-            parameterGroupIterator = translation->configParameters.find(parameterGroupId);
-            if(parameterGroupIterator == translation->configParameters.end()) return std::make_pair("", "");
-        }
-        else if(parameterGroupType == ParameterGroup::Type::Enum::variables)
-        {
-            parameterGroupIterator = translation->variables.find(parameterGroupId);
-            if(parameterGroupIterator == translation->variables.end()) return std::make_pair("", "");
-        }
-        else if(parameterGroupType == ParameterGroup::Type::Enum::link)
-        {
-            parameterGroupIterator = translation->linkParameters.find(parameterGroupId);
-            if(parameterGroupIterator == translation->linkParameters.end()) return std::make_pair("", "");
-        }
-
-        auto parameterIterator = parameterGroupIterator->second.find(parameterId);
-        if(parameterIterator == parameterGroupIterator->second.end()) return std::make_pair("", "");
-
-        return std::make_pair(parameterIterator->second.label, parameterIterator->second.description);
+    if (parameterGroupType == ParameterGroup::Type::Enum::config) {
+      parameterGroupIterator = translation->configParameters.find(parameterGroupId);
+      if (parameterGroupIterator == translation->configParameters.end()) return std::make_pair("", "");
+    } else if (parameterGroupType == ParameterGroup::Type::Enum::variables) {
+      parameterGroupIterator = translation->variables.find(parameterGroupId);
+      if (parameterGroupIterator == translation->variables.end()) return std::make_pair("", "");
+    } else if (parameterGroupType == ParameterGroup::Type::Enum::link) {
+      parameterGroupIterator = translation->linkParameters.find(parameterGroupId);
+      if (parameterGroupIterator == translation->linkParameters.end()) return std::make_pair("", "");
     }
-    catch(const std::exception& ex)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return std::make_pair("", "");
+
+    auto parameterIterator = parameterGroupIterator->second.find(parameterId);
+    if (parameterIterator == parameterGroupIterator->second.end()) return std::make_pair("", "");
+
+    return std::make_pair(parameterIterator->second.label, parameterIterator->second.description);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return std::make_pair("", "");
 }
 
 }

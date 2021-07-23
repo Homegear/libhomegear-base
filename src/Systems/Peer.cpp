@@ -3458,71 +3458,63 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
       if (fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalEnumeration->maximumValue))));
       if (fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalEnumeration->minimumValue))));
       if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ENUM")))));
+      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ENUM"))));
 
       if (fields.empty() || fields.find("VALUE_LIST") != fields.end()) {
         PVariable valueList(new Variable(VariableType::tArray));
         for (std::vector<EnumerationValue>::iterator j = logicalEnumeration->values.begin(); j != logicalEnumeration->values.end(); ++j) {
-          valueList->arrayValue->push_back(PVariable(new Variable(j->id)));
+          valueList->arrayValue->push_back(std::make_shared<Variable>(j->id));
         }
         description->structValue->insert(StructElement("VALUE_LIST", valueList));
       }
     } else if (parameter->logical->type == ILogical::Type::tFloat) {
       LogicalDecimal *logicalDecimal = (LogicalDecimal *)parameter->logical.get();
 
-      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-      if ((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalDecimal->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", PVariable(new Variable(logicalDecimal->defaultValue))));
-      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-      if (fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", PVariable(new Variable(logicalDecimal->maximumValue))));
-      if (fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", PVariable(new Variable(logicalDecimal->minimumValue))));
-      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
+      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(parameter->control)));
+      if ((fields.empty() || fields.find("DEFAULT") != fields.end()) && logicalDecimal->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(logicalDecimal->defaultValue)));
+      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::make_shared<Variable>(parameter->id)));
+      if (fields.empty() || fields.find("MAX") != fields.end()) description->structValue->insert(StructElement("MAX", std::make_shared<Variable>(logicalDecimal->maximumValue)));
+      if (fields.empty() || fields.find("MIN") != fields.end()) description->structValue->insert(StructElement("MIN", std::make_shared<Variable>(logicalDecimal->minimumValue)));
+      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
 
       if ((fields.empty() || fields.find("SPECIAL") != fields.end()) && !logicalDecimal->specialValuesStringMap.empty()) {
         PVariable specialValues(new Variable(VariableType::tArray));
         for (std::unordered_map<std::string, double>::iterator j = logicalDecimal->specialValuesStringMap.begin(); j != logicalDecimal->specialValuesStringMap.end(); ++j) {
           PVariable specialElement(new Variable(VariableType::tStruct));
-          specialElement->structValue->insert(StructElement("ID", PVariable(new Variable(j->first))));
-          specialElement->structValue->insert(StructElement("VALUE", PVariable(new Variable(j->second))));
+          specialElement->structValue->insert(StructElement("ID", std::make_shared<Variable>(j->first)));
+          specialElement->structValue->insert(StructElement("VALUE", std::make_shared<Variable>(j->second)));
           specialValues->arrayValue->push_back(specialElement);
         }
         description->structValue->insert(StructElement("SPECIAL", specialValues));
       }
 
-      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("FLOAT")))));
+      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("FLOAT"))));
     } else if (parameter->logical->type == ILogical::Type::tArray) {
       if (!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("ARRAY")))));
+      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(parameter->control)));
+      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::make_shared<Variable>(parameter->id)));
+      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ARRAY"))));
     } else if (parameter->logical->type == ILogical::Type::tStruct) {
       if (!clientInfo->initNewFormat) return Variable::createError(-5, "Parameter is unsupported by this client.");
-      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", PVariable(new Variable(parameter->control))));
-      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", PVariable(new Variable(uiFlags))));
-      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable(parameter->id))));
-      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", PVariable(new Variable(operations))));
-      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", PVariable(new Variable(index))));
-      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", PVariable(new Variable(std::string("STRUCT")))));
+      if ((fields.empty() || fields.find("CONTROL") != fields.end()) && !parameter->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(parameter->control)));
+      if (fields.empty() || fields.find("FLAGS") != fields.end()) description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+      if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", std::make_shared<Variable>(parameter->id)));
+      if (fields.empty() || fields.find("OPERATIONS") != fields.end()) description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+      if ((fields.empty() || fields.find("TAB_ORDER") != fields.end()) && index != -1) description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+      if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("STRUCT"))));
     }
 
     if (fields.empty() || fields.find("UNIT") != fields.end()) description->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(parameter->unit)));
     if ((fields.empty() || fields.find("MANDATORY") != fields.end()) && parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<Variable>(parameter->mandatory));
-    if ((fields.empty() || fields.find("FORM_FIELD_TYPE") != fields.end()) && !parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", PVariable(new Variable(parameter->formFieldType))));
-    if ((fields.empty() || fields.find("FORM_POSITION") != fields.end()) && parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", PVariable(new Variable(parameter->formPosition))));
+    if ((fields.empty() || fields.find("FORM_FIELD_TYPE") != fields.end()) && !parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::make_shared<Variable>(parameter->formFieldType)));
+    if ((fields.empty() || fields.find("FORM_POSITION") != fields.end()) && parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::make_shared<Variable>(parameter->formPosition)));
     if (fields.find("PRIORITY") != fields.end() && parameter->priority != -1) description->structValue->emplace("PRIORITY", std::make_shared<Variable>(parameter->priority));
-    if (fields.find("IBS_ID") != fields.end() && !parameter->ibsId.empty()) description->structValue->emplace("IBS_ID", std::make_shared<Variable>(parameter->ibsId));
-    if (fields.find("LABELS") != fields.end() && !parameter->labels.empty()) {
-      auto labels = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
-      for (auto &label : parameter->labels) {
-        labels->structValue->emplace(label.first, std::make_shared<Variable>(label.second));
-      }
-      description->structValue->emplace("LABELS", labels);
-    }
 
     if (type == ParameterGroup::Type::Enum::variables) {
       auto valuesCentralIterator = valuesCentral.find(channel);

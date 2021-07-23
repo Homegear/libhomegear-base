@@ -92,36 +92,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "ccu2Visible") { ccu2Visible = (propertyValue == "true"); }
         else if (propertyName == "linkedParameter") { linkedParameter = propertyValue; }
         else if (propertyName == "priority") { priority = Math::getNumber(propertyValue); }
-        else if (propertyName == "ibsId") { ibsId = propertyValue; }
-        else if (propertyName == "labels") {
-          for (xml_attribute *attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute()) {
-            _bl->out.printWarning("Warning: Unknown attribute for \"labels\": " + std::string(attr->name()));
-          }
-          for (xml_node *labelNode = propertyNode->first_node(); labelNode; labelNode = labelNode->next_sibling()) {
-            std::string labelName(labelNode->name());
-            std::string labelValue(labelNode->value());
-            if (labelName == "label") {
-              std::string language;
-
-              for (xml_attribute *attr = labelNode->first_attribute(); attr; attr = attr->next_attribute()) {
-                std::string attributeName(attr->name());
-                std::string attributeValue(attr->value());
-                if (attributeName == "lang") {
-                  language = attributeValue;
-                } else {
-                  _bl->out.printWarning("Warning: Unknown attribute for \"labels\": " + std::string(attr->name()));
-                }
-              }
-
-              if (language.empty()) {
-                _bl->out.printWarning("Warning: Attribute \"lang\" is missing for \"label\".");
-                continue;
-              }
-
-              labels.emplace(language, labelValue);
-            }
-          }
-        } else if (propertyName == "casts") {
+        else if (propertyName == "casts") {
           for (xml_attribute *attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute()) {
             _bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
           }

@@ -1112,24 +1112,6 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
       propertiesNode->append_node(node);
     }
 
-    if (!parameter->ibsId.empty()) {
-      xml_node *node = doc->allocate_node(node_element, "ibsId", doc->allocate_string(parameter->ibsId.c_str(), parameter->ibsId.size() + 1));
-      propertiesNode->append_node(node);
-    }
-
-    if (!parameter->labels.empty()) {
-      xml_node *node = doc->allocate_node(node_element, "labels");
-      propertiesNode->append_node(node);
-      for (auto &label : parameter->labels) {
-        xml_node *labelNode = doc->allocate_node(node_element, "label", doc->allocate_string(label.second.c_str(), label.second.size() + 1));
-
-        xml_attribute *labelAttr = doc->allocate_attribute("lang", doc->allocate_string(label.first.c_str(), label.first.size() + 1));
-        labelNode->append_attribute(labelAttr);
-
-        node->append_node(labelNode);
-      }
-    }
-
     if (!parameter->casts.empty()) {
       xml_node *node = doc->allocate_node(node_element, "casts");
       propertiesNode->append_node(node);
