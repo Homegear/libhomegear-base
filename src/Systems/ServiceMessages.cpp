@@ -232,7 +232,6 @@ bool ServiceMessages::set(std::string id, bool value) {
         save(_unreachTime, 0, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.unreach";
-      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.unreach");
     } else if (id == "STICKY_UNREACH") {
       if (value != _stickyUnreach) {
         if (value && (_bl->booting || _bl->shuttingDown)) return true;
@@ -241,7 +240,6 @@ bool ServiceMessages::set(std::string id, bool value) {
         save(_stickyUnreachTime, 1, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.stickyUnreach";
-      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.stickyUnreach");
     } else if (id == "CONFIG_PENDING") {
       if (value != _configPending) {
         _configPending = value;
@@ -250,7 +248,6 @@ bool ServiceMessages::set(std::string id, bool value) {
         if (_configPending) _configPendingSetTime = HelperFunctions::getTime();
       }
       serviceMessage->message = "l10n.common.serviceMessage.configPending";
-      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.configPending");
     } else if (id == "LOWBAT") {
       if (value != _lowbat) {
         _lowbat = value;
@@ -258,7 +255,6 @@ bool ServiceMessages::set(std::string id, bool value) {
         save(_lowbatTime, 3, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.lowbat";
-      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage.lowbat");
     } else //false == 0, a little dirty, but it works
     {
       if (!value) {
@@ -286,7 +282,6 @@ bool ServiceMessages::set(std::string id, bool value) {
       auto variableName = id;
       HelperFunctions::toLower(variableName);
       serviceMessage->message = "l10n.common.serviceMessage." + variableName;
-      serviceMessage->messageTranslations = TranslationManager::getTranslations("l10n.common.serviceMessage." + variableName);
       raiseServiceMessageEvent(serviceMessage);
 
       std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>({id}));

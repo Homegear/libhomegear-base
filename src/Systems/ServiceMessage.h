@@ -32,6 +32,7 @@
 #define LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
 
 #include "../Variable.h"
+#include "../Managers/TranslationManager.h"
 
 namespace BaseLib {
 
@@ -41,7 +42,8 @@ enum class ServiceMessageType {
   kDevice = 2
 };
 
-struct ServiceMessage {
+class ServiceMessage {
+ public:
   uint64_t databaseId = 0;
   ServiceMessageType type = ServiceMessageType::kGlobal;
   int32_t familyId = 0;
@@ -53,10 +55,11 @@ struct ServiceMessage {
   std::string messageSubId;
   int32_t timestamp = 0;
   std::string message;
-  BaseLib::PVariable messageTranslations = std::make_shared<Variable>(VariableType::tStruct);
   std::list<std::string> variables;
   int64_t value = 0;
   PVariable data;
+
+  PVariable serialize();
 };
 typedef std::shared_ptr<ServiceMessage> PServiceMessage;
 
