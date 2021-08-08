@@ -149,7 +149,6 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value) {
       } else {
         if (_peerId == 0) return;
         data.push_back(std::make_shared<Database::DataColumn>(-1)); //familyID
-        data.push_back(std::make_shared<Database::DataColumn>("")); //interface
         data.push_back(std::make_shared<Database::DataColumn>(_peerId)); //peerID
         data.push_back(std::make_shared<Database::DataColumn>(index)); //messageID
         data.push_back(std::make_shared<Database::DataColumn>(std::string())); //messageSubID
