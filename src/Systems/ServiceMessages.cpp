@@ -383,6 +383,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("UNREACH"));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
         if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.unreach", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.unreach"));
@@ -404,6 +405,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("STICKY_UNREACH"));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
         if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.stickyUnreach", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.stickyUnreach"));
@@ -425,6 +427,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("CONFIG_PENDING"));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kInfo));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
         if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.configPending", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.configPending"));
@@ -446,6 +449,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("LOWBAT"));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
         if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.lowbat", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.lowbat"));
@@ -471,6 +475,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
           element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
           element->structValue->emplace("CHANNEL", std::make_shared<Variable>(error.first));
           element->structValue->emplace("VARIABLE", std::make_shared<Variable>(inner.first));
+          element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
           element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(inner.second.timestamp));
           auto variableName = inner.first;
           if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName), language)));

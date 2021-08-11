@@ -64,6 +64,7 @@ void GlobalServiceMessages::load() {
       serviceMessage->message = row.second.at(8)->textValue;
       serviceMessage->value = row.second.at(7)->intValue;
       serviceMessage->data = _rpcDecoder->decodeResponse(*row.second.at(10)->binaryValue);
+      serviceMessage->priority = (ServiceMessagePriority)row.second.at(11)->intValue;;
       _serviceMessages[row.second.at(1)->intValue][row.second.at(4)->intValue][row.second.at(5)->textValue].emplace(row.second.at(8)->textValue, std::move(serviceMessage));
     }
   }
@@ -115,6 +116,7 @@ void GlobalServiceMessages::set(int32_t familyId, const std::string &interface, 
     databaseData.push_back(std::make_shared<Database::DataColumn>(message)); //message
     databaseData.push_back(std::make_shared<Database::DataColumn>(variablesBlob)); //variables
     databaseData.push_back(std::make_shared<Database::DataColumn>(dataBlob)); //binaryData
+    databaseData.push_back(std::make_shared<Database::DataColumn>((int32_t)priority)); //priority
     _bl->db->saveGlobalServiceMessageAsynchronous(databaseData);
   }
   catch (const std::exception &ex) {
@@ -166,6 +168,7 @@ PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo, const std::strin
             auto element = std::make_shared<Variable>(VariableType::tStruct);
             element->structValue->emplace("TYPE", std::make_shared<Variable>(message.second->familyId == -1 ? 0 : 1));
             if (message.second->familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(message.second->familyId));
+            element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)message.second->priority));
             element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(message.second->timestamp));
             if (message.second->familyId != -1 && !message.second->interface.empty()) element->structValue->emplace("INTERFACE", std::make_shared<Variable>(message.second->interface));
             element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
