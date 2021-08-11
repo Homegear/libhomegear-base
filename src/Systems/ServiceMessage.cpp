@@ -38,6 +38,7 @@ PVariable BaseLib::ServiceMessage::serialize() {
   serviceMessage->structValue->emplace("MESSAGE", TranslationManager::getTranslations(message, variables));
   serviceMessage->structValue->emplace("VALUE", std::make_shared<Variable>(value));
   serviceMessage->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(timestamp));
+  serviceMessage->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)priority));
   if (type == ServiceMessageType::kGlobal) {
     serviceMessage->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(messageId));
     serviceMessage->structValue->emplace("MESSAGE_SUBID", std::make_shared<Variable>(messageSubId));

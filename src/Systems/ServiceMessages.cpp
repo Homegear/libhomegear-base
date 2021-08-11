@@ -29,8 +29,6 @@
 */
 
 #include "ServiceMessages.h"
-
-#include <memory>
 #include "../BaseLib.h"
 
 namespace BaseLib::Systems {
@@ -136,7 +134,7 @@ void ServiceMessages::load() {
   }
 }
 
-void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value) {
+void ServiceMessages::save(ServiceMessagePriority priority, int64_t timestamp, uint32_t index, bool value) {
   try {
     bool idIsKnown = _variableDatabaseIDs.find(index) != _variableDatabaseIDs.end();
     Database::DataRow data;
@@ -157,6 +155,7 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value) {
         data.push_back(std::make_shared<Database::DataColumn>()); //message
         data.push_back(std::make_shared<Database::DataColumn>()); //variables
         data.push_back(std::make_shared<Database::DataColumn>()); //binaryData
+        data.push_back(std::make_shared<Database::DataColumn>((int32_t)priority)); //priority
         raiseSaveServiceMessage(data);
       }
     } else if (idIsKnown) {
@@ -169,7 +168,7 @@ void ServiceMessages::save(int64_t timestamp, uint32_t index, bool value) {
   }
 }
 
-void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, uint8_t value) {
+void ServiceMessages::save(ServiceMessagePriority priority, int64_t timestamp, int32_t channel, std::string id, uint8_t value) {
   try {
     uint32_t index = 1000;
     for (std::string::iterator i = id.begin(); i != id.end(); ++i) {
@@ -189,7 +188,6 @@ void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, u
       } else {
         if (_peerId == 0) return;
         data.push_back(std::make_shared<Database::DataColumn>(-1)); //familyID
-        data.push_back(std::make_shared<Database::DataColumn>("")); //interface
         data.push_back(std::make_shared<Database::DataColumn>(_peerId)); //peerID
         data.push_back(std::make_shared<Database::DataColumn>(index)); //messageID
         data.push_back(std::make_shared<Database::DataColumn>(std::string())); //messageSubID
@@ -198,6 +196,7 @@ void ServiceMessages::save(int64_t timestamp, int32_t channel, std::string id, u
         data.push_back(std::make_shared<Database::DataColumn>(id)); //message
         data.push_back(std::make_shared<Database::DataColumn>()); //variables
         data.push_back(std::make_shared<Database::DataColumn>(binaryValue)); //binaryData
+        data.push_back(std::make_shared<Database::DataColumn>((int32_t)priority)); //priority
         raiseSaveServiceMessage(data);
       }
     } else if (idIsKnown) {
@@ -221,6 +220,7 @@ bool ServiceMessages::set(std::string id, bool value) {
     serviceMessage->channel = 0;
     serviceMessage->variable = id;
     serviceMessage->value = value;
+    serviceMessage->priority = ServiceMessagePriority::kWarning;
 
     if (id == "LOWBAT_REPORTING") id = "LOWBAT"; //HM-TC-IT-WM-W-EU
     if (id == "UNREACH") {
@@ -228,7 +228,7 @@ bool ServiceMessages::set(std::string id, bool value) {
         if (value && (_bl->booting || _bl->shuttingDown)) return true;
         _unreach = value;
         _unreachTime = HelperFunctions::getTimeSeconds();
-        save(_unreachTime, 0, value);
+        save(serviceMessage->priority, _unreachTime, 0, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.unreach";
     } else if (id == "STICKY_UNREACH") {
@@ -236,14 +236,15 @@ bool ServiceMessages::set(std::string id, bool value) {
         if (value && (_bl->booting || _bl->shuttingDown)) return true;
         _stickyUnreach = value;
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
-        save(_stickyUnreachTime, 1, value);
+        save(serviceMessage->priority, _stickyUnreachTime, 1, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.stickyUnreach";
     } else if (id == "CONFIG_PENDING") {
+      serviceMessage->priority = ServiceMessagePriority::kInfo;
       if (value != _configPending) {
         _configPending = value;
         _configPendingTime = HelperFunctions::getTimeSeconds();
-        save(_configPendingTime, 2, value);
+        save(serviceMessage->priority, _configPendingTime, 2, value);
         if (_configPending) _configPendingSetTime = HelperFunctions::getTime();
       }
       serviceMessage->message = "l10n.common.serviceMessage.configPending";
@@ -251,7 +252,7 @@ bool ServiceMessages::set(std::string id, bool value) {
       if (value != _lowbat) {
         _lowbat = value;
         _lowbatTime = HelperFunctions::getTimeSeconds();
-        save(_lowbatTime, 3, value);
+        save(serviceMessage->priority, _lowbatTime, 3, value);
       }
       serviceMessage->message = "l10n.common.serviceMessage.lowbat";
     } else //false == 0, a little dirty, but it works
@@ -275,7 +276,7 @@ bool ServiceMessages::set(std::string id, bool value) {
       }
 
       std::vector<uint8_t> data = {(uint8_t)value};
-      save(HelperFunctions::getTimeSeconds(), 0, id, value);
+      save(serviceMessage->priority, HelperFunctions::getTimeSeconds(), 0, id, value);
       raiseSaveParameter(id, 0, data);
 
       auto variableName = id;
@@ -301,7 +302,7 @@ bool ServiceMessages::set(std::string id, bool value) {
             errorIterator->second.value = 0;
             errorIterator->second.timestamp = HelperFunctions::getTimeSeconds();
             std::vector<uint8_t> data2 = {(uint8_t)value};
-            save(errorIterator->second.timestamp, error.first, id, value);
+            save(serviceMessage->priority, errorIterator->second.timestamp, error.first, id, value);
             raiseSaveParameter(id, error.first, data2);
 
             auto serviceMessage2 = std::make_shared<ServiceMessage>();
@@ -363,7 +364,7 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel) {
         _errors[channel][id] = errorInfo;
       }
     }
-    save(HelperFunctions::getTimeSeconds(), channel, id, value);
+    save(ServiceMessagePriority::kWarning, HelperFunctions::getTimeSeconds(), channel, id, value);
     //RPC Broadcast is done in peer's packetReceived
   }
   catch (const std::exception &ex) {
@@ -567,7 +568,7 @@ void ServiceMessages::setConfigPending(bool value) {
     if (value != _configPending) {
       _configPending = value;
       _configPendingTime = BaseLib::HelperFunctions::getTimeSeconds();
-      save(_configPendingTime, 2, value);
+      save(ServiceMessagePriority::kInfo, _configPendingTime, 2, value);
       if (_configPending) _configPendingSetTime = BaseLib::HelperFunctions::getTime();
       std::vector<uint8_t> data = {(uint8_t)value};
       raiseSaveParameter("CONFIG_PENDING", 0, data);
@@ -600,7 +601,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       _unreachResendCounter = 0;
       _unreach = value;
       _unreachTime = HelperFunctions::getTimeSeconds();
-      save(_unreachTime, 0, value);
+      save(ServiceMessagePriority::kWarning, _unreachTime, 0, value);
 
       if (value) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is unreachable.");
       std::vector<uint8_t> data = {(uint8_t)value};
@@ -612,7 +613,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       if (value) {
         _stickyUnreach = value;
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
-        save(_stickyUnreachTime, 1, value);
+        save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, value);
         raiseSaveParameter("STICKY_UNREACH", 0, data);
 
         valueKeys->push_back("STICKY_UNREACH");

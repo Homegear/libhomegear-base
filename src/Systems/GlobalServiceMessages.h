@@ -50,7 +50,7 @@ class GlobalServiceMessages {
   void init(BaseLib::SharedObjects *baseLib);
   void load();
 
-  void set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string& messageSubId, int32_t timestamp, const std::string& message, const std::list<std::string>& variables, const PVariable& data = PVariable(), int64_t value = 0);
+  void set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string& messageSubId, ServiceMessagePriority priority, int32_t timestamp, const std::string& message, const std::list<std::string>& variables, const PVariable& data = PVariable(), int64_t value = 0);
   void unset(int32_t familyId, int32_t messageId, std::string messageSubId, std::string message);
 
   std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, const std::string &language);

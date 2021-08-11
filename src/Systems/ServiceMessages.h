@@ -69,8 +69,8 @@ class ServiceMessages : public IEvents {
   virtual void setPeerSerial(std::string peerSerial) { _peerSerial = peerSerial; }
 
   virtual void load();
-  virtual void save(int64_t timestamp, uint32_t index, bool value);
-  virtual void save(int64_t timestamp, int32_t channel, std::string id, uint8_t value);
+  virtual void save(ServiceMessagePriority priority, int64_t timestamp, uint32_t index, bool value);
+  virtual void save(ServiceMessagePriority priority, int64_t timestamp, int32_t channel, std::string id, uint8_t value);
   virtual bool set(std::string id, bool value);
   virtual void set(std::string id, uint8_t value, uint32_t channel);
   virtual std::shared_ptr<Variable> get(const PRpcClientInfo &clientInfo, bool returnId, const std::string &language);

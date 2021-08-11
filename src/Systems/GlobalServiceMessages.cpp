@@ -72,13 +72,14 @@ void GlobalServiceMessages::load() {
   }
 }
 
-void GlobalServiceMessages::set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string &messageSubId, int32_t timestamp, const std::string &message, const std::list<std::string> &variables, const PVariable &data, int64_t value) {
+void GlobalServiceMessages::set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string &messageSubId, ServiceMessagePriority priority, int32_t timestamp, const std::string &message, const std::list<std::string> &variables, const PVariable &data, int64_t value) {
   try {
     auto serviceMessage = std::make_shared<ServiceMessage>();
     serviceMessage->familyId = familyId;
     serviceMessage->interface = interface;
     serviceMessage->messageId = messageId;
     serviceMessage->messageSubId = messageSubId;
+    serviceMessage->priority = priority;
     serviceMessage->timestamp = timestamp;
     serviceMessage->message = message;
     serviceMessage->variables = variables;

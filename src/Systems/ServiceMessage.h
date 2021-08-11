@@ -42,6 +42,15 @@ enum class ServiceMessageType {
   kDevice = 2
 };
 
+enum class ServiceMessagePriority {
+  kUndefined = 0,
+  kCritical = 1,
+  kError = 2,
+  kWarning = 3,
+  kInfo = 4,
+  kDebug = 5
+};
+
 class ServiceMessage {
  public:
   uint64_t databaseId = 0;
@@ -57,6 +66,7 @@ class ServiceMessage {
   std::string message;
   std::list<std::string> variables;
   int64_t value = 0;
+  ServiceMessagePriority priority = ServiceMessagePriority::kUndefined;
   PVariable data;
 
   PVariable serialize();
