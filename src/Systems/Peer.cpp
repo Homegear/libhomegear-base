@@ -3135,7 +3135,7 @@ PVariable Peer::getParamset(PRpcClientInfo clientInfo, int32_t channel, Paramete
       if (!remotePeer || remotePeer->channel != remoteChannel) return Variable::createError(-3, "Not paired to this peer.");
 
       auto linksIterator = linksCentral.find(channel);
-      if (linksIterator == linksCentral.end()) return Variable::createError(-2, "Unknown channel.");
+      if (linksIterator == linksCentral.end()) return Variable::createError(-2, "There is no link parameter set for this channel.");
       auto remotePeerIterator = linksIterator->second.find(remotePeer->address);
       if (remotePeerIterator == linksIterator->second.end()) return Variable::createError(-3, "Unknown remote peer.");
       auto remoteChannelIterator = remotePeerIterator->second.find(remoteChannel);
