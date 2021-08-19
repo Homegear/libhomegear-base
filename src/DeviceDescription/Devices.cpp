@@ -29,6 +29,8 @@
 */
 
 #include "Devices.h"
+
+#include <memory>
 #include "../BaseLib.h"
 #include "HomeMatic/HmConverter.h"
 
@@ -603,7 +605,8 @@ std::shared_ptr<HomegearDevice> Devices::loadHomeMatic(std::string &filepath) {
         std::map<HmDeviceDescription::ParameterSet::Type::Enum, std::shared_ptr<HmDeviceDescription::ParameterSet>>::iterator paramsetIterator = channelIterator->second->parameterSets.find(HmDeviceDescription::ParameterSet::Type::Enum::values);
         if (paramsetIterator != channelIterator->second->parameterSets.end() && paramsetIterator->second) {
           std::shared_ptr<HmDeviceDescription::HomeMaticParameter> parameter = paramsetIterator->second->getParameter("VALVE_STATE");
-          if (parameter) parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write
+          if (parameter)
+            parameter->operations = (HmDeviceDescription::HomeMaticParameter::Operations::Enum)(HmDeviceDescription::HomeMaticParameter::Operations::Enum::read | HmDeviceDescription::HomeMaticParameter::Operations::Enum::write
                 | HmDeviceDescription::HomeMaticParameter::Operations::Enum::event);
         }
       }
@@ -1182,127 +1185,128 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
       if (i->second->service) uiFlags += 8;
       if (i->second->sticky) uiFlags += 0x10;
       if (i->second->logical->type == ILogical::Type::tBoolean) {
-        LogicalBoolean *parameter = (LogicalBoolean *)i->second->logical.get();
+        auto *parameter = (LogicalBoolean *)i->second->logical.get();
 
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("BOOL")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(parameter->defaultValue)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("BOOL"))));
       } else if (i->second->logical->type == ILogical::Type::tString) {
-        LogicalString *parameter = (LogicalString *)i->second->logical.get();
+        auto *parameter = (LogicalString *)i->second->logical.get();
 
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRING")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(parameter->defaultValue)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("STRING"))));
       } else if (i->second->logical->type == ILogical::Type::tAction) {
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ACTION")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ACTION"))));
       } else if (i->second->logical->type == ILogical::Type::tInteger) {
-        LogicalInteger *parameter = (LogicalInteger *)i->second->logical.get();
+        auto *parameter = (LogicalInteger *)i->second->logical.get();
 
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
-        description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(parameter->defaultValue)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("MAX", std::make_shared<Variable>(parameter->maximumValue)));
+        description->structValue->insert(StructElement("MIN", std::make_shared<Variable>(parameter->minimumValue)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
 
         if (!parameter->specialValuesStringMap.empty()) {
           std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
-          for (std::unordered_map<std::string, int32_t>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j) {
+          for (auto &j : parameter->specialValuesStringMap) {
             std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
-            specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
-            specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+            specialElement->structValue->insert(StructElement("ID", std::make_shared<Variable>(j.first)));
+            specialElement->structValue->insert(StructElement("VALUE", std::make_shared<Variable>(j.second)));
             specialValues->arrayValue->push_back(specialElement);
           }
           description->structValue->insert(StructElement("SPECIAL", specialValues));
         }
 
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("INTEGER")))));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("INTEGER"))));
       } else if (i->second->logical->type == ILogical::Type::tEnum) {
-        LogicalEnumeration *parameter = (LogicalEnumeration *)i->second->logical.get();
+        auto *parameter = (LogicalEnumeration *)i->second->logical.get();
 
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValueExists ? parameter->defaultValue : 0))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
-        description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ENUM")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(parameter->defaultValueExists ? parameter->defaultValue : 0)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("MAX", std::make_shared<Variable>(parameter->maximumValue)));
+        description->structValue->insert(StructElement("MIN", std::make_shared<Variable>(parameter->minimumValue)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ENUM"))));
 
         std::shared_ptr<Variable> valueList(new Variable(VariableType::tArray));
-        for (std::vector<EnumerationValue>::iterator j = parameter->values.begin(); j != parameter->values.end(); ++j) {
-          valueList->arrayValue->push_back(std::shared_ptr<Variable>(new Variable(j->id)));
+        for (auto &value : parameter->values) {
+          valueList->arrayValue->push_back(std::make_shared<Variable>(value.id));
         }
         description->structValue->insert(StructElement("VALUE_LIST", valueList));
       } else if (i->second->logical->type == ILogical::Type::tFloat) {
-        LogicalDecimal *parameter = (LogicalDecimal *)i->second->logical.get();
+        auto *parameter = (LogicalDecimal *)i->second->logical.get();
 
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::shared_ptr<Variable>(new Variable(parameter->defaultValue))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("MAX", std::shared_ptr<Variable>(new Variable(parameter->maximumValue))));
-        description->structValue->insert(StructElement("MIN", std::shared_ptr<Variable>(new Variable(parameter->minimumValue))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        if (parameter->defaultValueExists) description->structValue->insert(StructElement("DEFAULT", std::make_shared<Variable>(parameter->defaultValue)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("MAX", std::make_shared<Variable>(parameter->maximumValue)));
+        description->structValue->insert(StructElement("MIN", std::make_shared<Variable>(parameter->minimumValue)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
 
         if (!parameter->specialValuesStringMap.empty()) {
           std::shared_ptr<Variable> specialValues(new Variable(VariableType::tArray));
-          for (std::unordered_map<std::string, double>::iterator j = parameter->specialValuesStringMap.begin(); j != parameter->specialValuesStringMap.end(); ++j) {
+          for (auto &j : parameter->specialValuesStringMap) {
             std::shared_ptr<Variable> specialElement(new Variable(VariableType::tStruct));
-            specialElement->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(j->first))));
-            specialElement->structValue->insert(StructElement("VALUE", std::shared_ptr<Variable>(new Variable(j->second))));
+            specialElement->structValue->insert(StructElement("ID", std::make_shared<Variable>(j.first)));
+            specialElement->structValue->insert(StructElement("VALUE", std::make_shared<Variable>(j.second)));
             specialValues->arrayValue->push_back(specialElement);
           }
           description->structValue->insert(StructElement("SPECIAL", specialValues));
         }
 
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("FLOAT")))));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("FLOAT"))));
       } else if (i->second->logical->type == ILogical::Type::tArray) {
         if (!clientInfo->initNewFormat) continue;
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("ARRAY")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("ARRAY"))));
       } else if (i->second->logical->type == ILogical::Type::tStruct) {
         if (!clientInfo->initNewFormat) continue;
-        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::shared_ptr<Variable>(new Variable(i->second->control))));
-        description->structValue->insert(StructElement("FLAGS", std::shared_ptr<Variable>(new Variable(uiFlags))));
-        description->structValue->insert(StructElement("ID", std::shared_ptr<Variable>(new Variable(i->second->id))));
-        description->structValue->insert(StructElement("OPERATIONS", std::shared_ptr<Variable>(new Variable(operations))));
-        description->structValue->insert(StructElement("TAB_ORDER", std::shared_ptr<Variable>(new Variable(index))));
-        description->structValue->insert(StructElement("TYPE", std::shared_ptr<Variable>(new Variable(std::string("STRUCT")))));
+        if (!i->second->control.empty()) description->structValue->insert(StructElement("CONTROL", std::make_shared<Variable>(i->second->control)));
+        description->structValue->insert(StructElement("FLAGS", std::make_shared<Variable>(uiFlags)));
+        description->structValue->insert(StructElement("ID", std::make_shared<Variable>(i->second->id)));
+        description->structValue->insert(StructElement("OPERATIONS", std::make_shared<Variable>(operations)));
+        description->structValue->insert(StructElement("TAB_ORDER", std::make_shared<Variable>(index)));
+        description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(std::string("STRUCT"))));
       }
 
-      description->structValue->insert(StructElement("UNIT", std::shared_ptr<Variable>(new Variable(i->second->unit))));
+      description->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(i->second->unit)));
       if (i->second->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(i->second->mandatory));
-      if (!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::shared_ptr<Variable>(new Variable(i->second->formFieldType))));
-      if (i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::shared_ptr<Variable>(new Variable(i->second->formPosition))));
+      if (!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::make_shared<Variable>(i->second->formFieldType)));
+      if (i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::make_shared<Variable>(i->second->formPosition)));
 
-      std::string language = clientInfo ? clientInfo->language : "en";
+      std::string language = clientInfo ? clientInfo->language : "";
       std::string filename = device->getFilename();
-      auto parameterTranslations = _translations->getParameterTranslations(filename, language, type, parameterGroup->id, i->second->id);
+      auto parameterLabel = _translations->getParameterLabel(filename, language, type, parameterGroup->id, i->second->id);
+      auto parameterDescription = _translations->getParameterDescription(filename, language, type, parameterGroup->id, i->second->id);
 
-      if (!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
-      if (!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+      if (!parameterLabel->stringValue.empty() || !parameterLabel->structValue->empty()) description->structValue->emplace("LABEL", parameterLabel);
+      if (!parameterDescription->stringValue.empty() || !parameterDescription->structValue->empty()) description->structValue->emplace("DESCRIPTION", parameterDescription);
 
       index++;
       descriptions->structValue->insert(StructElement(i->second->id, description));
@@ -1327,11 +1331,9 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
       if (!deviceType->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) description->structValue->insert(StructElement("SERIAL_PREFIX", std::make_shared<Variable>(deviceType->serialPrefix)));
 
       std::string filename = device->getFilename();
-      std::string language = clientInfo ? clientInfo->language : "en";
-      std::string descriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
-      if (!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", std::make_shared<Variable>(descriptionText)));
-      std::string longDescriptionText = _translations->getTypeDescription(filename, language, deviceType->id);
-      if (!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", std::make_shared<Variable>(longDescriptionText)));
+      std::string language = clientInfo ? clientInfo->language : "";
+      if (fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", _translations->getTypeDescription(filename, language, deviceType->id)));
+      if (fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", _translations->getTypeLongDescription(filename, language, deviceType->id)));
 
       if (fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(device->pairingMethod)));
 
@@ -1340,9 +1342,9 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
       if (fields.empty() || fields.find("CHANNELS") != fields.end()) description->structValue->insert(StructElement("CHANNELS", variable2));
 
       if (fields.empty() || fields.find("CHANNELS") != fields.end()) {
-        for (Functions::iterator i = device->functions.begin(); i != device->functions.end(); ++i) {
-          if (!i->second->visible) continue;
-          if (fields.empty() || fields.find("CHANNELS") != fields.end()) variable2->arrayValue->push_back(std::make_shared<Variable>(i->first));
+        for (auto &function : device->functions) {
+          if (!function.second->visible) continue;
+          if (fields.empty() || fields.find("CHANNELS") != fields.end()) variable2->arrayValue->push_back(std::make_shared<Variable>(function.first));
         }
       }
 
@@ -1370,7 +1372,7 @@ PVariable Devices::listKnownDeviceType(PRpcClientInfo clientInfo, std::shared_pt
       if (fields.empty() || fields.find("TYPE") != fields.end()) description->structValue->insert(StructElement("TYPE", std::make_shared<Variable>(deviceType->id)));
 
       if (fields.empty() || fields.find("TYPE_ID") != fields.end()) {
-        if(deviceType->typeNumber <= 0xFFFFFFFF) description->structValue->insert(StructElement("TYPE_ID", std::make_shared<Variable>((int32_t)deviceType->typeNumber)));
+        if (deviceType->typeNumber <= 0xFFFFFFFF) description->structValue->insert(StructElement("TYPE_ID", std::make_shared<Variable>((int32_t)deviceType->typeNumber)));
         else description->structValue->insert(StructElement("TYPE_ID", std::make_shared<Variable>(deviceType->typeNumber)));
       }
 

@@ -36,8 +36,7 @@
 #include "ServiceMessages.h"
 #include "../BaseLib.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 
 RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter const &rhs) {
   rpcParameter = rhs.rpcParameter;
@@ -2421,7 +2420,7 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
 
       std::shared_ptr<ICentral> central = getCentral();
       if (!central) return description;
-      std::string language = clientInfo ? clientInfo->language : "en";
+      std::string language = clientInfo ? clientInfo->language : "";
       std::string filename = _rpcDevice->getFilename();
 
       if (fields.empty() || fields.find("FAMILY") != fields.end()) description->structValue->insert(StructElement("FAMILY", PVariable(new Variable((uint32_t)getCentral()->deviceFamily()))));
@@ -2433,10 +2432,8 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
                                                        PVariable(new Variable(supportedDevice->serialPrefix))));
 
       if (supportedDevice) {
-        std::string descriptionText = central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id);
-        if (!descriptionText.empty() && fields.find("DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("DESCRIPTION", PVariable(new Variable(descriptionText))));
-        std::string longDescriptionText = central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id);
-        if (!longDescriptionText.empty() && fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->insert(StructElement("LONG_DESCRIPTION", PVariable(new Variable(longDescriptionText))));
+        if (fields.find("DESCRIPTION") != fields.end()) description->structValue->emplace("DESCRIPTION", central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id));
+        if (fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->emplace("LONG_DESCRIPTION", central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id));
       }
 
       if (fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(_rpcDevice->pairingMethod)));
@@ -3569,12 +3566,13 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     if (fields.empty() || fields.find("LABEL") != fields.end() || fields.find("DESCRIPTION") != fields.end()) {
       std::shared_ptr<ICentral> central = getCentral();
       if (!central) return description;
-      std::string language = clientInfo ? clientInfo->language : "en";
+      std::string language = clientInfo ? clientInfo->language : "";
       std::string filename = _rpcDevice->getFilename();
       if (parameter->parent()) {
-        auto parameterTranslations = central->getTranslations()->getParameterTranslations(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
-        if (!parameterTranslations.first.empty()) description->structValue->insert(StructElement("LABEL", std::shared_ptr<Variable>(new Variable(parameterTranslations.first))));
-        if (!parameterTranslations.second.empty()) description->structValue->insert(StructElement("DESCRIPTION", std::shared_ptr<Variable>(new Variable(parameterTranslations.second))));
+        auto parameterLabel = central->getTranslations()->getParameterLabel(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
+        auto parameterDescription = central->getTranslations()->getParameterLabel(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
+        if (!parameterLabel->stringValue.empty() || !parameterLabel->structValue->empty()) description->structValue->emplace("LABEL", parameterLabel);
+        if (!parameterDescription->stringValue.empty() || !parameterDescription->structValue->empty()) description->structValue->emplace("DESCRIPTION", parameterDescription);
       }
     }
 
@@ -3945,5 +3943,4 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
 }
 
 //End RPC methods
-}
 }
