@@ -94,6 +94,8 @@ class IPhysicalInterface : public IEventsEx {
   virtual void setup(int32_t userID, int32_t groupID, bool setPermissions) {}
   virtual std::string getType() { return _settings->type; }
   virtual std::string getID() { return _settings->id; }
+  virtual std::string getSerialNumber() { return ""; }
+  virtual std::string getFirmwareVersion() { return ""; }
   virtual bool isDefault() { return _settings->isDefault; }
   virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
   virtual int32_t getAddress() { return _myAddress; }
