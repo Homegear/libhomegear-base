@@ -29,6 +29,8 @@
 */
 
 #include "PhysicalInterfaces.h"
+
+#include <memory>
 #include "IPhysicalInterface.h"
 #include "../BaseLib.h"
 
@@ -151,16 +153,18 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces() {
     for (auto interface : _physicalInterfaces) {
       BaseLib::PVariable interfaceStruct(new BaseLib::Variable(BaseLib::VariableType::tStruct));
 
-      interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", BaseLib::PVariable(new BaseLib::Variable(_familyId))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("ID", BaseLib::PVariable(new BaseLib::Variable(interface.second->getID()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", BaseLib::PVariable(new BaseLib::Variable(interface.second->getAddress()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("TYPE", BaseLib::PVariable(new BaseLib::Variable(interface.second->getType()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("CONNECTED", BaseLib::PVariable(new BaseLib::Variable(interface.second->isOpen()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("DEFAULT", BaseLib::PVariable(new BaseLib::Variable(interface.second->isDefault()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("IP_ADDRESS", BaseLib::PVariable(new BaseLib::Variable(interface.second->getIpAddress()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("HOSTNAME", BaseLib::PVariable(new BaseLib::Variable(interface.second->getHostname()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketSent() / 1000)))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketReceived() / 1000)))));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", std::make_shared<BaseLib::Variable>(_familyId)));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("ID", std::make_shared<BaseLib::Variable>(interface.second->getID())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("SERIALNUMBER", std::make_shared<BaseLib::Variable>(interface.second->getSerialNumber())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("FIRMWAREVERSION", std::make_shared<BaseLib::Variable>(interface.second->getFirmwareVersion())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", std::make_shared<BaseLib::Variable>(interface.second->getAddress())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("TYPE", std::make_shared<BaseLib::Variable>(interface.second->getType())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("CONNECTED", std::make_shared<BaseLib::Variable>(interface.second->isOpen())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("DEFAULT", std::make_shared<BaseLib::Variable>(interface.second->isDefault())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("IP_ADDRESS", std::make_shared<BaseLib::Variable>(interface.second->getIpAddress())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("HOSTNAME", std::make_shared<BaseLib::Variable>(interface.second->getHostname())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", std::make_shared<BaseLib::Variable>((uint32_t)(interface.second->lastPacketSent() / 1000))));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", std::make_shared<BaseLib::Variable>((uint32_t)(interface.second->lastPacketReceived() / 1000))));
       array->arrayValue->push_back(interfaceStruct);
     }
     return array;
