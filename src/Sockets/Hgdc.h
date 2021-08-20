@@ -96,7 +96,6 @@ class Hgdc : public IQueue {
   // }}}
 
   void listen();
-  PVariable invoke(const std::string &methodName, const PArray &parameters, int32_t timeout = 10000);
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
  public:
   explicit Hgdc(SharedObjects *bl, uint16_t port);
@@ -104,6 +103,8 @@ class Hgdc : public IQueue {
 
   void start();
   void stop();
+
+  PVariable invoke(const std::string &methodName, const PArray &parameters, int32_t timeout = 10000);
 
   int32_t registerPacketReceivedEventHandler(int64_t familyId, std::function<void(int64_t, const std::string &, const std::vector<uint8_t> &)> value);
   void unregisterPacketReceivedEventHandler(int32_t eventHandlerId);
