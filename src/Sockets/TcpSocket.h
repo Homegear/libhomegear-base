@@ -562,6 +562,12 @@ class TcpSocket : public IQueue {
   int32_t clientCount();
 
   /**
+   * Returns the size of the packet processing queue.
+   * @return Returns the size of the packet processing queue.
+   */
+  uint32_t processingQueueSize();
+
+  /**
    * Returns the distinguished name of the client certificate. This method only returns a non empty string if
    * the client certificate is valid.
    *

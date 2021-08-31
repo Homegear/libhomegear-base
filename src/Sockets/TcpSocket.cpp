@@ -546,6 +546,10 @@ int32_t TcpSocket::clientCount() {
   return _clients.size();
 }
 
+uint32_t TcpSocket::processingQueueSize() {
+  return queueSize(0);
+}
+
 std::string TcpSocket::getClientCertDn(int32_t clientId) {
   std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
   auto clientIterator = _clients.find(clientId);
@@ -718,10 +722,11 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
     if (!queueEntry) return;
 
     std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
-    bool more = !queueEntry->clientData->backlog.empty();
+    bool hasData = !queueEntry->clientData->backlog.empty();
     backlogGuard.unlock();
 
-    while (more) {
+    //Send a maximum of 10 packets
+    for (int32_t i = 0; i < 10; i++) {
       backlogGuard.lock();
       auto packet = queueEntry->clientData->backlog.front();
       queueEntry->clientData->backlog.pop();
@@ -730,10 +735,17 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       if (_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
 
       backlogGuard.lock();
-      more = !queueEntry->clientData->backlog.empty();
-      if (!more) queueEntry->clientData->busy = false;
+      hasData = !queueEntry->clientData->backlog.empty();
+      if (!hasData) {
+        queueEntry->clientData->busy = false;
+        backlogGuard.unlock();
+        break;
+      }
       backlogGuard.unlock();
     }
+    backlogGuard.lock();
+    queueEntry->clientData->busy = false;
+    backlogGuard.unlock();
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
