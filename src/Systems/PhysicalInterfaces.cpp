@@ -154,6 +154,7 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces() {
       BaseLib::PVariable interfaceStruct(new BaseLib::Variable(BaseLib::VariableType::tStruct));
 
       interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", std::make_shared<BaseLib::Variable>(_familyId)));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("VIRTUAL", std::make_shared<BaseLib::Variable>(false)));
       interfaceStruct->structValue->insert(BaseLib::StructElement("ID", std::make_shared<BaseLib::Variable>(interface.second->getID())));
       interfaceStruct->structValue->insert(BaseLib::StructElement("SERIALNUMBER", std::make_shared<BaseLib::Variable>(interface.second->getSerialNumber())));
       interfaceStruct->structValue->insert(BaseLib::StructElement("FIRMWAREVERSION", std::make_shared<BaseLib::Variable>(interface.second->getFirmwareVersion())));
