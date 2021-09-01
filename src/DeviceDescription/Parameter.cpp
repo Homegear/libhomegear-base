@@ -150,7 +150,24 @@ void Parameter::parseXml(xml_node *node) {
               }
 
               role.id = Math::getUnsignedNumber64(roleValue);
-              if (role.id != 0) roles.emplace(role.id, role);
+              if (role.id != 0) {
+                uint64_t middleGroupRoleId = 0;
+                uint64_t mainGroupRoleId = 0;
+
+                //{{{ Get parent roles
+                {
+                  uint64_t hexRoleId = BaseLib::Math::getNumber64(std::to_string(role.id), true);
+                  middleGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FFFF00, 6));
+                  mainGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FF0000, 6));
+                  if (middleGroupRoleId == mainGroupRoleId || middleGroupRoleId == role.id) middleGroupRoleId = 0;
+                  if (mainGroupRoleId == role.id) mainGroupRoleId = 0;
+                }
+                //}}}
+
+                if (mainGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (middleGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                roles.emplace(role.id, role);
+              }
             } else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
           }
         } else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
