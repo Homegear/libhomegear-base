@@ -186,7 +186,7 @@ class TcpSocket : public IQueue {
     std::queue<std::shared_ptr<TcpPacket>> backlog;
 
     TcpClientData() {
-      buffer.resize(1024);
+      buffer.resize(4096);
     }
   };
   typedef std::shared_ptr<TcpClientData> PTcpClientData;

@@ -31,7 +31,6 @@
 #include "TcpSocket.h"
 #include "../BaseLib.h"
 #include "../Security/SecureVector.h"
-#include <gnutls/gnutls.h>
 
 namespace BaseLib {
 TcpSocket::CertificateCredentials::CertificateCredentials(gnutls_certificate_credentials_t credentials, gnutls_datum_t dhParams) : _credentials(credentials) {
@@ -595,6 +594,19 @@ void TcpSocket::serverThread() {
         socketDescriptor = _socketDescriptor->descriptor;
       }
 
+      { //Send backlog
+        if (_packetReceivedCallback && queueIsStarted(0)) {
+          for (auto &client : clients) {
+            if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+            std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
+            if (!client.second->backlog.empty() && !client.second->busy) {
+              std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
+              enqueue(0, queueEntry);
+            }
+          }
+        }
+      }
+
       timeval timeout{};
       timeout.tv_sec = 0;
       timeout.tv_usec = 100000;
@@ -737,7 +749,6 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       backlogGuard.lock();
       hasData = !queueEntry->clientData->backlog.empty();
       if (!hasData) {
-        queueEntry->clientData->busy = false;
         backlogGuard.unlock();
         break;
       }
