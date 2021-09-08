@@ -2456,7 +2456,8 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
       }
 
       if (fields.empty() || fields.find("FIRMWARE") != fields.end()) {
-        if (_firmwareVersion != -1) description->structValue->insert(StructElement("FIRMWARE", PVariable(new Variable(getFirmwareVersionString(_firmwareVersion)))));
+        auto firmwareVersion = getFirmwareVersion();
+        if (firmwareVersion != -1) description->structValue->insert(StructElement("FIRMWARE", PVariable(new Variable(getFirmwareVersionString(firmwareVersion)))));
         else if (!_firmwareVersionString.empty()) description->structValue->insert(StructElement("FIRMWARE", PVariable(new Variable(_firmwareVersionString))));
         else description->structValue->insert(StructElement("FIRMWARE", PVariable(new Variable(std::string("?")))));
       }
