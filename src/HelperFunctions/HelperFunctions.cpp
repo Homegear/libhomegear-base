@@ -53,6 +53,10 @@ int64_t HelperFunctions::getTimeMicroseconds() {
   return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+int64_t HelperFunctions::getTimeNanoseconds() {
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 int64_t HelperFunctions::getTimeSeconds() {
   auto time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
   if (time < 0) time = 0;
@@ -100,18 +104,61 @@ std::string HelperFunctions::getTimeString(std::string format, int64_t time) {
   return timeStream.str();
 }
 
-std::string HelperFunctions::getTimeUuid(int64_t time) {
+std::string HelperFunctions::getTimeUuid() {
+  //{{{ Make sure UUIDs are unique
+  static std::mutex mutex;
+  static uint32_t counter = 0;
+  static int64_t lastTime = 0;
+  std::lock_guard<std::mutex> lock(mutex);
+  auto now = getTimeNanoseconds();
+  if (now == lastTime) counter++;
+  else counter = 0;
+  lastTime = now;
+  //}}}
+
   std::string uuid;
-  uuid = BaseLib::HelperFunctions::getHexString(time == 0 ? getTimeMicroseconds() : time, 16);
+  uuid = BaseLib::HelperFunctions::getHexString(now, 16);
   uuid.reserve(53);
   uuid.push_back('-');
-  uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8) + "-");
+  uuid.append(BaseLib::HelperFunctions::getHexString(counter, 8) + "-");
   uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
   uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
   uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4) + "-");
   uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(-2147483648, 2147483647), 8));
   uuid.append(BaseLib::HelperFunctions::getHexString(BaseLib::HelperFunctions::getRandomNumber(0, 65535), 4));
   return uuid;
+}
+
+std::string HelperFunctions::getUuid1(bool useRandomNodeId) {
+  //{{{ Make sure UUIDs are unique
+  static std::mutex mutex;
+  static uint32_t counter = getRandomNumber(0, 16383);
+  static int64_t lastTime = 0;
+  std::lock_guard<std::mutex> lock(mutex);
+  auto now = getTimeNanoseconds() / 100;
+  counter++;
+  lastTime = now;
+  //}}}
+
+  static auto randomNodeId = getRandomBytes(6);
+  static auto macAddress = getUBinary(Net::getMacAddress(true));
+  if (macAddress.empty()) useRandomNodeId = true;
+  if (useRandomNodeId) randomNodeId.at(0) |= 1; //Set least significant bit of first byte to 1 (the MAC address multicast bit). This is required by RFC 4122
+
+  std::vector<uint8_t> uuidBytes;
+  uuidBytes.resize(16, 0);
+  uuidBytes[0] = now >> 24u;
+  uuidBytes[1] = now >> 16u;
+  uuidBytes[2] = now >> 8u;
+  uuidBytes[3] = now;
+  uuidBytes[4] = now >> 40u;
+  uuidBytes[5] = now >> 32u;
+  uuidBytes[6] = ((now >> 56u) & 0x0Fu) | 1u;
+  uuidBytes[7] = now >> 48u;
+  uuidBytes[8] = ((counter >> 8) & 0x3Fu) | 0x80u;
+  uuidBytes[9] = counter;
+  if (useRandomNodeId) std::copy(randomNodeId.begin(), randomNodeId.end(), uuidBytes.begin() + 10);
+  else std::copy(macAddress.begin(), macAddress.end(), macAddress.begin() + 10);
 }
 
 std::string HelperFunctions::stripNonAlphaNumeric(const std::string &s, const std::unordered_set<char> &whitelist) {

@@ -30,6 +30,7 @@
 
 #include "Net.h"
 #include "HelperFunctions.h"
+#include "Io.h"
 
 #include <asm/types.h>
 #include <netinet/ether.h>
@@ -72,7 +73,7 @@ int32_t Net::readNlSocket(int32_t sockFd, std::vector<char> &buffer, uint32_t me
   return (int32_t)messageLength;
 }
 
-bool Net::isIp(const std::string& ipAddress) {
+bool Net::isIp(const std::string &ipAddress) {
   struct sockaddr_in sa{};
   struct sockaddr_in6 sa6{};
   if (inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr)) != 1 && inet_pton(AF_INET6, ipAddress.c_str(), &(sa6.sin6_addr)) != 1) return false;
@@ -180,7 +181,7 @@ Net::RouteInfoList Net::getRoutes() {
   return routeInfo;
 }
 
-std::string Net::getMyIpAddress(const std::string& interfaceName) {
+std::string Net::getMyIpAddress(const std::string &interfaceName) {
   std::string address;
 
   if (interfaceName.empty()) {
@@ -317,6 +318,43 @@ std::string Net::getMyIp6Address(std::string interfaceName) {
     if (!addressFound) return getMyIpAddress(interfaceName);
   }
   return address;
+}
+
+std::vector<uint8_t> Net::getMacAddress(bool allowLocallyAdministered, const std::string &interface) {
+  std::string path = "/sys/class/net/";
+  std::vector<std::string> directories = Io::getDirectories(path);
+  std::string data;
+  std::vector<uint8_t> mac;
+  for (std::string &directory : directories) {
+    if (!interface.empty() && directory == interface) {
+      data = BaseLib::Io::getFileContent(path + directory + "/address");
+      data = HelperFunctions::stripNonAlphaNumeric(data);
+      mac = BaseLib::HelperFunctions::getUBinary(data);
+      if (mac.size() != 6) mac.clear();
+      break;
+    } else {
+      if (directory.find("lo") != std::string::npos ||
+          directory.find("vir") != std::string::npos ||
+          directory.find("tun") != std::string::npos ||
+          directory.find("wl") != std::string::npos ||
+          directory.find("wg") != std::string::npos ||
+          directory.find("dummy") != std::string::npos ||
+          directory.find("docker") != std::string::npos ||
+          directory.find("vpns") != std::string::npos ||
+          !BaseLib::Io::fileExists(path + directory + "/address")) {
+        continue;
+      }
+      data = BaseLib::Io::getFileContent(path + directory + "/address");
+      data = HelperFunctions::stripNonAlphaNumeric(data);
+      mac = BaseLib::HelperFunctions::getUBinary(data);
+      if (mac.size() != 6 || (mac.at(0) & 1) || ((mac.at(0) & 2) && !allowLocallyAdministered)) {
+        mac.clear();
+        continue; //Either not a MAC address or multicast or locally administered bits are set
+      }
+      break;
+    }
+  }
+  return mac;
 }
 
 }

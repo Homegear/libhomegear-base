@@ -114,6 +114,8 @@ public:
 	 * @return The returned routes of type RouteInfoList.
 	 */
 	static RouteInfoList getRoutes();
+
+	static std::vector<uint8_t> getMacAddress(bool allowLocallyAdministered, const std::string &interface = "");
 private:
 	static int32_t readNlSocket(int32_t sockFd, std::vector<char>& buffer, uint32_t messageIndex, uint32_t pid);
 };

@@ -64,6 +64,7 @@ class HelperFunctions {
    *
    * @see getTimeSeconds()
    * @see getTimeMicroseconds()
+   * @see getTimeNanoseconds()
    * @return The current unix time stamp in milliseconds.
    */
   static int64_t getTime();
@@ -73,15 +74,27 @@ class HelperFunctions {
    *
    * @see getTimeSeconds()
    * @see getTime()
+   * @see getTimeNanoseconds()
    * @return The current unix time stamp in microseconds.
    */
   static int64_t getTimeMicroseconds();
+
+  /**
+   * Gets the current unix time stamp in microseconds.
+   *
+   * @see getTimeMicroseconds()
+   * @see getTimeSeconds()
+   * @see getTime()
+   * @return The current unix time stamp in microseconds.
+   */
+  static int64_t getTimeNanoseconds();
 
   /**
    * Gets the current unix time stamp in seconds.
    *
    * @see getTime()
    * @see getTimeMicroseconds()
+   * @see getTimeNanoseconds()
    * @return The current unix time stamp in seconds.
    */
   static int64_t getTimeSeconds();
@@ -112,12 +125,25 @@ class HelperFunctions {
   static std::string getTimeString(std::string format, int64_t time = 0);
 
   /**
-   * Calculates a version 1 UUID (see RFC 4122) including a time stamp in 100-nanosecond intervals.
+   * Calculates a Homegear-specific UUID including a time stamp in 100-nanosecond intervals.
    *
-   * @param time The time in microseconds to calculate the UUID for or "0" to use the current time.
    * @return Returns a time UUID.
    */
-  static std::string getTimeUuid(int64_t time = 0);
+  static std::string getTimeUuid();
+
+  /**
+   * Calculates a version 1 UUID (see RFC 4122) including a time stamp in 100-nanosecond intervals.
+   * Calling this method is thread safe. Please note that UUIDs are only unique within one process. Collisions are impossible if the following conditions are met:
+   *
+   * 1. The MAC address of the network interface was issued by the OUI (i. e. is unique)
+   * 2. There are not more than 16384 UUIDs generated within one 100 nanosecond block
+   *
+   * When the MAC address is not unique or a random node ID is used, collisions are not impossible but very improbable.
+   *
+   * @param useRandomNodeId When set to true a random node ID is generated with every start of the program (i. e. every initialization of the base library) and used instead of the computers MAC address.
+   * @return Returns a time UUID.
+   */
+  static std::string getUuid1(bool useRandomNodeId = false);
 
   /**
    * Left trims a string.
