@@ -59,6 +59,15 @@ class HelperFunctions {
    */
   HelperFunctions();
 
+  static int64_t getTimezoneOffset();
+
+  /**
+   * Gets the current local time as unix time stamp in milliseconds
+   *
+   * @return The current local time as unix time stamp in milliseconds.
+   */
+  static int64_t getLocalTime();
+
   /**
    * Gets the current unix time stamp in milliseconds.
    *
@@ -141,9 +150,17 @@ class HelperFunctions {
    * When the MAC address is not unique or a random node ID is used, collisions are not impossible but very improbable.
    *
    * @param useRandomNodeId When set to true a random node ID is generated with every start of the program (i. e. every initialization of the base library) and used instead of the computers MAC address.
-   * @return Returns a time UUID.
+   * @return Returns a version 1 UUID.
    */
   static std::string getUuid1(bool useRandomNodeId = false);
+
+  /**
+   * Calculates a version 4 UUID (see RFC 4122).
+   * Calling this method is thread safe. Please note that collisions are very improbable but not impossible:
+   *
+   * @return Returns a version 4 UUID.
+   */
+  static std::string getUuid4();
 
   /**
    * Left trims a string.

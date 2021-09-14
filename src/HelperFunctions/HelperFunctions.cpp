@@ -45,6 +45,20 @@ const std::array<int32_t, 16> HelperFunctions::_binaryToASCIITable{0x30, 0x31, 0
 HelperFunctions::HelperFunctions() {
 }
 
+int64_t HelperFunctions::getTimezoneOffset() {
+  std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::tm localTime{};
+  localtime_r(&t, &localTime);
+  return localTime.tm_gmtoff;
+}
+
+int64_t HelperFunctions::getLocalTime() {
+  std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::tm localTime{};
+  localtime_r(&t, &localTime);
+  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + (localTime.tm_gmtoff * 1000);
+}
+
 int64_t HelperFunctions::getTime() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
@@ -133,11 +147,9 @@ std::string HelperFunctions::getUuid1(bool useRandomNodeId) {
   //{{{ Make sure UUIDs are unique
   static std::mutex mutex;
   static uint32_t counter = getRandomNumber(0, 16383);
-  static int64_t lastTime = 0;
   std::lock_guard<std::mutex> lock(mutex);
   auto now = getTimeNanoseconds() / 100;
   counter++;
-  lastTime = now;
   //}}}
 
   static auto randomNodeId = getRandomBytes(6);
@@ -159,6 +171,42 @@ std::string HelperFunctions::getUuid1(bool useRandomNodeId) {
   uuidBytes[9] = counter;
   if (useRandomNodeId) std::copy(randomNodeId.begin(), randomNodeId.end(), uuidBytes.begin() + 10);
   else std::copy(macAddress.begin(), macAddress.end(), macAddress.begin() + 10);
+
+  std::string uuid;
+  uuid.reserve(36);
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data(), 4));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 4, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 6, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 8, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 10, 6));
+  toLower(uuid);
+
+  return uuid;
+}
+
+std::string HelperFunctions::getUuid4() {
+  std::vector<uint8_t> uuidBytes = getRandomBytes(16);
+  uuidBytes[6] = (uuidBytes[6] & 0x0Fu) | 4u;
+  uuidBytes[8] = (uuidBytes[8] & 0x3Fu) | 0x80u;
+
+  std::string uuid;
+  uuid.reserve(36);
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data(), 4));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 4, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 6, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 8, 2));
+  uuid.push_back('-');
+  uuid.append(BaseLib::HelperFunctions::getHexString(uuidBytes.data() + 10, 6));
+  toLower(uuid);
+
+  return uuid;
 }
 
 std::string HelperFunctions::stripNonAlphaNumeric(const std::string &s, const std::unordered_set<char> &whitelist) {
