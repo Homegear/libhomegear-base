@@ -3571,7 +3571,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
       std::string filename = _rpcDevice->getFilename();
       if (parameter->parent()) {
         auto parameterLabel = central->getTranslations()->getParameterLabel(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
-        auto parameterDescription = central->getTranslations()->getParameterLabel(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
+        auto parameterDescription = central->getTranslations()->getParameterDescription(filename, language, parameter->parent()->type(), parameter->parent()->id, parameter->id);
         if (!parameterLabel->stringValue.empty() || !parameterLabel->structValue->empty()) description->structValue->emplace("LABEL", parameterLabel);
         if (!parameterDescription->stringValue.empty() || !parameterDescription->structValue->empty()) description->structValue->emplace("DESCRIPTION", parameterDescription);
       }

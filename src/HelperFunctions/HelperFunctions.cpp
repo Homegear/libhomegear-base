@@ -90,7 +90,7 @@ std::string HelperFunctions::getTimeString(int64_t time) {
     milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch()).count() % 1000;
   }
   char timeString[50];
-  std::tm localTime;
+  std::tm localTime{};
   localtime_r(&t, &localTime);
   strftime(&timeString[0], 50, &timeFormat[0], &localTime);
   std::ostringstream timeStream;
