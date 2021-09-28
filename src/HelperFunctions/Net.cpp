@@ -223,8 +223,16 @@ std::string Net::getMyIpAddress(const std::string &interfaceName) {
         if (!route->ipv6 && *std::max_element(route->sourceAddress.begin(), route->sourceAddress.begin() + 4) != 0 &&
             *std::max_element(route->destinationAddress.begin(), route->destinationAddress.begin() + 4) != 0) {
           if (route->sourceAddress.at(0) == 10 || route->sourceAddress.at(0) == 172 || (route->sourceAddress.at(0) == 192 && route->sourceAddress.at(1) == 168)) {
-            address = std::to_string(route->sourceAddress.at(0)) + '.' + std::to_string(route->sourceAddress.at(1)) + '.' + std::to_string(route->sourceAddress.at(2)) + '.' + std::to_string(route->sourceAddress.at(3));
-            break;
+            if (route->interfaceName.compare(0, 3, "tun") != 0 &&
+                route->interfaceName.compare(0, 3, "tap") != 0 &&
+                route->interfaceName.compare(0, 3, "vir") != 0 &&
+                route->interfaceName.compare(0, 2, "wg") != 0 &&
+                route->interfaceName.compare(0, 2, "lo") != 0 &&
+                route->interfaceName.compare(0, 6, "docker") != 0 &&
+                route->interfaceName.compare(0, 4, "vpns") != 0) {
+              address = std::to_string(route->sourceAddress.at(0)) + '.' + std::to_string(route->sourceAddress.at(1)) + '.' + std::to_string(route->sourceAddress.at(2)) + '.' + std::to_string(route->sourceAddress.at(3));
+              break;
+            }
           }
         }
       }
@@ -243,10 +251,13 @@ std::string Net::getMyIpAddress(const std::string &interfaceName) {
       switch (info->ifa_addr->sa_family) {
         case AF_INET: inet_ntop(info->ifa_addr->sa_family, &((struct sockaddr_in *)info->ifa_addr)->sin_addr, buffer.data(), buffer.size() - 1);
           address = std::string(buffer.data());
+          std::string currentInterfaceName(info->ifa_name);
           if (!interfaceName.empty()) {
-            std::string currentInterfaceName(info->ifa_name);
-            if (currentInterfaceName == interfaceName &&
-                currentInterfaceName.compare(0, 3, "tun") != 0 &&
+            if (currentInterfaceName == interfaceName) {
+              addressFound = true;
+            }
+          } else if (address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) {
+            if (currentInterfaceName.compare(0, 3, "tun") != 0 &&
                 currentInterfaceName.compare(0, 3, "tap") != 0 &&
                 currentInterfaceName.compare(0, 3, "vir") != 0 &&
                 currentInterfaceName.compare(0, 2, "wg") != 0 &&
@@ -255,7 +266,7 @@ std::string Net::getMyIpAddress(const std::string &interfaceName) {
                 currentInterfaceName.compare(0, 4, "vpns") != 0) {
               addressFound = true;
             }
-          } else if (address.compare(0, 3, "10.") == 0 || address.compare(0, 4, "172.") == 0 || address.compare(0, 8, "192.168.") == 0) addressFound = true;
+          }
           break;
       }
       if (addressFound) break;
@@ -297,10 +308,13 @@ std::string Net::getMyIp6Address(std::string interfaceName) {
       switch (info->ifa_addr->sa_family) {
         case AF_INET6: inet_ntop(info->ifa_addr->sa_family, &((struct sockaddr_in6 *)info->ifa_addr)->sin6_addr, buffer.data(), buffer.size() - 1);
           address = std::string(buffer.data());
+          std::string currentInterfaceName(info->ifa_name);
           if (!interfaceName.empty()) {
-            std::string currentInterfaceName(info->ifa_name);
-            if (currentInterfaceName == interfaceName &&
-                currentInterfaceName.compare(0, 3, "tun") != 0 &&
+            if (currentInterfaceName == interfaceName) {
+              addressFound = true;
+            }
+          } else if (address.compare(0, 3, "::1") != 0 && address.compare(0, 4, "fe80") != 0) {
+            if (currentInterfaceName.compare(0, 3, "tun") != 0 &&
                 currentInterfaceName.compare(0, 3, "tap") != 0 &&
                 currentInterfaceName.compare(0, 3, "vir") != 0 &&
                 currentInterfaceName.compare(0, 2, "wg") != 0 &&
@@ -309,7 +323,7 @@ std::string Net::getMyIp6Address(std::string interfaceName) {
                 currentInterfaceName.compare(0, 4, "vpns") != 0) {
               addressFound = true;
             }
-          } else if (address.compare(0, 3, "::1") != 0 && address.compare(0, 4, "fe80") != 0) addressFound = true;
+          }
           break;
       }
       if (addressFound) break;
