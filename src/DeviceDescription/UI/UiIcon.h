@@ -31,47 +31,47 @@
 #ifndef UIICON_H_
 #define UIICON_H_
 
+#include "../../Variable.h"
+
 #include <string>
 #include <map>
 #include <memory>
 
-namespace rapidxml
-{
+namespace rapidxml {
 class xml_node;
 }
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiIcon;
 
 typedef std::shared_ptr<UiIcon> PUiIcon;
 
-class UiIcon
-{
-public:
-    UiIcon(BaseLib::SharedObjects* baseLib);
-    UiIcon(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiIcon(UiIcon const& rhs);
-    virtual ~UiIcon() = default;
+class UiIcon {
+ public:
+  UiIcon(BaseLib::SharedObjects *baseLib);
+  UiIcon(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiIcon(UiIcon const &rhs);
+  virtual ~UiIcon() = default;
 
-    UiIcon& operator=(const UiIcon& rhs);
+  UiIcon &operator=(const UiIcon &rhs);
 
-    //Attributes
-    std::string id;
+  static PUiIcon fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json);
 
-    //Elements
-    std::string name;
-    std::string color;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Attributes
+  std::string id;
+
+  //Elements
+  std::string name;
+  std::string color;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

@@ -29,6 +29,8 @@
 */
 
 #include "GlobalServiceMessages.h"
+
+#include <memory>
 #include "../BaseLib.h"
 
 namespace BaseLib {
@@ -43,8 +45,8 @@ GlobalServiceMessages::~GlobalServiceMessages() {
 
 void GlobalServiceMessages::init(SharedObjects *baseLib) {
   _bl = baseLib;
-  _rpcDecoder = std::unique_ptr<BaseLib::Rpc::RpcDecoder>(new BaseLib::Rpc::RpcDecoder(baseLib, false, false));
-  _rpcEncoder = std::unique_ptr<BaseLib::Rpc::RpcEncoder>(new BaseLib::Rpc::RpcEncoder(baseLib, false, true));
+  _rpcDecoder = std::make_unique<BaseLib::Rpc::RpcDecoder>(baseLib, false, false);
+  _rpcEncoder = std::make_unique<BaseLib::Rpc::RpcEncoder>(baseLib, false, true);
 }
 
 void GlobalServiceMessages::load() {
@@ -55,13 +57,15 @@ void GlobalServiceMessages::load() {
       auto serviceMessage = std::make_shared<ServiceMessage>();
       serviceMessage->databaseId = (uint64_t)row.second.at(0)->intValue;
       serviceMessage->familyId = row.second.at(1)->intValue;
-      serviceMessage->messageId = row.second.at(3)->intValue;
-      serviceMessage->messageSubId = row.second.at(4)->textValue;
-      serviceMessage->timestamp = row.second.at(5)->intValue;
-      serviceMessage->message = row.second.at(7)->textValue;
-      serviceMessage->value = row.second.at(6)->intValue;
-      serviceMessage->data = _rpcDecoder->decodeResponse(*row.second.at(9)->binaryValue);
-      _serviceMessages[row.second.at(1)->intValue][row.second.at(3)->intValue][row.second.at(4)->textValue].emplace(row.second.at(7)->textValue, std::move(serviceMessage));
+      serviceMessage->interface = row.second.at(2)->textValue;
+      serviceMessage->messageId = row.second.at(4)->intValue;
+      serviceMessage->messageSubId = row.second.at(5)->textValue;
+      serviceMessage->timestamp = row.second.at(6)->intValue;
+      serviceMessage->message = row.second.at(8)->textValue;
+      serviceMessage->value = row.second.at(7)->intValue;
+      serviceMessage->data = _rpcDecoder->decodeResponse(*row.second.at(10)->binaryValue);
+      serviceMessage->priority = (ServiceMessagePriority)row.second.at(11)->intValue;;
+      _serviceMessages[row.second.at(1)->intValue][row.second.at(4)->intValue][row.second.at(5)->textValue].emplace(row.second.at(8)->textValue, std::move(serviceMessage));
     }
   }
   catch (const std::exception &ex) {
@@ -69,12 +73,14 @@ void GlobalServiceMessages::load() {
   }
 }
 
-void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, std::string messageSubId, int32_t timestamp, std::string message, std::list<std::string> variables, PVariable data, int64_t value) {
+void GlobalServiceMessages::set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string &messageSubId, ServiceMessagePriority priority, int32_t timestamp, const std::string &message, const std::list<std::string> &variables, const PVariable &data, int64_t value) {
   try {
     auto serviceMessage = std::make_shared<ServiceMessage>();
     serviceMessage->familyId = familyId;
+    serviceMessage->interface = interface;
     serviceMessage->messageId = messageId;
     serviceMessage->messageSubId = messageSubId;
+    serviceMessage->priority = priority;
     serviceMessage->timestamp = timestamp;
     serviceMessage->message = message;
     serviceMessage->variables = variables;
@@ -97,19 +103,21 @@ void GlobalServiceMessages::set(int32_t familyId, int32_t messageId, std::string
     std::vector<char> dataBlob;
     if (data) _rpcEncoder->encodeResponse(data, dataBlob);
 
-    Database::DataRow data;
-    data.push_back(std::make_shared<Database::DataColumn>(messageSubId)); //Selector for WHERE clause
-    data.push_back(std::make_shared<Database::DataColumn>(message)); //Selector for WHERE clause
-    data.push_back(std::make_shared<Database::DataColumn>(familyId)); //familyID
-    data.push_back(std::make_shared<Database::DataColumn>(0)); //peerID
-    data.push_back(std::make_shared<Database::DataColumn>(messageId)); //messageID
-    data.push_back(std::make_shared<Database::DataColumn>(messageSubId)); //messageSubID
-    data.push_back(std::make_shared<Database::DataColumn>(timestamp)); //timestamp
-    data.push_back(std::make_shared<Database::DataColumn>(value)); //integerValue
-    data.push_back(std::make_shared<Database::DataColumn>(message)); //message
-    data.push_back(std::make_shared<Database::DataColumn>(variablesBlob)); //variables
-    data.push_back(std::make_shared<Database::DataColumn>(dataBlob)); //binaryData
-    _bl->db->saveGlobalServiceMessageAsynchronous(data);
+    Database::DataRow databaseData;
+    databaseData.push_back(std::make_shared<Database::DataColumn>(messageSubId)); //Selector for WHERE clause
+    databaseData.push_back(std::make_shared<Database::DataColumn>(message)); //Selector for WHERE clause
+    databaseData.push_back(std::make_shared<Database::DataColumn>(familyId)); //familyID
+    databaseData.push_back(std::make_shared<Database::DataColumn>(interface)); //interface
+    databaseData.push_back(std::make_shared<Database::DataColumn>(0)); //peerID
+    databaseData.push_back(std::make_shared<Database::DataColumn>(messageId)); //messageID
+    databaseData.push_back(std::make_shared<Database::DataColumn>(messageSubId)); //messageSubID
+    databaseData.push_back(std::make_shared<Database::DataColumn>(timestamp)); //timestamp
+    databaseData.push_back(std::make_shared<Database::DataColumn>(value)); //integerValue
+    databaseData.push_back(std::make_shared<Database::DataColumn>(message)); //message
+    databaseData.push_back(std::make_shared<Database::DataColumn>(variablesBlob)); //variables
+    databaseData.push_back(std::make_shared<Database::DataColumn>(dataBlob)); //binaryData
+    databaseData.push_back(std::make_shared<Database::DataColumn>((int32_t)priority)); //priority
+    _bl->db->saveGlobalServiceMessageAsynchronous(databaseData);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -148,7 +156,7 @@ void GlobalServiceMessages::unset(int32_t familyId, int32_t messageId, std::stri
   }
 }
 
-PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo) {
+PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo, const std::string &language) {
   try {
     std::lock_guard<std::mutex> serviceMessagesGuard(_serviceMessagesMutex);
     PVariable serviceMessages(new Variable(VariableType::tArray));
@@ -160,10 +168,13 @@ PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo) {
             auto element = std::make_shared<Variable>(VariableType::tStruct);
             element->structValue->emplace("TYPE", std::make_shared<Variable>(message.second->familyId == -1 ? 0 : 1));
             if (message.second->familyId != -1) element->structValue->emplace("FAMILY_ID", std::make_shared<Variable>(message.second->familyId));
+            element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)message.second->priority));
             element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(message.second->timestamp));
+            if (message.second->familyId != -1 && !message.second->interface.empty()) element->structValue->emplace("INTERFACE", std::make_shared<Variable>(message.second->interface));
             element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
             element->structValue->emplace("MESSAGE_SUBID", std::make_shared<Variable>(message.second->messageSubId));
-            element->structValue->emplace("MESSAGE", std::make_shared<Variable>(message.second->message));
+            if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation(message.second->message, language)));
+            else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations(message.second->message));
             auto variables = std::make_shared<Variable>(VariableType::tArray);
             variables->arrayValue->reserve(message.second->variables.size());
             for (auto &variable : message.second->variables) {

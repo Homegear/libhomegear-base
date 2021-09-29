@@ -41,73 +41,73 @@
 #include <unordered_map>
 #include <atomic>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 class FileDescriptor;
 
-class SsdpInfo
-{
-public:
-	SsdpInfo();
-	SsdpInfo(std::string ip, int32_t port, std::string path, PVariable info);
-	virtual ~SsdpInfo();
-	std::string ip() { return _ip; }
-	void setIp(std::string value) { _ip = value; }
-	int32_t port() { return _port; }
-	void setPort(int32_t value) { _port = value; }
-	void setPath(std::string value) { _path = value; }
-	std::string location() { return _location; }
-	void setLocation(std::string value) { _location = value; }
-	const PVariable info() { return _info; }
-	void setInfo(PVariable value) { _info = value; }
-	void addField(std::string key, std::string value) { _fields.emplace(key, value); }
-	std::string getField(std::string key) { auto fieldsIterator = _fields.find(key); if(fieldsIterator != _fields.end()) return fieldsIterator->second; else return ""; }
-    std::unordered_map<std::string, std::string>& getFields() { return _fields; };
-private:
-	std::string _ip;
-	int32_t _port;
-	std::string _path;
-	std::string _location;
-	PVariable _info;
-	std::unordered_map<std::string, std::string> _fields;
+class SsdpInfo {
+ public:
+  SsdpInfo();
+  SsdpInfo(std::string ip, int32_t port, std::string path, PVariable info);
+  virtual ~SsdpInfo();
+  std::string ip() { return _ip; }
+  void setIp(std::string value) { _ip = value; }
+  int32_t port() { return _port; }
+  void setPort(int32_t value) { _port = value; }
+  void setPath(std::string value) { _path = value; }
+  std::string location() { return _location; }
+  void setLocation(std::string value) { _location = value; }
+  const PVariable info() { return _info; }
+  void setInfo(PVariable value) { _info = value; }
+  void addField(std::string key, std::string value) { _fields.emplace(key, value); }
+  std::string getField(std::string key) {
+    auto fieldsIterator = _fields.find(key);
+    if (fieldsIterator != _fields.end()) return fieldsIterator->second; else return "";
+  }
+  std::unordered_map<std::string, std::string> &getFields() { return _fields; };
+ private:
+  std::string _ip;
+  int32_t _port;
+  std::string _path;
+  std::string _location;
+  PVariable _info;
+  std::unordered_map<std::string, std::string> _fields;
 };
 
-class Ssdp
-{
-public:
-	Ssdp(BaseLib::SharedObjects* baseLib);
-	virtual ~Ssdp();
+class Ssdp {
+ public:
+  Ssdp(BaseLib::SharedObjects *baseLib);
+  virtual ~Ssdp();
 
-	/**
-	 * Searches for SSDP devices and returns the IPv4 addresses.
-	 *
-	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
-	 * @param[in] timeout The time to wait for responses
-	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
-	 */
-	void searchDevices(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices);
+  /**
+   * Searches for SSDP devices and returns the IPv4 addresses.
+   *
+   * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
+   * @param[in] timeout The time to wait for responses
+   * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
+   */
+  void searchDevices(const std::string &stHeader, uint32_t timeout, std::vector<SsdpInfo> &devices);
 
-	/**
-	 * Searches for SSDP devices by listening for NOTIFY packets and returns the IPv4 addresses.
-	 *
-	 * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
-	 * @param[in] timeout The time to wait for responses
-	 * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
-	 * @param[in] abort When set to true during the search, the search is aborted.
-	 */
-	void searchDevicesPassive(const std::string& stHeader, uint32_t timeout, std::vector<SsdpInfo>& devices, std::atomic_bool& abort);
-private:
-	BaseLib::SharedObjects* _bl = nullptr;
-	std::string _address;
+  /**
+   * Searches for SSDP devices by listening for NOTIFY packets and returns the IPv4 addresses.
+   *
+   * @param[in] stHeader The ST header with the URN to search for (e. g. urn:schemas-upnp-org:device:basic:1)
+   * @param[in] timeout The time to wait for responses
+   * @param[out] devices The found devices with device information parsed from XML to a Homegear variable struct.
+   * @param[in] abort When set to true during the search, the search is aborted.
+   */
+  void searchDevicesPassive(const std::string &stHeader, uint32_t timeout, std::vector<SsdpInfo> &devices, std::atomic_bool &abort);
+ private:
+  BaseLib::SharedObjects *_bl = nullptr;
+  std::string _address;
 
-	void getAddress();
-	void sendSearchBroadcast(std::shared_ptr<FileDescriptor>& serverSocketDescriptor, const std::string& stHeader, uint32_t timeout);
-	void processPacket(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info);
-	void processPacketPassive(Http& http, const std::string& stHeader, std::map<std::string, SsdpInfo>& info);
-	void getDeviceInfo(std::map<std::string, SsdpInfo>& info, std::vector<SsdpInfo>& devices);
-	std::shared_ptr<FileDescriptor> getSocketDescriptor(int32_t port, bool bindToMulticast);
+  void getAddress();
+  void sendSearchBroadcast(std::shared_ptr<FileDescriptor> &serverSocketDescriptor, const std::string &stHeader, uint32_t timeout);
+  void processPacket(Http &http, const std::string &stHeader, std::map<std::string, SsdpInfo> &info);
+  void processPacketPassive(Http &http, const std::string &stHeader, std::map<std::string, SsdpInfo> &info);
+  void getDeviceInfo(std::map<std::string, SsdpInfo> &info, std::vector<SsdpInfo> &devices);
+  std::shared_ptr<FileDescriptor> getSocketDescriptor(int32_t port, bool bindToMulticast);
 };
 
 }

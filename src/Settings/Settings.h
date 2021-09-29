@@ -82,7 +82,9 @@ class Settings {
   bool databaseMemoryJournal() { return _databaseMemoryJournal; }
   bool databaseWALJournal() { return _databaseWALJournal; }
   std::string databasePath() { return _databasePath; }
+  std::string factoryDatabasePath() { return _factoryDatabasePath; }
   std::string databaseBackupPath() { return _databaseBackupPath; }
+  std::string factoryDatabaseBackupPath() { return _factoryDatabaseBackupPath; }
   uint32_t databaseMaxBackups() { return _databaseMaxBackups; }
   std::string logfilePath() { return _logfilePath; }
   bool waitForCorrectTime() { return _waitForCorrectTime; }
@@ -103,6 +105,9 @@ class Settings {
   int32_t maxNodeThreadsPerProcess() { return _maxNodeThreadsPerProcess; }
   int32_t nodeBlueWatchdogTimeout() { return _nodeBlueWatchdogTimeout; }
   bool nodeBlueManualClientStart() { return _nodeBlueManualClientStart; }
+  std::string nodeRedJsPath() { return _nodeRedJsPath; }
+  uint16_t nodeRedPort() { return _nodeRedPort; }
+  std::string nodeOptions() { return _nodeOptions; }
   uint32_t ipcThreadCount() { return _ipcThreadCount; }
   uint32_t ipcServerMaxConnections() { return _ipcServerMaxConnections; }
   uint32_t cliServerMaxConnections() { return _cliServerMaxConnections; }
@@ -118,9 +123,6 @@ class Settings {
   int32_t packetQueueThreadPolicy() { return _packetQueueThreadPolicy; }
   int32_t packetReceivedThreadPriority() { return _packetReceivedThreadPriority; }
   int32_t packetReceivedThreadPolicy() { return _packetReceivedThreadPolicy; }
-  uint32_t eventThreadCount() { return _eventThreadCount; }
-  int32_t eventThreadPriority() { return _eventThreadPriority; }
-  int32_t eventThreadPolicy() { return _eventThreadPolicy; }
   std::string familyConfigPath() { return _familyConfigPath; }
   std::string deviceDescriptionPath() { return _deviceDescriptionPath; }
   std::string clientSettingsPath() { return _clientSettingsPath; }
@@ -144,6 +146,7 @@ class Settings {
   uint32_t nodeBlueEventLimit1() { return _nodeBlueEventLimit1; }
   uint32_t nodeBlueEventLimit2() { return _nodeBlueEventLimit2; }
   uint32_t nodeBlueEventLimit3() { return _nodeBlueEventLimit3; }
+  std::string nodeBlueUriPathsExcludedFromLogin() { return _nodeBlueUriPathsExcludedFromLogin; }
   std::string adminUiPath() { return _adminUiPath; }
   uint32_t adminUiPathPermissions() { return _adminUiPathPermissions; }
   std::string adminUiPathUser() { return _adminUiPathUser; }
@@ -152,6 +155,7 @@ class Settings {
   uint32_t uiPathPermissions() { return _uiPathPermissions; }
   std::string uiPathUser() { return _uiPathUser; }
   std::string uiPathGroup() { return _uiPathGroup; }
+  std::string uiTranslationPath() { return _uiTranslationPath; }
   bool reloadRolesOnStartup() { return _reloadRolesOnStartup; }
   std::string firmwarePath() { return _firmwarePath; }
   std::string tempPath() { return _tempPath; }
@@ -162,7 +166,6 @@ class Settings {
   std::string lockFilePathGroup() { return _lockFilePathGroup; }
   std::string phpIniPath() { return _phpIniPath; }
   std::map<std::string, bool> &tunnelClients() { return _tunnelClients; }
-  std::map<std::string, std::string> &clientAddressesToReplace() { return _clientAddressesToReplace; }
   std::string gpioPath() { return _gpioPath; }
   std::vector<uint32_t> exportGpios() { return _exportGpios; }
   std::string oauthCertPath() { return _oauthCertPath; }
@@ -215,7 +218,9 @@ class Settings {
   bool _databaseMemoryJournal = false;
   bool _databaseWALJournal = true;
   std::string _databasePath;
+  std::string _factoryDatabasePath;
   std::string _databaseBackupPath;
+  std::string _factoryDatabaseBackupPath;
   uint32_t _databaseMaxBackups = 10;
   std::string _logfilePath;
   bool _waitForCorrectTime = true;
@@ -235,6 +240,9 @@ class Settings {
   int32_t _maxNodeThreadsPerProcess = 80;
   int32_t _nodeBlueWatchdogTimeout = -1;
   bool _nodeBlueManualClientStart = false;
+  std::string _nodeRedJsPath;
+  uint16_t _nodeRedPort = 1999;
+  std::string _nodeOptions;
   uint32_t _ipcThreadCount = 10;
   uint32_t _ipcServerMaxConnections = 20;
   uint32_t _cliServerMaxConnections = 50;
@@ -250,9 +258,6 @@ class Settings {
   int32_t _packetQueueThreadPolicy = SCHED_FIFO;
   int32_t _packetReceivedThreadPriority = 0;
   int32_t _packetReceivedThreadPolicy = SCHED_OTHER;
-  uint32_t _eventThreadCount = 5;
-  int32_t _eventThreadPriority = 0;
-  int32_t _eventThreadPolicy = SCHED_OTHER;
   std::string _familyConfigPath;
   std::string _deviceDescriptionPath;
   std::string _clientSettingsPath;
@@ -276,6 +281,7 @@ class Settings {
   uint32_t _nodeBlueEventLimit1 = 100;
   uint32_t _nodeBlueEventLimit2 = 300;
   uint32_t _nodeBlueEventLimit3 = 400;
+  std::string _nodeBlueUriPathsExcludedFromLogin;
   std::string _adminUiPath;
   uint32_t _adminUiPathPermissions = 504;
   std::string _adminUiPathUser;
@@ -284,6 +290,7 @@ class Settings {
   uint32_t _uiPathPermissions = 504;
   std::string _uiPathUser;
   std::string _uiPathGroup;
+  std::string _uiTranslationPath;
   bool _reloadRolesOnStartup = true;
   std::string _firmwarePath;
   std::string _tempPath;
@@ -293,7 +300,6 @@ class Settings {
   std::string _lockFilePathGroup;
   std::string _phpIniPath;
   std::map<std::string, bool> _tunnelClients;
-  std::map<std::string, std::string> _clientAddressesToReplace;
   std::string _gpioPath;
   std::vector<uint32_t> _exportGpios;
   uint32_t _maxWaitForPhysicalInterfaces = 180;

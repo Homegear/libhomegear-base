@@ -29,6 +29,8 @@
 */
 
 #include "FamilySettings.h"
+
+#include <memory>
 #include "../BaseLib.h"
 
 namespace BaseLib {
@@ -53,7 +55,7 @@ FamilySettings::PFamilySetting FamilySettings::get(std::string name) {
   BaseLib::HelperFunctions::toLower(name);
   _settingsMutex.lock();
   try {
-    std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+    auto settingIterator = _settings.find(name);
     if (settingIterator != _settings.end()) {
       PFamilySetting setting = settingIterator->second;
       _settingsMutex.unlock();
@@ -70,7 +72,7 @@ FamilySettings::PFamilySetting FamilySettings::get(std::string name) {
 std::string FamilySettings::getString(std::string name) {
   _settingsMutex.lock();
   try {
-    std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+    auto settingIterator = _settings.find(name);
     if (settingIterator != _settings.end()) {
       std::string setting = settingIterator->second->stringValue;
       _settingsMutex.unlock();
@@ -87,7 +89,7 @@ std::string FamilySettings::getString(std::string name) {
 int32_t FamilySettings::getNumber(std::string name) {
   _settingsMutex.lock();
   try {
-    std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+    auto settingIterator = _settings.find(name);
     if (settingIterator != _settings.end()) {
       int32_t setting = settingIterator->second->integerValue;
       _settingsMutex.unlock();
@@ -104,7 +106,7 @@ int32_t FamilySettings::getNumber(std::string name) {
 std::vector<char> FamilySettings::getBinary(std::string name) {
   _settingsMutex.lock();
   try {
-    std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+    auto settingIterator = _settings.find(name);
     if (settingIterator != _settings.end()) {
       std::vector<char> setting = settingIterator->second->binaryValue;
       _settingsMutex.unlock();
@@ -124,7 +126,7 @@ void FamilySettings::set(std::string name, const std::string &value) {
     if (name.empty()) return;
     {
       std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-      std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+      auto settingIterator = _settings.find(name);
       if (settingIterator != _settings.end()) {
         settingIterator->second->stringValue = value;
         settingIterator->second->integerValue = 0;
@@ -136,15 +138,15 @@ void FamilySettings::set(std::string name, const std::string &value) {
       }
     }
     Database::DataRow data;
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(0)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(0)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(0));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(0));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>());
+    data.push_back(std::make_shared<Database::DataColumn>(value));
+    data.push_back(std::make_shared<Database::DataColumn>());
     _bl->db->saveFamilyVariableAsynchronous(_familyId, data);
   }
   catch (const std::exception &ex) {
@@ -158,7 +160,7 @@ void FamilySettings::set(std::string name, int32_t value) {
     if (name.empty()) return;
     {
       std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-      std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+      auto settingIterator = _settings.find(name);
       if (settingIterator != _settings.end()) {
         settingIterator->second->stringValue.clear();
         settingIterator->second->integerValue = value;
@@ -170,15 +172,15 @@ void FamilySettings::set(std::string name, int32_t value) {
       }
     }
     Database::DataRow data;
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(1)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(1));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(1));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>(value));
+    data.push_back(std::make_shared<Database::DataColumn>());
+    data.push_back(std::make_shared<Database::DataColumn>());
     _bl->db->saveFamilyVariableAsynchronous(_familyId, data);
   }
   catch (const std::exception &ex) {
@@ -192,7 +194,7 @@ void FamilySettings::set(std::string name, const std::vector<char> &value) {
     if (name.empty()) return;
     {
       std::lock_guard<std::mutex> settingGuard(_settingsMutex);
-      std::map<std::string, PFamilySetting>::iterator settingIterator = _settings.find(name);
+      auto settingIterator = _settings.find(name);
       if (settingIterator != _settings.end()) {
         settingIterator->second->stringValue.clear();
         settingIterator->second->integerValue = 0;
@@ -204,15 +206,15 @@ void FamilySettings::set(std::string name, const std::vector<char> &value) {
       }
     }
     Database::DataRow data;
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(2)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(2)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn()));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(value)));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(2));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(2));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
+    data.push_back(std::make_shared<Database::DataColumn>());
+    data.push_back(std::make_shared<Database::DataColumn>());
+    data.push_back(std::make_shared<Database::DataColumn>(value));
     _bl->db->saveFamilyVariableAsynchronous(_familyId, data);
   }
   catch (const std::exception &ex) {
@@ -225,8 +227,8 @@ void FamilySettings::deleteFromDatabase(std::string name) {
     BaseLib::HelperFunctions::toLower(name);
     if (name.empty()) return;
     Database::DataRow data;
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(_familyId)));
-    data.push_back(std::shared_ptr<Database::DataColumn>(new Database::DataColumn(name)));
+    data.push_back(std::make_shared<Database::DataColumn>(_familyId));
+    data.push_back(std::make_shared<Database::DataColumn>(name));
     _bl->db->deleteFamilyVariable(data);
   }
   catch (const std::exception &ex) {
@@ -238,7 +240,7 @@ std::map<std::string, PPhysicalInterfaceSettings> FamilySettings::getPhysicalInt
   return _physicalInterfaceSettings;
 }
 
-void FamilySettings::load(std::string filename) {
+void FamilySettings::load(const std::string& filename) {
   try {
     std::unique_lock<std::mutex> settingsGuard(_settingsMutex);
     _settings.clear();
@@ -378,6 +380,9 @@ void FamilySettings::processStringSetting(std::string &name, std::string &value,
     } else if (name == "default") {
       settings->isDefault = (value == "true");
       _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
+    } else if (name == "rawpacketevents") {
+      settings->rawPacketEvents = (value == "true");
+      _bl->out.printDebug("Debug: rawPacketEvents set to " + std::to_string(settings->rawPacketEvents));
     } else if (name == "devicetype") {
       if (settings->type.length() > 0)
         _bl->out.printWarning("Warning: deviceType for \"" + settings->id + "\" in family with ID \"" + std::to_string(_familyId) + "\" is set multiple times within one device block. Is the interface header missing (e. g. \"[My Interface]\")?");
@@ -598,6 +603,9 @@ void FamilySettings::processDatabaseSetting(std::string &name, PFamilySetting &v
     if (name == "default") {
       settings->isDefault = (bool)value->integerValue;
       _bl->out.printDebug("Debug: default set to " + std::to_string(settings->isDefault));
+    } else if (name == "rawpacketevents") {
+      settings->rawPacketEvents = (bool)value->integerValue;
+      _bl->out.printDebug("Debug: rawPacketEvents set to " + std::to_string(settings->rawPacketEvents));
     } else if (name == "devicetype") {
       if (settings->type.length() > 0)
         _bl->out.printWarning("Warning: deviceType for \"" + settings->id + "\" in family with ID \"" + std::to_string(_familyId) + "\" is set multiple times within one device block. Is the interface header missing (e. g. \"[My Interface]\")?");

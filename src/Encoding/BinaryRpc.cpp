@@ -31,120 +31,98 @@
 #include "BinaryRpc.h"
 #include "../BaseLib.h"
 
-namespace BaseLib
-{
-namespace Rpc
-{
+namespace BaseLib::Rpc {
 
-BinaryRpc::BinaryRpc()
-{
-	_data.reserve(1024);
+BinaryRpc::BinaryRpc() {
+  _data.reserve(1024);
 }
 
-BinaryRpc::BinaryRpc(BaseLib::SharedObjects* bl) : BinaryRpc()
-{
+BinaryRpc::BinaryRpc(BaseLib::SharedObjects *bl) : BinaryRpc() {
 }
 
-int32_t BinaryRpc::process(char* buffer, int32_t bufferLength)
-{
-	int32_t initialBufferLength = bufferLength;
-	if(bufferLength <= 0) return 0;
-	if(_finished) reset();
-	if(!_dataProcessingStarted)
-	{
-		_headerProcessingStarted = true;
-		if(_data.size() + bufferLength < 8)
-		{
-			_data.insert(_data.end(), buffer, buffer + bufferLength);
-			return initialBufferLength;
-		}
-		else if(_data.size() < 8)
-		{
-			int32_t sizeToInsert = 8 - _data.size();
-			_data.insert(_data.end(), buffer, buffer + sizeToInsert);
-			buffer += sizeToInsert;
-			bufferLength -= sizeToInsert;
-		}
-		if(strncmp(_data.data(), "Bin", 3) != 0)
-		{
-			_finished = true;
-			throw BinaryRpcException("Packet does not start with \"Bin\".");
-		}
-		_type = (_data[3] & 1) ? Type::response : Type::request;
-		if(_data[3] == 0x40 ||_data[3] == 0x41)
-		{
-			_hasHeader = true;
-			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_headerSize, _data.data() + 4, 4);
-			if(_headerSize > _maxHeaderSize)
-			{
-				_finished = true;
-				throw BinaryRpcException("Header is larger than " + std::to_string(_maxHeaderSize) + " bytes.");
-			}
-		}
-		else
-		{
-			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_dataSize, _data.data() + 4, 4);
-			if(_dataSize > _maxContentSize)
-			{
-				_finished = true;
-				throw BinaryRpcException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
-			}
-		}
-		if(_dataSize == 0 && _headerSize == 0)
-		{
-			_finished = true;
-			throw BinaryRpcException("Invalid packet format.");
-		}
-		if(_dataSize == 0) //Has header
-		{
-			if(_data.size() + bufferLength < 8 + _headerSize + 4)
-			{
-				if(_headerSize + 8 + 100 > _data.capacity()) _data.reserve(_headerSize + 8 + 1024);
-				_data.insert(_data.end(), buffer, buffer + bufferLength);
-				return initialBufferLength;
-			}
-			int32_t sizeToInsert = (8 + _headerSize + 4) - _data.size();
-			_data.insert(_data.end(), buffer, buffer + sizeToInsert);
-			buffer += sizeToInsert;
-			bufferLength -= sizeToInsert;
-			BaseLib::HelperFunctions::memcpyBigEndian((char*)&_dataSize, _data.data() + 8 + _headerSize, 4);
-			_dataSize += _headerSize + 4;
-			if(_dataSize > _maxContentSize)
-			{
-				_finished = true;
-				throw BinaryRpcException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
-			}
-		}
+int32_t BinaryRpc::process(char *buffer, int32_t bufferLength) {
+  int32_t initialBufferLength = bufferLength;
+  if (bufferLength <= 0) return 0;
+  if (_finished) reset();
+  if (!_dataProcessingStarted) {
+    _headerProcessingStarted = true;
+    if (_data.size() + bufferLength < 8) {
+      _data.insert(_data.end(), buffer, buffer + bufferLength);
+      return initialBufferLength;
+    } else if (_data.size() < 8) {
+      int32_t sizeToInsert = 8 - _data.size();
+      _data.insert(_data.end(), buffer, buffer + sizeToInsert);
+      buffer += sizeToInsert;
+      bufferLength -= sizeToInsert;
+    }
+    if (strncmp(_data.data(), "Bin", 3) != 0) {
+      _finished = true;
+      throw BinaryRpcException("Packet does not start with \"Bin\".");
+    }
+    _type = (_data[3] & 1) ? Type::response : Type::request;
+    if (_data[3] == 0x40 || _data[3] == 0x41) {
+      _hasHeader = true;
+      BaseLib::HelperFunctions::memcpyBigEndian((char *)&_headerSize, _data.data() + 4, 4);
+      if (_headerSize > _maxHeaderSize) {
+        _finished = true;
+        throw BinaryRpcException("Header is larger than " + std::to_string(_maxHeaderSize) + " bytes.");
+      }
+    } else {
+      BaseLib::HelperFunctions::memcpyBigEndian((char *)&_dataSize, _data.data() + 4, 4);
+      if (_dataSize > _maxContentSize) {
+        _finished = true;
+        throw BinaryRpcException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
+      }
+    }
+    if (_dataSize == 0 && _headerSize == 0) {
+      _finished = true;
+      throw BinaryRpcException("Invalid packet format.");
+    }
+    if (_dataSize == 0) //Has header
+    {
+      if (_data.size() + bufferLength < 8 + _headerSize + 4) {
+        if (_headerSize + 8 + 100 > _data.capacity()) _data.reserve(_headerSize + 8 + 1024);
+        _data.insert(_data.end(), buffer, buffer + bufferLength);
+        return initialBufferLength;
+      }
+      int32_t sizeToInsert = (8 + _headerSize + 4) - _data.size();
+      _data.insert(_data.end(), buffer, buffer + sizeToInsert);
+      buffer += sizeToInsert;
+      bufferLength -= sizeToInsert;
+      BaseLib::HelperFunctions::memcpyBigEndian((char *)&_dataSize, _data.data() + 8 + _headerSize, 4);
+      _dataSize += _headerSize + 4;
+      if (_dataSize > _maxContentSize) {
+        _finished = true;
+        throw BinaryRpcException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
+      }
+    }
 
-		_dataProcessingStarted = true;
-		_data.reserve(8 + _dataSize);
-	}
+    _dataProcessingStarted = true;
+    _data.reserve(8 + _dataSize);
+  }
 
-	if(_data.size() + bufferLength < _dataSize + 8)
-	{
-		_data.insert(_data.end(), buffer, buffer + bufferLength);
-		return initialBufferLength;
-	}
-	int32_t sizeToInsert = (8 + _dataSize) - _data.size();
-	_data.insert(_data.end(), buffer, buffer + sizeToInsert);
-	bufferLength -= sizeToInsert;
-	_finished = true;
-	return initialBufferLength - bufferLength;
+  if (_data.size() + bufferLength < _dataSize + 8) {
+    _data.insert(_data.end(), buffer, buffer + bufferLength);
+    return initialBufferLength;
+  }
+  int32_t sizeToInsert = (8 + _dataSize) - _data.size();
+  _data.insert(_data.end(), buffer, buffer + sizeToInsert);
+  bufferLength -= sizeToInsert;
+  _finished = true;
+  return initialBufferLength - bufferLength;
 }
 
-void BinaryRpc::reset()
-{
-	_data.clear();
-	_data.shrink_to_fit();
-	_data.reserve(1024);
-	_type = Type::unknown;
-	_headerProcessingStarted = false;
-	_dataProcessingStarted = false;
-	_finished = false;
-	_hasHeader = false;
-	_headerSize = 0;
-	_dataSize = 0;
+void BinaryRpc::reset() {
+  _data.clear();
+  _data.shrink_to_fit();
+  _data.reserve(1024);
+  _type = Type::unknown;
+  _headerProcessingStarted = false;
+  _dataProcessingStarted = false;
+  _finished = false;
+  _hasHeader = false;
+  _headerSize = 0;
+  _dataSize = 0;
 }
 
-}
 }

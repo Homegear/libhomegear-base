@@ -28,53 +28,28 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
+#ifndef LIBHOMEGEAR_BASE_SRC_HELPERFUNCTIONS_HA_H_
+#define LIBHOMEGEAR_BASE_SRC_HELPERFUNCTIONS_HA_H_
 
-#include "../../Variable.h"
-#include <string>
-#include <unordered_map>
-#include <memory>
-
-using namespace rapidxml;
+#include "Io.h"
 
 namespace BaseLib {
 
-class SharedObjects;
+enum class HaInstanceType {
+  kUndefined = 0,
+  kUnknown = 1,
+  kNone = 2,
+  kMaster = 3,
+  kSlave = 4
+};
 
-namespace DeviceDescription {
-
-class UiControl;
-class HomegearUiElement;
-
-typedef std::shared_ptr<UiControl> PUiControl;
-
-class UiControl {
+class Ha {
  public:
-  UiControl(BaseLib::SharedObjects *baseLib);
-  UiControl(BaseLib::SharedObjects *baseLib, xml_node *node);
-  UiControl(UiControl const &rhs);
-  virtual ~UiControl() = default;
+  Ha() = delete;
 
-  UiControl &operator=(const UiControl &rhs);
-
-  //Attributes
-  std::string id;
-
-  //Elements
-  int32_t x = -1;
-  int32_t y = -1;
-  int32_t columns = 1;
-  int32_t rows = 1;
-  std::unordered_map<std::string, PVariable> metadata;
-
-  //Helpers
-  std::shared_ptr<HomegearUiElement> uiElement;
- protected:
-  BaseLib::SharedObjects *_bl = nullptr;
+  static HaInstanceType getInstanceType();
 };
 
 }
-}
 
-#endif
+#endif //LIBHOMEGEAR_BASE_SRC_HELPERFUNCTIONS_HA_H_

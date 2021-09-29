@@ -37,23 +37,19 @@
 
 #include <set>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-namespace Systems
-{
-    class Peer;
+namespace Systems {
+class Peer;
 }
 
-namespace Security
-{
+namespace Security {
 
-enum class AclResult
-{
-    error = -3,
-    notInList = -2,
-    deny = -1,
-    accept = 0
+enum class AclResult {
+  error = -3,
+  notInList = -2,
+  deny = -1,
+  accept = 0
 };
 
 /**
@@ -61,10 +57,9 @@ enum class AclResult
  *
  * @see Acl
  */
-class AclException : public Exception
-{
-public:
-    AclException(std::string message) : Exception(message) {}
+class AclException : public Exception {
+ public:
+  AclException(std::string message) : Exception(message) {}
 };
 
 /**
@@ -112,229 +107,230 @@ public:
  * Mqtt
  *  - Check method access
  */
-class Acl
-{
-private:
-    /**
-     * When set to "true", _devicesRead is included in the ACL checks.
-     */
-    bool _devicesReadSet = false;
+class Acl {
+ private:
+  /**
+   * When set to "true", _devicesRead is included in the ACL checks.
+   */
+  bool _devicesReadSet = false;
 
-    /**
-     * Key: Peer ID; value: access/no access
-     *
-     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
-     */
-    std::unordered_map<uint64_t, bool> _devicesRead;
+  /**
+   * Key: Peer ID; value: access/no access
+   *
+   * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
+   */
+  std::unordered_map<uint64_t, bool> _devicesRead;
 
-    /**
-     * When set to "true", _devicesWrite is included in the ACL checks.
-     */
-    bool _devicesWriteSet = false;
+  /**
+   * When set to "true", _devicesWrite is included in the ACL checks.
+   */
+  bool _devicesWriteSet = false;
 
-    /**
-     * Key: Peer ID; value: access/no access
-     *
-     * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
-     */
-    std::unordered_map<uint64_t, bool> _devicesWrite;
+  /**
+   * Key: Peer ID; value: access/no access
+   *
+   * Grant all entry: 0 (all devices) => true, can be combined with "no access" entries.
+   */
+  std::unordered_map<uint64_t, bool> _devicesWrite;
 
-    /**
-     * When set to "true", _variablesRead is included in the ACL checks.
-     */
-    bool _variablesReadSet = false;
+  /**
+   * When set to "true", _variablesRead is included in the ACL checks.
+   */
+  bool _variablesReadSet = false;
 
-    /**
-     * Key1: Device; key2: channel; key 3: variable name; value: access/no access
-     *
-     * For system variables key1 is "0",  and channel is "-1".
-     *
-     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
-     */
-    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
+  /**
+   * Key1: Device; key2: channel; key 3: variable name; value: access/no access
+   *
+   * For system variables key1 is "0",  and channel is "-1".
+   *
+   * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
+   */
+  std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesRead;
 
-    /**
-     * When set to "true", _variablesWrite is included in the ACL checks.
-     */
-    bool _variablesWriteSet = false;
+  /**
+   * When set to "true", _variablesWrite is included in the ACL checks.
+   */
+  bool _variablesWriteSet = false;
 
-    /**
-     * Key1: Device; key2: Channel; key 3: variable name; value: access/no access
-     *
-     * For system variables key1 is "0",  and channel is "-1".
-     *
-     * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
-     * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
-     */
-    std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
+  /**
+   * Key1: Device; key2: Channel; key 3: variable name; value: access/no access
+   *
+   * For system variables key1 is "0",  and channel is "-1".
+   *
+   * Grant all entry for device variables: 0 (all devices) => -3 (all channels) => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for metadata: 0 (all devices) => -2 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for system variables: 0 (all devices) => -1 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for specific metadata: Peer ID => -2 => "*" => true, can be combined with "no access" entries.
+   * Grant all entry for all channels of a peer: Peer ID => -3 => "*" => true, can be combined with "no access" entries.
+   */
+  std::unordered_map<uint64_t, std::unordered_map<int32_t, std::unordered_map<std::string, bool>>> _variablesWrite;
 
-    /**
-     * When set to "true", _roomsRead is included in the ACL checks.
-     */
-    bool _roomsReadSet = false;
+  /**
+   * When set to "true", _roomsRead is included in the ACL checks.
+   */
+  bool _roomsReadSet = false;
 
-    /**
-     * Key: Room ID; value: access/no access
-     */
-    std::unordered_map<uint64_t, bool> _roomsRead;
+  /**
+   * Key: Room ID; value: access/no access
+   */
+  std::unordered_map<uint64_t, bool> _roomsRead;
 
-    /**
-     * When set to "true", _roomsWrite is included in the ACL checks.
-     */
-    bool _roomsWriteSet = false;
+  /**
+   * When set to "true", _roomsWrite is included in the ACL checks.
+   */
+  bool _roomsWriteSet = false;
 
-    /**
-     * Key: Room ID; value: access/no access
-     *
-     * ID 0 stands for "no room assigned"
-     */
-    std::unordered_map<uint64_t, bool> _roomsWrite;
+  /**
+   * Key: Room ID; value: access/no access
+   *
+   * ID 0 stands for "no room assigned"
+   */
+  std::unordered_map<uint64_t, bool> _roomsWrite;
 
-    /**
-     * When set to "true", _categoriesRead is included in the ACL checks.
-     */
-    bool _categoriesReadSet = false;
+  /**
+   * When set to "true", _categoriesRead is included in the ACL checks.
+   */
+  bool _categoriesReadSet = false;
 
-    /**
-     * Key: Category ID; value: access/no access
-     *
-     * ID 0 stands for "no category assigned"
-     */
-    std::unordered_map<uint64_t, bool> _categoriesRead;
+  /**
+   * Key: Category ID; value: access/no access
+   *
+   * ID 0 stands for "no category assigned"
+   */
+  std::unordered_map<uint64_t, bool> _categoriesRead;
 
-    /**
-     * When set to "true", _categoriesWrite is included in the ACL checks.
-     */
-    bool _categoriesWriteSet = false;
+  /**
+   * When set to "true", _categoriesWrite is included in the ACL checks.
+   */
+  bool _categoriesWriteSet = false;
 
-    /**
-     * Key: Category ID; value: access/no access
-     */
-    std::unordered_map<uint64_t, bool> _categoriesWrite;
+  /**
+   * Key: Category ID; value: access/no access
+   */
+  std::unordered_map<uint64_t, bool> _categoriesWrite;
 
-    /**
-     * When set to "true", _rolesRead is included in the ACL checks.
-     */
-    bool _rolesReadSet = false;
+  /**
+   * When set to "true", _rolesRead is included in the ACL checks.
+   */
+  bool _rolesReadSet = false;
 
-    /**
-     * Key: Role ID; value: access/no access
-     *
-     * ID 0 stands for "no role assigned"
-     */
-    std::unordered_map<uint64_t, bool> _rolesRead;
+  /**
+   * Key: Role ID; value: access/no access
+   *
+   * ID 0 stands for "no role assigned"
+   */
+  std::unordered_map<uint64_t, bool> _rolesRead;
 
-    /**
-     * When set to "true", _rolesWrite is included in the ACL checks.
-     */
-    bool _rolesWriteSet = false;
+  /**
+   * When set to "true", _rolesWrite is included in the ACL checks.
+   */
+  bool _rolesWriteSet = false;
 
-    /**
-     * Key: Role ID; value: access/no access
-     */
-    std::unordered_map<uint64_t, bool> _rolesWrite;
+  /**
+   * Key: Role ID; value: access/no access
+   */
+  std::unordered_map<uint64_t, bool> _rolesWrite;
 
-    /**
-     * When set to "true", _methods is included in the ACL checks.
-     */
-    bool _methodsSet = false;
+  /**
+   * When set to "true", _methods is included in the ACL checks.
+   */
+  bool _methodsSet = false;
 
-    /**
-     * Key: Method name; value: access/no access.
-     *
-     * Grant all entry: "*" => true
-     * Deny all entry: "*" => false
-     */
-    std::unordered_map<std::string, bool> _methods;
+  /**
+   * Key: Method name; value: access/no access.
+   *
+   * Grant all entry: "*" => true
+   * Deny all entry: "*" => false
+   */
+  std::unordered_map<std::string, bool> _methods;
 
-    /**
-     * When set to "true", _eventServerMethods is included in the ACL checks.
-     */
-    bool _eventServerMethodsSet = false;
+  /**
+   * When set to "true", _eventServerMethods is included in the ACL checks.
+   */
+  bool _eventServerMethodsSet = false;
 
-    /**
-     * Key: Method name; value: access/no access.
-     *
-     * Grant all entry: "*" => true
-     * Deny all entry: "*" => false
-     */
-    std::unordered_map<std::string, bool> _eventServerMethods;
+  /**
+   * Key: Method name; value: access/no access.
+   *
+   * Grant all entry: "*" => true
+   * Deny all entry: "*" => false
+   */
+  std::unordered_map<std::string, bool> _eventServerMethods;
 
-    /**
-     * When set to "true", _services is included in the ACL checks.
-     */
-    bool _servicesSet = false;
+  /**
+   * When set to "true", _services is included in the ACL checks.
+   */
+  bool _servicesSet = false;
 
-    /**
-     * Key: Service name; value: access/no access.
-     *
-     * Grant all entry: "*" => true
-     * Deny all entry: "*" => false
-     */
-    std::unordered_map<std::string, bool> _services;
-public:
-    Acl();
+  /**
+   * Key: Service name; value: access/no access.
+   *
+   * Grant all entry: "*" => true
+   * Deny all entry: "*" => false
+   */
+  std::unordered_map<std::string, bool> _services;
+ public:
+  Acl();
 
-    /**
-     * Destructor.
-     */
-    virtual ~Acl();
+  /**
+   * Destructor.
+   */
+  virtual ~Acl();
 
-    bool categoriesReadSet() { return _categoriesReadSet; }
-    bool categoriesWriteSet() { return _categoriesWriteSet; }
-    bool rolesReadSet() { return _rolesReadSet; }
-    bool rolesWriteSet() { return _rolesWriteSet; }
-    bool devicesReadSet() { return _devicesReadSet; }
-    bool devicesWriteSet() { return _devicesWriteSet; }
-    bool roomsReadSet() { return _roomsReadSet; }
-    bool roomsWriteSet() { return _roomsWriteSet; }
-    bool variablesReadSet() { return _variablesReadSet; }
-    bool variablesWriteSet() { return _variablesWriteSet; }
+  bool categoriesReadSet() { return _categoriesReadSet; }
+  bool categoriesWriteSet() { return _categoriesWriteSet; }
+  bool rolesReadSet() { return _rolesReadSet; }
+  bool rolesWriteSet() { return _rolesWriteSet; }
+  bool devicesReadSet() { return _devicesReadSet; }
+  bool devicesWriteSet() { return _devicesWriteSet; }
+  bool roomsReadSet() { return _roomsReadSet; }
+  bool roomsWriteSet() { return _roomsWriteSet; }
+  bool variablesReadSet() { return _variablesReadSet; }
+  bool variablesWriteSet() { return _variablesWriteSet; }
 
-    PVariable toVariable();
+  PVariable toVariable();
 
-    /**
-     * Converts a Variable structure to an ACL. This is not thread safe, so make sure no checks are being executed when calling this method!
-     *
-     * @param serializedData The structure to convert to an ACL.
-     */
-    void fromVariable(PVariable serializedData);
+  /**
+   * Converts a Variable structure to an ACL. This is not thread safe, so make sure no checks are being executed when calling this method!
+   *
+   * @param serializedData The structure to convert to an ACL.
+   */
+  void fromVariable(PVariable serializedData);
 
-    AclResult checkServiceAccess(std::string& serviceName);
-    AclResult checkCategoriesReadAccess(std::set<uint64_t>& categories);
-    AclResult checkCategoriesWriteAccess(std::set<uint64_t>& categories);
-    AclResult checkCategoryReadAccess(uint64_t category);
-    AclResult checkCategoryWriteAccess(uint64_t category);
-    AclResult checkRolesReadAccess(std::set<uint64_t>& roles);
-    AclResult checkRolesWriteAccess(std::set<uint64_t>& roles);
-    AclResult checkRoleReadAccess(uint64_t role);
-    AclResult checkRoleWriteAccess(uint64_t role);
-    AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
-    AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
-    AclResult checkEventServerMethodAccess(std::string& methodName);
-    AclResult checkMethodAccess(std::string& methodName);
-    AclResult checkMethodAndCategoryReadAccess(std::string& methodName, uint64_t categoryId);
-    AclResult checkMethodAndCategoryWriteAccess(std::string& methodName, uint64_t categoryId);
-    AclResult checkMethodAndRoleReadAccess(std::string& methodName, uint64_t roleId);
-    AclResult checkMethodAndRoleWriteAccess(std::string& methodName, uint64_t roleId);
-    AclResult checkMethodAndRoomReadAccess(std::string& methodName, uint64_t roomId);
-    AclResult checkMethodAndRoomWriteAccess(std::string& methodName, uint64_t roomId);
-    AclResult checkMethodAndDeviceWriteAccess(std::string& methodName, uint64_t peerId);
-    AclResult checkRoomReadAccess(uint64_t roomId);
-    AclResult checkRoomWriteAccess(uint64_t roomId);
-    AclResult checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
-    AclResult checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
-    AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
-    AclResult checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string& variableName);
+  AclResult checkServiceAccess(std::string &serviceName);
+  AclResult checkCategoriesReadAccess(std::set<uint64_t> &categories);
+  AclResult checkCategoriesWriteAccess(std::set<uint64_t> &categories);
+  AclResult checkCategoryReadAccess(uint64_t category);
+  AclResult checkCategoryWriteAccess(uint64_t category);
+  AclResult checkRolesReadAccess(std::set<uint64_t> &roles);
+  AclResult checkRolesWriteAccess(std::set<uint64_t> &roles);
+  AclResult checkRoleReadAccess(uint64_t role);
+  AclResult checkRoleWriteAccess(uint64_t role);
+  AclResult checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer);
+  AclResult checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer);
+  AclResult checkEventServerMethodAccess(std::string &methodName);
+  AclResult checkMethodAccess(std::string &methodName);
+  AclResult checkMethodAndCategoryReadAccess(std::string &methodName, uint64_t categoryId);
+  AclResult checkMethodAndCategoryWriteAccess(std::string &methodName, uint64_t categoryId);
+  AclResult checkMethodAndRoleReadAccess(std::string &methodName, uint64_t roleId);
+  AclResult checkMethodAndRoleWriteAccess(std::string &methodName, uint64_t roleId);
+  AclResult checkMethodAndRoomReadAccess(std::string &methodName, uint64_t roomId);
+  AclResult checkMethodAndRoomWriteAccess(std::string &methodName, uint64_t roomId);
+  AclResult checkMethodAndDeviceWriteAccess(std::string &methodName, uint64_t peerId);
+  AclResult checkNodeBlueVariableReadAccess(const std::string &nodeId, int32_t input);
+  AclResult checkNodeBlueVariableWriteAccess(const std::string &nodeId, int32_t input);
+  AclResult checkRoomReadAccess(uint64_t roomId);
+  AclResult checkRoomWriteAccess(uint64_t roomId);
+  AclResult checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
+  AclResult checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
+  AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string &variableName);
+  AclResult checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string &variableName);
 
-    std::string toString(int32_t indentation = 0);
+  std::string toString(int32_t indentation = 0);
 };
 
 typedef std::shared_ptr<Acl> PAcl;

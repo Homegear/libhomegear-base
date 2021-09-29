@@ -58,7 +58,7 @@ class FamilySettings {
   FamilySettings(BaseLib::SharedObjects *bl, int32_t familyId);
   virtual ~FamilySettings();
   void dispose();
-  void load(std::string filename);
+  void load(const std::string& filename);
   bool changed();
   PFamilySetting get(std::string name);
   std::string getString(std::string name);

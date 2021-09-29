@@ -31,56 +31,48 @@
 #include "UiGrid.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-UiGrid::UiGrid(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
+UiGrid::UiGrid(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-UiGrid::UiGrid(BaseLib::SharedObjects* baseLib, xml_node* node) : UiGrid(baseLib)
-{
-    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        _bl->out.printWarning("Warning: Unknown attribute for \"condition\": " + std::string(attr->name()));
-    }
-    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "width") width = Math::getNumber(value);
-        else if(name == "height") height = Math::getNumber(value);
-        else if(name == "columns") columns = Math::getNumber(value);
-        else if(name == "rows") rows = Math::getNumber(value);
-        else _bl->out.printWarning("Warning: Unknown node in \"condition\": " + name);
-    }
+UiGrid::UiGrid(BaseLib::SharedObjects *baseLib, xml_node *node) : UiGrid(baseLib) {
+  for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+    _bl->out.printWarning("Warning: Unknown attribute for \"condition\": " + std::string(attr->name()));
+  }
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string name(subNode->name());
+    std::string value(subNode->value());
+    if (name == "width") width = Math::getNumber(value);
+    else if (name == "height") height = Math::getNumber(value);
+    else if (name == "columns") columns = Math::getNumber(value);
+    else if (name == "rows") rows = Math::getNumber(value);
+    else _bl->out.printWarning("Warning: Unknown node in \"condition\": " + name);
+  }
 }
 
-UiGrid::UiGrid(UiGrid const& rhs)
-{
-    _bl = rhs._bl;
+UiGrid::UiGrid(UiGrid const &rhs) {
+  _bl = rhs._bl;
 
-    width = rhs.width;
-    height = rhs.height;
-    columns = rhs.columns;
-    rows = rhs.rows;
+  width = rhs.width;
+  height = rhs.height;
+  columns = rhs.columns;
+  rows = rhs.rows;
 }
 
-UiGrid& UiGrid::operator=(const UiGrid& rhs)
-{
-    if(&rhs == this) return *this;
+UiGrid &UiGrid::operator=(const UiGrid &rhs) {
+  if (&rhs == this) return *this;
 
-    _bl = rhs._bl;
+  _bl = rhs._bl;
 
-    width = rhs.width;
-    height = rhs.height;
-    columns = rhs.columns;
-    rows = rhs.rows;
+  width = rhs.width;
+  height = rhs.height;
+  columns = rhs.columns;
+  rows = rhs.rows;
 
-    return *this;
+  return *this;
 }
 
 }

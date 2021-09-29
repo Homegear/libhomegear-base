@@ -186,7 +186,7 @@ class TcpSocket : public IQueue {
     std::queue<std::shared_ptr<TcpPacket>> backlog;
 
     TcpClientData() {
-      buffer.resize(1024);
+      buffer.resize(4096);
     }
   };
   typedef std::shared_ptr<TcpClientData> PTcpClientData;
@@ -407,7 +407,7 @@ class TcpSocket : public IQueue {
    *
    * @param buffer The buffer to fill.
    * @param bufferSize The size of the buffer.
-   * @returns The number of bytes read. The returned value is always greater than 0.
+   * @returns The number of bytes read. The returned value is always greater than 0 (in all other cases exceptions are thrown).
    * @throws SocketOperationException Thrown when socket is nullptr.
    * @throws SocketTimeOutException Thrown when reading times out.
    * @throws SocketClosedException Thrown when socket is closed.
@@ -420,7 +420,7 @@ class TcpSocket : public IQueue {
    * @param buffer The buffer to fill.
    * @param bufferSize The size of the buffer.
    * @param[out] moreData If true, call proofread immediately again (without calling e. g. select first).
-   * @returns The number of bytes read. The returned value is always greater than 0.
+   * @returns The number of bytes read. The returned value is always greater than 0 (in all other cases exceptions are thrown).
    * @throws SocketOperationException Thrown when socket is nullptr.
    * @throws SocketTimeOutException Thrown when reading times out.
    * @throws SocketClosedException Thrown when socket is closed.
@@ -560,6 +560,12 @@ class TcpSocket : public IQueue {
    * @return The number of connected clients.
    */
   int32_t clientCount();
+
+  /**
+   * Returns the size of the packet processing queue.
+   * @return Returns the size of the packet processing queue.
+   */
+  uint32_t processingQueueSize();
 
   /**
    * Returns the distinguished name of the client certificate. This method only returns a non empty string if

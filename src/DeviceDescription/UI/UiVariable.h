@@ -40,50 +40,52 @@
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiVariable;
 
 typedef std::shared_ptr<UiVariable> PUiVariable;
 
-class UiVariable
-{
-public:
-    UiVariable(BaseLib::SharedObjects* baseLib);
-    UiVariable(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiVariable(UiVariable const& rhs);
-    virtual ~UiVariable() = default;
+class UiVariable {
+ public:
+  UiVariable(BaseLib::SharedObjects *baseLib);
+  UiVariable(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiVariable(UiVariable const &rhs);
+  virtual ~UiVariable() = default;
 
-    UiVariable& operator=(const UiVariable& rhs);
+  UiVariable &operator=(const UiVariable &rhs);
 
-    //Elements
-    int32_t familyId = -1;
-    int32_t deviceTypeId = -1;
-    int32_t channel = -1;
-    std::string name;
-    PVariable value;
+  //Elements
+  int32_t familyId = -1;
+  int32_t deviceTypeId = -1;
+  int32_t channel = -1;
+  std::string name;
+  PVariable value;
 
-    //Properties
-    bool visualizeInOverview = true;
-    std::string unit;
-    PVariable minimumValue;
-    PVariable maximumValue;
-    PVariable minimumValueScaled;
-    PVariable maximumValueScaled;
+  //Properties
+  std::string label;
+  std::string description;
+  std::string types;
+  uint32_t role = 0;
+  bool visualizeInOverview = true;
+  std::string unit;
+  PVariable minimumValue;
+  PVariable maximumValue;
+  PVariable minimumValueScaled;
+  PVariable maximumValueScaled;
+  PVariable automationInfo;
 
-    //Rendering
-    std::list<PUiCondition> rendering;
+  //Rendering
+  std::list<PUiCondition> rendering;
 
-    //Helpers
-    uint64_t peerId = 0;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Helpers
+  uint64_t peerId = 0;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

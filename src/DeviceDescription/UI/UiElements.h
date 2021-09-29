@@ -38,62 +38,59 @@
 #include <memory>
 #include <mutex>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 /**
  * Class holding information on how UI elements look like. It is used to load all UI elements.
  */
-class UiElements
-{
-public:
-    struct UiVariableInfo
-    {
-        uint64_t peerId = 0;
-        int32_t channel = -1;
-        std::string name;
-        PVariable value;
-        PVariable minimumValue;
-        PVariable maximumValue;
-        PVariable minimumValueScaled;
-        PVariable maximumValueScaled;
-    };
-    typedef std::shared_ptr<UiVariableInfo> PUiVariableInfo;
+class UiElements {
+ public:
+  struct UiVariableInfo {
+    uint64_t peerId = 0;
+    int32_t channel = -1;
+    std::string name;
+    PVariable value;
+    std::string unit;
+    PVariable minimumValue;
+    PVariable maximumValue;
+    PVariable minimumValueScaled;
+    PVariable maximumValueScaled;
+    PVariable rendering;
+  } __attribute__((aligned(128)));
+  typedef std::shared_ptr<UiVariableInfo> PUiVariableInfo;
 
-    struct UiPeerInfo
-    {
-        std::vector<std::vector<PUiVariableInfo>> inputPeers;
-        std::vector<std::vector<PUiVariableInfo>> outputPeers;
-    };
-    typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
+  struct UiPeerInfo {
+    std::vector<std::vector<PUiVariableInfo>> inputPeers;
+    std::vector<std::vector<PUiVariableInfo>> outputPeers;
+  } __attribute__((aligned(64)));
+  typedef std::shared_ptr<UiPeerInfo> PUiPeerInfo;
 
-    UiElements(BaseLib::SharedObjects* baseLib);
-    virtual ~UiElements() = default;
-    void clear();
+  explicit UiElements(BaseLib::SharedObjects *baseLib);
+  virtual ~UiElements() = default;
+  void clear();
 
-    PVariable getUiElements(const std::string& language);
-    PHomegearUiElement getUiElement(const std::string& language, const std::string& id);
+  PVariable getUiElements(const std::string &language);
+  PHomegearUiElement getUiElement(const std::string &language, const std::string &id);
 
-    /**
-     * Returns an UI element and assigns peer IDs to it.
-     *
-     * @param language The language to return (e. g. "en-US")
-     * @param id The ID of the UI element
-     * @param peerInfo The peer IDs to assign
-     * @return Returns the UI element on success.
-     */
-    PHomegearUiElement getUiElement(const std::string& language, const std::string& id, PUiPeerInfo peerInfo);
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
-    std::mutex _uiInfoMutex;
-    std::unordered_map<std::string, std::unordered_map<std::string, PHomegearUiElement>> _uiInfo;
+  /**
+   * Returns an UI element and assigns peer IDs to it.
+   *
+   * @param language The language to return (e. g. "en-US")
+   * @param id The ID of the UI element
+   * @param peerInfo The peer IDs to assign
+   * @return Returns the UI element on success.
+   */
+  PHomegearUiElement getUiElement(const std::string &language, const std::string &id, PUiPeerInfo peerInfo);
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  std::mutex _uiInfoMutex;
+  std::unordered_map<std::string, std::unordered_map<std::string, PHomegearUiElement>> _uiInfo;
 
-    void load(const std::string& language);
+  void load(const std::string &language);
 };
 
 }
