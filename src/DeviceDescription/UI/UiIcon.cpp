@@ -31,57 +31,62 @@
 #include "UiIcon.h"
 #include "../../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib)
-{
-    _bl = baseLib;
+UiIcon::UiIcon(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-UiIcon::UiIcon(BaseLib::SharedObjects* baseLib, xml_node* node) : UiIcon(baseLib)
-{
-    for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    {
-        std::string name(attr->name());
-        std::string value(attr->value());
-        if(name == "id") id = value;
-        else _bl->out.printWarning("Warning: Unknown attribute for \"icon\": " + std::string(attr->name()));
-    }
-    for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-    {
-        std::string name(subNode->name());
-        std::string value(subNode->value());
-        if(name == "name") this->name = value;
-        else if(name == "color") color = value;
-        else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
-    }
+UiIcon::UiIcon(BaseLib::SharedObjects *baseLib, xml_node *node) : UiIcon(baseLib) {
+  for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+    std::string name(attr->name());
+    std::string value(attr->value());
+    if (name == "id") id = value;
+    else _bl->out.printWarning("Warning: Unknown attribute for \"icon\": " + std::string(attr->name()));
+  }
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string name(subNode->name());
+    std::string value(subNode->value());
+    if (name == "name") this->name = value;
+    else if (name == "color") color = value;
+    else _bl->out.printWarning("Warning: Unknown node in \"icon\": " + name);
+  }
 }
 
-UiIcon::UiIcon(UiIcon const& rhs)
-{
-    _bl = rhs._bl;
+UiIcon::UiIcon(UiIcon const &rhs) {
+  _bl = rhs._bl;
 
-    id = rhs.id;
+  id = rhs.id;
 
-    name = rhs.name;
-    color = rhs.color;
+  name = rhs.name;
+  color = rhs.color;
 }
 
-UiIcon& UiIcon::operator=(const UiIcon& rhs)
-{
-    if(&rhs == this) return *this;
+PUiIcon UiIcon::fromJson(BaseLib::SharedObjects *baseLib, const std::string &id, const PVariable &json) {
+  auto icon = std::make_shared<UiIcon>(baseLib);
+  icon->id = id;
 
-    _bl = rhs._bl;
+  auto iterator = json->structValue->find("color");
+  if (iterator != json->structValue->end()) icon->color = iterator->second->stringValue;
 
-    id = rhs.id;
+  iterator = json->structValue->find("name");
+  if (iterator != json->structValue->end()) icon->name = iterator->second->stringValue;
 
-    name = rhs.name;
-    color = rhs.color;
+  return icon;
+}
 
-    return *this;
+UiIcon &UiIcon::operator=(const UiIcon &rhs) {
+  if (&rhs == this) return *this;
+
+  _bl = rhs._bl;
+
+  id = rhs.id;
+
+  name = rhs.name;
+  color = rhs.color;
+
+  return *this;
 }
 
 }

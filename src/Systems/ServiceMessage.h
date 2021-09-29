@@ -28,53 +28,51 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
+#ifndef LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
+#define LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
 
-#include "../../Variable.h"
-#include <string>
-#include <unordered_map>
-#include <memory>
-
-using namespace rapidxml;
+#include "../Variable.h"
+#include "../Managers/TranslationManager.h"
 
 namespace BaseLib {
 
-class SharedObjects;
-
-namespace DeviceDescription {
-
-class UiControl;
-class HomegearUiElement;
-
-typedef std::shared_ptr<UiControl> PUiControl;
-
-class UiControl {
- public:
-  UiControl(BaseLib::SharedObjects *baseLib);
-  UiControl(BaseLib::SharedObjects *baseLib, xml_node *node);
-  UiControl(UiControl const &rhs);
-  virtual ~UiControl() = default;
-
-  UiControl &operator=(const UiControl &rhs);
-
-  //Attributes
-  std::string id;
-
-  //Elements
-  int32_t x = -1;
-  int32_t y = -1;
-  int32_t columns = 1;
-  int32_t rows = 1;
-  std::unordered_map<std::string, PVariable> metadata;
-
-  //Helpers
-  std::shared_ptr<HomegearUiElement> uiElement;
- protected:
-  BaseLib::SharedObjects *_bl = nullptr;
+enum class ServiceMessageType {
+  kGlobal = 0,
+  kFamily = 1,
+  kDevice = 2
 };
 
-}
+enum class ServiceMessagePriority {
+  kUndefined = 0,
+  kCritical = 1,
+  kError = 2,
+  kWarning = 3,
+  kInfo = 4,
+  kDebug = 5
+};
+
+class ServiceMessage {
+ public:
+  uint64_t databaseId = 0;
+  ServiceMessageType type = ServiceMessageType::kGlobal;
+  int32_t familyId = 0;
+  uint64_t peerId = 0;
+  int32_t channel = -1;
+  std::string variable;
+  std::string interface;
+  int32_t messageId = 0;
+  std::string messageSubId;
+  int32_t timestamp = 0;
+  std::string message;
+  std::list<std::string> variables;
+  int64_t value = 0;
+  ServiceMessagePriority priority = ServiceMessagePriority::kUndefined;
+  PVariable data;
+
+  PVariable serialize();
+};
+typedef std::shared_ptr<ServiceMessage> PServiceMessage;
+
 }
 
-#endif
+#endif //LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_

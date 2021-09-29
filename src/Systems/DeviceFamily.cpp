@@ -31,8 +31,7 @@
 #include "DeviceFamily.h"
 #include "../BaseLib.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 std::shared_ptr<DeviceDescription::Devices> DeviceFamily::getRpcDevices() { return _rpcDevices; }
 std::shared_ptr<ICentral> DeviceFamily::getCentral() { return _central; }
 bool DeviceFamily::hasPhysicalInterface() { return true; }
@@ -167,5 +166,4 @@ PVariable DeviceFamily::listKnownDeviceTypes(PRpcClientInfo clientInfo, bool cha
 }
 // }}}
 
-}
 }

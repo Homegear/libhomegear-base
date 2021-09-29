@@ -83,6 +83,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
     virtual void onRPCNewDevices(std::vector<uint64_t> &ids, PVariable deviceDescriptions) = 0;
     virtual void onRPCDeleteDevices(std::vector<uint64_t> &ids, PVariable deviceAddresses, PVariable deviceInfo) = 0;
     virtual void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values) = 0;
+    virtual void onServiceMessageEvent(const PServiceMessage &serviceMessage) = 0;
     virtual void onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) = 0;
     virtual BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) = 0;
     virtual uint64_t onGetRoomIdByName(std::string &name) = 0;
@@ -177,7 +178,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable getParamset(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel);
   virtual PVariable getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls);
   virtual PVariable getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkDeviceAcls, bool checkVariableAcls);
-  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls);
+  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnId, const std::string &language, bool checkAcls);
   virtual PVariable getSniffedDevices(PRpcClientInfo clientInfo) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
   virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
@@ -267,25 +268,27 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual void raiseRPCNewDevices(std::vector<uint64_t> &ids, PVariable deviceDescriptions);
   virtual void raiseRPCDeleteDevices(std::vector<uint64_t> &ids, PVariable deviceAddresses, PVariable deviceInfo);
   virtual void raiseEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values);
+  virtual void raiseServiceMessageEvent(const PServiceMessage &serviceMessage);
   virtual void raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait);
   virtual BaseLib::PVariable raiseInvokeRpc(std::string &methodName, BaseLib::PArray &parameters);
   virtual uint64_t raiseGetRoomIdByName(std::string &name);
   //End event handling
 
   //Physical device event handling
-  virtual bool onPacketReceived(std::string &senderID, std::shared_ptr<Packet> packet) = 0;
+  bool onPacketReceived(std::string &senderID, std::shared_ptr<Packet> packet) override = 0;
   //End physical device event handling
 
   // {{{ Peer event handling
   //Hooks
-  virtual void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink *eventHandler, std::map<int32_t, PEventHandler> &eventHandlers);
-  virtual void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler> &eventHandlers);
+  void onAddWebserverEventHandler(BaseLib::Rpc::IWebserverEventSink *eventHandler, std::map<int32_t, PEventHandler> &eventHandlers) override;
+  void onRemoveWebserverEventHandler(std::map<int32_t, PEventHandler> &eventHandlers) override;
 
-  virtual void onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values);
-  virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
-  virtual void onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values);
-  virtual void onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait);
-  virtual BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters);
+  void onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) override;
+  void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) override;
+  void onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values) override;
+  void onServiceMessageEvent(const PServiceMessage &serviceMessage) override;
+  void onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) override;
+  BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) override;
   // }}}
 
   virtual void setPeerId(uint64_t oldPeerId, uint64_t newPeerId);

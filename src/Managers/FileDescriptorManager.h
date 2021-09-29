@@ -47,7 +47,7 @@ struct FileDescriptor
 	int32_t id = -1;
 	std::atomic_int descriptor{-1};
 	gnutls_session_t tlsSession = nullptr;
-};
+} __attribute__((aligned(16)));
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 

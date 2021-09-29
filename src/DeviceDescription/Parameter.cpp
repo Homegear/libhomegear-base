@@ -69,6 +69,7 @@ void Parameter::parseXml(xml_node *node) {
         std::string propertyValue(propertyNode->value());
         if (propertyName == "readable") readable = propertyValue == "true";
         else if (propertyName == "writeable") writeable = propertyValue == "true";
+        else if (propertyName == "readOnInit") readOnInit = propertyValue == "true";
         else if (propertyName == "transmitted") transmitted = propertyValue == "true";
         else if (propertyName == "addonWriteable") { addonWriteable = (propertyValue == "true"); }
         else if (propertyName == "password") { password = (propertyValue == "true"); }
@@ -81,8 +82,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "signed") {
           isSignedSet = true;
           isSigned = (propertyValue == "true");
-        }
-        else if (propertyName == "control") control = propertyValue;
+        } else if (propertyName == "control") control = propertyValue;
         else if (propertyName == "unit") unit = propertyValue;
         else if (propertyName == "mandatory") mandatory = (propertyValue == "true");
         else if (propertyName == "formFieldType") formFieldType = propertyValue;
@@ -91,6 +91,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "resetAfterRestart") { resetAfterRestart = (propertyValue == "true"); }
         else if (propertyName == "ccu2Visible") { ccu2Visible = (propertyValue == "true"); }
         else if (propertyName == "linkedParameter") { linkedParameter = propertyValue; }
+        else if (propertyName == "priority") { priority = Math::getNumber(propertyValue); }
         else if (propertyName == "casts") {
           for (xml_attribute *attr = propertyNode->first_attribute(); attr; attr = attr->next_attribute()) {
             _bl->out.printWarning("Warning: Unknown attribute for \"casts\": " + std::string(attr->name()));
@@ -149,7 +150,24 @@ void Parameter::parseXml(xml_node *node) {
               }
 
               role.id = Math::getUnsignedNumber64(roleValue);
-              if (role.id != 0) roles.emplace(role.id, role);
+              if (role.id != 0) {
+                uint64_t middleGroupRoleId = 0;
+                uint64_t mainGroupRoleId = 0;
+
+                //{{{ Get parent roles
+                {
+                  uint64_t hexRoleId = BaseLib::Math::getNumber64(std::to_string(role.id), true);
+                  middleGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FFFF00, 6));
+                  mainGroupRoleId = BaseLib::Math::getNumber64(BaseLib::HelperFunctions::getHexString(hexRoleId & 0x00FF0000, 6));
+                  if (middleGroupRoleId == mainGroupRoleId || middleGroupRoleId == role.id) middleGroupRoleId = 0;
+                  if (mainGroupRoleId == role.id) mainGroupRoleId = 0;
+                }
+                //}}}
+
+                if (mainGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (middleGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                roles.emplace(role.id, role);
+              }
             } else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
           }
         } else _bl->out.printWarning("Warning: Unknown parameter property: " + propertyName);
@@ -365,7 +383,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
           if (variable->integerValue > parameter->maximumValue) variable->integerValue = parameter->maximumValue;
           else if (variable->integerValue < parameter->minimumValue) variable->integerValue = parameter->minimumValue;
           if (role.invert) {
-            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue = !((bool)variable->integerValue);
+            if (parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue = !((bool)variable->integerValue);
             else variable->integerValue = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue - parameter->minimumValue));
           }
           if (role.scale) variable->integerValue = std::lround(Math::scale((double)variable->integerValue, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));
@@ -378,7 +396,7 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
           if (variable->integerValue64 > parameter->maximumValue) variable->integerValue64 = parameter->maximumValue;
           else if (variable->integerValue64 < parameter->minimumValue) variable->integerValue64 = parameter->minimumValue;
           if (role.invert) {
-            if(parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue64 = !((bool)variable->integerValue64);
+            if (parameter->minimumValue == 0 && parameter->maximumValue <= 2) variable->integerValue64 = !((bool)variable->integerValue64);
             else variable->integerValue64 = parameter->minimumValue + ((parameter->maximumValue - parameter->minimumValue) - (variable->integerValue64 - parameter->minimumValue));
           }
           if (role.scale) variable->integerValue64 = std::llround(Math::scale((double)variable->integerValue64, role.scaleInfo.valueMin, role.scaleInfo.valueMax, role.scaleInfo.scaleMin, role.scaleInfo.scaleMax));

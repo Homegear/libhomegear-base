@@ -113,6 +113,10 @@ void ICentral::raiseEvent(std::string &source, uint64_t peerId, int32_t channel,
   if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onEvent(source, peerId, channel, variables, values);
 }
 
+void ICentral::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
+}
+
 void ICentral::raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
   if (_eventHandler) ((ICentralEventSink *)_eventHandler)->onRunScript(scriptInfo, wait);
 }
@@ -147,6 +151,10 @@ void ICentral::onRPCUpdateDevice(uint64_t id, int32_t channel, std::string addre
 
 void ICentral::onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) {
   raiseEvent(source, peerId, channel, variables, values);
+}
+
+void ICentral::onServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  raiseServiceMessageEvent(serviceMessage);
 }
 
 void ICentral::onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
@@ -562,7 +570,7 @@ PVariable ICentral::getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId
 
 PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (peer) return peer->getConfigParameter(clientInfo, channel, name);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -574,7 +582,7 @@ PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, std::string se
 
 PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string name) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) return peer->getConfigParameter(clientInfo, channel, name);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -586,7 +594,7 @@ PVariable ICentral::getConfigParameter(PRpcClientInfo clientInfo, uint64_t id, u
 
 PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::map<std::string, bool> fields) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (!peer) return Variable::createError(-2, "Unknown device.");
 
     return peer->getDeviceDescription(clientInfo, channel, fields);
@@ -599,7 +607,7 @@ PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, std::string 
 
 PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::map<std::string, bool> fields) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (!peer) return Variable::createError(-2, "Unknown device.");
 
     return peer->getDeviceDescription(clientInfo, channel, fields);
@@ -613,7 +621,7 @@ PVariable ICentral::getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id,
 PVariable ICentral::getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields, bool checkAcls) {
   try {
     if (id > 0) {
-      std::shared_ptr<Peer> peer(getPeer(id));
+      auto peer = getPeer(id);
       if (!peer) return Variable::createError(-2, "Unknown device.");
 
       return peer->getDeviceInfo(clientInfo, fields);
@@ -692,8 +700,8 @@ PVariable ICentral::getLinkInfo(PRpcClientInfo clientInfo, std::string senderSer
   try {
     if (senderSerialNumber.empty()) return Variable::createError(-2, "Given sender address is empty.");
     if (receiverSerialNumber.empty()) return Variable::createError(-2, "Given receiver address is empty.");
-    std::shared_ptr<Peer> sender(getPeer(senderSerialNumber));
-    std::shared_ptr<Peer> receiver(getPeer(receiverSerialNumber));
+    auto sender = getPeer(senderSerialNumber);
+    auto receiver = getPeer(receiverSerialNumber);
     if (!sender) return Variable::createError(-2, "Sender device not found.");
     if (!receiver) return Variable::createError(-2, "Receiver device not found.");
     return sender->getLinkInfo(clientInfo, senderChannel, receiver->getID(), receiverChannel);
@@ -708,8 +716,8 @@ PVariable ICentral::getLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, in
   try {
     if (senderId == 0) return Variable::createError(-2, "Sender id is not set.");
     if (receiverId == 0) return Variable::createError(-2, "Receiver id is not set.");
-    std::shared_ptr<Peer> sender(getPeer(senderId));
-    std::shared_ptr<Peer> receiver(getPeer(receiverId));
+    auto sender = getPeer(senderId);
+    auto receiver = getPeer(receiverId);
     if (!sender) return Variable::createError(-2, "Sender device not found.");
     if (!receiver) return Variable::createError(-2, "Receiver device not found.");
     return sender->getLinkInfo(clientInfo, senderChannel, receiver->getID(), receiverChannel);
@@ -722,7 +730,7 @@ PVariable ICentral::getLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, in
 
 PVariable ICentral::getLinkPeers(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (!peer) return Variable::createError(-2, "Unknown device.");
     return peer->getLinkPeers(clientInfo, channel, false);
   }
@@ -734,7 +742,7 @@ PVariable ICentral::getLinkPeers(PRpcClientInfo clientInfo, std::string serialNu
 
 PVariable ICentral::getLinkPeers(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(peerId));
+    auto peer = getPeer(peerId);
     if (!peer) return Variable::createError(-2, "Unknown device.");
     return peer->getLinkPeers(clientInfo, channel, true);
   }
@@ -747,7 +755,7 @@ PVariable ICentral::getLinkPeers(PRpcClientInfo clientInfo, uint64_t peerId, int
 PVariable ICentral::getLinks(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, int32_t flags) {
   try {
     if (serialNumber.empty()) return getLinks(clientInfo, 0, -1, flags);
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (!peer) return Variable::createError(-2, "Unknown device.");
     return getLinks(clientInfo, peer->getID(), channel, flags, false);
   }
@@ -772,7 +780,7 @@ PVariable ICentral::getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t
         array->arrayValue->insert(array->arrayValue->begin(), element->arrayValue->begin(), element->arrayValue->end());
       }
     } else {
-      std::shared_ptr<Peer> peer(getPeer(peerId));
+      auto peer = getPeer(peerId);
       if (!peer) return Variable::createError(-2, "Unknown device.");
       element = peer->getLink(clientInfo, channel, flags, false);
       array->arrayValue->insert(array->arrayValue->begin(), element->arrayValue->begin(), element->arrayValue->end());
@@ -787,8 +795,8 @@ PVariable ICentral::getLinks(PRpcClientInfo clientInfo, uint64_t peerId, int32_t
 
 PVariable ICentral::getName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
-    if (peer) return PVariable(new Variable(peer->getName(channel)));
+    auto peer = getPeer(id);
+    if (peer) return std::make_shared<Variable>(peer->getName(channel));
     return Variable::createError(-2, "Unknown device.");
   }
   catch (const std::exception &ex) {
@@ -846,11 +854,11 @@ PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNum
       PVariable paramset(new Variable(VariableType::tStruct));
       return paramset;
     } else {
-      std::shared_ptr<Peer> peer(getPeer(serialNumber));
+      auto peer = getPeer(serialNumber);
       if (!peer) return Variable::createError(-2, "Unknown device.");
       uint64_t remoteId = 0;
       if (!remoteSerialNumber.empty()) {
-        std::shared_ptr<Peer> remotePeer(getPeer(remoteSerialNumber));
+        auto remotePeer = getPeer(remoteSerialNumber);
         if (!remotePeer) {
           if (remoteSerialNumber != getSerialNumber()) return Variable::createError(-3, "Remote peer is unknown.");
         } else remoteId = remotePeer->getID();
@@ -866,7 +874,7 @@ PVariable ICentral::getParamset(PRpcClientInfo clientInfo, std::string serialNum
 
 PVariable ICentral::getParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(peerId));
+    auto peer = getPeer(peerId);
     if (!peer) return Variable::createError(-2, "Unknown device.");
     return peer->getParamset(clientInfo, channel, type, remoteId, remoteChannel, checkAcls);
   }
@@ -882,10 +890,10 @@ PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, std::strin
       PVariable descriptions(new Variable(VariableType::tStruct));
       return descriptions;
     } else {
-      std::shared_ptr<Peer> peer(getPeer(serialNumber));
+      auto peer = getPeer(serialNumber);
       uint64_t remoteId = 0;
       if (!remoteSerialNumber.empty()) {
-        std::shared_ptr<Peer> remotePeer(getPeer(remoteSerialNumber));
+        auto remotePeer = getPeer(remoteSerialNumber);
         if (remotePeer) remoteId = remotePeer->getID();
       }
       if (peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel, false);
@@ -900,7 +908,7 @@ PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, std::strin
 
 PVariable ICentral::getParamsetDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, bool checkAcls) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) return peer->getParamsetDescription(clientInfo, channel, type, remoteId, remoteChannel, checkAcls);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -917,10 +925,10 @@ PVariable ICentral::getParamsetId(PRpcClientInfo clientInfo, std::string serialN
       if (type != ParameterGroup::Type::Enum::config) return Variable::createError(-3, "Unknown parameter set.");
       return PVariable(new Variable(std::string("rf_homegear_central_master")));
     } else {
-      std::shared_ptr<Peer> peer(getPeer(serialNumber));
+      auto peer = getPeer(serialNumber);
       uint64_t remoteId = 0;
       if (!remoteSerialNumber.empty()) {
-        std::shared_ptr<Peer> remotePeer(getPeer(remoteSerialNumber));
+        auto remotePeer = getPeer(remoteSerialNumber);
         if (remotePeer) remoteId = remotePeer->getID();
       }
       if (peer) return peer->getParamsetId(clientInfo, channel, type, remoteId, remoteChannel);
@@ -935,7 +943,7 @@ PVariable ICentral::getParamsetId(PRpcClientInfo clientInfo, std::string serialN
 
 PVariable ICentral::getParamsetId(PRpcClientInfo clientInfo, uint64_t peerId, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(peerId));
+    auto peer = getPeer(peerId);
     if (!peer) return Variable::createError(-2, "Unknown device.");
     return peer->getParamsetId(clientInfo, channel, type, remoteId, remoteChannel);
   }
@@ -951,13 +959,13 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
     if (filterType == 1) //Serial number
     {
       std::shared_ptr<Peer> peer = getPeer(filterValue);
-      if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+      if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
     } else if (filterType == 2) //Physical address
     {
       int32_t address = Math::getNumber(filterValue);
       if (address != 0) {
         std::shared_ptr<Peer> peer = getPeer(address);
-        if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer && (!checkAcls || clientInfo->acls->checkDeviceReadAccess(peer))) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 3) //Type id
     {
@@ -967,7 +975,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getDeviceType() == type) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getDeviceType() == type) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 4) //Type string
     {
@@ -976,7 +984,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getTypeString() == filterValue) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getRpcTypeString() == filterValue) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 5) //Name
     {
@@ -985,7 +993,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->getName().find(filterValue) != std::string::npos) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->getName().find(filterValue) != std::string::npos) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 6) //Pending config
     {
@@ -994,7 +1002,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getConfigPending()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getConfigPending()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 7) //Unreachable
     {
@@ -1003,7 +1011,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 8) //Reachable
     {
@@ -1012,7 +1020,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (!peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (!peer->serviceMessages->getUnreach()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     } else if (filterType == 9) //Low battery
     {
@@ -1021,7 +1029,7 @@ PVariable ICentral::getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std
       for (auto &peer : peers) {
         if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-        if (peer->serviceMessages->getLowbat()) ids->arrayValue->push_back(PVariable(new Variable((int32_t)peer->getID())));
+        if (peer->serviceMessages->getLowbat()) ids->arrayValue->push_back(std::make_shared<Variable>(peer->getID()));
       }
     }
     return ids;
@@ -1077,7 +1085,7 @@ PVariable ICentral::getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
   return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId, bool checkAcls) {
+PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId, const std::string &language, bool checkAcls) {
   try {
     std::vector<std::shared_ptr<Peer>> peers = getPeers();
 
@@ -1085,7 +1093,7 @@ PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId,
     for (auto &peer : peers) {
       if (checkAcls && !clientInfo->acls->checkDeviceReadAccess(peer)) continue;
 
-      PVariable messages = peer->getServiceMessages(clientInfo, returnId);
+      PVariable messages = peer->getServiceMessages(clientInfo, returnId, language);
       if (!messages->arrayValue->empty()) serviceMessages->arrayValue->insert(serviceMessages->arrayValue->end(), messages->arrayValue->begin(), messages->arrayValue->end());
     }
     return serviceMessages;
@@ -1098,7 +1106,7 @@ PVariable ICentral::getServiceMessages(PRpcClientInfo clientInfo, bool returnId,
 
 PVariable ICentral::getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (peer) return peer->getValue(clientInfo, channel, valueKey, requestFromDevice, asynchronous);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -1110,7 +1118,7 @@ PVariable ICentral::getValue(PRpcClientInfo clientInfo, std::string serialNumber
 
 PVariable ICentral::getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) return peer->getValue(clientInfo, channel, valueKey, requestFromDevice, asynchronous);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -1122,7 +1130,7 @@ PVariable ICentral::getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t ch
 
 PVariable ICentral::getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, const std::unordered_set<std::string> &fields) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) return peer->getVariableDescription(clientInfo, channel, valueKey, fields);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -1308,7 +1316,7 @@ PVariable ICentral::removeChannelFromRoom(PRpcClientInfo clientInfo, uint64_t pe
 
 PVariable ICentral::reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (!peer) return Variable::createError(-2, "Peer not found.");
     return peer->reportValueUsage(clientInfo);
   }
@@ -1343,7 +1351,7 @@ PVariable ICentral::rssiInfo(PRpcClientInfo clientInfo, bool checkAcls) {
 PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_t newPeerId) {
   try {
     if (oldPeerId == 0 || oldPeerId >= 0x40000000) return Variable::createError(-100, "The current peer ID is invalid.");
-    std::shared_ptr<Peer> peer(getPeer(oldPeerId));
+    auto peer = getPeer(oldPeerId);
     if (!peer) return Variable::createError(-2, "Peer not found.");
     PVariable result = peer->setId(clientInfo, newPeerId);
     if (result->errorStruct) return result;
@@ -1374,7 +1382,7 @@ PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_
     raiseRPCNewDevices(newIds, deviceDescriptions);
     // }}}
 
-    return PVariable(new Variable(VariableType::tVoid));
+    return std::make_shared<Variable>(VariableType::tVoid);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -1386,8 +1394,8 @@ PVariable ICentral::setLinkInfo(PRpcClientInfo clientInfo, std::string senderSer
   try {
     if (senderSerialNumber.empty()) return Variable::createError(-2, "Given sender address is empty.");
     if (receiverSerialNumber.empty()) return Variable::createError(-2, "Given receiver address is empty.");
-    std::shared_ptr<Peer> sender(getPeer(senderSerialNumber));
-    std::shared_ptr<Peer> receiver(getPeer(receiverSerialNumber));
+    auto sender = getPeer(senderSerialNumber);
+    auto receiver = getPeer(receiverSerialNumber);
     if (!sender) return Variable::createError(-2, "Sender device not found.");
     if (!receiver) return Variable::createError(-2, "Receiver device not found.");
     PVariable result1 = sender->setLinkInfo(clientInfo, senderChannel, receiver->getID(), receiverChannel, name, description);
@@ -1406,8 +1414,8 @@ PVariable ICentral::setLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, in
   try {
     if (senderId == 0) return Variable::createError(-2, "Sender id is not set.");
     if (receiverId == 0) return Variable::createError(-2, "Receiver id is not set.");
-    std::shared_ptr<Peer> sender(getPeer(senderId));
-    std::shared_ptr<Peer> receiver(getPeer(receiverId));
+    auto sender = getPeer(senderId);
+    auto receiver = getPeer(receiverId);
     if (!sender) return Variable::createError(-2, "Sender device not found.");
     if (!receiver) return Variable::createError(-2, "Receiver device not found.");
     PVariable result1 = sender->setLinkInfo(clientInfo, senderChannel, receiver->getID(), receiverChannel, name, description);
@@ -1424,7 +1432,7 @@ PVariable ICentral::setLinkInfo(PRpcClientInfo clientInfo, uint64_t senderId, in
 
 PVariable ICentral::setName(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::string name) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) {
       peer->setName(channel, name);
       return PVariable(new Variable(VariableType::tVoid));
@@ -1439,7 +1447,7 @@ PVariable ICentral::setName(PRpcClientInfo clientInfo, uint64_t id, int32_t chan
 
 PVariable ICentral::setValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, PVariable value, bool wait) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(serialNumber));
+    auto peer = getPeer(serialNumber);
     if (peer) return peer->setValue(clientInfo, channel, valueKey, value, wait);
     return Variable::createError(-2, "Unknown device.");
   }
@@ -1451,7 +1459,7 @@ PVariable ICentral::setValue(PRpcClientInfo clientInfo, std::string serialNumber
 
 PVariable ICentral::setValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, PVariable value, bool wait) {
   try {
-    std::shared_ptr<Peer> peer(getPeer(id));
+    auto peer = getPeer(id);
     if (peer) return peer->setValue(clientInfo, channel, valueKey, value, wait);
     return Variable::createError(-2, "Unknown device.");
   }

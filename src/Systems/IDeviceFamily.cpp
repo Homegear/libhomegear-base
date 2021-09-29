@@ -31,8 +31,7 @@
 #include "IDeviceFamily.h"
 #include "../BaseLib.h"
 
-namespace BaseLib {
-namespace Systems {
+namespace BaseLib::Systems {
 FamilyType IDeviceFamily::type() { return _type; }
 int32_t IDeviceFamily::getFamily() { return _family; }
 std::string IDeviceFamily::getName() { return _name; }
@@ -44,12 +43,19 @@ IDeviceFamily::IDeviceFamily(BaseLib::SharedObjects *bl, IFamilyEventSink *event
   _name = name;
   _type = type;
   if (_eventHandler) setEventHandler(_eventHandler);
-  std::string filename = getName();
-  HelperFunctions::toLower(filename);
-  filename = _bl->settings.familyConfigPath() + HelperFunctions::stripNonAlphaNumeric(filename) + ".conf";
+
+  std::string namePrefix = getName();
+  HelperFunctions::toLower(namePrefix);
+  namePrefix = HelperFunctions::stripNonAlphaNumeric(namePrefix);
+
+  auto settingsFilename = _bl->settings.familyConfigPath() + namePrefix + ".conf";
   _settings.reset(new FamilySettings(bl, id));
-  _bl->out.printInfo("Info: Loading settings from " + filename);
-  _settings->load(filename);
+  _bl->out.printInfo("Info: Loading settings from " + settingsFilename);
+  _settings->load(settingsFilename);
+
+  auto translationPath = _bl->settings.uiTranslationPath() + namePrefix + "/";
+  _bl->out.printInfo("Info: Loading translations from " + translationPath);
+  TranslationManager::load(translationPath);
 }
 
 IDeviceFamily::~IDeviceFamily() {
@@ -112,6 +118,10 @@ void IDeviceFamily::raiseEvent(std::string &source, uint64_t peerID, int32_t cha
   if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onEvent(source, peerID, channel, variables, values);
 }
 
+void IDeviceFamily::raiseServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onServiceMessageEvent(serviceMessage);
+}
+
 void IDeviceFamily::raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
   if (_eventHandler) ((IFamilyEventSink *)_eventHandler)->onRunScript(scriptInfo, wait);
 }
@@ -165,6 +175,10 @@ void IDeviceFamily::onEvent(std::string &source, uint64_t peerID, int32_t channe
   raiseEvent(source, peerID, channel, variables, values);
 }
 
+void IDeviceFamily::onServiceMessageEvent(const PServiceMessage &serviceMessage) {
+  raiseServiceMessageEvent(serviceMessage);
+}
+
 void IDeviceFamily::onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) {
   raiseRunScript(scriptInfo, wait);
 }
@@ -194,5 +208,4 @@ bool IDeviceFamily::locked() {
   return _locked;
 }
 
-}
 }

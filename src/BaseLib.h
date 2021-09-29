@@ -48,6 +48,7 @@
 #include "Managers/SerialDeviceManager.h"
 #include "Managers/FileDescriptorManager.h"
 #include "Managers/ThreadManager.h"
+#include "Managers/TranslationManager.h"
 #include "HelperFunctions/HelperFunctions.h"
 #include "HelperFunctions/Color.h"
 #include "HelperFunctions/Math.h"
@@ -85,142 +86,150 @@
 #include "Sockets/TcpSocket.h"
 #include "Sockets/UdpSocket.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 /**
  * This is the base library main class.
  * It is used to share objects and data between all modules and the main program.
  */
-class SharedObjects
-{
-public:
-    SharedObjects(const SharedObjects&) = delete;  //Copy constructor
-    SharedObjects& operator=(const SharedObjects&) = delete; //Copy assignment operator
+class SharedObjects {
+ public:
+  SharedObjects(const SharedObjects &) = delete;  //Copy constructor
+  SharedObjects &operator=(const SharedObjects &) = delete; //Copy assignment operator
 
-	/**
-	 * The current debug level for logging.
-	 */
-	int32_t debugLevel = 3;
+  /**
+   * The current debug level for logging.
+   */
+  int32_t debugLevel = 3;
 
-	/*
-	 * User ID of the Homegear process.
-	 */
-	uid_t userId = 0;
+  /*
+   * User ID of the Homegear process.
+   */
+  uid_t userId = 0;
 
-	/*
-	 * Group ID of the Homegear process.
-	 */
-	gid_t groupId = 0;
+  /*
+   * Group ID of the Homegear process.
+   */
+  gid_t groupId = 0;
 
-	/**
-	 * True when Homegear is still starting. It is set to false, when start up is complete and isOpen() of all interfaces is "true" (plus 30 seconds).
-	 */
-	std::atomic_bool booting{ true };
+  /**
+   * True when Homegear is still starting. It is set to false, when start up is complete and isOpen() of all interfaces is "true" (plus 30 seconds).
+   */
+  std::atomic_bool booting{true};
 
-	/**
-	 * True when Homegear received signal 15.
-	 */
-	std::atomic_bool shuttingDown{ false };
+  /**
+   * True when Homegear received signal 15.
+   */
+  std::atomic_bool shuttingDown{false};
 
-	/**
-	 * The FileDescriptorManager object where all file or socket descriptors should be registered.
-	 * This should be done to avoid errors as it can happen, that a closed file descriptor is reopened and suddenly valid again without the object using the old descriptor noticing it.
-	 */
-	FileDescriptorManager fileDescriptorManager;
+  /**
+   * True when Homegear runs in slave mode of a master/slave installation.
+   */
+  std::atomic_bool slaveMode{false};
 
-	/**
-	 * The serial device manager can be used to access one serial device across multiple modules.
-	 */
-	SerialDeviceManager serialDeviceManager;
+  /**
+   * True when maintenance mode is enabled.
+   */
+  std::atomic_bool maintenanceMode{false};
 
-	/**
-	 * The main.conf settings.
-	 */
-	Settings settings;
+  /**
+   * The FileDescriptorManager object where all file or socket descriptors should be registered.
+   * This should be done to avoid errors as it can happen, that a closed file descriptor is reopened and suddenly valid again without the object using the old descriptor noticing it.
+   */
+  FileDescriptorManager fileDescriptorManager;
 
-	/**
-	 * Provides database access.
-	 */
-	std::shared_ptr<Database::IDatabaseController> db;
+  /**
+   * The serial device manager can be used to access one serial device across multiple modules.
+   */
+  SerialDeviceManager serialDeviceManager;
 
-	/**
-	 * Port, the non-ssl RPC server listens on.
-	 */
-	uint32_t rpcPort = 0;
+  /**
+   * The main.conf settings.
+   */
+  Settings settings;
 
-	/**
-	 * Return the time of the creation of the object (the Homegear start time).
-	 *
-	 * @return The unix epoch time in milliseconds.
-	 */
-	int64_t getStartTime();
+  /**
+   * Provides database access.
+   */
+  std::shared_ptr<Database::IDatabaseController> db;
 
-	/**
-	 * Set the start time.
-	 */
-	void setStartTime(int64_t time);
+  /**
+   * Port, the non-ssl RPC server listens on.
+   */
+  uint32_t rpcPort = 0;
 
-	/**
-	 * Object to store information about running updates and to only allow one update at a time.
-	 */
-	Systems::UpdateInfo deviceUpdateInfo;
+  /**
+   * Return the time of the creation of the object (the Homegear start time).
+   *
+   * @return The unix epoch time in milliseconds.
+   */
+  int64_t getStartTime();
 
-	/**
-	 * Functions to ease your life for a lot of standard operations. As all methods are static, this variable is only
-	 * kept for backwards compatibility.
-	 */
-	HelperFunctions hf;
+  /**
+   * Set the start time.
+   */
+  void setStartTime(int64_t time);
 
-	/**
-	 * Functions for io operations.
-	 */
-	Io io;
+  /**
+   * Object to store information about running updates and to only allow one update at a time.
+   */
+  Systems::UpdateInfo deviceUpdateInfo;
 
-	/**
-	 * The main output object to print text to the standard and error output.
-	 */
-	Output out;
+  /**
+   * Functions to ease your life for a lot of standard operations. As all methods are static, this variable is only
+   * kept for backwards compatibility.
+   */
+  HelperFunctions hf;
 
-	/**
-	 * The thread manager.
-	 */
-	ThreadManager threadManager;
+  /**
+   * Functions for io operations.
+   */
+  Io io;
 
-	/**
-	 * Global service messages.
-	 */
-	Systems::GlobalServiceMessages globalServiceMessages;
+  /**
+   * The main output object to print text to the standard and error output.
+   */
+  Output out;
 
-	/**
-	 * Homegear Daisy Chain
-	 */
-	std::shared_ptr<Hgdc> hgdc;
+  /**
+   * The thread manager.
+   */
+  ThreadManager threadManager;
 
-	/**
-	 * Default signal mask
-	 */
-	static sigset_t defaultSignalMask;
+  /**
+   * Global service messages.
+   */
+  Systems::GlobalServiceMessages globalServiceMessages;
 
-	/**
-	 * Main constructor.
-	 *
-	 * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time. This is only relevant when using the thread manager.
-	 */
-	explicit SharedObjects(bool testMaxThreadCount = false);
+  /**
+   * Homegear Daisy Chain
+   */
+  std::shared_ptr<Hgdc> hgdc;
 
-	/**
-	 * Destructor.
-	 */
-	virtual ~SharedObjects();
+  /**
+   * Default signal mask
+   */
+  static sigset_t defaultSignalMask;
 
-	/**
-	 * Returns the Homegear version.
-	 * @return The Homegear version string.
-	 */
-	static std::string version();
-private:
-	int64_t _startTime = 0;
+  /**
+   * Main constructor.
+   *
+   * @param testMaxThreadCount If set to "true", the library tests the maximum number of threads possible. This takes some time. This is only relevant when using the thread manager.
+   */
+  explicit SharedObjects(bool testMaxThreadCount = false);
+
+  /**
+   * Destructor.
+   */
+  virtual ~SharedObjects();
+
+  /**
+   * Returns the Homegear version.
+   * @return The Homegear version string.
+   */
+  static std::string version();
+ private:
+  int64_t _startTime = 0;
 };
 }
 #endif

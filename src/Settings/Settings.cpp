@@ -77,6 +77,7 @@ void Settings::reset() {
   _databaseMemoryJournal = false;
   _databaseWALJournal = true;
   _databasePath = "";
+  _factoryDatabasePath = "";
   _databaseBackupPath = "";
   _databaseMaxBackups = 10;
   _logfilePath = "/var/log/homegear/";
@@ -95,6 +96,10 @@ void Settings::reset() {
   _nodeBlueServerMaxConnections = 20;
   _maxNodeThreadsPerProcess = 80;
   _nodeBlueWatchdogTimeout = -1;
+  _nodeBlueManualClientStart = false;
+  _nodeRedJsPath = "";
+  _nodeRedPort = 1999;
+  _nodeOptions = "--max_old_space_size=400";
   _ipcThreadCount = 10;
   _ipcServerMaxConnections = 20;
   _cliServerMaxConnections = 50;
@@ -110,9 +115,6 @@ void Settings::reset() {
   _packetQueueThreadPolicy = SCHED_FIFO;
   _packetReceivedThreadPriority = 0;
   _packetReceivedThreadPolicy = SCHED_OTHER;
-  _eventThreadCount = 5;
-  _eventThreadPriority = 0;
-  _eventThreadPolicy = SCHED_OTHER;
   _familyConfigPath = "/etc/homegear/families/";
   _deviceDescriptionPath = "/etc/homegear/devices/";
   _clientSettingsPath = "/etc/homegear/rpcclients.conf";
@@ -136,6 +138,7 @@ void Settings::reset() {
   _nodeBlueEventLimit1 = 100;
   _nodeBlueEventLimit2 = 300;
   _nodeBlueEventLimit3 = 400;
+  _nodeBlueUriPathsExcludedFromLogin = "";
   _adminUiPath = "/var/lib/homegear/admin-ui/";
   _adminUiPathPermissions = 504;
   _adminUiPathUser = "";
@@ -144,6 +147,7 @@ void Settings::reset() {
   _uiPathPermissions = 504;
   _uiPathUser = "";
   _uiPathGroup = "";
+  _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
   _firmwarePath = "/usr/share/homegear/firmware/";
   _tempPath = "/var/lib/homegear/tmp/";
   _lockFilePath = "/var/lock/";
@@ -152,7 +156,6 @@ void Settings::reset() {
   _lockFilePathGroup = "";
   _phpIniPath = "/etc/homegear/php.ini";
   _tunnelClients.clear();
-  _clientAddressesToReplace.clear();
   _gpioPath = "/sys/class/gpio/";
   _exportGpios.clear();
   _oauthCertPath = "";
@@ -282,15 +285,10 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (_dataPath.back() != '/') _dataPath.push_back('/');
           if (_writeableDataPath == _executablePath) _writeableDataPath = _dataPath;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPath set to " + _dataPath);
-        } else if (name == "databasepath" && _dataPath.empty() && !value.empty()) {
-          _dataPath = value.substr(0, value.find_last_of("/") + 1);;
-          if (_dataPath.empty()) _dataPath = _executablePath;
-          if (_dataPath.back() != '/') _dataPath.push_back('/');
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPath set to " + _dataPath);
         } else if (name == "datapathpermissions") {
           _dataPathPermissions = Math::getOctalNumber(value);
           if (_dataPathPermissions == 0) _dataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathPermissions set to " + _dataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathPermissions set to " + std::to_string(_dataPathPermissions));
         } else if (name == "datapathuser") {
           _dataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: dataPathUser set to " + _dataPathUser);
@@ -305,7 +303,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "writeabledatapathpermissions") {
           _writeableDataPathPermissions = Math::getOctalNumber(value);
           if (_writeableDataPathPermissions == 0) _writeableDataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathPermissions set to " + _writeableDataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathPermissions set to " + std::to_string(_writeableDataPathPermissions));
         } else if (name == "writeabledatapathuser") {
           _writeableDataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: writeableDataPathUser set to " + _writeableDataPathUser);
@@ -320,7 +318,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "familydatapathpermissions") {
           _familyDataPathPermissions = Math::getOctalNumber(value);
           if (_familyDataPathPermissions == 0) _familyDataPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathPermissions set to " + _familyDataPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathPermissions set to " + std::to_string(_familyDataPathPermissions));
         } else if (name == "familydatapathuser") {
           _familyDataPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: familyDataPathUser set to " + _familyDataPathUser);
@@ -340,10 +338,18 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _databasePath = value;
           if (!_databasePath.empty() && _databasePath.back() != '/') _databasePath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databasePath set to " + _databasePath);
+        } else if (name == "factorydatabasepath") {
+          _factoryDatabasePath = value;
+          if (!_factoryDatabasePath.empty() && _factoryDatabasePath.back() != '/') _factoryDatabasePath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: factoryDatabasePath set to " + _factoryDatabasePath);
         } else if (name == "databasebackuppath") {
           _databaseBackupPath = value;
           if (!_databaseBackupPath.empty() && _databaseBackupPath.back() != '/') _databaseBackupPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: databaseBackupPath set to " + _databaseBackupPath);
+        } else if (name == "factorydatabasebackuppath") {
+          _factoryDatabaseBackupPath = value;
+          if (!_factoryDatabaseBackupPath.empty() && _factoryDatabaseBackupPath.back() != '/') _factoryDatabaseBackupPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: factoryDatabaseBackupPath set to " + _factoryDatabaseBackupPath);
         } else if (name == "databasemaxbackups") {
           _databaseMaxBackups = Math::getNumber(value);
           if (_databaseMaxBackups > 10000) _databaseMaxBackups = 10000;
@@ -411,6 +417,9 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "nodeblueeventlimit3") {
           _nodeBlueEventLimit3 = Math::getUnsignedNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueEventLimit3 set to " + std::to_string(_nodeBlueEventLimit3));
+        } else if (name == "nodeblueuripathsexcludedfromlogin") {
+          _nodeBlueUriPathsExcludedFromLogin = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueUriPathsExcludedFromLogin set to " + _nodeBlueUriPathsExcludedFromLogin);
         } else if (name == "maxnodethreadsperprocess") {
           _maxNodeThreadsPerProcess = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maxNodeThreadsPerProcess set to " + std::to_string(_maxNodeThreadsPerProcess));
@@ -422,6 +431,15 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "flowsmanualclientstart" || name == "nodebluemanualclientstart") {
           _nodeBlueManualClientStart = HelperFunctions::toLower(value) == "true";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueManualClientStart set to " + std::to_string(_nodeBlueManualClientStart));
+        } else if (name == "noderedjspath") {
+          _nodeRedJsPath = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedJsPath set to " + _nodeRedJsPath);
+        } else if (name == "noderedport") {
+          _nodeRedPort = Math::getUnsignedNumber(value);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeRedPort set to " + std::to_string(_nodeRedPort));
+        } else if (name == "nodeoptions") {
+          _nodeOptions = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeOptions set to " + _nodeOptions);
         } else if (name == "ipcthreadcount") {
           _ipcThreadCount = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: ipcThreadCount set to " + std::to_string(_ipcThreadCount));
@@ -482,18 +500,6 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _packetReceivedThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
           _packetReceivedThreadPriority = ThreadManager::parseThreadPriority(_packetReceivedThreadPriority, _packetReceivedThreadPolicy);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: packetReceivedThreadPolicy set to " + std::to_string(_packetReceivedThreadPolicy));
-        } else if (name == "eventthreadcount") {
-          _eventThreadCount = Math::getNumber(value);
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadCount set to " + std::to_string(_eventThreadCount));
-        } else if (name == "eventthreadpriority") {
-          _eventThreadPriority = Math::getNumber(value);
-          if (_eventThreadPriority > 99) _eventThreadPriority = 99;
-          if (_eventThreadPriority < 0) _eventThreadPriority = 0;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadPriority set to " + std::to_string(_eventThreadPriority));
-        } else if (name == "eventthreadpolicy") {
-          _eventThreadPolicy = ThreadManager::getThreadPolicyFromString(value);
-          _eventThreadPriority = ThreadManager::parseThreadPriority(_eventThreadPriority, _eventThreadPolicy);
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: eventThreadPolicy set to " + std::to_string(_eventThreadPolicy));
         } else if (name == "familyconfigpath") {
           _familyConfigPath = value;
           if (_familyConfigPath.empty()) _familyConfigPath = "/etc/homegear/families";
@@ -533,7 +539,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "scriptpathpermissions") {
           _scriptPathPermissions = Math::getOctalNumber(value);
           if (_scriptPathPermissions == 0) _scriptPathPermissions = 360;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathPermissions set to " + _scriptPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathPermissions set to " + std::to_string(_scriptPathPermissions));
         } else if (name == "scriptpathuser") {
           _scriptPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: scriptPathUser set to " + _scriptPathUser);
@@ -548,7 +554,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "flowspathpermissions" || name == "nodebluepathpermissions") {
           _nodeBluePathPermissions = Math::getOctalNumber(value);
           if (_nodeBluePathPermissions == 0) _nodeBluePathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodebluePathPermissions set to " + _nodeBluePathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodebluePathPermissions set to " + std::to_string(_nodeBluePathPermissions));
         } else if (name == "flowspathuser" || name == "nodebluepathuser") {
           _nodeBluePathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBluePathUser set to " + _nodeBluePathUser);
@@ -578,7 +584,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "adminuipathpermissions") {
           _adminUiPathPermissions = Math::getOctalNumber(value);
           if (_adminUiPathPermissions == 0) _adminUiPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathPermissions set to " + _adminUiPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathPermissions set to " + std::to_string(_adminUiPathPermissions));
         } else if (name == "adminuipathuser") {
           _adminUiPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: adminUiPathUser set to " + _adminUiPathUser);
@@ -593,13 +599,18 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "uipathpermissions") {
           _uiPathPermissions = Math::getOctalNumber(value);
           if (_uiPathPermissions == 0) _uiPathPermissions = 504;
-          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathPermissions set to " + _uiPathPermissions);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathPermissions set to " + std::to_string(_uiPathPermissions));
         } else if (name == "uipathuser") {
           _uiPathUser = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathUser set to " + _uiPathUser);
         } else if (name == "uipathgroup") {
           _uiPathGroup = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiPathGroup set to " + _uiPathGroup);
+        } else if (name == "uitranslationpath") {
+          _uiTranslationPath = value;
+          if (_uiTranslationPath.empty()) _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
+          if (_uiTranslationPath.back() != '/') _uiTranslationPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiTranslationPath set to " + _uiTranslationPath);
         } else if (name == "reloadrolesonstartup") {
           _reloadRolesOnStartup = HelperFunctions::toLower(value) == "true";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));
@@ -633,14 +644,6 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: phpIniPath set to " + _phpIniPath);
         } else if (name == "redirecttosshtunnel") {
           if (!value.empty()) _tunnelClients[HelperFunctions::toLower(value)] = true;
-        } else if (name == "replaceclientserveraddress") {
-          //Todo: Remove setting.
-          if (!hideOutput) _bl->out.printWarning("Setting replaceClientServerAddress is deprecated and will be removed by end of 2020.");
-          if (!value.empty()) {
-            std::pair<std::string, std::string> addresses = BaseLib::HelperFunctions::splitLast(HelperFunctions::toLower(value), ' ');
-            if (!value.empty()) _clientAddressesToReplace[addresses.first] = addresses.second;
-            if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: Added replaceClientServerAddress " + addresses.first + " " + addresses.second);
-          }
         } else if (name == "gpiopath") {
           _gpioPath = value;
           if (_gpioPath.empty()) _gpioPath = "/sys/class/gpio/";
@@ -676,13 +679,13 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           // }}}
           //{{{ Deprecated settings
         else if (name == "capath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting caPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting caPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "certpath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting certPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting certPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "keypath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting keyPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting keyPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "dhparampath") {
-          if (!hideOutput) _bl->out.printWarning("Warning: The setting dhParamPath has been moved from \"main.conf\" to \"rpcservers.conf\".");
+          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting dhParamPath has been moved from "main.conf" to "rpcservers.conf".)");
         }
           //}}}
         else {

@@ -31,44 +31,37 @@
 #include "BaseLib.h"
 #include "../config.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 sigset_t SharedObjects::defaultSignalMask;
 
-SharedObjects::SharedObjects(bool testMaxThreadCount)
-{
-	threadManager.init(this, testMaxThreadCount);
-	serialDeviceManager.init(this);
-	io.init(this);
-	settings.init(this);
-	out.init(this);
-	globalServiceMessages.init(this);
+SharedObjects::SharedObjects(bool testMaxThreadCount) {
+  threadManager.init(this, testMaxThreadCount);
+  serialDeviceManager.init(this);
+  io.init(this);
+  settings.init(this);
+  out.init(this);
+  globalServiceMessages.init(this);
 
-    if(pthread_sigmask(SIG_BLOCK, nullptr, &defaultSignalMask) < 0)
-    {
-        out.printCritical("SIG_BLOCK error. Exiting Homegear.");
-        exit(1);
-    }
+  if (pthread_sigmask(SIG_BLOCK, nullptr, &defaultSignalMask) < 0) {
+    out.printCritical("SIG_BLOCK error. Exiting Homegear.");
+    exit(1);
+  }
 }
 
-SharedObjects::~SharedObjects()
-{
+SharedObjects::~SharedObjects() {
 }
 
-std::string SharedObjects::version()
-{
-	return VERSION;
+std::string SharedObjects::version() {
+  return VERSION;
 }
 
-int64_t SharedObjects::getStartTime()
-{
-    return _startTime;
+int64_t SharedObjects::getStartTime() {
+  return _startTime;
 }
 
-void SharedObjects::setStartTime(int64_t time)
-{
-    _startTime = time;
+void SharedObjects::setStartTime(int64_t time) {
+  _startTime = time;
 }
 
 }

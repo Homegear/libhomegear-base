@@ -28,53 +28,16 @@
  * files in the program, then also delete it here.
 */
 
-#ifndef UICONTROL_H_
-#define UICONTROL_H_
-
-#include "../../Variable.h"
-#include <string>
-#include <unordered_map>
-#include <memory>
-
-using namespace rapidxml;
+#include "Ha.h"
 
 namespace BaseLib {
 
-class SharedObjects;
-
-namespace DeviceDescription {
-
-class UiControl;
-class HomegearUiElement;
-
-typedef std::shared_ptr<UiControl> PUiControl;
-
-class UiControl {
- public:
-  UiControl(BaseLib::SharedObjects *baseLib);
-  UiControl(BaseLib::SharedObjects *baseLib, xml_node *node);
-  UiControl(UiControl const &rhs);
-  virtual ~UiControl() = default;
-
-  UiControl &operator=(const UiControl &rhs);
-
-  //Attributes
-  std::string id;
-
-  //Elements
-  int32_t x = -1;
-  int32_t y = -1;
-  int32_t columns = 1;
-  int32_t rows = 1;
-  std::unordered_map<std::string, PVariable> metadata;
-
-  //Helpers
-  std::shared_ptr<HomegearUiElement> uiElement;
- protected:
-  BaseLib::SharedObjects *_bl = nullptr;
-};
-
-}
+HaInstanceType Ha::getInstanceType() {
+  if (!Io::fileExists("/configured")) return HaInstanceType::kNone;
+  auto content = Io::getFileContent("/configured");
+  if (content.compare(0, 5, "slave") == 0) return HaInstanceType::kSlave;
+  else if (content.compare(0, 5, "master") == 0) return HaInstanceType::kMaster;
+  return HaInstanceType::kUnknown;
 }
 
-#endif
+}

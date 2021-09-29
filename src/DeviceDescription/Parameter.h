@@ -89,6 +89,7 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   //Properties
   bool readable = true;
   bool writeable = true;
+  bool readOnInit = false;
   bool transmitted = true;
 
   /**
@@ -120,6 +121,7 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   int32_t formPosition = -1;
   std::string metadata;
   bool resetAfterRestart = false;
+  int32_t priority = -1;
 
   /**
    * Deprecated. Remove beginning of 2021.

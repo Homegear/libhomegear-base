@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(libhomegear-base)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCE_FILES
         src/Database/DatabaseTypes.h
@@ -214,6 +214,6 @@ set(SOURCE_FILES
         src/Managers/Environment.h
         src/Sockets/Hgdc.cpp
         src/Sockets/Hgdc.h
-        src/Systems/Role.h)
+        src/Systems/Role.h src/Managers/TranslationManager.cpp src/Managers/TranslationManager.h src/Systems/ServiceMessage.h src/Systems/ServiceMessage.cpp src/HelperFunctions/Ha.cpp src/HelperFunctions/Ha.h)
 
 add_library(homegear-base SHARED ${SOURCE_FILES})

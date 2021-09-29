@@ -34,6 +34,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
 
 #include "HomegearDeviceTranslation.h"
 #include "ParameterGroup.h"
@@ -49,23 +50,25 @@ namespace DeviceDescription
 /**
  * Class to work with translations of device description files of one device family. It is used to load all translations and retrieve the translation of a device.
  */
-class DeviceTranslations
-{
-public:
-	DeviceTranslations(BaseLib::SharedObjects* baseLib, int32_t family);
-	virtual ~DeviceTranslations() = default;
-	void clear();
-    std::string getTypeDescription(const std::string& filename, std::string& language, const std::string& deviceId);
-    std::string getTypeLongDescription(const std::string& filename, std::string& language, const std::string& deviceId);
-    std::pair<std::string, std::string> getParameterTranslations(const std::string& filename, std::string& language, ParameterGroup::Type::Enum parameterGroupType, const std::string& parameterGroupId, const std::string& parameterId);
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
-	int32_t _family = -1;
-    std::mutex _deviceTranslationsMutex;
-	std::unordered_map<std::string, std::unordered_map<std::string, PHomegearDeviceTranslation>> _deviceTranslations;
+class DeviceTranslations {
+ public:
+  DeviceTranslations(BaseLib::SharedObjects *baseLib, int32_t family);
+  virtual ~DeviceTranslations() = default;
+  void clear();
+  PVariable getTypeDescription(const std::string &filename, const std::string &language, const std::string &deviceId);
+  PVariable getTypeLongDescription(const std::string &filename, const std::string &language, const std::string &deviceId);
+  PVariable getParameterLabel(const std::string &filename, const std::string &language, ParameterGroup::Type::Enum parameterGroupType, const std::string &parameterGroupId, const std::string &parameterId);
+  PVariable getParameterDescription(const std::string &filename, const std::string &language, ParameterGroup::Type::Enum parameterGroupType, const std::string &parameterGroupId, const std::string &parameterId);
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  int32_t _family = -1;
+  std::mutex _deviceTranslationsMutex;
+  std::unordered_map<std::string, std::unordered_map<std::string, PHomegearDeviceTranslation>> _deviceTranslations;
 
-    PHomegearDeviceTranslation getTranslation(const std::string& filename, std::string& language);
-	PHomegearDeviceTranslation load(const std::string& filename, std::string& language);
+  std::unordered_set<std::string> getLanguages();
+  std::unordered_map<std::string, PHomegearDeviceTranslation> getTranslations(const std::string &filename);
+  PHomegearDeviceTranslation getTranslation(const std::string &filename, const std::string &language);
+  PHomegearDeviceTranslation load(const std::string &filename, const std::string &language);
 };
 
 }

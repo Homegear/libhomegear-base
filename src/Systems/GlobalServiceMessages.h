@@ -35,8 +35,7 @@
 #include "../Sockets/RpcClientInfo.h"
 #include "../Encoding/RpcDecoder.h"
 #include "../Encoding/RpcEncoder.h"
-
-#include <mutex>
+#include "ServiceMessage.h"
 
 namespace BaseLib {
 
@@ -51,23 +50,11 @@ class GlobalServiceMessages {
   void init(BaseLib::SharedObjects *baseLib);
   void load();
 
-  void set(int32_t familyId, int32_t messageId, std::string messageSubId, int32_t timestamp, std::string message, std::list<std::string> variables, PVariable data = PVariable(), int64_t value = 0);
+  void set(int32_t familyId, const std::string &interface, int32_t messageId, const std::string& messageSubId, ServiceMessagePriority priority, int32_t timestamp, const std::string& message, const std::list<std::string>& variables, const PVariable& data = PVariable(), int64_t value = 0);
   void unset(int32_t familyId, int32_t messageId, std::string messageSubId, std::string message);
 
-  std::shared_ptr<Variable> get(PRpcClientInfo clientInfo);
+  std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, const std::string &language);
  protected:
-  struct ServiceMessage {
-    uint64_t databaseId = 0;
-    int32_t familyId = 0;
-    int32_t messageId = 0;
-    std::string messageSubId;
-    int32_t timestamp = 0;
-    std::string message;
-    std::list<std::string> variables;
-    int64_t value = 0;
-    PVariable data;
-  };
-  typedef std::shared_ptr<ServiceMessage> PServiceMessage;
   typedef int32_t FamilyId;
   typedef int32_t MessageId;
   typedef std::string MessageSubId;

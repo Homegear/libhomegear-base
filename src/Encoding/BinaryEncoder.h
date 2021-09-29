@@ -36,35 +36,33 @@
 #include <vector>
 #include <string>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-class BinaryEncoder
-{
-public:
-    BinaryEncoder() = default;
+class BinaryEncoder {
+ public:
+  BinaryEncoder() = default;
 
-    /**
-     * Dummy constructor for backwards compatability.
-     */
-    explicit BinaryEncoder(BaseLib::SharedObjects* baseLib);
+  /**
+   * Dummy constructor for backwards compatability.
+   */
+  explicit BinaryEncoder(BaseLib::SharedObjects *baseLib);
 
-	static void encodeInteger(std::vector<char>& encodedData, int32_t integer);
-    static void encodeInteger(std::vector<uint8_t>& encodedData, int32_t integer);
-    static void encodeInteger64(std::vector<char>& encodedData, int64_t integer);
-    static void encodeInteger64(std::vector<uint8_t>& encodedData, int64_t integer);
-    static void encodeByte(std::vector<char>& encodedData, uint8_t byte);
-    static void encodeByte(std::vector<uint8_t>& encodedData, uint8_t byte);
-    static void encodeString(std::vector<char>& packet, const std::string& string);
-    static void encodeString(std::vector<uint8_t>& encodedData, const std::string& string);
-    static void encodeBinary(std::vector<char>& packet, const std::vector<uint8_t>& data);
-    static void encodeBinary(std::vector<uint8_t>& encodedData, const std::vector<uint8_t>& data);
-    static void encodeBoolean(std::vector<char>& encodedData, bool boolean);
-    static void encodeBoolean(std::vector<uint8_t>& encodedData, bool boolean);
-    static void encodeFloat(std::vector<char>& encodedData, double floatValue);
-    static void encodeFloat(std::vector<uint8_t>& encodedData, double floatValue);
+  static void encodeInteger(std::vector<char> &encodedData, int32_t integer);
+  static void encodeInteger(std::vector<uint8_t> &encodedData, int32_t integer);
+  static void encodeInteger64(std::vector<char> &encodedData, int64_t integer);
+  static void encodeInteger64(std::vector<uint8_t> &encodedData, int64_t integer);
+  static void encodeByte(std::vector<char> &encodedData, uint8_t byte);
+  static void encodeByte(std::vector<uint8_t> &encodedData, uint8_t byte);
+  static void encodeString(std::vector<char> &packet, const std::string &string);
+  static void encodeString(std::vector<uint8_t> &encodedData, const std::string &string);
+  static void encodeBinary(std::vector<char> &packet, const std::vector<uint8_t> &data);
+  static void encodeBinary(std::vector<uint8_t> &encodedData, const std::vector<uint8_t> &data);
+  static void encodeBoolean(std::vector<char> &encodedData, bool boolean);
+  static void encodeBoolean(std::vector<uint8_t> &encodedData, bool boolean);
+  static void encodeFloat(std::vector<char> &encodedData, double floatValue);
+  static void encodeFloat(std::vector<uint8_t> &encodedData, double floatValue);
 };
 }
 #endif

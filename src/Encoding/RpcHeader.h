@@ -33,18 +33,15 @@
 
 #include <string>
 
-namespace BaseLib
-{
-namespace Rpc
-{
-class RpcHeader
-{
-public:
-	RpcHeader() {}
-	virtual ~RpcHeader() {}
+namespace BaseLib::Rpc {
 
-	std::string authorization;
+class RpcHeader {
+ public:
+  RpcHeader() = default;
+  ~RpcHeader() = default;
+
+  std::string authorization;
 };
-} /* namespace Rpc */
+
 }
 #endif /* RPCHEADER_H_ */
