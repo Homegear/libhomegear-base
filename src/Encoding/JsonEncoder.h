@@ -39,49 +39,48 @@
 #include <codecvt>
 #endif
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Rpc
-{
+namespace Rpc {
 
-class JsonEncoder
-{
-public:
-    JsonEncoder() = default;
-    explicit JsonEncoder(BaseLib::SharedObjects* dummy) {}
-    virtual ~JsonEncoder() = default;
+class JsonEncoder {
+ public:
+  JsonEncoder() = default;
+  explicit JsonEncoder(BaseLib::SharedObjects *dummy) {}
+  virtual ~JsonEncoder() = default;
 
-    static void encode(const std::shared_ptr<Variable>& variable, std::string& json);
-    static void encode(const std::shared_ptr<Variable>& variable, std::vector<char>& json);
-    void encodeRequest(std::string& methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>>& parameters, std::vector<char>& encodedData);
-    static void encodeResponse(const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
-    static void encodeMQTTResponse(const std::string& methodName, const std::shared_ptr<Variable>& variable, int32_t id, std::vector<char>& json);
+  static void encode(const std::shared_ptr<Variable> &variable, std::string &json);
+  static void encode(const std::shared_ptr<Variable> &variable, std::vector<char> &json);
+  static std::string encode(const std::shared_ptr<Variable> &variable);
+  static std::vector<char> encodeBinary(const std::shared_ptr<Variable> &variable);
+  void encodeRequest(std::string &methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> &parameters, std::vector<char> &encodedData);
+  static void encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
+  static void encodeMQTTResponse(const std::string &methodName, const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
 
-    static std::string encodeString(const std::string& s);
-private:
-    int32_t _requestId = 1;
+  static std::string encodeString(const std::string &s);
+ private:
+  int32_t _requestId = 1;
 
-    static void encodeValue(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeValue(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeArray(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeArray(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeStruct(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeStruct(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeBoolean(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeBoolean(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeInteger( const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeInteger( const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeInteger64( const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeInteger64( const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeFloat(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeFloat(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeString(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeString(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
-    static void encodeVoid(const std::shared_ptr<Variable>& variable, std::ostringstream& s);
-    static void encodeVoid(const std::shared_ptr<Variable>& variable, std::vector<char>& s);
+  static void encodeValue(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeArray(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeArray(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeStruct(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeStruct(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeBoolean(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeBoolean(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeInteger(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeInteger(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeInteger64(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeInteger64(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeFloat(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeFloat(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeString(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeString(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeVoid(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeVoid(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
 };
 }
 }

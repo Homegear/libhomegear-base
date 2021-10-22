@@ -35,44 +35,41 @@
 
 #include <map>
 
-namespace BaseLib
-{
+namespace BaseLib {
 class SharedObjects;
 
-class ITimedQueueEntry
-{
-public:
-	ITimedQueueEntry() {}
-	ITimedQueueEntry(int64_t time) { _time = time; };
-	virtual ~ITimedQueueEntry() {};
+class ITimedQueueEntry {
+ public:
+  ITimedQueueEntry() {}
+  ITimedQueueEntry(int64_t time) { _time = time; };
+  virtual ~ITimedQueueEntry() {};
 
-	int64_t getTime() { return _time; }
-	void setTime(int64_t value) { _time = value; }
-private:
-	int64_t _time = 0;
+  int64_t getTime() { return _time; }
+  void setTime(int64_t value) { _time = value; }
+ private:
+  int64_t _time = 0;
 };
 
-class ITimedQueue : public IQueueBase
-{
-public:
-	ITimedQueue(SharedObjects* baseLib, uint32_t queueCount);
-	virtual ~ITimedQueue();
+class ITimedQueue : public IQueueBase {
+ public:
+  ITimedQueue(SharedObjects *baseLib, uint32_t queueCount);
+  virtual ~ITimedQueue();
 
-	void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
-	void stopQueue(int32_t index);
-	bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry>& entry, int64_t& id);
-	void removeQueueEntry(int32_t index, int64_t id);
-	virtual void processQueueEntry(int32_t index, int64_t id, std::shared_ptr<ITimedQueueEntry>& entry) = 0;
-private:
-	static const int32_t _bufferSize = 1000;
-	std::vector<bool> _firstPositionChanged;
-	std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
-	std::vector<std::map<int64_t, std::shared_ptr<ITimedQueueEntry>>> _buffer;
-	std::unique_ptr<std::mutex[]> _processingThreadMutex = nullptr;
-	std::vector<std::thread> _processingThread;
-	std::unique_ptr<std::condition_variable[]> _processingConditionVariable = nullptr;
+  void startQueue(int32_t index, int32_t threadPriority, int32_t threadPolicy);
+  void stopQueue(int32_t index);
+  bool enqueue(int32_t index, std::shared_ptr<ITimedQueueEntry> &entry, int64_t &id);
+  void removeQueueEntry(int32_t index, int64_t id);
+  virtual void processQueueEntry(int32_t index, int64_t id, std::shared_ptr<ITimedQueueEntry> &entry) = 0;
+ private:
+  static const int32_t _bufferSize = 1000;
+  std::vector<bool> _firstPositionChanged;
+  std::unique_ptr<std::mutex[]> _bufferMutex = nullptr;
+  std::vector<std::map<int64_t, std::shared_ptr<ITimedQueueEntry>>> _buffer;
+  std::unique_ptr<std::mutex[]> _processingThreadMutex = nullptr;
+  std::vector<std::thread> _processingThread;
+  std::unique_ptr<std::condition_variable[]> _processingConditionVariable = nullptr;
 
-	void process(int32_t index);
+  void process(int32_t index);
 };
 
 }

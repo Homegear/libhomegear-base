@@ -31,25 +31,21 @@
 #include "IQueueBase.h"
 #include "BaseLib.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-IQueueBase::IQueueBase(SharedObjects* baseLib, uint32_t queueCount)
-{
-	_bl = baseLib;
-	if(queueCount < 1000000) _queueCount = queueCount;
-	_stopProcessingThread.reset(new std::atomic_bool[queueCount]);
+IQueueBase::IQueueBase(SharedObjects *baseLib, uint32_t queueCount) {
+  _bl = baseLib;
+  if (queueCount < 1000000) _queueCount = queueCount;
+  _stopProcessingThread.reset(new std::atomic_bool[queueCount]);
 }
 
-void IQueueBase::printQueueFullError(BaseLib::Output& out, std::string message)
-{
-    uint32_t droppedEntries = ++_droppedEntries;
-    if(BaseLib::HelperFunctions::getTime() - _lastQueueFullError > 10000)
-    {
-        _lastQueueFullError = BaseLib::HelperFunctions::getTime();
-        _droppedEntries = 0;
-        out.printError(message + " This message won't repeat for 10 seconds. Dropped outputs since last message: " + std::to_string(droppedEntries));
-    }
+void IQueueBase::printQueueFullError(BaseLib::Output &out, const std::string &message) {
+  uint32_t droppedEntries = ++_droppedEntries;
+  if (BaseLib::HelperFunctions::getTime() - _lastQueueFullError > 10000) {
+    _lastQueueFullError = BaseLib::HelperFunctions::getTime();
+    _droppedEntries = 0;
+    out.printError(message + " This message won't repeat for 10 seconds. Dropped outputs since last message: " + std::to_string(droppedEntries));
+  }
 }
 
 }

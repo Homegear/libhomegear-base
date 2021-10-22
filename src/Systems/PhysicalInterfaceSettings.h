@@ -59,6 +59,7 @@ class PhysicalInterfaceSettings {
   std::unordered_map<std::string, PVariable> all;
   std::string id;
   bool isDefault = false;
+  bool rawPacketEvents = false;
   std::string device;
   std::string type;
   uint32_t responseDelay = 95;

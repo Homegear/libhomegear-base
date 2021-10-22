@@ -94,11 +94,15 @@ class IPhysicalInterface : public IEventsEx {
   virtual void setup(int32_t userID, int32_t groupID, bool setPermissions) {}
   virtual std::string getType() { return _settings->type; }
   virtual std::string getID() { return _settings->id; }
+  virtual std::string getSerialNumber() { return ""; }
+  virtual std::string getFirmwareVersion() { return ""; }
   virtual bool isDefault() { return _settings->isDefault; }
   virtual bool isNetworkDevice() { return _settings->device.empty() && !_settings->host.empty() && !_settings->port.empty(); }
   virtual int32_t getAddress() { return _myAddress; }
   virtual std::string getIpAddress() { return _ipAddress; }
   virtual std::string getHostname() { return _hostname; }
+
+  void setRawPacketEvent(std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> value) { _rawPacketEvent.swap(value); }
  protected:
   BaseLib::SharedObjects *_bl = nullptr;
   int32_t _familyId = -1;
@@ -130,6 +134,8 @@ class IPhysicalInterface : public IEventsEx {
   int32_t _myAddress = 0;
   std::string _hostname;
   std::string _ipAddress;
+
+  std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> _rawPacketEvent;
 
   //Event handling
   virtual void raisePacketReceived(std::shared_ptr<Packet> packet);

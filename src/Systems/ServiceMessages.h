@@ -37,13 +37,7 @@
 #include "../IEvents.h"
 #include "../Database/DatabaseTypes.h"
 #include "../Sockets/RpcClientInfo.h"
-
-#include <string>
-#include <memory>
-#include <chrono>
-#include <map>
-#include <mutex>
-#include <vector>
+#include "ServiceMessage.h"
 
 namespace BaseLib {
 
@@ -59,6 +53,7 @@ class ServiceMessages : public IEvents {
 
     virtual void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values) = 0;
     virtual void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values) = 0;
+    virtual void onServiceMessageEvent(const PServiceMessage &serviceMessage) = 0;
     virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) = 0;
     virtual std::shared_ptr<Database::DataTable> onGetServiceMessages() = 0;
     virtual void onSaveServiceMessage(Database::DataRow &data) = 0;
@@ -74,11 +69,11 @@ class ServiceMessages : public IEvents {
   virtual void setPeerSerial(std::string peerSerial) { _peerSerial = peerSerial; }
 
   virtual void load();
-  virtual void save(int32_t timestamp, uint32_t index, bool value);
-  virtual void save(int32_t timestamp, int32_t channel, std::string id, uint8_t value);
+  virtual void save(ServiceMessagePriority priority, int64_t timestamp, uint32_t index, bool value);
+  virtual void save(ServiceMessagePriority priority, int64_t timestamp, int32_t channel, std::string id, uint8_t value);
   virtual bool set(std::string id, bool value);
   virtual void set(std::string id, uint8_t value, uint32_t channel);
-  virtual std::shared_ptr<Variable> get(PRpcClientInfo clientInfo, bool returnID);
+  virtual std::shared_ptr<Variable> get(const PRpcClientInfo &clientInfo, bool returnId, const std::string &language);
 
   virtual void setConfigPending(bool value);
   virtual bool getConfigPending() { return _configPending; }
@@ -87,7 +82,7 @@ class ServiceMessages : public IEvents {
 
   virtual void setUnreach(bool value, bool requeue);
   virtual bool getUnreach() { return _unreach; }
-  virtual void checkUnreach(int32_t cyclicTimeout, uint32_t lastPacketReceived);
+  virtual void checkUnreach(int32_t cyclicTimeout, int64_t lastPacketReceived);
   virtual void endUnreach();
 
   virtual bool getLowbat() { return _lowbat; }
@@ -103,15 +98,15 @@ class ServiceMessages : public IEvents {
   std::string _peerSerial;
   bool _disposing = false;
   bool _configPending = false;
-  int32_t _configPendingTime = 0;
+  int64_t _configPendingTime = 0;
   int64_t _configPendingSetTime = 0;
   int32_t _unreachResendCounter = 0;
   bool _unreach = false;
-  int32_t _unreachTime = 0;
+  int64_t _unreachTime = 0;
   bool _stickyUnreach = false;
-  int32_t _stickyUnreachTime = 0;
+  int64_t _stickyUnreachTime = 0;
   bool _lowbat = false;
-  int32_t _lowbatTime = 0;
+  int64_t _lowbatTime = 0;
 
   std::mutex _errorMutex;
   std::map<uint32_t, std::map<std::string, ErrorInfo>> _errors;
@@ -121,6 +116,7 @@ class ServiceMessages : public IEvents {
 
   virtual void raiseEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<std::shared_ptr<BaseLib::Variable>>> &values);
   virtual void raiseRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<std::shared_ptr<Variable>>> &values);
+  virtual void raiseServiceMessageEvent(const PServiceMessage &serviceMessage);
   virtual void raiseSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data);
   virtual std::shared_ptr<Database::DataTable> raiseGetServiceMessages();
   virtual void raiseSaveServiceMessage(Database::DataRow &data);

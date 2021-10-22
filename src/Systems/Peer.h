@@ -58,6 +58,21 @@ class Peer;
 
 class RpcConfigurationParameter {
  public:
+  /**
+   * The id of this parameter in the database.
+   */
+  uint64_t databaseId = 0;
+
+  /**
+   * The special type of the parameter (0 = none, 1 = roles).
+   */
+  int32_t specialType = 0;
+
+  /**
+   * The RPC parameter as defined in the XML file.
+   */
+  DeviceDescription::PParameter rpcParameter;
+
   RpcConfigurationParameter() {}
   RpcConfigurationParameter(RpcConfigurationParameter const &rhs);
   virtual ~RpcConfigurationParameter() {}
@@ -188,21 +203,6 @@ class RpcConfigurationParameter {
     std::lock_guard<std::mutex> roomGuard(_roomMutex);
     _room = id;
   }
-
-  /**
-   * The id of this parameter in the database.
-   */
-  uint64_t databaseId = 0;
-
-  /**
-   * The special type of the parameter (0 = none, 1 = roles).
-   */
-  int32_t specialType = 0;
-
-  /**
-   * The RPC parameter as defined in the XML file.
-   */
-  DeviceDescription::PParameter rpcParameter;
  private:
   std::mutex _logicalDataMutex;
   BaseLib::PVariable _logicalData;
@@ -317,10 +317,15 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
     virtual void onRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) = 0;
     virtual void onRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint) = 0;
     virtual void onEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) = 0;
+    virtual void onServiceMessageEvent(const PServiceMessage &serviceMessage) = 0;
     virtual void onRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait) = 0;
     virtual BaseLib::PVariable onInvokeRpc(std::string &methodName, BaseLib::PArray &parameters) = 0;
   };
   //End event handling
+
+  static const uint64_t kMaximumPeerId = 0x3FFFFFFF;
+  static constexpr std::pair<uint64_t, uint64_t> kVirtualPeerIdRange{0x40000000, 0x4FFFFFFF};
+  static constexpr std::pair<uint64_t, uint64_t> kUiPeerIdRange{0x50000000, 0x5FFFFFFF};
 
   std::atomic_bool deleting; //Needed, so the peer gets not saved in central's worker thread while being deleted
 
@@ -523,7 +528,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual PVariable getParamsetId(PRpcClientInfo clientInfo, uint32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
   virtual PVariable getRolesInDevice(PRpcClientInfo clientInfo, bool checkAcls);
   virtual PVariable getRolesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
-  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID);
+  virtual PVariable getServiceMessages(PRpcClientInfo clientInfo, bool returnID, const std::string &language);
   virtual PVariable getValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
   virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, const std::unordered_set<std::string> &fields);
   virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
@@ -600,6 +605,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual void raiseRPCEvent(std::string &source, uint64_t id, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values);
   virtual void raiseRPCUpdateDevice(uint64_t id, int32_t channel, std::string address, int32_t hint);
   virtual void raiseEvent(std::string &source, uint64_t peerID, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values);
+  void raiseServiceMessageEvent(const PServiceMessage &serviceMessage);
   virtual void raiseRunScript(ScriptEngine::PScriptInfo &scriptInfo, bool wait);
   virtual BaseLib::PVariable raiseInvokeRpc(std::string &methodName, BaseLib::PArray &parameters);
   // }}}
@@ -607,13 +613,14 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   //ServiceMessages event handling
   virtual void onConfigPending(bool configPending);
 
-  virtual void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values);
-  virtual void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values);
-  virtual void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data);
-  virtual std::shared_ptr<Database::DataTable> onGetServiceMessages();
-  virtual void onSaveServiceMessage(Database::DataRow &data);
-  virtual void onDeleteServiceMessage(uint64_t databaseID);
-  virtual void onEnqueuePendingQueues();
+  void onEvent(std::string &source, uint64_t peerId, int32_t channel, std::shared_ptr<std::vector<std::string>> &variables, std::shared_ptr<std::vector<PVariable>> &values) override;
+  void onRPCEvent(std::string &source, uint64_t peerId, int32_t channel, std::string &deviceAddress, std::shared_ptr<std::vector<std::string>> &valueKeys, std::shared_ptr<std::vector<PVariable>> &values) override;
+  void onServiceMessageEvent(const PServiceMessage &serviceMessage) override;
+  void onSaveParameter(std::string name, uint32_t channel, std::vector<uint8_t> &data) override;
+  std::shared_ptr<Database::DataTable> onGetServiceMessages() override;
+  void onSaveServiceMessage(Database::DataRow &data) override;
+  void onDeleteServiceMessage(uint64_t databaseID) override;
+  void onEnqueuePendingQueues() override;
   //End ServiceMessages event handling
 
   /**

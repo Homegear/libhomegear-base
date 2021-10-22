@@ -39,35 +39,32 @@
 #include <unordered_map>
 #include <memory>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiGrid;
 
 typedef std::shared_ptr<UiGrid> PUiGrid;
 
-class UiGrid
-{
-public:
-    UiGrid(BaseLib::SharedObjects* baseLib);
-    UiGrid(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiGrid(UiGrid const& rhs);
-    virtual ~UiGrid() = default;
+class UiGrid {
+ public:
+  UiGrid(BaseLib::SharedObjects *baseLib);
+  UiGrid(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiGrid(UiGrid const &rhs);
+  virtual ~UiGrid() = default;
 
-    UiGrid& operator=(const UiGrid& rhs);
+  UiGrid &operator=(const UiGrid &rhs);
 
-    //Elements
-    int32_t width = -1;
-    int32_t height = -1;
-    int32_t columns = -1;
-    int32_t rows = -1;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Elements
+  int32_t width = -1;
+  int32_t height = -1;
+  int32_t columns = -1;
+  int32_t rows = -1;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

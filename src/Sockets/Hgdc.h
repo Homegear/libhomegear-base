@@ -41,86 +41,84 @@
 
 #include <condition_variable>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-class Hgdc : public IQueue
-{
-private:
-    struct RequestInfo
-    {
-        std::mutex waitMutex;
-        std::condition_variable conditionVariable;
-    };
-    typedef std::shared_ptr<RequestInfo> PRequestInfo;
+class Hgdc : public IQueue {
+ private:
+  struct RequestInfo {
+    std::mutex waitMutex;
+    std::condition_variable conditionVariable;
+  };
+  typedef std::shared_ptr<RequestInfo> PRequestInfo;
 
-    struct RpcResponse
-    {
-        std::atomic_bool finished{false};
-        int32_t packetId = 0;
-        BaseLib::PVariable response;
-    };
+  struct RpcResponse {
+    std::atomic_bool finished{false};
+    int32_t packetId = 0;
+    BaseLib::PVariable response;
+  };
 
-    typedef std::shared_ptr<RpcResponse> PRpcResponse;
+  typedef std::shared_ptr<RpcResponse> PRpcResponse;
 
-    class QueueEntry : public BaseLib::IQueueEntry
-    {
-    public:
-        std::string method;
-        BaseLib::PArray parameters;
-    };
+  class QueueEntry : public BaseLib::IQueueEntry {
+   public:
+    std::string method;
+    BaseLib::PArray parameters;
+  };
 
-    SharedObjects* _bl = nullptr;
-    uint16_t _port = 0;
+  SharedObjects *_bl = nullptr;
+  uint16_t _port = 0;
 
-    Output _out;
-    std::unique_ptr<TcpSocket> _tcpSocket;
-    std::unique_ptr<Rpc::BinaryRpc> _binaryRpc;
-    std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
-    std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
+  Output _out;
+  std::unique_ptr<TcpSocket> _tcpSocket;
+  std::unique_ptr<Rpc::BinaryRpc> _binaryRpc;
+  std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
+  std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
 
-    std::atomic_bool _stopped{true};
-    std::atomic_bool _stopCallbackThread{true};
-    std::thread _listenThread;
+  std::atomic_bool _stopped{true};
+  std::atomic_bool _stopCallbackThread{true};
+  std::thread _listenThread;
 
-    int32_t _currentEventHandlerId = 0;
-    std::mutex _packetReceivedEventHandlersMutex;
-    std::unordered_map<int64_t, std::list<std::pair<int32_t, std::function<void(int64_t, const std::string&, const std::vector<uint8_t>&)>>>> _packetReceivedEventHandlers;
-    std::mutex _moduleUpdateEventHandlersMutex;
-    std::unordered_map<int32_t, std::function<void(const BaseLib::PVariable&)>> _moduleUpdateEventHandlers;
-    std::mutex _reconnectedEventHandlersMutex;
-    std::unordered_map<int32_t, std::function<void()>> _reconnectedEventHandlers;
+  int32_t _currentEventHandlerId = 0;
+  std::mutex _packetReceivedEventHandlersMutex;
+  std::unordered_map<int64_t, std::list<std::pair<int32_t, std::function<void(int64_t, const std::string &, const std::vector<uint8_t> &)>>>> _packetReceivedEventHandlers;
+  std::mutex _moduleUpdateEventHandlersMutex;
+  std::unordered_map<int32_t, std::function<void(const BaseLib::PVariable &)>> _moduleUpdateEventHandlers;
+  std::mutex _reconnectedEventHandlersMutex;
+  std::unordered_map<int32_t, std::function<void()>> _reconnectedEventHandlers;
 
-    // {{{ Needed for "invoke()"
-    std::mutex _requestInfoMutex;
-    std::map<pthread_t, PRequestInfo> _requestInfo;
-    std::mutex _packetIdMutex;
-    int32_t _currentPacketId = 0;
-    std::mutex _rpcResponsesMutex;
-    std::unordered_map<pthread_t, std::unordered_map<int32_t, PRpcResponse>> _rpcResponses;
-    // }}}
+  // {{{ Needed for "invoke()"
+  std::mutex _requestInfoMutex;
+  std::map<pthread_t, PRequestInfo> _requestInfo;
+  std::mutex _packetIdMutex;
+  int32_t _currentPacketId = 0;
+  std::mutex _rpcResponsesMutex;
+  std::unordered_map<pthread_t, std::unordered_map<int32_t, PRpcResponse>> _rpcResponses;
+  // }}}
 
-    void listen();
-    PVariable invoke(const std::string& methodName, const PArray& parameters, int32_t timeout = 10000);
-    void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry>& entry) override;
-public:
-    explicit Hgdc(SharedObjects* bl, uint16_t port);
-    ~Hgdc();
+  void listen();
+  void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
+ public:
+  explicit Hgdc(SharedObjects *bl, uint16_t port);
+  ~Hgdc();
 
-    void start();
-    void stop();
+  void start();
+  void stop();
 
-    int32_t registerPacketReceivedEventHandler(int64_t familyId, std::function<void(int64_t, const std::string&, const std::vector<uint8_t>&)> value);
-    void unregisterPacketReceivedEventHandler(int32_t eventHandlerId);
-    int32_t registerModuleUpdateEventHandler(std::function<void(const BaseLib::PVariable&)> value);
-    void unregisterModuleUpdateEventHandler(int32_t eventHandlerId);
-    int32_t registerReconnectedEventHandler(std::function<void()> value);
-    void unregisterReconnectedEventHandler(int32_t eventHandlerId);
+  PVariable invoke(const std::string &methodName, const PArray &parameters, int32_t timeout = 10000);
 
-    PVariable getModules(int64_t familyId = -1);
-    bool sendPacket(const std::string& serialNumber, const std::vector<uint8_t>& packet);
-    bool sendPacket(const std::string& serialNumber, const std::vector<char>& packet);
-    bool setMode(const std::string& serialNumber, uint8_t mode);
+  int32_t registerPacketReceivedEventHandler(int64_t familyId, std::function<void(int64_t, const std::string &, const std::vector<uint8_t> &)> value);
+  void unregisterPacketReceivedEventHandler(int32_t eventHandlerId);
+  int32_t registerModuleUpdateEventHandler(std::function<void(const BaseLib::PVariable &)> value);
+  void unregisterModuleUpdateEventHandler(int32_t eventHandlerId);
+  int32_t registerReconnectedEventHandler(std::function<void()> value);
+  void unregisterReconnectedEventHandler(int32_t eventHandlerId);
+
+  bool isMaster();
+  PVariable getModules(int64_t familyId = -1);
+  bool sendPacket(const std::string &serialNumber, const std::vector<uint8_t> &packet);
+  bool sendPacket(const std::string &serialNumber, const std::vector<char> &packet);
+  bool moduleReset(const std::string &serialNumber);
+  bool setMode(const std::string &serialNumber, uint8_t mode);
 };
 
 }

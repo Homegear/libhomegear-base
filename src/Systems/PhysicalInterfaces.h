@@ -40,6 +40,7 @@
 #include <map>
 #include <vector>
 #include <atomic>
+#include <functional>
 
 namespace BaseLib {
 
@@ -56,13 +57,14 @@ class PhysicalInterfaces {
   void dispose();
 
   uint32_t count();
-  void clear();
   virtual void stopListening();
   virtual void startListening();
   bool lifetick();
   bool isOpen();
   void setup(int32_t userID, int32_t groupID, bool setPermissions);
   PVariable listInterfaces();
+
+  void setRawPacketEvent(std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> value) { _rawPacketEvent.swap(value); }
  protected:
   BaseLib::SharedObjects *_bl = nullptr;
   int32_t _familyId = -1;
@@ -70,7 +72,11 @@ class PhysicalInterfaces {
   std::mutex _physicalInterfacesMutex;
   std::map<std::string, std::shared_ptr<IPhysicalInterface>> _physicalInterfaces;
 
+  std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> _rawPacketEvent;
+
   virtual void create() {};
+
+  void rawPacketEvent(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet);
 };
 
 }

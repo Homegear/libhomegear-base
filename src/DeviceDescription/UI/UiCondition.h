@@ -33,6 +33,7 @@
 
 #include "UiIcon.h"
 #include "UiText.h"
+#include "../../Variable.h"
 #include <string>
 #include <list>
 #include <unordered_map>
@@ -40,37 +41,36 @@
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class UiCondition;
 
 typedef std::shared_ptr<UiCondition> PUiCondition;
 
-class UiCondition
-{
-public:
-    UiCondition(BaseLib::SharedObjects* baseLib);
-    UiCondition(BaseLib::SharedObjects* baseLib, xml_node* node);
-    UiCondition(UiCondition const& rhs);
-    virtual ~UiCondition() = default;
+class UiCondition {
+ public:
+  UiCondition(BaseLib::SharedObjects *baseLib);
+  UiCondition(BaseLib::SharedObjects *baseLib, xml_node *node);
+  UiCondition(UiCondition const &rhs);
+  virtual ~UiCondition() = default;
 
-    UiCondition& operator=(const UiCondition& rhs);
+  UiCondition &operator=(const UiCondition &rhs);
 
-    //Attributes
-    std::string conditionOperator;
-    std::string conditionValue;
+  static std::list<PUiCondition> fromJson(BaseLib::SharedObjects *baseLib, const PVariable &json);
 
-    //Elements
-    std::unordered_map<std::string, PUiIcon> icons;
-    std::unordered_map<std::string, PUiText> texts;
-protected:
-    BaseLib::SharedObjects* _bl = nullptr;
+  //Attributes
+  std::string conditionOperator;
+  std::string conditionValue;
+
+  //Elements
+  std::unordered_map<std::string, PUiIcon> icons;
+  std::unordered_map<std::string, PUiText> texts;
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 
 }

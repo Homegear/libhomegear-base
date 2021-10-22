@@ -413,7 +413,7 @@ pid_t ProcessManager::systemp(const std::string& command, const std::vector<std:
 int32_t ProcessManager::exec(const std::string& command, int maxFd, std::string& output)
 {
     pid_t pid = 0;
-    FILE* pipe = popen2(command.c_str(), "r", maxFd, pid);
+    FILE* pipe = popen2(command, "r", maxFd, pid);
     if(!pipe) return -1;
     try
     {

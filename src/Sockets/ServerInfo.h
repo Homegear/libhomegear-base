@@ -40,85 +40,79 @@
 #include <vector>
 #include <unordered_set>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 class FileDescriptor;
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
-namespace Rpc
-{
+namespace Rpc {
 
-class ServerInfo
-{
-public:
-	class Info
-	{
-	public:
-		enum AuthType { undefined = 0, none = 1, basic = 2, cert = 4, session = 8, oauth2Local = 16 };
+class ServerInfo {
+ public:
+  class Info {
+   public:
+    enum AuthType { undefined = 0, none = 1, basic = 2, cert = 4, session = 8, oauth2Local = 16 };
 
-		Info()
-		{
-			interface = "::";
-			contentPath = "/var/lib/homegear/www/";
-		}
-		virtual ~Info() {}
-		int32_t index = -1;
-		std::string name;
-		std::string interface;
-		int32_t port = -1;
-		bool ssl = true;
-		std::string caPath;
-		std::string certPath;
-		std::string keyPath;
-		std::string dhParamPath;
-		AuthType authType = AuthType::cert;
-		std::unordered_set<uint64_t> validGroups;
-		std::string contentPath;
-		uint32_t contentPathPermissions = 360;
-		std::string contentPathUser;
-		std::string contentPathGroup;
-		bool webServer = false;
-		bool webSocket = false;
-		AuthType websocketAuthType = AuthType::basic;
-		bool xmlrpcServer = true;
-		bool jsonrpcServer = true;
-		bool restServer = true;
-		bool familyServer = false;
-        int32_t cacheAssets = 2592000;
-		std::string redirectTo;
+    Info() {
+      interface = "::";
+      contentPath = "/var/lib/homegear/www/";
+    }
+    virtual ~Info() {}
+    int32_t index = -1;
+    std::string name;
+    std::string interface;
+    int32_t port = -1;
+    bool ssl = true;
+    std::string caPath;
+    std::string certPath;
+    std::string keyPath;
+    std::string dhParamPath;
+    AuthType authType = AuthType::cert;
+    std::unordered_set<uint64_t> validGroups;
+    std::string contentPath;
+    uint32_t contentPathPermissions = 360;
+    std::string contentPathUser;
+    std::string contentPathGroup;
+    bool webServer = false;
+    bool webSocket = false;
+    AuthType websocketAuthType = AuthType::session;
+    bool rpcServer = false;
+    bool restServer = false;
+    bool familyServer = false;
+    int32_t cacheAssets = 2592000;
+    std::string redirectTo;
 
-		// Helpers
-		PFileDescriptor socketDescriptor;
+    // Helpers
+    PFileDescriptor socketDescriptor;
 
-		// Mods
-		std::map<std::string, std::vector<std::string>> modSettings;
+    // Mods
+    std::map<std::string, std::vector<std::string>> modSettings;
 
-		//Not settable
-		std::string address;
-		PVariable serializedInfo;
+    //Not settable
+    std::string address;
+    PVariable serializedInfo;
 
-		/**
-		 * Serializes the whole object except modSettings.
-		 */
-		PVariable serialize();
-		void unserialize(PVariable data);
-	};
+    /**
+     * Serializes the whole object except modSettings.
+     */
+    PVariable serialize();
+    void unserialize(PVariable data);
+  };
 
-	ServerInfo();
-	ServerInfo(BaseLib::SharedObjects* baseLib);
-	virtual ~ServerInfo() {}
-	void init(BaseLib::SharedObjects* baseLib);
-	void load(std::string filename);
+  ServerInfo();
+  explicit ServerInfo(BaseLib::SharedObjects *baseLib);
+  ~ServerInfo() = default;
+  void init(BaseLib::SharedObjects *baseLib);
+  void load(const std::string &filename);
 
-	int32_t count() { return _servers.size(); }
-	std::shared_ptr<Info> get(int32_t index) { if(_servers.find(index) != _servers.end()) return _servers[index]; else return std::shared_ptr<Info>(); }
-private:
-	BaseLib::SharedObjects* _bl = nullptr;
-	std::map<int32_t, std::shared_ptr<Info>> _servers;
+  int32_t count() { return _servers.size(); }
+  std::shared_ptr<Info> get(int32_t index) { if (_servers.find(index) != _servers.end()) return _servers[index]; else return std::shared_ptr<Info>(); }
+ private:
+  BaseLib::SharedObjects *_bl = nullptr;
+  std::map<int32_t, std::shared_ptr<Info>> _servers;
 
-	void reset();
+  void reset();
 };
 
 typedef std::shared_ptr<ServerInfo::Info> PServerInfo;

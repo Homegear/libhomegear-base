@@ -60,6 +60,9 @@ IPhysicalInterface::~IPhysicalInterface() {
   lock.unlock();
   _packetProcessingConditionVariable.notify_one();
   _bl->threadManager.join(_packetProcessingThread);
+
+  //Function pointers need to be cleaned up before unloading the module
+  _rawPacketEvent = std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>();
 }
 
 bool IPhysicalInterface::lifetick() {
@@ -124,7 +127,9 @@ void IPhysicalInterface::processPackets() {
     std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
     try {
       if (_packetBufferHead == _packetBufferTail) {
-        _packetProcessingConditionVariable.wait(lock, [&] { return _packetProcessingPacketAvailable; });
+        while (!_packetProcessingConditionVariable.wait_for(lock, std::chrono::milliseconds(1000), [&] {
+          return _packetProcessingPacketAvailable || _stopPacketProcessingThread;
+        }));
       }
       if (_stopPacketProcessingThread) return;
 
@@ -152,6 +157,8 @@ void IPhysicalInterface::processPackets() {
             if (i->second->handler()) ((IPhysicalInterfaceEventSink *)i->second->handler())->onPacketReceived(_settings->id, packet);
             i->second->unlock();
           }
+
+          if (_rawPacketEvent) _rawPacketEvent(_familyId, _settings->id, packet->toVariable());
         } else _bl->out.printWarning("Warning (" + _settings->id + "): Packet was nullptr.");
         processingTime = HelperFunctions::getTime() - processingTime;
         if (processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");
@@ -195,7 +202,8 @@ void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet) {
 void IPhysicalInterface::setDevicePermission(int32_t userID, int32_t groupID) {
   try {
     if (_settings->device.empty()) {
-      _bl->out.printError("Could not setup device " + _settings->type + " the device path is empty.");
+      //Only output error for non-network clients.
+      if (_settings->host.empty()) _bl->out.printError("Could not setup device " + _settings->type + " the device path is empty.");
       return;
     }
     int32_t result = chown(_settings->device.c_str(), userID, groupID);

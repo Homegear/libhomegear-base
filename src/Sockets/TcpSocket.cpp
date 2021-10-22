@@ -31,7 +31,6 @@
 #include "TcpSocket.h"
 #include "../BaseLib.h"
 #include "../Security/SecureVector.h"
-#include <gnutls/gnutls.h>
 
 namespace BaseLib {
 TcpSocket::CertificateCredentials::CertificateCredentials(gnutls_certificate_credentials_t credentials, gnutls_datum_t dhParams) : _credentials(credentials) {
@@ -368,7 +367,6 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
     clientData->certificateCredentials = _certificateCredentials;
   }
 
-
   int32_t result = 0;
   if ((result = gnutls_init(&clientData->fileDescriptor->tlsSession, GNUTLS_SERVER)) != GNUTLS_E_SUCCESS) {
     clientData->fileDescriptor->tlsSession = nullptr;
@@ -414,16 +412,20 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
       if (gnutls_x509_crt_list_import(&clientCertificates, &certMax, derClientCertificates, GNUTLS_X509_FMT_DER, 0) < 1) {
         if (_requireClientCert) {
           _bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+          gnutls_x509_crt_deinit(clientCertificates);
           throw SocketSslException("Client certificate verification has failed: Error importing client certificate.");
         }
       } else {
-        gnutls_datum_t distinguishedName;
+        gnutls_datum_t distinguishedName{};
         if (gnutls_x509_crt_get_dn2(clientCertificates, &distinguishedName) != GNUTLS_E_SUCCESS) {
           if (_requireClientCert) {
             _bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
+            gnutls_free(distinguishedName.data);
+            gnutls_x509_crt_deinit(clientCertificates);
             throw SocketSslException("Client certificate verification has failed: Error getting client certificate's distinguished name.");
           }
         } else clientData->clientCertDn = std::string((char *)distinguishedName.data, distinguishedName.size);
+        gnutls_free(distinguishedName.data);
 
         std::array<char, 40> certificateSerial{};
         size_t certificateSerialSize = certificateSerial.size();
@@ -432,6 +434,7 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
         clientData->clientCertSerial = HelperFunctions::getHexString(certificateSerial.data(), certificateSerialSize);
         clientData->clientCertExpiration = gnutls_x509_crt_get_expiration_time(clientCertificates);
       }
+      gnutls_x509_crt_deinit(clientCertificates);
     }
   }
 }
@@ -532,19 +535,18 @@ bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char> &packet, 
 }
 
 void TcpSocket::closeClientConnection(int32_t clientId) {
-  {
-    std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-    auto clientIterator = _clients.find(clientId);
-    if (clientIterator != _clients.end()) clientIterator->second->socket->close();
-  }
-
-  if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientId, 0, "");
-  else if (_connectionClosedCallback) _connectionClosedCallback(clientId);
+  std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+  auto clientIterator = _clients.find(clientId);
+  if (clientIterator != _clients.end()) clientIterator->second->socket->close();
 }
 
 int32_t TcpSocket::clientCount() {
   std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
   return _clients.size();
+}
+
+uint32_t TcpSocket::processingQueueSize() {
+  return queueSize(0);
 }
 
 std::string TcpSocket::getClientCertDn(int32_t clientId) {
@@ -592,6 +594,19 @@ void TcpSocket::serverThread() {
         socketDescriptor = _socketDescriptor->descriptor;
       }
 
+      { //Send backlog
+        if (_packetReceivedCallback && queueIsStarted(0)) {
+          for (auto &client : clients) {
+            if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+            std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
+            if (!client.second->backlog.empty() && !client.second->busy) {
+              std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
+              enqueue(0, queueEntry);
+            }
+          }
+        }
+      }
+
       timeval timeout{};
       timeout.tv_sec = 0;
       timeout.tv_usec = 100000;
@@ -613,7 +628,9 @@ void TcpSocket::serverThread() {
         }
       }
 
-      result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
+      do {
+        result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
+      } while (result == -1 && errno == EINTR);
       if (result == 0) {
         if (HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) {
           collectGarbage();
@@ -621,7 +638,6 @@ void TcpSocket::serverThread() {
         }
         continue;
       } else if (result == -1) {
-        if (errno == EINTR) continue;
         _bl->out.printError("Error: select returned -1: " + std::string(strerror(errno)));
         continue;
       }
@@ -636,22 +652,22 @@ void TcpSocket::serverThread() {
           getpeername(clientFileDescriptor->descriptor, (struct sockaddr *)&clientInfo, &addressSize);
 
           uint16_t port = 0;
-          char ipString[INET6_ADDRSTRLEN];
+          std::array<char, INET6_ADDRSTRLEN> ipString{};
           if (clientInfo.ss_family == AF_INET) {
             auto *s = (struct sockaddr_in *)&clientInfo;
             port = ntohs(s->sin_port);
-            inet_ntop(AF_INET, &s->sin_addr, ipString, sizeof(ipString));
+            inet_ntop(AF_INET, &s->sin_addr, ipString.data(), ipString.size());
           } else { // AF_INET6
             auto *s = (struct sockaddr_in6 *)&clientInfo;
             port = ntohs(s->sin6_port);
-            inet_ntop(AF_INET6, &s->sin6_addr, ipString, sizeof(ipString));
+            inet_ntop(AF_INET6, &s->sin6_addr, ipString.data(), ipString.size());
           }
-          std::string address = std::string(ipString);
+          std::string address = std::string(ipString.data());
 
           if (_clients.size() > _maxConnections) {
             collectGarbage();
             if (_clients.size() > _maxConnections) {
-              _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString);
+              _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString.data());
               _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
               continue;
             }
@@ -696,18 +712,12 @@ void TcpSocket::serverThread() {
         continue;
       }
 
-      PTcpClientData clientData;
-      {
-        for (auto &client : clients) {
-          if (client.second->fileDescriptor->descriptor == -1) continue;
-          if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
-            clientData = client.second;
-            break;
-          }
+      for (auto &client : clients) {
+        if (client.second->fileDescriptor->descriptor == -1) continue;
+        if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
+          readClient(client.second);
         }
       }
-
-      if (clientData) readClient(clientData);
     }
     catch (const std::exception &ex) {
       _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -724,10 +734,11 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
     if (!queueEntry) return;
 
     std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
-    bool more = !queueEntry->clientData->backlog.empty();
+    bool hasData = !queueEntry->clientData->backlog.empty();
     backlogGuard.unlock();
 
-    while (more) {
+    //Send a maximum of 10 packets
+    for (int32_t i = 0; i < 10; i++) {
       backlogGuard.lock();
       auto packet = queueEntry->clientData->backlog.front();
       queueEntry->clientData->backlog.pop();
@@ -736,10 +747,16 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       if (_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
 
       backlogGuard.lock();
-      more = !queueEntry->clientData->backlog.empty();
-      if (!more) queueEntry->clientData->busy = false;
+      hasData = !queueEntry->clientData->backlog.empty();
+      if (!hasData) {
+        backlogGuard.unlock();
+        break;
+      }
       backlogGuard.unlock();
     }
+    backlogGuard.lock();
+    queueEntry->clientData->busy = false;
+    backlogGuard.unlock();
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -747,7 +764,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
 }
 
 void TcpSocket::collectGarbage() {
-  _lastGarbageCollection = BaseLib::HelperFunctions::getTime();
+  _lastGarbageCollection = HelperFunctions::getTime();
 
   std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
   std::vector<int32_t> clientsToRemove;
@@ -763,10 +780,8 @@ void TcpSocket::collectGarbage() {
 
 void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients) {
   std::vector<int32_t> clientsToRemove;
-  {
-    for (auto &client : clients) {
-      if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
-    }
+  for (auto &client : clients) {
+    if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
   }
   for (auto &client : clientsToRemove) {
     clients.erase(client);
@@ -1087,11 +1102,13 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData) {
   }
   FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
   fileDescriptorGuard.unlock();
-  bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
+  do {
+    bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
+  } while (bytesRead == -1 && errno == EINTR);
   if (bytesRead == 0) {
     throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
   }
-  if (bytesRead != 1) {
+  if (bytesRead == -1) {
     readGuard.unlock();
     close();
     throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
@@ -1171,7 +1188,10 @@ int32_t TcpSocket::proofwrite(const std::vector<char> &data) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }
@@ -1241,7 +1261,10 @@ int32_t TcpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }
@@ -1311,7 +1334,10 @@ int32_t TcpSocket::proofwrite(const std::string &data) {
     }
     FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
     fileDescriptorGuard.unlock();
-    int32_t readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    int32_t readyFds = 0;
+    do {
+      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
+    } while (readyFds == -1 && errno == EINTR);
     if (readyFds == 0) {
       throw SocketTimeOutException("Writing to socket timed out.");
     }
@@ -1473,7 +1499,6 @@ void TcpSocket::getConnection() {
 
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Connecting to host " + _hostname + " on port " + _port + (_useSsl ? " using SSL" : "") + "...");
 
-  //Retry for two minutes
   for (int32_t i = 0; i < _connectionRetries; ++i) {
     struct addrinfo *serverInfo = nullptr;
     struct addrinfo hostInfo{};
@@ -1540,20 +1565,19 @@ void TcpSocket::getConnection() {
       }
     }
 
-    int32_t connectResult = 0;
-    if ((connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen)) == -1 && errno != EINPROGRESS) {
+    int32_t connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen);
+    int errorNumber = errno;
+    freeaddrinfo(serverInfo);
+    if (connectResult == -1 && errorNumber != EINPROGRESS) {
       if (i < _connectionRetries - 1) {
-        freeaddrinfo(serverInfo);
         _bl->fileDescriptorManager.shutdown(_socketDescriptor);
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         continue;
       } else {
-        freeaddrinfo(serverInfo);
         _bl->fileDescriptorManager.shutdown(_socketDescriptor);
         throw SocketTimeOutException("Connecting to server " + _ipAddress + " on port " + _port + " timed out: " + strerror(errno));
       }
     }
-    freeaddrinfo(serverInfo);
 
     if (connectResult != 0) //We have to wait for the connection
     {

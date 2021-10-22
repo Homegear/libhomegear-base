@@ -29,6 +29,8 @@
 */
 
 #include "PhysicalInterfaces.h"
+
+#include <memory>
 #include "IPhysicalInterface.h"
 #include "../BaseLib.h"
 
@@ -54,6 +56,9 @@ void PhysicalInterfaces::dispose() {
   _physicalInterfaceSettings.clear();
   _physicalInterfaces.clear();
   _physicalInterfacesMutex.unlock();
+
+  //Function pointers need to be cleaned up before unloading the module
+  _rawPacketEvent = std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>();
 }
 
 bool PhysicalInterfaces::lifetick() {
@@ -102,6 +107,7 @@ void PhysicalInterfaces::startListening() {
   try {
     std::lock_guard<std::mutex> interfacesGuard(_physicalInterfacesMutex);
     for (std::map<std::string, std::shared_ptr<IPhysicalInterface>>::iterator j = _physicalInterfaces.begin(); j != _physicalInterfaces.end(); ++j) {
+      j->second->setRawPacketEvent(std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>(std::bind(&PhysicalInterfaces::rawPacketEvent, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
       j->second->startListening();
     }
   }
@@ -147,16 +153,19 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces() {
     for (auto interface : _physicalInterfaces) {
       BaseLib::PVariable interfaceStruct(new BaseLib::Variable(BaseLib::VariableType::tStruct));
 
-      interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", BaseLib::PVariable(new BaseLib::Variable(_familyId))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("ID", BaseLib::PVariable(new BaseLib::Variable(interface.second->getID()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", BaseLib::PVariable(new BaseLib::Variable(interface.second->getAddress()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("TYPE", BaseLib::PVariable(new BaseLib::Variable(interface.second->getType()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("CONNECTED", BaseLib::PVariable(new BaseLib::Variable(interface.second->isOpen()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("DEFAULT", BaseLib::PVariable(new BaseLib::Variable(interface.second->isDefault()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("IP_ADDRESS", BaseLib::PVariable(new BaseLib::Variable(interface.second->getIpAddress()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("HOSTNAME", BaseLib::PVariable(new BaseLib::Variable(interface.second->getHostname()))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketSent() / 1000)))));
-      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", BaseLib::PVariable(new BaseLib::Variable((uint32_t)(interface.second->lastPacketReceived() / 1000)))));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("FAMILYID", std::make_shared<BaseLib::Variable>(_familyId)));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("VIRTUAL", std::make_shared<BaseLib::Variable>(false)));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("ID", std::make_shared<BaseLib::Variable>(interface.second->getID())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("SERIALNUMBER", std::make_shared<BaseLib::Variable>(interface.second->getSerialNumber())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("FIRMWAREVERSION", std::make_shared<BaseLib::Variable>(interface.second->getFirmwareVersion())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("PHYSICALADDRESS", std::make_shared<BaseLib::Variable>(interface.second->getAddress())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("TYPE", std::make_shared<BaseLib::Variable>(interface.second->getType())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("CONNECTED", std::make_shared<BaseLib::Variable>(interface.second->isOpen())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("DEFAULT", std::make_shared<BaseLib::Variable>(interface.second->isDefault())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("IP_ADDRESS", std::make_shared<BaseLib::Variable>(interface.second->getIpAddress())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("HOSTNAME", std::make_shared<BaseLib::Variable>(interface.second->getHostname())));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETSENT", std::make_shared<BaseLib::Variable>((uint32_t)(interface.second->lastPacketSent() / 1000))));
+      interfaceStruct->structValue->insert(BaseLib::StructElement("LASTPACKETRECEIVED", std::make_shared<BaseLib::Variable>((uint32_t)(interface.second->lastPacketReceived() / 1000))));
       array->arrayValue->push_back(interfaceStruct);
     }
     return array;
@@ -165,6 +174,10 @@ BaseLib::PVariable PhysicalInterfaces::listInterfaces() {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
   return BaseLib::Variable::createError(-32500, "Unknown application error.");
+}
+
+void PhysicalInterfaces::rawPacketEvent(int32_t familyId, const std::string &interfaceId, const PVariable &packet) {
+  if (_rawPacketEvent) _rawPacketEvent(familyId, interfaceId, packet);
 }
 
 }

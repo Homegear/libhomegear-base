@@ -30,11 +30,8 @@
 
 #include "RpcHeader.h"
 
-namespace BaseLib
-{
-namespace Rpc
-{
-
+namespace BaseLib {
+namespace Rpc {
 
 }
 }

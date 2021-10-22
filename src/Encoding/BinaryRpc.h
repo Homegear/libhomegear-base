@@ -34,72 +34,67 @@
 #include "../Variable.h"
 #include "../Exception.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Rpc
-{
+namespace Rpc {
 
-class BinaryRpcException : public BaseLib::Exception
-{
-public:
-	explicit BinaryRpcException(const std::string& message) : BaseLib::Exception(message) {}
+class BinaryRpcException : public BaseLib::Exception {
+ public:
+  explicit BinaryRpcException(const std::string &message) : BaseLib::Exception(message) {}
 };
 
-class BinaryRpc
-{
-public:
-	enum class Type
-	{
-		unknown,
-		request,
-		response
-	};
+class BinaryRpc {
+ public:
+  enum class Type {
+    unknown,
+    request,
+    response
+  };
 
-    BinaryRpc();
+  BinaryRpc();
 
-    /**
-     * Deprecated old constructor.
-     */
-	explicit BinaryRpc(BaseLib::SharedObjects* bl);
-	~BinaryRpc() = default;
+  /**
+   * Deprecated old constructor.
+   */
+  explicit BinaryRpc(BaseLib::SharedObjects *bl);
+  ~BinaryRpc() = default;
 
-	size_t getMaxHeaderSize() { return _maxHeaderSize; }
-	void setMaxHeaderSize(size_t value) { _maxHeaderSize = value; }
-	size_t getMaxContentSize() { return _maxContentSize; }
-	void setMaxContentSize(size_t value) { _maxContentSize = value; }
-	Type getType() { return _type; }
-	bool hasHeader() { return _hasHeader; }
-	bool processingStarted() { return _headerProcessingStarted || _dataProcessingStarted; }
-	bool headerProcessingStarted() { return _headerProcessingStarted; }
-	bool dataProcessingStarted() { return _dataProcessingStarted; }
-	bool isFinished() { return _finished; }
-	std::vector<char>& getData() { return _data; }
+  size_t getMaxHeaderSize() { return _maxHeaderSize; }
+  void setMaxHeaderSize(size_t value) { _maxHeaderSize = value; }
+  size_t getMaxContentSize() { return _maxContentSize; }
+  void setMaxContentSize(size_t value) { _maxContentSize = value; }
+  Type getType() { return _type; }
+  bool hasHeader() { return _hasHeader; }
+  bool processingStarted() { return _headerProcessingStarted || _dataProcessingStarted; }
+  bool headerProcessingStarted() { return _headerProcessingStarted; }
+  bool dataProcessingStarted() { return _dataProcessingStarted; }
+  bool isFinished() { return _finished; }
+  std::vector<char> &getData() { return _data; }
 
-	void reset();
+  void reset();
 
-	/**
-	 * Parses binary RPC data from a buffer.
-	 *
-	 * @param buffer The buffer to parse
-	 * @param bufferLength The maximum number of bytes to process.
-	 * @return The number of processed bytes.
-	 */
-	int32_t process(char* buffer, int32_t bufferLength);
-private:
-	SharedObjects* _bl = nullptr;
-	size_t _maxHeaderSize = 102400;
-	size_t _maxContentSize = 104857600;
-	bool _hasHeader = false;
-	bool _headerProcessingStarted = false;
-	bool _dataProcessingStarted = false;
-	bool _finished = false;
-	Type _type = Type::unknown;
-	uint32_t _headerSize = 0;
-	uint32_t _dataSize = 0;
-	std::vector<char> _data;
+  /**
+   * Parses binary RPC data from a buffer.
+   *
+   * @param buffer The buffer to parse
+   * @param bufferLength The maximum number of bytes to process.
+   * @return The number of processed bytes.
+   */
+  int32_t process(char *buffer, int32_t bufferLength);
+ private:
+  SharedObjects *_bl = nullptr;
+  size_t _maxHeaderSize = 102400;
+  size_t _maxContentSize = 104857600;
+  bool _hasHeader = false;
+  bool _headerProcessingStarted = false;
+  bool _dataProcessingStarted = false;
+  bool _finished = false;
+  Type _type = Type::unknown;
+  uint32_t _headerSize = 0;
+  uint32_t _dataSize = 0;
+  std::vector<char> _data;
 };
 }
 }
