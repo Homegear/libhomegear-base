@@ -740,6 +740,10 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
     //Send a maximum of 10 packets
     for (int32_t i = 0; i < 10; i++) {
       backlogGuard.lock();
+      if (queueEntry->clientData->backlog.empty()) {
+        queueEntry->clientData->busy = false;
+        return;
+      }
       auto packet = queueEntry->clientData->backlog.front();
       queueEntry->clientData->backlog.pop();
       backlogGuard.unlock();
