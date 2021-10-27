@@ -802,6 +802,8 @@ std::string Http::decodeURL(const std::string &url) {
       if (i == url.end()) return decoded.str();
       character += (char)Math::getNumber(*i);
       decoded << character;
+    } else if (*i == '+') {
+      decoded << ' ';
     } else decoded << *i;
   }
   return decoded.str();
