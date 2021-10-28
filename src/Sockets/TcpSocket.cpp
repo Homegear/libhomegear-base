@@ -733,9 +733,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
     queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
     if (!queueEntry) return;
 
-    std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
-    bool hasData = !queueEntry->clientData->backlog.empty();
-    backlogGuard.unlock();
+    std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex, std::defer_lock);
 
     //Send a maximum of 10 packets
     for (int32_t i = 0; i < 10; i++) {
@@ -749,14 +747,6 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       backlogGuard.unlock();
 
       if (_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
-
-      backlogGuard.lock();
-      hasData = !queueEntry->clientData->backlog.empty();
-      if (!hasData) {
-        backlogGuard.unlock();
-        break;
-      }
-      backlogGuard.unlock();
     }
     backlogGuard.lock();
     queueEntry->clientData->busy = false;
