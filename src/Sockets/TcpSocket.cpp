@@ -742,7 +742,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
         queueEntry->clientData->busy = false;
         return;
       }
-      auto packet = queueEntry->clientData->backlog.front();
+      std::shared_ptr<TcpPacket> packet = queueEntry->clientData->backlog.front();
       queueEntry->clientData->backlog.pop();
       backlogGuard.unlock();
 
