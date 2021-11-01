@@ -600,6 +600,7 @@ void TcpSocket::serverThread() {
             if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
             std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
             if (!client.second->backlog.empty() && !client.second->busy) {
+              client.second->busy = true;
               std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
               enqueue(0, queueEntry);
             }
