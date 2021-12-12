@@ -374,7 +374,7 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel) {
     serviceMessage->variable = id;
     serviceMessage->value = value;
     serviceMessage->priority = ServiceMessagePriority::kWarning;
-    serviceMessage->message = "l10n.common.serviceMessage." + id;
+    serviceMessage->message = "l10n.common.serviceMessage." + BaseLib::HelperFunctions::toLower(id);
     raiseServiceMessageEvent(serviceMessage);
 
     //RPC Broadcast is done in peer's packetReceived
