@@ -365,6 +365,18 @@ void ServiceMessages::set(std::string id, uint8_t value, uint32_t channel) {
       }
     }
     save(ServiceMessagePriority::kWarning, HelperFunctions::getTimeSeconds(), channel, id, value);
+
+    auto serviceMessage = std::make_shared<ServiceMessage>();
+    serviceMessage->type = ServiceMessageType::kDevice;
+    serviceMessage->timestamp = HelperFunctions::getTimeSeconds();
+    serviceMessage->peerId = _peerId;
+    serviceMessage->channel = channel;
+    serviceMessage->variable = id;
+    serviceMessage->value = value;
+    serviceMessage->priority = ServiceMessagePriority::kWarning;
+    serviceMessage->message = "l10n.common.serviceMessage." + id;
+    raiseServiceMessageEvent(serviceMessage);
+
     //RPC Broadcast is done in peer's packetReceived
   }
   catch (const std::exception &ex) {
