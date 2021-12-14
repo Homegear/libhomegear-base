@@ -45,7 +45,8 @@ RpcConfigurationParameter::RpcConfigurationParameter(RpcConfigurationParameter c
   _binaryData = rhs._binaryData;
   _partialBinaryData = rhs._partialBinaryData;
   _logicalData = rhs._logicalData;
-  _room = rhs._room;
+  _room = rhs._room.load();
+  _buildingPart = rhs._buildingPart.load();
   _categories = rhs._categories;
   _roles = rhs._roles;
   _invert = rhs._invert;
@@ -61,7 +62,8 @@ RpcConfigurationParameter &RpcConfigurationParameter::operator=(const RpcConfigu
   _binaryData = rhs._binaryData;
   _partialBinaryData = rhs._partialBinaryData;
   _logicalData = rhs._logicalData;
-  _room = rhs._room;
+  _room = rhs._room.load();
+  _buildingPart = rhs._buildingPart.load();
   _categories = rhs._categories;
   _roles = rhs._roles;
   _invert = rhs._invert;
@@ -486,6 +488,57 @@ bool Peer::setRoom(int32_t channel, uint64_t roomId) {
   std::string roomString = rooms.str();
 
   saveVariable(1007, roomString);
+  return true;
+}
+
+std::set<int32_t> Peer::getChannelsInBuildingPart(uint64_t buildingPartId) {
+  std::set<int32_t> result;
+  std::lock_guard<std::mutex> buildingPartGuard(_buildingPartMutex);
+  for (auto &buildingPartIterator : _buildingParts) {
+    if (buildingPartIterator.second == buildingPartId) result.emplace(buildingPartIterator.first);
+  }
+  return result;
+}
+
+uint64_t Peer::getBuildingPart(int32_t channel) {
+  std::lock_guard<std::mutex> buildingPartGuard(_buildingPartMutex);
+  auto buildingPartIterator = _buildingParts.find(channel);
+  if (buildingPartIterator != _buildingParts.end()) return buildingPartIterator->second;
+  return 0;
+}
+
+bool Peer::hasBuildingPartInChannels(uint64_t buildingPartId) {
+  std::lock_guard<std::mutex> buildingPartGuard(_buildingPartMutex);
+  for (auto &buildingPartIterator : _buildingParts) {
+    if (buildingPartIterator.second == buildingPartId) return true;
+  }
+  return false;
+}
+
+bool Peer::buildingPartsSet() {
+  std::lock_guard<std::mutex> buildingPartGuard(_buildingPartMutex);
+  for (auto &buildingPartIterator : _buildingParts) {
+    if (buildingPartIterator.second != 0) return true;
+  }
+  return false;
+}
+
+bool Peer::setBuildingPart(int32_t channel, uint64_t buildingPartId) {
+  if (channel != -1) {
+    auto channelIterator = _rpcDevice->functions.find(channel);
+    if (channelIterator == _rpcDevice->functions.end()) return false;
+  }
+
+  std::lock_guard<std::mutex> buildingPartGuard(_buildingPartMutex);
+  _buildingParts[channel] = buildingPartId;
+
+  std::ostringstream buildingParts;
+  for (auto buildingPartPair : _buildingParts) {
+    buildingParts << std::to_string(buildingPartPair.first) << "," << std::to_string(buildingPartPair.second) << ";";
+  }
+  std::string buildingPartString = buildingParts.str();
+
+  saveVariable(1009, buildingPartString);
   return true;
 }
 
@@ -1066,6 +1119,17 @@ void Peer::loadVariables(ICentral *central, std::shared_ptr<Database::DataTable>
           }
           break;
         }
+        case 1009: {
+          std::vector<std::string> buildingPartStrings = HelperFunctions::splitAll(row->second.at(4)->textValue, ';');
+          for (auto buildingPartString : buildingPartStrings) {
+            if (buildingPartString.empty()) continue;
+            auto buildingPartPair = HelperFunctions::splitFirst(buildingPartString, ',');
+            int32_t channel = Math::getNumber(buildingPartPair.first);
+            uint64_t buildingPart = Math::getNumber64(buildingPartPair.second);
+            if (buildingPart != 0) _buildingParts[channel] = buildingPart;
+          }
+          break;
+        }
       }
     }
     return;
@@ -1422,15 +1486,16 @@ void Peer::loadConfig() {
 
         { // Rooms / categories / roles
           parameterInfo->parameter.setRoom((uint64_t)row->second.at(8)->intValue);
+          parameterInfo->parameter.setBuildingPart((uint64_t)row->second.at(9)->intValue);
 
-          std::vector<std::string> categoryStrings = HelperFunctions::splitAll(row->second.at(9)->textValue, ',');
+          std::vector<std::string> categoryStrings = HelperFunctions::splitAll(row->second.at(10)->textValue, ',');
           for (auto categoryString : categoryStrings) {
             if (categoryString.empty()) continue;
             uint64_t category = (uint64_t)Math::getNumber64(categoryString);
             if (category != 0) parameterInfo->parameter.addCategory(category);
           }
 
-          std::vector<std::string> roleStrings = HelperFunctions::splitAll(row->second.at(10)->textValue, ',');
+          std::vector<std::string> roleStrings = HelperFunctions::splitAll(row->second.at(11)->textValue, ',');
           for (auto roleString : roleStrings) {
             if (roleString.empty()) continue;
             auto parts = HelperFunctions::splitAll(roleString, '-');
@@ -1452,9 +1517,9 @@ void Peer::loadConfig() {
           }
         }
 
-        parameterInfo->specialType = row->second.at(11)->intValue;
-        if (row->second.at(12)->binaryValue->empty()) parameterInfo->metadata = std::make_shared<Variable>();
-        else parameterInfo->metadata = rpcDecoder.decodeResponse(*row->second.at(12)->binaryValue);
+        parameterInfo->specialType = row->second.at(12)->intValue;
+        if (row->second.at(13)->binaryValue->empty()) parameterInfo->metadata = std::make_shared<Variable>();
+        else parameterInfo->metadata = rpcDecoder.decodeResponse(*row->second.at(13)->binaryValue);
 
         Functions::iterator functionIterator = _rpcDevice->functions.find(parameterInfo->channel);
         if (functionIterator == _rpcDevice->functions.end()) {
@@ -1729,6 +1794,77 @@ uint64_t Peer::getVariableRoom(int32_t channel, const std::string &variableName)
     if (variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return 0;
 
     return variableIterator->second.getRoom();
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return 0;
+}
+
+bool Peer::setVariableBuildingPart(int32_t channel, std::string &variableName, uint64_t buildingPartId) {
+  try {
+    auto channelIterator = valuesCentral.find(channel);
+    if (channelIterator == valuesCentral.end()) {
+      _bl->out.printWarning("Warning: Could not add variable to building part: Channel not found.");
+      return false;
+    }
+    auto variableIterator = channelIterator->second.find(variableName);
+    if (variableIterator == channelIterator->second.end()) {
+      _bl->out.printWarning("Warning: Could not add variable " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + " to building part " + std::to_string(buildingPartId) + ": Variable not found.");
+      return false;
+    }
+    if (!variableIterator->second.rpcParameter) {
+      _bl->out.printWarning("Warning: Could not add variable to building part " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated RPC parameter. Try to restart Homegear.");
+      return false;
+    }
+    if (variableIterator->second.databaseId == 0) {
+      _bl->out.printWarning("Warning: Could not add variable to building part " + std::to_string(_peerID) + "." + std::to_string(channel) + "." + variableName + ": Variable has no associated database ID. Try to restart Homegear.");
+      return false;
+    }
+    variableIterator->second.setBuildingPart(buildingPartId);
+
+    Database::DataRow data;
+    data.push_back(std::make_shared<Database::DataColumn>(buildingPartId));
+    data.push_back(std::make_shared<Database::DataColumn>(variableIterator->second.databaseId));
+    _bl->db->savePeerParameterBuildingPartAsynchronous(data);
+
+    return true;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return false;
+}
+
+void Peer::removeBuildingPartFromVariables(uint64_t buildingPartId) {
+  try {
+    for (auto &channelIterator : valuesCentral) {
+      for (auto &variableIterator : channelIterator.second) {
+        if (!variableIterator.second.rpcParameter || variableIterator.second.databaseId == 0) continue;
+        if (variableIterator.second.getBuildingPart() == buildingPartId) {
+          variableIterator.second.setBuildingPart(0);
+
+          Database::DataRow data;
+          data.push_back(std::make_shared<Database::DataColumn>(buildingPartId));
+          data.push_back(std::make_shared<Database::DataColumn>(variableIterator.second.databaseId));
+          _bl->db->savePeerParameterBuildingPartAsynchronous(data);
+        }
+      }
+    }
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+}
+
+uint64_t Peer::getVariableBuildingPart(int32_t channel, const std::string &variableName) {
+  try {
+    auto channelIterator = valuesCentral.find(channel);
+    if (channelIterator == valuesCentral.end()) return 0;
+    auto variableIterator = channelIterator->second.find(variableName);
+    if (variableIterator == channelIterator->second.end() || !variableIterator->second.rpcParameter || variableIterator->second.databaseId == 0) return 0;
+
+    return variableIterator->second.getBuildingPart();
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -2262,6 +2398,8 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
         element->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter.rpcParameter->unit))));
         auto room = parameter.getRoom();
         if (room != 0) element->structValue->insert(StructElement("ROOM", std::make_shared<Variable>(room)));
+        auto buildingPart = parameter.getBuildingPart();
+        if (buildingPart != 0) element->structValue->insert(StructElement("BUILDING_PART", std::make_shared<Variable>(buildingPart)));
         auto categoryIds = parameter.getCategories();
         if (!categoryIds.empty()) {
           auto categories = std::make_shared<Variable>(VariableType::tArray);
@@ -3534,6 +3672,11 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
         if (room != 0) description->structValue->emplace("ROOM", std::make_shared<Variable>(room));
       }
 
+      if (fields.empty() || fields.find("BUILDING_PART") != fields.end()) {
+        auto buildingPart = valueParameterIterator->second.getBuildingPart();
+        if (buildingPart != 0) description->structValue->emplace("BUILDING_PART", std::make_shared<Variable>(buildingPart));
+      }
+
       if (fields.empty() || fields.find("CATEGORIES") != fields.end()) {
         auto categories = valueParameterIterator->second.getCategories();
         if (!categories.empty()) {
@@ -3703,6 +3846,42 @@ PVariable Peer::getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, b
             if (roomId == channelRoomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
           }
         } else if (variableIterator.second.getRoom() == roomId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+      }
+      if (!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
+    }
+
+    return channels;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable Peer::getVariablesInBuildingPart(PRpcClientInfo clientInfo, uint64_t buildingPartId, bool returnDeviceAssigned, bool checkAcls) {
+  try {
+    if (_disposing) return Variable::createError(-32500, "Peer is disposing.");
+    if (!_rpcDevice) return Variable::createError(-32500, "Unknown application error.");
+
+    auto central = getCentral();
+    if (!central) return Variable::createError(-32500, "Could not get central.");
+    auto me = central->getPeer(_peerID);
+    if (!me) return Variable::createError(-32500, "Could not get peer object.");
+
+    auto channels = std::make_shared<Variable>(VariableType::tStruct);
+
+    for (auto &channelIterator : valuesCentral) {
+      auto variables = std::make_shared<Variable>(VariableType::tArray);
+      variables->arrayValue->reserve(channelIterator.second.size());
+      for (auto &variableIterator : channelIterator.second) {
+        if (checkAcls && !clientInfo->acls->checkVariableReadAccess(me, channelIterator.first, variableIterator.first)) continue;
+        if (variableIterator.second.getBuildingPart() == 0) {
+          if (returnDeviceAssigned) {
+            auto channelBuildingPartId = getBuildingPart(channelIterator.first);
+            if (channelBuildingPartId == 0) channelBuildingPartId = getBuildingPart(-1);
+            if (buildingPartId == channelBuildingPartId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
+          }
+        } else if (variableIterator.second.getBuildingPart() == buildingPartId) variables->arrayValue->push_back(std::make_shared<Variable>(variableIterator.first));
       }
       if (!variables->arrayValue->empty()) channels->structValue->emplace(std::to_string(channelIterator.first), variables);
     }

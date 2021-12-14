@@ -68,10 +68,11 @@ class AclException : public Exception {
  * 1. Variables
  * 2. Devices
  * 3. Rooms
- * 4. Categories
- * 5. Roles
- * 6. Methods
- * 7. Event Server Methods
+ * 4. Building parts
+ * 5. Categories
+ * 6. Roles
+ * 7. Methods
+ * 8. Event Server Methods
  *
  * Security needs to be applied here:
  *
@@ -192,6 +193,28 @@ class Acl {
   std::unordered_map<uint64_t, bool> _roomsWrite;
 
   /**
+   * When set to "true", _buildingPartsRead is included in the ACL checks.
+   */
+  bool _buildingPartsReadSet = false;
+
+  /**
+   * Key: Building part ID; value: access/no access
+   */
+  std::unordered_map<uint64_t, bool> _buildingPartsRead;
+
+  /**
+   * When set to "true", _buildingPartsWrite is included in the ACL checks.
+   */
+  bool _buildingPartsWriteSet = false;
+
+  /**
+   * Key: Building part ID ID; value: access/no access
+   *
+   * ID 0 stands for "no building part assigned"
+   */
+  std::unordered_map<uint64_t, bool> _buildingPartsWrite;
+
+  /**
    * When set to "true", _categoriesRead is included in the ACL checks.
    */
   bool _categoriesReadSet = false;
@@ -289,6 +312,8 @@ class Acl {
   bool devicesWriteSet() { return _devicesWriteSet; }
   bool roomsReadSet() { return _roomsReadSet; }
   bool roomsWriteSet() { return _roomsWriteSet; }
+  bool buildingPartsReadSet() { return _buildingPartsReadSet; }
+  bool buildingPartsWriteSet() { return _buildingPartsWriteSet; }
   bool variablesReadSet() { return _variablesReadSet; }
   bool variablesWriteSet() { return _variablesWriteSet; }
 
@@ -320,11 +345,15 @@ class Acl {
   AclResult checkMethodAndRoleWriteAccess(std::string &methodName, uint64_t roleId);
   AclResult checkMethodAndRoomReadAccess(std::string &methodName, uint64_t roomId);
   AclResult checkMethodAndRoomWriteAccess(std::string &methodName, uint64_t roomId);
+  AclResult checkMethodAndBuildingPartReadAccess(std::string &methodName, uint64_t buildingPartId);
+  AclResult checkMethodAndBuildingPartWriteAccess(std::string &methodName, uint64_t buildingPartId);
   AclResult checkMethodAndDeviceWriteAccess(std::string &methodName, uint64_t peerId);
   AclResult checkNodeBlueVariableReadAccess(const std::string &nodeId, int32_t input);
   AclResult checkNodeBlueVariableWriteAccess(const std::string &nodeId, int32_t input);
   AclResult checkRoomReadAccess(uint64_t roomId);
   AclResult checkRoomWriteAccess(uint64_t roomId);
+  AclResult checkBuildingPartReadAccess(uint64_t buildingPartId);
+  AclResult checkBuildingPartWriteAccess(uint64_t buildingPartId);
   AclResult checkSystemVariableReadAccess(Database::PSystemVariable systemVariable);
   AclResult checkSystemVariableWriteAccess(Database::PSystemVariable systemVariable);
   AclResult checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string &variableName);

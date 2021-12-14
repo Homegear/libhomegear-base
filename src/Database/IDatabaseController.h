@@ -263,6 +263,7 @@ class IDatabaseController {
   virtual void savePeerParameterAsynchronous(DataRow &data) = 0;
   virtual void saveSpecialPeerParameterAsynchronous(DataRow &data) = 0;
   virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow &data) = 0;
+  virtual void savePeerParameterBuildingPartAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerParameterRolesAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerVariableAsynchronous(DataRow &data) = 0;
