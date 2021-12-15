@@ -125,7 +125,7 @@ class IDatabaseController {
   virtual BaseLib::PVariable createBuildingPart(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
   virtual BaseLib::PVariable deleteBuildingPart(uint64_t buildingPartId) = 0;
   virtual BaseLib::PVariable getBuildingPartMetadata(uint64_t buildingPartId) = 0;
-  virtual BaseLib::PVariable getBuildingParts(std::string languageCode) = 0;
+  virtual BaseLib::PVariable getBuildingParts(BaseLib::PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
   virtual bool buildingPartExists(uint64_t buildingPartId) = 0;
   virtual BaseLib::PVariable setBuildingPartMetadata(uint64_t buildingPartId, BaseLib::PVariable metadata) = 0;
   virtual BaseLib::PVariable updateBuildingPart(uint64_t buildingPartId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
