@@ -33,19 +33,18 @@
 
 #include <sys/stat.h>
 
-namespace BaseLib {
-namespace Systems {
+#include <memory>
 
-IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects *baseLib, int32_t familyId) {
+namespace BaseLib::Systems {
+
+IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects *baseLib, int32_t familyId) : IQueue(baseLib, 1, 1000) {
   _bl = baseLib;
   _familyId = familyId;
   _settings.reset(new PhysicalInterfaceSettings());
-  _fileDescriptor = std::shared_ptr<FileDescriptor>(new FileDescriptor());
-  _gpioDescriptors[1] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
-  _gpioDescriptors[2] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
-  _gpioDescriptors[3] = std::shared_ptr<FileDescriptor>(new FileDescriptor());
-  _stopPacketProcessingThread = false;
-  _stopCallbackThread = false;
+  _fileDescriptor = std::make_shared<FileDescriptor>();
+  _gpioDescriptors[1] = std::make_shared<FileDescriptor>();
+  _gpioDescriptors[2] = std::make_shared<FileDescriptor>();
+  _gpioDescriptors[3] = std::make_shared<FileDescriptor>();
   _stopped = false;
 }
 
@@ -54,12 +53,7 @@ IPhysicalInterface::IPhysicalInterface(BaseLib::SharedObjects *baseLib, int32_t 
 }
 
 IPhysicalInterface::~IPhysicalInterface() {
-  _stopPacketProcessingThread = true;
-  std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
-  _packetProcessingPacketAvailable = true;
-  lock.unlock();
-  _packetProcessingConditionVariable.notify_one();
-  _bl->threadManager.join(_packetProcessingThread);
+  stopQueue(0);
 
   //Function pointers need to be cleaned up before unloading the module
   _rawPacketEvent = std::function<void(int32_t, const std::string &, const BaseLib::PVariable &)>();
@@ -81,19 +75,7 @@ bool IPhysicalInterface::lifetick() {
 
 void IPhysicalInterface::startListening() {
   try {
-    _stopPacketProcessingThread = true;
-    std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
-    _packetProcessingPacketAvailable = true;
-    lock.unlock();
-    _packetProcessingConditionVariable.notify_one();
-    _bl->threadManager.join(_packetProcessingThread);
-    _stopPacketProcessingThread = false;
-    lock.lock();
-    _packetProcessingPacketAvailable = false;
-    lock.unlock();
-    _packetBufferHead = 0;
-    _packetBufferTail = 0;
-    _bl->threadManager.start(_packetProcessingThread, true, 45, SCHED_FIFO, &IPhysicalInterface::processPackets, this);
+    startQueue(0, false, 3);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -102,12 +84,7 @@ void IPhysicalInterface::startListening() {
 
 void IPhysicalInterface::stopListening() {
   try {
-    _stopPacketProcessingThread = true;
-    std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
-    _packetProcessingPacketAvailable = true;
-    lock.unlock();
-    _packetProcessingConditionVariable.notify_one();
-    _bl->threadManager.join(_packetProcessingThread);
+    stopQueue(0);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -122,77 +99,43 @@ void IPhysicalInterface::disableUpdateMode() {
   throw Exception("Error: Method disableUpdateMode is not implemented.");
 }
 
-void IPhysicalInterface::processPackets() {
-  while (!_stopPacketProcessingThread) {
-    std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
-    try {
-      if (_packetBufferHead == _packetBufferTail) {
-        while (!_packetProcessingConditionVariable.wait_for(lock, std::chrono::milliseconds(1000), [&] {
-          return _packetProcessingPacketAvailable || _stopPacketProcessingThread;
-        }));
-      }
-      if (_stopPacketProcessingThread) return;
+void IPhysicalInterface::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) {
+  try {
+    auto queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
+    if (!queueEntry) return;
 
-      //We need to copy all elements. In packetReceived so much can happen, that _homeMaticDevicesMutex might deadlock
+    _lifetickTime.store(BaseLib::HelperFunctions::getTime(), std::memory_order_release); //Write first, otherwise race condition
+    _lifetickState.store(false, std::memory_order_release);
+
+    int64_t processingTime = HelperFunctions::getTime();
+    _lastPacketReceived = processingTime;
+
+    if (queueEntry->packet) {
+      //We need to copy all elements. In packetReceived so much can happen, that mutexes might deadlock
       EventHandlers eventHandlers = getEventHandlers();
 
-      while (_packetBufferHead != _packetBufferTail) {
-        _lifetickTime.store(BaseLib::HelperFunctions::getTime(), std::memory_order_release); //Write first, otherwise race condition
-        _lifetickState.store(false, std::memory_order_release);
-
-        int64_t processingTime = HelperFunctions::getTime();
-        _lastPacketReceived = processingTime;
-
-        std::shared_ptr<Packet> packet = _packetBuffer[_packetBufferTail];
-        _packetBuffer[_packetBufferTail].reset();
-        _packetBufferTail++;
-        if (_packetBufferTail >= _packetBufferSize) _packetBufferTail = 0;
-        if (_packetBufferHead == _packetBufferTail) _packetProcessingPacketAvailable = false; //Set here, because otherwise it might be set to "true" in raisePacketReceived and then set to false again after the while loop
-
-        lock.unlock();
-
-        if (packet) {
-          for (EventHandlers::iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i) {
-            i->second->lock();
-            if (i->second->handler()) ((IPhysicalInterfaceEventSink *)i->second->handler())->onPacketReceived(_settings->id, packet);
-            i->second->unlock();
-          }
-
-          if (_rawPacketEvent) _rawPacketEvent(_familyId, _settings->id, packet->toVariable());
-        } else _bl->out.printWarning("Warning (" + _settings->id + "): Packet was nullptr.");
-        processingTime = HelperFunctions::getTime() - processingTime;
-        if (processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");
-
-        _lifetickState.store(true, std::memory_order_release);
-
-        lock.lock();
+      for (auto &eventHandler: eventHandlers) {
+        eventHandler.second->lock();
+        if (eventHandler.second->handler()) ((IPhysicalInterfaceEventSink *)eventHandler.second->handler())->onPacketReceived(_settings->id, queueEntry->packet);
+        eventHandler.second->unlock();
       }
-    }
-    catch (const std::exception &ex) {
-      _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
+
+      if (_rawPacketEvent) _rawPacketEvent(_familyId, _settings->id, queueEntry->packet->toVariable());
+    } else _bl->out.printWarning("Warning (" + _settings->id + "): Packet was nullptr.");
+    processingTime = HelperFunctions::getTime() - processingTime;
+    if (processingTime > _maxPacketProcessingTime) _bl->out.printInfo("Info (" + _settings->id + "): Packet processing took longer than 1 second (" + std::to_string(processingTime) + " ms).");
+
+    _lifetickState.store(true, std::memory_order_release);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
 }
 
 void IPhysicalInterface::raisePacketReceived(std::shared_ptr<Packet> packet) {
   try {
-    std::unique_lock<std::mutex> lock(_packetProcessingThreadMutex);
-    int32_t tempHead = _packetBufferHead + 1;
-    if (tempHead >= _packetBufferSize) tempHead = 0;
-    if (tempHead == _packetBufferTail) {
-      _bl->out.printError("Error (" + _settings->id + "): More than " + std::to_string(_packetBufferSize) + " packets are queued to be processed. Your packet processing is too slow. Dropping packet.");
-      return;
-    }
-
-    _packetBuffer[_packetBufferHead] = packet;
-    _packetBufferHead++;
-    if (_packetBufferHead >= _packetBufferSize) {
-      _packetBufferHead = 0;
-    }
-    _packetProcessingPacketAvailable = true;
-
-    lock.unlock();
-    _packetProcessingConditionVariable.notify_one();
+    std::shared_ptr<IQueueEntry> queueEntry = std::make_shared<QueueEntry>(std::move(packet));
+    enqueue(0, queueEntry);
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -533,5 +476,4 @@ void IPhysicalInterface::saveSettingToDatabase(std::string setting, std::vector<
   }
 }
 
-}
 }
