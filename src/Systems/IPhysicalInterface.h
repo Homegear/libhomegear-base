@@ -125,7 +125,7 @@ class IPhysicalInterface : public IEventsEx, public IQueue {
   std::map<uint32_t, std::shared_ptr<FileDescriptor>> _gpioDescriptors;
   std::atomic<int64_t> _lastPacketSent{-1};
   std::atomic<int64_t> _lastPacketReceived{-1};
-  const int64_t _maxPacketProcessingTime = 1000;
+  int64_t _maxPacketProcessingTime = 1000;
   std::atomic_bool _updateMode{false};
   std::atomic<int64_t> _lifetickTime{0};
   std::atomic_bool _lifetickState{true};
