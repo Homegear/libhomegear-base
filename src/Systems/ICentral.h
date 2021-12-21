@@ -132,6 +132,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable activateLinkParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t remoteId, int32_t remoteChannel, bool longPress) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable addCategoryToChannel(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t categoryId);
   virtual PVariable addDevice(PRpcClientInfo clientInfo, std::string serialNumber) { return Variable::createError(-32601, "Method not implemented for this central."); }
+  virtual PVariable addChannelToBuildingPart(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t buildingPartId);
   virtual PVariable addChannelToRoom(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t roomId);
   virtual PVariable addLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description) {
     return Variable::createError(-32601,
@@ -150,6 +151,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable deleteDevice(PRpcClientInfo clientInfo, uint64_t peerId, int32_t flags) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable getAllConfig(PRpcClientInfo clientInfo, uint64_t peerId, bool checkAcls);
   virtual PVariable getAllValues(PRpcClientInfo clientInfo, BaseLib::PArray peerIds, bool returnWriteOnly, bool checkAcls);
+  virtual PVariable getChannelsInBuildingPart(PRpcClientInfo clientInfo, uint64_t buildingPartId, bool checkAcls);
   virtual PVariable getChannelsInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
   virtual PVariable getChannelsInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
   virtual PVariable getConfigParameter(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string name);
@@ -157,6 +159,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, std::map<std::string, bool> fields);
   virtual PVariable getDeviceDescription(PRpcClientInfo clientInfo, uint64_t id, int32_t channel, std::map<std::string, bool> fields);
   virtual PVariable getDeviceInfo(PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields, bool checkAcls);
+  virtual PVariable getDevicesInBuildingPart(PRpcClientInfo clientInfo, uint64_t buildingPartId, bool checkAcls);
   virtual PVariable getDevicesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
   virtual PVariable getDevicesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool checkAcls);
   virtual PVariable getPeerId(PRpcClientInfo clientInfo, int32_t filterType, std::string filterValue, bool checkAcls);
@@ -183,6 +186,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable getValue(PRpcClientInfo clientInfo, std::string serialNumber, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
   virtual PVariable getValue(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
   virtual PVariable getVariableDescription(PRpcClientInfo clientInfo, uint64_t id, uint32_t channel, std::string valueKey, const std::unordered_set<std::string> &fields);
+  virtual PVariable getVariablesInBuildingPart(PRpcClientInfo clientInfo, uint64_t buildingPartId, bool returnDeviceAssigned, bool checkDeviceAcls, bool checkVariableAcls);
   virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkDeviceAcls, bool checkVariableAcls);
   virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkDeviceAcls, bool checkVariableAcls);
   virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool returnDeviceAssigned, bool checkDeviceAcls, bool checkVariableAcls);
@@ -194,6 +198,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   virtual PVariable putParamset(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteId, int32_t remoteChannel, PVariable paramset, bool checkAcls);
   virtual PVariable reportValueUsage(PRpcClientInfo clientInfo, std::string serialNumber);
   virtual PVariable removeCategoryFromChannel(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t categoryId);
+  virtual PVariable removeChannelFromBuildingPart(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t buildingPartId);
   virtual PVariable removeChannelFromRoom(PRpcClientInfo clientInfo, uint64_t peerId, int32_t channel, uint64_t roomId);
   virtual PVariable removeLink(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel) {
     return Variable::createError(-32601,
