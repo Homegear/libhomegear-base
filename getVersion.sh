@@ -33,4 +33,4 @@ done
 rm -f contributors*
 
 revision=$(($revision1 + $revision2))
-echo "0.7.49-${revision}d$(date '+%Y%m%d%H%M%S')"
+echo "0.7.49-${revision}+$(date '+%Y%m%d%H%M%S')"
