@@ -34,6 +34,7 @@
 #include "../IEvents.h"
 #include "PhysicalInterfaceSettings.h"
 #include "../Managers/FileDescriptorManager.h"
+#include "../IQueue.h"
 
 #include <list>
 #include <thread>
@@ -52,7 +53,7 @@ namespace Systems {
 
 class Packet;
 
-class IPhysicalInterface : public IEventsEx {
+class IPhysicalInterface : public IEventsEx, public IQueue {
  public:
   struct GPIODirection {
     enum Enum {
@@ -104,28 +105,26 @@ class IPhysicalInterface : public IEventsEx {
 
   void setRawPacketEvent(std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> value) { _rawPacketEvent.swap(value); }
  protected:
+  class QueueEntry : public BaseLib::IQueueEntry {
+   public:
+    QueueEntry(const std::shared_ptr<Packet> &packet) { this->packet = packet; };
+
+    std::shared_ptr<Packet> packet;
+  };
+
   BaseLib::SharedObjects *_bl = nullptr;
   int32_t _familyId = -1;
   std::shared_ptr<PhysicalInterfaceSettings> _settings;
-  std::thread _listenThread;
-  std::thread _callbackThread;
-  std::atomic_bool _stopCallbackThread;
-  static const int32_t _packetBufferSize = 1000;
-  int32_t _packetBufferHead = 0;
-  int32_t _packetBufferTail = 0;
-  std::shared_ptr<Packet> _packetBuffer[_packetBufferSize];
-  std::mutex _packetProcessingThreadMutex;
-  std::thread _packetProcessingThread;
-  bool _packetProcessingPacketAvailable = false;
-  std::condition_variable _packetProcessingConditionVariable;
-  std::atomic_bool _stopPacketProcessingThread;
+  std::thread _listenThread; //Used by derived classes
+  std::thread _callbackThread; //Used by derived classes
+  std::atomic_bool _stopCallbackThread {false}; //Used by derived classes
   std::string _lockfile;
   std::mutex _sendMutex;
-  std::atomic_bool _stopped;
+  std::atomic_bool _stopped; //Used by derived classes
   std::shared_ptr<FileDescriptor> _fileDescriptor;
   std::map<uint32_t, std::shared_ptr<FileDescriptor>> _gpioDescriptors;
-  int64_t _lastPacketSent = -1;
-  int64_t _lastPacketReceived = -1;
+  std::atomic<int64_t> _lastPacketSent{-1};
+  std::atomic<int64_t> _lastPacketReceived{-1};
   int64_t _maxPacketProcessingTime = 1000;
   std::atomic_bool _updateMode{false};
   std::atomic<int64_t> _lifetickTime{0};
@@ -140,7 +139,7 @@ class IPhysicalInterface : public IEventsEx {
   //Event handling
   virtual void raisePacketReceived(std::shared_ptr<Packet> packet);
   //End event handling
-  void processPackets();
+  void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
   virtual void setDevicePermission(int32_t userID, int32_t groupID);
   virtual void openGPIO(uint32_t index, bool readOnly);
   virtual void getGPIOPath(uint32_t index);

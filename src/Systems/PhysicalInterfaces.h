@@ -62,7 +62,7 @@ class PhysicalInterfaces {
   bool lifetick();
   bool isOpen();
   void setup(int32_t userID, int32_t groupID, bool setPermissions);
-  PVariable listInterfaces();
+  virtual PVariable listInterfaces();
 
   void setRawPacketEvent(std::function<void(int32_t familyId, const std::string &interfaceId, const BaseLib::PVariable &packet)> value) { _rawPacketEvent.swap(value); }
  protected:

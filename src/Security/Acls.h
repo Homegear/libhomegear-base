@@ -65,14 +65,16 @@ class Acls {
   bool devicesWriteSet();
   bool roomsReadSet();
   bool roomsWriteSet();
-  bool roomsCategoriesRolesDevicesReadSet();
-  bool roomsCategoriesRolesDevicesWriteSet();
+  bool buildingPartsReadSet();
+  bool buildingPartsWriteSet();
+  bool buildingPartsRoomsCategoriesRolesDevicesReadSet();
+  bool buildingPartsRoomsCategoriesRolesDevicesWriteSet();
   bool variablesReadSet();
   bool variablesWriteSet();
-  bool variablesRoomsCategoriesRolesDevicesReadSet();
-  bool variablesRoomsCategoriesRolesDevicesWriteSet();
-  bool variablesRoomsCategoriesRolesReadSet();
-  bool variablesRoomsCategoriesRolesWriteSet();
+  bool variablesBuildingPartsRoomsCategoriesRolesDevicesReadSet();
+  bool variablesBuildingPartsRoomsCategoriesRolesDevicesWriteSet();
+  bool variablesBuildingPartsRoomsCategoriesRolesReadSet();
+  bool variablesBuildingPartsRoomsCategoriesRolesWriteSet();
 
   void clear();
   bool fromUser(std::string &userName);
@@ -240,6 +242,24 @@ class Acls {
   bool checkMethodAndRoomWriteAccess(std::string methodName, uint64_t roomId);
 
   /**
+   * Checks if the ACLs grant access to a method and building part.
+   *
+   * @param methodName The name of the method to check.
+   * @param buildingPartId The ID of the building part to check.
+   * @return "methodName" and "buildingPartId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+   */
+  bool checkMethodAndBuildingPartReadAccess(std::string methodName, uint64_t buildingPartId);
+
+  /**
+   * Checks if the ACLs grant access to a method and building part.
+   *
+   * @param methodName The name of the method to check.
+   * @param buildingPartId The ID of the building part to check.
+   * @return "methodName" and "buildingPartId" are checked individually. This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+   */
+  bool checkMethodAndBuildingPartWriteAccess(std::string methodName, uint64_t buildingPartId);
+
+  /**
    * Checks if the ACLs grant access to a method and device.
    *
    * @param methodName The name of the method to check.
@@ -281,6 +301,22 @@ class Acls {
    * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
    */
   bool checkRoomWriteAccess(uint64_t roomId);
+
+  /**
+ * Checks if the ACLs grant access to a building part.
+ *
+ * @param buildingPartId The ID of the building part to check.
+ * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+ */
+  bool checkBuildingPartReadAccess(uint64_t buildingPartId);
+
+  /**
+   * Checks if the ACLs grant access to a building part.
+   *
+   * @param buildingPartId The ID of the building part to check.
+   * @return This method returns "false" if (1) access is explicitly denied in one of the ACLs, (2) on error or (3) if the checked entity is not in at least one of the ACLs. It returns "true" if (1) the checked entity is not part of all ACLs or (2) if access is granted in at least one ACL.
+   */
+  bool checkBuildingPartWriteAccess(uint64_t buildingPartId);
 
   /**
    * Checks if the ACLs grant access to a system variable.

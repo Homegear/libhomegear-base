@@ -34,7 +34,7 @@
 namespace BaseLib::Rpc {
 
 BinaryRpc::BinaryRpc() {
-  _data.reserve(1024);
+  _data.reserve(4096);
 }
 
 BinaryRpc::BinaryRpc(BaseLib::SharedObjects *bl) : BinaryRpc() {
@@ -86,6 +86,10 @@ int32_t BinaryRpc::process(char *buffer, int32_t bufferLength) {
         return initialBufferLength;
       }
       int32_t sizeToInsert = (8 + _headerSize + 4) - _data.size();
+      if (sizeToInsert <= 0) {
+        _finished = true;
+        throw BinaryRpcException("Invalid data (calculated size to insert is wrong).");
+      }
       _data.insert(_data.end(), buffer, buffer + sizeToInsert);
       buffer += sizeToInsert;
       bufferLength -= sizeToInsert;
@@ -106,6 +110,10 @@ int32_t BinaryRpc::process(char *buffer, int32_t bufferLength) {
     return initialBufferLength;
   }
   int32_t sizeToInsert = (8 + _dataSize) - _data.size();
+  if (sizeToInsert <= 0) {
+    _finished = true;
+    throw BinaryRpcException("Invalid data (calculated size to insert is wrong).");
+  }
   _data.insert(_data.end(), buffer, buffer + sizeToInsert);
   bufferLength -= sizeToInsert;
   _finished = true;
@@ -113,9 +121,11 @@ int32_t BinaryRpc::process(char *buffer, int32_t bufferLength) {
 }
 
 void BinaryRpc::reset() {
+  if (_data.capacity() > 4096) {
+    _data.resize(4096);
+    _data.shrink_to_fit();
+  }
   _data.clear();
-  _data.shrink_to_fit();
-  _data.reserve(1024);
   _type = Type::unknown;
   _headerProcessingStarted = false;
   _dataProcessingStarted = false;

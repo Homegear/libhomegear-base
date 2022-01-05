@@ -387,6 +387,7 @@ int32_t Http::process(char *buffer, int32_t bufferLength, bool checkForChunkedXm
   if (!_header.parsed) return processedBytes;
   if ((_header.method == "GET" && _header.contentLength == 0) ||
       (_header.method == "DELETE" && _header.contentLength == 0) ||
+      (_header.method == "OPTIONS" && _header.contentLength == 0) ||
       _header.method == "M-SEARCH" ||
       (_header.method == "NOTIFY" && _header.contentLength == 0) ||
       (_contentLengthSet && _header.contentLength == 0) ||
@@ -801,6 +802,8 @@ std::string Http::decodeURL(const std::string &url) {
       if (i == url.end()) return decoded.str();
       character += (char)Math::getNumber(*i);
       decoded << character;
+    } else if (*i == '+') {
+      decoded << ' ';
     } else decoded << *i;
   }
   return decoded.str();
