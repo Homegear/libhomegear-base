@@ -47,10 +47,11 @@ PVariable Acl::toVariable() {
      * 2. Variables
      * 3. Devices
      * 4. Rooms
-     * 5. Categories
-     * 6. Roles
-     * 7. Methods
-     * 8. Event Server Methods
+     * 5. Building parts
+     * 6. Categories
+     * 7. Roles
+     * 8. Methods
+     * 9. Event Server Methods
      */
 
     PVariable acl = std::make_shared<Variable>(VariableType::tStruct);
@@ -58,7 +59,7 @@ PVariable Acl::toVariable() {
     if (_servicesSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &service : _services) {
+      for (auto &service: _services) {
         rootElement->structValue->emplace(service.first, std::make_shared<Variable>(service.second));
       }
 
@@ -68,13 +69,13 @@ PVariable Acl::toVariable() {
     if (_variablesReadSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &device : _variablesRead) {
+      for (auto &device: _variablesRead) {
         PVariable deviceElement = std::make_shared<Variable>(VariableType::tStruct);
 
-        for (auto &channel : device.second) {
+        for (auto &channel: device.second) {
           PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
 
-          for (auto &variable : channel.second) {
+          for (auto &variable: channel.second) {
             channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
           }
 
@@ -90,13 +91,13 @@ PVariable Acl::toVariable() {
     if (_variablesWriteSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &device : _variablesWrite) {
+      for (auto &device: _variablesWrite) {
         PVariable deviceElement = std::make_shared<Variable>(VariableType::tStruct);
 
-        for (auto &channel : device.second) {
+        for (auto &channel: device.second) {
           PVariable channelElement = std::make_shared<Variable>(VariableType::tStruct);
 
-          for (auto &variable : channel.second) {
+          for (auto &variable: channel.second) {
             channelElement->structValue->emplace(variable.first, std::make_shared<Variable>(variable.second));
           }
 
@@ -112,7 +113,7 @@ PVariable Acl::toVariable() {
     if (_devicesReadSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &device : _devicesRead) {
+      for (auto &device: _devicesRead) {
         rootElement->structValue->emplace(std::to_string(device.first), std::make_shared<Variable>(device.second));
       }
 
@@ -122,7 +123,7 @@ PVariable Acl::toVariable() {
     if (_devicesWriteSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &device : _devicesWrite) {
+      for (auto &device: _devicesWrite) {
         rootElement->structValue->emplace(std::to_string(device.first), std::make_shared<Variable>(device.second));
       }
 
@@ -132,7 +133,7 @@ PVariable Acl::toVariable() {
     if (_roomsReadSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &room : _roomsRead) {
+      for (auto &room: _roomsRead) {
         rootElement->structValue->emplace(std::to_string(room.first), std::make_shared<Variable>(room.second));
       }
 
@@ -142,17 +143,37 @@ PVariable Acl::toVariable() {
     if (_roomsWriteSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &room : _roomsWrite) {
+      for (auto &room: _roomsWrite) {
         rootElement->structValue->emplace(std::to_string(room.first), std::make_shared<Variable>(room.second));
       }
 
       acl->structValue->emplace("roomsWrite", rootElement);
     }
 
+    if (_buildingPartsReadSet) {
+      PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+      for (auto &buildingPart: _buildingPartsRead) {
+        rootElement->structValue->emplace(std::to_string(buildingPart.first), std::make_shared<Variable>(buildingPart.second));
+      }
+
+      acl->structValue->emplace("buildingPartsRead", rootElement);
+    }
+
+    if (_buildingPartsWriteSet) {
+      PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
+
+      for (auto &buildingPart: _buildingPartsWrite) {
+        rootElement->structValue->emplace(std::to_string(buildingPart.first), std::make_shared<Variable>(buildingPart.second));
+      }
+
+      acl->structValue->emplace("buildingPartsWrite", rootElement);
+    }
+
     if (_categoriesReadSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &category : _categoriesRead) {
+      for (auto &category: _categoriesRead) {
         rootElement->structValue->emplace(std::to_string(category.first), std::make_shared<Variable>(category.second));
       }
 
@@ -162,7 +183,7 @@ PVariable Acl::toVariable() {
     if (_categoriesWriteSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &category : _categoriesWrite) {
+      for (auto &category: _categoriesWrite) {
         rootElement->structValue->emplace(std::to_string(category.first), std::make_shared<Variable>(category.second));
       }
 
@@ -172,7 +193,7 @@ PVariable Acl::toVariable() {
     if (_rolesReadSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &role : _rolesRead) {
+      for (auto &role: _rolesRead) {
         rootElement->structValue->emplace(std::to_string(role.first), std::make_shared<Variable>(role.second));
       }
 
@@ -182,7 +203,7 @@ PVariable Acl::toVariable() {
     if (_rolesWriteSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &role : _rolesWrite) {
+      for (auto &role: _rolesWrite) {
         rootElement->structValue->emplace(std::to_string(role.first), std::make_shared<Variable>(role.second));
       }
 
@@ -192,7 +213,7 @@ PVariable Acl::toVariable() {
     if (_methodsSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &method : _methods) {
+      for (auto &method: _methods) {
         rootElement->structValue->emplace(method.first, std::make_shared<Variable>(method.second));
       }
 
@@ -202,7 +223,7 @@ PVariable Acl::toVariable() {
     if (_eventServerMethodsSet) {
       PVariable rootElement = std::make_shared<Variable>(VariableType::tStruct);
 
-      for (auto &method : _eventServerMethods) {
+      for (auto &method: _eventServerMethods) {
         rootElement->structValue->emplace(method.first, std::make_shared<Variable>(method.second));
       }
 
@@ -225,22 +246,22 @@ void Acl::fromVariable(PVariable serializedData) {
     if (!serializedData) throw AclException("serializedData is nullptr.");
     if (serializedData->type != VariableType::tStruct) throw AclException("Data is not of type Struct.");
 
-    for (auto &rootElement : *serializedData->structValue) {
+    for (auto &rootElement: *serializedData->structValue) {
       if (rootElement.first == "services") {
         _servicesSet = true;
-        for (auto &serviceElement : *rootElement.second->structValue) {
+        for (auto &serviceElement: *rootElement.second->structValue) {
           if (serviceElement.second->type != VariableType::tBoolean) throw AclException("Service element is not of type bool.");
           _services[serviceElement.first] = serviceElement.second->booleanValue;
         }
       } else if (rootElement.first == "variablesRead") {
         _variablesReadSet = true;
-        for (auto &deviceElement : *rootElement.second->structValue) {
+        for (auto &deviceElement: *rootElement.second->structValue) {
           if (deviceElement.second->type != VariableType::tStruct) throw AclException("Device element is not of type Struct.");
           std::string deviceString = deviceElement.first;
           if (!Math::isNumber(deviceString, false)) throw AclException("Peer ID is not a valid number.");
           uint64_t peerId = Math::getNumber64(deviceString, false);
 
-          for (auto &channelElement : *deviceElement.second->structValue) {
+          for (auto &channelElement: *deviceElement.second->structValue) {
             if (channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
             std::string channelString = channelElement.first;
             if (!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
@@ -254,13 +275,13 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "variablesWrite") {
         _variablesWriteSet = true;
-        for (auto &deviceElement : *rootElement.second->structValue) {
+        for (auto &deviceElement: *rootElement.second->structValue) {
           if (deviceElement.second->type != VariableType::tStruct) throw AclException("Device element is not of type Struct.");
           std::string deviceString = deviceElement.first;
           if (!Math::isNumber(deviceString, false)) throw AclException("Peer ID is not a valid number.");
           uint64_t peerId = Math::getNumber64(deviceString, false);
 
-          for (auto &channelElement : *deviceElement.second->structValue) {
+          for (auto &channelElement: *deviceElement.second->structValue) {
             if (channelElement.second->type != VariableType::tStruct) throw AclException("Channel element is not of type Struct.");
             std::string channelString = channelElement.first;
             if (!Math::isNumber(channelString, false)) throw AclException("Channel index is not a valid number.");
@@ -274,7 +295,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "devicesRead") {
         _devicesReadSet = true;
-        for (auto &deviceElement : *rootElement.second->structValue) {
+        for (auto &deviceElement: *rootElement.second->structValue) {
           if (deviceElement.second->type != VariableType::tBoolean) throw AclException("Device element is not of type bool.");
           std::string idString = deviceElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Device ID is not a valid number.");
@@ -282,7 +303,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "devicesWrite") {
         _devicesWriteSet = true;
-        for (auto &deviceElement : *rootElement.second->structValue) {
+        for (auto &deviceElement: *rootElement.second->structValue) {
           if (deviceElement.second->type != VariableType::tBoolean) throw AclException("Device element is not of type bool.");
           std::string idString = deviceElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Device ID is not a valid number.");
@@ -290,7 +311,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "roomsRead") {
         _roomsReadSet = true;
-        for (auto &roomElement : *rootElement.second->structValue) {
+        for (auto &roomElement: *rootElement.second->structValue) {
           if (roomElement.second->type != VariableType::tBoolean) throw AclException("Room element is not of type bool.");
           std::string idString = roomElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Room ID is not a valid number.");
@@ -298,15 +319,31 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "roomsWrite") {
         _roomsWriteSet = true;
-        for (auto &roomElement : *rootElement.second->structValue) {
+        for (auto &roomElement: *rootElement.second->structValue) {
           if (roomElement.second->type != VariableType::tBoolean) throw AclException("Room element is not of type bool.");
           std::string idString = roomElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Room ID is not a valid number.");
           _roomsWrite[Math::getNumber64(idString, false)] = roomElement.second->booleanValue;
         }
+      } else if (rootElement.first == "buildingPartsRead") {
+        _buildingPartsReadSet = true;
+        for (auto &buildingPartElement: *rootElement.second->structValue) {
+          if (buildingPartElement.second->type != VariableType::tBoolean) throw AclException("Building part element is not of type bool.");
+          std::string idString = buildingPartElement.first;
+          if (!Math::isNumber(idString, false)) throw AclException("Building part ID is not a valid number.");
+          _buildingPartsRead[Math::getNumber64(idString, false)] = buildingPartElement.second->booleanValue;
+        }
+      } else if (rootElement.first == "buildingPartsWrite") {
+        _buildingPartsWriteSet = true;
+        for (auto &buildingPartElement: *rootElement.second->structValue) {
+          if (buildingPartElement.second->type != VariableType::tBoolean) throw AclException("Building part element is not of type bool.");
+          std::string idString = buildingPartElement.first;
+          if (!Math::isNumber(idString, false)) throw AclException("Building part ID is not a valid number.");
+          _buildingPartsWrite[Math::getNumber64(idString, false)] = buildingPartElement.second->booleanValue;
+        }
       } else if (rootElement.first == "categoriesRead") {
         _categoriesReadSet = true;
-        for (auto &categoryElement : *rootElement.second->structValue) {
+        for (auto &categoryElement: *rootElement.second->structValue) {
           if (categoryElement.second->type != VariableType::tBoolean) throw AclException("Category element is not of type bool.");
           std::string idString = categoryElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Category ID is not a valid number.");
@@ -314,7 +351,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "categoriesWrite") {
         _categoriesWriteSet = true;
-        for (auto &categoryElement : *rootElement.second->structValue) {
+        for (auto &categoryElement: *rootElement.second->structValue) {
           if (categoryElement.second->type != VariableType::tBoolean) throw AclException("Category element is not of type bool.");
           std::string idString = categoryElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Category ID is not a valid number.");
@@ -322,7 +359,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "rolesRead") {
         _rolesReadSet = true;
-        for (auto &roleElement : *rootElement.second->structValue) {
+        for (auto &roleElement: *rootElement.second->structValue) {
           if (roleElement.second->type != VariableType::tBoolean) throw AclException("Role element is not of type bool.");
           std::string idString = roleElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Role ID is not a valid number.");
@@ -330,7 +367,7 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "rolesWrite") {
         _rolesWriteSet = true;
-        for (auto &roleElement : *rootElement.second->structValue) {
+        for (auto &roleElement: *rootElement.second->structValue) {
           if (roleElement.second->type != VariableType::tBoolean) throw AclException("Role element is not of type bool.");
           std::string idString = roleElement.first;
           if (!Math::isNumber(idString, false)) throw AclException("Role ID is not a valid number.");
@@ -338,13 +375,13 @@ void Acl::fromVariable(PVariable serializedData) {
         }
       } else if (rootElement.first == "methods") {
         _methodsSet = true;
-        for (auto &methodElement : *rootElement.second->structValue) {
+        for (auto &methodElement: *rootElement.second->structValue) {
           if (methodElement.second->type != VariableType::tBoolean) throw AclException("Method element is not of type bool.");
           _methods[methodElement.first] = methodElement.second->booleanValue;
         }
       } else if (rootElement.first == "eventServerMethods") {
         _eventServerMethodsSet = true;
-        for (auto &methodElement : *rootElement.second->structValue) {
+        for (auto &methodElement: *rootElement.second->structValue) {
           if (methodElement.second->type != VariableType::tBoolean) throw AclException("Method element is not of type bool.");
           _eventServerMethods[methodElement.first] = methodElement.second->booleanValue;
         }
@@ -370,7 +407,7 @@ std::string Acl::toString(int32_t indentation) {
 
   if (_servicesSet) {
     stream << prefix << "Allowed services:" << std::endl;
-    for (auto &service : _services) {
+    for (auto &service: _services) {
       std::string serviceString = service.first == "*" ? "all" : service.first;
       stream << prefix << "  * " << serviceString << ": " << (service.second ? "accept" : "deny") << std::endl;
     }
@@ -378,12 +415,12 @@ std::string Acl::toString(int32_t indentation) {
 
   if (_variablesReadSet) {
     stream << prefix << "Readable variables:" << std::endl;
-    for (auto &device : _variablesRead) {
+    for (auto &device: _variablesRead) {
       stream << prefix << "  * Device " << device.first << ":" << std::endl;
-      for (auto &channel : device.second) {
+      for (auto &channel: device.second) {
         stream << prefix << "    - Channel " << channel.first << ":" << std::endl;
 
-        for (auto &variable : channel.second) {
+        for (auto &variable: channel.second) {
           stream << prefix << "      " << variable.first << ": " << (variable.second ? "accept" : "deny") << std::endl;
         }
       }
@@ -393,12 +430,12 @@ std::string Acl::toString(int32_t indentation) {
 
   if (_variablesWriteSet) {
     stream << prefix << "Writeable variables:" << std::endl;
-    for (auto &device : _variablesWrite) {
+    for (auto &device: _variablesWrite) {
       stream << prefix << "  * Device " << device.first << ":" << std::endl;
-      for (auto &channel : device.second) {
+      for (auto &channel: device.second) {
         stream << prefix << "    - Channel " << channel.first << ":" << std::endl;
 
-        for (auto &variable : channel.second) {
+        for (auto &variable: channel.second) {
           stream << prefix << "      " << variable.first << ": " << (variable.second ? "accept" : "deny") << std::endl;
         }
       }
@@ -408,63 +445,77 @@ std::string Acl::toString(int32_t indentation) {
 
   if (_devicesReadSet) {
     stream << prefix << "Readable devices:" << std::endl;
-    for (auto &device : _devicesRead) {
+    for (auto &device: _devicesRead) {
       stream << prefix << "  * " << device.first << ": " << (device.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_devicesWriteSet) {
     stream << prefix << "Writeable devices:" << std::endl;
-    for (auto &device : _devicesWrite) {
+    for (auto &device: _devicesWrite) {
       stream << prefix << "  * " << device.first << ": " << (device.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_roomsReadSet) {
     stream << prefix << "Readable room IDs:" << std::endl;
-    for (auto &room : _roomsRead) {
+    for (auto &room: _roomsRead) {
       stream << prefix << "  * " << room.first << ": " << (room.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_roomsWriteSet) {
     stream << prefix << "Writeable room IDs:" << std::endl;
-    for (auto &room : _roomsWrite) {
+    for (auto &room: _roomsWrite) {
       stream << prefix << "  * " << room.first << ": " << (room.second ? "accept" : "deny") << std::endl;
+    }
+  }
+
+  if (_buildingPartsReadSet) {
+    stream << prefix << "Readable building part IDs:" << std::endl;
+    for (auto &buildingPart: _buildingPartsRead) {
+      stream << prefix << "  * " << buildingPart.first << ": " << (buildingPart.second ? "accept" : "deny") << std::endl;
+    }
+  }
+
+  if (_buildingPartsWriteSet) {
+    stream << prefix << "Writeable building part IDs:" << std::endl;
+    for (auto &buildingPart: _buildingPartsWrite) {
+      stream << prefix << "  * " << buildingPart.first << ": " << (buildingPart.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_categoriesReadSet) {
     stream << prefix << "Readable category IDs:" << std::endl;
-    for (auto &category : _categoriesRead) {
+    for (auto &category: _categoriesRead) {
       stream << prefix << "  * " << category.first << ": " << (category.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_categoriesWriteSet) {
     stream << prefix << "Writeable category IDs:" << std::endl;
-    for (auto &category : _categoriesWrite) {
+    for (auto &category: _categoriesWrite) {
       stream << prefix << "  * " << category.first << ": " << (category.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_rolesReadSet) {
     stream << prefix << "Readable role IDs:" << std::endl;
-    for (auto &role : _rolesRead) {
+    for (auto &role: _rolesRead) {
       stream << prefix << "  * " << role.first << ": " << (role.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_rolesWriteSet) {
     stream << prefix << "Writeable role IDs:" << std::endl;
-    for (auto &role : _rolesWrite) {
+    for (auto &role: _rolesWrite) {
       stream << prefix << "  * " << role.first << ": " << (role.second ? "accept" : "deny") << std::endl;
     }
   }
 
   if (_methodsSet) {
     stream << prefix << "Executable RPC methods:" << std::endl;
-    for (auto &method : _methods) {
+    for (auto &method: _methods) {
       std::string methodString = method.first == "*" ? "all" : method.first;
       stream << prefix << "  * " << methodString << ": " << (method.second ? "accept" : "deny") << std::endl;
     }
@@ -472,7 +523,7 @@ std::string Acl::toString(int32_t indentation) {
 
   if (_eventServerMethodsSet) {
     stream << prefix << "Executable event server RPC methods:" << std::endl;
-    for (auto &method : _eventServerMethods) {
+    for (auto &method: _eventServerMethods) {
       std::string methodString = method.first == "*" ? "all" : method.first;
       stream << prefix << "  * " << methodString << ": " << (method.second ? "accept" : "deny") << std::endl;
     }
@@ -505,7 +556,7 @@ AclResult Acl::checkCategoriesReadAccess(std::set<uint64_t> &categories) {
     if (!_categoriesReadSet) return AclResult::notInList;
 
     AclResult categoryResult = AclResult::notInList;
-    for (auto &categoryId : categories) {
+    for (auto &categoryId: categories) {
       auto categoriesIterator = _categoriesRead.find(categoryId);
       if (categoriesIterator != _categoriesRead.end()) {
         categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
@@ -527,7 +578,7 @@ AclResult Acl::checkCategoriesWriteAccess(std::set<uint64_t> &categories) {
     if (!_categoriesWriteSet) return AclResult::notInList;
 
     AclResult categoryResult = AclResult::notInList;
-    for (auto &categoryId : categories) {
+    for (auto &categoryId: categories) {
       auto categoriesIterator = _categoriesWrite.find(categoryId);
       if (categoriesIterator != _categoriesWrite.end()) {
         categoryResult = categoriesIterator->second ? AclResult::accept : AclResult::deny;
@@ -581,7 +632,7 @@ AclResult Acl::checkRolesReadAccess(std::set<uint64_t> &roles) {
     if (!_rolesReadSet) return AclResult::notInList;
 
     AclResult roleResult = AclResult::notInList;
-    for (auto &roleId : roles) {
+    for (auto &roleId: roles) {
       auto rolesIterator = _rolesRead.find(roleId);
       if (rolesIterator != _rolesRead.end()) {
         roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
@@ -603,7 +654,7 @@ AclResult Acl::checkRolesWriteAccess(std::set<uint64_t> &roles) {
     if (!_rolesWriteSet) return AclResult::notInList;
 
     AclResult roleResult = AclResult::notInList;
-    for (auto &roleId : roles) {
+    for (auto &roleId: roles) {
       auto rolesIterator = _rolesWrite.find(roleId);
       if (rolesIterator != _rolesWrite.end()) {
         roleResult = rolesIterator->second ? AclResult::accept : AclResult::deny;
@@ -655,12 +706,12 @@ AclResult Acl::checkRoleWriteAccess(uint64_t roleId) {
 AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer) {
   try {
     if (!peer) return AclResult::error;
-    if (!_roomsReadSet && !_categoriesReadSet && !_devicesReadSet) return AclResult::notInList;
+    if (!_roomsReadSet && !_buildingPartsReadSet && !_categoriesReadSet && !_devicesReadSet) return AclResult::notInList;
 
     AclResult roomResult = AclResult::notInList;
     if (_roomsReadSet) {
       if (peer->roomsSet()) {
-        for (auto &roomsIterator : _roomsRead) {
+        for (auto &roomsIterator: _roomsRead) {
           if (roomsIterator.first == 0) continue;
           if (peer->hasRoomInChannels(roomsIterator.first)) {
             roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
@@ -676,10 +727,29 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer) {
       }
     } else roomResult = AclResult::accept;
 
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsReadSet) {
+      if (peer->buildingPartsSet()) {
+        for (auto &buildingPartsIterator: _buildingPartsRead) {
+          if (buildingPartsIterator.first == 0) continue;
+          if (peer->hasBuildingPartInChannels(buildingPartsIterator.first)) {
+            buildingPartResult = buildingPartsIterator.second ? AclResult::accept : AclResult::deny;
+            if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+          }
+        }
+      } else {
+        auto buildingPartsIterator = _buildingPartsRead.find(0);
+        if (buildingPartsIterator != _buildingPartsRead.end()) {
+          buildingPartResult = buildingPartsIterator->second ? AclResult::accept : AclResult::deny;
+          if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+        }
+      }
+    } else buildingPartResult = AclResult::accept;
+
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesReadSet) {
       if (peer->hasCategories()) {
-        for (auto &categoriesIterator : _categoriesRead) {
+        for (auto &categoriesIterator: _categoriesRead) {
           if (categoriesIterator.first == 0) continue;
           if (peer->hasCategoryInChannels(categoriesIterator.first)) {
             categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
@@ -712,7 +782,7 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer) {
       }
     } else deviceResult = AclResult::accept;
 
-    if (roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+    if (roomResult == AclResult::accept || buildingPartResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
     return AclResult::notInList;
   }
@@ -726,12 +796,12 @@ AclResult Acl::checkDeviceReadAccess(std::shared_ptr<Systems::Peer> peer) {
 AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer) {
   try {
     if (!peer) return AclResult::error;
-    if (!_roomsWriteSet && !_categoriesWriteSet && !_devicesWriteSet) return AclResult::notInList;
+    if (!_roomsWriteSet && !_buildingPartsWriteSet && !_categoriesWriteSet && !_devicesWriteSet) return AclResult::notInList;
 
     AclResult roomResult = AclResult::notInList;
     if (_roomsWriteSet) {
       if (peer->roomsSet()) {
-        for (auto &roomsIterator : _roomsWrite) {
+        for (auto &roomsIterator: _roomsWrite) {
           if (roomsIterator.first == 0) continue;
           if (peer->hasRoomInChannels(roomsIterator.first)) {
             roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
@@ -747,10 +817,29 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer) {
       }
     } else roomResult = AclResult::accept;
 
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsWriteSet) {
+      if (peer->buildingPartsSet()) {
+        for (auto &buildingPartsIterator: _buildingPartsWrite) {
+          if (buildingPartsIterator.first == 0) continue;
+          if (peer->hasBuildingPartInChannels(buildingPartsIterator.first)) {
+            buildingPartResult = buildingPartsIterator.second ? AclResult::accept : AclResult::deny;
+            if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+          }
+        }
+      } else {
+        auto buildingPartsIterator = _buildingPartsWrite.find(0);
+        if (buildingPartsIterator != _buildingPartsWrite.end()) {
+          buildingPartResult = buildingPartsIterator->second ? AclResult::accept : AclResult::deny;
+          if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+        }
+      }
+    } else buildingPartResult = AclResult::accept;
+
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesWriteSet) {
       if (peer->hasCategories()) {
-        for (auto &categoriesIterator : _categoriesWrite) {
+        for (auto &categoriesIterator: _categoriesWrite) {
           if (categoriesIterator.first == 0) continue;
           if (peer->hasCategoryInChannels(categoriesIterator.first)) {
             categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
@@ -783,7 +872,7 @@ AclResult Acl::checkDeviceWriteAccess(std::shared_ptr<Systems::Peer> peer) {
       }
     } else deviceResult = AclResult::accept;
 
-    if (roomResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+    if (roomResult == AclResult::accept || buildingPartResult == AclResult::accept || categoryResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
     return AclResult::notInList;
   }
@@ -994,6 +1083,60 @@ AclResult Acl::checkMethodAndRoomWriteAccess(std::string &methodName, uint64_t r
   return AclResult::error;
 }
 
+AclResult Acl::checkMethodAndBuildingPartReadAccess(std::string &methodName, uint64_t buildingPartId) {
+  try {
+    if (!_methodsSet && !_buildingPartsReadSet) return AclResult::notInList;
+
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsReadSet) {
+      auto buildingPartIterator = _buildingPartsRead.find(buildingPartId); //Check specific access first in case of "no access".
+      if (buildingPartIterator != _roomsRead.end()) {
+        buildingPartResult = buildingPartIterator->second ? AclResult::accept : AclResult::deny;
+        if (!buildingPartIterator->second) return buildingPartResult; //Deny access
+      }
+    } else buildingPartResult = AclResult::accept;
+
+    auto methodResult = checkMethodAccess(methodName);
+    if (methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+    if (buildingPartResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+    return AclResult::notInList;
+  }
+  catch (const std::exception &ex) {
+  }
+  catch (...) {
+  }
+  return AclResult::error;
+}
+
+AclResult Acl::checkMethodAndBuildingPartWriteAccess(std::string &methodName, uint64_t buildingPartId) {
+  try {
+    if (!_methodsSet && !_buildingPartsWriteSet) return AclResult::notInList;
+
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsWriteSet) {
+      auto buildingPartsIterator = _buildingPartsWrite.find(buildingPartId); //Check specific access first in case of "no access".
+      if (buildingPartsIterator != _buildingPartsWrite.end()) {
+        buildingPartResult = buildingPartsIterator->second ? AclResult::accept : AclResult::deny;
+        if (!buildingPartsIterator->second) return buildingPartResult; //Deny access
+      }
+    } else buildingPartResult = AclResult::accept;
+
+    auto methodResult = checkMethodAccess(methodName);
+    if (methodResult == AclResult::deny || methodResult == AclResult::error) return methodResult; //Deny access
+
+    if (buildingPartResult == AclResult::accept && methodResult == AclResult::accept) return AclResult::accept;
+
+    return AclResult::notInList;
+  }
+  catch (const std::exception &ex) {
+  }
+  catch (...) {
+  }
+  return AclResult::error;
+}
+
 AclResult Acl::checkMethodAndDeviceWriteAccess(std::string &methodName, uint64_t peerId) {
   try {
     if (!_methodsSet && !_devicesWriteSet) return AclResult::notInList;
@@ -1123,6 +1266,38 @@ AclResult Acl::checkRoomWriteAccess(uint64_t roomId) {
   return AclResult::error;
 }
 
+AclResult Acl::checkBuildingPartReadAccess(uint64_t buildingPartId) {
+  try {
+    if (!_buildingPartsReadSet) return AclResult::notInList;
+
+    auto buildingPartIterator = _buildingPartsRead.find(buildingPartId); //Check specific access first in case of "no access".
+    if (buildingPartIterator != _buildingPartsRead.end()) return buildingPartIterator->second ? AclResult::accept : AclResult::deny;
+
+    return AclResult::notInList;
+  }
+  catch (const std::exception &ex) {
+  }
+  catch (...) {
+  }
+  return AclResult::error;
+}
+
+AclResult Acl::checkBuildingPartWriteAccess(uint64_t buildingPartId) {
+  try {
+    if (!_buildingPartsWriteSet) return AclResult::notInList;
+
+    auto buildingPartIterator = _buildingPartsWrite.find(buildingPartId); //Check specific access first in case of "no access".
+    if (buildingPartIterator != _buildingPartsWrite.end()) return buildingPartIterator->second ? AclResult::accept : AclResult::deny;
+
+    return AclResult::notInList;
+  }
+  catch (const std::exception &ex) {
+  }
+  catch (...) {
+  }
+  return AclResult::error;
+}
+
 AclResult Acl::checkSystemVariableReadAccess(Database::PSystemVariable systemVariable) {
   try {
     if (!systemVariable) return AclResult::error;
@@ -1161,7 +1336,7 @@ AclResult Acl::checkSystemVariableReadAccess(Database::PSystemVariable systemVar
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesReadSet) {
       if (!systemVariable->categories.empty()) {
-        for (auto category : systemVariable->categories) {
+        for (auto category: systemVariable->categories) {
           if (category == 0) continue;
           auto categoriesIterator = _categoriesRead.find(category);
           if (categoriesIterator != _categoriesRead.end()) {
@@ -1224,7 +1399,7 @@ AclResult Acl::checkSystemVariableWriteAccess(Database::PSystemVariable systemVa
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesWriteSet) {
       if (!systemVariable->categories.empty()) {
-        for (auto category : systemVariable->categories) {
+        for (auto category: systemVariable->categories) {
           if (category == 0) continue;
           auto categoriesIterator = _categoriesWrite.find(category);
           if (categoriesIterator != _categoriesWrite.end()) {
@@ -1255,7 +1430,7 @@ AclResult Acl::checkSystemVariableWriteAccess(Database::PSystemVariable systemVa
 AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string &variableName) {
   try {
     if (!peer) return AclResult::error;
-    if (!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_categoriesReadSet && !_rolesReadSet) return AclResult::notInList;
+    if (!_variablesReadSet && !_devicesReadSet && !_roomsReadSet && !_buildingPartsReadSet && !_categoriesReadSet && !_rolesReadSet) return AclResult::notInList;
 
     AclResult variableResult = AclResult::notInList;
     if (_variablesReadSet) {
@@ -1331,7 +1506,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
     AclResult roomResult = AclResult::notInList;
     if (_roomsReadSet) {
       auto roomId = peer->getVariableRoom(channel, variableName);
-      for (auto &roomsIterator : _roomsRead) {
+      for (auto &roomsIterator: _roomsRead) {
         if (roomId == roomsIterator.first) {
           roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
           if (roomResult == AclResult::deny) return roomResult; //Deny access
@@ -1339,9 +1514,20 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
       }
     } else roomResult = AclResult::accept;
 
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsReadSet) {
+      auto buildingPartId = peer->getVariableBuildingPart(channel, variableName);
+      for (auto &buildingPartIterator: _buildingPartsRead) {
+        if (buildingPartId == buildingPartIterator.first) {
+          buildingPartResult = buildingPartIterator.second ? AclResult::accept : AclResult::deny;
+          if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+        }
+      }
+    } else buildingPartResult = AclResult::accept;
+
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesReadSet) {
-      for (auto &categoriesIterator : _categoriesRead) {
+      for (auto &categoriesIterator: _categoriesRead) {
         if ((categoriesIterator.first == 0 && !peer->variableHasCategories(channel, variableName)) || peer->variableHasCategory(channel, variableName, categoriesIterator.first)) {
           categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
           if (categoryResult == AclResult::deny) return categoryResult; //Deny access
@@ -1351,7 +1537,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
 
     AclResult roleResult = AclResult::notInList;
     if (_rolesReadSet) {
-      for (auto &rolesIterator : _rolesRead) {
+      for (auto &rolesIterator: _rolesRead) {
         if ((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first)) {
           roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
           if (roleResult == AclResult::deny) return roleResult; //Deny access
@@ -1362,7 +1548,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
     auto deviceResult = checkDeviceReadAccess(peer);
     if (deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-    if (variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+    if (variableResult == AclResult::accept || roomResult == AclResult::accept || buildingPartResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
     return AclResult::notInList;
   }
@@ -1376,7 +1562,7 @@ AclResult Acl::checkVariableReadAccess(std::shared_ptr<Systems::Peer> peer, int3
 AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int32_t channel, const std::string &variableName) {
   try {
     if (!peer) return AclResult::error;
-    if (!_variablesWriteSet && !_devicesWriteSet && !_roomsWriteSet && !_categoriesWriteSet && !_rolesWriteSet) return AclResult::notInList;
+    if (!_variablesWriteSet && !_devicesWriteSet && !_roomsWriteSet && !_buildingPartsWriteSet && !_categoriesWriteSet && !_rolesWriteSet) return AclResult::notInList;
 
     AclResult variableResult = AclResult::notInList;
     if (_variablesWriteSet) {
@@ -1452,7 +1638,7 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
     AclResult roomResult = AclResult::notInList;
     if (_roomsWriteSet) {
       auto roomId = peer->getVariableRoom(channel, variableName);
-      for (auto &roomsIterator : _roomsWrite) {
+      for (auto &roomsIterator: _roomsWrite) {
         if (roomId == roomsIterator.first) //Also checks for roomId 0 = "no room set"
         {
           roomResult = roomsIterator.second ? AclResult::accept : AclResult::deny;
@@ -1461,9 +1647,21 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
       }
     } else roomResult = AclResult::accept;
 
+    AclResult buildingPartResult = AclResult::notInList;
+    if (_buildingPartsWriteSet) {
+      auto buildingPartId = peer->getVariableBuildingPart(channel, variableName);
+      for (auto &buildingPartsIterator: _buildingPartsWrite) {
+        if (buildingPartId == buildingPartsIterator.first) //Also checks for buildingPartId 0 = "no building part set"
+        {
+          buildingPartResult = buildingPartsIterator.second ? AclResult::accept : AclResult::deny;
+          if (buildingPartResult == AclResult::deny) return buildingPartResult; //Deny access
+        }
+      }
+    } else buildingPartResult = AclResult::accept;
+
     AclResult categoryResult = AclResult::notInList;
     if (_categoriesWriteSet) {
-      for (auto &categoriesIterator : _categoriesWrite) {
+      for (auto &categoriesIterator: _categoriesWrite) {
         if ((categoriesIterator.first == 0 && !peer->variableHasCategories(channel, variableName)) || peer->variableHasCategory(channel, variableName, categoriesIterator.first)) {
           categoryResult = categoriesIterator.second ? AclResult::accept : AclResult::deny;
           if (categoryResult == AclResult::deny) return categoryResult; //Deny access
@@ -1473,7 +1671,7 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
 
     AclResult roleResult = AclResult::notInList;
     if (_rolesWriteSet) {
-      for (auto &rolesIterator : _rolesWrite) {
+      for (auto &rolesIterator: _rolesWrite) {
         if ((rolesIterator.first == 0 && !peer->variableHasRoles(channel, variableName)) || peer->variableHasRole(channel, variableName, rolesIterator.first)) {
           roleResult = rolesIterator.second ? AclResult::accept : AclResult::deny;
           if (roleResult == AclResult::deny) return roleResult; //Deny access
@@ -1484,7 +1682,7 @@ AclResult Acl::checkVariableWriteAccess(std::shared_ptr<Systems::Peer> peer, int
     auto deviceResult = checkDeviceWriteAccess(peer);
     if (deviceResult == AclResult::deny || deviceResult == AclResult::error) return deviceResult; //Deny access
 
-    if (variableResult == AclResult::accept || roomResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
+    if (variableResult == AclResult::accept || roomResult == AclResult::accept || buildingPartResult == AclResult::accept || categoryResult == AclResult::accept || roleResult == AclResult::accept || deviceResult == AclResult::accept) return AclResult::accept;
 
     return AclResult::notInList;
   }

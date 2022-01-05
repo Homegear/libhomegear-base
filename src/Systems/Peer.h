@@ -196,12 +196,17 @@ class RpcConfigurationParameter {
   Role mainRole();
 
   uint64_t getRoom() {
-    std::lock_guard<std::mutex> roomGuard(_roomMutex);
     return _room;
   }
   void setRoom(uint64_t id) {
-    std::lock_guard<std::mutex> roomGuard(_roomMutex);
     _room = id;
+  }
+
+  uint64_t getBuildingPart() {
+    return _buildingPart;
+  }
+  void setBuildingPart(uint64_t id) {
+    _buildingPart = id;
   }
  private:
   std::mutex _logicalDataMutex;
@@ -220,8 +225,8 @@ class RpcConfigurationParameter {
   bool _scale = false;
   Role _mainRole;
   std::unordered_map<uint64_t, Role> _roles;
-  std::mutex _roomMutex;
-  uint64_t _room = 0;
+  std::atomic<uint64_t> _room{0};
+  std::atomic<uint64_t> _buildingPart{0};
 };
 
 class ConfigDataBlock {
@@ -404,6 +409,11 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual bool hasRoomInChannels(uint64_t roomId);
   bool roomsSet();
   virtual bool setRoom(int32_t channel, uint64_t value);
+  virtual std::set<int32_t> getChannelsInBuildingPart(uint64_t buildingPartId);
+  virtual uint64_t getBuildingPart(int32_t channel);
+  virtual bool hasBuildingPartInChannels(uint64_t buildingPartId);
+  bool buildingPartsSet();
+  virtual bool setBuildingPart(int32_t channel, uint64_t value);
   virtual std::unordered_map<int32_t, std::set<uint64_t>> getCategories();
   virtual std::set<uint64_t> getCategories(int32_t channel);
   virtual std::set<int32_t> getChannelsInCategory(uint64_t categoryId);
@@ -432,6 +442,9 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual bool setVariableRoom(int32_t channel, std::string &variableName, uint64_t roomId);
   virtual void removeRoomFromVariables(uint64_t roomId);
   virtual uint64_t getVariableRoom(int32_t channel, const std::string &variableName);
+  virtual bool setVariableBuildingPart(int32_t channel, std::string &variableName, uint64_t buildingPartId);
+  virtual void removeBuildingPartFromVariables(uint64_t buildingPartId);
+  virtual uint64_t getVariableBuildingPart(int32_t channel, const std::string &variableName);
   virtual bool addCategoryToVariable(int32_t channel, std::string &variableName, uint64_t categoryId);
   virtual bool removeCategoryFromVariable(int32_t channel, std::string &variableName, uint64_t categoryId);
   virtual void removeCategoryFromVariables(uint64_t categoryId);
@@ -534,6 +547,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual PVariable getVariablesInCategory(PRpcClientInfo clientInfo, uint64_t categoryId, bool checkAcls);
   virtual PVariable getVariablesInRole(PRpcClientInfo clientInfo, uint64_t roleId, bool checkAcls);
   virtual PVariable getVariablesInRoom(PRpcClientInfo clientInfo, uint64_t roomId, bool returnDeviceAssigned, bool checkAcls);
+  virtual PVariable getVariablesInBuildingPart(PRpcClientInfo clientInfo, uint64_t buildingPartId, bool returnDeviceAssigned, bool checkAcls);
   virtual PVariable putParamset(PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing = false) = 0;
   virtual PVariable reportValueUsage(PRpcClientInfo clientInfo);
   virtual PVariable rssiInfo(PRpcClientInfo clientInfo);
@@ -581,6 +595,8 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
 
   std::mutex _roomMutex;
   std::unordered_map<int32_t, uint64_t> _rooms;
+  std::mutex _buildingPartMutex;
+  std::unordered_map<int32_t, uint64_t> _buildingParts;
   std::mutex _categoriesMutex;
   std::unordered_map<int32_t, std::set<uint64_t>> _categories;
   //End

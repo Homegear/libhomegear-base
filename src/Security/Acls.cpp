@@ -138,19 +138,37 @@ bool Acls::roomsWriteSet() {
   return false;
 }
 
-bool Acls::roomsCategoriesRolesDevicesReadSet() {
+bool Acls::buildingPartsReadSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
+    if (acl->buildingPartsReadSet()) return true;
   }
 
   return false;
 }
 
-bool Acls::roomsCategoriesRolesDevicesWriteSet() {
+bool Acls::buildingPartsWriteSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
+    if (acl->buildingPartsWriteSet()) return true;
+  }
+
+  return false;
+}
+
+bool Acls::buildingPartsRoomsCategoriesRolesDevicesReadSet() {
+  std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+  for (auto &acl : _acls) {
+    if (acl->buildingPartsReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
+  }
+
+  return false;
+}
+
+bool Acls::buildingPartsRoomsCategoriesRolesDevicesWriteSet() {
+  std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+  for (auto &acl : _acls) {
+    if (acl->buildingPartsWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
   }
 
   return false;
@@ -174,37 +192,37 @@ bool Acls::variablesWriteSet() {
   return false;
 }
 
-bool Acls::variablesRoomsCategoriesRolesReadSet() {
+bool Acls::variablesBuildingPartsRoomsCategoriesRolesReadSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet()) return true;
+    if (acl->variablesReadSet() || acl->buildingPartsReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet()) return true;
   }
 
   return false;
 }
 
-bool Acls::variablesRoomsCategoriesRolesWriteSet() {
+bool Acls::variablesBuildingPartsRoomsCategoriesRolesWriteSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet()) return true;
+    if (acl->variablesWriteSet() || acl->buildingPartsWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet()) return true;
   }
 
   return false;
 }
 
-bool Acls::variablesRoomsCategoriesRolesDevicesReadSet() {
+bool Acls::variablesBuildingPartsRoomsCategoriesRolesDevicesReadSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->variablesReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
+    if (acl->variablesReadSet() || acl->buildingPartsReadSet() || acl->roomsReadSet() || acl->categoriesReadSet() || acl->rolesReadSet() || acl->devicesReadSet()) return true;
   }
 
   return false;
 }
 
-bool Acls::variablesRoomsCategoriesRolesDevicesWriteSet() {
+bool Acls::variablesBuildingPartsRoomsCategoriesRolesDevicesWriteSet() {
   std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
   for (auto &acl : _acls) {
-    if (acl->variablesWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
+    if (acl->variablesWriteSet() || acl->buildingPartsWriteSet() || acl->roomsWriteSet() || acl->categoriesWriteSet() || acl->rolesWriteSet() || acl->devicesWriteSet()) return true;
   }
 
   return false;
@@ -683,6 +701,50 @@ bool Acls::checkMethodAndRoomWriteAccess(std::string methodName, uint64_t roomId
   return false;
 }
 
+bool Acls::checkMethodAndBuildingPartReadAccess(std::string methodName, uint64_t buildingPartId) {
+  try {
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    bool acceptSet = false;
+    for (auto &acl : _acls) {
+      auto result = acl->checkMethodAndBuildingPartReadAccess(methodName, buildingPartId);
+      if (result == AclResult::error || result == AclResult::deny) {
+        if (_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or building part " + std::to_string(buildingPartId) + " (1).");
+        return false;
+      } else if (result == AclResult::accept) acceptSet = true;
+    }
+
+    if (!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or building part " + std::to_string(buildingPartId) + " (2).");
+    return acceptSet;
+  }
+  catch (const std::exception &ex) {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+
+  return false;
+}
+
+bool Acls::checkMethodAndBuildingPartWriteAccess(std::string methodName, uint64_t buildingPartId) {
+  try {
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    bool acceptSet = false;
+    for (auto &acl : _acls) {
+      auto result = acl->checkMethodAndBuildingPartWriteAccess(methodName, buildingPartId);
+      if (result == AclResult::error || result == AclResult::deny) {
+        if (_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or building part " + std::to_string(buildingPartId) + " (1).");
+        return false;
+      } else if (result == AclResult::accept) acceptSet = true;
+    }
+
+    if (!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to method " + methodName + " or building part " + std::to_string(buildingPartId) + " (2).");
+    return acceptSet;
+  }
+  catch (const std::exception &ex) {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+
+  return false;
+}
+
 bool Acls::checkMethodAndDeviceWriteAccess(std::string methodName, uint64_t peerId) {
   try {
     std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
@@ -786,6 +848,50 @@ bool Acls::checkRoomWriteAccess(uint64_t roomId) {
     }
 
     if (!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to room " + std::to_string(roomId) + " (2).");
+    return acceptSet;
+  }
+  catch (const std::exception &ex) {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+
+  return false;
+}
+
+bool Acls::checkBuildingPartReadAccess(uint64_t buildingPartId) {
+  try {
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    bool acceptSet = false;
+    for (auto &acl : _acls) {
+      auto result = acl->checkBuildingPartReadAccess(buildingPartId);
+      if (result == AclResult::error || result == AclResult::deny) {
+        if (_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to building part " + std::to_string(buildingPartId) + " (1).");
+        return false;
+      } else if (result == AclResult::accept) acceptSet = true;
+    }
+
+    if (!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to building part " + std::to_string(buildingPartId) + " (2).");
+    return acceptSet;
+  }
+  catch (const std::exception &ex) {
+    _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+
+  return false;
+}
+
+bool Acls::checkBuildingPartWriteAccess(uint64_t buildingPartId) {
+  try {
+    std::lock_guard<std::mutex> aclsGuard(_aclsMutex);
+    bool acceptSet = false;
+    for (auto &acl : _acls) {
+      auto result = acl->checkBuildingPartWriteAccess(buildingPartId);
+      if (result == AclResult::error || result == AclResult::deny) {
+        if (_bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to building part " + std::to_string(buildingPartId) + " (1).");
+        return false;
+      } else if (result == AclResult::accept) acceptSet = true;
+    }
+
+    if (!acceptSet && _bl->debugLevel >= 5) _out.printDebug("Debug: Access denied to building part " + std::to_string(buildingPartId) + " (2).");
     return acceptSet;
   }
   catch (const std::exception &ex) {

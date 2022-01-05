@@ -104,17 +104,31 @@ class IDatabaseController {
   // }}}
 
   // {{{ Buildings
+  virtual BaseLib::PVariable addBuildingPartToBuilding(uint64_t buildingId, uint64_t buildingPartId) = 0;
   virtual BaseLib::PVariable addStoryToBuilding(uint64_t buildingId, uint64_t storyId) = 0;
   virtual BaseLib::PVariable createBuilding(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
-  virtual BaseLib::PVariable deleteBuilding(uint64_t storyId) = 0;
+  virtual BaseLib::PVariable deleteBuilding(uint64_t buildingId) = 0;
+  virtual BaseLib::PVariable getBuildingPartsInBuilding(PRpcClientInfo clientInfo, uint64_t buildingId, bool checkAcls) = 0;
   virtual BaseLib::PVariable getStoriesInBuilding(PRpcClientInfo clientInfo, uint64_t buildingId, bool checkAcls) = 0;
   virtual BaseLib::PVariable getBuildingMetadata(uint64_t buildingId) = 0;
   virtual BaseLib::PVariable getBuildings(std::string languageCode) = 0;
+  virtual BaseLib::PVariable removeBuildingPartFromBuildings(uint64_t buildingPartId) = 0;
+  virtual BaseLib::PVariable removeBuildingPartFromBuilding(uint64_t buildingId, uint64_t buildingPartId) = 0;
   virtual BaseLib::PVariable removeStoryFromBuildings(uint64_t storyId) = 0;
   virtual BaseLib::PVariable removeStoryFromBuilding(uint64_t buildingId, uint64_t storyId) = 0;
   virtual bool buildingExists(uint64_t buildingId) = 0;
   virtual BaseLib::PVariable setBuildingMetadata(uint64_t buildingId, BaseLib::PVariable metadata) = 0;
   virtual BaseLib::PVariable updateBuilding(uint64_t buildingId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+  // }}}
+
+  // {{{ Building parts
+  virtual BaseLib::PVariable createBuildingPart(BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
+  virtual BaseLib::PVariable deleteBuildingPart(uint64_t buildingPartId) = 0;
+  virtual BaseLib::PVariable getBuildingPartMetadata(uint64_t buildingPartId) = 0;
+  virtual BaseLib::PVariable getBuildingParts(BaseLib::PRpcClientInfo clientInfo, std::string languageCode, bool checkAcls) = 0;
+  virtual bool buildingPartExists(uint64_t buildingPartId) = 0;
+  virtual BaseLib::PVariable setBuildingPartMetadata(uint64_t buildingPartId, BaseLib::PVariable metadata) = 0;
+  virtual BaseLib::PVariable updateBuildingPart(uint64_t buildingPartId, BaseLib::PVariable translations, BaseLib::PVariable metadata) = 0;
   // }}}
 
   // {{{ Stories
@@ -249,6 +263,7 @@ class IDatabaseController {
   virtual void savePeerParameterAsynchronous(DataRow &data) = 0;
   virtual void saveSpecialPeerParameterAsynchronous(DataRow &data) = 0;
   virtual void savePeerParameterRoomAsynchronous(BaseLib::Database::DataRow &data) = 0;
+  virtual void savePeerParameterBuildingPartAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerParameterCategoriesAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerParameterRolesAsynchronous(BaseLib::Database::DataRow &data) = 0;
   virtual void savePeerVariableAsynchronous(DataRow &data) = 0;

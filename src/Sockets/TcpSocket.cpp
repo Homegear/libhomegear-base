@@ -600,6 +600,7 @@ void TcpSocket::serverThread() {
             if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
             std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
             if (!client.second->backlog.empty() && !client.second->busy) {
+              client.second->busy = true;
               std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
               enqueue(0, queueEntry);
             }
@@ -733,26 +734,20 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
     queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
     if (!queueEntry) return;
 
-    std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex);
-    bool hasData = !queueEntry->clientData->backlog.empty();
-    backlogGuard.unlock();
+    std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex, std::defer_lock);
 
     //Send a maximum of 10 packets
     for (int32_t i = 0; i < 10; i++) {
       backlogGuard.lock();
-      auto packet = queueEntry->clientData->backlog.front();
+      if (queueEntry->clientData->backlog.empty()) {
+        queueEntry->clientData->busy = false;
+        return;
+      }
+      std::shared_ptr<TcpPacket> packet = queueEntry->clientData->backlog.front();
       queueEntry->clientData->backlog.pop();
       backlogGuard.unlock();
 
       if (_packetReceivedCallback) _packetReceivedCallback(queueEntry->clientData->id, *packet);
-
-      backlogGuard.lock();
-      hasData = !queueEntry->clientData->backlog.empty();
-      if (!hasData) {
-        backlogGuard.unlock();
-        break;
-      }
-      backlogGuard.unlock();
     }
     backlogGuard.lock();
     queueEntry->clientData->busy = false;

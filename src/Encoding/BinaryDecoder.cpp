@@ -46,14 +46,7 @@ BinaryDecoder::BinaryDecoder(BaseLib::SharedObjects *baseLib, bool ansi) : Binar
 
 int32_t BinaryDecoder::decodeInteger(const std::vector<char> &encodedData, uint32_t &position) {
   int32_t integer = 0;
-  if (position + 4 > encodedData.size()) {
-    if (position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
-    //IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
-    std::string string(&encodedData.at(position), encodedData.size());
-    position = encodedData.size();
-    integer = Math::getNumber(string);
-    return integer;
-  }
+  if (position + 4 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
   HelperFunctions::memcpyBigEndian((char *)&integer, &encodedData.at(position), 4);
   position += 4;
   return integer;
@@ -61,14 +54,7 @@ int32_t BinaryDecoder::decodeInteger(const std::vector<char> &encodedData, uint3
 
 int32_t BinaryDecoder::decodeInteger(const std::vector<uint8_t> &encodedData, uint32_t &position) {
   int32_t integer = 0;
-  if (position + 4 > encodedData.size()) {
-    if (position + 1 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
-    //IP-Symcon encodes integers as string => Difficult to interpret. This works for numbers up to 3 digits:
-    std::string string((char *)&encodedData.at(position), encodedData.size());
-    position = encodedData.size();
-    integer = Math::getNumber(string);
-    return integer;
-  }
+  if (position + 4 > encodedData.size()) throw BinaryDecoderException("Unexpected end of data.");
   HelperFunctions::memcpyBigEndian((char *)&integer, (char *)&encodedData.at(position), 4);
   position += 4;
   return integer;
