@@ -213,9 +213,12 @@ const std::array<int32_t, 23> Math::_asciiToBinaryTable{0, 1, 2, 3, 4, 5, 6, 7, 
 bool Math::isNumber(const std::string &s, bool hex) {
   if (!hex) hex = (s.find('x') != std::string::npos);
   if (!hex) {
-    for (char const &c: s) {
-      if (std::isdigit(c) == 0) return false;
-    }
+    auto c = s.c_str();
+    if (*c == '-') c++;
+    do {
+      if (std::isdigit(*c) == 0) return false;
+      c++;
+    } while(*c != '\0');
   } else try { std::stoll(s, 0, 16); } catch (...) { return false; }
   return true;
 }
