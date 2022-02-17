@@ -138,6 +138,7 @@ void Settings::reset() {
   _nodeBlueEventLimit1 = 100;
   _nodeBlueEventLimit2 = 300;
   _nodeBlueEventLimit3 = 400;
+  _nodeBlueFrontendHistorySize = 50;
   _nodeBlueUriPathsExcludedFromLogin = "";
   _adminUiPath = "/var/lib/homegear/admin-ui/";
   _adminUiPathPermissions = 504;
@@ -417,6 +418,9 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "nodeblueeventlimit3") {
           _nodeBlueEventLimit3 = Math::getUnsignedNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueEventLimit3 set to " + std::to_string(_nodeBlueEventLimit3));
+        } else if (name == "nodebluefrontendhistorysize") {
+          _nodeBlueFrontendHistorySize = Math::getUnsignedNumber(value);
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueFrontendHistorySize set to " + std::to_string(_nodeBlueFrontendHistorySize));
         } else if (name == "nodeblueuripathsexcludedfromlogin") {
           _nodeBlueUriPathsExcludedFromLogin = value;
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueUriPathsExcludedFromLogin set to " + _nodeBlueUriPathsExcludedFromLogin);
