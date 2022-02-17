@@ -531,10 +531,10 @@ std::string HelperFunctions::getHexString(const std::vector<char> &data) {
 std::string HelperFunctions::getHexString(const std::vector<uint16_t> &data) {
   std::string s(data.size() * 4, ' ');
   for (uint32_t i = 0; i < data.size(); ++i) {
-    s[2 * i] = _binaryToASCIITable[data[i] >> 12];
-    s[2 * i + 1] = _binaryToASCIITable[(data[i] >> 8) & 0x0F];
-    s[2 * i + 2] = _binaryToASCIITable[(data[i] >> 4) & 0x0F];
-    s[2 * i + 3] = _binaryToASCIITable[data[i] & 0x0F];
+    s[4 * i] = _binaryToASCIITable[data[i] >> 12];
+    s[4 * i + 1] = _binaryToASCIITable[(data[i] >> 8) & 0x0F];
+    s[4 * i + 2] = _binaryToASCIITable[(data[i] >> 4) & 0x0F];
+    s[4 * i + 3] = _binaryToASCIITable[data[i] & 0x0F];
   }
   return s;
 }

@@ -126,6 +126,7 @@ public:
         std::string hostname;
         int32_t port = 502;
         bool useSsl = false;
+        bool keepAlive = true;
         std::string certFile;
         std::string certData;
         std::string keyFile;
@@ -337,6 +338,11 @@ private:
     bool _debug = false;
 
     /**
+     * Keep alive
+     */
+    bool _keepAlive = true;
+
+    /**
 	 * The common base library object.
 	 */
     BaseLib::SharedObjects* _bl = nullptr;
@@ -356,7 +362,7 @@ private:
     /**
      * The hostname of the Modbus server.
      */
-    std::string _hostname = "";
+    std::string _hostname;
 
     /**
      * The port the Modbus server listens on.
