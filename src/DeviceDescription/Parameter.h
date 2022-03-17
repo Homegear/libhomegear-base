@@ -102,6 +102,7 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   bool internal = false;
   bool parameterGroupSelector = false;
   bool service = false;
+  bool serviceInverted = false;
   bool sticky = false;
   bool transform = false;
   bool isSignedSet = false;

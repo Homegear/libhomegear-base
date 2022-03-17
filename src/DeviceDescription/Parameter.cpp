@@ -77,6 +77,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "internal") { internal = (propertyValue == "true"); }
         else if (propertyName == "parameterGroupSelector") { parameterGroupSelector = (propertyValue == "true"); }
         else if (propertyName == "service") { service = (propertyValue == "true"); }
+        else if (propertyName == "serviceInverted") { serviceInverted = (propertyValue == "true"); }
         else if (propertyName == "sticky") { sticky = (propertyValue == "true"); }
         else if (propertyName == "transform") { transform = (propertyValue == "true"); }
         else if (propertyName == "signed") {
