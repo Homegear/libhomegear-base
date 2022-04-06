@@ -93,11 +93,25 @@ void JsonDecoder::skipWhitespace(const std::string &json, uint32_t &pos) {
   while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t')) {
     pos++;
   }
+
+  if (pos + 1 < json.length() && json[pos] == '/' && json[pos + 1] == '/') {
+    pos += 2;
+    while (pos < json.length() && json[pos] != '\n' && json[pos] != '\r') {
+      pos++;
+    }
+  }
 }
 
 void JsonDecoder::skipWhitespace(const std::vector<char> &json, uint32_t &pos) {
   while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t')) {
     pos++;
+  }
+
+  if (pos + 1 < json.size() && json[pos] == '/' && json[pos + 1] == '/') {
+    pos += 2;
+    while (pos < json.size() && json[pos] != '\n' && json[pos] != '\r') {
+      pos++;
+    }
   }
 }
 
