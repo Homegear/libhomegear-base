@@ -123,6 +123,7 @@ class Variable {
   virtual ~Variable();
   static PVariable createError(int32_t faultCode, std::string faultString);
   std::string print(bool stdout = false, bool stderr = false, bool oneLine = false);
+  void trimStrings();
   static std::string getTypeString(VariableType type);
   void setType(VariableType value) { type = value; };
   void setType(DeviceDescription::ILogical::Type::Enum value);
