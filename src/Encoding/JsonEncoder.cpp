@@ -49,6 +49,21 @@ void JsonEncoder::encodeRequest(std::string &methodName, std::shared_ptr<std::li
   encode(methodCall, encodedData);
 }
 
+void JsonEncoder::encodeRequest(std::string &methodName, std::shared_ptr<Variable> &parameters, std::vector<char> &encodedData) {
+  std::shared_ptr<Variable> methodCall(new Variable(VariableType::tStruct));
+  methodCall->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
+  methodCall->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
+  if(parameters->type == VariableType::tStruct || parameters->type == VariableType::tArray) {
+    methodCall->structValue->insert(StructElement("params", parameters));
+  } else {
+    std::shared_ptr<Variable> params(new Variable(VariableType::tArray));
+    params->arrayValue->push_back(parameters);
+    methodCall->structValue->insert(StructElement("params", params));
+  }
+  methodCall->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(_requestId++))));
+  encode(methodCall, encodedData);
+}
+
 void JsonEncoder::encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json) {
   std::shared_ptr<Variable> response(new Variable(VariableType::tStruct));
   response->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));

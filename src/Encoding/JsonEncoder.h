@@ -56,6 +56,7 @@ class JsonEncoder {
   static std::string encode(const std::shared_ptr<Variable> &variable);
   static std::vector<char> encodeBinary(const std::shared_ptr<Variable> &variable);
   void encodeRequest(std::string &methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> &parameters, std::vector<char> &encodedData);
+  void encodeRequest(std::string &methodName, std::shared_ptr<Variable> &parameters, std::vector<char> &encodedData);
   static void encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
   static void encodeMQTTResponse(const std::string &methodName, const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
 
