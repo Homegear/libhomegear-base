@@ -35,6 +35,7 @@
 #include "../Variable.h"
 
 #include <list>
+#include <atomic>
 #if __GNUC__ > 4
 #include <codecvt>
 #endif
@@ -56,13 +57,13 @@ class JsonEncoder {
   static std::string encode(const std::shared_ptr<Variable> &variable);
   static std::vector<char> encodeBinary(const std::shared_ptr<Variable> &variable);
   void encodeRequest(std::string &methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> &parameters, std::vector<char> &encodedData);
-  void encodeRequest(std::string &methodName, std::shared_ptr<Variable> &parameters, std::vector<char> &encodedData);
+  std::vector<char> encodeRequest(const std::string &methodName, const std::shared_ptr<Variable> &parameters);
   static void encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
   static void encodeMQTTResponse(const std::string &methodName, const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json);
 
   static std::string encodeString(const std::string &s);
  private:
-  int32_t _requestId = 1;
+  std::atomic<int32_t> _requestId{1};
 
   static void encodeValue(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
   static void encodeValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
