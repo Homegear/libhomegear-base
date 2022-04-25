@@ -221,11 +221,12 @@ void Variable::parseXmlNode(const xml_node *node, PStruct &xmlStruct) {
   }
 }
 
-std::shared_ptr<Variable> Variable::createError(int32_t faultCode, std::string faultString) {
+std::shared_ptr<Variable> Variable::createError(int32_t faultCode, const std::string& faultString, bool retry) {
   std::shared_ptr<Variable> error = std::make_shared<Variable>(VariableType::tStruct);
   error->errorStruct = true;
-  error->structValue->insert(StructElement("faultCode", std::make_shared<Variable>(faultCode)));
-  error->structValue->insert(StructElement("faultString", std::make_shared<Variable>(faultString)));
+  error->structValue->emplace("faultCode", std::make_shared<Variable>(faultCode));
+  error->structValue->emplace("faultString", std::make_shared<Variable>(faultString));
+  error->structValue->emplace("retry", std::make_shared<Variable>(retry));
   return error;
 }
 

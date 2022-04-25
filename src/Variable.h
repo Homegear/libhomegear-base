@@ -121,7 +121,7 @@ class Variable {
   explicit Variable(DeviceDescription::ILogical::Type::Enum variableType);
   explicit Variable(const xml_node *node);
   virtual ~Variable();
-  static PVariable createError(int32_t faultCode, std::string faultString);
+  static PVariable createError(int32_t faultCode, const std::string& faultString, bool retry = false);
   std::string print(bool stdout = false, bool stderr = false, bool oneLine = false);
   void trimStrings();
   static std::string getTypeString(VariableType type);
