@@ -93,10 +93,12 @@ Modbus::~Modbus() {
 }
 
 void Modbus::connect() {
+  std::lock_guard<std::mutex> socketGuard(_socketMutex);
   if (_socket) _socket->open();
 }
 
 void Modbus::disconnect() {
+  std::lock_guard<std::mutex> socketGuard(_socketMutex);
   if (_socket) _socket->close();
 }
 
