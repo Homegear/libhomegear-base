@@ -37,53 +37,49 @@
 #include <codecvt>
 #endif
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace Rpc
-{
-class JsonDecoderException : public BaseLib::Exception
-{
-public:
-	explicit JsonDecoderException(std::string message) : BaseLib::Exception(message) {}
+namespace Rpc {
+class JsonDecoderException : public BaseLib::Exception {
+ public:
+  explicit JsonDecoderException(std::string message) : BaseLib::Exception(message) {}
 };
 
-class JsonDecoder
-{
-public:
-    JsonDecoder() = default;
-	explicit JsonDecoder(BaseLib::SharedObjects* dummy) {};
-	virtual ~JsonDecoder() = default;
+class JsonDecoder {
+ public:
+  JsonDecoder() = default;
+  explicit JsonDecoder(BaseLib::SharedObjects *dummy) {};
+  virtual ~JsonDecoder() = default;
 
-	static std::shared_ptr<Variable> decode(const std::string& json);
-    static std::shared_ptr<Variable> decode(const std::string& json, uint32_t& bytesRead);
-    static std::shared_ptr<Variable> decode(const std::vector<char>& json);
-    static std::shared_ptr<Variable> decode(const std::vector<char>& json, uint32_t& bytesRead);
+  static std::shared_ptr<Variable> decode(const std::string &json);
+  static std::shared_ptr<Variable> decode(const std::string &json, uint32_t &bytesRead);
+  static std::shared_ptr<Variable> decode(const std::vector<char> &json);
+  static std::shared_ptr<Variable> decode(const std::vector<char> &json, uint32_t &bytesRead);
 
-    static std::string decodeString(const std::string& s);
-private:
-	static inline bool posValid(const std::string& json, uint32_t pos);
-	static inline bool posValid(const std::vector<char>& json, uint32_t pos);
-    static void skipWhitespace(const std::string& json, uint32_t& pos);
-    static void skipWhitespace(const std::vector<char>& json, uint32_t& pos);
-    static void decodeObject(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& variable);
-    static void decodeObject(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& variable);
-    static void decodeArray(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& variable);
-    static void decodeArray(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& variable);
-    static void decodeString(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeString(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeString(const std::string& json, uint32_t& pos, std::string& s);
-    static void decodeString(const std::vector<char>& json, uint32_t& pos, std::string& s);
-    static bool decodeValue(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static bool decodeValue(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeBoolean(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeBoolean(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeNull(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static void decodeNull(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static bool decodeNumber(const std::string& json, uint32_t& pos, std::shared_ptr<Variable>& value);
-    static bool decodeNumber(const std::vector<char>& json, uint32_t& pos, std::shared_ptr<Variable>& value);
+  static std::string decodeString(const std::string &s);
+ private:
+  static inline bool posValid(const std::string &json, uint32_t pos);
+  static inline bool posValid(const std::vector<char> &json, uint32_t pos);
+  static void skipWhitespace(const std::string &json, uint32_t &pos);
+  static void skipWhitespace(const std::vector<char> &json, uint32_t &pos);
+  static void decodeObject(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &variable);
+  static void decodeObject(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &variable);
+  static void decodeArray(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &variable);
+  static void decodeArray(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &variable);
+  static void decodeString(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeString(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeString(const std::string &json, uint32_t &pos, std::string &s);
+  static void decodeString(const std::vector<char> &json, uint32_t &pos, std::string &s);
+  static bool decodeValue(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static bool decodeValue(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeBoolean(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeBoolean(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeNull(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static void decodeNull(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static bool decodeNumber(const std::string &json, uint32_t &pos, std::shared_ptr<Variable> &value);
+  static bool decodeNumber(const std::vector<char> &json, uint32_t &pos, std::shared_ptr<Variable> &value);
 };
 }
 }

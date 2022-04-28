@@ -89,35 +89,41 @@ void ServiceMessages::load() {
   try {
     std::shared_ptr<BaseLib::Database::DataTable> rows = raiseGetServiceMessages();
     for (BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row) {
-      _variableDatabaseIDs[row->second.at(3)->intValue] = row->second.at(0)->intValue;
-      if (row->second.at(3)->intValue < 1000) {
-        switch (row->second.at(3)->intValue) {
-          /*case 0:
-              _unreach = (bool)row->second.at(5)->intValue;
-              break;*/
-          case 1: _stickyUnreach = (bool)row->second.at(6)->intValue;
-            _stickyUnreachTime = row->second.at(5)->intValue;
+      _variableDatabaseIDs[row->second.at(4)->intValue] = row->second.at(0)->intValue;
+      if (row->second.at(4)->intValue < 1000) {
+        switch (row->second.at(4)->intValue) {
+          case 0: {
+            _unreach = (bool)row->second.at(7)->intValue;
             break;
-          case 2: _configPending = (bool)row->second.at(6)->intValue;
-            _configPendingTime = row->second.at(5)->intValue;
+          }
+          case 1: {
+            _stickyUnreach = (bool)row->second.at(7)->intValue;
+            _stickyUnreachTime = row->second.at(6)->intValue;
             break;
-          case 3: _lowbat = (bool)row->second.at(6)->intValue;
-            _lowbatTime = row->second.at(5)->intValue;
+          }
+          case 2: {
+            _configPending = (bool)row->second.at(7)->intValue;
+            _configPendingTime = row->second.at(6)->intValue;
             break;
+          }
+          case 3: {
+            _lowbat = (bool)row->second.at(7)->intValue;
+            _lowbatTime = row->second.at(6)->intValue;
+            break;
+          }
         }
       } else {
-        int32_t channel = row->second.at(6)->intValue;
-        std::string id = row->second.at(7)->textValue;
-        std::shared_ptr<std::vector<char>> value = row->second.at(9)->binaryValue;
+        int32_t channel = row->second.at(7)->intValue;
+        std::string id = row->second.at(8)->textValue;
+        std::shared_ptr<std::vector<char>> value = row->second.at(10)->binaryValue;
         if (channel < 0 || id.empty() || value->empty()) continue;
         ErrorInfo errorInfo;
         errorInfo.value = (uint8_t)value->at(0);
-        errorInfo.timestamp = row->second.at(5)->intValue;
+        errorInfo.timestamp = row->second.at(6)->intValue;
         std::lock_guard<std::mutex> errorsGuard(_errorMutex);
         _errors[channel][id] = errorInfo;
       }
     }
-    _unreach = false; //Always set _unreach to false on start up.
 
     //Synchronize service message data with peer parameters:
     std::vector<uint8_t> data = {(uint8_t)_unreach};
@@ -295,7 +301,7 @@ bool ServiceMessages::set(std::string id, bool value) {
       if (!value) //Set for all other channels
       {
         std::lock_guard<std::mutex> errorsGuard(_errorMutex);
-        for (auto &error : _errors) {
+        for (auto &error: _errors) {
           if (error.first == 0) continue;
           auto errorIterator = error.second.find(id);
           if (errorIterator != error.second.end()) {
@@ -477,8 +483,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
       }
     }
     std::lock_guard<std::mutex> errorGuard(_errorMutex);
-    for (auto &error : _errors) {
-      for (auto &inner : error.second) {
+    for (auto &error: _errors) {
+      for (auto &inner: error.second) {
         if (inner.second.value == 0) continue;
 
         if (returnId) {

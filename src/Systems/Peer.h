@@ -174,6 +174,14 @@ class RpcConfigurationParameter {
     std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
     return _roles.find(id) != _roles.end();
   }
+  bool hasServiceRole() {
+    std::lock_guard<std::mutex> rolesGuard(_rolesMutex);
+    for (auto &role: _roles) {
+      auto hexRole = BaseLib::Math::getNumber(std::to_string(role.first), true);
+      if (((hexRole & 0xFF0000)) == 0x800000) return true;
+    }
+    return false;
+  }
   void addRole(const Role &role);
   void addRole(uint64_t id, RoleDirection direction, bool invert, bool scale, RoleScaleInfo scaleInfo);
   void removeRole(uint64_t id);

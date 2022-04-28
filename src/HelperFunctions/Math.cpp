@@ -218,7 +218,7 @@ bool Math::isNumber(const std::string &s, bool hex) {
     do {
       if (std::isdigit(*c) == 0) return false;
       c++;
-    } while(*c != '\0');
+    } while (*c != '\0');
   } else try { std::stoll(s, 0, 16); } catch (...) { return false; }
   return true;
 }
@@ -417,4 +417,9 @@ double Math::scale(double value, double valueMin, double valueMax, double scaleM
 
   return scaleMin + bigSpan;
 }
+
+double Math::metricExponentialMovingAverage(double interval, double period, double metric, double lastAverage) {
+  return (1.0 - std::exp(-interval / period)) * metric + std::exp(-interval / period) * lastAverage;
+}
+
 }

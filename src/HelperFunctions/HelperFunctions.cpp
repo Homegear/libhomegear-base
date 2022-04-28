@@ -190,7 +190,7 @@ std::string HelperFunctions::getUuid1(bool useRandomNodeId) {
 
 std::string HelperFunctions::getUuid4() {
   std::vector<uint8_t> uuidBytes = getRandomBytes(16);
-  uuidBytes[6] = (uuidBytes[6] & 0x0Fu) | 4u;
+  uuidBytes[6] = (uuidBytes[6] & 0x0Fu) | 0x40u;
   uuidBytes[8] = (uuidBytes[8] & 0x3Fu) | 0x80u;
 
   std::string uuid;

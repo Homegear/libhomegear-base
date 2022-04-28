@@ -1056,6 +1056,12 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
       propertiesNode->append_node(node);
     }
 
+    if (parameter->serviceInverted) {
+      tempString = "true";
+      xml_node *node = doc->allocate_node(node_element, "serviceInverted", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+      propertiesNode->append_node(node);
+    }
+
     if (parameter->sticky) {
       tempString = "true";
       xml_node *node = doc->allocate_node(node_element, "sticky", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
