@@ -4,4 +4,4 @@ SCRIPTDIR="$( cd "$(dirname $0)" && pwd )"
 
 REVISION_FILE=$SCRIPTDIR/revision.txt
 REVISION=$(cat $REVISION_FILE)
-echo "0.7.51-${REVISION}"
+echo "0.7.52-${REVISION}"
