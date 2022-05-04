@@ -33,6 +33,7 @@
 #include "../Security/SecureVector.h"
 
 namespace BaseLib {
+
 TcpSocket::CertificateCredentials::CertificateCredentials(gnutls_certificate_credentials_t credentials, gnutls_datum_t dhParams) : _credentials(credentials) {
   if (dhParams.size > 0) {
     int result = 0;
@@ -185,12 +186,14 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects *baseLib, TcpServerInfo &serverInfo)
   _connectionClosedCallbackEx.swap(serverInfo.connectionClosedCallbackEx);
   _packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
-  _serverThreads.resize(serverInfo.serverThreads);
+  server_threads_.resize(serverInfo.serverThreads);
+  average_packets_per_minute_received_.resize(serverInfo.serverThreads);
+  average_packets_per_minute_sent_.resize(serverInfo.serverThreads);
 }
 
 TcpSocket::~TcpSocket() {
   _stopServer = true;
-  for (auto &serverThread : _serverThreads) {
+  for (auto &serverThread: server_threads_) {
     _bl->threadManager.join(serverThread);
   }
 
@@ -247,8 +250,8 @@ void TcpSocket::startPreboundServer(std::string &listenAddress, size_t processin
 
   if (processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
-  for (auto &serverThread : _serverThreads) {
-    _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+  for (uint32_t i = 0; i < server_threads_.size(); i++) {
+    _bl->threadManager.start(server_threads_.at(i), true, &TcpSocket::serverThread, this, i);
   }
 }
 
@@ -268,8 +271,8 @@ void TcpSocket::startServer(std::string address, std::string port, std::string &
 
   if (processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
-  for (auto &serverThread : _serverThreads) {
-    _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+  for (uint32_t i = 0; i < server_threads_.size(); i++) {
+    _bl->threadManager.start(server_threads_.at(i), true, &TcpSocket::serverThread, this, i);
   }
 }
 
@@ -290,8 +293,8 @@ void TcpSocket::startServer(std::string address, std::string &listenAddress, int
 
   if (processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
-  for (auto &serverThread : _serverThreads) {
-    _bl->threadManager.start(serverThread, true, &TcpSocket::serverThread, this);
+  for (uint32_t i = 0; i < server_threads_.size(); i++) {
+    _bl->threadManager.start(server_threads_.at(i), true, &TcpSocket::serverThread, this, i);
   }
 }
 
@@ -303,7 +306,7 @@ void TcpSocket::waitForServerStopped() {
   stopQueue(0);
 
   _stopServer = true;
-  for (auto &serverThread : _serverThreads) {
+  for (auto &serverThread: server_threads_) {
     _bl->threadManager.join(serverThread);
   }
 
@@ -450,13 +453,13 @@ void TcpSocket::readClient(const PTcpClientData &clientData) {
       if (bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
 
       {
-        std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_received_mutex_);
         auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
-        auto interval = (double)(time - average_mean_data_received_.last_measurement);
+        auto &average_mean_data = average_packets_per_minute_received_.at(clientData->thread_index);
+        auto interval = (double)(time - average_mean_data.last_measurement);
         if (interval == 0) interval = 1;
         double current_packets_per_minute = 60000000 / interval;
-        average_mean_data_received_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_received_.last_output);
-        average_mean_data_received_.last_measurement = time;
+        average_mean_data.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data.last_output);
+        average_mean_data.last_measurement = time;
       }
 
       if (_packetReceivedCallback) {
@@ -510,13 +513,13 @@ bool TcpSocket::sendToClient(int32_t clientId, const TcpPacket &packet, bool clo
     }
 
     {
-      std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
       auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
-      auto interval = (double)(time - average_mean_data_sent_.last_measurement);
+      auto &average_mean_data = average_packets_per_minute_sent_.at(clientData->thread_index);
+      auto interval = (double)(time - average_mean_data.last_measurement);
       if (interval == 0) interval = 1;
       double current_packets_per_minute = 60000000 / interval;
-      average_mean_data_sent_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_sent_.last_output);
-      average_mean_data_sent_.last_measurement = time;
+      average_mean_data.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data.last_output);
+      average_mean_data.last_measurement = time;
     }
 
     return true;
@@ -547,13 +550,13 @@ bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char> &packet, 
     }
 
     {
-      std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
       auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
-      auto interval = (double)(time - average_mean_data_sent_.last_measurement);
+      auto &average_mean_data = average_packets_per_minute_sent_.at(clientData->thread_index);
+      auto interval = (double)(time - average_mean_data.last_measurement);
       if (interval == 0) interval = 1;
       double current_packets_per_minute = 60000000 / interval;
-      average_mean_data_sent_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_sent_.last_output);
-      average_mean_data_sent_.last_measurement = time;
+      average_mean_data.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data.last_output);
+      average_mean_data.last_measurement = time;
     }
 
     return true;
@@ -602,11 +605,11 @@ int64_t TcpSocket::getClientCertExpiration(int32_t clientId) {
   return 0;
 }
 
-void TcpSocket::serverThread() {
-  sigset_t signalSet{};
-  sigemptyset(&signalSet);
-  sigaddset(&signalSet, SIGPIPE);
-  if (pthread_sigmask(SIG_BLOCK, &signalSet, nullptr) != 0) {
+void TcpSocket::serverThread(uint32_t thread_index) {
+  sigset_t signal_set{};
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGPIPE);
+  if (pthread_sigmask(SIG_BLOCK, &signal_set, nullptr) != 0) {
     _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
   }
 
@@ -628,7 +631,7 @@ void TcpSocket::serverThread() {
 
       { //Send backlog
         if (_packetReceivedCallback && queueIsStarted(0)) {
-          for (auto &client : clients) {
+          for (auto &client: clients) {
             if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
             std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
             if (!client.second->backlog.empty() && !client.second->busy) {
@@ -653,7 +656,7 @@ void TcpSocket::serverThread() {
         FD_SET(socketDescriptor, &readFileDescriptor);
 
         {
-          for (auto &client : clients) {
+          for (auto &client: clients) {
             if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
             FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
             if (client.second->fileDescriptor->descriptor > maxfd) maxfd = client.second->fileDescriptor->descriptor;
@@ -716,6 +719,7 @@ void TcpSocket::serverThread() {
           clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
           clientData->socket->setReadTimeout(100000);
           clientData->socket->setWriteTimeout(15000000);
+          clientData->thread_index = thread_index;
 
           if (_useSsl) initClientSsl(clientData);
 
@@ -745,7 +749,7 @@ void TcpSocket::serverThread() {
         continue;
       }
 
-      for (auto &client : clients) {
+      for (auto &client: clients) {
         if (client.second->fileDescriptor->descriptor == -1) continue;
         if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
           readClient(client.second);
@@ -796,21 +800,21 @@ void TcpSocket::collectGarbage() {
   std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
   std::vector<int32_t> clientsToRemove;
   {
-    for (auto &client : _clients) {
+    for (auto &client: _clients) {
       if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
     }
   }
-  for (auto &client : clientsToRemove) {
+  for (auto &client: clientsToRemove) {
     _clients.erase(client);
   }
 }
 
 void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients) {
   std::vector<int32_t> clientsToRemove;
-  for (auto &client : clients) {
+  for (auto &client: clients) {
     if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
   }
-  for (auto &client : clientsToRemove) {
+  for (auto &client: clientsToRemove) {
     clients.erase(client);
   }
 }
@@ -940,7 +944,7 @@ void TcpSocket::initSsl() {
     }
   }
 
-  for (auto &certificateInfo : _certificates) {
+  for (auto &certificateInfo: _certificates) {
     gnutls_certificate_credentials_t x509Credentials = nullptr;
     if ((result = gnutls_certificate_allocate_credentials(&x509Credentials)) != GNUTLS_E_SUCCESS) {
       x509Credentials = nullptr;
@@ -1408,13 +1412,19 @@ bool TcpSocket::connected() {
 }
 
 double TcpSocket::GetPacketsPerMinuteReceived() {
-  std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_received_mutex_);
-  return average_mean_data_received_.last_output;
+  double result = 0.0;
+  for (auto &element: average_packets_per_minute_received_) {
+    result += element.last_output;
+  }
+  return result;
 }
 
 double TcpSocket::GetPacketsPerMinuteSent() {
-  std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
-  return average_mean_data_sent_.last_output;
+  double result = 0.0;
+  for (auto &element: average_packets_per_minute_sent_) {
+    result += element.last_output;
+  }
+  return result;
 }
 
 void TcpSocket::getSocketDescriptor() {

@@ -170,6 +170,7 @@ class TcpSocket : public IQueue {
   typedef std::vector<uint8_t> TcpPacket;
 
   struct TcpClientData {
+    int32_t thread_index = -1;
     int32_t id = 0;
     PFileDescriptor fileDescriptor;
     std::vector<uint8_t> buffer;
@@ -585,8 +586,10 @@ class TcpSocket : public IQueue {
   // }}}
  protected:
   struct AverageMeanData {
-    int64_t last_measurement = 0;
-    double last_output = 0.0;
+    AverageMeanData() = default;
+    AverageMeanData(const AverageMeanData &data) {}
+    std::atomic<int64_t> last_measurement{0};
+    std::atomic<double> last_output{0.0};
   };
 
   BaseLib::SharedObjects *_bl = nullptr;
@@ -612,10 +615,8 @@ class TcpSocket : public IQueue {
   std::string _dhParamFile;
   std::string _dhParamData;
   bool _requireClientCert = false;
-  std::mutex average_mean_data_received_mutex_;
-  AverageMeanData average_mean_data_received_;
-  std::mutex average_mean_data_sent_mutex_;
-  AverageMeanData average_mean_data_sent_;
+  std::vector<AverageMeanData> average_packets_per_minute_received_;
+  std::vector<AverageMeanData> average_packets_per_minute_sent_;
   std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
   std::function<void(int32_t clientId)> _connectionClosedCallback;
   std::function<void(int32_t clientId, int32_t errorCode, const std::string &errorString)> _connectionClosedCallbackEx;
@@ -628,7 +629,7 @@ class TcpSocket : public IQueue {
   gnutls_priority_t _tlsPriorityCache = nullptr;
 
   std::atomic_bool _stopServer;
-  std::vector<std::thread> _serverThreads;
+  std::vector<std::thread> server_threads_;
 
   int64_t _lastGarbageCollection = 0;
 
@@ -663,7 +664,7 @@ class TcpSocket : public IQueue {
   // {{{ For server only
   void bindSocket();
 
-  void serverThread();
+  void serverThread(uint32_t thread_index);
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
   void collectGarbage();
   void collectGarbage(std::map<int32_t, PTcpClientData> &clients);
