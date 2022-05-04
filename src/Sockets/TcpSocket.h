@@ -402,6 +402,9 @@ class TcpSocket : public IQueue {
    */
   bool connected();
 
+  double GetPacketsPerMinuteReceived();
+  double GetPacketsPerMinuteSent();
+
   /**
    * Use this overload when there are no socket operations outside of this class.
    *
@@ -581,6 +584,11 @@ class TcpSocket : public IQueue {
   int64_t getClientCertExpiration(int32_t clientId);
   // }}}
  protected:
+  struct AverageMeanData {
+    int64_t last_measurement = 0;
+    double last_output = 0.0;
+  };
+
   BaseLib::SharedObjects *_bl = nullptr;
   int32_t _connectionRetries = 3;
   int64_t _readTimeout = 15000000;
@@ -604,6 +612,10 @@ class TcpSocket : public IQueue {
   std::string _dhParamFile;
   std::string _dhParamData;
   bool _requireClientCert = false;
+  std::mutex average_mean_data_received_mutex_;
+  AverageMeanData average_mean_data_received_;
+  std::mutex average_mean_data_sent_mutex_;
+  AverageMeanData average_mean_data_sent_;
   std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
   std::function<void(int32_t clientId)> _connectionClosedCallback;
   std::function<void(int32_t clientId, int32_t errorCode, const std::string &errorString)> _connectionClosedCallbackEx;

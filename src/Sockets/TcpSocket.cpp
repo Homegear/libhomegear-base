@@ -449,6 +449,16 @@ void TcpSocket::readClient(const PTcpClientData &clientData) {
 
       if (bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
 
+      {
+        std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_received_mutex_);
+        auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
+        auto interval = (double)(time - average_mean_data_received_.last_measurement);
+        if (interval == 0) interval = 1;
+        double current_packets_per_minute = 60000000 / interval;
+        average_mean_data_received_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_received_.last_output);
+        average_mean_data_received_.last_measurement = time;
+      }
+
       if (_packetReceivedCallback) {
         if (queueIsStarted(0)) {
           auto bytesReceived = std::make_shared<std::vector<uint8_t>>(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
@@ -498,6 +508,17 @@ bool TcpSocket::sendToClient(int32_t clientId, const TcpPacket &packet, bool clo
       if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
       else if (_connectionClosedCallback) _connectionClosedCallback(clientData->id);
     }
+
+    {
+      std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
+      auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
+      auto interval = (double)(time - average_mean_data_sent_.last_measurement);
+      if (interval == 0) interval = 1;
+      double current_packets_per_minute = 60000000 / interval;
+      average_mean_data_sent_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_sent_.last_output);
+      average_mean_data_sent_.last_measurement = time;
+    }
+
     return true;
   }
   catch (const std::exception &ex) {
@@ -524,6 +545,17 @@ bool TcpSocket::sendToClient(int32_t clientId, const std::vector<char> &packet, 
       if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(clientData->id, 0, "");
       else if (_connectionClosedCallback) _connectionClosedCallback(clientData->id);
     }
+
+    {
+      std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
+      auto time = BaseLib::HelperFunctions::getTimeMicroseconds();
+      auto interval = (double)(time - average_mean_data_sent_.last_measurement);
+      if (interval == 0) interval = 1;
+      double current_packets_per_minute = 60000000 / interval;
+      average_mean_data_sent_.last_output = Math::metricExponentialMovingAverage(interval, 60000000, current_packets_per_minute, average_mean_data_sent_.last_output);
+      average_mean_data_sent_.last_measurement = time;
+    }
+
     return true;
   }
   catch (const std::exception &ex) {
@@ -1373,6 +1405,16 @@ bool TcpSocket::connected() {
   char buffer[1];
   if (recv(_socketDescriptor->descriptor, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) return false;
   return true;
+}
+
+double TcpSocket::GetPacketsPerMinuteReceived() {
+  std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_received_mutex_);
+  return average_mean_data_received_.last_output;
+}
+
+double TcpSocket::GetPacketsPerMinuteSent() {
+  std::lock_guard<std::mutex> average_mean_data_guard(average_mean_data_sent_mutex_);
+  return average_mean_data_sent_.last_output;
 }
 
 void TcpSocket::getSocketDescriptor() {
