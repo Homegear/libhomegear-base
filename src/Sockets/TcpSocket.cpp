@@ -683,6 +683,11 @@ void TcpSocket::serverThread(uint32_t thread_index) {
         socklen_t addressSize = sizeof(addressSize);
         std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
         if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
+        if (clientFileDescriptor->descriptor >= FD_SETSIZE) {
+          _bl->out.printError("Error: No more clients can connect to me as the maximum number of file descriptors is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort);
+          _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+          continue;
+        }
 
         try {
           getpeername(clientFileDescriptor->descriptor, (struct sockaddr *)&clientInfo, &addressSize);
