@@ -617,8 +617,8 @@ class TcpSocket : public IQueue {
   std::string _dhParamFile;
   std::string _dhParamData;
   bool _requireClientCert = false;
-  std::atomic<uint32_t> server_threads_in_use_;
-  std::atomic<uint32_t> processing_threads_in_use_;
+  std::atomic<uint32_t> server_threads_in_use_{0};
+  std::atomic<uint32_t> processing_threads_in_use_{0};
   std::vector<AverageMeanData> average_packets_per_minute_received_;
   std::vector<AverageMeanData> average_packets_per_minute_sent_;
   std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
