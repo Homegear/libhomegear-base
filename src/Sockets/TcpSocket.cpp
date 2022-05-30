@@ -635,11 +635,11 @@ void TcpSocket::serverThread(uint32_t thread_index) {
             if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
             std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
             if (!client.second->backlog.empty() && !client.second->busy) {
-              threads_in_use_++;
+              server_threads_in_use_++;
               client.second->busy = true;
               std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
               enqueue(0, queueEntry);
-              threads_in_use_--;
+              server_threads_in_use_--;
             }
           }
         }
@@ -681,18 +681,18 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       }
 
       if (FD_ISSET(socketDescriptor, &readFileDescriptor) && !_stopServer) {
-        threads_in_use_++;
+        server_threads_in_use_++;
         struct sockaddr_storage clientInfo{};
         socklen_t addressSize = sizeof(addressSize);
         std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
         if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
-          threads_in_use_--;
+          server_threads_in_use_--;
           continue;
         }
         if (clientFileDescriptor->descriptor >= FD_SETSIZE) {
           _bl->out.printError("Error: No more clients can connect to me as the maximum number of file descriptors is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort);
           _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-          threads_in_use_--;
+          server_threads_in_use_--;
           continue;
         }
 
@@ -717,14 +717,14 @@ void TcpSocket::serverThread(uint32_t thread_index) {
             if (_clients.size() > _maxConnections) {
               _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString.data());
               _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-              threads_in_use_--;
+              server_threads_in_use_--;
               continue;
             }
           }
 
           if (_stopServer) {
             _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-            threads_in_use_--;
+            server_threads_in_use_--;
             continue;
           }
 
@@ -760,16 +760,16 @@ void TcpSocket::serverThread(uint32_t thread_index) {
           _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
           _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
         }
-        threads_in_use_--;
+        server_threads_in_use_--;
         continue;
       }
 
       for (auto &client: clients) {
         if (client.second->fileDescriptor->descriptor == -1) continue;
         if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
-          threads_in_use_++;
+          server_threads_in_use_++;
           readClient(client.second);
-          threads_in_use_--;
+          server_threads_in_use_--;
         }
       }
     }
@@ -782,10 +782,14 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 }
 
 void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) {
+  processing_threads_in_use_++;
   try {
     std::shared_ptr<QueueEntry> queueEntry;
     queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
-    if (!queueEntry) return;
+    if (!queueEntry) {
+      processing_threads_in_use_--;
+      return;
+    }
 
     std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex, std::defer_lock);
 
@@ -794,6 +798,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       backlogGuard.lock();
       if (queueEntry->clientData->backlog.empty()) {
         queueEntry->clientData->busy = false;
+        processing_threads_in_use_--;
         return;
       }
       std::shared_ptr<TcpPacket> packet = queueEntry->clientData->backlog.front();
@@ -809,6 +814,7 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
+  processing_threads_in_use_--;
 }
 
 void TcpSocket::collectGarbage() {
@@ -1444,8 +1450,12 @@ double TcpSocket::GetPacketsPerMinuteSent() {
   return result;
 }
 
-uint32_t TcpSocket::GetThreadsInUse() {
-  return threads_in_use_;
+uint32_t TcpSocket::GetServerThreadsInUse() {
+  return server_threads_in_use_;
+}
+
+uint32_t TcpSocket::GetProcessingThreadsInUse() {
+  return processing_threads_in_use_;
 }
 
 void TcpSocket::getSocketDescriptor() {

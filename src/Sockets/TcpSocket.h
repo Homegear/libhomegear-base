@@ -405,7 +405,8 @@ class TcpSocket : public IQueue {
 
   double GetPacketsPerMinuteReceived();
   double GetPacketsPerMinuteSent();
-  uint32_t GetThreadsInUse();
+  uint32_t GetServerThreadsInUse();
+  uint32_t GetProcessingThreadsInUse();
 
   /**
    * Use this overload when there are no socket operations outside of this class.
@@ -616,7 +617,8 @@ class TcpSocket : public IQueue {
   std::string _dhParamFile;
   std::string _dhParamData;
   bool _requireClientCert = false;
-  std::atomic<uint32_t> threads_in_use_;
+  std::atomic<uint32_t> server_threads_in_use_;
+  std::atomic<uint32_t> processing_threads_in_use_;
   std::vector<AverageMeanData> average_packets_per_minute_received_;
   std::vector<AverageMeanData> average_packets_per_minute_sent_;
   std::function<void(int32_t clientId, std::string address, uint16_t port)> _newConnectionCallback;
