@@ -167,6 +167,11 @@ class HttpServer {
   void waitForStop();
   void reload();
 
+  double GetPacketsPerMinuteReceived();
+  double GetPacketsPerMinuteSent();
+  uint32_t GetServerThreadsInUse();
+  uint32_t GetProcessingThreadsInUse();
+
   void send(int32_t clientId, const TcpSocket::TcpPacket &packet, bool closeConnection = true);
   void send(int32_t clientId, const std::vector<char> &packet, bool closeConnection = true);
 

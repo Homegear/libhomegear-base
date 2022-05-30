@@ -84,6 +84,22 @@ void HttpServer::reload() {
   _socket->reloadCertificates();
 }
 
+double HttpServer::GetPacketsPerMinuteReceived() {
+  return _socket->GetPacketsPerMinuteReceived();
+}
+
+double HttpServer::GetPacketsPerMinuteSent() {
+  return _socket->GetPacketsPerMinuteSent();
+}
+
+uint32_t HttpServer::GetServerThreadsInUse() {
+  return _socket->GetServerThreadsInUse();
+}
+
+uint32_t HttpServer::GetProcessingThreadsInUse() {
+  return _socket->GetProcessingThreadsInUse();
+}
+
 void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t port) {
   try {
     HttpClientInfo clientInfo;
