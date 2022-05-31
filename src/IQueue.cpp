@@ -108,42 +108,57 @@ IQueue::~IQueue() {
 }
 
 int32_t IQueue::queueSize(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _bufferCount[index];
 }
 
 bool IQueue::queueEmpty(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _bufferCount[index] > 0;
 }
 
+uint32_t IQueue::processingThreadCount(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _processingThread[index].size();
+}
+
 double IQueue::maxThreadLoad(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxThreadLoad[index];
 }
 
 double IQueue::maxThreadLoad1m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxThreadLoad1m[index];
 }
 
 double IQueue::maxThreadLoad10m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxThreadLoad10m[index];
 }
 
 double IQueue::maxThreadLoad1h(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxThreadLoad1h[index];
 }
 
 int64_t IQueue::maxWait(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxWait[index];
 }
 
 int64_t IQueue::maxWait1m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxWait1m[index];
 }
 
 int64_t IQueue::maxWait10m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxWait10m[index];
 }
 
 int64_t IQueue::maxWait1h(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _maxWait1h[index];
 }
 

@@ -1450,12 +1450,20 @@ double TcpSocket::GetPacketsPerMinuteSent() {
   return result;
 }
 
-uint32_t TcpSocket::GetServerThreadsInUse() {
-  return server_threads_in_use_;
+double TcpSocket::GetServerThreadLoad() {
+  double thread_count = server_threads_.size();
+  if (thread_count == 0.0) return 0.0;
+  return ((double)server_threads_in_use_ / thread_count) + ((double)processingQueueSize() / thread_count);
 }
 
-uint32_t TcpSocket::GetProcessingThreadsInUse() {
-  return processing_threads_in_use_;
+double TcpSocket::GetProcessingThreadLoad() {
+  double thread_count = processingThreadCount(0);
+  if (thread_count == 0.0) return 0.0;
+  return ((double)processing_threads_in_use_ / thread_count) + ((double)processingQueueSize() / thread_count);
+}
+
+double TcpSocket::GetProcessingThreadLoadMax() {
+  return maxThreadLoad1m(0);
 }
 
 void TcpSocket::getSocketDescriptor() {

@@ -92,12 +92,16 @@ double HttpServer::GetPacketsPerMinuteSent() {
   return _socket->GetPacketsPerMinuteSent();
 }
 
-uint32_t HttpServer::GetServerThreadsInUse() {
-  return _socket->GetServerThreadsInUse();
+double HttpServer::GetServerThreadLoad() {
+  return _socket->GetServerThreadLoad();
 }
 
-uint32_t HttpServer::GetProcessingThreadsInUse() {
-  return _socket->GetProcessingThreadsInUse();
+double HttpServer::GetProcessingThreadLoad() {
+  return _socket->GetProcessingThreadLoad();
+}
+
+double HttpServer::GetProcessingThreadLoadMax() {
+  return _socket->GetProcessingThreadLoadMax();
 }
 
 void HttpServer::newConnection(int32_t clientId, std::string address, uint16_t port) {

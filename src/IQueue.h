@@ -111,6 +111,13 @@ class IQueue : public IQueueBase {
   bool queueEmpty(int32_t index);
 
   /**
+   * Returns the number of processing threads.
+   *
+   * @return The number of processing threads for this queue.
+   */
+  uint32_t processingThreadCount(int32_t index);
+
+  /**
    * Returns the number of items queued in a queue.
    *
    * @param index The index of the queue to check.

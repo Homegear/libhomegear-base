@@ -405,8 +405,27 @@ class TcpSocket : public IQueue {
 
   double GetPacketsPerMinuteReceived();
   double GetPacketsPerMinuteSent();
-  uint32_t GetServerThreadsInUse();
-  uint32_t GetProcessingThreadsInUse();
+
+  /**
+   * Returns the current server thread load. A load of 1.0 means all threads are in use. (Queue backlog / thread count) is added to this load, so the load can be greater than 1.0.
+   *
+   * @return
+   */
+  double GetServerThreadLoad();
+
+  /**
+   * Returns the current processing thread load. A load of 1.0 means all threads are in use. (Queue backlog / thread count) is added to this load, so the load can be greater than 1.0.
+   *
+   * @return
+   */
+  double GetProcessingThreadLoad();
+
+  /**
+   * Returns the maximum load of the last minute.
+   *
+   * @return
+   */
+  double GetProcessingThreadLoadMax();
 
   /**
    * Use this overload when there are no socket operations outside of this class.
