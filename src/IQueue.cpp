@@ -222,43 +222,44 @@ void IQueue::process(int32_t index) {
       }));
       if (_stopProcessingThread[index]) return;
 
-      { //Metrics
-        _threadsInUse[index]++;
-        auto time = BaseLib::HelperFunctions::getTime();
-        double backlog = _bufferCount[index];
-        double threadLoad = ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + (backlog / (double)_processingThread[index].size());
-
-        if (time - _last1mCycle[index] >= 60000) {
-          _last1mCycle[index] = time;
-          _maxThreadLoad1m[index] = _maxThreadLoad1mCurrent[index].load();
-          _maxThreadLoad1mCurrent[index] = 0;
-          _maxWait1m[index] = _maxWait1mCurrent[index].load();
-          _maxWait1mCurrent[index] = 0;
-        }
-
-        if (time - _last10mCycle[index] >= 600000) {
-          _last10mCycle[index] = time;
-          _maxThreadLoad10m[index] = _maxThreadLoad10mCurrent[index].load();
-          _maxThreadLoad10mCurrent[index] = 0;
-          _maxWait10m[index] = _maxWait10mCurrent[index].load();
-          _maxWait10mCurrent[index] = 0;
-        }
-
-        if (time - _last1hCycle[index] >= 3600000) {
-          _last1hCycle[index] = time;
-          _maxThreadLoad1h[index] = _maxThreadLoad1hCurrent[index].load();
-          _maxThreadLoad1hCurrent[index] = 0;
-          _maxWait1h[index] = _maxWait1hCurrent[index].load();
-          _maxWait1hCurrent[index] = 0;
-        }
-
-        if (threadLoad > _maxThreadLoad[index]) _maxThreadLoad[index] = threadLoad;
-        if (threadLoad > _maxThreadLoad1mCurrent[index]) _maxThreadLoad1mCurrent[index] = threadLoad;
-        if (threadLoad > _maxThreadLoad10mCurrent[index]) _maxThreadLoad10mCurrent[index] = threadLoad;
-        if (threadLoad > _maxThreadLoad1hCurrent[index]) _maxThreadLoad1hCurrent[index] = threadLoad;
-      }
+      _threadsInUse[index]++;
 
       do {
+        { //Metrics
+          auto time = BaseLib::HelperFunctions::getTime();
+          double backlog = _bufferCount[index];
+          double threadLoad = ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + (backlog / (double)_processingThread[index].size());
+
+          if (time - _last1mCycle[index] >= 60000) {
+            _last1mCycle[index] = time;
+            _maxThreadLoad1m[index] = _maxThreadLoad1mCurrent[index].load();
+            _maxThreadLoad1mCurrent[index] = 0;
+            _maxWait1m[index] = _maxWait1mCurrent[index].load();
+            _maxWait1mCurrent[index] = 0;
+          }
+
+          if (time - _last10mCycle[index] >= 600000) {
+            _last10mCycle[index] = time;
+            _maxThreadLoad10m[index] = _maxThreadLoad10mCurrent[index].load();
+            _maxThreadLoad10mCurrent[index] = 0;
+            _maxWait10m[index] = _maxWait10mCurrent[index].load();
+            _maxWait10mCurrent[index] = 0;
+          }
+
+          if (time - _last1hCycle[index] >= 3600000) {
+            _last1hCycle[index] = time;
+            _maxThreadLoad1h[index] = _maxThreadLoad1hCurrent[index].load();
+            _maxThreadLoad1hCurrent[index] = 0;
+            _maxWait1h[index] = _maxWait1hCurrent[index].load();
+            _maxWait1hCurrent[index] = 0;
+          }
+
+          if (threadLoad > _maxThreadLoad[index]) _maxThreadLoad[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad1mCurrent[index]) _maxThreadLoad1mCurrent[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad10mCurrent[index]) _maxThreadLoad10mCurrent[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad1hCurrent[index]) _maxThreadLoad1hCurrent[index] = threadLoad;
+        }
+
         std::shared_ptr<IQueueEntry> entry;
 
         entry = _buffer[index][_bufferHead[index]];
@@ -289,6 +290,7 @@ void IQueue::process(int32_t index) {
 
         lock.lock();
       } while (_bufferCount[index] > 0 && !_stopProcessingThread[index]);
+
       _threadsInUse[index]--;
     }
     catch (const std::exception &ex) {
