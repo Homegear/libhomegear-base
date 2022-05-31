@@ -40,12 +40,14 @@ class SharedObjects;
 
 class IQueueEntry {
  public:
-  IQueueEntry() {};
-  virtual ~IQueueEntry() {};
+  IQueueEntry() = default;
+  virtual ~IQueueEntry() = default;
+
+  int64_t time = 0;
 };
 
 /**
- * This class implements a queue after the producer-consumer paradigma. It can manage one or more queues. Your class needs to be derived from @c IQueue to use it.
+ * This class implements a queue after the producer-consumer paradigm. It can manage one or more queues. Your class needs to be derived from @c IQueue to use it.
  */
 class IQueue : public IQueueBase {
  public:
@@ -115,6 +117,15 @@ class IQueue : public IQueueBase {
    * @return Return the number of queued items.
    */
   int32_t queueSize(int32_t index);
+
+  double maxThreadLoad(int32_t index);
+  double maxThreadLoad1m(int32_t index);
+  double maxThreadLoad10m(int32_t index);
+  double maxThreadLoad1h(int32_t index);
+  int64_t maxWait(int32_t index);
+  int64_t maxWait1m(int32_t index);
+  int64_t maxWait10m(int32_t index);
+  int64_t maxWait1h(int32_t index);
  private:
   int32_t _bufferSize = 10000;
   std::vector<int32_t> _bufferHead;
@@ -126,6 +137,29 @@ class IQueue : public IQueueBase {
   std::vector<std::vector<std::shared_ptr<std::thread>>> _processingThread;
   std::unique_ptr<std::condition_variable[]> _produceConditionVariable = nullptr;
   std::unique_ptr<std::condition_variable[]> _processingConditionVariable = nullptr;
+
+  std::unique_ptr<std::atomic<uint32_t>[]> _threadsInUse;
+
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad1mCurrent;
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad1m;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait1mCurrent;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait1m;
+  std::unique_ptr<std::atomic<int64_t>[]> _last1mCycle;
+
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad10mCurrent;
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad10m;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait10mCurrent;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait10m;
+  std::unique_ptr<std::atomic<int64_t>[]> _last10mCycle;
+
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad1hCurrent;
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad1h;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait1hCurrent;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait1h;
+  std::unique_ptr<std::atomic<int64_t>[]> _last1hCycle;
+
+  std::unique_ptr<std::atomic<double>[]> _maxThreadLoad;
+  std::unique_ptr<std::atomic<int64_t>[]> _maxWait;
 
   void process(int32_t index);
 };
