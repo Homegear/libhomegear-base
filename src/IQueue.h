@@ -125,6 +125,7 @@ class IQueue : public IQueueBase {
    */
   int32_t queueSize(int32_t index);
 
+  double threadLoad(int32_t index);
   double maxThreadLoad(int32_t index);
   double maxThreadLoad1m(int32_t index);
   double maxThreadLoad10m(int32_t index);

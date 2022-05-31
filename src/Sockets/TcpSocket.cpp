@@ -782,14 +782,10 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 }
 
 void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) {
-  processing_threads_in_use_++;
   try {
     std::shared_ptr<QueueEntry> queueEntry;
     queueEntry = std::dynamic_pointer_cast<QueueEntry>(entry);
-    if (!queueEntry) {
-      processing_threads_in_use_--;
-      return;
-    }
+    if (!queueEntry) return;
 
     std::unique_lock<std::mutex> backlogGuard(queueEntry->clientData->backlogMutex, std::defer_lock);
 
@@ -798,7 +794,6 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
       backlogGuard.lock();
       if (queueEntry->clientData->backlog.empty()) {
         queueEntry->clientData->busy = false;
-        processing_threads_in_use_--;
         return;
       }
       std::shared_ptr<TcpPacket> packet = queueEntry->clientData->backlog.front();
@@ -814,7 +809,6 @@ void TcpSocket::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueue
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
-  processing_threads_in_use_--;
 }
 
 void TcpSocket::collectGarbage() {
@@ -1457,9 +1451,7 @@ double TcpSocket::GetServerThreadLoad() {
 }
 
 double TcpSocket::GetProcessingThreadLoad() {
-  double thread_count = processingThreadCount(0);
-  if (thread_count == 0.0) return 0.0;
-  return ((double)processing_threads_in_use_ / thread_count) + ((double)processingQueueSize() / thread_count);
+  return threadLoad(0);
 }
 
 double TcpSocket::GetProcessingThreadLoadMax() {

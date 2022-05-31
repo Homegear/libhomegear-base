@@ -113,13 +113,18 @@ int32_t IQueue::queueSize(int32_t index) {
 }
 
 bool IQueue::queueEmpty(int32_t index) {
-  if (index < 0 || index >= _queueCount) return 0;
+  if (index < 0 || index >= _queueCount) return true;
   return _bufferCount[index] > 0;
 }
 
 uint32_t IQueue::processingThreadCount(int32_t index) {
   if (index < 0 || index >= _queueCount) return 0;
   return _processingThread[index].size();
+}
+
+double IQueue::threadLoad(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + ((double)_bufferCount[index] / (double)_processingThread[index].size());
 }
 
 double IQueue::maxThreadLoad(int32_t index) {
@@ -242,8 +247,7 @@ void IQueue::process(int32_t index) {
       do {
         { //Metrics
           auto time = BaseLib::HelperFunctions::getTime();
-          double backlog = _bufferCount[index];
-          double threadLoad = ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + (backlog / (double)_processingThread[index].size());
+          double threadLoad = ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + ((double)_bufferCount[index] / (double)_processingThread[index].size());
 
           if (time - _last1mCycle[index] >= 60000) {
             _last1mCycle[index] = time;
