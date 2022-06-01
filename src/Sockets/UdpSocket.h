@@ -34,67 +34,71 @@
 #include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-class UdpSocket
-{
-public:
-	UdpSocket(BaseLib::SharedObjects* baseLib);
-    UdpSocket(BaseLib::SharedObjects* baseLib, std::string listenPort);
-	UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port);
-    UdpSocket(BaseLib::SharedObjects* baseLib, std::string hostname, std::string port, std::string listenPort);
-	virtual ~UdpSocket();
+class UdpSocket {
+ public:
+  UdpSocket(BaseLib::SharedObjects *baseLib);
+  UdpSocket(BaseLib::SharedObjects *baseLib, std::string listenPort);
+  UdpSocket(BaseLib::SharedObjects *baseLib, std::string hostname, std::string port);
+  UdpSocket(BaseLib::SharedObjects *baseLib, std::string hostname, std::string port, std::string listenPort);
+  virtual ~UdpSocket();
 
-	void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
-	void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
-	void setHostname(std::string hostname) { close(); _hostname = hostname; }
-	void setPort(std::string port) { close(); _port = port; }
-	std::string getClientIp() { return _clientIp; }
-	std::string getListenIp() { return _listenIp; }
-	uint16_t getListenPort() { return _listenPort; }
+  void setReadTimeout(int64_t timeout) { _readTimeout = timeout; }
+  void setAutoConnect(bool autoConnect) { _autoConnect = autoConnect; }
+  void setHostname(std::string hostname) {
+    close();
+    _hostname = hostname;
+  }
+  void setPort(std::string port) {
+    close();
+    _port = port;
+  }
+  std::string getClientIp() { return _clientIp; }
+  std::string getListenIp() { return _listenIp; }
+  uint16_t getListenPort() { return _listenPort; }
 
-	bool isOpen();
+  bool isOpen();
 
-	/**
-	 * Reads bytes from UDP socket into "buffer".
-	 *
-	 * @param[in] buffer The char array to write received bytes into.
-	 * @param[in] bufferSize The size of the buffer.
-	 * @param[out] senderIp The IP the packet was received from.
-	 * @return Returns the number of bytes written into "buffer". Never returns 0 or a negative number.
-	 * @throws SocketTimeOutException Thrown on timeout.
-	 * @throws SocketClosedException Thrown when socket was closed.
-	 * @throws SocketOperationException Thrown when socket is nullptr.
-	 */
-	int32_t proofread(char* buffer, int32_t bufferSize, std::string& senderIp);
+  /**
+   * Reads bytes from UDP socket into "buffer".
+   *
+   * @param[in] buffer The char array to write received bytes into.
+   * @param[in] bufferSize The size of the buffer.
+   * @param[out] senderIp The IP the packet was received from.
+   * @return Returns the number of bytes written into "buffer". Never returns 0 or a negative number.
+   * @throws SocketTimeOutException Thrown on timeout.
+   * @throws SocketClosedException Thrown when socket was closed.
+   * @throws SocketOperationException Thrown when socket is nullptr.
+   */
+  int32_t proofread(char *buffer, int32_t bufferSize, std::string &senderIp);
 
-	int32_t proofwrite(const std::shared_ptr<std::vector<char>> data);
-	int32_t proofwrite(const std::vector<char>& data);
-	int32_t proofwrite(const std::string& data);
-	int32_t proofwrite(const char* buffer, int32_t bytesToWrite);
-	void open();
-	void close();
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
-	int64_t _readTimeout = 15000000;
-	bool _autoConnect = true;
-	std::string _hostname;
-	std::string _clientIp;
-	std::string _port;
-	std::string _listenIp;
-	uint16_t _listenPort = 0;
-	struct addrinfo* _serverInfo = nullptr;
-	std::mutex _readMutex;
-	std::mutex _writeMutex;
+  int32_t proofwrite(const std::shared_ptr<std::vector<char>>& data);
+  int32_t proofwrite(const std::vector<char> &data);
+  int32_t proofwrite(const std::string &data);
+  int32_t proofwrite(const char *buffer, int32_t bytesToWrite);
+  void open();
+  void close();
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
+  int64_t _readTimeout = 15000000;
+  bool _autoConnect = true;
+  std::string _hostname;
+  std::string _clientIp;
+  std::string _port;
+  std::string _listenIp;
+  uint16_t _listenPort = 0;
+  struct addrinfo *_serverInfo = nullptr;
+  std::mutex _readMutex;
+  std::mutex _writeMutex;
 
-	std::shared_ptr<FileDescriptor> _socketDescriptor;
+  std::shared_ptr<FileDescriptor> _socketDescriptor;
 
-	void getSocketDescriptor();
-	void getConnection();
-	void autoConnect();
+  void getSocketDescriptor();
+  void getConnection();
+  void autoConnect();
 };
 
 typedef std::shared_ptr<BaseLib::UdpSocket> PUdpSocket;

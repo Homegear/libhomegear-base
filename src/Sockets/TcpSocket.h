@@ -57,6 +57,7 @@
 #include <netinet/in.h> //Needed for BSD
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <sys/un.h>
 #include <errno.h>
 #include <poll.h>
@@ -445,12 +446,13 @@ class TcpSocket : public IQueue {
    * @param buffer The buffer to fill.
    * @param bufferSize The size of the buffer.
    * @param[out] moreData If true, call proofread immediately again (without calling e. g. select first).
+   * @param skip_poll Skips the call to select. Set this to `true` when you know, that data is available.
    * @returns The number of bytes read. The returned value is always greater than 0 (in all other cases exceptions are thrown).
    * @throws SocketOperationException Thrown when socket is nullptr.
    * @throws SocketTimeOutException Thrown when reading times out.
    * @throws SocketClosedException Thrown when socket is closed.
    */
-  int32_t proofread(char *buffer, int32_t bufferSize, bool &moreData);
+  int32_t proofread(char *buffer, int32_t bufferSize, bool &moreData, bool skip_poll = false);
 
   /**
    * Writes data to a socket.
@@ -689,7 +691,7 @@ class TcpSocket : public IQueue {
   void serverThread(uint32_t thread_index);
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
   void collectGarbage();
-  void collectGarbage(std::map<int32_t, PTcpClientData> &clients);
+  void collectGarbage(std::map<int32_t, PTcpClientData> &clients, int epoll_fd);
   void initClientSsl(PTcpClientData &clientData);
   void readClient(const PTcpClientData &clientData);
   // }}}
