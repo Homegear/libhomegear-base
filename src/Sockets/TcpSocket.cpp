@@ -648,9 +648,17 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       timeval timeout{};
       timeout.tv_sec = 0;
       timeout.tv_usec = 100000;
-      fd_set readFileDescriptor;
-      int32_t maxfd = 0;
-      FD_ZERO(&readFileDescriptor);
+      auto epoll_fd = epoll_create1(0);
+      if (epoll_fd == -1) {
+        _bl->out.printError("Error: Could not create epoll file descriptor.");
+        continue;
+      }
+
+      struct epoll_event event;
+      struct epoll_event events[_maxConnections];
+
+      event.events = EPOLLIN;
+
       {
         auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
         fileDescriptorGuard.lock();

@@ -57,6 +57,7 @@
 #include <netinet/in.h> //Needed for BSD
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <sys/un.h>
 #include <errno.h>
 #include <poll.h>
