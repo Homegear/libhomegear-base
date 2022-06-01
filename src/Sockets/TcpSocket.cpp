@@ -790,6 +790,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
               _bl->fileDescriptorManager.close(client_iterator->second->fileDescriptor);
               if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(client_iterator->second->id, -201, std::string("Connection to client closed."));
               else if (_connectionClosedCallback) _connectionClosedCallback(client_iterator->second->id);
+              continue;
             }
             server_threads_in_use_++;
             readClient(client_iterator->second);
