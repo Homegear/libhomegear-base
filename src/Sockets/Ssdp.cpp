@@ -78,7 +78,7 @@ std::shared_ptr<FileDescriptor> Ssdp::getSocketDescriptor(int32_t port, bool bin
   try {
     if (_address.empty()) getAddress();
     if (_address.empty()) return serverSocketDescriptor;
-    serverSocketDescriptor = _bl->fileDescriptorManager.add(socket(AF_INET, SOCK_DGRAM, 0));
+    serverSocketDescriptor = _bl->fileDescriptorManager.add(socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0));
     if (serverSocketDescriptor->descriptor == -1) {
       _bl->out.printError("Error: Could not create socket.");
       return serverSocketDescriptor;

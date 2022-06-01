@@ -299,7 +299,7 @@ bool Io::copyFile(const std::string& source, const std::string& dest)
 {
 	try
 	{
-		int32_t in_fd = open(source.c_str(), O_RDONLY);
+		int32_t in_fd = open(source.c_str(), O_RDONLY | O_CLOEXEC);
 		if(in_fd == -1)
 		{
 			_bl->out.printError("Error copying file " + source + ": " + strerror(errno));
@@ -308,7 +308,7 @@ bool Io::copyFile(const std::string& source, const std::string& dest)
 
 		unlink(dest.c_str());
 
-		int32_t out_fd = open(dest.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
+		int32_t out_fd = open(dest.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | O_CLOEXEC);
 		if(out_fd == -1)
 		{
 			close(in_fd);

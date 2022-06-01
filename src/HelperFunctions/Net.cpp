@@ -116,7 +116,7 @@ Net::RouteInfoList Net::getRoutes() {
   int32_t length = 0;
   std::vector<char> nlBuffer(nlBufferLength, 0);
 
-  if ((socketDescriptor = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) throw NetException("Could not create socket: " + std::string(strerror(errno)));
+  if ((socketDescriptor = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0) throw NetException("Could not create socket: " + std::string(strerror(errno)));
 
   nlMessage = (struct nlmsghdr *)(nlBuffer.data());
 

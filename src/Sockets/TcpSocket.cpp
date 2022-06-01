@@ -613,7 +613,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
     _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
   }
 
-  auto epoll_fd = epoll_create1(0);
+  auto epoll_fd = epoll_create1(FD_CLOEXEC);
   if (epoll_fd == -1) {
     _bl->out.printCritical("Critical: Could not create epoll file descriptor: " + std::string(strerror(errno)));
     return;
@@ -700,7 +700,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
           server_threads_in_use_++;
           struct sockaddr_storage clientInfo{};
           socklen_t addressSize = sizeof(addressSize);
-          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
+          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept4(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize, SOCK_CLOEXEC));
           if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
             server_threads_in_use_--;
             continue;
@@ -888,11 +888,8 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager &fileDescri
   bool bound = false;
   int32_t error = 0;
   for (struct addrinfo *info = serverInfo; info != 0; info = info->ai_next) {
-    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype, info->ai_protocol));
+    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype | SOCK_CLOEXEC, info->ai_protocol));
     if (socketDescriptor->descriptor == -1) continue;
-    if (!(fcntl(socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK)) {
-      if (fcntl(socketDescriptor->descriptor, F_SETFL, fcntl(socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw SocketOperationException("Error: Could not set socket options.");
-    }
     if (setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
     if (bind(socketDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1) {
       socketDescriptor.reset();
@@ -1593,7 +1590,7 @@ void TcpSocket::getConnection() {
     ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
     _ipAddress = std::string(ipStringBuffer);
 
-    _socketDescriptor = _bl->fileDescriptorManager.add(socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol));
+    _socketDescriptor = _bl->fileDescriptorManager.add(socket(serverInfo->ai_family, serverInfo->ai_socktype | SOCK_CLOEXEC | SOCK_NONBLOCK, serverInfo->ai_protocol));
     if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
       freeaddrinfo(serverInfo);
       throw SocketOperationException("Could not create socket for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
@@ -1625,14 +1622,6 @@ void TcpSocket::getConnection() {
       freeaddrinfo(serverInfo);
       _bl->fileDescriptorManager.shutdown(_socketDescriptor);
       throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
-    }
-
-    if (!(fcntl(_socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK)) {
-      if (fcntl(_socketDescriptor->descriptor, F_SETFL, fcntl(_socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) {
-        freeaddrinfo(serverInfo);
-        _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-        throw SocketOperationException("Could not set socket options for server " + _ipAddress + " on port " + _port + ": " + strerror(errno));
-      }
     }
 
     int32_t connectResult = connect(_socketDescriptor->descriptor, serverInfo->ai_addr, serverInfo->ai_addrlen);

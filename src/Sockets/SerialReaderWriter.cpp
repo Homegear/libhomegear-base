@@ -63,7 +63,7 @@ SerialReaderWriter::~SerialReaderWriter() {
 void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, CharacterSize characterSize, bool twoStopBits) {
   _handles++;
   if (_fileDescriptor->descriptor > -1) return;
-  _fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags));
+  _fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags | O_CLOEXEC));
   if (_fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't open device \"" + _device + "\": " + strerror(errno));
 
   if (!Io::writeLockFile(_fileDescriptor->descriptor, false)) {

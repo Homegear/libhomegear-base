@@ -61,7 +61,7 @@ void Spi::open()
 	if(_fileDescriptor && _fileDescriptor->descriptor != -1) close();
 	if(_device.empty()) throw SpiException("\"device\" is empty.");
 	_lockfile = _bl->settings.lockFilePath() + "LCK.." + _device.substr(_device.find_last_of('/') + 1);
-	int lockfileDescriptor = ::open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+	int lockfileDescriptor = ::open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | O_CLOEXEC);
 	if(lockfileDescriptor == -1)
 	{
 		if(errno != EEXIST) throw SpiException("Couldn't create lockfile " + _lockfile + ": " + strerror(errno));
@@ -71,13 +71,13 @@ void Spi::open()
 		lockfileStream >> processID;
 		if(getpid() != processID && kill(processID, 0) == 0) throw SpiException("Rf device is in use: " + _device);
 		unlink(_lockfile.c_str());
-		lockfileDescriptor = ::open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+		lockfileDescriptor = ::open(_lockfile.c_str(), O_WRONLY | O_EXCL | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | O_CLOEXEC);
 		if(lockfileDescriptor == -1) throw SpiException("Couldn't create lockfile " + _lockfile + ": " + strerror(errno));
 	}
 	dprintf(lockfileDescriptor, "%10i", getpid());
 	::close(lockfileDescriptor);
 
-	_fileDescriptor = _bl->fileDescriptorManager.add(::open(_device.c_str(), O_RDWR | O_NONBLOCK));
+	_fileDescriptor = _bl->fileDescriptorManager.add(::open(_device.c_str(), O_RDWR | O_NONBLOCK | O_CLOEXEC));
 	usleep(100);
 
 	if(_fileDescriptor->descriptor == -1) throw SpiException("Couldn't open rf device \"" + _device + "\": " + strerror(errno));

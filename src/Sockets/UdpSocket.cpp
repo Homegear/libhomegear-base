@@ -292,20 +292,11 @@ void UdpSocket::getConnection() {
   ipStringBuffer[INET6_ADDRSTRLEN] = '\0';
   _clientIp = std::string(ipStringBuffer);
 
-  _socketDescriptor = _bl->fileDescriptorManager.add(socket(_serverInfo->ai_family, _serverInfo->ai_socktype, _serverInfo->ai_protocol));
+  _socketDescriptor = _bl->fileDescriptorManager.add(socket(_serverInfo->ai_family, _serverInfo->ai_socktype | SOCK_CLOEXEC | SOCK_NONBLOCK, _serverInfo->ai_protocol));
   if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
     freeaddrinfo(_serverInfo);
     _serverInfo = nullptr;
     throw SocketOperationException("Could not create UDP socket for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
-  }
-
-  if (!(fcntl(_socketDescriptor->descriptor, F_GETFL) & O_NONBLOCK)) {
-    if (fcntl(_socketDescriptor->descriptor, F_SETFL, fcntl(_socketDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) {
-      freeaddrinfo(_serverInfo);
-      _serverInfo = nullptr;
-      _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-      throw SocketOperationException("Could not set socket options for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
-    }
   }
 
   if (_serverInfo->ai_family == AF_INET) {
