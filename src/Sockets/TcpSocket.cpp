@@ -448,7 +448,7 @@ void TcpSocket::readClient(const PTcpClientData &clientData) {
     bool moreData = true;
 
     while (moreData) {
-      bytesRead = clientData->socket->proofread((char *)clientData->buffer.data(), clientData->buffer.size(), moreData);
+      bytesRead = clientData->socket->proofread((char *)clientData->buffer.data(), clientData->buffer.size(), moreData, true);
 
       if (bytesRead > (signed)clientData->buffer.size()) bytesRead = clientData->buffer.size();
 
@@ -613,7 +613,15 @@ void TcpSocket::serverThread(uint32_t thread_index) {
     _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
   }
 
-  int32_t result = 0;
+  auto epoll_fd = epoll_create1(0);
+  if (epoll_fd == -1) {
+    _bl->out.printCritical("Critical: Could not create epoll file descriptor: " + std::string(strerror(errno)));
+    return;
+  }
+
+  struct epoll_event events[_maxConnections];
+
+  int32_t nfds = 0;
   int32_t socketDescriptor = -1;
   std::map<int32_t, PTcpClientData> clients;
   while (!_stopServer) {
@@ -621,12 +629,39 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       {
         std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
         if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
+          if (socketDescriptor != -1) {
+            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
+              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
+              continue;
+            }
+          }
           if (_stopServer) break;
           std::this_thread::sleep_for(std::chrono::milliseconds(5000));
           bindSocket();
           continue;
         }
-        socketDescriptor = _socketDescriptor->descriptor;
+
+        if (socketDescriptor != _socketDescriptor->descriptor) {
+          if (socketDescriptor != -1) {
+            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
+              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
+              continue;
+            }
+          }
+
+          socketDescriptor = _socketDescriptor->descriptor;
+          if (socketDescriptor == -1) continue;
+
+          struct epoll_event event{};
+          event.events = EPOLLIN | EPOLLET;
+          event.data.fd = socketDescriptor;
+          if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socketDescriptor, &event) == -1) {
+            _bl->out.printError("Error: Could not add socket descriptor to epoll events: " + std::string(strerror(errno)));
+            _bl->fileDescriptorManager.shutdown(_socketDescriptor);
+            socketDescriptor = -1;
+            continue;
+          }
+        }
       }
 
       { //Send backlog
@@ -645,133 +680,121 @@ void TcpSocket::serverThread(uint32_t thread_index) {
         }
       }
 
-      timeval timeout{};
-      timeout.tv_sec = 0;
-      timeout.tv_usec = 100000;
-      auto epoll_fd = epoll_create1(0);
-      if (epoll_fd == -1) {
-        _bl->out.printError("Error: Could not create epoll file descriptor.");
-        continue;
-      }
-
-      struct epoll_event event;
-      struct epoll_event events[_maxConnections];
-
-      event.events = EPOLLIN;
-
-      {
-        auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-        fileDescriptorGuard.lock();
-        maxfd = socketDescriptor;
-        FD_SET(socketDescriptor, &readFileDescriptor);
-
-        {
-          for (auto &client: clients) {
-            if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
-            FD_SET(client.second->fileDescriptor->descriptor, &readFileDescriptor);
-            if (client.second->fileDescriptor->descriptor > maxfd) maxfd = client.second->fileDescriptor->descriptor;
-          }
-        }
-      }
-
       do {
-        result = select(maxfd + 1, &readFileDescriptor, nullptr, nullptr, &timeout);
-      } while (result == -1 && errno == EINTR);
-      if (result == 0) {
+        nfds = epoll_wait(epoll_fd, events, _maxConnections, 100);
+      } while (nfds == -1 && errno == EINTR);
+
+      if (nfds == 0) {
         if (HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) {
           collectGarbage();
-          collectGarbage(clients);
+          collectGarbage(clients, epoll_fd);
         }
         continue;
-      } else if (result == -1) {
-        _bl->out.printError("Error: select returned -1: " + std::string(strerror(errno)));
+      } else if (nfds == -1) {
+        _bl->out.printError("Error: epoll_wait returned -1: " + std::string(strerror(errno)));
         continue;
       }
 
-      if (FD_ISSET(socketDescriptor, &readFileDescriptor) && !_stopServer) {
-        server_threads_in_use_++;
-        struct sockaddr_storage clientInfo{};
-        socklen_t addressSize = sizeof(addressSize);
-        std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
-        if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
-          server_threads_in_use_--;
-          continue;
-        }
-
-        try {
-          getpeername(clientFileDescriptor->descriptor, (struct sockaddr *)&clientInfo, &addressSize);
-
-          uint16_t port = 0;
-          std::array<char, INET6_ADDRSTRLEN> ipString{};
-          if (clientInfo.ss_family == AF_INET) {
-            auto *s = (struct sockaddr_in *)&clientInfo;
-            port = ntohs(s->sin_port);
-            inet_ntop(AF_INET, &s->sin_addr, ipString.data(), ipString.size());
-          } else { // AF_INET6
-            auto *s = (struct sockaddr_in6 *)&clientInfo;
-            port = ntohs(s->sin6_port);
-            inet_ntop(AF_INET6, &s->sin6_addr, ipString.data(), ipString.size());
-          }
-          std::string address = std::string(ipString.data());
-
-          if (_clients.size() > _maxConnections) {
-            collectGarbage();
-            if (_clients.size() > _maxConnections) {
-              _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString.data());
-              _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-              server_threads_in_use_--;
-              continue;
-            }
-          }
-
-          if (_stopServer) {
-            _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+      for (int32_t i = 0; i < nfds; i++) {
+        if (events[i].data.fd == socketDescriptor && !_stopServer) {
+          server_threads_in_use_++;
+          struct sockaddr_storage clientInfo{};
+          socklen_t addressSize = sizeof(addressSize);
+          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
+          if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
             server_threads_in_use_--;
             continue;
           }
 
-          PTcpClientData clientData = std::make_shared<TcpClientData>();
-          clientData->fileDescriptor = clientFileDescriptor;
-          clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
-          clientData->socket->setReadTimeout(100000);
-          clientData->socket->setWriteTimeout(15000000);
-          clientData->thread_index = thread_index;
+          try {
+            getpeername(clientFileDescriptor->descriptor, (struct sockaddr *)&clientInfo, &addressSize);
 
-          if (_useSsl) initClientSsl(clientData);
-
-          int32_t currentClientId = 0;
-
-          {
-            std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-            while (currentClientId == 0) {
-              currentClientId = _currentClientId++;
+            uint16_t port = 0;
+            std::array<char, INET6_ADDRSTRLEN> ipString{};
+            if (clientInfo.ss_family == AF_INET) {
+              auto *s = (struct sockaddr_in *)&clientInfo;
+              port = ntohs(s->sin_port);
+              inet_ntop(AF_INET, &s->sin_addr, ipString.data(), ipString.size());
+            } else { // AF_INET6
+              auto *s = (struct sockaddr_in6 *)&clientInfo;
+              port = ntohs(s->sin6_port);
+              inet_ntop(AF_INET6, &s->sin6_addr, ipString.data(), ipString.size());
             }
-            clientData->id = currentClientId;
-            _clients[currentClientId] = clientData;
+            std::string address = std::string(ipString.data());
+
+            if (_clients.size() > _maxConnections) {
+              collectGarbage();
+              if (_clients.size() > _maxConnections) {
+                _bl->out.printError("Error: No more clients can connect to me as the maximum number of allowed connections is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort + ", client IP: " + ipString.data());
+                _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+                server_threads_in_use_--;
+                continue;
+              }
+            }
+
+            struct epoll_event event{};
+            event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP;
+            event.data.fd = clientFileDescriptor->descriptor;
+            if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, clientFileDescriptor->descriptor, &event) == -1) {
+              _bl->out.printError("Error: Could not add client socket descriptor to epoll events: " + std::string(strerror(errno)));
+              _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+              server_threads_in_use_--;
+              continue;
+            }
+
+            if (_stopServer) {
+              _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+              server_threads_in_use_--;
+              continue;
+            }
+
+            PTcpClientData clientData = std::make_shared<TcpClientData>();
+            clientData->fileDescriptor = clientFileDescriptor;
+            clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
+            clientData->socket->setReadTimeout(100000);
+            clientData->socket->setWriteTimeout(15000000);
+            clientData->thread_index = thread_index;
+
+            if (_useSsl) initClientSsl(clientData);
+
+            int32_t currentClientId = 0;
+
+            {
+              std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+              while (currentClientId == 0) {
+                currentClientId = _currentClientId++;
+              }
+              clientData->id = currentClientId;
+              _clients[currentClientId] = clientData;
+            }
+
+            clients[clientData->fileDescriptor->descriptor] = clientData;
+
+            if (_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
           }
-
-          clients[currentClientId] = clientData;
-
-          if (_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
-        }
-        catch (const SocketSslHandshakeFailedException &ex) {
-          _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-          _bl->out.printInfo("Info: " + std::string(ex.what()));
-        }
-        catch (const std::exception &ex) {
-          _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-          _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-        }
-        server_threads_in_use_--;
-        continue;
-      }
-
-      for (auto &client: clients) {
-        if (client.second->fileDescriptor->descriptor == -1) continue;
-        if (FD_ISSET(client.second->fileDescriptor->descriptor, &readFileDescriptor)) {
-          server_threads_in_use_++;
-          readClient(client.second);
+          catch (const SocketSslHandshakeFailedException &ex) {
+            _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+            _bl->out.printInfo("Info: " + std::string(ex.what()));
+          }
+          catch (const std::exception &ex) {
+            _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
+            _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+          }
           server_threads_in_use_--;
+          continue;
+        } else {
+          auto client_iterator = clients.find(events[i].data.fd);
+          if (client_iterator != clients.end()) {
+            if (client_iterator->second->fileDescriptor->descriptor == -1) continue;
+            if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
+              _bl->fileDescriptorManager.close(client_iterator->second->fileDescriptor);
+              if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(client_iterator->second->id, -201, std::string("Connection to client closed."));
+              else if (_connectionClosedCallback) _connectionClosedCallback(client_iterator->second->id);
+            }
+            server_threads_in_use_++;
+            readClient(client_iterator->second);
+            server_threads_in_use_--;
+          }
         }
       }
     }
@@ -828,10 +851,15 @@ void TcpSocket::collectGarbage() {
   }
 }
 
-void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients) {
+void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients, int epoll_fd) {
   std::vector<int32_t> clientsToRemove;
   for (auto &client: clients) {
-    if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) clientsToRemove.push_back(client.first);
+    if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) {
+      if (!epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client.first, nullptr)) {
+        _bl->out.printError("Error: Could not remove client socket descriptor from epoll events: " + std::string(strerror(errno)));
+      }
+      clientsToRemove.push_back(client.first);
+    }
   }
   for (auto &client: clientsToRemove) {
     clients.erase(client);
@@ -1112,7 +1140,7 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize) {
   return proofread(buffer, bufferSize, moreData);
 }
 
-int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData) {
+int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, bool skip_poll) {
   moreData = false;
 
   if (!_socketDescriptor) throw SocketOperationException("Socket descriptor is nullptr.");
@@ -1135,34 +1163,26 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData) {
     }
   }
 
-  timeval timeout{};
-  int32_t seconds = _readTimeout / 1000000;
-  timeout.tv_sec = seconds;
-  timeout.tv_usec = _readTimeout - (1000000 * seconds);
-  fd_set readFileDescriptor{};
-  FD_ZERO(&readFileDescriptor);
-  auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-  fileDescriptorGuard.lock();
-  int32_t nfds = _socketDescriptor->descriptor + 1;
-  if (nfds <= 0) {
-    fileDescriptorGuard.unlock();
-    readGuard.unlock();
-    close();
-    throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
+  if (!skip_poll) {
+    pollfd poll_struct{
+        (int)_socketDescriptor->descriptor,
+        (short)(POLLIN),
+        (short)(POLLHUP | POLLRDHUP | POLLERR)
+    };
+
+    int32_t poll_result = -1;
+    do {
+      poll_result = poll(&poll_struct, 1, (int)(_readTimeout / 1000));
+    } while (poll_result == -1 && errno == EINTR);
+    if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+      readGuard.unlock();
+      close();
+      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
+    } else if (poll_result == 0) {
+      throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
+    }
   }
-  FD_SET(_socketDescriptor->descriptor, &readFileDescriptor);
-  fileDescriptorGuard.unlock();
-  do {
-    bytesRead = select(nfds, &readFileDescriptor, nullptr, nullptr, &timeout);
-  } while (bytesRead == -1 && errno == EINTR);
-  if (bytesRead == 0) {
-    throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
-  }
-  if (bytesRead == -1) {
-    readGuard.unlock();
-    close();
-    throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
-  }
+
   if (_socketDescriptor->tlsSession) {
     do {
       bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
@@ -1221,34 +1241,24 @@ int32_t TcpSocket::proofwrite(const std::vector<char> &data) {
 
   int32_t totalBytesWritten = 0;
   while (totalBytesWritten < (signed)data.size()) {
-    timeval timeout{};
-    int32_t seconds = _writeTimeout / 1000000;
-    timeout.tv_sec = seconds;
-    timeout.tv_usec = _writeTimeout - (1000000 * seconds);
-    fd_set writeFileDescriptor;
-    FD_ZERO(&writeFileDescriptor);
-    auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-    fileDescriptorGuard.lock();
-    int32_t nfds = _socketDescriptor->descriptor + 1;
-    if (nfds <= 0) {
-      fileDescriptorGuard.unlock();
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
-    }
-    FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
-    fileDescriptorGuard.unlock();
-    int32_t readyFds = 0;
-    do {
-      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
-    } while (readyFds == -1 && errno == EINTR);
-    if (readyFds == 0) {
-      throw SocketTimeOutException("Writing to socket timed out.");
-    }
-    if (readyFds != 1) {
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
+    { //Check if we can write to socket
+      pollfd poll_struct{
+          (int)_socketDescriptor->descriptor,
+          (short)(POLLOUT),
+          (short)(POLLHUP | POLLRDHUP | POLLERR)
+      };
+
+      int32_t poll_result = -1;
+      do {
+        poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
+      } while (poll_result == -1 && errno == EINTR);
+      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+        writeGuard.unlock();
+        close();
+        throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
+      } else if (poll_result == 0) {
+        throw SocketTimeOutException("Writing to socket timed out.", SocketTimeOutException::SocketTimeOutType::selectTimeout);
+      }
     }
 
     int32_t bytesToSend = data.size() - totalBytesWritten;
@@ -1294,34 +1304,24 @@ int32_t TcpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
 
   int32_t totalBytesWritten = 0;
   while (totalBytesWritten < bytesToWrite) {
-    timeval timeout{};
-    int32_t seconds = _writeTimeout / 1000000;
-    timeout.tv_sec = seconds;
-    timeout.tv_usec = _writeTimeout - (1000000 * seconds);
-    fd_set writeFileDescriptor;
-    FD_ZERO(&writeFileDescriptor);
-    auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-    fileDescriptorGuard.lock();
-    int32_t nfds = _socketDescriptor->descriptor + 1;
-    if (nfds <= 0) {
-      fileDescriptorGuard.unlock();
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
-    }
-    FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
-    fileDescriptorGuard.unlock();
-    int32_t readyFds = 0;
-    do {
-      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
-    } while (readyFds == -1 && errno == EINTR);
-    if (readyFds == 0) {
-      throw SocketTimeOutException("Writing to socket timed out.");
-    }
-    if (readyFds != 1) {
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
+    { //Check if we can write to socket
+      pollfd poll_struct{
+          (int)_socketDescriptor->descriptor,
+          (short)(POLLOUT),
+          (short)(POLLHUP | POLLRDHUP | POLLERR)
+      };
+
+      int32_t poll_result = -1;
+      do {
+        poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
+      } while (poll_result == -1 && errno == EINTR);
+      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+        writeGuard.unlock();
+        close();
+        throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
+      } else if (poll_result == 0) {
+        throw SocketTimeOutException("Writing to socket timed out.", SocketTimeOutException::SocketTimeOutType::selectTimeout);
+      }
     }
 
     int32_t bytesToSend = bytesToWrite - totalBytesWritten;
@@ -1367,34 +1367,24 @@ int32_t TcpSocket::proofwrite(const std::string &data) {
 
   int32_t totalBytesWritten = 0;
   while (totalBytesWritten < (signed)data.size()) {
-    timeval timeout{};
-    int32_t seconds = _writeTimeout / 1000000;
-    timeout.tv_sec = seconds;
-    timeout.tv_usec = _writeTimeout - (1000000 * seconds);
-    fd_set writeFileDescriptor;
-    FD_ZERO(&writeFileDescriptor);
-    auto fileDescriptorGuard = _bl->fileDescriptorManager.getLock();
-    fileDescriptorGuard.lock();
-    int32_t nfds = _socketDescriptor->descriptor + 1;
-    if (nfds <= 0) {
-      fileDescriptorGuard.unlock();
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (6).");
-    }
-    FD_SET(_socketDescriptor->descriptor, &writeFileDescriptor);
-    fileDescriptorGuard.unlock();
-    int32_t readyFds = 0;
-    do {
-      readyFds = select(nfds, nullptr, &writeFileDescriptor, nullptr, &timeout);
-    } while (readyFds == -1 && errno == EINTR);
-    if (readyFds == 0) {
-      throw SocketTimeOutException("Writing to socket timed out.");
-    }
-    if (readyFds != 1) {
-      writeGuard.unlock();
-      close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
+    { //Check if we can write to socket
+      pollfd poll_struct{
+          (int)_socketDescriptor->descriptor,
+          (short)(POLLOUT),
+          (short)(POLLHUP | POLLRDHUP | POLLERR)
+      };
+
+      int32_t poll_result = -1;
+      do {
+        poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
+      } while (poll_result == -1 && errno == EINTR);
+      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+        writeGuard.unlock();
+        close();
+        throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
+      } else if (poll_result == 0) {
+        throw SocketTimeOutException("Writing to socket timed out.", SocketTimeOutException::SocketTimeOutType::selectTimeout);
+      }
     }
 
     int32_t bytesToSend = data.size() - totalBytesWritten;
@@ -1661,12 +1651,11 @@ void TcpSocket::getConnection() {
 
     if (connectResult != 0) //We have to wait for the connection
     {
-      pollfd pollstruct
-          {
-              (int)_socketDescriptor->descriptor,
-              (short)(POLLIN | POLLOUT | POLLERR),
-              (short)0
-          };
+      pollfd pollstruct{
+          (int)_socketDescriptor->descriptor,
+          (short)(POLLIN | POLLOUT | POLLERR),
+          (short)0
+      };
 
       int32_t pollResult = poll(&pollstruct, 1, (int)(_readTimeout / 1000));
       if (pollResult < 0 || (pollstruct.revents & POLLERR)) {
