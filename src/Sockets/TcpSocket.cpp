@@ -248,6 +248,10 @@ void TcpSocket::startPreboundServer(std::string &listenAddress, size_t processin
   _stopServer = false;
   listenAddress = _ipAddress;
 
+  if (_maxConnections > FD_SETSIZE) {
+    throw SocketInvalidParametersException("Setting max connections (" + std::to_string(_maxConnections) + ") is larger than maximum size of file descriptor set (" + std::to_string(FD_SETSIZE) + ").");
+  }
+
   if (processingThreads > 0) startQueue(0, false, processingThreads, 0, SCHED_OTHER);
 
   for (uint32_t i = 0; i < server_threads_.size(); i++) {
@@ -257,6 +261,10 @@ void TcpSocket::startPreboundServer(std::string &listenAddress, size_t processin
 
 void TcpSocket::startServer(std::string address, std::string port, std::string &listenAddress, size_t processingThreads) {
   waitForServerStopped();
+
+  if (_maxConnections > FD_SETSIZE) {
+    throw SocketInvalidParametersException("Setting max connections (" + std::to_string(_maxConnections) + ") is larger than maximum size of file descriptor set (" + std::to_string(FD_SETSIZE) + ").");
+  }
 
   if (_useSsl) {
     initSsl();
@@ -278,6 +286,10 @@ void TcpSocket::startServer(std::string address, std::string port, std::string &
 
 void TcpSocket::startServer(std::string address, std::string &listenAddress, int32_t &listenPort, size_t processingThreads) {
   waitForServerStopped();
+
+  if (_maxConnections > FD_SETSIZE) {
+    throw SocketInvalidParametersException("Setting max connections (" + std::to_string(_maxConnections) + ") is larger than maximum size of file descriptor set (" + std::to_string(FD_SETSIZE) + ").");
+  }
 
   if (_useSsl) {
     initSsl();
@@ -686,12 +698,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
         socklen_t addressSize = sizeof(addressSize);
         std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize));
         if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
-          server_threads_in_use_--;
-          continue;
-        }
-        if (clientFileDescriptor->descriptor >= FD_SETSIZE) {
-          _bl->out.printError("Error: No more clients can connect to me as the maximum number of file descriptors is reached. Listen IP: " + _listenAddress + ", bound port: " + _listenPort);
-          _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
           server_threads_in_use_--;
           continue;
         }
