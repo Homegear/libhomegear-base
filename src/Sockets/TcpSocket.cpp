@@ -448,7 +448,7 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
   }
 }
 
-void TcpSocket::readClient(const PTcpClientData &clientData) {
+void TcpSocket::readClient(const PTcpClientData &clientData, std::unordered_map<int32_t, PTcpClientData> &backlog_clients) {
   try {
     int32_t bytesRead = 0;
     bool moreData = true;
@@ -473,6 +473,7 @@ void TcpSocket::readClient(const PTcpClientData &clientData) {
           auto bytesReceived = std::make_shared<std::vector<uint8_t>>(clientData->buffer.data(), clientData->buffer.data() + bytesRead);
           std::lock_guard<std::mutex> backlogGuard(clientData->backlogMutex);
           clientData->backlog.push(std::move(bytesReceived));
+          if (clientData->busy) backlog_clients.emplace(clientData->id, clientData);
           if (clientData->backlog.size() > 10000) {
             while (!clientData->backlog.empty()) {
               clientData->backlog.pop();
@@ -623,7 +624,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 
   int32_t nfds = 0;
   int32_t socketDescriptor = -1;
-  std::map<int32_t, PTcpClientData> clients;
+  std::unordered_map<int32_t, PTcpClientData> backlog_clients;
   while (!_stopServer) {
     try {
       {
@@ -640,17 +641,26 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 
       { //Send backlog
         if (_packetReceivedCallback && queueIsStarted(0)) {
-          for (auto &client: clients) {
-            if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) continue;
+          std::unordered_set<int32_t> clients_to_delete;
+
+          server_threads_in_use_++;
+          for (auto &client: backlog_clients) {
             std::lock_guard<std::mutex> backlogGuard(client.second->backlogMutex);
-            if (!client.second->backlog.empty() && !client.second->busy) {
-              server_threads_in_use_++;
+            if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1 || client.second->backlog.empty()) {
+              clients_to_delete.emplace(client.first);
+              continue;
+            }
+            if (!client.second->busy) {
               client.second->busy = true;
               std::shared_ptr<BaseLib::IQueueEntry> queueEntry = std::make_shared<QueueEntry>(client.second);
               enqueue(0, queueEntry);
-              server_threads_in_use_--;
             }
           }
+
+          for (auto client: clients_to_delete) {
+            backlog_clients.erase(client);
+          }
+          server_threads_in_use_--;
         }
       }
 
@@ -661,7 +671,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       if (nfds == 0) {
         if (HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) {
           collectGarbage();
-          collectGarbage(clients);
         }
         continue;
       } else if (nfds == -1) {
@@ -727,8 +736,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
               _clients[clientFileDescriptor->id] = clientData;
             }
 
-            clients[clientData->id] = clientData;
-
             if (_newConnectionCallback) _newConnectionCallback(clientData->id, address, port);
           }
           catch (const SocketSslHandshakeFailedException &ex) {
@@ -765,7 +772,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
             continue;
           }
           server_threads_in_use_++;
-          readClient(client_data);
+          readClient(client_data, backlog_clients);
           server_threads_in_use_--;
 
         }

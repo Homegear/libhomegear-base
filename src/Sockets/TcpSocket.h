@@ -694,7 +694,7 @@ class TcpSocket : public IQueue {
   void collectGarbage();
   void collectGarbage(std::map<int32_t, PTcpClientData> &clients);
   void initClientSsl(PTcpClientData &clientData);
-  void readClient(const PTcpClientData &clientData);
+  void readClient(const PTcpClientData &clientData, std::unordered_map<int32_t, PTcpClientData>& backlog_clients);
   // }}}
 };
 
