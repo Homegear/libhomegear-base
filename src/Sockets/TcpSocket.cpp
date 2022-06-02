@@ -722,6 +722,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
             }
 
             PTcpClientData clientData = std::make_shared<TcpClientData>();
+            clientData->id = clientFileDescriptor->id;
             clientData->fileDescriptor = clientFileDescriptor;
             clientData->socket = std::make_shared<BaseLib::TcpSocket>(_bl, clientFileDescriptor);
             clientData->socket->setReadTimeout(100000);
@@ -732,8 +733,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 
             {
               std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-              clientData->id = clientFileDescriptor->id;
-              _clients[clientFileDescriptor->id] = clientData;
+              _clients[clientData->id] = clientData;
             }
 
             if (_newConnectionCallback) _newConnectionCallback(clientData->id, address, port);
