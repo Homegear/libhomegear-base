@@ -402,7 +402,9 @@ void TcpSocket::initClientSsl(PTcpClientData &clientData) {
     throw SocketSslException("Error setting TLS socket descriptor: Provided socket descriptor is invalid.");
   }
   gnutls_transport_set_ptr(clientData->fileDescriptor->tlsSession, (gnutls_transport_ptr_t)(uintptr_t)clientData->fileDescriptor->descriptor);
-  result = gnutls_handshake(clientData->fileDescriptor->tlsSession);
+  do {
+    result = gnutls_handshake(clientData->fileDescriptor->tlsSession);
+  } while (result < 0 && gnutls_error_is_fatal(result) == 0);
   if (result < 0) {
     _bl->fileDescriptorManager.shutdown(clientData->fileDescriptor);
     throw SocketSslHandshakeFailedException("TLS handshake has failed: " + std::string(gnutls_strerror(result)));
@@ -683,7 +685,8 @@ void TcpSocket::serverThread(uint32_t thread_index) {
           server_threads_in_use_++;
           struct sockaddr_storage clientInfo{};
           socklen_t addressSize = sizeof(addressSize);
-          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept4(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize, SOCK_CLOEXEC), epoll_fd_, EPOLLIN | EPOLLRDHUP | EPOLLHUP);
+          std::shared_ptr<BaseLib::FileDescriptor>
+              clientFileDescriptor = _bl->fileDescriptorManager.add(accept4(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize, SOCK_NONBLOCK | SOCK_CLOEXEC), epoll_fd_, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
           if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
             server_threads_in_use_--;
             continue;
@@ -771,10 +774,12 @@ void TcpSocket::serverThread(uint32_t thread_index) {
             else if (_connectionClosedCallback) _connectionClosedCallback(file_descriptor->id);
             continue;
           }
-          server_threads_in_use_++;
-          readClient(client_data, backlog_clients);
-          server_threads_in_use_--;
 
+          if (events[i].events & EPOLLIN) {
+            server_threads_in_use_++;
+            readClient(client_data, backlog_clients);
+            server_threads_in_use_--;
+          }
         }
       }
     }
@@ -865,7 +870,7 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager &fileDescri
   bool bound = false;
   int32_t error = 0;
   for (struct addrinfo *info = serverInfo; info != nullptr; info = info->ai_next) {
-    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype | SOCK_CLOEXEC, info->ai_protocol), epoll_fd, EPOLLIN);
+    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype | SOCK_CLOEXEC, info->ai_protocol), epoll_fd, EPOLLIN | EPOLLET);
     if (socketDescriptor->descriptor == -1) continue;
     if (setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
     if (bind(socketDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1) {
@@ -1160,13 +1165,14 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, b
   if (_socketDescriptor->tlsSession) {
     do {
       bytesRead = gnutls_record_recv(_socketDescriptor->tlsSession, buffer, bufferSize);
-    } while (bytesRead == GNUTLS_E_INTERRUPTED || bytesRead == GNUTLS_E_AGAIN);
-
+    } while (bytesRead == GNUTLS_E_INTERRUPTED);
+    if (bytesRead == GNUTLS_E_AGAIN) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
     if (gnutls_record_check_pending(_socketDescriptor->tlsSession) > 0) moreData = true;
   } else {
     do {
       bytesRead = read(_socketDescriptor->descriptor, buffer, bufferSize);
-    } while (bytesRead < 0 && (errno == EAGAIN || errno == EINTR));
+    } while (bytesRead < 0 && errno == EINTR);
+    if (errno == EWOULDBLOCK || errno == EAGAIN) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
   }
   if (bytesRead <= 0) {
     if (bytesRead == -1) {
