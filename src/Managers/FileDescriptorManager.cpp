@@ -121,7 +121,7 @@ PFileDescriptor FileDescriptorManager::add(int file_descriptor, int epoll_file_d
   if (epoll_file_descriptor != -1) {
     descriptor->epoll_descriptor = epoll_file_descriptor;
     struct epoll_event event{};
-    event.events = EPOLLIN | EPOLLET;
+    event.events = epoll_events;
     event.data.fd = file_descriptor;
     epoll_ctl(epoll_file_descriptor, EPOLL_CTL_ADD, file_descriptor, &event);
   }

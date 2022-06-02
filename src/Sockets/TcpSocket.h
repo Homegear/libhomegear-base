@@ -34,6 +34,7 @@
 #include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../IQueue.h"
+#include "../Encoding/BinaryRpc.h"
 
 #include <thread>
 #include <string>
@@ -347,7 +348,7 @@ class TcpSocket : public IQueue {
 
   virtual ~TcpSocket();
 
-  static PFileDescriptor bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort, int epoll_fd = -1);
+  static PFileDescriptor bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort);
 
   PFileDescriptor getFileDescriptor();
   std::string getIpAddress();
@@ -650,7 +651,6 @@ class TcpSocket : public IQueue {
   std::string _listenPort;
   int32_t _boundListenPort = -1;
 
-  int epoll_fd_ = -1;
   gnutls_priority_t _tlsPriorityCache = nullptr;
 
   std::atomic_bool _stopServer;
@@ -658,10 +658,6 @@ class TcpSocket : public IQueue {
 
   int64_t _lastGarbageCollection = 0;
 
-  /**
-   * Stores the current client ID. The client ID is incremented by one for every client, so it is unique for a long time.
-   */
-  int32_t _currentClientId = 0;
   std::mutex _clientsMutex;
   std::map<int32_t, PTcpClientData> _clients;
   // }}}
@@ -692,9 +688,9 @@ class TcpSocket : public IQueue {
   void serverThread(uint32_t thread_index);
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
   void collectGarbage();
-  void collectGarbage(std::map<int32_t, PTcpClientData> &clients);
+  void collectGarbage(std::unordered_map<int32_t, PTcpClientData> &clients);
   void initClientSsl(PTcpClientData &clientData);
-  void readClient(const PTcpClientData &clientData, std::unordered_map<int32_t, PTcpClientData>& backlog_clients);
+  void readClient(const PTcpClientData &client_data, std::unordered_map<int32_t, PTcpClientData> &backlog_clients);
   // }}}
 };
 
