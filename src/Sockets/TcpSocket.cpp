@@ -629,39 +629,13 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       {
         std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
         if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
-          if (socketDescriptor != -1) {
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
-              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
-              continue;
-            }
-          }
           if (_stopServer) break;
           std::this_thread::sleep_for(std::chrono::milliseconds(5000));
           bindSocket();
           continue;
         }
 
-        if (socketDescriptor != _socketDescriptor->descriptor) {
-          if (socketDescriptor != -1) {
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
-              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
-              continue;
-            }
-          }
-
-          socketDescriptor = _socketDescriptor->descriptor;
-          if (socketDescriptor == -1) continue;
-
-          struct epoll_event event{};
-          event.events = EPOLLIN | EPOLLET;
-          event.data.fd = socketDescriptor;
-          if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socketDescriptor, &event) == -1) {
-            _bl->out.printError("Error: Could not add socket descriptor to epoll events: " + std::string(strerror(errno)));
-            _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-            socketDescriptor = -1;
-            continue;
-          }
-        }
+        socketDescriptor = _socketDescriptor->descriptor;
       }
 
       { //Send backlog
@@ -730,16 +704,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
                 server_threads_in_use_--;
                 continue;
               }
-            }
-
-            struct epoll_event event{};
-            event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP;
-            event.data.fd = clientFileDescriptor->descriptor;
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, clientFileDescriptor->descriptor, &event) == -1) {
-              _bl->out.printError("Error: Could not add client socket descriptor to epoll events: " + std::string(strerror(errno)));
-              _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-              server_threads_in_use_--;
-              continue;
             }
 
             if (_stopServer) {
