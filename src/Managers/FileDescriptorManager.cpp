@@ -41,153 +41,181 @@
 #include <sys/socket.h>
 #include <sys/resource.h>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 typedef std::unordered_map<int32_t, PFileDescriptor> FileDescriptors;
 
-struct FileDescriptorManager::OpaquePointer
-{
-    uint32_t _currentId = 0;
-    std::atomic_int _maxFd{0};
-    std::mutex _descriptorsMutex;
-    FileDescriptors _descriptors;
+struct FileDescriptorManager::OpaquePointer {
+  uint32_t _currentId = 0;
+  std::atomic_int _maxFd{0};
+  std::mutex _descriptorsMutex;
+  FileDescriptors _descriptors;
 };
 
-FileDescriptorManager::FileDescriptorManager() : _opaquePointer(new OpaquePointer())
-{
+FileDescriptorManager::FileDescriptorManager() : opaque_pointer_(new OpaquePointer()) {
 
 }
 
-FileDescriptorManager::FileDescriptorManager(FileDescriptorManager&& other) noexcept = default;
+FileDescriptorManager::FileDescriptorManager(FileDescriptorManager &&other) noexcept = default;
 
-FileDescriptorManager::~FileDescriptorManager()
-{
-    dispose();
+FileDescriptorManager::~FileDescriptorManager() {
+  dispose();
 }
 
-void FileDescriptorManager::dispose()
-{
-	std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-	for(auto& descriptor : _opaquePointer->_descriptors)
-	{
-		if(!descriptor.second) continue;
-		::close(descriptor.second->descriptor);
-	}
-    _opaquePointer->_descriptors.clear();
+void FileDescriptorManager::dispose() {
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  for (auto &descriptor: opaque_pointer_->_descriptors) {
+    if (!descriptor.second) continue;
+    ::close(descriptor.second->descriptor);
+  }
+  opaque_pointer_->_descriptors.clear();
 }
 
-PFileDescriptor FileDescriptorManager::add(int fileDescriptor)
-{
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    if(fileDescriptor < 0 ) return std::make_shared<FileDescriptor>();
-    auto descriptorIterator = _opaquePointer->_descriptors.find(fileDescriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end())
-    {
-        PFileDescriptor oldDescriptor = descriptorIterator->second;
-        if(oldDescriptor->tlsSession)
-        {
-            gnutls_deinit(oldDescriptor->tlsSession);
-            oldDescriptor->tlsSession = nullptr;
-        }
-        oldDescriptor->descriptor = -1;
+PFileDescriptor FileDescriptorManager::add(int fileDescriptor) {
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  if (fileDescriptor < 0) return std::make_shared<FileDescriptor>();
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(fileDescriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end()) {
+    PFileDescriptor oldDescriptor = descriptorIterator->second;
+    if (oldDescriptor->tlsSession) {
+      gnutls_deinit(oldDescriptor->tlsSession);
+      oldDescriptor->tlsSession = nullptr;
     }
-    PFileDescriptor descriptor = std::make_shared<FileDescriptor>();
-    descriptor->id = _opaquePointer->_currentId++;
-    descriptor->descriptor = fileDescriptor;
-    _opaquePointer->_descriptors[fileDescriptor] = descriptor;
-    if(fileDescriptor > _opaquePointer->_maxFd) _opaquePointer->_maxFd.store(fileDescriptor, std::memory_order_relaxed);
-    fcntl(fileDescriptor, F_SETFD, fcntl(fileDescriptor, F_GETFD) | FD_CLOEXEC);
-    return descriptor;
+    oldDescriptor->descriptor = -1;
+  }
+  PFileDescriptor descriptor = std::make_shared<FileDescriptor>();
+  descriptor->id = opaque_pointer_->_currentId++;
+  descriptor->descriptor = fileDescriptor;
+  opaque_pointer_->_descriptors[fileDescriptor] = descriptor;
+  if (fileDescriptor > opaque_pointer_->_maxFd) opaque_pointer_->_maxFd.store(fileDescriptor, std::memory_order_relaxed);
+  fcntl(fileDescriptor, F_SETFD, fcntl(fileDescriptor, F_GETFD) | FD_CLOEXEC);
+  return descriptor;
 }
 
-void FileDescriptorManager::remove(PFileDescriptor& descriptor)
-{
-    if(!descriptor || descriptor->descriptor < 0) return;
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    auto descriptorIterator = _opaquePointer->_descriptors.find(descriptor->descriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second->id == descriptor->id)
-    {
-        descriptor->descriptor = -1;
-        _opaquePointer->_descriptors.erase(descriptor->descriptor);
+PFileDescriptor FileDescriptorManager::add(int file_descriptor, int epoll_file_descriptor, uint32_t epoll_events) {
+  std::lock_guard<std::mutex> descriptors_guard(opaque_pointer_->_descriptorsMutex);
+  if (file_descriptor < 0) return std::make_shared<FileDescriptor>();
+  auto descriptor_iterator = opaque_pointer_->_descriptors.find(file_descriptor);
+  if (descriptor_iterator != opaque_pointer_->_descriptors.end()) {
+    PFileDescriptor old_descriptor = descriptor_iterator->second;
+
+    if (old_descriptor->epoll_descriptor != -1) {
+      epoll_ctl(old_descriptor->epoll_descriptor, EPOLL_CTL_DEL, old_descriptor->descriptor, nullptr);
     }
-}
 
-void FileDescriptorManager::close(PFileDescriptor& descriptor)
-{
-    if(!descriptor || descriptor->descriptor < 0) return;
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    auto descriptorIterator = _opaquePointer->_descriptors.find(descriptor->descriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second->id == descriptor->id)
-    {
-        _opaquePointer->_descriptors.erase(descriptor->descriptor);
-        if(descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
-        ::close(descriptor->descriptor);
-        if(descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-        descriptor->tlsSession = nullptr;
-        descriptor->descriptor = -1;
+    if (old_descriptor->tlsSession) {
+      gnutls_deinit(old_descriptor->tlsSession);
+      old_descriptor->tlsSession = nullptr;
     }
+    old_descriptor->descriptor = -1;
+  }
+  PFileDescriptor descriptor = std::make_shared<FileDescriptor>();
+  while (descriptor->id == 0) {
+    descriptor->id = opaque_pointer_->_currentId++;
+  }
+  descriptor->descriptor = file_descriptor;
+  opaque_pointer_->_descriptors[file_descriptor] = descriptor;
+  if (file_descriptor > opaque_pointer_->_maxFd) opaque_pointer_->_maxFd.store(file_descriptor, std::memory_order_relaxed);
+  fcntl(file_descriptor, F_SETFD, fcntl(file_descriptor, F_GETFD) | FD_CLOEXEC);
+
+  if (epoll_file_descriptor != -1) {
+    descriptor->epoll_descriptor = epoll_file_descriptor;
+    struct epoll_event event{};
+    event.events = EPOLLIN | EPOLLET;
+    event.data.fd = file_descriptor;
+    epoll_ctl(epoll_file_descriptor, EPOLL_CTL_ADD, file_descriptor, &event);
+  }
+
+  return descriptor;
 }
 
-void FileDescriptorManager::shutdown(PFileDescriptor& descriptor)
-{
-    if(!descriptor || descriptor->descriptor < 0) return;
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    auto descriptorIterator = _opaquePointer->_descriptors.find(descriptor->descriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id)
-    {
-        _opaquePointer->_descriptors.erase(descriptor->descriptor);
-        if(descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
-        //On SSL connections shutdown is not necessary and might even cause segfaults
-        if(!descriptor->tlsSession) ::shutdown(descriptor->descriptor, 0);
-        ::close(descriptor->descriptor);
-        if(descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-        descriptor->tlsSession = nullptr;
-        descriptor->descriptor = -1;
+void FileDescriptorManager::remove(PFileDescriptor &descriptor) {
+  if (!descriptor || descriptor->descriptor < 0) return;
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
+    if (descriptor->epoll_descriptor != -1) {
+      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
     }
+
+    descriptor->descriptor = -1;
+    opaque_pointer_->_descriptors.erase(descriptor->descriptor);
+  }
 }
 
-std::unique_lock<std::mutex> FileDescriptorManager::getLock()
-{
-	return std::unique_lock<std::mutex>(_opaquePointer->_descriptorsMutex, std::defer_lock);
-}
-
-PFileDescriptor FileDescriptorManager::get(int fileDescriptor)
-{
-    if(fileDescriptor < 0) return PFileDescriptor();
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    auto descriptorIterator = _opaquePointer->_descriptors.find(fileDescriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end()) return descriptorIterator->second;
-    return PFileDescriptor();
-}
-
-bool FileDescriptorManager::isValid(int fileDescriptor, int32_t id)
-{
-    if(fileDescriptor < 0) return false;
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    auto descriptorIterator = _opaquePointer->_descriptors.find(fileDescriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second->id == id) return true;
-    return false;
-}
-
-bool FileDescriptorManager::isValid(const PFileDescriptor& descriptor)
-{
-    if(!descriptor || descriptor->descriptor < 0) return false;
-    std::lock_guard<std::mutex> descriptorsGuard(_opaquePointer->_descriptorsMutex);
-    FileDescriptors::iterator descriptorIterator = _opaquePointer->_descriptors.find(descriptor->descriptor);
-    if(descriptorIterator != _opaquePointer->_descriptors.end() && descriptorIterator->second->id == descriptor->id) return true;
-	return false;
-}
-
-int32_t FileDescriptorManager::getMax()
-{
-    //Child process
-    struct rlimit limits{};
-    if(getrlimit(RLIMIT_NOFILE, &limits) == -1 || limits.rlim_cur >= INT32_MAX)
-    {
-        return _opaquePointer->_maxFd.load(std::memory_order_relaxed) + 1024;
+void FileDescriptorManager::close(PFileDescriptor &descriptor) {
+  if (!descriptor || descriptor->descriptor < 0) return;
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
+    if (descriptor->epoll_descriptor != -1) {
+      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
     }
-    return limits.rlim_cur;
+
+    opaque_pointer_->_descriptors.erase(descriptor->descriptor);
+    if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
+    ::close(descriptor->descriptor);
+    if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
+    descriptor->tlsSession = nullptr;
+    descriptor->descriptor = -1;
+  }
+}
+
+void FileDescriptorManager::shutdown(PFileDescriptor &descriptor) {
+  if (!descriptor || descriptor->descriptor < 0) return;
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id) {
+    if (descriptor->epoll_descriptor != -1) {
+      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
+    }
+
+    opaque_pointer_->_descriptors.erase(descriptor->descriptor);
+    if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
+    //On SSL connections shutdown is not necessary and might even cause segfaults
+    if (!descriptor->tlsSession) ::shutdown(descriptor->descriptor, 0);
+    ::close(descriptor->descriptor);
+    if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
+    descriptor->tlsSession = nullptr;
+    descriptor->descriptor = -1;
+  }
+}
+
+std::unique_lock<std::mutex> FileDescriptorManager::getLock() {
+  return std::unique_lock<std::mutex>(opaque_pointer_->_descriptorsMutex, std::defer_lock);
+}
+
+PFileDescriptor FileDescriptorManager::get(int fileDescriptor) {
+  if (fileDescriptor < 0) return {};
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(fileDescriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end()) return descriptorIterator->second;
+  return {};
+}
+
+bool FileDescriptorManager::isValid(int fileDescriptor, int32_t id) {
+  if (fileDescriptor < 0) return false;
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(fileDescriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == id) return true;
+  return false;
+}
+
+bool FileDescriptorManager::isValid(const PFileDescriptor &descriptor) {
+  if (!descriptor || descriptor->descriptor < 0) return false;
+  std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
+  auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
+  if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) return true;
+  return false;
+}
+
+int32_t FileDescriptorManager::getMax() {
+  //Child process
+  struct rlimit limits{};
+  if (getrlimit(RLIMIT_NOFILE, &limits) == -1 || limits.rlim_cur >= INT32_MAX) {
+    return opaque_pointer_->_maxFd.load(std::memory_order_relaxed) + 1024;
+  }
+  return limits.rlim_cur;
 }
 
 }

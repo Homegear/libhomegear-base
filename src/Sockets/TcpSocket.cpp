@@ -189,6 +189,12 @@ TcpSocket::TcpSocket(BaseLib::SharedObjects *baseLib, TcpServerInfo &serverInfo)
   server_threads_.resize(serverInfo.serverThreads);
   average_packets_per_minute_received_.resize(serverInfo.serverThreads);
   average_packets_per_minute_sent_.resize(serverInfo.serverThreads);
+
+  epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
+  if (epoll_fd_ == -1) {
+    _bl->out.printCritical("Critical: Could not create epoll file descriptor: " + std::string(strerror(errno)));
+    return;
+  }
 }
 
 TcpSocket::~TcpSocket() {
@@ -241,7 +247,7 @@ void TcpSocket::bindServerSocket(std::string address, std::string port, std::str
 }
 
 void TcpSocket::bindSocket() {
-  _socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _backlogSize, _ipAddress, _boundListenPort);
+  _socketDescriptor = bindAndReturnSocket(_bl->fileDescriptorManager, _listenAddress, _listenPort, _backlogSize, _ipAddress, _boundListenPort, epoll_fd_);
 }
 
 void TcpSocket::startPreboundServer(std::string &listenAddress, size_t processingThreads) {
@@ -613,12 +619,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
     _bl->out.printWarning("Warning: " + std::string("Could not block SIGPIPE."));
   }
 
-  auto epoll_fd = epoll_create1(FD_CLOEXEC);
-  if (epoll_fd == -1) {
-    _bl->out.printCritical("Critical: Could not create epoll file descriptor: " + std::string(strerror(errno)));
-    return;
-  }
-
   struct epoll_event events[_maxConnections];
 
   int32_t nfds = 0;
@@ -629,39 +629,13 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       {
         std::lock_guard<std::mutex> socketDescriptorGuard(_socketDescriptorMutex);
         if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
-          if (socketDescriptor != -1) {
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
-              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
-              continue;
-            }
-          }
           if (_stopServer) break;
           std::this_thread::sleep_for(std::chrono::milliseconds(5000));
           bindSocket();
           continue;
         }
 
-        if (socketDescriptor != _socketDescriptor->descriptor) {
-          if (socketDescriptor != -1) {
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, socketDescriptor, nullptr) == -1) {
-              _bl->out.printError("Error: Could not remove old socket descriptor from epoll events: " + std::string(strerror(errno)));
-              continue;
-            }
-          }
-
-          socketDescriptor = _socketDescriptor->descriptor;
-          if (socketDescriptor == -1) continue;
-
-          struct epoll_event event{};
-          event.events = EPOLLIN | EPOLLET;
-          event.data.fd = socketDescriptor;
-          if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socketDescriptor, &event) == -1) {
-            _bl->out.printError("Error: Could not add socket descriptor to epoll events: " + std::string(strerror(errno)));
-            _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-            socketDescriptor = -1;
-            continue;
-          }
-        }
+        socketDescriptor = _socketDescriptor->descriptor;
       }
 
       { //Send backlog
@@ -681,13 +655,13 @@ void TcpSocket::serverThread(uint32_t thread_index) {
       }
 
       do {
-        nfds = epoll_wait(epoll_fd, events, _maxConnections, 100);
+        nfds = epoll_wait(epoll_fd_, events, _maxConnections, 100);
       } while (nfds == -1 && errno == EINTR);
 
       if (nfds == 0) {
         if (HelperFunctions::getTime() - _lastGarbageCollection > 60000 || _clients.size() >= _maxConnections) {
           collectGarbage();
-          collectGarbage(clients, epoll_fd);
+          collectGarbage(clients);
         }
         continue;
       } else if (nfds == -1) {
@@ -700,7 +674,7 @@ void TcpSocket::serverThread(uint32_t thread_index) {
           server_threads_in_use_++;
           struct sockaddr_storage clientInfo{};
           socklen_t addressSize = sizeof(addressSize);
-          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept4(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize, SOCK_CLOEXEC));
+          std::shared_ptr<BaseLib::FileDescriptor> clientFileDescriptor = _bl->fileDescriptorManager.add(accept4(socketDescriptor, (struct sockaddr *)&clientInfo, &addressSize, SOCK_CLOEXEC), epoll_fd_, EPOLLIN | EPOLLRDHUP | EPOLLHUP);
           if (!clientFileDescriptor || clientFileDescriptor->descriptor == -1) {
             server_threads_in_use_--;
             continue;
@@ -732,16 +706,6 @@ void TcpSocket::serverThread(uint32_t thread_index) {
               }
             }
 
-            struct epoll_event event{};
-            event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP;
-            event.data.fd = clientFileDescriptor->descriptor;
-            if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, clientFileDescriptor->descriptor, &event) == -1) {
-              _bl->out.printError("Error: Could not add client socket descriptor to epoll events: " + std::string(strerror(errno)));
-              _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
-              server_threads_in_use_--;
-              continue;
-            }
-
             if (_stopServer) {
               _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
               server_threads_in_use_--;
@@ -757,20 +721,15 @@ void TcpSocket::serverThread(uint32_t thread_index) {
 
             if (_useSsl) initClientSsl(clientData);
 
-            int32_t currentClientId = 0;
-
             {
               std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
-              while (currentClientId == 0) {
-                currentClientId = _currentClientId++;
-              }
-              clientData->id = currentClientId;
-              _clients[currentClientId] = clientData;
+              clientData->id = clientFileDescriptor->id;
+              _clients[clientFileDescriptor->id] = clientData;
             }
 
-            clients[clientData->fileDescriptor->descriptor] = clientData;
+            clients[clientData->id] = clientData;
 
-            if (_newConnectionCallback) _newConnectionCallback(currentClientId, address, port);
+            if (_newConnectionCallback) _newConnectionCallback(clientData->id, address, port);
           }
           catch (const SocketSslHandshakeFailedException &ex) {
             _bl->fileDescriptorManager.shutdown(clientFileDescriptor);
@@ -783,19 +742,32 @@ void TcpSocket::serverThread(uint32_t thread_index) {
           server_threads_in_use_--;
           continue;
         } else {
-          auto client_iterator = clients.find(events[i].data.fd);
-          if (client_iterator != clients.end()) {
-            if (client_iterator->second->fileDescriptor->descriptor == -1) continue;
-            if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
-              _bl->fileDescriptorManager.close(client_iterator->second->fileDescriptor);
-              if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(client_iterator->second->id, -201, std::string("Connection to client closed."));
-              else if (_connectionClosedCallback) _connectionClosedCallback(client_iterator->second->id);
-              continue;
-            }
-            server_threads_in_use_++;
-            readClient(client_iterator->second);
-            server_threads_in_use_--;
+          auto file_descriptor = _bl->fileDescriptorManager.get(events[i].data.fd);
+          if (!file_descriptor) continue;
+
+          if (file_descriptor->descriptor == -1) continue;
+
+          PTcpClientData client_data;
+
+          {
+            std::lock_guard<std::mutex> clientsGuard(_clientsMutex);
+            auto client_iterator = _clients.find(file_descriptor->id);
+            if (client_iterator == _clients.end()) continue;
+            client_data = client_iterator->second;
           }
+
+          if (!client_data) continue;
+
+          if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
+            _bl->fileDescriptorManager.close(file_descriptor);
+            if (_connectionClosedCallbackEx) _connectionClosedCallbackEx(file_descriptor->id, -201, std::string("Connection to client closed."));
+            else if (_connectionClosedCallback) _connectionClosedCallback(file_descriptor->id);
+            continue;
+          }
+          server_threads_in_use_++;
+          readClient(client_data);
+          server_threads_in_use_--;
+
         }
       }
     }
@@ -852,13 +824,10 @@ void TcpSocket::collectGarbage() {
   }
 }
 
-void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients, int epoll_fd) {
+void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients) {
   std::vector<int32_t> clientsToRemove;
   for (auto &client: clients) {
     if (!client.second->fileDescriptor || client.second->fileDescriptor->descriptor == -1) {
-      if (!epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client.first, nullptr)) {
-        _bl->out.printError("Error: Could not remove client socket descriptor from epoll events: " + std::string(strerror(errno)));
-      }
       clientsToRemove.push_back(client.first);
     }
   }
@@ -868,7 +837,7 @@ void TcpSocket::collectGarbage(std::map<int32_t, PTcpClientData> &clients, int e
 }
 // }}}
 
-PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort) {
+PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort, int epoll_fd) {
   PFileDescriptor socketDescriptor;
   addrinfo hostInfo{};
   addrinfo *serverInfo = nullptr;
@@ -888,8 +857,8 @@ PFileDescriptor TcpSocket::bindAndReturnSocket(FileDescriptorManager &fileDescri
 
   bool bound = false;
   int32_t error = 0;
-  for (struct addrinfo *info = serverInfo; info != 0; info = info->ai_next) {
-    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype | SOCK_CLOEXEC, info->ai_protocol));
+  for (struct addrinfo *info = serverInfo; info != nullptr; info = info->ai_next) {
+    socketDescriptor = fileDescriptorManager.add(socket(info->ai_family, info->ai_socktype | SOCK_CLOEXEC, info->ai_protocol), epoll_fd, EPOLLIN);
     if (socketDescriptor->descriptor == -1) continue;
     if (setsockopt(socketDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw SocketOperationException("Error: Could not set socket options.");
     if (bind(socketDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1) {

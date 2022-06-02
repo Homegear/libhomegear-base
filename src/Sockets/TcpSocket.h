@@ -237,7 +237,7 @@ class TcpSocket : public IQueue {
    *
    * @param baseLib The base library object.
    */
-  TcpSocket(BaseLib::SharedObjects *baseLib);
+  explicit TcpSocket(BaseLib::SharedObjects *baseLib);
 
   /**
    * Constructor to just wrap an existing socket descriptor.
@@ -347,7 +347,7 @@ class TcpSocket : public IQueue {
 
   virtual ~TcpSocket();
 
-  static PFileDescriptor bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort);
+  static PFileDescriptor bindAndReturnSocket(FileDescriptorManager &fileDescriptorManager, const std::string &address, const std::string &port, uint32_t connectionBacklogSize, std::string &listenAddress, int32_t &listenPort, int epoll_fd = -1);
 
   PFileDescriptor getFileDescriptor();
   std::string getIpAddress();
@@ -650,6 +650,7 @@ class TcpSocket : public IQueue {
   std::string _listenPort;
   int32_t _boundListenPort = -1;
 
+  int epoll_fd_ = -1;
   gnutls_priority_t _tlsPriorityCache = nullptr;
 
   std::atomic_bool _stopServer;
@@ -691,7 +692,7 @@ class TcpSocket : public IQueue {
   void serverThread(uint32_t thread_index);
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
   void collectGarbage();
-  void collectGarbage(std::map<int32_t, PTcpClientData> &clients, int epoll_fd);
+  void collectGarbage(std::map<int32_t, PTcpClientData> &clients);
   void initClientSsl(PTcpClientData &clientData);
   void readClient(const PTcpClientData &clientData);
   // }}}
