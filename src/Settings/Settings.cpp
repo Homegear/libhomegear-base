@@ -401,7 +401,7 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           _nodeBlueProcessingThreadCountServer = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueProcessingThreadCountServer set to " + std::to_string(_nodeBlueProcessingThreadCountServer));
         } else if (name == "flowsprocessingthreadcountnodes" || name == "nodeblueprocessingthreadcountnodes") {
-          _nodeBlueProcessingThreadCountServer = Math::getNumber(value);
+          _nodeBlueProcessingThreadCountNodes = Math::getNumber(value);
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: nodeBlueProcessingThreadCountNodes set to " + std::to_string(_nodeBlueProcessingThreadCountNodes));
         } else if (name == "flowsservermaxconnections" || name == "nodeblueservermaxconnections") {
           _nodeBlueServerMaxConnections = Math::getNumber(value);
