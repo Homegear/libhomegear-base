@@ -1191,7 +1191,7 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, b
     do {
       bytesRead = read(_socketDescriptor->descriptor, buffer, bufferSize);
     } while (bytesRead < 0 && (errno == EINTR || errno == EAGAIN));
-    if (errno == EWOULDBLOCK) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
+    if (bytesRead < 0 && errno == EWOULDBLOCK) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
   }
   if (bytesRead <= 0) {
     if (bytesRead == -1) {
