@@ -1162,21 +1162,24 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, b
     }
   }
 
+  if (_socketDescriptor->descriptor == -1) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
+
   if (!skip_poll) {
     pollfd poll_struct{
         (int)_socketDescriptor->descriptor,
-        (short)(POLLIN),
-        (short)(POLLHUP | POLLRDHUP | POLLERR)
+        (short)(POLLIN | POLLRDHUP),
+        (short)(0)
     };
 
     int32_t poll_result = -1;
     do {
       poll_result = poll(&poll_struct, 1, (int)(_readTimeout / 1000));
     } while (poll_result == -1 && errno == EINTR);
-    if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+    if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLRDHUP | POLLHUP)) || _socketDescriptor->descriptor == -1) {
       readGuard.unlock();
       close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (1).");
+      if (poll_result == -1) throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2): " + strerror(errno));
+      else throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
     } else if (poll_result == 0) {
       throw SocketTimeOutException("Reading from socket timed out (1).", SocketTimeOutException::SocketTimeOutType::selectTimeout);
     }
@@ -1195,7 +1198,7 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, b
   }
   if (bytesRead <= 0) {
     if (bytesRead == -1) {
-      if (errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (2).", SocketTimeOutException::SocketTimeOutType::readTimeout);
+      if (errno == ETIMEDOUT) throw SocketTimeOutException("Reading from socket timed out (3).", SocketTimeOutException::SocketTimeOutType::readTimeout);
       else {
         readGuard.unlock();
         close();
@@ -1204,7 +1207,7 @@ int32_t TcpSocket::proofread(char *buffer, int32_t bufferSize, bool &moreData, b
     } else {
       readGuard.unlock();
       close();
-      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
+      throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (4).");
     }
   }
   if (bytesRead > bufferSize) bytesRead = bufferSize;
@@ -1243,15 +1246,15 @@ int32_t TcpSocket::proofwrite(const std::vector<char> &data) {
     { //Check if we can write to socket
       pollfd poll_struct{
           (int)_socketDescriptor->descriptor,
-          (short)(POLLOUT),
-          (short)(POLLHUP | POLLRDHUP | POLLERR)
+          (short)(POLLOUT | POLLRDHUP),
+          (short)(0)
       };
 
       int32_t poll_result = -1;
       do {
         poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
       } while (poll_result == -1 && errno == EINTR);
-      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+      if (poll_result < 0 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLRDHUP | POLLHUP)) || _socketDescriptor->descriptor == -1) {
         writeGuard.unlock();
         close();
         throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
@@ -1306,15 +1309,15 @@ int32_t TcpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
     { //Check if we can write to socket
       pollfd poll_struct{
           (int)_socketDescriptor->descriptor,
-          (short)(POLLOUT),
-          (short)(POLLHUP | POLLRDHUP | POLLERR)
+          (short)(POLLOUT | POLLRDHUP),
+          (short)(0)
       };
 
       int32_t poll_result = -1;
       do {
         poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
       } while (poll_result == -1 && errno == EINTR);
-      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+      if (poll_result < 0 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLRDHUP | POLLHUP)) || _socketDescriptor->descriptor == -1) {
         writeGuard.unlock();
         close();
         throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (5).");
@@ -1369,15 +1372,15 @@ int32_t TcpSocket::proofwrite(const std::string &data) {
     { //Check if we can write to socket
       pollfd poll_struct{
           (int)_socketDescriptor->descriptor,
-          (short)(POLLOUT),
-          (short)(POLLHUP | POLLRDHUP | POLLERR)
+          (short)(POLLOUT | POLLRDHUP),
+          (short)(0)
       };
 
       int32_t poll_result = -1;
       do {
         poll_result = poll(&poll_struct, 1, (int)(_writeTimeout / 1000));
       } while (poll_result == -1 && errno == EINTR);
-      if (poll_result < 0 || (poll_struct.revents & (POLLERR | POLLRDHUP | POLLHUP))) {
+      if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLRDHUP | POLLHUP)) || _socketDescriptor->descriptor == -1) {
         writeGuard.unlock();
         close();
         throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (7).");
@@ -1649,7 +1652,7 @@ void TcpSocket::getConnection() {
       };
 
       int32_t pollResult = poll(&pollstruct, 1, (int)(_readTimeout / 1000));
-      if (pollResult < 0 || (pollstruct.revents & POLLERR)) {
+      if (pollResult == -1 || (pollstruct.revents & (POLLERR | POLLHUP | POLLRDHUP | POLLNVAL)) || _socketDescriptor->descriptor == -1) {
         if (i < _connectionRetries - 1) {
           _bl->fileDescriptorManager.shutdown(_socketDescriptor);
           std::this_thread::sleep_for(std::chrono::milliseconds(200));
