@@ -85,6 +85,7 @@ void Parameter::parseXml(xml_node *node) {
           isSigned = (propertyValue == "true");
         } else if (propertyName == "control") control = propertyValue;
         else if (propertyName == "unit") unit = propertyValue;
+        else if (propertyName == "unitCode") unit_code = (UnitCode)Math::getNumber(propertyValue);
         else if (propertyName == "mandatory") mandatory = (propertyValue == "true");
         else if (propertyName == "formFieldType") formFieldType = propertyValue;
         else if (propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);

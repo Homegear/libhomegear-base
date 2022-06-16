@@ -1090,6 +1090,12 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
       propertiesNode->append_node(node);
     }
 
+    if (parameter->unit_code != UnitCode::kUndefined) {
+      tempString = std::to_string((int32_t)parameter->unit_code);
+      xml_node *node = doc->allocate_node(node_element, "unitCode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
+      propertiesNode->append_node(node);
+    }
+
     if (!parameter->formFieldType.empty()) {
       xml_node *node = doc->allocate_node(node_element, "formFieldType", doc->allocate_string(parameter->formFieldType.c_str(), parameter->formFieldType.size() + 1));
       propertiesNode->append_node(node);
