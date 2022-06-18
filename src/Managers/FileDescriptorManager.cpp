@@ -148,14 +148,15 @@ void FileDescriptorManager::close(PFileDescriptor &descriptor) {
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
-    if (descriptor->epoll_descriptor != -1) {
-      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
-    }
-
     opaque_pointer_->_descriptors.erase(descriptor->descriptor);
     if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
     ::close(descriptor->descriptor);
     if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
+
+    if (descriptor->epoll_descriptor != -1) {
+      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
+    }
+
     descriptor->tlsSession = nullptr;
     descriptor->descriptor = -1;
   }
@@ -166,16 +167,17 @@ void FileDescriptorManager::shutdown(PFileDescriptor &descriptor) {
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id) {
-    if (descriptor->epoll_descriptor != -1) {
-      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
-    }
-
     opaque_pointer_->_descriptors.erase(descriptor->descriptor);
     if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
     //On SSL connections shutdown is not necessary and might even cause segfaults
     if (!descriptor->tlsSession) ::shutdown(descriptor->descriptor, 0);
     ::close(descriptor->descriptor);
     if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
+
+    if (descriptor->epoll_descriptor != -1) {
+      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
+    }
+
     descriptor->tlsSession = nullptr;
     descriptor->descriptor = -1;
   }

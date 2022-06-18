@@ -95,7 +95,7 @@ int32_t UdpSocket::proofread(char *buffer, int32_t bufferSize, std::string &send
   { //Check if we can read from socket
     pollfd poll_struct{
         (int)_socketDescriptor->descriptor,
-        (short)(POLLIN | POLLRDHUP),
+        (short)(POLLIN),
         (short)(0)
     };
 
@@ -103,7 +103,7 @@ int32_t UdpSocket::proofread(char *buffer, int32_t bufferSize, std::string &send
     do {
       poll_result = poll(&poll_struct, 1, (int)(_readTimeout / 1000));
     } while (poll_result == -1 && errno == EINTR);
-    if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLRDHUP | POLLHUP)) || _socketDescriptor->descriptor == -1) {
+    if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLHUP)) || _socketDescriptor->descriptor == -1) {
       readGuard.unlock();
       close();
       throw SocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
