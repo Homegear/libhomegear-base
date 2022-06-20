@@ -47,7 +47,7 @@ HelperFunctions::HelperFunctions() {
 
 int32_t HelperFunctions::compareConstant(const std::string &s1, const std::string &s2) {
   auto size = std::min(s1.size(), s2.size());
-  
+
   unsigned char result = 0;
   for (size_t i = 0; i < size; i++) {
     result |= s1[i] ^ s2[i];

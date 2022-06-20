@@ -157,6 +157,10 @@ class Settings {
   std::string uiPathUser() { return _uiPathUser; }
   std::string uiPathGroup() { return _uiPathGroup; }
   std::string uiTranslationPath() { return _uiTranslationPath; }
+  std::string webSshPath() { return _webSshPath; }
+  uint32_t webSshPathPermissions() { return _webSshPathPermissions; }
+  std::string webSshPathUser() { return _webSshPathUser; }
+  std::string webSshPathGroup() { return _webSshPathGroup; }
   bool reloadRolesOnStartup() { return _reloadRolesOnStartup; }
   std::string firmwarePath() { return _firmwarePath; }
   std::string tempPath() { return _tempPath; }
@@ -293,6 +297,10 @@ class Settings {
   std::string _uiPathUser;
   std::string _uiPathGroup;
   std::string _uiTranslationPath;
+  std::string _webSshPath;
+  uint32_t _webSshPathPermissions = 360;
+  std::string _webSshPathUser;
+  std::string _webSshPathGroup;
   bool _reloadRolesOnStartup = true;
   std::string _firmwarePath;
   std::string _tempPath;

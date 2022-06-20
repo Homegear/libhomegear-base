@@ -149,6 +149,10 @@ void Settings::reset() {
   _uiPathUser = "";
   _uiPathGroup = "";
   _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
+  _webSshPath = "/var/lib/homegear/web-ssh/";
+  _webSshPathPermissions = 360;
+  _webSshPathUser = "";
+  _webSshPathGroup = "";
   _firmwarePath = "/usr/share/homegear/firmware/";
   _tempPath = "/var/lib/homegear/tmp/";
   _lockFilePath = "/var/lock/";
@@ -615,6 +619,21 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (_uiTranslationPath.empty()) _uiTranslationPath = "/var/lib/homegear/admin-ui/translations/modules/";
           if (_uiTranslationPath.back() != '/') _uiTranslationPath.push_back('/');
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: uiTranslationPath set to " + _uiTranslationPath);
+        } else if (name == "websshpath") {
+          _webSshPath = value;
+          if (_webSshPath.empty()) _webSshPath = "/var/lib/homegear/web-ssh/";
+          if (_webSshPath.back() != '/') _webSshPath.push_back('/');
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: webSshPath set to " + _webSshPath);
+        } else if (name == "websshpathpermissions") {
+          _webSshPathPermissions = Math::getOctalNumber(value);
+          if (_webSshPathPermissions == 0) _webSshPathPermissions = 360;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: webSshPathPermissions set to " + std::to_string(_webSshPathPermissions));
+        } else if (name == "websshpathuser") {
+          _webSshPathUser = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: webSshPathUser set to " + _webSshPathUser);
+        } else if (name == "websshpathgroup") {
+          _webSshPathGroup = value;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: webSshPathGroup set to " + _webSshPathGroup);
         } else if (name == "reloadrolesonstartup") {
           _reloadRolesOnStartup = HelperFunctions::toLower(value) == "true";
           if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: reloadRolesOnStartup set to " + std::to_string(_reloadRolesOnStartup));
