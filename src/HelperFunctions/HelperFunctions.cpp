@@ -45,6 +45,17 @@ const std::array<int32_t, 16> HelperFunctions::_binaryToASCIITable{0x30, 0x31, 0
 HelperFunctions::HelperFunctions() {
 }
 
+int32_t HelperFunctions::compareConstant(const std::string &s1, const std::string &s2) {
+  auto size = std::min(s1.size(), s2.size());
+  
+  unsigned char result = 0;
+  for (size_t i = 0; i < size; i++) {
+    result |= s1[i] ^ s2[i];
+  }
+
+  return result;
+}
+
 int64_t HelperFunctions::getTimezoneOffset() {
   std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm localTime{};
