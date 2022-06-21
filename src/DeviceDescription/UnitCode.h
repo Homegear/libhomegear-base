@@ -30,6 +30,8 @@
 #ifndef LIBHOMEGEAR_BASE_SRC_DEVICEDESCRIPTION_UNITCODE_H_
 #define LIBHOMEGEAR_BASE_SRC_DEVICEDESCRIPTION_UNITCODE_H_
 
+namespace BaseLib::DeviceDescription {
+
 enum class UnitCode : int32_t {
   kUndefined = -1,
   kSquareMeters = 0,
@@ -293,7 +295,14 @@ enum class UnitCode : int32_t {
   kThousandStandardCubicFeetPerDay = -17725,
   kPoundsMassPerDay = -17724,
   kMillirems = -17722,
-  kMilliremsPerHour = -17721
+  kMilliremsPerHour = -17721,
+
+  //Custom codes
+  kTimestampMicroseconds = 2147483647,
+  kTimestampMilliseconds = 2147483646,
+  kTimestampSeconds = 2147483645,
+  kHeatingCostAllocatorUnits = 2147483644
 };
 
+}
 #endif //LIBHOMEGEAR_BASE_SRC_DEVICEDESCRIPTION_UNITCODE_H_

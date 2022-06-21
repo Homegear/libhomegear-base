@@ -70,15 +70,20 @@ DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects *baseLib, xml_no
 
 void DecimalIntegerScale::fromPacket(PVariable &value) {
   if (!value) return;
+  if (value->type == BaseLib::VariableType::tFloat) value->floatValue = (value->floatValue / factor) - offset;
+  else if (value->type == BaseLib::VariableType::tInteger) value->floatValue = ((double)value->integerValue / factor) - offset;
+  else value->floatValue = ((double)value->integerValue64 / factor) - offset;
   value->type = VariableType::tFloat;
-  value->floatValue = ((double)value->integerValue / factor) - offset;
   value->integerValue = 0;
+  value->integerValue64 = 0;
 }
 
 void DecimalIntegerScale::toPacket(PVariable &value) {
   if (!value) return;
-  value->integerValue = std::lround((value->floatValue + offset) * factor);
-  value->type = VariableType::tInteger;
+  value->integerValue64 = std::llround((value->floatValue + offset) * factor);
+  value->integerValue = (int32_t)value->integerValue64;
+  if ((int64_t)value->integerValue != value->integerValue64) value->type = VariableType::tInteger64;
+  else value->type = VariableType::tInteger;
   value->floatValue = 0;
 }
 

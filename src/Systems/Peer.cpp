@@ -2395,7 +2395,8 @@ PVariable Peer::getAllValues(PRpcClientInfo clientInfo, bool returnWriteOnly, bo
         element->structValue->insert(StructElement("READABLE", PVariable(new Variable(parameter.rpcParameter->readable))));
         element->structValue->insert(StructElement("WRITEABLE", PVariable(new Variable(parameter.rpcParameter->writeable))));
         element->structValue->insert(StructElement("TRANSMITTED", PVariable(new Variable(parameter.rpcParameter->transmitted))));
-        element->structValue->insert(StructElement("UNIT", PVariable(new Variable(parameter.rpcParameter->unit))));
+        element->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(parameter.rpcParameter->unit)));
+        if (parameter.rpcParameter->unit_code != UnitCode::kUndefined) element->structValue->insert(StructElement("UNIT_CODE", std::make_shared<Variable>((int32_t)parameter.rpcParameter->unit_code)));
         auto room = parameter.getRoom();
         if (room != 0) element->structValue->insert(StructElement("ROOM", std::make_shared<Variable>(room)));
         auto buildingPart = parameter.getBuildingPart();
@@ -3656,6 +3657,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     }
 
     if (fields.empty() || fields.find("UNIT") != fields.end()) description->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(parameter->unit)));
+    if ((fields.empty() || fields.find("UNIT_CODE") != fields.end()) && parameter->unit_code != UnitCode::kUndefined) description->structValue->insert(StructElement("UNIT_CODE", std::make_shared<Variable>(parameter->unit_code)));
     if ((fields.empty() || fields.find("MANDATORY") != fields.end()) && parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<Variable>(parameter->mandatory));
     if ((fields.empty() || fields.find("FORM_FIELD_TYPE") != fields.end()) && !parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::make_shared<Variable>(parameter->formFieldType)));
     if ((fields.empty() || fields.find("FORM_POSITION") != fields.end()) && parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::make_shared<Variable>(parameter->formPosition)));
