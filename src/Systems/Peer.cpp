@@ -3657,7 +3657,7 @@ PVariable Peer::getVariableDescription(PRpcClientInfo clientInfo, const PParamet
     }
 
     if (fields.empty() || fields.find("UNIT") != fields.end()) description->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(parameter->unit)));
-    if ((fields.empty() || fields.find("UNIT_CODE") != fields.end()) && parameter->unit_code != UnitCode::kUndefined) description->structValue->insert(StructElement("UNIT_CODE", std::make_shared<Variable>(parameter->unit_code)));
+    if ((fields.empty() || fields.find("UNIT_CODE") != fields.end()) && parameter->unit_code != UnitCode::kUndefined) description->structValue->insert(StructElement("UNIT_CODE", std::make_shared<Variable>((int32_t)parameter->unit_code)));
     if ((fields.empty() || fields.find("MANDATORY") != fields.end()) && parameter->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<Variable>(parameter->mandatory));
     if ((fields.empty() || fields.find("FORM_FIELD_TYPE") != fields.end()) && !parameter->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::make_shared<Variable>(parameter->formFieldType)));
     if ((fields.empty() || fields.find("FORM_POSITION") != fields.end()) && parameter->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::make_shared<Variable>(parameter->formPosition)));
