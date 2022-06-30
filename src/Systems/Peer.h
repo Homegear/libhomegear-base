@@ -439,7 +439,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual HomegearDevice::ReceiveModes::Enum getRXModes();
   virtual bool isTeam() { return false; }
   virtual void setLastPacketReceived();
-  virtual uint32_t getLastPacketReceived() { return _lastPacketReceived; }
+  virtual int64_t getLastPacketReceived() { return _lastPacketReceived; }
   virtual bool pendingQueuesEmpty() { return true; }
   virtual void enqueuePendingQueues() {}
   virtual int32_t getChannelGroupedWith(int32_t channel) = 0;
@@ -618,7 +618,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
 
   bool _disposing = false;
   bool _saveTeam = false;
-  uint32_t _lastPacketReceived = 0;
+  std::atomic<int64_t> _lastPacketReceived{0};
 
   // {{{ Event handling
   //Hooks

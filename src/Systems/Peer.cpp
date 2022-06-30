@@ -241,7 +241,8 @@ Peer::Peer(SharedObjects *baseLib, uint32_t parentId, IPeerEventSink *eventHandl
     _bl = baseLib;
     _parentID = parentId;
     serviceMessages.reset(new ServiceMessages(baseLib, 0, "", this));
-    _lastPacketReceived = HelperFunctions::getTimeSeconds();
+    //Set time a little earlier than now to make the first received packet set LAST_PACKET_RECEIVED on channel 0.
+    _lastPacketReceived = HelperFunctions::getTimeSeconds() - 2;
     _rpcDevice.reset();
     setEventHandler(eventHandler);
   }
@@ -671,7 +672,7 @@ HomegearDevice::ReceiveModes::Enum Peer::getRXModes() {
 }
 
 void Peer::setLastPacketReceived() {
-  uint32_t now = HelperFunctions::getTimeSeconds();
+  int64_t now = HelperFunctions::getTimeSeconds();
   if (_lastPacketReceived == now) return;
   _lastPacketReceived = now;
   std::unordered_map<uint32_t, std::unordered_map<std::string, RpcConfigurationParameter>>::iterator valuesIterator = valuesCentral.find(0);
