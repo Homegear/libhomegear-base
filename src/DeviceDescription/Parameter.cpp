@@ -166,8 +166,8 @@ void Parameter::parseXml(xml_node *node) {
                 }
                 //}}}
 
-                if (mainGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
-                if (middleGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (mainGroupRoleId != 0) roles.emplace(mainGroupRoleId, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (middleGroupRoleId != 0) roles.emplace(middleGroupRoleId, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
                 roles.emplace(role.id, role);
               }
             } else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
