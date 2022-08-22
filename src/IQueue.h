@@ -73,6 +73,16 @@ class IQueue : public IQueueBase {
   void startQueue(int32_t index, bool waitWhenFull, uint32_t processingThreadCount, int32_t threadPriority = 0, int32_t threadPolicy = SCHED_OTHER);
 
   /**
+   * Starts the threads of a queue using a thread count that can be increased later.
+   *
+   * @param index The index of the queue to start. The number of queues is defined by @c queueCount in the constructor.
+   * @param waitWhenFull When set to @c true, @c enqueue() waits until the queue is empty enough to queue the provided item. This takes precedence over the argument @c waitWhenFull of @c enqueue().
+   * @param initialProcessingThreadCount The number of processing threads to start with the call of this method.
+   * @param maxProcessingThreadCount The number maximum number of processing threads that can be started.
+   */
+  void startQueue(int32_t index, bool waitWhenFull, uint32_t initialProcessingThreadCount, uint32_t maxProcessingThreadCount);
+
+  /**
    * Stops the threads of a queue previously started with @c startQueue().
    *
    * @param index The index of the queue to stop.
@@ -83,6 +93,14 @@ class IQueue : public IQueueBase {
    * Checks if the specified queue has been started.
    */
   bool queueIsStarted(int32_t index);
+
+  /**
+   * Start an additional thread.
+   *
+   * @param index The index of the queue to add the new thread.
+   * @return Returns true when the thread could be started.
+   */
+  bool addThread(int32_t index);
 
   /**
    * Enqueues an item.
@@ -118,6 +136,13 @@ class IQueue : public IQueueBase {
   uint32_t processingThreadCount(int32_t index);
 
   /**
+   * Returns the maximum number of processing threads.
+   *
+   * @return The number maximum number of processing threads for this queue.
+   */
+  uint32_t maxProcessingThreadCount(int32_t index);
+
+  /**
    * Returns the number of items queued in a queue.
    *
    * @param index The index of the queue to check.
@@ -135,6 +160,7 @@ class IQueue : public IQueueBase {
   int64_t maxWait10m(int32_t index);
   int64_t maxWait1h(int32_t index);
  private:
+  std::mutex _addThreadMutex;
   int32_t _bufferSize = 10000;
   std::vector<int32_t> _bufferHead;
   std::vector<int32_t> _bufferTail;

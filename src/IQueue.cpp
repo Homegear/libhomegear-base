@@ -122,6 +122,11 @@ uint32_t IQueue::processingThreadCount(int32_t index) {
   return _processingThread[index].size();
 }
 
+uint32_t IQueue::maxProcessingThreadCount(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _processingThread[index].capacity();
+}
+
 double IQueue::threadLoad(int32_t index) {
   if (index < 0 || index >= _queueCount) return 0;
   return ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + ((double)_bufferCount[index] / (double)_processingThread[index].size());
@@ -174,10 +179,27 @@ void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t processingThr
   _bufferTail[index] = 0;
   _bufferCount[index] = 0;
   _waitWhenFull[index] = waitWhenFull;
+  _processingThread[index].reserve(processingThreadCount);
   for (uint32_t i = 0; i < processingThreadCount; i++) {
     std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
     _bl->threadManager.start(*thread, true, threadPriority, threadPolicy, &IQueue::process, this, index);
-    _processingThread[index].push_back(thread);
+    _processingThread[index].emplace_back(thread);
+  }
+  _buffer.at(index).resize(_bufferSize);
+}
+
+void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t initialProcessingThreadCount, uint32_t maxProcessingThreadCount) {
+  if (index < 0 || index >= _queueCount) return;
+  _stopProcessingThread[index] = false;
+  _bufferHead[index] = 0;
+  _bufferTail[index] = 0;
+  _bufferCount[index] = 0;
+  _waitWhenFull[index] = waitWhenFull;
+  _processingThread[index].reserve(maxProcessingThreadCount);
+  for (uint32_t i = 0; i < initialProcessingThreadCount; i++) {
+    std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
+    _bl->threadManager.start(*thread, true, &IQueue::process, this, index);
+    _processingThread[index].emplace_back(thread);
   }
   _buffer.at(index).resize(_bufferSize);
 }
@@ -190,8 +212,8 @@ void IQueue::stopQueue(int32_t index) {
   lock.unlock();
   _processingConditionVariable[index].notify_all();
   _produceConditionVariable[index].notify_all();
-  for (uint32_t i = 0; i < _processingThread[index].size(); i++) {
-    _bl->threadManager.join(*(_processingThread[index][i]));
+  for (auto &i: _processingThread[index]) {
+    _bl->threadManager.join(*i);
   }
   _processingThread[index].clear();
   _buffer[index].clear();
@@ -199,6 +221,7 @@ void IQueue::stopQueue(int32_t index) {
 }
 
 bool IQueue::queueIsStarted(int32_t index) {
+  if (index < 0 || index >= _queueCount) return false;
   return _stopProcessingThread[index] == false;
 }
 
@@ -225,8 +248,20 @@ bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry> &entry, bool wa
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
-  catch (...) {
-    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  return false;
+}
+
+bool IQueue::addThread(int32_t index) {
+  try {
+    std::lock_guard<std::mutex> addThreadGuard(_addThreadMutex);
+    if (index < 0 || index >= _queueCount) return false;
+    if (_processingThread.size() == _processingThread.capacity()) return false;
+    std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
+    _bl->threadManager.start(*thread, true, &IQueue::process, this, index);
+    _processingThread[index].emplace_back(thread);
+    return true;
+  } catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
   return false;
 }
