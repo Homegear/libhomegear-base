@@ -94,6 +94,7 @@ void ServiceMessages::load() {
         switch (row->second.at(4)->intValue) {
           case 0: {
             _unreach = (bool)row->second.at(7)->intValue;
+            _unreachTime = row->second.at(6)->intValue;
             break;
           }
           case 1: {
@@ -525,10 +526,15 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
     if (cyclicTimeout > 0 && (time - lastPacketReceived) > cyclicTimeout) {
       if (!_unreach) {
         _unreach = true;
+        _unreachTime = HelperFunctions::getTimeSeconds();
         _stickyUnreach = true;
+        _stickyUnreachTime = HelperFunctions::getTimeSeconds();
 
         _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is set to unreachable, because no packet was received within " + std::to_string(cyclicTimeout) + " seconds. The Last packet was received at "
                                + BaseLib::HelperFunctions::getTimeString(lastPacketReceived * 1000));
+
+        save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
+        save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, _stickyUnreach);
 
         std::vector<uint8_t> data = {1};
         raiseSaveParameter("UNREACH", 0, data);
@@ -558,6 +564,8 @@ void ServiceMessages::endUnreach() {
       _unreachResendCounter = 0;
 
       _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is reachable again.");
+
+      save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
 
       std::vector<uint8_t> data = {0};
       raiseSaveParameter("UNREACH", 0, data);
@@ -624,7 +632,9 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       _unreachResendCounter = 0;
       _unreach = value;
       _unreachTime = HelperFunctions::getTimeSeconds();
+      _stickyUnreachTime = HelperFunctions::getTimeSeconds();
       save(ServiceMessagePriority::kWarning, _unreachTime, 0, value);
+      save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, value);
 
       if (value) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is unreachable.");
       std::vector<uint8_t> data = {(uint8_t)value};
