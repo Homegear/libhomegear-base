@@ -2572,11 +2572,14 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
                                                        PVariable(new Variable(supportedDevice->serialPrefix))));
 
       if (supportedDevice) {
+        if (fields.empty() || fields.find("TYPE_STRING") != fields.end()) description->structValue->emplace("TYPE_STRING", std::make_shared<Variable>(supportedDevice->id));
         if (fields.find("DESCRIPTION") != fields.end()) description->structValue->emplace("DESCRIPTION", central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id));
         if (fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->emplace("LONG_DESCRIPTION", central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id));
       }
 
       if (fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(_rpcDevice->pairingMethod)));
+      if (fields.empty() || fields.find("HARDWARE_VERSION") != fields.end() && !supportedDevice->hardwareVersion.empty()) description->structValue->insert(StructElement("HARDWARE_VERSION", std::make_shared<Variable>(supportedDevice->hardwareVersion)));
+      if (fields.empty() || fields.find("MANUFACTURER") != fields.end() && !supportedDevice->manufacturer.empty()) description->structValue->insert(StructElement("MANUFACTURER", std::make_shared<Variable>(supportedDevice->manufacturer)));
 
       PVariable variable = PVariable(new Variable(VariableType::tArray));
       PVariable variable2 = PVariable(new Variable(VariableType::tArray));

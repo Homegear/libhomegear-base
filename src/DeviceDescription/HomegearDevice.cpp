@@ -295,6 +295,16 @@ void HomegearDevice::saveDevice(xml_document *doc, xml_node *parentNode, Homegea
         subnode->append_attribute(attr);
       }
 
+      if (!(*i)->hardwareVersion.empty()) {
+        xml_node *deviceNode = doc->allocate_node(node_element, "hardwareVersion", doc->allocate_string((*i)->hardwareVersion.c_str(), (*i)->hardwareVersion.size() + 1));
+        subnode->append_node(subnode);
+      }
+
+      if (!(*i)->manufacturer.empty()) {
+        xml_node *deviceNode = doc->allocate_node(node_element, "manufacturer", doc->allocate_string((*i)->manufacturer.c_str(), (*i)->manufacturer.size() + 1));
+        subnode->append_node(subnode);
+      }
+
       xml_node *deviceNode = doc->allocate_node(node_element, "description", doc->allocate_string((*i)->description.c_str(), (*i)->description.size() + 1));
       subnode->append_node(deviceNode);
 
