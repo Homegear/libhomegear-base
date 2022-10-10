@@ -529,11 +529,12 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
     if (_bl->booting || _bl->shuttingDown) return;
     int64_t time = HelperFunctions::getTimeSeconds();
     if (cyclicTimeout > 0 && (time - lastPacketReceived) > cyclicTimeout) {
-      if (!_unreach) {
+      if (!_unreach || HelperFunctions::getTime() - last_unreach_event_ >= 86400000) {
         _unreach = true;
         _unreachTime = HelperFunctions::getTimeSeconds();
         _stickyUnreach = true;
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
+        last_unreach_event_ = HelperFunctions::getTime();
 
         _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is set to unreachable, because no packet was received within " + std::to_string(cyclicTimeout) + " seconds. The Last packet was received at "
                                + BaseLib::HelperFunctions::getTimeString(lastPacketReceived * 1000));
