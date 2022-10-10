@@ -575,11 +575,12 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
 
 void ServiceMessages::endUnreach() {
   try {
-    if (_unreach) {
+    if (_unreach || HelperFunctions::getTime() - last_unreach_event_ >= 86400000) {
+      if (_unreach) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is reachable again.");
+
       _unreach = false;
       _unreachResendCounter = 0;
-
-      _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is reachable again.");
+      last_unreach_event_ = HelperFunctions::getTime();
 
       save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
 
