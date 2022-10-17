@@ -1708,6 +1708,16 @@ void Peer::loadConfig() {
         valuesCentral[roleParameter->channel].erase(roleParameter->parameterName);
       }
     }
+
+    { //Set last packet received
+      auto valuesIterator = valuesCentral.find(0);
+      if (valuesIterator != valuesCentral.end()) {
+        auto parameterIterator = valuesIterator->second.find("LAST_PACKET_RECEIVED");
+        if (parameterIterator != valuesIterator->second.end() && parameterIterator->second.rpcParameter) {
+          _lastPacketReceived = parameterIterator->second.rpcParameter->convertFromPacket(parameterIterator->second.getBinaryData(), parameterIterator->second.mainRole(), false)->integerValue64;
+        }
+      }
+    }
   }
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
@@ -2577,7 +2587,9 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
       }
 
       if (fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(_rpcDevice->pairingMethod)));
-      if ((fields.empty() || fields.find("HARDWARE_VERSION") != fields.end()) && !supportedDevice->hardwareVersion.empty()) description->structValue->insert(StructElement("HARDWARE_VERSION", std::make_shared<Variable>(supportedDevice->hardwareVersion)));
+      if ((fields.empty() || fields.find("HARDWARE_VERSION") != fields.end()) && !supportedDevice->hardwareVersion.empty())
+        description->structValue->insert(StructElement("HARDWARE_VERSION",
+                                                       std::make_shared<Variable>(supportedDevice->hardwareVersion)));
       if ((fields.empty() || fields.find("MANUFACTURER") != fields.end()) && !supportedDevice->manufacturer.empty()) description->structValue->insert(StructElement("MANUFACTURER", std::make_shared<Variable>(supportedDevice->manufacturer)));
 
       PVariable variable = PVariable(new Variable(VariableType::tArray));
