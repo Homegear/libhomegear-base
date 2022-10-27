@@ -276,7 +276,7 @@ void Parameter::parseXml(xml_node *node) {
   }
 
   // {{{ Set role.scaleInfo.valueMin and role.scaleInfo.valueMax if not specified in XML
-  for (auto &role : roles) {
+  for (auto &role: roles) {
     if (!role.second.scale || role.second.scaleInfo.valueSet) continue;
     if (logical->type == ILogical::Type::Enum::tFloat) {
       auto parameter = std::dynamic_pointer_cast<LogicalDecimal>(logical);
@@ -318,7 +318,11 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
       return std::make_shared<Variable>(role.invert == !(bool)integerValue);
     } else if (logical->type == ILogical::Type::Enum::tString && casts.empty()) {
       if (!value->empty() && value->at(0) != 0) {
-        int32_t size = value->back() == 0 ? value->size() - 1 : value->size();
+        auto size = 0;
+        for (auto element: *value) {
+          if (element != '\0') size++;
+        }
+        if (size > value->size()) size = value->size();
         std::string string(value->begin(), value->begin() + size);
         return std::make_shared<Variable>(string);
       }
@@ -429,7 +433,7 @@ void Parameter::convertToPacket(const std::string &value, const Role &role, std:
       else //value is id of enum element
       {
         auto *parameter = (LogicalEnumeration *)logical.get();
-        for (auto &element : parameter->values) {
+        for (auto &element: parameter->values) {
           if (element.id == value) {
             rpcValue.reset(new Variable(element.index));
             break;
@@ -535,7 +539,7 @@ void Parameter::convertToPacket(const PVariable &value, const Role &role, std::v
           else variable->integerValue = (int32_t)variable->booleanValue;
         }
       } else {
-        for (auto &cast : casts) {
+        for (auto &cast: casts) {
           cast->toPacket(variable);
         }
       }
@@ -621,7 +625,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t> &data) {
       std::vector<uint8_t> oldData = data;
       data.clear();
       for (uint32_t j = 0; j < bytesMissing; j++) data.push_back(0);
-      for (auto element : oldData) data.push_back(element);
+      for (auto element: oldData) data.push_back(element);
     }
   }
   catch (const std::exception &ex) {
