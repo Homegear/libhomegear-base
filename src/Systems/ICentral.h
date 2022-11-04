@@ -218,6 +218,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
    * @return Returns "RPC void" on success or RPC error "-100" when the new peer ID is invalid and error "-101" when the new peer ID is already in use.
    */
   virtual std::shared_ptr<BaseLib::Variable> setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_t newPeerId);
+  virtual std::shared_ptr<BaseLib::Variable> setSerialNumber(PRpcClientInfo clientInfo, uint64_t peer_id, const std::string &new_serial_number);
   virtual PVariable setInstallMode(PRpcClientInfo clientInfo, bool on, uint32_t duration, BaseLib::PVariable metadata, bool debugOutput = true) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable setInterface(PRpcClientInfo clientInfo, uint64_t peerId, std::string interfaceId) { return Variable::createError(-32601, "Method not implemented for this central."); }
   virtual PVariable setLinkInfo(PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel, std::string name, std::string description);
@@ -297,6 +298,7 @@ class ICentral : public Peer::IPeerEventSink, public IPhysicalInterface::IPhysic
   // }}}
 
   virtual void setPeerId(uint64_t oldPeerId, uint64_t newPeerId);
+  virtual void setPeerSerialNumber(const std::string &old_serial_number, const std::string &new_serial_number);
   virtual void deletePeersFromDatabase();
   virtual void loadVariables() = 0;
   virtual void loadPeers() {}

@@ -280,6 +280,26 @@ void ICentral::setPeerId(uint64_t oldPeerId, uint64_t newPeerId) {
   }
 }
 
+void ICentral::setPeerSerialNumber(const std::string &old_serial_number, const std::string &new_serial_number) {
+  try {
+    std::shared_ptr<Peer> peer = getPeer(old_serial_number);
+    if (!peer) return;
+    {
+      std::lock_guard<std::mutex> peersGuard(_peersMutex);
+      if (_peersBySerial.find(old_serial_number) != _peersBySerial.end()) _peersBySerial.erase(old_serial_number);
+      _peersBySerial[new_serial_number] = peer;
+    }
+
+    std::vector<std::shared_ptr<Peer>> peers = getPeers();
+    for (auto &element: peers) {
+      element->updatePeer(old_serial_number, new_serial_number);
+    }
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+}
+
 int32_t ICentral::deviceFamily() {
   return _deviceFamily;
 }
@@ -1469,6 +1489,24 @@ PVariable ICentral::setId(PRpcClientInfo clientInfo, uint64_t oldPeerId, uint64_
     auto newIds = std::vector<uint64_t>{newPeerId};
     raiseRPCNewDevices(newIds, deviceDescriptions);
     // }}}
+
+    return std::make_shared<Variable>(VariableType::tVoid);
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return Variable::createError(-32500, "Unknown application error.");
+}
+
+std::shared_ptr<BaseLib::Variable> ICentral::setSerialNumber(PRpcClientInfo clientInfo, uint64_t peer_id, const std::string &new_serial_number) {
+  try {
+    if (peer_id == 0 || peer_id >= 0x40000000) return Variable::createError(-100, "The peer ID is invalid.");
+    auto peer = getPeer(peer_id);
+    if (!peer) return Variable::createError(-2, "Peer not found.");
+    auto old_serial_number = peer->getSerialNumber();
+    PVariable result = peer->setSerialNumber(clientInfo, new_serial_number);
+    if (result->errorStruct) return result;
+    setPeerSerialNumber(old_serial_number, new_serial_number);
 
     return std::make_shared<Variable>(VariableType::tVoid);
   }

@@ -821,6 +821,27 @@ void Peer::updatePeer(uint64_t oldId, uint64_t newId) {
   }
 }
 
+void Peer::updatePeer(const std::string &old_serial_number, const std::string &new_serial_number) {
+  try {
+    bool changed = false;
+    {
+      std::lock_guard<std::mutex> peersGuard(_peersMutex);
+      for (std::unordered_map<int32_t, std::vector<std::shared_ptr<BasicPeer>>>::iterator i = _peers.begin(); i != _peers.end(); ++i) {
+        for (std::vector<std::shared_ptr<BasicPeer>>::iterator j = i->second.begin(); j != i->second.end(); ++j) {
+          if ((*j)->serialNumber == old_serial_number) {
+            (*j)->serialNumber = new_serial_number;
+            changed = true;
+          }
+        }
+      }
+    }
+    if (changed) savePeers();
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+}
+
 void Peer::deleteFromDatabase() {
   try {
     deleting = true;
@@ -4000,6 +4021,26 @@ PVariable Peer::setId(PRpcClientInfo clientInfo, uint64_t newPeerId) {
   return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
 
+PVariable Peer::setSerialNumber(PRpcClientInfo clientInfo, const std::string &new_serial_number) {
+  try {
+    if (new_serial_number == _serialNumber) return Variable::createError(-100, "New serial number is the same as the old one.");
+
+    std::shared_ptr<ICentral> central(getCentral());
+    if (central) {
+      std::shared_ptr<Peer> peer = central->getPeer(new_serial_number);
+      if (peer) return Variable::createError(-101, "New serial number is already in use.");
+      if (!_bl->db->setPeerSerialNumber(_peerID, new_serial_number)) return Variable::createError(-32500, "Error setting serial number. See log for more details.");
+      _serialNumber = new_serial_number;
+      if (serviceMessages) serviceMessages->setPeerSerial(new_serial_number);
+      return PVariable(new Variable(VariableType::tVoid));
+    } else return Variable::createError(-32500, "Application error. Central could not be found.");
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return Variable::createError(-32500, "Unknown application error. See error log for more details.");
+}
+
 PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, PVariable value, bool wait) {
   try {
     if (_disposing) return Variable::createError(-32500, "Peer is disposing.");
@@ -4138,6 +4179,5 @@ PVariable Peer::setValue(PRpcClientInfo clientInfo, uint32_t channel, std::strin
   }
   return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
-
 //End RPC methods
 }
