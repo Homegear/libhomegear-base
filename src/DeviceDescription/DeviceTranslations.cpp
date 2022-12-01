@@ -71,6 +71,7 @@ std::shared_ptr<HomegearDeviceTranslation> DeviceTranslations::load(const std::s
 std::unordered_set<std::string> DeviceTranslations::getLanguages() {
   try {
     std::string translationsPath = _bl->settings.deviceDescriptionPath() + std::to_string((int32_t)_family) + "/l10n/";
+    if (!Io::directoryExists(translationsPath)) return {};
     auto languageDirectories = Io::getDirectories(translationsPath);
     std::unordered_set<std::string> languages;
     for (auto &element : languageDirectories) {
@@ -81,7 +82,7 @@ std::unordered_set<std::string> DeviceTranslations::getLanguages() {
   } catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
-  return std::unordered_set<std::string>();
+  return {};
 }
 
 std::unordered_map<std::string, PHomegearDeviceTranslation> DeviceTranslations::getTranslations(const std::string &filename) {
