@@ -138,7 +138,7 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
 
   std::vector<char> response(_readBuffer->begin(), _readBuffer->begin() + bytesread);
 
-  if (_packetReceivedCallback) _packetSentCallback(response);
+  if (_packetReceivedCallback) _packetReceivedCallback(response);
 
   if (bytesread < 9) {
     if (!_keepAlive) _socket->close();
