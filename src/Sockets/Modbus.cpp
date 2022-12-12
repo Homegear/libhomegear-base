@@ -57,7 +57,6 @@ const uint8_t Modbus::_reverseByteMask[256] = {
 };
 
 Modbus::Modbus(BaseLib::SharedObjects *baseLib, Modbus::ModbusInfo &serverInfo) {
-  _bl = baseLib;
   _hostname = serverInfo.hostname;
   if (_hostname.empty()) throw ModbusException("The provided hostname is empty.");
   if (serverInfo.port > 0 && serverInfo.port < 65536) _port = serverInfo.port;
@@ -67,7 +66,7 @@ Modbus::Modbus(BaseLib::SharedObjects *baseLib, Modbus::ModbusInfo &serverInfo) 
 
   _keepAlive = serverInfo.keepAlive;
 
-  _socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl,
+  _socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(baseLib,
                                                                        _hostname,
                                                                        std::to_string(_port),
                                                                        serverInfo.useSsl,
@@ -82,6 +81,9 @@ Modbus::Modbus(BaseLib::SharedObjects *baseLib, Modbus::ModbusInfo &serverInfo) 
   _socket->setConnectionRetries(2);
   _socket->setReadTimeout(serverInfo.timeout * 1000);
   _socket->setWriteTimeout(serverInfo.timeout * 1000);
+
+  _packetSentCallback.swap(serverInfo.packetSentCallback);
+  _packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 }
 
 Modbus::~Modbus() {
@@ -119,9 +121,9 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
   if (packet.size() < 8) throw ModbusException("Could not send packet as it is invalid.");
 
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
-  if (_debug) _bl->out.printMessage("Sending Modbus packet: " + BaseLib::HelperFunctions::getHexString(packet));
   if (!_keepAlive) _socket->open();
   _socket->proofwrite(packet);
+  if (_packetSentCallback) _packetSentCallback(packet);
 
   uint32_t bytesread = 0;
   uint32_t size = 0;
@@ -136,7 +138,7 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
 
   std::vector<char> response(_readBuffer->begin(), _readBuffer->begin() + bytesread);
 
-  if (_debug) _bl->out.printMessage("Modbus packet received: " + BaseLib::HelperFunctions::getHexString(response));
+  if (_packetReceivedCallback) _packetReceivedCallback(response);
 
   if (bytesread < 9) {
     if (!_keepAlive) _socket->close();
