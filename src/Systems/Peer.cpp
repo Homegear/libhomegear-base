@@ -909,6 +909,7 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet) {
     }
     for (auto &parameter: valueSet->parameters) {
       if (!parameter.second) continue;
+      if (_bl->settings.devLog()) _bl->out.printInfo("Info (devlog): Loading parameter " + parameter.second->id + "...");
       if (!parameter.second->id.empty() && channelIterator->second.find(parameter.second->id) == channelIterator->second.end()) {
         RpcConfigurationParameter parameterStruct;
         parameterStruct.rpcParameter = parameter.second;
@@ -919,7 +920,9 @@ void Peer::initializeValueSet(int32_t channel, PVariables valueSet) {
         channelIterator->second.emplace(parameter.second->id, std::move(parameterStruct));
 
         //Add roles
+        if (_bl->settings.devLog()) _bl->out.printInfo("Info (devlog): Loading roles for parameter " + parameter.second->id + "...");
         for (auto &role: parameter.second->roles) {
+          if (_bl->settings.devLog()) _bl->out.printInfo("Info (devlog): Loading role " + std::to_string(role.second.id) + " for parameter " + parameter.second->id + "...");
           addRoleToVariable(channel, parameter.second->id, role.second.id, role.second.direction, role.second.invert, role.second.scale, role.second.scaleInfo);
         }
       }
