@@ -111,7 +111,6 @@ std::string HelperFunctions::getTimeString(int64_t time) {
 
 std::string HelperFunctions::getTimeString(std::string format, int64_t time) {
   std::time_t t;
-  int32_t milliseconds;
   if (time > 0) {
     t = std::time_t(time / 1000);
   } else {

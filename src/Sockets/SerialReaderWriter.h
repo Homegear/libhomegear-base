@@ -34,6 +34,7 @@
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../IEvents.h"
+#include "../LowLevel/Gpio.h"
 
 #include <thread>
 #include <atomic>
@@ -85,6 +86,20 @@ class SerialReaderWriter : public IEventsEx {
 
   bool isOpen() { return _fileDescriptor && _fileDescriptor->descriptor != -1; }
   std::shared_ptr<FileDescriptor> fileDescriptor() { return _fileDescriptor; }
+
+  /**
+   * This GPIO is set to high when reading the UART buffer starts and to low when it has finished.
+   *
+   * @param gpio
+   */
+  void setReadGpio(int32_t index);
+
+  /**
+   * This GPIO is set to high when writing to the UART buffer starts and to low when it has finished.
+   *
+   * @param gpio
+   */
+  void setWriteGpio(int32_t index);
 
   /**
    * Opens the serial device.
@@ -152,6 +167,10 @@ class SerialReaderWriter : public IEventsEx {
   int32_t _flags = 0;
   int32_t _readThreadPriority = 0;
   int32_t _handles = 0;
+
+  int32_t read_gpio_index_ = -1;
+  int32_t write_gpio_index_ = -1;
+  std::unique_ptr<LowLevel::Gpio> gpio_;
 
   std::atomic_bool _stopReadThread;
   std::mutex _readThreadMutex;

@@ -318,12 +318,12 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
       return std::make_shared<Variable>(role.invert == !(bool)integerValue);
     } else if (logical->type == ILogical::Type::Enum::tString && casts.empty()) {
       if (!value->empty() && value->at(0) != 0) {
-        auto size = 0;
+        std::size_t size = 0;
         for (auto element: *value) {
           if (element != '\0') size++;
         }
         if (size > value->size()) size = value->size();
-        std::string string(value->begin(), value->begin() + size);
+        std::string string(value->begin(), value->begin() + (signed)size);
         return std::make_shared<Variable>(string);
       }
       return std::make_shared<Variable>(VariableType::tString);
