@@ -92,14 +92,14 @@ class SerialReaderWriter : public IEventsEx {
    *
    * @param gpio
    */
-  void setReadGpio(int32_t index);
+  void setReadGpio(int32_t index, const std::string &gpio_path);
 
   /**
    * This GPIO is set to high when writing to the UART buffer starts and to low when it has finished.
    *
    * @param gpio
    */
-  void setWriteGpio(int32_t index);
+  void setWriteGpio(int32_t index, const std::string &gpio_path);
 
   /**
    * Opens the serial device.

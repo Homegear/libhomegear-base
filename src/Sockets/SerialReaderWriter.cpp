@@ -60,18 +60,18 @@ SerialReaderWriter::~SerialReaderWriter() {
   closeDevice();
 }
 
-void SerialReaderWriter::setReadGpio(int32_t index) {
+void SerialReaderWriter::setReadGpio(int32_t index, const std::string &gpio_path) {
   read_gpio_index_ = index;
-  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, _bl->settings.gpioPath());
+  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, gpio_path);
   gpio_->exportGpio(index);
   gpio_->setDirection(index, LowLevel::Gpio::GpioDirection::Enum::OUT);
   gpio_->openDevice(index, false);
   gpio_->set(index, false);
 }
 
-void SerialReaderWriter::setWriteGpio(int32_t index) {
+void SerialReaderWriter::setWriteGpio(int32_t index, const std::string &gpio_path) {
   write_gpio_index_ = index;
-  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, _bl->settings.gpioPath());
+  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, gpio_path);
   gpio_->exportGpio(index);
   gpio_->setDirection(index, LowLevel::Gpio::GpioDirection::Enum::OUT);
   gpio_->openDevice(index, false);
