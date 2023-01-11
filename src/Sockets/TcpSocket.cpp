@@ -1128,9 +1128,8 @@ void TcpSocket::autoConnect() {
 }
 
 void TcpSocket::close() {
-  std::unique_lock<std::mutex> readGuard(_readMutex, std::defer_lock);
-  std::unique_lock<std::mutex> writeGuard(_writeMutex, std::defer_lock);
-  std::lock(readGuard, writeGuard);
+  //Don't lock any mutexes for closing socket. There is always a reason the socket is being closed. Locking mutexes here
+  //causes the class to hang.
   _bl->fileDescriptorManager.close(_socketDescriptor);
 }
 
