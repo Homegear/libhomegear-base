@@ -2708,6 +2708,11 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
         }
         description->structValue->emplace("CATEGORIES", categoriesResult);
       }
+
+      auto building_part = getBuildingPart(-1);
+      if (fields.find("BUILDING_PART") != fields.end() && building_part != 0) {
+        description->structValue->emplace("BUILDING_PART", std::make_shared<BaseLib::Variable>(building_part));
+      }
     } else {
       if (_rpcDevice->functions.find(channel) == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
       PFunction rpcFunction = _rpcDevice->functions.at(channel);
@@ -2815,6 +2820,11 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
           categoriesResult->arrayValue->push_back(std::make_shared<Variable>(category));
         }
         description->structValue->emplace("CATEGORIES", categoriesResult);
+      }
+
+      auto building_part = getBuildingPart(channel);
+      if (fields.find("BUILDING_PART") != fields.end() && building_part != 0) {
+        description->structValue->emplace("BUILDING_PART", std::make_shared<BaseLib::Variable>(building_part));
       }
     }
     return description;
