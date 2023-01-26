@@ -43,6 +43,37 @@
 
 namespace BaseLib {
 
+FileDescriptor::~FileDescriptor() {
+  if (tlsSession) gnutls_deinit(tlsSession);
+
+  if (epoll_descriptor != -1) {
+    epoll_ctl(epoll_descriptor, EPOLL_CTL_DEL, closed_descriptor_, nullptr);
+  }
+
+  tlsSession = nullptr;
+}
+
+void FileDescriptor::Invalidate() {
+  closed_descriptor_ = descriptor.load();
+  descriptor = -1;
+}
+
+void FileDescriptor::Close() {
+  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_WR);
+  ::close(descriptor);
+  closed_descriptor_ = descriptor.load();
+  descriptor = -1;
+}
+
+void FileDescriptor::Shutdown() {
+  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_WR);
+  //On SSL connections shutdown is not necessary and might even cause segfaults
+  if (!tlsSession) ::shutdown(descriptor, 0);
+  ::close(descriptor);
+  closed_descriptor_ = descriptor.load();
+  descriptor = -1;
+}
+
 typedef std::unordered_map<int32_t, PFileDescriptor> FileDescriptors;
 
 struct FileDescriptorManager::OpaquePointer {
@@ -66,7 +97,7 @@ void FileDescriptorManager::dispose() {
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   for (auto &descriptor: opaque_pointer_->_descriptors) {
     if (!descriptor.second) continue;
-    ::close(descriptor.second->descriptor);
+    descriptor.second->Close();
   }
   opaque_pointer_->_descriptors.clear();
 }
@@ -98,16 +129,7 @@ PFileDescriptor FileDescriptorManager::add(int file_descriptor, int epoll_file_d
   auto descriptor_iterator = opaque_pointer_->_descriptors.find(file_descriptor);
   if (descriptor_iterator != opaque_pointer_->_descriptors.end()) {
     PFileDescriptor old_descriptor = descriptor_iterator->second;
-
-    if (old_descriptor->epoll_descriptor != -1) {
-      epoll_ctl(old_descriptor->epoll_descriptor, EPOLL_CTL_DEL, old_descriptor->descriptor, nullptr);
-    }
-
-    if (old_descriptor->tlsSession) {
-      gnutls_deinit(old_descriptor->tlsSession);
-      old_descriptor->tlsSession = nullptr;
-    }
-    old_descriptor->descriptor = -1;
+    old_descriptor->Invalidate();
   }
   PFileDescriptor descriptor = std::make_shared<FileDescriptor>();
   while (descriptor->id == 0) {
@@ -134,11 +156,7 @@ void FileDescriptorManager::remove(PFileDescriptor &descriptor) {
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
-    if (descriptor->epoll_descriptor != -1) {
-      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
-    }
-
-    descriptor->descriptor = -1;
+    descriptor->Close();
     opaque_pointer_->_descriptors.erase(descriptor->descriptor);
   }
 }
@@ -149,16 +167,7 @@ void FileDescriptorManager::close(PFileDescriptor &descriptor) {
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
     opaque_pointer_->_descriptors.erase(descriptor->descriptor);
-    if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
-    ::close(descriptor->descriptor);
-    if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-
-    if (descriptor->epoll_descriptor != -1) {
-      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
-    }
-
-    descriptor->tlsSession = nullptr;
-    descriptor->descriptor = -1;
+    descriptor->Close();
   }
 }
 
@@ -168,18 +177,7 @@ void FileDescriptorManager::shutdown(PFileDescriptor &descriptor) {
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id) {
     opaque_pointer_->_descriptors.erase(descriptor->descriptor);
-    if (descriptor->tlsSession) gnutls_bye(descriptor->tlsSession, GNUTLS_SHUT_WR);
-    //On SSL connections shutdown is not necessary and might even cause segfaults
-    if (!descriptor->tlsSession) ::shutdown(descriptor->descriptor, 0);
-    ::close(descriptor->descriptor);
-    if (descriptor->tlsSession) gnutls_deinit(descriptor->tlsSession);
-
-    if (descriptor->epoll_descriptor != -1) {
-      epoll_ctl(descriptor->epoll_descriptor, EPOLL_CTL_DEL, descriptor->descriptor, nullptr);
-    }
-
-    descriptor->tlsSession = nullptr;
-    descriptor->descriptor = -1;
+    descriptor->Shutdown();
   }
 }
 

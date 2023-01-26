@@ -42,11 +42,19 @@ namespace BaseLib {
 
 class SharedObjects;
 
-struct FileDescriptor {
+class FileDescriptor {
+ public:
   int32_t id = 0;
   std::atomic_int descriptor{-1};
   std::atomic_int epoll_descriptor{-1};
   gnutls_session_t tlsSession = nullptr;
+
+  ~FileDescriptor();
+  void Invalidate();
+  void Close();
+  void Shutdown();
+ private:
+  std::atomic_int closed_descriptor_{-1};
 } __attribute__((aligned(16)));
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
