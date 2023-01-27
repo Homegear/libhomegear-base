@@ -55,7 +55,7 @@ class FileDescriptor {
   void Shutdown();
  private:
   std::atomic_int closed_descriptor_{-1};
-} __attribute__((aligned(16)));
+};
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
