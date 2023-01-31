@@ -2601,20 +2601,21 @@ PVariable Peer::getDeviceDescription(PRpcClientInfo clientInfo, int32_t channel,
       if (fields.empty() || fields.find("ID") != fields.end()) description->structValue->insert(StructElement("ID", PVariable(new Variable((uint32_t)_peerID))));
       if (fields.empty() || fields.find("ADDRESS") != fields.end()) description->structValue->insert(StructElement("ADDRESS", PVariable(new Variable(_serialNumber))));
       if (fields.empty() || fields.find("NAME") != fields.end()) description->structValue->insert(StructElement("NAME", PVariable(new Variable(getName(-1)))));
-      if (supportedDevice && !supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end()))
-        description->structValue->insert(StructElement("SERIAL_PREFIX",
-                                                       PVariable(new Variable(supportedDevice->serialPrefix))));
-
       if (supportedDevice) {
+        if (!supportedDevice->serialPrefix.empty() && (fields.empty() || fields.find("SERIAL_PREFIX") != fields.end())) {
+          description->structValue->insert(StructElement("SERIAL_PREFIX", PVariable(new Variable(supportedDevice->serialPrefix))));
+        }
         if (fields.find("DESCRIPTION") != fields.end()) description->structValue->emplace("DESCRIPTION", central->getTranslations()->getTypeDescription(filename, language, supportedDevice->id));
         if (fields.find("LONG_DESCRIPTION") != fields.end()) description->structValue->emplace("LONG_DESCRIPTION", central->getTranslations()->getTypeLongDescription(filename, language, supportedDevice->id));
+        if ((fields.empty() || fields.find("HARDWARE_VERSION") != fields.end()) && !supportedDevice->hardwareVersion.empty()) {
+          description->structValue->insert(StructElement("HARDWARE_VERSION", std::make_shared<Variable>(supportedDevice->hardwareVersion)));
+        }
+        if ((fields.empty() || fields.find("MANUFACTURER") != fields.end()) && !supportedDevice->manufacturer.empty()) {
+          description->structValue->insert(StructElement("MANUFACTURER", std::make_shared<Variable>(supportedDevice->manufacturer)));
+        }
       }
 
       if (fields.empty() || fields.find("PAIRING_METHOD") != fields.end()) description->structValue->insert(StructElement("PAIRING_METHOD", std::make_shared<Variable>(_rpcDevice->pairingMethod)));
-      if ((fields.empty() || fields.find("HARDWARE_VERSION") != fields.end()) && !supportedDevice->hardwareVersion.empty())
-        description->structValue->insert(StructElement("HARDWARE_VERSION",
-                                                       std::make_shared<Variable>(supportedDevice->hardwareVersion)));
-      if ((fields.empty() || fields.find("MANUFACTURER") != fields.end()) && !supportedDevice->manufacturer.empty()) description->structValue->insert(StructElement("MANUFACTURER", std::make_shared<Variable>(supportedDevice->manufacturer)));
 
       PVariable variable = PVariable(new Variable(VariableType::tArray));
       PVariable variable2 = PVariable(new Variable(VariableType::tArray));
