@@ -152,7 +152,7 @@ PFileDescriptor FileDescriptorManager::add(int file_descriptor, int epoll_file_d
 }
 
 void FileDescriptorManager::remove(PFileDescriptor &descriptor) {
-  if (!descriptor || descriptor->descriptor < 0) return;
+  if (!descriptor || descriptor->descriptor == -1) return;
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
@@ -162,7 +162,7 @@ void FileDescriptorManager::remove(PFileDescriptor &descriptor) {
 }
 
 void FileDescriptorManager::close(PFileDescriptor &descriptor) {
-  if (!descriptor || descriptor->descriptor < 0) return;
+  if (!descriptor || descriptor->descriptor == -1) return;
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second->id == descriptor->id) {
@@ -172,7 +172,7 @@ void FileDescriptorManager::close(PFileDescriptor &descriptor) {
 }
 
 void FileDescriptorManager::shutdown(PFileDescriptor &descriptor) {
-  if (!descriptor || descriptor->descriptor < 0) return;
+  if (!descriptor || descriptor->descriptor == -1) return;
   std::lock_guard<std::mutex> descriptorsGuard(opaque_pointer_->_descriptorsMutex);
   auto descriptorIterator = opaque_pointer_->_descriptors.find(descriptor->descriptor);
   if (descriptorIterator != opaque_pointer_->_descriptors.end() && descriptorIterator->second && descriptorIterator->second->id == descriptor->id) {
@@ -182,7 +182,7 @@ void FileDescriptorManager::shutdown(PFileDescriptor &descriptor) {
 }
 
 std::unique_lock<std::mutex> FileDescriptorManager::getLock() {
-  return std::unique_lock<std::mutex>(opaque_pointer_->_descriptorsMutex, std::defer_lock);
+  return {opaque_pointer_->_descriptorsMutex, std::defer_lock};
 }
 
 PFileDescriptor FileDescriptorManager::get(int fileDescriptor) {
