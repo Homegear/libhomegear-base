@@ -59,16 +59,16 @@ void FileDescriptor::Invalidate() {
 }
 
 void FileDescriptor::Close() {
-  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_RDWR);
+  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_WR);
   ::close(descriptor);
   closed_descriptor_ = descriptor.load();
   descriptor = -1;
 }
 
 void FileDescriptor::Shutdown() {
-  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_RDWR);
+  if (tlsSession) gnutls_bye(tlsSession, GNUTLS_SHUT_WR);
   //On SSL connections shutdown is not necessary and might even cause segfaults
-  if (!tlsSession) ::shutdown(descriptor, SHUT_RDWR);
+  if (!tlsSession) ::shutdown(descriptor, SHUT_WR);
   ::close(descriptor);
   closed_descriptor_ = descriptor.load();
   descriptor = -1;
