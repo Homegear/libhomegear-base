@@ -54,7 +54,7 @@ public:
 	 * @param path The GET path called by the client.
 	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
 	 */
-	virtual bool onGet(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	virtual bool onGet(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<C1Net::TcpSocket>& socket, std::string& path) { return false; }
 
 	/**
 	 * Called on every HTTP POST request processed by the web server.
@@ -65,7 +65,7 @@ public:
 	 * @param path The POST path called by the client.
 	 * @return Return true when the request was handled. When false is returned, the request will be handled by the web server.
 	 */
-	virtual bool onPost(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<TcpSocket>& socket, std::string& path) { return false; }
+	virtual bool onPost(PServerInfo& serverInfo, Http& httpRequest, std::shared_ptr<C1Net::TcpSocket>& socket, std::string& path) { return false; }
 };
 }
 }

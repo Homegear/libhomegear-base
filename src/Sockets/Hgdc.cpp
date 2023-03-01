@@ -238,7 +238,7 @@ void Hgdc::listen() {
           continue;
         }
         if (bytesRead <= 0) continue;
-        if (bytesRead > (signed)buffer.size()) bytesRead = buffer.size();
+        if (bytesRead > buffer.size()) bytesRead = buffer.size();
 
         if (_bl->debugLevel >= 5) _out.printDebug("Debug: TCP packet received: " + BaseLib::HelperFunctions::getHexString(buffer.data(), bytesRead));
 

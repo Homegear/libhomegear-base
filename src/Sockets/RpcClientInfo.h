@@ -32,9 +32,11 @@
 #define RPCCLIENTINFO_H_
 
 #include "../Variable.h"
+
 #include <memory>
 #include <condition_variable>
 #include <atomic>
+#include <c1-net/TcpSocket.h>
 
 namespace BaseLib
 {
@@ -107,7 +109,7 @@ public:
     uint64_t peerId = 0;
 
     std::shared_ptr<FileDescriptor> socketDescriptor;
-    std::shared_ptr<TcpSocket> socket;
+    std::shared_ptr<C1Net::TcpSocket> socket;
 
 	std::atomic<int64_t> lastReceivedPacket;
 
