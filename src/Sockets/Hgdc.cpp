@@ -60,14 +60,22 @@ void Hgdc::start() {
 
     startQueue(0, false, 2);
 
-    _tcpSocket.reset(new BaseLib::TcpSocket(_bl, "localhost", std::to_string(_port)));
-    _tcpSocket->setConnectionRetries(2);
-    _tcpSocket->setReadTimeout(1000000);
-    _tcpSocket->setWriteTimeout(5000000);
+    C1Net::TcpSocketInfo tcp_socket_info;
+    tcp_socket_info.read_timeout = 5000;
+    tcp_socket_info.write_timeout = 5000;
+    tcp_socket_info.log_callback = std::bind(&Hgdc::Log, this, std::placeholders::_1, std::placeholders::_2);;
+
+    C1Net::TcpSocketHostInfo tcp_socket_host_info;
+    tcp_socket_host_info.host = "localhost";
+    tcp_socket_host_info.port = _port;
+    tcp_socket_host_info.auto_connect = false;
+    tcp_socket_host_info.connection_retries = 2;
+
+    _tcpSocket = std::make_unique<C1Net::TcpSocket>(tcp_socket_info, tcp_socket_host_info);
 
     try {
-      _tcpSocket->open();
-      if (_tcpSocket->connected()) {
+      _tcpSocket->Open();
+      if (_tcpSocket->Connected()) {
         _out.printInfo("Info: Successfully connected.");
         _stopped = false;
         std::shared_ptr<QueueEntry> queueEntry = std::make_shared<QueueEntry>();
@@ -94,7 +102,7 @@ void Hgdc::stop() {
     _stopCallbackThread = true;
     _bl->threadManager.join(_listenThread);
     _stopped = true;
-    if (_tcpSocket) _tcpSocket->close();
+    if (_tcpSocket) _tcpSocket->Shutdown();
     _tcpSocket.reset();
   }
   catch (const std::exception &ex) {
@@ -123,8 +131,8 @@ void Hgdc::unregisterPacketReceivedEventHandler(int32_t eventHandlerId) {
     if (eventHandlerId == -1) return;
 
     std::lock_guard<std::mutex> eventHandlersGuard(_packetReceivedEventHandlersMutex);
-    for (auto &eventHandlers : _packetReceivedEventHandlers) {
-      for (auto &eventHandler : eventHandlers.second) {
+    for (auto &eventHandlers: _packetReceivedEventHandlers) {
+      for (auto &eventHandler: eventHandlers.second) {
         if (eventHandler.first == eventHandlerId) {
           _packetReceivedEventHandlers.erase(eventHandler.first);
           break;
@@ -193,20 +201,25 @@ void Hgdc::unregisterReconnectedEventHandler(int32_t eventHandlerId) {
   }
 }
 
+void Hgdc::Log(uint32_t log_level, const std::string &message) {
+  _out.printMessage("Core TCP client: " + message, (int32_t)log_level, log_level < 3);
+}
+
 void Hgdc::listen() {
   try {
-    std::vector<char> buffer(4096);
-    int32_t processedBytes = 0;
+    std::vector<uint8_t> buffer(4096);
+    std::size_t processedBytes = 0;
+    bool more_data = false;
     while (!_stopCallbackThread) {
       try {
-        if (_stopped || !_tcpSocket->connected()) {
+        if (_stopped || !_tcpSocket->Connected()) {
           if (_stopCallbackThread) return;
           if (_stopped) _out.printWarning("Warning: Connection to device closed. Trying to reconnect...");
-          _tcpSocket->close();
+          _tcpSocket->Shutdown();
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
           if (_stopCallbackThread) return;
-          _tcpSocket->open();
-          if (_tcpSocket->connected()) {
+          _tcpSocket->Shutdown();
+          if (_tcpSocket->Connected()) {
             _out.printInfo("Info: Successfully connected.");
             _stopped = false;
             std::shared_ptr<QueueEntry> queueEntry = std::make_shared<QueueEntry>();
@@ -217,9 +230,9 @@ void Hgdc::listen() {
           continue;
         }
 
-        int32_t bytesRead = 0;
+        std::size_t bytesRead = 0;
         try {
-          bytesRead = _tcpSocket->proofread(buffer.data(), buffer.size());
+          bytesRead = _tcpSocket->Read(buffer.data(), buffer.size(), more_data);
         }
         catch (BaseLib::SocketTimeOutException &ex) {
           continue;
@@ -232,7 +245,7 @@ void Hgdc::listen() {
         processedBytes = 0;
         while (processedBytes < bytesRead) {
           try {
-            processedBytes += _binaryRpc->process(buffer.data() + processedBytes, bytesRead - processedBytes);
+            processedBytes += _binaryRpc->process((char *)buffer.data() + processedBytes, bytesRead - processedBytes);
             if (_binaryRpc->isFinished()) {
               if (_binaryRpc->getType() == BaseLib::Rpc::BinaryRpc::Type::request) {
                 std::shared_ptr<QueueEntry> queueEntry = std::make_shared<QueueEntry>();
@@ -241,9 +254,9 @@ void Hgdc::listen() {
                 enqueue(0, baseQueueEntry);
 
                 BaseLib::PVariable response = std::make_shared<BaseLib::Variable>();
-                std::vector<char> data;
+                std::vector<uint8_t> data;
                 _rpcEncoder->encodeResponse(response, data);
-                _tcpSocket->proofwrite(data);
+                _tcpSocket->Send(data);
               } else if (_binaryRpc->getType() == BaseLib::Rpc::BinaryRpc::Type::response) {
                 auto response = _rpcDecoder->decodeResponse(_binaryRpc->getData());
 
@@ -313,7 +326,7 @@ PVariable Hgdc::invoke(const std::string &methodName, const PArray &parameters, 
     array->emplace_back(std::move(std::make_shared<BaseLib::Variable>((int64_t)threadId)));
     array->emplace_back(std::move(std::make_shared<BaseLib::Variable>(packetId)));
     array->emplace_back(std::move(std::make_shared<BaseLib::Variable>(parameters)));
-    std::vector<char> encodedPacket;
+    std::vector<uint8_t> encodedPacket;
     _rpcEncoder->encodeRequest(methodName, array, encodedPacket);
 
     PRpcResponse response;
@@ -330,7 +343,7 @@ PVariable Hgdc::invoke(const std::string &methodName, const PArray &parameters, 
     int32_t i = 0;
     for (i = 0; i < 5; i++) {
       try {
-        _tcpSocket->proofwrite(encodedPacket);
+        _tcpSocket->Send(encodedPacket);
         break;
       }
       catch (const BaseLib::SocketOperationException &ex) {
@@ -377,7 +390,7 @@ PVariable Hgdc::invoke(const std::string &methodName, const PArray &parameters, 
 
 bool Hgdc::sendPacket(const std::string &serialNumber, const std::vector<uint8_t> &packet) {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return false;
+    if (!_tcpSocket || !_tcpSocket->Connected()) return false;
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
     parameters->reserve(2);
@@ -400,7 +413,7 @@ bool Hgdc::sendPacket(const std::string &serialNumber, const std::vector<uint8_t
 
 bool Hgdc::sendPacket(const std::string &serialNumber, const std::vector<char> &packet) {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return false;
+    if (!_tcpSocket || !_tcpSocket->Connected()) return false;
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
     parameters->reserve(2);
@@ -423,7 +436,7 @@ bool Hgdc::sendPacket(const std::string &serialNumber, const std::vector<char> &
 
 bool Hgdc::moduleReset(const std::string &serialNumber) {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return false;
+    if (!_tcpSocket || !_tcpSocket->Connected()) return false;
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
     parameters->push_back(std::make_shared<BaseLib::Variable>(serialNumber));
@@ -444,7 +457,7 @@ bool Hgdc::moduleReset(const std::string &serialNumber) {
 
 bool Hgdc::setMode(const std::string &serialNumber, uint8_t mode) {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return false;
+    if (!_tcpSocket || !_tcpSocket->Connected()) return false;
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
     parameters->reserve(2);
@@ -467,7 +480,7 @@ bool Hgdc::setMode(const std::string &serialNumber, uint8_t mode) {
 
 bool Hgdc::isMaster() {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return false;
+    if (!_tcpSocket || !_tcpSocket->Connected()) return false;
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
 
@@ -481,7 +494,7 @@ bool Hgdc::isMaster() {
 
 PVariable Hgdc::getModules(int64_t familyId) {
   try {
-    if (!_tcpSocket || !_tcpSocket->connected()) return BaseLib::Variable::createError(-32500, "Not connected.");
+    if (!_tcpSocket || !_tcpSocket->Connected()) return BaseLib::Variable::createError(-32500, "Not connected.");
 
     BaseLib::PArray parameters = std::make_shared<BaseLib::Array>();
     parameters->push_back(std::make_shared<BaseLib::Variable>(familyId));
@@ -504,18 +517,18 @@ void Hgdc::processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry
         std::lock_guard<std::mutex> eventHandlersGuard(_packetReceivedEventHandlersMutex);
         auto eventHandlersIterator = _packetReceivedEventHandlers.find(queueEntry->parameters->at(0)->integerValue64);
         if (eventHandlersIterator != _packetReceivedEventHandlers.end()) {
-          for (auto &eventHandler : eventHandlersIterator->second) {
+          for (auto &eventHandler: eventHandlersIterator->second) {
             if (eventHandler.second) eventHandler.second(queueEntry->parameters->at(0)->integerValue64, queueEntry->parameters->at(1)->stringValue, queueEntry->parameters->at(2)->binaryValue);
           }
         }
       } else if (queueEntry->method == "moduleUpdate") {
         std::lock_guard<std::mutex> eventHandlersGuard(_moduleUpdateEventHandlersMutex);
-        for (auto &eventHandler : _moduleUpdateEventHandlers) {
+        for (auto &eventHandler: _moduleUpdateEventHandlers) {
           if (eventHandler.second) eventHandler.second(queueEntry->parameters->at(0));
         }
       } else if (queueEntry->method == "reconnected") {
         std::lock_guard<std::mutex> eventHandlersGuard(_reconnectedEventHandlersMutex);
-        for (auto &eventHandler : _reconnectedEventHandlers) {
+        for (auto &eventHandler: _reconnectedEventHandlers) {
           if (eventHandler.second) eventHandler.second();
         }
       }

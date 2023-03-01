@@ -30,8 +30,9 @@
 
 #include "Ssdp.h"
 #include "../BaseLib.h"
-#include "../Encoding/RapidXml/rapidxml.h"
+
 #include <ifaddrs.h>
+#include <arpa/inet.h>
 
 namespace BaseLib {
 

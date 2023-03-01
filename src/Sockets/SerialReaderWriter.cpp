@@ -30,9 +30,12 @@
 
 #include "SerialReaderWriter.h"
 
+#include "../BaseLib.h"
+
 #include <memory>
 #include <utility>
-#include "../BaseLib.h"
+
+#include <sys/poll.h>
 
 namespace BaseLib {
 

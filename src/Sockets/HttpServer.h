@@ -34,7 +34,8 @@
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../Encoding/Http.h"
-#include "TcpSocket.h"
+
+#include <c1-net/TcpServer.h>
 
 #include <atomic>
 
@@ -123,11 +124,14 @@ class HttpServerException : public Exception {
 class HttpServer {
  public:
   struct HttpServerInfo {
+    std::string listenAddress = "::";
+    uint16_t port = 80;
     bool useSsl = false;
     uint32_t connectionBacklogSize = 100;
     uint32_t maxConnections = 10;
     uint32_t serverThreads = 1;
-    std::unordered_map<std::string, TcpSocket::PCertificateInfo> certificates;
+    uint32_t processingThreads = 1;
+    std::unordered_map<std::string, C1Net::PCertificateInfo> certificates;
     std::string dhParamFile;
     std::string dhParamData;
     bool requireClientCert = false;
@@ -149,20 +153,9 @@ class HttpServer {
    * @param port The port number to bind the server to.
    * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
    */
-  void bind(std::string address, std::string port, std::string &listenAddress);
+  void bind();
 
-  /**
-   * Starts listening on the already bound socket (created with bind()). This splits up the start process to be able
-   * to listen on ports lower than 1024 and do a privilege drop. Don't call startServer() when using pre-binding as
-   * this recreates the socket.
-   *
-   * @see bind
-   *
-   * @param[out] listenAddress The IP address the server was bound to (e. g. `192.168.0.152`).
-   */
-  void startPrebound(std::string &listenAddress, size_t processingThreads = 0);
-
-  void start(std::string address, std::string port, std::string &listenAddress, size_t processingThreads = 0);
+  void start();
   void stop();
   void waitForStop();
   void reload();
@@ -173,7 +166,7 @@ class HttpServer {
   double GetProcessingThreadLoad();
   double GetProcessingThreadLoadMax();
 
-  void send(int32_t clientId, const TcpSocket::TcpPacket &packet, bool closeConnection = true);
+  void send(int32_t clientId, const C1Net::TcpPacket &packet, bool closeConnection = true);
   void send(int32_t clientId, const std::vector<char> &packet, bool closeConnection = true);
 
   std::string getClientCertDn(int32_t clientId);
@@ -185,7 +178,7 @@ class HttpServer {
   };
 
   BaseLib::SharedObjects *_bl = nullptr;
-  std::shared_ptr<TcpSocket> _socket;
+  std::shared_ptr<C1Net::TcpServer> _socket;
 
   std::mutex _httpClientInfoMutex;
   std::unordered_map<int32_t, HttpClientInfo> _httpClientInfo;
@@ -194,9 +187,10 @@ class HttpServer {
   std::function<void(int32_t clientId)> _connectionClosedCallback;
   std::function<void(int32_t clientId, Http &http)> _packetReceivedCallback;
 
-  void newConnection(int32_t clientId, std::string address, uint16_t port);
-  void connectionClosed(int32_t clientId);
-  void packetReceived(int32_t clientId, TcpSocket::TcpPacket &packet);
+  void Log(uint32_t log_level, const std::string &message);
+  void newConnection(const C1Net::TcpServer::PTcpClientData &client_data);
+  void connectionClosed(const C1Net::TcpServer::PTcpClientData &client_data, int32_t errorCode, const std::string &error_string);
+  void packetReceived(const C1Net::TcpServer::PTcpClientData &client_data, const C1Net::TcpPacket &packet);
 };
 
 }

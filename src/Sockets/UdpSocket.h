@@ -34,6 +34,8 @@
 #include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
 
+#include <netdb.h>
+
 namespace BaseLib {
 
 class SharedObjects;

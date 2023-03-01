@@ -31,6 +31,7 @@
 #include "Gpio.h"
 #include "../BaseLib.h"
 
+#include <sys/poll.h>
 #include <sys/stat.h>
 
 namespace BaseLib {

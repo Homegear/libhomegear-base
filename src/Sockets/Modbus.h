@@ -32,9 +32,14 @@
 #define LIBHOMEGEAR_BASE_MODBUS_H
 
 #include "../Exception.h"
-#include "TcpSocket.h"
+#include "../Security/SecureVector.h"
+
+#include <c1-net/TcpSocket.h>
+#include <map>
 
 namespace BaseLib {
+
+class SharedObjects;
 
 /**
  * Exception class for the Modbus server.
@@ -172,7 +177,7 @@ class Modbus {
    * Checks if the socket is connected.
    * @return Returns true when the socket is connected and false otherwise.
    */
-  bool isConnected() { return _socket && _socket->connected(); }
+  bool isConnected() { return _socket && _socket->Connected(); }
 
   /**
    * Executes modbus function 01 (0x01) "Read Coils".
@@ -338,7 +343,7 @@ class Modbus {
   /**
    * The socket object.
    */
-  std::unique_ptr<TcpSocket> _socket;
+  std::unique_ptr<C1Net::TcpSocket> _socket;
 
   /**
    * The hostname of the Modbus server.

@@ -31,6 +31,10 @@
 #include "../BaseLib.h"
 #include "UdpSocket.h"
 
+#include <netdb.h>
+#include <sys/poll.h>
+#include <arpa/inet.h>
+
 namespace BaseLib {
 
 UdpSocket::UdpSocket(BaseLib::SharedObjects *baseLib) : UdpSocket(baseLib, "") {
