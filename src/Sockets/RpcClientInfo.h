@@ -40,7 +40,6 @@ namespace BaseLib
 {
 
 class FileDescriptor;
-class TcpSocket;
 
 namespace Security
 {
