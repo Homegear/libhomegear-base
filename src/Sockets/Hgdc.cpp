@@ -234,7 +234,7 @@ void Hgdc::listen() {
         try {
           bytesRead = _tcpSocket->Read(buffer.data(), buffer.size(), more_data);
         }
-        catch (BaseLib::UdpSocketTimeoutException &ex) {
+        catch (const C1Net::TimeoutException &ex) {
           continue;
         }
         if (bytesRead <= 0) continue;
@@ -346,7 +346,7 @@ PVariable Hgdc::invoke(const std::string &methodName, const PArray &parameters, 
         _tcpSocket->Send(encodedPacket);
         break;
       }
-      catch (const BaseLib::UdpSocketOperationException &ex) {
+      catch (const C1Net::Exception &ex) {
         _out.printError("Error: " + std::string(ex.what()));
         if (i == 5) {
           std::lock_guard<std::mutex> responseGuard(_rpcResponsesMutex);

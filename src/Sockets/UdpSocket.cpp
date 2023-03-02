@@ -87,12 +87,12 @@ void UdpSocket::close() {
 
 int32_t UdpSocket::proofread(char *buffer, int32_t bufferSize, std::string &senderIp) {
   senderIp.clear();
-  if (!_socketDescriptor) throw UdpSocketOperationException("Socket descriptor is nullptr.");
+  if (!_socketDescriptor) throw C1Net::Exception("Socket descriptor is nullptr.");
   std::unique_lock<std::mutex> readGuard(_readMutex);
   if (_autoConnect && !isOpen()) {
     readGuard.unlock();
     autoConnect();
-    if (!isOpen()) throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
+    if (!isOpen()) throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
     readGuard.lock();
   }
 
@@ -110,9 +110,9 @@ int32_t UdpSocket::proofread(char *buffer, int32_t bufferSize, std::string &send
     if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLHUP)) || _socketDescriptor->descriptor == -1) {
       readGuard.unlock();
       close();
-      throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
+      throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (2).");
     } else if (poll_result == 0) {
-      throw UdpSocketTimeoutException("Reading from socket timed out (1).", UdpSocketTimeoutException::SocketTimeOutType::selectTimeout);
+      throw C1Net::TimeoutException("Reading from socket timed out (1).");
     }
   }
 
@@ -123,7 +123,7 @@ int32_t UdpSocket::proofread(char *buffer, int32_t bufferSize, std::string &send
     bytesRead = recvfrom(_socketDescriptor->descriptor, buffer, bufferSize, 0, &clientInfo, &addressLength);
   } while (bytesRead < 0 && (errno == EAGAIN || errno == EINTR));
   if (bytesRead <= 0) {
-    throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
+    throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (3).");
   }
   readGuard.unlock();
   std::array<char, INET6_ADDRSTRLEN + 1> ipStringBuffer{};
@@ -145,19 +145,19 @@ int32_t UdpSocket::proofwrite(const std::shared_ptr<std::vector<char>> &data) {
 }
 
 int32_t UdpSocket::proofwrite(const std::vector<char> &data) {
-  if (!_socketDescriptor) throw UdpSocketOperationException("Socket descriptor is nullptr.");
+  if (!_socketDescriptor) throw C1Net::Exception("Socket descriptor is nullptr.");
   std::unique_lock<std::mutex> writeGuard(_writeMutex);
   if (!isOpen()) {
     writeGuard.unlock();
     autoConnect();
-    if (!isOpen()) throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
+    if (!isOpen()) throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
     writeGuard.lock();
   }
   if (data.empty()) {
     return 0;
   }
   if (data.size() > 104857600) {
-    throw UdpSocketDataLimitException("Data size is larger than 100 MiB.");
+    throw C1Net::Exception("Data size is larger than 100 MiB.");
   }
 
   int32_t totalBytesWritten = 0;
@@ -167,7 +167,7 @@ int32_t UdpSocket::proofwrite(const std::vector<char> &data) {
       if (bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
       writeGuard.unlock();
       close();
-      throw UdpSocketOperationException(strerror(errno));
+      throw C1Net::Exception(strerror(errno));
     }
     totalBytesWritten += bytesWritten;
   }
@@ -175,19 +175,19 @@ int32_t UdpSocket::proofwrite(const std::vector<char> &data) {
 }
 
 int32_t UdpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
-  if (!_socketDescriptor) throw UdpSocketOperationException("Socket descriptor is nullptr.");
+  if (!_socketDescriptor) throw C1Net::Exception("Socket descriptor is nullptr.");
   std::unique_lock<std::mutex> writeGuard(_writeMutex);
   if (!isOpen()) {
     writeGuard.unlock();
     autoConnect();
-    if (!isOpen()) throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
+    if (!isOpen()) throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
     writeGuard.lock();
   }
   if (bytesToWrite <= 0) {
     return 0;
   }
   if (bytesToWrite > 104857600) {
-    throw UdpSocketDataLimitException("Data size is larger than 100 MiB.");
+    throw C1Net::Exception("Data size is larger than 100 MiB.");
   }
 
   int32_t totalBytesWritten = 0;
@@ -197,7 +197,7 @@ int32_t UdpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
       if (bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
       writeGuard.unlock();
       close();
-      throw UdpSocketOperationException(strerror(errno));
+      throw C1Net::Exception(strerror(errno));
     }
     totalBytesWritten += bytesWritten;
   }
@@ -205,19 +205,19 @@ int32_t UdpSocket::proofwrite(const char *buffer, int32_t bytesToWrite) {
 }
 
 int32_t UdpSocket::proofwrite(const std::string &data) {
-  if (!_socketDescriptor) throw UdpSocketOperationException("Socket descriptor is nullptr.");
+  if (!_socketDescriptor) throw C1Net::Exception("Socket descriptor is nullptr.");
   std::unique_lock<std::mutex> writeGuard(_writeMutex);
   if (!isOpen()) {
     writeGuard.unlock();
     autoConnect();
-    if (!isOpen()) throw UdpSocketClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
+    if (!isOpen()) throw C1Net::ClosedException("Connection to client number " + std::to_string(_socketDescriptor->id) + " closed (8).");
     writeGuard.lock();
   }
   if (data.empty()) {
     return 0;
   }
   if (data.size() > 104857600) {
-    throw UdpSocketDataLimitException("Data size is larger than 100 MiB.");
+    throw C1Net::Exception("Data size is larger than 100 MiB.");
   }
 
   int32_t totalBytesWritten = 0;
@@ -227,7 +227,7 @@ int32_t UdpSocket::proofwrite(const std::string &data) {
       if (bytesWritten == -1 && (errno == EINTR || errno == EAGAIN)) continue;
       writeGuard.unlock();
       close();
-      throw UdpSocketOperationException(strerror(errno));
+      throw C1Net::Exception(strerror(errno));
     }
     totalBytesWritten += bytesWritten;
   }
@@ -250,7 +250,7 @@ void UdpSocket::getSocketDescriptor() {
     if (!_serverInfo || !_socketDescriptor || _socketDescriptor->descriptor == -1) {
       _readMutex.unlock();
       _writeMutex.unlock();
-      throw UdpSocketOperationException("Could not connect to server.");
+      throw C1Net::Exception("Could not connect to server.");
     }
     _writeMutex.unlock();
     _readMutex.unlock();
@@ -265,8 +265,8 @@ void UdpSocket::getSocketDescriptor() {
 
 void UdpSocket::getConnection() {
   _socketDescriptor.reset();
-  if (_hostname.empty()) throw UdpSocketInvalidParametersException("Hostname is empty");
-  if (_port.empty()) throw UdpSocketInvalidParametersException("Port is empty");
+  if (_hostname.empty()) throw C1Net::Exception("Hostname is empty");
+  if (_port.empty()) throw C1Net::Exception("Port is empty");
 
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Opening socket to UDP host " + _hostname + " on port " + _port + "...");
 
@@ -282,7 +282,7 @@ void UdpSocket::getConnection() {
   if (getaddrinfo(_hostname.c_str(), _port.c_str(), &hostInfo, &_serverInfo) != 0) {
     freeaddrinfo(_serverInfo);
     _serverInfo = nullptr;
-    throw UdpSocketOperationException("Could not get address information: " + std::string(strerror(errno)));
+    throw C1Net::Exception("Could not get address information: " + std::string(strerror(errno)));
   }
 
   char ipStringBuffer[INET6_ADDRSTRLEN + 1];
@@ -300,7 +300,7 @@ void UdpSocket::getConnection() {
   if (!_socketDescriptor || _socketDescriptor->descriptor == -1) {
     freeaddrinfo(_serverInfo);
     _serverInfo = nullptr;
-    throw UdpSocketOperationException("Could not create UDP socket for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
+    throw C1Net::Exception("Could not create UDP socket for server " + _clientIp + " on port " + _port + ": " + strerror(errno));
   }
 
   if (_serverInfo->ai_family == AF_INET) {
@@ -312,7 +312,7 @@ void UdpSocket::getConnection() {
       freeaddrinfo(_serverInfo);
       _serverInfo = nullptr;
       _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-      throw UdpSocketOperationException("Could not bind server: " + std::string(strerror(errno)));
+      throw C1Net::Exception("Could not bind server: " + std::string(strerror(errno)));
     }
 
     uint32_t clientInfoSize = sizeof(clientInfo);
@@ -320,7 +320,7 @@ void UdpSocket::getConnection() {
       freeaddrinfo(_serverInfo);
       _serverInfo = nullptr;
       _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-      throw UdpSocketOperationException("Could not get listen ip and port: " + std::string(strerror(errno)));
+      throw C1Net::Exception("Could not get listen ip and port: " + std::string(strerror(errno)));
     }
 
     auto s = (struct sockaddr_in *)&(clientInfo.sin_addr);
@@ -337,7 +337,7 @@ void UdpSocket::getConnection() {
       freeaddrinfo(_serverInfo);
       _serverInfo = nullptr;
       _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-      throw UdpSocketOperationException("Could not bind server: " + std::string(strerror(errno)));
+      throw C1Net::Exception("Could not bind server: " + std::string(strerror(errno)));
     }
 
     uint32_t clientInfoSize = sizeof(clientInfo);
@@ -345,7 +345,7 @@ void UdpSocket::getConnection() {
       freeaddrinfo(_serverInfo);
       _serverInfo = nullptr;
       _bl->fileDescriptorManager.shutdown(_socketDescriptor);
-      throw UdpSocketOperationException("Could not get listen ip and port: " + std::string(strerror(errno)));
+      throw C1Net::Exception("Could not get listen ip and port: " + std::string(strerror(errno)));
     }
 
     auto s = (struct sockaddr_in6 *)&(clientInfo.sin6_addr);

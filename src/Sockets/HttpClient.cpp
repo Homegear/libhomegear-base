@@ -244,10 +244,10 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     try {
       if (!_socket->Connected()) _socket->Open();
     }
-    catch (const C1Net::TcpSocketTimeoutException &ex) {
+    catch (const C1Net::TimeoutException &ex) {
       throw HttpClientTimeOutException(std::string(ex.what()));
     }
-    catch (const C1Net::TcpSocketException &ex) {
+    catch (const C1Net::Exception &ex) {
       throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
     }
 
@@ -255,16 +255,16 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Sending packet to HTTP server \"" + _hostname + "\": " + request);
       _socket->Send((uint8_t *)request.data(), request.size());
     }
-    catch (const C1Net::TcpSocketClosedException &ex) {
+    catch (const C1Net::ClosedException &ex) {
       _socket->Shutdown();
       if (i == 1) http.setFinished();
       else continue;
     }
-    catch (const C1Net::TcpSocketTimeoutException &ex) {
+    catch (const C1Net::TimeoutException &ex) {
       if (i == 1) throw HttpClientTimeOutException(std::string(ex.what()));
       continue;
     }
-    catch (const C1Net::TcpSocketException &ex) {
+    catch (const C1Net::Exception &ex) {
       _socket->Shutdown();
       if (i == 1) throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
       continue;
@@ -287,16 +287,16 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
         }
         receivedBytes = _socket->Read(buffer.data() + bufferPos, bufferMax - bufferPos, more_data);
       }
-      catch (const C1Net::TcpSocketTimeoutException &ex) {
+      catch (const C1Net::TimeoutException &ex) {
         if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
       }
-      catch (const C1Net::TcpSocketClosedException &ex) {
+      catch (const C1Net::ClosedException &ex) {
         _socket->Shutdown();
         if (i == 1) http.setFinished();
         break;
       }
-      catch (const C1Net::TcpSocketException &ex) {
+      catch (const C1Net::Exception &ex) {
         if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
       }

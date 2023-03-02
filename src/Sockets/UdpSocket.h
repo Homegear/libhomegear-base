@@ -31,7 +31,6 @@
 #ifndef UDPSOCKETOPERATIONS_H_
 #define UDPSOCKETOPERATIONS_H_
 
-#include "SocketExceptions.h"
 #include "../Managers/FileDescriptorManager.h"
 
 #include <netdb.h>
