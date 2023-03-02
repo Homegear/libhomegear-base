@@ -33,79 +33,37 @@
 
 #include "../Exception.h"
 
-namespace BaseLib
-{
+namespace BaseLib {
 
-class SocketOperationException : public Exception
-{
-public:
-	explicit SocketOperationException(const std::string& message) : Exception(message) {}
+class UdpSocketOperationException : public Exception {
+ public:
+  explicit UdpSocketOperationException(const std::string &message) : Exception(message) {}
 };
 
-class SocketSizeMismatchException : public SocketOperationException
-{
-public:
-    explicit SocketSizeMismatchException(const std::string& message) : SocketOperationException(message) {}
+class UdpSocketTimeoutException : public UdpSocketOperationException {
+ public:
+  enum class SocketTimeOutType {
+    undefined,
+    selectTimeout,
+    readTimeout
+  };
+
+  explicit UdpSocketTimeoutException(const std::string &message) : UdpSocketOperationException(message) {}
+  UdpSocketTimeoutException(const std::string &message, SocketTimeOutType type) : UdpSocketOperationException(message), _type(type) {}
+
+  SocketTimeOutType getType() { return _type; }
+ private:
+  SocketTimeOutType _type = SocketTimeOutType::undefined;
 };
 
-class SocketTimeOutException : public SocketOperationException
-{
-public:
-	enum class SocketTimeOutType
-	{
-		undefined,
-		selectTimeout,
-		readTimeout
-	};
-
-    explicit SocketTimeOutException(const std::string& message) : SocketOperationException(message) {}
-	SocketTimeOutException(const std::string& message, SocketTimeOutType type) : SocketOperationException(message), _type(type) {}
-
-	SocketTimeOutType getType() { return _type; }
-private:
-	SocketTimeOutType _type = SocketTimeOutType::undefined;
+class UdpSocketClosedException : public UdpSocketOperationException {
+ public:
+  explicit UdpSocketClosedException(const std::string &message) : UdpSocketOperationException(message) {}
 };
 
-class SocketClosedException : public SocketOperationException
-{
-public:
-    explicit SocketClosedException(const std::string& message) : SocketOperationException(message) {}
-};
-
-class SocketInvalidParametersException : public SocketOperationException
-{
-public:
-    explicit SocketInvalidParametersException(const std::string& message) : SocketOperationException(message) {}
-};
-
-class SocketDataLimitException : public SocketOperationException
-{
-public:
-    explicit SocketDataLimitException(const std::string& message) : SocketOperationException(message) {}
-};
-
-class SocketSslException : public SocketOperationException
-{
-public:
-    explicit SocketSslException(const std::string& message) : SocketOperationException(message) {}
-};
-
-class SocketSslHandshakeFailedException : public SocketSslException
-{
-public:
-    explicit SocketSslHandshakeFailedException(const std::string& message) : SocketSslException(message) {}
-};
-
-class SocketBindException : public SocketOperationException
-{
-public:
-    explicit SocketBindException(const std::string& message) : SocketOperationException(message) {}
-};
-
-class SocketAddressInUseException : public SocketBindException
-{
-public:
-    explicit SocketAddressInUseException(const std::string& message) : SocketBindException(message) {}
+class UdpSocketDataLimitException : public UdpSocketOperationException {
+ public:
+  explicit UdpSocketDataLimitException(const std::string &message) : UdpSocketOperationException(message) {}
 };
 
 }

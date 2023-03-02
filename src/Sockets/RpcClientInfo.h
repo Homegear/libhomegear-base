@@ -108,7 +108,6 @@ public:
      */
     uint64_t peerId = 0;
 
-    std::shared_ptr<FileDescriptor> socketDescriptor;
     std::shared_ptr<C1Net::TcpSocket> socket;
 
 	std::atomic<int64_t> lastReceivedPacket;
