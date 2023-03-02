@@ -66,6 +66,11 @@ class UdpSocketDataLimitException : public UdpSocketOperationException {
   explicit UdpSocketDataLimitException(const std::string &message) : UdpSocketOperationException(message) {}
 };
 
+class UdpSocketInvalidParametersException : public UdpSocketOperationException {
+ public:
+  explicit UdpSocketInvalidParametersException(const std::string &message) : UdpSocketOperationException(message) {}
+};
+
 }
 
 #endif
