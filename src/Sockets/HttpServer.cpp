@@ -55,7 +55,7 @@ HttpServer::HttpServer(BaseLib::SharedObjects *baseLib, HttpServerInfo &serverIn
   _connectionClosedCallback.swap(serverInfo.connectionClosedCallback);
   _packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 
-  _socket = std::make_shared<C1Net::TcpServer>(baseLib, tcpServerInfo);
+  _socket = std::make_shared<C1Net::TcpServer>(tcpServerInfo);
 }
 
 HttpServer::~HttpServer() {
