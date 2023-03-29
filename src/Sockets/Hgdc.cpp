@@ -218,7 +218,7 @@ void Hgdc::listen() {
           _tcpSocket->Shutdown();
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
           if (_stopCallbackThread) return;
-          _tcpSocket->Shutdown();
+          _tcpSocket->Open();
           if (_tcpSocket->Connected()) {
             _out.printInfo("Info: Successfully connected.");
             _stopped = false;
