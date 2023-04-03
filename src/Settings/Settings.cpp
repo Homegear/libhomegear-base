@@ -682,6 +682,11 @@ void Settings::load(const std::string &filename, const std::string &executablePa
         } else if (name == "maxwaitforphysicalinterfaces") {
           _maxWaitForPhysicalInterfaces = Math::getUnsignedNumber(value);
           if (_maxWaitForPhysicalInterfaces < 1) _maxWaitForPhysicalInterfaces = 1;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: maxWaitForPhysicalInterfaces set to " + _gpioPath);
+        } else if (name == "stacksize") {
+          _stackSize = Math::getUnsignedNumber(value);
+          if (_stackSize < 131072) _stackSize = 131072;
+          if (!hideOutput && _bl->debugLevel >= 5) _bl->out.printDebug("Debug: stackSize set to " + _gpioPath);
         }
           // {{{ OAuth
         else if (name == "oauthcertpath") {

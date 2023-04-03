@@ -178,6 +178,7 @@ class Settings {
   int32_t oauthTokenLifetime() { return _oauthTokenLifetime; }
   int32_t oauthRefreshTokenLifetime() { return _oauthRefreshTokenLifetime; }
   uint32_t maxWaitForPhysicalInterfaces() { return _maxWaitForPhysicalInterfaces; }
+  uint32_t stackSize() { return _stackSize; }
  private:
   BaseLib::SharedObjects *_bl = nullptr;
   std::string _executablePath;
@@ -313,6 +314,7 @@ class Settings {
   std::string _gpioPath;
   std::vector<uint32_t> _exportGpios;
   uint32_t _maxWaitForPhysicalInterfaces = 180;
+  uint32_t _stackSize = 524288;
 
   // {{{ OAuth
   std::string _oauthCertPath;
