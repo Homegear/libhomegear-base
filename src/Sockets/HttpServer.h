@@ -135,6 +135,7 @@ class HttpServer {
     std::string dhParamFile;
     std::string dhParamData;
     bool requireClientCert = false;
+    bool useProxyProtocol = false;
 
     std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
     std::function<void(int32_t clientId)> connectionClosedCallback;

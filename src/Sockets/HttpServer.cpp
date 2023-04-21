@@ -46,6 +46,7 @@ HttpServer::HttpServer(BaseLib::SharedObjects *baseLib, HttpServerInfo &serverIn
   tcpServerInfo.processing_threads = serverInfo.processingThreads;
   tcpServerInfo.certificates = serverInfo.certificates;
   tcpServerInfo.require_client_cert = serverInfo.requireClientCert;
+  tcpServerInfo.use_proxy_protocol = serverInfo.useProxyProtocol;
   tcpServerInfo.log_callback = std::bind(&HttpServer::Log, this, std::placeholders::_1, std::placeholders::_2);
   tcpServerInfo.new_connection_callback = std::bind(&HttpServer::newConnection, this, std::placeholders::_1);
   tcpServerInfo.connection_closed_callback = std::bind(&HttpServer::connectionClosed, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
