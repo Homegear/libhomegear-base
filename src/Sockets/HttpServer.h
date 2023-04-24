@@ -135,7 +135,20 @@ class HttpServer {
     std::string dhParamFile;
     std::string dhParamData;
     bool requireClientCert = false;
+
+    /**
+     * Use proxy protocol to read original sender information. Please note that non-proxy protocol packets are
+     * discarded when this is enabled.
+     *
+     * See https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+     */
     bool useProxyProtocol = false;
+
+    /**
+     * Only relevant when `useProxyProtocol` is set to `true`. List of allowed IPv4 and IPv6 source addresses. All
+     * other source addresses are rejected.
+     */
+    std::vector<std::string> validProxyProtocolSources;
 
     std::function<void(int32_t clientId, std::string address, uint16_t port)> newConnectionCallback;
     std::function<void(int32_t clientId)> connectionClosedCallback;
