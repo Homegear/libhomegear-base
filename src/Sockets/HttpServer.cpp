@@ -149,7 +149,7 @@ void HttpServer::packetReceived(const C1Net::TcpServer::PTcpClientData &client_d
 
     uint32_t processedBytes = 0;
     while (processedBytes < packet.size()) {
-      processedBytes = http->process((char *)(packet.data() + processedBytes), packet.size() - processedBytes);
+      processedBytes += http->process((char *)(packet.data() + processedBytes), packet.size() - processedBytes);
       if (http->isFinished()) {
         if (_packetReceivedCallback) _packetReceivedCallback(client_data->GetId(), *http);
         http->reset();
