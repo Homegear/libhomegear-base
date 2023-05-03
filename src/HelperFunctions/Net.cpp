@@ -54,7 +54,7 @@
 namespace BaseLib {
 int32_t Net::readNlSocket(int32_t sockFd, std::vector<char> &buffer, uint32_t messageIndex, uint32_t pid) {
   struct nlmsghdr *nlHeader = nullptr;
-  size_t readLength = 0;
+  ssize_t readLength = 0;
   uint32_t messageLength = 0;
   do {
     if (messageLength >= buffer.size()) {
