@@ -71,8 +71,8 @@ DecimalIntegerScale::DecimalIntegerScale(BaseLib::SharedObjects *baseLib, xml_no
 void DecimalIntegerScale::fromPacket(PVariable &value) {
   if (!value) return;
   if (value->type == BaseLib::VariableType::tFloat) value->floatValue = (value->floatValue / factor) - offset;
-  else if (value->type == BaseLib::VariableType::tInteger) value->floatValue = ((double)value->integerValue / factor) - offset;
-  else value->floatValue = ((double)value->integerValue64 / factor) - offset;
+  else if (value->type == BaseLib::VariableType::tInteger) value->floatValue = ((double) value->integerValue / factor) - offset;
+  else value->floatValue = ((double) value->integerValue64 / factor) - offset;
   value->type = VariableType::tFloat;
   value->integerValue = 0;
   value->integerValue64 = 0;
@@ -81,8 +81,8 @@ void DecimalIntegerScale::fromPacket(PVariable &value) {
 void DecimalIntegerScale::toPacket(PVariable &value) {
   if (!value) return;
   value->integerValue64 = std::llround((value->floatValue + offset) * factor);
-  value->integerValue = (int32_t)value->integerValue64;
-  if ((int64_t)value->integerValue != value->integerValue64) value->type = VariableType::tInteger64;
+  value->integerValue = (int32_t) value->integerValue64;
+  if ((int64_t) value->integerValue != value->integerValue64) value->type = VariableType::tInteger64;
   else value->type = VariableType::tInteger;
   value->floatValue = 0;
 }
@@ -107,7 +107,7 @@ DecimalIntegerInverseScale::DecimalIntegerInverseScale(BaseLib::SharedObjects *b
 void DecimalIntegerInverseScale::fromPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tFloat;
-  value->floatValue = ((double)factor / value->integerValue);
+  value->floatValue = ((double) factor / value->integerValue);
   value->integerValue = 0;
 }
 
@@ -174,16 +174,16 @@ IntegerIntegerScale::IntegerIntegerScale(BaseLib::SharedObjects *baseLib, xml_no
 void IntegerIntegerScale::fromPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tInteger;
-  if (operation == Operation::Enum::division) value->integerValue = std::lround((double)value->integerValue * factor) - offset;
-  else if (operation == Operation::Enum::multiplication) value->integerValue = std::lround((double)value->integerValue / factor) - offset;
+  if (operation == Operation::Enum::division) value->integerValue = std::lround((double) value->integerValue * factor) - offset;
+  else if (operation == Operation::Enum::multiplication) value->integerValue = std::lround((double) value->integerValue / factor) - offset;
   else _bl->out.printWarning("Warning: Operation is not set for parameter conversion integerIntegerScale.");
 }
 
 void IntegerIntegerScale::toPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tInteger;
-  if (operation == Operation::Enum::multiplication) value->integerValue = std::lround((double)(value->integerValue + offset) * factor);
-  else if (operation == Operation::Enum::division) value->integerValue = std::lround((double)(value->integerValue + offset) / factor);
+  if (operation == Operation::Enum::multiplication) value->integerValue = std::lround((double) (value->integerValue + offset) * factor);
+  else if (operation == Operation::Enum::division) value->integerValue = std::lround((double) (value->integerValue + offset) / factor);
   else _bl->out.printWarning("Warning: Operation is not set for parameter conversion integerIntegerScale.");
 }
 
@@ -341,7 +341,7 @@ void BooleanInteger::toPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tInteger;
   if (invert) value->booleanValue = !value->booleanValue;
-  if (trueValue == 0 && falseValue == 0) value->integerValue = (int32_t)value->booleanValue;
+  if (trueValue == 0 && falseValue == 0) value->integerValue = (int32_t) value->booleanValue;
   else if (value->booleanValue) value->integerValue = trueValue;
   else value->integerValue = falseValue;
   value->booleanValue = false;
@@ -383,7 +383,7 @@ void BooleanDecimal::toPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tFloat;
   if (invert) value->booleanValue = !value->booleanValue;
-  if (trueValue == 0 && falseValue == 0) value->floatValue = (double)value->booleanValue;
+  if (trueValue == 0 && falseValue == 0) value->floatValue = (double) value->booleanValue;
   else if (value->booleanValue) value->floatValue = trueValue;
   else value->floatValue = falseValue;
   value->booleanValue = false;
@@ -497,7 +497,7 @@ void DecimalConfigTime::toPacket(PVariable &value) {
     if (value->floatValue < 0) value->floatValue = 0;
     int32_t maxNumber = (1 << bits) - 1;
     int32_t factorIndex = 0;
-    while (factorIndex < (signed)factors.size() && (value->floatValue / factors.at(factorIndex)) > maxNumber) factorIndex++;
+    while (factorIndex < (signed) factors.size() && (value->floatValue / factors.at(factorIndex)) > maxNumber) factorIndex++;
 
     value->integerValue = (factorIndex << bits) | std::lround(value->floatValue / factors.at(factorIndex));
   } else {
@@ -564,8 +564,8 @@ void IntegerTinyFloat::fromPacket(PVariable &value) {
 void IntegerTinyFloat::toPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tInteger;
-  int64_t maxMantissa = (((int64_t)1 << mantissaSize) - 1);
-  int64_t maxExponent = (((int64_t)1 << exponentSize) - 1);
+  int64_t maxMantissa = (((int64_t) 1 << mantissaSize) - 1);
+  int64_t maxExponent = (((int64_t) 1 << exponentSize) - 1);
   int64_t mantissa = value->integerValue;
   int64_t exponent = 0;
   if (maxMantissa > 0) {
@@ -595,7 +595,7 @@ StringUnsignedInteger::StringUnsignedInteger(BaseLib::SharedObjects *baseLib, xm
 void StringUnsignedInteger::fromPacket(PVariable &value) {
   if (!value) return;
   value->type = VariableType::tString;
-  value->stringValue = std::to_string((uint32_t)value->integerValue);
+  value->stringValue = std::to_string((uint32_t) value->integerValue);
   value->integerValue = 0;
 }
 
@@ -649,7 +649,7 @@ void OptionString::fromPacket(PVariable &value) {
   auto parameter = _parameter.lock();
   if (!value || !parameter) return;
   value->type = VariableType::tInteger;
-  LogicalEnumeration *logicalEnum = (LogicalEnumeration *)parameter->logical.get();
+  LogicalEnumeration *logicalEnum = (LogicalEnumeration *) parameter->logical.get();
   value->integerValue = -1;
   for (std::vector<EnumerationValue>::iterator i = logicalEnum->values.begin(); i != logicalEnum->values.end(); ++i) {
     if (i->id == value->stringValue) {
@@ -669,8 +669,8 @@ void OptionString::toPacket(PVariable &value) {
   if (!value || !parameter) return;
   if (parameter->logical->type == ILogical::Type::Enum::tEnum) {
     value->type = VariableType::tString;
-    LogicalEnumeration *logicalEnum = (LogicalEnumeration *)parameter->logical.get();
-    if (value->integerValue >= 0 && value->integerValue < (signed)logicalEnum->values.size()) {
+    LogicalEnumeration *logicalEnum = (LogicalEnumeration *) parameter->logical.get();
+    if (value->integerValue >= 0 && value->integerValue < (signed) logicalEnum->values.size()) {
       value->stringValue = logicalEnum->values.at(value->integerValue).id;
     } else _bl->out.printWarning("Warning: Cannot convert variable, because enum index is not valid.");
     value->integerValue = 0;
@@ -960,7 +960,7 @@ void HexStringByteArray::toPacket(PVariable &value) {
     std::vector<std::string> bytes = BaseLib::HelperFunctions::splitAll(value->stringValue, ',');
     value->stringValue = "";
     value->stringValue.reserve(bytes.size() * 2);
-    for (auto byte : bytes) {
+    for (auto &byte : bytes) {
       BaseLib::HelperFunctions::trim(byte);
       if (byte.size() > 2) byte = byte.substr(2);
       if (byte.size() > 2) byte = byte.substr(0, 2);
@@ -1023,13 +1023,13 @@ void Invert::fromPacket(PVariable &value) {
   if (!value || !parameter) return;
   if (parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
   else if (parameter->logical->type == ILogical::Type::Enum::tInteger) {
-    LogicalInteger *logical = (LogicalInteger *)parameter->logical.get();
+    LogicalInteger *logical = (LogicalInteger *) parameter->logical.get();
     value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
   } else if (parameter->logical->type == ILogical::Type::Enum::tInteger64) {
-    LogicalInteger64 *logical = (LogicalInteger64 *)parameter->logical.get();
+    LogicalInteger64 *logical = (LogicalInteger64 *) parameter->logical.get();
     value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
   } else if (parameter->logical->type == ILogical::Type::Enum::tFloat) {
-    LogicalDecimal *logical = (LogicalDecimal *)parameter->logical.get();
+    LogicalDecimal *logical = (LogicalDecimal *) parameter->logical.get();
     value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
   }
 }
@@ -1039,13 +1039,13 @@ void Invert::toPacket(PVariable &value) {
   if (!value || !parameter) return;
   if (parameter->logical->type == ILogical::Type::Enum::tBoolean) value->booleanValue = !value->booleanValue;
   else if (parameter->logical->type == ILogical::Type::Enum::tInteger) {
-    LogicalInteger *logical = (LogicalInteger *)parameter->logical.get();
+    LogicalInteger *logical = (LogicalInteger *) parameter->logical.get();
     value->integerValue = logical->maximumValue - (value->integerValue - logical->minimumValue);
   } else if (parameter->logical->type == ILogical::Type::Enum::tInteger64) {
-    LogicalInteger64 *logical = (LogicalInteger64 *)parameter->logical.get();
+    LogicalInteger64 *logical = (LogicalInteger64 *) parameter->logical.get();
     value->integerValue64 = logical->maximumValue - (value->integerValue64 - logical->minimumValue);
   } else if (parameter->logical->type == ILogical::Type::Enum::tFloat) {
-    LogicalDecimal *logical = (LogicalDecimal *)parameter->logical.get();
+    LogicalDecimal *logical = (LogicalDecimal *) parameter->logical.get();
     value->floatValue = logical->maximumValue - (value->floatValue - logical->minimumValue);
   }
 }
