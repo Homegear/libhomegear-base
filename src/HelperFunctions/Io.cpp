@@ -375,6 +375,7 @@ std::string Io::sha512(const std::string& file)
 		if(data.empty())
 		{
 			_bl->out.printError("Error: " + file + " is empty.");
+			gcry_md_close(stribogHandle);
 			return "";
 		}
 		gcry_md_write(stribogHandle, &data.at(0), data.size());
