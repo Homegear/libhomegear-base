@@ -103,6 +103,7 @@ class ServiceMessages : public IEvents {
   int32_t _unreachResendCounter = 0;
   bool _unreach = false;
   int64_t _unreachTime = 0;
+  int64_t last_unreach_event_ = HelperFunctions::getTime();
   bool _stickyUnreach = false;
   int64_t _stickyUnreachTime = 0;
   bool _lowbat = false;

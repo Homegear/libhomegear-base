@@ -35,20 +35,17 @@
 #include <memory>
 #include <vector>
 
-namespace rapidxml
-{
+namespace rapidxml {
 class xml_node;
 }
 
 using namespace rapidxml;
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-namespace DeviceDescription
-{
+namespace DeviceDescription {
 
 class HomegearDevice;
 class SupportedDevice;
@@ -56,34 +53,35 @@ class SupportedDevice;
 typedef std::shared_ptr<SupportedDevice> PSupportedDevice;
 typedef std::vector<PSupportedDevice> SupportedDevices;
 
-class SupportedDevice
-{
-public:
-	explicit SupportedDevice(BaseLib::SharedObjects* baseLib);
-    explicit SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node* node);
-	virtual ~SupportedDevice() = default;
+class SupportedDevice {
+ public:
+  explicit SupportedDevice(BaseLib::SharedObjects *baseLib);
+  explicit SupportedDevice(BaseLib::SharedObjects *baseLib, xml_node *node);
+  virtual ~SupportedDevice() = default;
 
-	std::string id;
-	std::string productId;
-	std::string description;
-	std::string longDescription;
-	std::string serialPrefix;
-	uint64_t typeNumber = 0;
-	uint32_t minFirmwareVersion = 0;
-	uint32_t maxFirmwareVersion = 0;
+  std::string id;
+  std::string productId;
+  std::string hardwareVersion;
+  std::string manufacturer;
+  std::string description;
+  std::string longDescription;
+  std::string serialPrefix;
+  uint64_t typeNumber = 0;
+  uint32_t minFirmwareVersion = 0;
+  uint32_t maxFirmwareVersion = 0;
 
-	bool matches(const std::string& typeId);
-	bool matches(uint64_t typeNumber, uint32_t firmwareVersion);
+  bool matches(const std::string &typeId);
+  bool matches(uint64_t typeNumber, uint32_t firmwareVersion);
 
-	/**
-	 * Checks if a firmware version matches this device description.
-	 *
-	 * @param version The firmware version to check or "-1".
-	 * @return Returns true if the firmware version is within minFirmwareVersion and maxFirmwareVersion or if it is -1.
-	 */
-	bool checkFirmwareVersion(int32_t version);
-protected:
-	BaseLib::SharedObjects* _bl = nullptr;
+  /**
+   * Checks if a firmware version matches this device description.
+   *
+   * @param version The firmware version to check or "-1".
+   * @return Returns true if the firmware version is within minFirmwareVersion and maxFirmwareVersion or if it is -1.
+   */
+  bool checkFirmwareVersion(int32_t version);
+ protected:
+  BaseLib::SharedObjects *_bl = nullptr;
 };
 }
 }

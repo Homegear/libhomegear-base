@@ -170,7 +170,7 @@ void IPhysicalInterface::openGPIO(uint32_t index, bool readOnly) {
   if (_settings->gpio.at(index).path.empty()) getGPIOPath(index);
   if (_settings->gpio.at(index).path.empty()) throw (Exception("Failed to open value file for GPIO with index " + std::to_string(index) + " and device \"" + _settings->type + "\": Unable to retrieve path."));
   std::string path = _settings->gpio[index].path + "value";
-  _gpioDescriptors[index] = _bl->fileDescriptorManager.add(open(path.c_str(), readOnly ? O_RDONLY : O_RDWR));
+  _gpioDescriptors[index] = _bl->fileDescriptorManager.add(open(path.c_str(), (readOnly ? O_RDONLY : O_RDWR) | O_CLOEXEC));
   if (_gpioDescriptors[index]->descriptor == -1) throw (Exception("Failed to open GPIO value file \"" + path + "\": " + std::string(strerror(errno))));
 }
 
@@ -334,7 +334,7 @@ void IPhysicalInterface::exportGPIO(uint32_t index) {
   if (!_settings->gpio[index].path.empty()) {
     _bl->out.printDebug("Debug: Unexporting GPIO with index " + std::to_string(index) + " and number " + std::to_string(_settings->gpio[index].number) + " for device \"" + _settings->type + "\".");
     path = _bl->settings.gpioPath() + "unexport";
-    fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
+    fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY | O_CLOEXEC));
     if (fileDescriptor->descriptor == -1) throw (Exception("Could not unexport GPIO with index " + std::to_string(index) + " for device \"" + _settings->type + "\". Failed to write to unexport file: " + std::string(strerror(errno))));
     if (write(fileDescriptor->descriptor, temp.c_str(), temp.size()) == -1) {
       _bl->out.printError("Error: Could not unexport GPIO with index " + std::to_string(index) + " and number " + temp + " for device \"" + _settings->type + "\": " + std::string(strerror(errno)));
@@ -345,7 +345,7 @@ void IPhysicalInterface::exportGPIO(uint32_t index) {
 
   _bl->out.printDebug("Debug: Exporting GPIO with index " + std::to_string(index) + " and number " + std::to_string(_settings->gpio[index].number) + " for device \"" + _settings->type + "\".");
   path = _bl->settings.gpioPath() + "export";
-  fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
+  fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY | O_CLOEXEC));
   if (fileDescriptor->descriptor == -1) throw (Exception("Error: Could not export GPIO with index " + std::to_string(index) + " for device \"" + _settings->type + "\". Failed to write to export file: " + std::string(strerror(errno))));
   if (write(fileDescriptor->descriptor, temp.c_str(), temp.size()) == -1) {
     _bl->out.printError("Error: Could not export GPIO with index " + std::to_string(index) + " and number " + temp + " for device \"" + _settings->type + "\": " + std::string(strerror(errno)));
@@ -365,7 +365,7 @@ bool IPhysicalInterface::setGPIODirection(uint32_t index, GPIODirection::Enum di
       return false;
     }
     std::string path(_settings->gpio[index].path + "direction");
-    std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
+    std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY | O_CLOEXEC));
     if (fileDescriptor->descriptor == -1) {
       _bl->out.printError("Could not write to direction file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno)));
       return false;
@@ -395,7 +395,7 @@ bool IPhysicalInterface::setGPIOEdge(uint32_t index, GPIOEdge::Enum edge) {
       return false;
     }
     std::string path(_settings->gpio[index].path + "edge");
-    std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY));
+    std::shared_ptr<FileDescriptor> fileDescriptor = _bl->fileDescriptorManager.add(open(path.c_str(), O_WRONLY | O_CLOEXEC));
     if (fileDescriptor->descriptor == -1) {
       _bl->out.printError("Could not write to edge file (" + path + ") of GPIO with index " + std::to_string(index) + ": " + std::string(strerror(errno)));
       return false;

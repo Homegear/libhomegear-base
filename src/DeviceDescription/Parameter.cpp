@@ -77,6 +77,7 @@ void Parameter::parseXml(xml_node *node) {
         else if (propertyName == "internal") { internal = (propertyValue == "true"); }
         else if (propertyName == "parameterGroupSelector") { parameterGroupSelector = (propertyValue == "true"); }
         else if (propertyName == "service") { service = (propertyValue == "true"); }
+        else if (propertyName == "serviceInverted") { serviceInverted = (propertyValue == "true"); }
         else if (propertyName == "sticky") { sticky = (propertyValue == "true"); }
         else if (propertyName == "transform") { transform = (propertyValue == "true"); }
         else if (propertyName == "signed") {
@@ -84,6 +85,7 @@ void Parameter::parseXml(xml_node *node) {
           isSigned = (propertyValue == "true");
         } else if (propertyName == "control") control = propertyValue;
         else if (propertyName == "unit") unit = propertyValue;
+        else if (propertyName == "unitCode") unit_code = (UnitCode)Math::getNumber(propertyValue);
         else if (propertyName == "mandatory") mandatory = (propertyValue == "true");
         else if (propertyName == "formFieldType") formFieldType = propertyValue;
         else if (propertyName == "formPosition") formPosition = Math::getNumber(propertyValue);
@@ -164,8 +166,8 @@ void Parameter::parseXml(xml_node *node) {
                 }
                 //}}}
 
-                if (mainGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
-                if (middleGroupRoleId != 0) roles.emplace(role.id, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (mainGroupRoleId != 0) roles.emplace(mainGroupRoleId, BaseLib::Role(mainGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
+                if (middleGroupRoleId != 0) roles.emplace(middleGroupRoleId, BaseLib::Role(middleGroupRoleId, role.direction, false, false, BaseLib::RoleScaleInfo()));
                 roles.emplace(role.id, role);
               }
             } else _bl->out.printWarning("Warning: Unknown parameter role: " + roleName);
@@ -274,7 +276,7 @@ void Parameter::parseXml(xml_node *node) {
   }
 
   // {{{ Set role.scaleInfo.valueMin and role.scaleInfo.valueMax if not specified in XML
-  for (auto &role : roles) {
+  for (auto &role: roles) {
     if (!role.second.scale || role.second.scaleInfo.valueSet) continue;
     if (logical->type == ILogical::Type::Enum::tFloat) {
       auto parameter = std::dynamic_pointer_cast<LogicalDecimal>(logical);
@@ -316,8 +318,12 @@ PVariable Parameter::convertFromPacket(const std::vector<uint8_t> &data, const R
       return std::make_shared<Variable>(role.invert == !(bool)integerValue);
     } else if (logical->type == ILogical::Type::Enum::tString && casts.empty()) {
       if (!value->empty() && value->at(0) != 0) {
-        int32_t size = value->back() == 0 ? value->size() - 1 : value->size();
-        std::string string(value->begin(), value->begin() + size);
+        std::size_t size = 0;
+        for (auto element: *value) {
+          if (element != '\0') size++;
+        }
+        if (size > value->size()) size = value->size();
+        std::string string(value->begin(), value->begin() + (signed)size);
         return std::make_shared<Variable>(string);
       }
       return std::make_shared<Variable>(VariableType::tString);
@@ -427,7 +433,7 @@ void Parameter::convertToPacket(const std::string &value, const Role &role, std:
       else //value is id of enum element
       {
         auto *parameter = (LogicalEnumeration *)logical.get();
-        for (auto &element : parameter->values) {
+        for (auto &element: parameter->values) {
           if (element.id == value) {
             rpcValue.reset(new Variable(element.index));
             break;
@@ -533,7 +539,7 @@ void Parameter::convertToPacket(const PVariable &value, const Role &role, std::v
           else variable->integerValue = (int32_t)variable->booleanValue;
         }
       } else {
-        for (auto &cast : casts) {
+        for (auto &cast: casts) {
           cast->toPacket(variable);
         }
       }
@@ -619,7 +625,7 @@ void Parameter::adjustBitPosition(std::vector<uint8_t> &data) {
       std::vector<uint8_t> oldData = data;
       data.clear();
       for (uint32_t j = 0; j < bytesMissing; j++) data.push_back(0);
-      for (auto element : oldData) data.push_back(element);
+      for (auto element: oldData) data.push_back(element);
     }
   }
   catch (const std::exception &ex) {

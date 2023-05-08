@@ -28,9 +28,10 @@
  * files in the program, then also delete it here.
 */
 
+#include "HttpClient.h"
+
 #include "../BaseLib.h"
 #include "../Encoding/Http.h"
-#include "HttpClient.h"
 
 #include <memory>
 
@@ -42,8 +43,24 @@ HttpClient::HttpClient(BaseLib::SharedObjects *baseLib, std::string hostname, in
   if (_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
   if (port > 0 && port < 65536) _port = port;
   _keepAlive = keepAlive;
-  _socket = std::make_shared<BaseLib::TcpSocket>(_bl, hostname, std::to_string(port), useSSL, caFile, verifyCertificate, certPath, keyPath);
-  _socket->setConnectionRetries(2);
+
+  C1Net::TcpSocketInfo tcp_socket_info;
+  tcp_socket_info.read_timeout = 5000;
+  tcp_socket_info.write_timeout = 5000;
+  tcp_socket_info.log_callback = std::bind(&HttpClient::Log, this, std::placeholders::_1, std::placeholders::_2);;
+
+  C1Net::TcpSocketHostInfo tcp_socket_host_info;
+  tcp_socket_host_info.host = hostname;
+  tcp_socket_host_info.port = _port;
+  tcp_socket_host_info.auto_connect = false;
+  tcp_socket_host_info.connection_retries = 2;
+  tcp_socket_host_info.tls = useSSL;
+  tcp_socket_host_info.ca_file = caFile;
+  tcp_socket_host_info.verify_certificate = verifyCertificate;
+  tcp_socket_host_info.client_cert_file = certPath;
+  tcp_socket_host_info.client_key_file = keyPath;
+
+  _socket = std::make_shared<C1Net::TcpSocket>(tcp_socket_info, tcp_socket_host_info);
 }
 
 HttpClient::HttpClient(BaseLib::SharedObjects *baseLib,
@@ -63,26 +80,49 @@ HttpClient::HttpClient(BaseLib::SharedObjects *baseLib,
   if (_hostname.empty()) throw HttpClientException("The provided hostname is empty.");
   if (port > 0 && port < 65536) _port = port;
   _keepAlive = keepAlive;
-  _socket = std::make_shared<BaseLib::TcpSocket>(_bl, hostname, std::to_string(port), useSSL, verifyCertificate, caFile, caData, certPath, certData, keyPath, keyData);
-  _socket->setConnectionRetries(2);
+
+  C1Net::TcpSocketInfo tcp_socket_info;
+  tcp_socket_info.read_timeout = 5000;
+  tcp_socket_info.write_timeout = 5000;
+  tcp_socket_info.log_callback = std::bind(&HttpClient::Log, this, std::placeholders::_1, std::placeholders::_2);;
+
+  C1Net::TcpSocketHostInfo tcp_socket_host_info;
+  tcp_socket_host_info.host = hostname;
+  tcp_socket_host_info.port = _port;
+  tcp_socket_host_info.auto_connect = false;
+  tcp_socket_host_info.connection_retries = 2;
+  tcp_socket_host_info.tls = useSSL;
+  tcp_socket_host_info.ca_file = caFile;
+  tcp_socket_host_info.ca_data = caData;
+  tcp_socket_host_info.verify_certificate = verifyCertificate;
+  tcp_socket_host_info.client_cert_file = certPath;
+  tcp_socket_host_info.client_cert_data = certData;
+  tcp_socket_host_info.client_key_file = keyPath;
+  if (keyData) tcp_socket_host_info.client_key_data = std::string(keyData->begin(), keyData->end());
+
+  _socket = std::make_shared<C1Net::TcpSocket>(tcp_socket_info, tcp_socket_host_info);
 }
 
 HttpClient::~HttpClient() {
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
   if (_socket) {
-    _socket->close();
+    _socket->Shutdown();
     _socket.reset();
   }
 }
 
+void HttpClient::Log(uint32_t log_level, const std::string &message) {
+  if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + message);
+}
+
 void HttpClient::setTimeout(uint32_t value) {
   if (value == 0) value = 1000;
-  _socket->setReadTimeout((int64_t)value * 1000);
-  _socket->setWriteTimeout((int64_t)value * 1000);
+  _socket->SetReadTimeout((int64_t)value);
+  _socket->SetWriteTimeout((int64_t)value);
 }
 
 void HttpClient::setVerifyHostname(bool value) {
-  _socket->setVerifyHostname(value);
+  _socket->SetVerifyHostname(value);
 }
 
 void HttpClient::setUserAgent(const std::string &value) {
@@ -92,7 +132,8 @@ void HttpClient::setUserAgent(const std::string &value) {
 void HttpClient::delete_(const std::string &path, std::string &data, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
-  std::string deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
+  std::string
+      deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + deleteRequest);
   sendRequest(deleteRequest, data);
 }
@@ -100,7 +141,8 @@ void HttpClient::delete_(const std::string &path, std::string &data, const std::
 void HttpClient::delete_(const std::string &path, Http &http, const std::string &additionalHeaders) {
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
-  std::string deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
+  std::string
+      deleteRequest = "DELETE " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\n" + additionalHeaders + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + deleteRequest);
   sendRequest(deleteRequest, http);
 }
@@ -125,7 +167,8 @@ void HttpClient::patch(const std::string &path, std::string &dataIn, std::string
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string patchRequest =
-      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + patchRequest);
   sendRequest(patchRequest, dataOut);
 }
@@ -134,7 +177,8 @@ void HttpClient::patch(const std::string &path, std::string &dataIn, Http &dataO
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string patchRequest =
-      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "PATCH " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + patchRequest);
   sendRequest(patchRequest, dataOut);
 }
@@ -143,7 +187,8 @@ void HttpClient::post(const std::string &path, std::string &dataIn, std::string 
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string postRequest =
-      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
   sendRequest(postRequest, dataOut);
 }
@@ -152,7 +197,8 @@ void HttpClient::post(const std::string &path, std::string &dataIn, Http &dataOu
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string postRequest =
-      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "POST " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + postRequest);
   sendRequest(postRequest, dataOut);
 }
@@ -161,7 +207,8 @@ void HttpClient::put(const std::string &path, std::string &dataIn, std::string &
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string putRequest =
-      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + putRequest);
   sendRequest(putRequest, dataOut);
 }
@@ -170,7 +217,8 @@ void HttpClient::put(const std::string &path, std::string &dataIn, Http &dataOut
   std::string fixedPath = path;
   if (fixedPath.empty()) fixedPath = "/";
   std::string putRequest =
-      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2) + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
+      "PUT " + fixedPath + " HTTP/1.1\r\nUser-Agent: " + _userAgent + "\r\nHost: " + _hostname + ":" + std::to_string(_port) + "\r\nConnection: " + (_keepAlive ? "Keep-Alive" : "Close") + "\r\nContent-Length: " + std::to_string(dataIn.size() + 2)
+          + "\r\n" + additionalHeaders + "\r\n" + dataIn + "\r\n";
   if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: HTTP request: " + putRequest);
   sendRequest(putRequest, dataOut);
 }
@@ -194,43 +242,40 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     _rawContent.clear();
     http.reset();
     try {
-      if (!_socket->connected()) _socket->open();
+      if (!_socket->Connected()) _socket->Open();
     }
-    catch (const BaseLib::SocketTimeOutException &ex) {
+    catch (const C1Net::TimeoutException &ex) {
       throw HttpClientTimeOutException(std::string(ex.what()));
     }
-    catch (const BaseLib::SocketOperationException &ex) {
+    catch (const C1Net::Exception &ex) {
       throw HttpClientException("Unable to connect to HTTP server \"" + _hostname + "\": " + ex.what());
     }
 
     try {
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Sending packet to HTTP server \"" + _hostname + "\": " + request);
-      _socket->proofwrite(request);
+      _socket->Send((uint8_t *)request.data(), request.size());
     }
-    catch (const BaseLib::SocketClosedException &ex) {
-      _socket->close();
+    catch (const C1Net::ClosedException &ex) {
+      _socket->Shutdown();
       if (i == 1) http.setFinished();
       else continue;
     }
-    catch (const BaseLib::SocketDataLimitException &ex) {
-      if (!_keepAlive) _socket->close();
-      throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
-    }
-    catch (const BaseLib::SocketTimeOutException &ex) {
+    catch (const C1Net::TimeoutException &ex) {
       if (i == 1) throw HttpClientTimeOutException(std::string(ex.what()));
       continue;
     }
-    catch (const BaseLib::SocketOperationException &ex) {
-      _socket->close();
+    catch (const C1Net::Exception &ex) {
+      _socket->Shutdown();
       if (i == 1) throw HttpClientException("Unable to write to HTTP server \"" + _hostname + "\": " + ex.what());
       continue;
     }
 
-    ssize_t receivedBytes;
+    std::size_t receivedBytes;
 
     int32_t bufferPos = 0;
     const int32_t bufferMax = 4096;
-    std::array<char, bufferMax + 1> buffer{};
+    std::array<uint8_t, bufferMax + 1> buffer{};
+    bool more_data = false;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); //Some servers need a little, before the socket can be read.
 
@@ -240,24 +285,24 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
           bufferPos = 0;
           throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): Buffer overflow.");
         }
-        receivedBytes = _socket->proofread(buffer.data() + bufferPos, bufferMax - bufferPos);
+        receivedBytes = _socket->Read(buffer.data() + bufferPos, bufferMax - bufferPos, more_data);
       }
-      catch (const BaseLib::SocketTimeOutException &ex) {
-        if (!_keepAlive) _socket->close();
+      catch (const C1Net::TimeoutException &ex) {
+        if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (1): " + ex.what());
       }
-      catch (const BaseLib::SocketClosedException &ex) {
-        _socket->close();
+      catch (const C1Net::ClosedException &ex) {
+        _socket->Shutdown();
         if (i == 1) http.setFinished();
         break;
       }
-      catch (const BaseLib::SocketOperationException &ex) {
-        if (!_keepAlive) _socket->close();
+      catch (const C1Net::Exception &ex) {
+        if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (3): " + ex.what());
       }
 
       if (bufferPos + receivedBytes > bufferMax) {
-        if (!_keepAlive) _socket->close();
+        if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\" (2): Buffer overflow.");
       }
 
@@ -270,7 +315,7 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       //they don't do something in the memory after buffer, we add '\0'
       buffer.at(bufferPos + receivedBytes) = '\0';
 
-      if (!http.headerIsFinished() && (!strncmp(buffer.data(), "401", 3) || !strncmp(buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
+      if (!http.headerIsFinished() && (!strncmp((char *)buffer.data(), "401", 3) || !strncmp((char *)buffer.data() + 9, "401", 3))) //"401 Unauthorized" or "HTTP/1.X 401 Unauthorized"
       {
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Server requires authentication.", 401);
       }
@@ -279,24 +324,24 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
 
       try {
         if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Received packet from HTTP server \"" + _hostname + "\": " + std::string(buffer.begin(), buffer.begin() + receivedBytes));
-        http.process(buffer.data(), receivedBytes);
+        http.process((char *)buffer.data(), receivedBytes);
         if (http.headerIsFinished() && responseIsHeaderOnly) {
           http.setFinished();
           break;
         }
       }
-      catch (HttpException &ex) {
-        if (!_keepAlive) _socket->close();
+      catch (const HttpException &ex) {
+        if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": " + ex.what(), ex.responseCode());
       }
       if (http.getContentSize() > 104857600 || http.getHeader().contentLength > 104857600) {
-        if (!_keepAlive) _socket->close();
+        if (!_keepAlive) _socket->Shutdown();
         throw HttpClientException("Unable to read from HTTP server \"" + _hostname + "\": Packet with data larger than 100 MiB received.");
       }
 
       if (http.isFinished()) break;
     }
-    if (!_keepAlive) _socket->close();
+    if (!_keepAlive) _socket->Shutdown();
     if (http.isFinished()) break;
   }
 }

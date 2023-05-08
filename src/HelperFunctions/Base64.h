@@ -31,64 +31,63 @@
 #include <string>
 #include <vector>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class Base64 {
-public:
-	virtual ~Base64() {}
+ public:
+  //For backwards compatibility
+  ~Base64() {}
 
-	/**
-	 * Encodes a string to Base64.
-	 *
-	 * @param[in] in The string to encode.
-	 * @param[out] out The string the result is stored in.
-	 */
-	static void encode(const std::string& in, std::string& out);
+  /**
+   * Encodes a string to Base64.
+   *
+   * @param[in] in The data to encode.
+   * @param[out] out The string, the base64-encoded result is stored in.
+   */
+  template<typename DataIn>
+  static void encode(const DataIn &in, std::string &out);
 
-	/**
-	 * Encodes a char vector to Base64.
-	 *
-	 * @param[in] in The binary data to encode.
-	 * @param[out] out The string the result is stored in.
-	 */
-	static void encode(const std::vector<char>& in, std::string& out);
+  /**
+   * Encodes a string to Base64.
+   *
+   * @param[in] in The data to encode.
+   *
+   * @return Returns the base64-encoded string.
+   */
+  template<typename DataIn>
+  static std::string encode(const DataIn &in);
 
-	/**
-	 * Encodes a byte vector to Base64.
-	 *
-	 * @param[in] in The binary data to encode.
-	 * @param[out] out The string the result is stored in.
-	 */
-	static void encode(const std::vector<uint8_t>& in, std::string& out);
+  /**
+   * Decodes a Base64 encoded string.
+   *
+   * @param[in] in The base64-encoded data to decode.
+   * @param[out] out The array, the result is stored in.
+   */
+  template<typename DataOut>
+  static void decode(const std::string &in, DataOut &out);
 
-	/**
-	 * Decodes a Base64 encoded string.
-	 *
-	 * @param[in] in The data to decode.
-	 * @param[out] out The string the result is stored in.
-	 */
-	static void decode(const std::string& in, std::string& out);
+  /**
+   * Decodes a Base64 encoded string.
+   *
+   * @param[in] in The base64-encoded data to decode.
+   * @return Returns an array containing the decoded result.
+   */
+  template<typename DataOut>
+  static DataOut decode(const std::string &in);
+ private:
+  static const std::string base64_chars;
 
-	/**
-	 * Decodes Base64 encoded binary data.
-	 *
-	 * @param[in] in The data to decode.
-	 * @param[out] out The char vector the result is stored in.
-	 */
-	static void decode(const std::string& in, std::vector<char>& out);
-private:
-	Base64() {}
+  Base64() {}
 
-	/**
-	 * Checks whether a character is Base64 decodeable.
-	 *
-	 * @param c The character to check.
-	 * @return Returns "true" when the character is decodeable, otherwise "false".
-	 */
-	static inline bool isBase64(unsigned char c) {
-		return (isalnum(c) || (c == '+') || (c == '/'));
-	}
+  /**
+   * Checks whether a character is Base64 decodeable.
+   *
+   * @param c The character to check.
+   * @return Returns "true" when the character is decodeable, otherwise "false".
+   */
+  static inline bool isBase64(unsigned char c) {
+    return (isalnum(c) || (c == '+') || (c == '/'));
+  }
 };
 
 }

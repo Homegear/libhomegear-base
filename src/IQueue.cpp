@@ -29,6 +29,8 @@
 */
 
 #include "IQueue.h"
+
+#include <memory>
 #include "BaseLib.h"
 
 namespace BaseLib {
@@ -41,16 +43,60 @@ IQueue::IQueue(SharedObjects *baseLib, uint32_t queueCount, uint32_t bufferSize)
   _bufferCount.resize(queueCount, 0);
   _waitWhenFull.resize(queueCount);
   _buffer.resize(queueCount);
-  _queueMutex.reset(new std::mutex[queueCount]);
+  _queueMutex = std::make_unique<std::mutex[]>(queueCount);
   _processingThread.resize(queueCount);
-  _produceConditionVariable.reset(new std::condition_variable[queueCount]);
-  _processingConditionVariable.reset(new std::condition_variable[queueCount]);
+  _produceConditionVariable = std::make_unique<std::condition_variable[]>(queueCount);
+  _processingConditionVariable = std::make_unique<std::condition_variable[]>(queueCount);
+
+  _threadsInUse = std::make_unique<std::atomic<uint32_t>[]>(queueCount);
+
+  _maxThreadLoad1m = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxThreadLoad1mCurrent = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxWait1m = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _maxWait1mCurrent = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _last1mCycle = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+
+  _maxThreadLoad10m = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxThreadLoad10mCurrent = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxWait10m = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _maxWait10mCurrent = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _last10mCycle = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+
+  _maxThreadLoad1h = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxThreadLoad1hCurrent = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxWait1h = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _maxWait1hCurrent = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+  _last1hCycle = std::make_unique<std::atomic<int64_t>[]>(queueCount);
+
+  _maxThreadLoad = std::make_unique<std::atomic<double>[]>(queueCount);
+  _maxWait = std::make_unique<std::atomic<int64_t>[]>(queueCount);
 
   for (int32_t i = 0; i < _queueCount; i++) {
     _bufferHead[i] = 0;
     _bufferTail[i] = 0;
     _bufferCount[i] = 0;
     _stopProcessingThread[i] = true;
+
+    _maxThreadLoad1m[i] = 0;
+    _maxThreadLoad1mCurrent[i] = 0;
+    _maxWait1m[i] = 0;
+    _maxWait1mCurrent[i] = 0;
+    _last1mCycle[i] = 0;
+
+    _maxThreadLoad10m[i] = 0;
+    _maxThreadLoad10mCurrent[i] = 0;
+    _maxWait10m[i] = 0;
+    _maxWait10mCurrent[i] = 0;
+    _last10mCycle[i] = 0;
+
+    _maxThreadLoad1h[i] = 0;
+    _maxThreadLoad1hCurrent[i] = 0;
+    _maxWait1h[i] = 0;
+    _maxWait1hCurrent[i] = 0;
+    _last1hCycle[i] = 0;
+
+    _maxThreadLoad[i] = 0;
+    _maxWait[i] = 0;
   }
 }
 
@@ -62,11 +108,68 @@ IQueue::~IQueue() {
 }
 
 int32_t IQueue::queueSize(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
   return _bufferCount[index];
 }
 
 bool IQueue::queueEmpty(int32_t index) {
+  if (index < 0 || index >= _queueCount) return true;
   return _bufferCount[index] > 0;
+}
+
+uint32_t IQueue::processingThreadCount(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _processingThread[index].size();
+}
+
+uint32_t IQueue::maxProcessingThreadCount(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _processingThread[index].capacity();
+}
+
+double IQueue::threadLoad(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + ((double)_bufferCount[index] / (double)_processingThread[index].size());
+}
+
+double IQueue::maxThreadLoad(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxThreadLoad[index];
+}
+
+double IQueue::maxThreadLoad1m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxThreadLoad1m[index];
+}
+
+double IQueue::maxThreadLoad10m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxThreadLoad10m[index];
+}
+
+double IQueue::maxThreadLoad1h(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxThreadLoad1h[index];
+}
+
+int64_t IQueue::maxWait(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxWait[index];
+}
+
+int64_t IQueue::maxWait1m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxWait1m[index];
+}
+
+int64_t IQueue::maxWait10m(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxWait10m[index];
+}
+
+int64_t IQueue::maxWait1h(int32_t index) {
+  if (index < 0 || index >= _queueCount) return 0;
+  return _maxWait1h[index];
 }
 
 void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t processingThreadCount, int32_t threadPriority, int32_t threadPolicy) {
@@ -76,10 +179,27 @@ void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t processingThr
   _bufferTail[index] = 0;
   _bufferCount[index] = 0;
   _waitWhenFull[index] = waitWhenFull;
+  _processingThread[index].reserve(processingThreadCount);
   for (uint32_t i = 0; i < processingThreadCount; i++) {
     std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
     _bl->threadManager.start(*thread, true, threadPriority, threadPolicy, &IQueue::process, this, index);
-    _processingThread[index].push_back(thread);
+    _processingThread[index].emplace_back(thread);
+  }
+  _buffer.at(index).resize(_bufferSize);
+}
+
+void IQueue::startQueue(int32_t index, bool waitWhenFull, uint32_t initialProcessingThreadCount, uint32_t maxProcessingThreadCount) {
+  if (index < 0 || index >= _queueCount) return;
+  _stopProcessingThread[index] = false;
+  _bufferHead[index] = 0;
+  _bufferTail[index] = 0;
+  _bufferCount[index] = 0;
+  _waitWhenFull[index] = waitWhenFull;
+  _processingThread[index].reserve(maxProcessingThreadCount);
+  for (uint32_t i = 0; i < initialProcessingThreadCount; i++) {
+    std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
+    _bl->threadManager.start(*thread, true, &IQueue::process, this, index);
+    _processingThread[index].emplace_back(thread);
   }
   _buffer.at(index).resize(_bufferSize);
 }
@@ -92,8 +212,8 @@ void IQueue::stopQueue(int32_t index) {
   lock.unlock();
   _processingConditionVariable[index].notify_all();
   _produceConditionVariable[index].notify_all();
-  for (uint32_t i = 0; i < _processingThread[index].size(); i++) {
-    _bl->threadManager.join(*(_processingThread[index][i]));
+  for (auto &i: _processingThread[index]) {
+    _bl->threadManager.join(*i);
   }
   _processingThread[index].clear();
   _buffer[index].clear();
@@ -101,12 +221,14 @@ void IQueue::stopQueue(int32_t index) {
 }
 
 bool IQueue::queueIsStarted(int32_t index) {
+  if (index < 0 || index >= _queueCount) return false;
   return _stopProcessingThread[index] == false;
 }
 
 bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry> &entry, bool waitWhenFull) {
   try {
     if (index < 0 || index >= _queueCount || !entry || _stopProcessingThread[index]) return true;
+    entry->time = HelperFunctions::getTime();
     std::unique_lock<std::mutex> lock(_queueMutex[index]);
     if (_waitWhenFull[index] || waitWhenFull) {
       while (!_produceConditionVariable[index].wait_for(lock, std::chrono::milliseconds(1000), [&] {
@@ -126,8 +248,20 @@ bool IQueue::enqueue(int32_t index, std::shared_ptr<IQueueEntry> &entry, bool wa
   catch (const std::exception &ex) {
     _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
-  catch (...) {
-    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  return false;
+}
+
+bool IQueue::addThread(int32_t index) {
+  try {
+    std::lock_guard<std::mutex> addThreadGuard(_addThreadMutex);
+    if (index < 0 || index >= _queueCount) return false;
+    if (_processingThread.size() == _processingThread.capacity()) return false;
+    std::shared_ptr<std::thread> thread = std::make_shared<std::thread>();
+    _bl->threadManager.start(*thread, true, &IQueue::process, this, index);
+    _processingThread[index].emplace_back(thread);
+    return true;
+  } catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
   return false;
 }
@@ -143,7 +277,43 @@ void IQueue::process(int32_t index) {
       }));
       if (_stopProcessingThread[index]) return;
 
+      _threadsInUse[index]++;
+
       do {
+        { //Metrics
+          auto time = BaseLib::HelperFunctions::getTime();
+          double threadLoad = ((double)_threadsInUse[index] / (double)_processingThread[index].size()) + ((double)_bufferCount[index] / (double)_processingThread[index].size());
+
+          if (time - _last1mCycle[index] >= 60000) {
+            _last1mCycle[index] = time;
+            _maxThreadLoad1m[index] = _maxThreadLoad1mCurrent[index].load();
+            _maxThreadLoad1mCurrent[index] = 0;
+            _maxWait1m[index] = _maxWait1mCurrent[index].load();
+            _maxWait1mCurrent[index] = 0;
+          }
+
+          if (time - _last10mCycle[index] >= 600000) {
+            _last10mCycle[index] = time;
+            _maxThreadLoad10m[index] = _maxThreadLoad10mCurrent[index].load();
+            _maxThreadLoad10mCurrent[index] = 0;
+            _maxWait10m[index] = _maxWait10mCurrent[index].load();
+            _maxWait10mCurrent[index] = 0;
+          }
+
+          if (time - _last1hCycle[index] >= 3600000) {
+            _last1hCycle[index] = time;
+            _maxThreadLoad1h[index] = _maxThreadLoad1hCurrent[index].load();
+            _maxThreadLoad1hCurrent[index] = 0;
+            _maxWait1h[index] = _maxWait1hCurrent[index].load();
+            _maxWait1hCurrent[index] = 0;
+          }
+
+          if (threadLoad > _maxThreadLoad[index]) _maxThreadLoad[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad1mCurrent[index]) _maxThreadLoad1mCurrent[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad10mCurrent[index]) _maxThreadLoad10mCurrent[index] = threadLoad;
+          if (threadLoad > _maxThreadLoad1hCurrent[index]) _maxThreadLoad1hCurrent[index] = threadLoad;
+        }
+
         std::shared_ptr<IQueueEntry> entry;
 
         entry = _buffer[index][_bufferHead[index]];
@@ -155,10 +325,27 @@ void IQueue::process(int32_t index) {
 
         _produceConditionVariable[index].notify_one();
 
-        if (entry) processQueueEntry(index, entry);
+        try {
+          if (entry) {
+            { //Metrics
+              auto time = BaseLib::HelperFunctions::getTime();
+              int64_t latency = time - entry->time;
+              if (latency > _maxWait[index]) _maxWait[index] = latency;
+              if (latency > _maxWait1mCurrent[index]) _maxWait1mCurrent[index] = latency;
+              if (latency > _maxWait10mCurrent[index]) _maxWait10mCurrent[index] = latency;
+              if (latency > _maxWait1hCurrent[index]) _maxWait1hCurrent[index] = latency;
+            }
+
+            processQueueEntry(index, entry);
+          }
+        } catch (const std::exception &ex) {
+          _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        }
 
         lock.lock();
       } while (_bufferCount[index] > 0 && !_stopProcessingThread[index]);
+
+      _threadsInUse[index]--;
     }
     catch (const std::exception &ex) {
       _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());

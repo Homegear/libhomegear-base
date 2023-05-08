@@ -30,9 +30,12 @@
 
 #include "SerialReaderWriter.h"
 
+#include "../BaseLib.h"
+
 #include <memory>
 #include <utility>
-#include "../BaseLib.h"
+
+#include <sys/poll.h>
 
 namespace BaseLib {
 
@@ -60,10 +63,28 @@ SerialReaderWriter::~SerialReaderWriter() {
   closeDevice();
 }
 
+void SerialReaderWriter::setReadGpio(int32_t index, const std::string &gpio_path) {
+  read_gpio_index_ = index;
+  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, gpio_path);
+  gpio_->exportGpio(index);
+  gpio_->setDirection(index, LowLevel::Gpio::GpioDirection::Enum::OUT);
+  gpio_->openDevice(index, false);
+  gpio_->set(index, false);
+}
+
+void SerialReaderWriter::setWriteGpio(int32_t index, const std::string &gpio_path) {
+  write_gpio_index_ = index;
+  if (!gpio_) gpio_ = std::make_unique<LowLevel::Gpio>(_bl, gpio_path);
+  gpio_->exportGpio(index);
+  gpio_->setDirection(index, LowLevel::Gpio::GpioDirection::Enum::OUT);
+  gpio_->openDevice(index, false);
+  gpio_->set(index, false);
+}
+
 void SerialReaderWriter::openDevice(bool parity, bool oddParity, bool events, CharacterSize characterSize, bool twoStopBits) {
   _handles++;
   if (_fileDescriptor->descriptor > -1) return;
-  _fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags));
+  _fileDescriptor = _bl->fileDescriptorManager.add(open(_device.c_str(), _flags | O_CLOEXEC));
   if (_fileDescriptor->descriptor == -1) throw SerialReaderWriterException("Couldn't open device \"" + _device + "\": " + strerror(errno));
 
   if (!Io::writeLockFile(_fileDescriptor->descriptor, false)) {
@@ -179,33 +200,39 @@ void SerialReaderWriter::closeDevice() {
 
 int32_t SerialReaderWriter::readChar(char &data, uint32_t timeout) {
   if (_writeOnly) return -1;
-  int32_t i = 0;
-  fd_set readFileDescriptor;
+  int32_t bytes_read = 0;
   while (!_stopReadThread) {
     if (_fileDescriptor->descriptor == -1) {
       _bl->out.printError("Error: File descriptor is invalid.");
       return -1;
     }
-    FD_ZERO(&readFileDescriptor);
-    FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
-    //Timeout needs to be set every time, so don't put it outside of the while loop
-    timeval timeval{};
-    timeval.tv_sec = timeout / 1000000;
-    timeval.tv_usec = timeout % 1000000;
-    i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, nullptr, nullptr, &timeval);
-    switch (i) {
-      case 0: //Timeout
-        return 1;
-      case 1: break;
-      default:
-        if (errno == EINTR) return 1;
-        //Error
-        _bl->fileDescriptorManager.close(_fileDescriptor);
-        return -1;
+
+    pollfd poll_struct{
+        (int)_fileDescriptor->descriptor,
+        (short)(POLLIN),
+        (short)(0)
+    };
+
+    int32_t poll_result = -1;
+    do {
+      poll_result = poll(&poll_struct, 1, (int)(timeout / 1000));
+    } while (poll_result == -1 && errno == EINTR);
+    if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLHUP)) || _fileDescriptor->descriptor == -1) {
+      //Error
+      _bl->fileDescriptorManager.close(_fileDescriptor);
+      return -1;
     }
-    i = read(_fileDescriptor->descriptor, &data, 1);
-    if (i == -1 || i == 0) {
-      if (i == -1 && (errno == EAGAIN || errno == EINTR)) continue;
+
+    if (poll_result == 0) {
+      //Timeout
+      return 1;
+    }
+
+    if (read_gpio_index_ != -1) gpio_->set(read_gpio_index_, true);
+    bytes_read = read(_fileDescriptor->descriptor, &data, 1);
+    if (read_gpio_index_ != -1) gpio_->set(read_gpio_index_, false);
+    if (bytes_read == -1 || bytes_read == 0) {
+      if (bytes_read == -1 && (errno == EAGAIN || errno == EINTR)) continue;
       _bl->fileDescriptorManager.close(_fileDescriptor);
       return -1;
     }
@@ -217,33 +244,40 @@ int32_t SerialReaderWriter::readChar(char &data, uint32_t timeout) {
 int32_t SerialReaderWriter::readLine(std::string &data, uint32_t timeout, char splitChar) {
   if (_writeOnly) return -1;
   data.clear();
-  int32_t i = 0;
+  int32_t bytes_read = 0;
   char localBuffer[1];
-  fd_set readFileDescriptor;
   while (!_stopReadThread) {
     if (_fileDescriptor->descriptor == -1) {
       _bl->out.printError("Error: File descriptor is invalid.");
       return -1;
     }
-    FD_ZERO(&readFileDescriptor);
-    FD_SET(_fileDescriptor->descriptor, &readFileDescriptor);
-    //Timeout needs to be set every time, so don't put it outside of the while loop
-    timeval timeval{};
-    timeval.tv_sec = timeout / 1000000;
-    timeval.tv_usec = timeout % 1000000;
-    i = select(_fileDescriptor->descriptor + 1, &readFileDescriptor, nullptr, nullptr, &timeval);
-    switch (i) {
-      case 0: //Timeout
-        return 1;
-      case 1: break;
-      default:
-        //Error
-        _bl->fileDescriptorManager.close(_fileDescriptor);
-        return -1;
+
+    pollfd poll_struct{
+        (int)_fileDescriptor->descriptor,
+        (short)(POLLIN),
+        (short)(0)
+    };
+
+    int32_t poll_result = -1;
+    do {
+      poll_result = poll(&poll_struct, 1, (int)(timeout / 1000));
+    } while (poll_result == -1 && errno == EINTR);
+    if (poll_result == -1 || (poll_struct.revents & (POLLNVAL | POLLERR | POLLHUP)) || _fileDescriptor->descriptor == -1) {
+      //Error
+      _bl->fileDescriptorManager.close(_fileDescriptor);
+      return -1;
     }
-    i = read(_fileDescriptor->descriptor, localBuffer, 1);
-    if (i == -1) {
-      if (errno == EAGAIN) continue;
+
+    if (poll_result == 0) {
+      //Timeout
+      return 1;
+    }
+
+    if (read_gpio_index_ != -1) gpio_->set(read_gpio_index_, true);
+    bytes_read = read(_fileDescriptor->descriptor, localBuffer, 1);
+    if (read_gpio_index_ != -1) gpio_->set(read_gpio_index_, false);
+    if (bytes_read == -1 || bytes_read == 0) {
+      if (errno == EAGAIN || errno == EINTR) continue;
       _bl->fileDescriptorManager.close(_fileDescriptor);
       continue;
     }
@@ -267,7 +301,9 @@ void SerialReaderWriter::writeLine(std::string &data) {
     std::lock_guard<std::mutex> sendGuard(_sendMutex);
     while (bytesWritten < (signed)data.length()) {
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + data);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, true);
       i = write(_fileDescriptor->descriptor, data.c_str() + bytesWritten, data.length() - bytesWritten);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, false);
       if (i == -1) {
         if (errno == EAGAIN) continue;
         _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
@@ -291,7 +327,9 @@ void SerialReaderWriter::writeData(const std::vector<char> &data) {
     std::lock_guard<std::mutex> sendGuard(_sendMutex);
     while (bytesWritten < (signed)data.size()) {
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + HelperFunctions::getHexString(data));
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, true);
       i = write(_fileDescriptor->descriptor, data.data() + bytesWritten, data.size() - bytesWritten);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, false);
       if (i == -1) {
         if (errno == EAGAIN) continue;
         _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
@@ -315,7 +353,9 @@ void SerialReaderWriter::writeData(const std::vector<uint8_t> &data) {
     std::lock_guard<std::mutex> sendGuard(_sendMutex);
     while (bytesWritten < (signed)data.size()) {
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + HelperFunctions::getHexString(data));
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, true);
       i = write(_fileDescriptor->descriptor, (char *)data.data() + bytesWritten, data.size() - bytesWritten);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, false);
       if (i == -1) {
         if (errno == EAGAIN) continue;
         _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
@@ -338,7 +378,9 @@ void SerialReaderWriter::writeChar(char data) {
     std::lock_guard<std::mutex> sendGuard(_sendMutex);
     while (bytesWritten < 1) {
       if (_bl->debugLevel >= 5) _bl->out.printDebug("Debug: Writing: " + data);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, true);
       i = write(_fileDescriptor->descriptor, &data, 1);
+      if (write_gpio_index_ != -1) gpio_->set(write_gpio_index_, false);
       if (i == -1) {
         if (errno == EAGAIN) continue;
         _bl->out.printError("Error writing to serial device \"" + _device + "\" (3, " + std::to_string(errno) + ").");
@@ -368,15 +410,15 @@ void SerialReaderWriter::readThread(bool parity, bool oddParity, CharacterSize c
       }
       if (readLine(data) == 0) {
         EventHandlers eventHandlers = getEventHandlers();
-        for (EventHandlers::const_iterator i = eventHandlers.begin(); i != eventHandlers.end(); ++i) {
-          i->second->lock();
+        for (const auto &eventHandler: eventHandlers) {
+          eventHandler.second->lock();
           try {
-            if (i->second->handler()) ((ISerialReaderWriterEventSink *)i->second->handler())->lineReceived(data);
+            if (eventHandler.second->handler()) ((ISerialReaderWriterEventSink *)eventHandler.second->handler())->lineReceived(data);
           }
           catch (const std::exception &ex) {
             _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
           }
-          i->second->unlock();
+          eventHandler.second->unlock();
         }
       }
       continue;

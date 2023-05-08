@@ -59,6 +59,15 @@ class HelperFunctions {
    */
   HelperFunctions();
 
+  /**
+   * Compares two strings in constant time.
+   *
+   * @param s1
+   * @param s2
+   * @return Returns 0 if the strings are equal. In all other cases a non-zero result is returned.
+   */
+  static int32_t compareConstant(const std::string &s1, const std::string &s2);
+
   static int64_t getTimezoneOffset();
 
   /**

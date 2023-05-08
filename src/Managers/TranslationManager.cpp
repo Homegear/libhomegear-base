@@ -103,7 +103,6 @@ BaseLib::PVariable TranslationManager::getTranslations(const std::string &key, c
   for (auto &language : _translations) {
     auto translationIterator = language.second.find(key);
     if (translationIterator == language.second.end()) {
-      translations->structValue->emplace(language.first, std::make_shared<Variable>(key));
       continue;
     }
 
@@ -115,6 +114,8 @@ BaseLib::PVariable TranslationManager::getTranslations(const std::string &key, c
 
     translations->structValue->emplace(language.first, std::make_shared<Variable>(translation));
   }
+
+  if (translations->structValue->empty())  translations->structValue->emplace("en", std::make_shared<Variable>(key));
 
   return translations;
 }

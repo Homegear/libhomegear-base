@@ -93,11 +93,25 @@ void JsonDecoder::skipWhitespace(const std::string &json, uint32_t &pos) {
   while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t')) {
     pos++;
   }
+
+  if (pos + 1 < json.length() && json[pos] == '/' && json[pos + 1] == '/') {
+    pos += 2;
+    while (pos < json.length() && json[pos] != '\n' && json[pos] != '\r') {
+      pos++;
+    }
+  }
 }
 
 void JsonDecoder::skipWhitespace(const std::vector<char> &json, uint32_t &pos) {
   while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\r' || json[pos] == '\t')) {
     pos++;
+  }
+
+  if (pos + 1 < json.size() && json[pos] == '/' && json[pos + 1] == '/') {
+    pos += 2;
+    while (pos < json.size() && json[pos] != '\n' && json[pos] != '\r') {
+      pos++;
+    }
   }
 }
 
@@ -302,7 +316,8 @@ void JsonDecoder::decodeString(const std::vector<char> &json, uint32_t &pos, std
 #if __GNUC__ > 4
 
 std::string JsonDecoder::decodeString(const std::string &s) {
-  std::string utf8; //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  std::string utf8;
   utf8.reserve(s.size());
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
   for (int32_t i = 0; i < (signed)s.size(); i++) {
@@ -361,7 +376,8 @@ std::string JsonDecoder::decodeString(const std::string &s) {
 }
 
 void JsonDecoder::decodeString(const std::string &json, uint32_t &pos, std::string &s) {
-  s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  s.clear();
   s.reserve(1024);
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
   if (!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");
@@ -429,7 +445,8 @@ void JsonDecoder::decodeString(const std::string &json, uint32_t &pos, std::stri
 }
 
 void JsonDecoder::decodeString(const std::vector<char> &json, uint32_t &pos, std::string &s) {
-  s.clear(); //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  //String is expected to be UTF-8, except "\uXXXX". This is how Webapps encode JSONs.
+  s.clear();
   s.reserve(1024);
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
   if (!posValid(json, pos)) throw JsonDecoderException("No closing '\"' found.");

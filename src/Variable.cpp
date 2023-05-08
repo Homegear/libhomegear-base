@@ -143,7 +143,7 @@ Variable::Variable(const PArray &arrayVal) : Variable() {
 Variable::Variable(const std::vector<std::string> &arrayVal) : Variable() {
   type = VariableType::tArray;
   arrayValue->reserve(arrayVal.size());
-  for (auto &element : arrayVal) {
+  for (auto &element: arrayVal) {
     arrayValue->push_back(std::make_shared<Variable>(element));
   }
 }
@@ -221,11 +221,12 @@ void Variable::parseXmlNode(const xml_node *node, PStruct &xmlStruct) {
   }
 }
 
-std::shared_ptr<Variable> Variable::createError(int32_t faultCode, std::string faultString) {
+std::shared_ptr<Variable> Variable::createError(int32_t faultCode, const std::string& faultString, bool retry) {
   std::shared_ptr<Variable> error = std::make_shared<Variable>(VariableType::tStruct);
   error->errorStruct = true;
-  error->structValue->insert(StructElement("faultCode", std::make_shared<Variable>(faultCode)));
-  error->structValue->insert(StructElement("faultString", std::make_shared<Variable>(faultString)));
+  error->structValue->emplace("faultCode", std::make_shared<Variable>(faultCode));
+  error->structValue->emplace("faultString", std::make_shared<Variable>(faultString));
+  error->structValue->emplace("retry", std::make_shared<Variable>(retry));
   return error;
 }
 
@@ -268,7 +269,7 @@ bool Variable::operator==(const Variable &rhs) {
   }
   if (type == VariableType::tStruct) {
     if (structValue->size() != rhs.structValue->size()) return false;
-    for (auto &element : *structValue) {
+    for (auto &element: *structValue) {
       auto rhsIterator = rhs.structValue->find(element.first);
       if (rhsIterator == rhs.structValue->end() || *element.second != *rhsIterator->second) return false;
     }
@@ -410,6 +411,19 @@ std::string Variable::print(bool stdout, bool stderr, bool oneLine) {
   return resultString;
 }
 
+void Variable::trimStrings() {
+  if (type == VariableType::tString) HelperFunctions::trim(stringValue);
+  else if (type == VariableType::tArray) {
+    for (auto &element: *arrayValue) {
+      element->trimStrings();
+    }
+  } else if (type == VariableType::tStruct) {
+    for (auto &element: *structValue) {
+      element.second->trimStrings();
+    }
+  }
+}
+
 std::string Variable::print(PVariable variable, std::string indent, bool ignoreIndentOnFirstLine, bool oneLine) {
   if (!variable) return "";
   std::ostringstream result;
@@ -447,7 +461,7 @@ std::string Variable::printArray(PArray array, std::string indent, bool ignoreIn
     currentIndent.push_back(' ');
     currentIndent.push_back(' ');
   }
-  for (auto &element : *array) {
+  for (auto &element: *array) {
     result << print(element, currentIndent, false, oneLine);
   }
   result << (oneLine ? " ] " : indent + "]\n");
@@ -462,7 +476,7 @@ std::string Variable::printStruct(PStruct tStruct, std::string indent, bool igno
     currentIndent.push_back(' ');
     currentIndent.push_back(' ');
   }
-  for (auto &element : *tStruct) {
+  for (auto &element: *tStruct) {
     result << currentIndent << "[" << element.first << "]" << " ";
     result << print(element.second, currentIndent, true, oneLine);
   }

@@ -871,7 +871,8 @@ std::unordered_map<std::string, std::string> Http::getParsedQueryString() {
 
   auto parts = BaseLib::HelperFunctions::splitAll(_header.args, '&');
   for (auto &part : parts) {
-    parsedQueryString.emplace(BaseLib::HelperFunctions::splitFirst(part, '='));
+    auto pair = BaseLib::HelperFunctions::splitFirst(part, '=');
+    parsedQueryString.emplace(decodeURL(pair.first), decodeURL(pair.second));
   }
   return parsedQueryString;
 }

@@ -1090,7 +1090,7 @@ AclResult Acl::checkMethodAndBuildingPartReadAccess(std::string &methodName, uin
     AclResult buildingPartResult = AclResult::notInList;
     if (_buildingPartsReadSet) {
       auto buildingPartIterator = _buildingPartsRead.find(buildingPartId); //Check specific access first in case of "no access".
-      if (buildingPartIterator != _roomsRead.end()) {
+      if (buildingPartIterator != _buildingPartsRead.end()) {
         buildingPartResult = buildingPartIterator->second ? AclResult::accept : AclResult::deny;
         if (!buildingPartIterator->second) return buildingPartResult; //Deny access
       }

@@ -32,21 +32,38 @@
 #include "../BaseLib.h"
 
 #include <iomanip>
+#include <memory>
 
-namespace BaseLib {
-namespace Rpc {
+namespace BaseLib::Rpc {
 
 void JsonEncoder::encodeRequest(std::string &methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> &parameters, std::vector<char> &encodedData) {
-  std::shared_ptr<Variable> methodCall(new Variable(VariableType::tStruct));
-  methodCall->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
-  methodCall->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
-  std::shared_ptr<Variable> params(new Variable(VariableType::tArray));
-  for (std::list<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i) {
-    params->arrayValue->push_back(*i);
+  auto methodCall = std::make_shared<Variable>(VariableType::tStruct);
+  methodCall->structValue->emplace(StructElement("jsonrpc", std::make_shared<Variable>(std::string("2.0"))));
+  methodCall->structValue->emplace(StructElement("method", std::make_shared<Variable>(methodName)));
+  auto params = std::make_shared<Variable>(VariableType::tArray);
+  for (auto &parameter: *parameters) {
+    params->arrayValue->emplace_back(parameter);
   }
-  methodCall->structValue->insert(StructElement("params", params));
-  methodCall->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(_requestId++))));
+  methodCall->structValue->emplace(StructElement("params", params));
+  methodCall->structValue->emplace(StructElement("id", std::make_shared<Variable>(_requestId.fetch_add(1))));
   encode(methodCall, encodedData);
+}
+
+std::vector<char> JsonEncoder::encodeRequest(const std::string &methodName, const std::shared_ptr<Variable> &parameters) {
+  auto methodCall = std::make_shared<Variable>(VariableType::tStruct);
+  methodCall->structValue->emplace(StructElement("jsonrpc", std::make_shared<Variable>(std::string("2.0"))));
+  methodCall->structValue->emplace(StructElement("method", std::make_shared<Variable>(methodName)));
+  if (parameters->type == VariableType::tStruct || parameters->type == VariableType::tArray) {
+    methodCall->structValue->emplace(StructElement("params", parameters));
+  } else {
+    auto params = std::make_shared<Variable>(VariableType::tArray);
+    params->arrayValue->emplace_back(parameters);
+    methodCall->structValue->emplace(StructElement("params", params));
+  }
+  methodCall->structValue->emplace(StructElement("id", std::make_shared<Variable>(_requestId.fetch_add(1))));
+  std::vector<char> encodedData;
+  encode(methodCall, encodedData);
+  return encodedData;
 }
 
 void JsonEncoder::encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json) {
@@ -400,7 +417,7 @@ std::string JsonEncoder::encodeString(const std::string &s) {
           'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', // C0-DF
           'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u'  // E0-FF
       };
-  for (const char16_t &c : utf16) {
+  for (const char16_t &c: utf16) {
     if ((uint16_t)c < 256 && escape[(uint8_t)c]) {
       result.push_back('\\');
       result.push_back(escape[(uint8_t)c]);
@@ -629,7 +646,7 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable> &variable, std::v
           'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u'  // E0-FF
       };
   s.push_back('"');
-  for (const char16_t c : utf16) {
+  for (const char16_t c: utf16) {
     if ((uint16_t)c < 256 && escape[(uint8_t)c]) {
       s.push_back('\\');
       s.push_back(escape[(uint8_t)c]);
@@ -796,5 +813,4 @@ void JsonEncoder::encodeVoid(const std::shared_ptr<Variable> &variable, std::vec
   s.push_back('l');
 }
 
-}
 }

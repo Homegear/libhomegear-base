@@ -34,7 +34,9 @@
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../Encoding/Http.h"
-#include "TcpSocket.h"
+#include "../Security/SecureVector.h"
+
+#include <c1-net/TcpSocket.h>
 
 namespace BaseLib {
 /**
@@ -135,7 +137,7 @@ class HttpClient {
    * Returns the underlying TcpSocket.
    * @return Returns the underlying TcpSocket.
    */
-  std::shared_ptr<TcpSocket> getSocket() { return _socket; }
+  std::shared_ptr<C1Net::TcpSocket> getSocket() { return _socket; }
 
   /**
    * Sets the socket timeout.
@@ -155,12 +157,12 @@ class HttpClient {
    * Returns "true" if the socket is connected, otherwise "false".
    * @return "true" if the socket is connected, otherwise "false".
    */
-  bool connected() { return _socket && _socket->connected(); }
+  bool connected() { return _socket && _socket->Connected(); }
 
   /**
    * Closes the socket.
    */
-  void disconnect() { if (_socket) _socket->close(); }
+  void disconnect() { if (_socket) _socket->Shutdown(); }
 
   /**
    * Enables storage of raw content. The raw content can be retrieved with getRawContent().
@@ -178,7 +180,7 @@ class HttpClient {
    * Returns the IP address of the HTTP server.
    * @return The IP address.
    */
-  std::string getIpAddress() { return _socket ? _socket->getIpAddress() : ""; }
+  std::string getIpAddress() { return _socket ? _socket->GetIpAddress() : ""; }
 
   /*
    * Sends an HTTP request and returns the response.
@@ -297,12 +299,12 @@ class HttpClient {
   /**
    * The socket object.
    */
-  std::shared_ptr<TcpSocket> _socket;
+  std::shared_ptr<C1Net::TcpSocket> _socket;
 
   /**
    * The hostname of the HTTP server.
    */
-  std::string _hostname = "";
+  std::string _hostname;
 
   /**
    * The port the HTTP server listens on.
@@ -325,6 +327,8 @@ class HttpClient {
    * Stores the raw response
    */
   std::vector<char> _rawContent;
+
+  void Log(uint32_t log_level, const std::string &message);
 };
 
 }

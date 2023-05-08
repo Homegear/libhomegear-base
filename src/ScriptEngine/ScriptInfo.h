@@ -39,7 +39,7 @@
 #include <condition_variable>
 #include <functional>
 
-#include "../Sockets/TcpSocket.h"
+#include <c1-net/TcpSocket.h>
 
 namespace BaseLib
 {
@@ -119,7 +119,7 @@ public:
 		std::condition_variable requestConditionVariable;
 
 		// Option 3: Write to socket
-		PTcpSocket socket;
+		C1Net::PTcpSocket socket;
 	// }}}
 
 	explicit ScriptInfo(ScriptType type);
