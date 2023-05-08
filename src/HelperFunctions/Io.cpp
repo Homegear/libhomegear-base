@@ -236,7 +236,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 			if(S_ISREG(statStruct.st_mode))
 			{
 				files.push_back(name);
-				if(files.size() == files.capacity()) files.reserve(files.size() + 100);
+				if(files.size() == files.capacity()) files.reserve(files.size() * 2);
 			}
 			else if(recursive && S_ISDIR(statStruct.st_mode))
 			{
@@ -244,7 +244,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 				for(std::vector<std::string>::iterator i = subdirFiles.begin(); i != subdirFiles.end(); ++i)
 				{
 					files.push_back(name + '/' + *i);
-					if(files.size() == files.capacity()) files.reserve(files.size() + 100);
+					if(files.size() == files.capacity()) files.reserve(files.size() * 2);
 				}
 			}
 		}
@@ -277,14 +277,14 @@ std::vector<std::string> Io::getDirectories(const std::string& path, bool recurs
 			if(S_ISDIR(statStruct.st_mode))
 			{
 				directories.push_back(name + '/');
-				if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
+				if(directories.size() == directories.capacity()) directories.reserve(directories.size() * 2);
 				if(recursive)
 				{
 					std::vector<std::string> subdirs = getDirectories(fixedPath + name, recursive);
 					for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
 					{
 						directories.push_back(name + '/' + *i);
-						if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
+						if(directories.size() == directories.capacity()) directories.reserve(directories.size() * 2);
 					}
 				}
 			}

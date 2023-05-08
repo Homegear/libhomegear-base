@@ -307,7 +307,7 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       }
 
       if (_keepRawContent) {
-        if (_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() + 4096);
+        if (_rawContent.size() + receivedBytes > _rawContent.capacity()) _rawContent.reserve(_rawContent.capacity() * 2);
         _rawContent.insert(_rawContent.end(), buffer.begin(), buffer.begin() + receivedBytes);
       }
 
