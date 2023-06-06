@@ -712,8 +712,6 @@ void Settings::load(const std::string &filename, const std::string &executablePa
           if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting certPath has been moved from "main.conf" to "rpcservers.conf".)");
         } else if (name == "keypath") {
           if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting keyPath has been moved from "main.conf" to "rpcservers.conf".)");
-        } else if (name == "dhparampath") {
-          if (!hideOutput) _bl->out.printWarning(R"(Warning: The setting dhParamPath has been moved from "main.conf" to "rpcservers.conf".)");
         }
           //}}}
         else {
