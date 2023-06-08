@@ -242,7 +242,9 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     _rawContent.clear();
     http.reset();
     try {
-      if (!_socket->Connected()) _socket->Open();
+      if (!_socket->Connected()) {
+        _socket->Open();
+      }
     }
     catch (const C1Net::TimeoutException &ex) {
       throw HttpClientTimeOutException(std::string(ex.what()));
@@ -257,7 +259,7 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
     }
     catch (const C1Net::ClosedException &ex) {
       _socket->Shutdown();
-      if (i == 1) http.setFinished();
+      if (i == 1) throw HttpClientException("Socket closed during write.");
       else continue;
     }
     catch (const C1Net::TimeoutException &ex) {
@@ -293,7 +295,7 @@ void HttpClient::sendRequest(const std::string &request, Http &http, bool respon
       }
       catch (const C1Net::ClosedException &ex) {
         _socket->Shutdown();
-        if (i == 1) http.setFinished();
+        if (i == 1) throw HttpClientException("Socket closed during read.");
         break;
       }
       catch (const C1Net::Exception &ex) {

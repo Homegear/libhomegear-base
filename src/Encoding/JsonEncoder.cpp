@@ -803,15 +803,15 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 #endif
 
 void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::ostringstream &s) {
-  variable->type = VariableType::tString;
-  variable->stringValue = Base64::encode(variable->binaryValue);
-  encodeString(variable, s);
+  auto variable_base64 = std::make_shared<Variable>(VariableType::tString);
+  variable_base64->stringValue = Base64::encode(variable->binaryValue);
+  encodeString(variable_base64, s);
 }
 
 void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s) {
-  variable->type = VariableType::tString;
-  variable->stringValue = Base64::encode(variable->binaryValue);
-  encodeString(variable, s);
+  auto variable_base64 = std::make_shared<Variable>(VariableType::tString);
+  variable_base64->stringValue = Base64::encode(variable->binaryValue);
+  encodeString(variable_base64, s);
 }
 
 void JsonEncoder::encodeVoid(const std::shared_ptr<Variable> &variable, std::ostringstream &s) {
