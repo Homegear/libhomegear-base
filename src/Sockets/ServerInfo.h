@@ -67,7 +67,6 @@ class ServerInfo {
     std::string caPath;
     std::string certPath;
     std::string keyPath;
-    std::string dhParamPath;
     AuthType authType = AuthType::cert;
     std::unordered_set<uint64_t> validGroups;
     std::string contentPath;
