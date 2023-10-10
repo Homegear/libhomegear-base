@@ -75,7 +75,7 @@ int64_t HelperFunctions::getTime() {
 }
 
 int64_t HelperFunctions::getTimeMicroseconds() {
-  return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  return ;
 }
 
 int64_t HelperFunctions::getTimeNanoseconds() {

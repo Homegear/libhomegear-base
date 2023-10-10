@@ -809,9 +809,9 @@ void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, s
 }
 
 void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s) {
-  auto variable_base64 = std::make_shared<Variable>(VariableType::tString);
-  variable_base64->stringValue = Base64::encode(variable->binaryValue);
-  encodeString(variable_base64, s);
+  auto variable_hex = std::make_shared<Variable>(VariableType::tString);
+  variable_hex->stringValue = HelperFunctions::getHexString(variable->binaryValue);
+  encodeString(variable_hex, s);
 }
 
 void JsonEncoder::encodeVoid(const std::shared_ptr<Variable> &variable, std::ostringstream &s) {
