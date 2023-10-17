@@ -8,7 +8,7 @@ Homepage: https://homegear.eu
 
 Package: libhomegear-base
 Architecture: any
-Depends: ${misc:Depends}, libgcrypt20, libgnutlsxx28, libgpg-error0 (>= 1.10), zlib1g
+Depends: ${misc:Depends}, libgcrypt20, libgnutlsxx28 | libgnutlsxx30, libgpg-error0 (>= 1.10), zlib1g
 Description: Base library for Homegear
  Homegear is a program to interface your home automation software 
  with your smart home devices.
