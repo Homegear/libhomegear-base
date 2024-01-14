@@ -35,6 +35,7 @@
 #include <map>
 #include <cmath>
 #include <bitset>
+#include <array>
 
 namespace BaseLib {
 class Math {
