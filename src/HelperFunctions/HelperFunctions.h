@@ -180,7 +180,9 @@ class HelperFunctions {
    * @return Returns a reference to the left trimmed string.
    */
   static inline std::string &ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+      return !std::isspace(ch);
+    }));
     return s;
   }
 
@@ -193,7 +195,9 @@ class HelperFunctions {
    * @return Returns a reference to the right trimmed string.
    */
   static inline std::string &rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+      return !std::isspace(ch);
+    }).base(), s.end());
     return s;
   }
 
@@ -241,7 +245,7 @@ class HelperFunctions {
    */
   static inline size_t utf8StringSize(const std::string &s) {
     if (s.empty()) return 0;
-    const unsigned char *pS = (const unsigned char *)s.c_str();
+    const unsigned char *pS = (const unsigned char *) s.c_str();
     size_t len = 0;
     while (*pS) len += (*pS++ & 0xc0) != 0x80;
     return len;
@@ -258,20 +262,20 @@ class HelperFunctions {
   static std::string utf8Substring(const std::string &s, uint32_t start, uint32_t length) {
     //From http://www.zedwood.com/article/cpp-utf-8-mb_substr-function
     if (length == 0) return "";
-    uint32_t c, i, ix, q, min = (unsigned)std::string::npos, max = (unsigned)std::string::npos;
+    uint32_t c, i, ix, q, min = (unsigned) std::string::npos, max = (unsigned) std::string::npos;
     for (q = 0, i = 0, ix = s.length(); i < ix; i++, q++) {
       if (q == start) min = i;
       if (q <= start + length || length == std::string::npos) max = i;
 
-      c = (unsigned char)s[i];
+      c = (unsigned char) s[i];
       if (c >= 0 && c <= 127) i += 0;
       else if ((c & 0xE0) == 0xC0) i += 1;
       else if ((c & 0xF0) == 0xE0) i += 2;
       else if ((c & 0xF8) == 0xF0) i += 3;
       else return ""; //invalid utf8
     }
-    if (q <= start + length || length == (unsigned)std::string::npos) max = i;
-    if (min == (unsigned)std::string::npos || max == (unsigned)std::string::npos) return "";
+    if (q <= start + length || length == (unsigned) std::string::npos) max = i;
+    if (min == (unsigned) std::string::npos || max == (unsigned) std::string::npos) return "";
     return s.substr(min, max);
   }
 
@@ -648,7 +652,13 @@ class HelperFunctions {
    * @param[out] showHelp Set to true when help is requested.
    * @return Returns true on success and false if "command" doesn't start with "longCommand", "shortCommand1" or "shortCommand2".
    */
-  static bool checkCliCommand(const std::string &command, const std::string &longCommand, const std::string &shortCommand1, const std::string &shortCommand2, uint32_t minArgumentCount, std::vector<std::string> &arguments, bool &showHelp);
+  static bool checkCliCommand(const std::string &command,
+                              const std::string &longCommand,
+                              const std::string &shortCommand1,
+                              const std::string &shortCommand2,
+                              uint32_t minArgumentCount,
+                              std::vector<std::string> &arguments,
+                              bool &showHelp);
 
   /**
    * Reverse memchr(). Searches the initial n bytes of buffer s for the last occurrence of 'c'.
