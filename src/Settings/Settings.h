@@ -35,7 +35,7 @@
 #include <map>
 #include <vector>
 
-#include <bits/sched.h>
+#include <sched.h>
 
 namespace BaseLib {
 class SharedObjects;
