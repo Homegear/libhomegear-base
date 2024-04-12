@@ -198,7 +198,7 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t> &buffer, u
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == coilBytes && response.size() == coilBytes + 9) break;
+      if ((uint8_t)response.at(8) >= coilBytes && response.size() >= coilBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus coils from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -213,8 +213,8 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t> &buffer, u
     }
   }
 
-  if ((uint8_t)response.at(8) == coilBytes && response.size() == coilBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i++) {
+  if ((uint8_t)response.at(8) >= coilBytes && response.size() >= coilBytes + 9) {
+    for (uint32_t i = 9; i < coilBytes + 9; i++) {
       buffer.at(i - 9) = _reverseByteMask[(uint8_t)response.at(i)];
     }
   }
@@ -238,7 +238,7 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t> &
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == inputBytes && response.size() == inputBytes + 9) break;
+      if ((uint8_t)response.at(8) >= inputBytes && response.size() >= inputBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus inputs from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -253,8 +253,8 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t> &
     }
   }
 
-  if ((uint8_t)response.at(8) == inputBytes && response.size() == inputBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i++) {
+  if ((uint8_t)response.at(8) >= inputBytes && response.size() >= inputBytes + 9) {
+    for (uint32_t i = 9; i < inputBytes + 9; i++) {
       buffer.at(i - 9) = _reverseByteMask[(uint8_t)response.at(i)];
     }
   }
@@ -278,7 +278,7 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) break;
+      if ((uint8_t)response.at(8) == registerBytes && response.size() >= registerBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus holding registers from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (ModbusServerBusyException &ex) {
@@ -293,8 +293,8 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
     }
   }
 
-  if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) {
+    for (uint32_t i = 9; i < registerBytes + 9; i += 2) {
       buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }
@@ -318,7 +318,7 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t> 
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) break;
+      if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus input registers from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -333,8 +333,8 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t> 
     }
   }
 
-  if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) {
+    for (uint32_t i = 9; i < registerBytes + 9; i += 2) {
       buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }
@@ -508,7 +508,7 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == readRegisterBytes && response.size() == (uint32_t)readRegisterBytes + 9) break;
+      if ((uint8_t)response.at(8) >= readRegisterBytes && response.size() >= (uint32_t)readRegisterBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read/write Modbus registers at address 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (write) and 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (read)");
     }
     catch (const ModbusServerBusyException &ex) {
@@ -523,8 +523,8 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
     }
   }
 
-  if ((uint8_t)response.at(8) == readRegisterBytes && response.size() == (uint32_t)readRegisterBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= readRegisterBytes && response.size() >= (uint32_t)readRegisterBytes + 9) {
+    for (uint32_t i = 9; i < (uint32_t)readRegisterBytes + 9; i += 2) {
       readBuffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }
