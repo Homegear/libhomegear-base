@@ -31,6 +31,7 @@
 #include "Http.h"
 #include "../HelperFunctions/Math.h"
 #include "../HelperFunctions/HelperFunctions.h"
+#include "JsonDecoder.h"
 
 #include <iomanip>
 
@@ -420,7 +421,11 @@ int32_t Http::process(char *buffer, int32_t bufferLength, bool checkForChunkedXm
   }
   _dataProcessingStarted = true;
 
-  if (_header.transferEncoding & TransferEncoding::Enum::chunked) processedBytes += processChunkedContent(buffer, bufferLength); else processedBytes += processContent(buffer, bufferLength);
+  if (_header.transferEncoding & TransferEncoding::Enum::chunked) {
+    processedBytes += processChunkedContent(buffer, bufferLength);
+  } else {
+    processedBytes += processContent(buffer, bufferLength);
+  }
 
   return processedBytes;
 }
@@ -667,11 +672,26 @@ void Http::setFinished() {
 int32_t Http::processContent(char *buffer, int32_t bufferLength) {
   if (_content.size() + bufferLength > _maxContentSize) throw HttpException("Data is larger than " + std::to_string(_maxContentSize) + " bytes.");
   int32_t processedBytes = bufferLength;
-  if (_header.contentLength == 0) _content.insert(_content.end(), buffer, buffer + bufferLength);
+  if (_header.contentLength == 0) {
+    _content.insert(_content.end(), buffer, buffer + bufferLength);
+    if (_header.contentType == "application/json") {
+      bool finished = true;
+      try {
+        Rpc::JsonDecoder::decode(_content);
+      } catch(...) {
+        finished = false;
+      }
+      if (finished) {
+        setFinished();
+      }
+    }
+  }
   else {
     if (_content.size() + bufferLength > _header.contentLength) processedBytes -= (_content.size() + bufferLength) - _header.contentLength;
     _content.insert(_content.end(), buffer, buffer + processedBytes);
-    if (_content.size() == _header.contentLength) setFinished();
+    if (_content.size() == _header.contentLength) {
+      setFinished();
+    }
   }
   if (processedBytes < bufferLength) {
     buffer += processedBytes;
