@@ -35,6 +35,7 @@
 #include <mutex>
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace BaseLib
 {
