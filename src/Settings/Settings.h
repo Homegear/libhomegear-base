@@ -34,6 +34,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstdint>
 
 #include <sched.h>
 
