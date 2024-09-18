@@ -36,6 +36,7 @@
 #include <cmath>
 #include <bitset>
 #include <array>
+#include <cstdint>
 
 namespace BaseLib {
 class Math {

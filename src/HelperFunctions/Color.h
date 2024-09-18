@@ -35,6 +35,7 @@
 
 #include <cmath>
 #include <string>
+#include <cstdint>
 
 namespace BaseLib
 {
