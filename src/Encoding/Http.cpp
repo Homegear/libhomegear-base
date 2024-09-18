@@ -406,7 +406,7 @@ int32_t Http::process(char *buffer, int32_t bufferLength, bool checkForChunkedXm
       }
       std::string chunk = _partialChunkSize + std::string(buffer, bufferLength);
       std::string::size_type pos = 0;
-      if (checkForChunkedXml) chunk.find('<');
+      if (checkForChunkedXml) pos = chunk.find('<');
       else {
         pos = chunk.find('[');
         std::string::size_type pos2 = chunk.find('{');
