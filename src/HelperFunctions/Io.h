@@ -33,6 +33,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace BaseLib {
 namespace Security {
