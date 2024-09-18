@@ -34,6 +34,7 @@
 #include "../Exception.h"
 #include <string>
 #include <map>
+#include <cstdint>
 
 namespace BaseLib
 {
