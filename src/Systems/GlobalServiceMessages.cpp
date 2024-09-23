@@ -173,7 +173,8 @@ PVariable GlobalServiceMessages::get(PRpcClientInfo clientInfo, const std::strin
             if (message.second->familyId != -1 && !message.second->interface.empty()) element->structValue->emplace("INTERFACE", std::make_shared<Variable>(message.second->interface));
             element->structValue->emplace("MESSAGE_ID", std::make_shared<Variable>(message.second->messageId));
             element->structValue->emplace("MESSAGE_SUBID", std::make_shared<Variable>(message.second->messageSubId));
-            if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation(message.second->message, language)));
+            if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>(message.second->message));
+            else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation(message.second->message, language)));
             else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations(message.second->message));
             auto variables = std::make_shared<Variable>(VariableType::tArray);
             variables->arrayValue->reserve(message.second->variables.size());

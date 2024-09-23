@@ -32,12 +32,13 @@
 #define LIBHOMEGEAR_BASE_HGDC_H
 
 #include "../Systems/Packet.h"
-#include "TcpSocket.h"
 #include "../Encoding/BinaryRpc.h"
 #include "../Encoding/RpcEncoder.h"
 #include "../Encoding/RpcDecoder.h"
 #include "../Output/Output.h"
 #include "../IQueue.h"
+
+#include <c1-net/TcpSocket.h>
 
 #include <condition_variable>
 
@@ -69,7 +70,7 @@ class Hgdc : public IQueue {
   uint16_t _port = 0;
 
   Output _out;
-  std::unique_ptr<TcpSocket> _tcpSocket;
+  std::unique_ptr<C1Net::TcpSocket> _tcpSocket;
   std::unique_ptr<Rpc::BinaryRpc> _binaryRpc;
   std::unique_ptr<Rpc::RpcEncoder> _rpcEncoder;
   std::unique_ptr<Rpc::RpcDecoder> _rpcDecoder;
@@ -95,6 +96,7 @@ class Hgdc : public IQueue {
   std::unordered_map<pthread_t, std::unordered_map<int32_t, PRpcResponse>> _rpcResponses;
   // }}}
 
+  void Log(uint32_t log_level, const std::string &message);
   void listen();
   void processQueueEntry(int32_t index, std::shared_ptr<BaseLib::IQueueEntry> &entry) override;
  public:

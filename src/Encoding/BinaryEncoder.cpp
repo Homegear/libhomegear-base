@@ -38,25 +38,25 @@ BinaryEncoder::BinaryEncoder(BaseLib::SharedObjects *baseLib) {
 
 void BinaryEncoder::encodeInteger(std::vector<char> &encodedData, int32_t integer) {
   char result[4];
-  HelperFunctions::memcpyBigEndian(result, (char *)&integer, 4);
+  HelperFunctions::memcpyBigEndian(result, (char *) &integer, 4);
   encodedData.insert(encodedData.end(), result, result + 4);
 }
 
 void BinaryEncoder::encodeInteger(std::vector<uint8_t> &encodedData, int32_t integer) {
   uint8_t result[4];
-  HelperFunctions::memcpyBigEndian(result, (uint8_t *)&integer, 4);
+  HelperFunctions::memcpyBigEndian(result, (uint8_t *) &integer, 4);
   encodedData.insert(encodedData.end(), result, result + 4);
 }
 
 void BinaryEncoder::encodeInteger64(std::vector<char> &encodedData, int64_t integer) {
   char result[8];
-  HelperFunctions::memcpyBigEndian(result, (char *)&integer, 8);
+  HelperFunctions::memcpyBigEndian(result, (char *) &integer, 8);
   encodedData.insert(encodedData.end(), result, result + 8);
 }
 
 void BinaryEncoder::encodeInteger64(std::vector<uint8_t> &encodedData, int64_t integer) {
   char result[8];
-  HelperFunctions::memcpyBigEndian(result, (char *)&integer, 8);
+  HelperFunctions::memcpyBigEndian(result, (char *) &integer, 8);
   encodedData.insert(encodedData.end(), result, result + 8);
 }
 
@@ -70,71 +70,79 @@ void BinaryEncoder::encodeByte(std::vector<uint8_t> &encodedData, uint8_t byte) 
 
 void BinaryEncoder::encodeString(std::vector<char> &encodedData, const std::string &string) {
   encodeInteger(encodedData, string.size());
-  if (!string.empty()) encodedData.insert(encodedData.end(), string.begin(), string.end());
+  if (!string.empty()) { encodedData.insert(encodedData.end(), string.begin(), string.end()); }
 }
 
 void BinaryEncoder::encodeString(std::vector<uint8_t> &encodedData, const std::string &string) {
   encodeInteger(encodedData, string.size());
-  if (!string.empty()) encodedData.insert(encodedData.end(), string.begin(), string.end());
+  if (!string.empty()) { encodedData.insert(encodedData.end(), string.begin(), string.end()); }
 }
 
 void BinaryEncoder::encodeBinary(std::vector<char> &encodedData, const std::vector<uint8_t> &data) {
   encodeInteger(encodedData, data.size());
-  if (!data.empty()) encodedData.insert(encodedData.end(), data.begin(), data.end());
+  if (!data.empty()) { encodedData.insert(encodedData.end(), data.begin(), data.end()); }
 }
 
 void BinaryEncoder::encodeBinary(std::vector<uint8_t> &encodedData, const std::vector<uint8_t> &data) {
   encodeInteger(encodedData, data.size());
-  if (!data.empty()) encodedData.insert(encodedData.end(), data.begin(), data.end());
+  if (!data.empty()) { encodedData.insert(encodedData.end(), data.begin(), data.end()); }
 }
 
 void BinaryEncoder::encodeBoolean(std::vector<char> &encodedData, bool boolean) {
-  encodedData.push_back((char)boolean);
+  encodedData.push_back((char) boolean);
 }
 
 void BinaryEncoder::encodeBoolean(std::vector<uint8_t> &encodedData, bool boolean) {
-  encodedData.push_back((uint8_t)boolean);
+  encodedData.push_back((uint8_t) boolean);
 }
 
 void BinaryEncoder::encodeFloat(std::vector<char> &encodedData, double floatValue) {
   double temp = std::abs(floatValue);
   int32_t exponent = 0;
-  if (temp != 0 && temp < 0.5) {
-    while (temp < 0.5) {
-      temp *= 2;
-      exponent--;
+  int32_t mantissa = 0;
+  if (std::isnormal(temp)) {
+    if (temp != 0 && temp < 0.5) {
+      while (temp < 0.5) {
+        temp *= 2;
+        exponent--;
+      }
+    } else {
+      while (temp >= 1) {
+        temp /= 2;
+        exponent++;
+      }
     }
-  } else
-    while (temp >= 1) {
-      temp /= 2;
-      exponent++;
-    }
-  if (floatValue < 0) temp *= -1;
-  int32_t mantissa = std::lround(temp * 0x40000000);
+    if (floatValue < 0) { temp *= -1; }
+    mantissa = std::lround(temp * 0x40000000);
+  }
   char data[8];
-  HelperFunctions::memcpyBigEndian(data, (char *)&mantissa, 4);
-  HelperFunctions::memcpyBigEndian(data + 4, (char *)&exponent, 4);
+  HelperFunctions::memcpyBigEndian(data, (char *) &mantissa, 4);
+  HelperFunctions::memcpyBigEndian(data + 4, (char *) &exponent, 4);
   encodedData.insert(encodedData.end(), data, data + 8);
 }
 
 void BinaryEncoder::encodeFloat(std::vector<uint8_t> &encodedData, double floatValue) {
   double temp = std::abs(floatValue);
   int32_t exponent = 0;
-  if (temp != 0 && temp < 0.5) {
-    while (temp < 0.5) {
-      temp *= 2;
-      exponent--;
+  int32_t mantissa = 0;
+  if (std::isnormal(temp)) {
+    if (temp != 0 && temp < 0.5) {
+      while (temp < 0.5) {
+        temp *= 2;
+        exponent--;
+      }
+    } else {
+      while (temp >= 1) {
+        temp /= 2;
+        exponent++;
+      }
     }
-  } else
-    while (temp >= 1) {
-      temp /= 2;
-      exponent++;
-    }
-  if (floatValue < 0) temp *= -1;
-  int32_t mantissa = std::lround(temp * 0x40000000);
+    if (floatValue < 0) { temp *= -1; }
+    mantissa = std::lround(temp * 0x40000000);
+  }
   char data[8];
-  HelperFunctions::memcpyBigEndian(data, (char *)&mantissa, 4);
-  HelperFunctions::memcpyBigEndian(data + 4, (char *)&exponent, 4);
+  HelperFunctions::memcpyBigEndian(data, (char *) &mantissa, 4);
+  HelperFunctions::memcpyBigEndian(data + 4, (char *) &exponent, 4);
   encodedData.insert(encodedData.end(), data, data + 8);
 }
 

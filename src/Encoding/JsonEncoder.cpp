@@ -32,21 +32,38 @@
 #include "../BaseLib.h"
 
 #include <iomanip>
+#include <memory>
 
-namespace BaseLib {
-namespace Rpc {
+namespace BaseLib::Rpc {
 
 void JsonEncoder::encodeRequest(std::string &methodName, std::shared_ptr<std::list<std::shared_ptr<Variable>>> &parameters, std::vector<char> &encodedData) {
-  std::shared_ptr<Variable> methodCall(new Variable(VariableType::tStruct));
-  methodCall->structValue->insert(StructElement("jsonrpc", std::shared_ptr<Variable>(new Variable(std::string("2.0")))));
-  methodCall->structValue->insert(StructElement("method", std::shared_ptr<Variable>(new Variable(methodName))));
-  std::shared_ptr<Variable> params(new Variable(VariableType::tArray));
-  for (std::list<std::shared_ptr<Variable>>::iterator i = parameters->begin(); i != parameters->end(); ++i) {
-    params->arrayValue->push_back(*i);
+  auto methodCall = std::make_shared<Variable>(VariableType::tStruct);
+  methodCall->structValue->emplace(StructElement("jsonrpc", std::make_shared<Variable>(std::string("2.0"))));
+  methodCall->structValue->emplace(StructElement("method", std::make_shared<Variable>(methodName)));
+  auto params = std::make_shared<Variable>(VariableType::tArray);
+  for (auto &parameter : *parameters) {
+    params->arrayValue->emplace_back(parameter);
   }
-  methodCall->structValue->insert(StructElement("params", params));
-  methodCall->structValue->insert(StructElement("id", std::shared_ptr<Variable>(new Variable(_requestId++))));
+  methodCall->structValue->emplace(StructElement("params", params));
+  methodCall->structValue->emplace(StructElement("id", std::make_shared<Variable>(_requestId.fetch_add(1))));
   encode(methodCall, encodedData);
+}
+
+std::vector<char> JsonEncoder::encodeRequest(const std::string &methodName, const std::shared_ptr<Variable> &parameters) {
+  auto methodCall = std::make_shared<Variable>(VariableType::tStruct);
+  methodCall->structValue->emplace(StructElement("jsonrpc", std::make_shared<Variable>(std::string("2.0"))));
+  methodCall->structValue->emplace(StructElement("method", std::make_shared<Variable>(methodName)));
+  if (parameters->type == VariableType::tStruct || parameters->type == VariableType::tArray) {
+    methodCall->structValue->emplace(StructElement("params", parameters));
+  } else {
+    auto params = std::make_shared<Variable>(VariableType::tArray);
+    params->arrayValue->emplace_back(parameters);
+    methodCall->structValue->emplace(StructElement("params", params));
+  }
+  methodCall->structValue->emplace(StructElement("id", std::make_shared<Variable>(_requestId.fetch_add(1))));
+  std::vector<char> encodedData;
+  encode(methodCall, encodedData);
+  return encodedData;
 }
 
 void JsonEncoder::encodeResponse(const std::shared_ptr<Variable> &variable, int32_t id, std::vector<char> &json) {
@@ -162,7 +179,7 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable> &variable, std::os
       break;
     case VariableType::tVariant: encodeVoid(variable, s);
       break;
-    case VariableType::tBinary: encodeVoid(variable, s);
+    case VariableType::tBinary: encodeBinaryValue(variable, s);
       break;
   }
 }
@@ -190,7 +207,7 @@ void JsonEncoder::encodeValue(const std::shared_ptr<Variable> &variable, std::ve
       break;
     case VariableType::tVariant: encodeVoid(variable, s);
       break;
-    case VariableType::tBinary: encodeVoid(variable, s);
+    case VariableType::tBinary: encodeBinaryValue(variable, s);
       break;
   }
 }
@@ -324,56 +341,56 @@ std::string JsonEncoder::encodeString(const std::string &s) {
      * 0001 0000 – 0010 FFFF => 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx //First five bits of the first byte are always 11110, the first two bits of the following bytes are always 10
      */
 
-    for (int32_t i = 0; i < (signed)s.size(); i++) {
-      uint8_t b1 = (uint8_t)s.at(i);
+    for (int32_t i = 0; i < (signed) s.size(); i++) {
+      uint8_t b1 = (uint8_t) s.at(i);
       if (b1 & 0x80) //> 1 byte or invalid
       {
         std::string utf8String;
         bool invalid = false;
         if ((b1 & 0xE0) == 0xC0) //Two bytes
         {
-          if (i + 1 >= (signed)s.size()) invalid = true;
+          if (i + 1 >= (signed) s.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)s.at(i + 1);
+            auto b2 = (uint8_t) s.at(i + 1);
             if ((b2 & 0xC0) == 0x80) {
               i++;
-              utf8String = std::string{(char)b1, (char)b2};
+              utf8String = std::string{(char) b1, (char) b2};
             } else invalid = true;
           }
         } else if ((b1 & 0xF0) == 0xE0) //Three bytes
         {
-          if (i + 2 >= (signed)s.size()) invalid = true;
+          if (i + 2 >= (signed) s.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)s.at(i + 1);
-            auto b3 = (uint8_t)s.at(i + 2);
+            auto b2 = (uint8_t) s.at(i + 1);
+            auto b3 = (uint8_t) s.at(i + 2);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) {
               i += 2;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3};
             } else invalid = true;
           }
         } else if ((b1 & 0xF8) == 0xF0) //Four bytes
         {
-          if (i + 3 >= (signed)s.size()) invalid = true;
+          if (i + 3 >= (signed) s.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)s.at(i + 1);
-            auto b3 = (uint8_t)s.at(i + 2);
-            auto b4 = (uint8_t)s.at(i + 3);
+            auto b2 = (uint8_t) s.at(i + 1);
+            auto b3 = (uint8_t) s.at(i + 2);
+            auto b4 = (uint8_t) s.at(i + 3);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) {
               i += 3;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3, (char)b4};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
             } else invalid = true;
           }
         } else invalid = true;
         if (invalid) //Assume ANSI
         {
           Ansi ansi(true, false);
-          utf8String = ansi.toUtf8(std::string((char *)&b1, 1));
+          utf8String = ansi.toUtf8(std::string((char *) &b1, 1));
         }
         if (!utf8String.empty()) {
           utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(utf8String));
         }
       } else {
-        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char)b1));
+        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char) b1));
       }
     }
   }
@@ -401,24 +418,24 @@ std::string JsonEncoder::encodeString(const std::string &s) {
           'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u'  // E0-FF
       };
   for (const char16_t &c : utf16) {
-    if ((uint16_t)c < 256 && escape[(uint8_t)c]) {
+    if ((uint16_t) c < 256 && escape[(uint8_t) c]) {
       result.push_back('\\');
-      result.push_back(escape[(uint8_t)c]);
+      result.push_back(escape[(uint8_t) c]);
       if (escape[c] == 'u') {
         result.push_back('0');
         result.push_back('0');
-        result.push_back(hexDigits[(uint8_t)c >> 4]);
-        result.push_back(hexDigits[(uint8_t)c & 0xF]);
+        result.push_back(hexDigits[(uint8_t) c >> 4]);
+        result.push_back(hexDigits[(uint8_t) c & 0xF]);
       }
     } else {
-      if ((uint16_t)c < 256) result.push_back((char)(uint8_t)c);
+      if ((uint16_t) c < 256) result.push_back((char) (uint8_t) c);
       else {
         result.push_back('\\');
         result.push_back('u');
-        result.push_back(hexDigits[(uint8_t)(c >> 12)]);
-        result.push_back(hexDigits[(uint8_t)((c >> 8) & 0x0F)]);
-        result.push_back(hexDigits[(uint8_t)((c >> 4) & 0x0F)]);
-        result.push_back(hexDigits[(uint8_t)(c & 0x0F)]);
+        result.push_back(hexDigits[(uint8_t) (c >> 12)]);
+        result.push_back(hexDigits[(uint8_t) ((c >> 8) & 0x0F)]);
+        result.push_back(hexDigits[(uint8_t) ((c >> 4) & 0x0F)]);
+        result.push_back(hexDigits[(uint8_t) (c & 0x0F)]);
       }
     }
   }
@@ -442,56 +459,56 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable> &variable, std::o
      * 0001 0000 – 0010 FFFF => 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx //First five bits of the first byte are always 11110, the first two bits of the following bytes are always 10
      */
 
-    for (int32_t i = 0; i < (signed)variable->stringValue.size(); i++) {
-      uint8_t b1 = (uint8_t)variable->stringValue.at(i);
+    for (int32_t i = 0; i < (signed) variable->stringValue.size(); i++) {
+      uint8_t b1 = (uint8_t) variable->stringValue.at(i);
       if (b1 & 0x80) //> 1 byte or invalid
       {
         std::string utf8String;
         bool invalid = false;
         if ((b1 & 0xE0) == 0xC0) //Two bytes
         {
-          if (i + 1 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 1 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
             if ((b2 & 0xC0) == 0x80) {
               i++;
-              utf8String = std::string{(char)b1, (char)b2};
+              utf8String = std::string{(char) b1, (char) b2};
             } else invalid = true;
           }
         } else if ((b1 & 0xF0) == 0xE0) //Three bytes
         {
-          if (i + 2 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 2 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
-            auto b3 = (uint8_t)variable->stringValue.at(i + 2);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+            auto b3 = (uint8_t) variable->stringValue.at(i + 2);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) {
               i += 2;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3};
             } else invalid = true;
           }
         } else if ((b1 & 0xF8) == 0xF0) //Four bytes
         {
-          if (i + 3 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 3 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
-            auto b3 = (uint8_t)variable->stringValue.at(i + 2);
-            auto b4 = (uint8_t)variable->stringValue.at(i + 3);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+            auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+            auto b4 = (uint8_t) variable->stringValue.at(i + 3);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) {
               i += 3;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3, (char)b4};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
             } else invalid = true;
           }
         } else invalid = true;
         if (invalid) //Assume ANSI
         {
           Ansi ansi(true, false);
-          utf8String = ansi.toUtf8(std::string((char *)&b1, 1));
+          utf8String = ansi.toUtf8(std::string((char *) &b1, 1));
         }
         if (!utf8String.empty()) {
           utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(utf8String));
         }
       } else {
-        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char)b1));
+        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char) b1));
       }
     }
   }
@@ -517,15 +534,15 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable> &variable, std::o
       };
   s << "\"";
   for (std::u16string::iterator i = utf16.begin(); i != utf16.end(); ++i) {
-    if ((uint16_t)*i < 256 && escape[(uint8_t)*i]) {
-      if (escape[(uint8_t)*i] == 'u') {
-        s << '\\' << escape[(uint8_t)*i];
-        s << '0' << '0' << hexDigits[((uint8_t)*i) >> 4] << hexDigits[((uint8_t)*i) & 0xF];
-      } else s << '\\' << escape[(uint8_t)*i];
+    if ((uint16_t) *i < 256 && escape[(uint8_t) *i]) {
+      if (escape[(uint8_t) *i] == 'u') {
+        s << '\\' << escape[(uint8_t) *i];
+        s << '0' << '0' << hexDigits[((uint8_t) *i) >> 4] << hexDigits[((uint8_t) *i) & 0xF];
+      } else s << '\\' << escape[(uint8_t) *i];
     } else {
-      if ((uint16_t)*i < 256) s << (char)(uint8_t)*i;
+      if ((uint16_t) *i < 256) s << (char) (uint8_t) *i;
       else {
-        s << '\\' << 'u' << hexDigits[(uint8_t)(*i >> 12)] << hexDigits[(uint8_t)((*i >> 8) & 0x0F)] << hexDigits[(uint8_t)((*i >> 4) & 0x0F)] << hexDigits[(uint8_t)(*i & 0x0F)];
+        s << '\\' << 'u' << hexDigits[(uint8_t) (*i >> 12)] << hexDigits[(uint8_t) ((*i >> 8) & 0x0F)] << hexDigits[(uint8_t) ((*i >> 4) & 0x0F)] << hexDigits[(uint8_t) (*i & 0x0F)];
       }
     }
   }
@@ -549,56 +566,56 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable> &variable, std::v
      * 0001 0000 – 0010 FFFF => 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx //First five bits of the first byte are always 11110, the first two bits of the following bytes are always 10
      */
 
-    for (int32_t i = 0; i < (signed)variable->stringValue.size(); i++) {
-      uint8_t b1 = (uint8_t)variable->stringValue.at(i);
+    for (int32_t i = 0; i < (signed) variable->stringValue.size(); i++) {
+      uint8_t b1 = (uint8_t) variable->stringValue.at(i);
       if (b1 & 0x80) //> 1 byte or invalid
       {
         std::string utf8String;
         bool invalid = false;
         if ((b1 & 0xE0) == 0xC0) //Two bytes
         {
-          if (i + 1 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 1 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
             if ((b2 & 0xC0) == 0x80) {
               i++;
-              utf8String = std::string{(char)b1, (char)b2};
+              utf8String = std::string{(char) b1, (char) b2};
             } else invalid = true;
           }
         } else if ((b1 & 0xF0) == 0xE0) //Three bytes
         {
-          if (i + 2 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 2 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
-            auto b3 = (uint8_t)variable->stringValue.at(i + 2);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+            auto b3 = (uint8_t) variable->stringValue.at(i + 2);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80) {
               i += 2;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3};
             } else invalid = true;
           }
         } else if ((b1 & 0xF8) == 0xF0) //Four bytes
         {
-          if (i + 3 >= (signed)variable->stringValue.size()) invalid = true;
+          if (i + 3 >= (signed) variable->stringValue.size()) invalid = true;
           else {
-            auto b2 = (uint8_t)variable->stringValue.at(i + 1);
-            auto b3 = (uint8_t)variable->stringValue.at(i + 2);
-            auto b4 = (uint8_t)variable->stringValue.at(i + 3);
+            auto b2 = (uint8_t) variable->stringValue.at(i + 1);
+            auto b3 = (uint8_t) variable->stringValue.at(i + 2);
+            auto b4 = (uint8_t) variable->stringValue.at(i + 3);
             if ((b2 & 0xC0) == 0x80 && (b3 & 0xC0) == 0x80 && (b4 & 0xC0) == 0x80) {
               i += 3;
-              utf8String = std::string{(char)b1, (char)b2, (char)b3, (char)b4};
+              utf8String = std::string{(char) b1, (char) b2, (char) b3, (char) b4};
             } else invalid = true;
           }
         } else invalid = true;
         if (invalid) //Assume ANSI
         {
           Ansi ansi(true, false);
-          utf8String = ansi.toUtf8(std::string((char *)&b1, 1));
+          utf8String = ansi.toUtf8(std::string((char *) &b1, 1));
         }
         if (!utf8String.empty()) {
           utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(utf8String));
         }
       } else {
-        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char)b1));
+        utf16.append(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes((char) b1));
       }
     }
   }
@@ -630,24 +647,24 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable> &variable, std::v
       };
   s.push_back('"');
   for (const char16_t c : utf16) {
-    if ((uint16_t)c < 256 && escape[(uint8_t)c]) {
+    if ((uint16_t) c < 256 && escape[(uint8_t) c]) {
       s.push_back('\\');
-      s.push_back(escape[(uint8_t)c]);
-      if (escape[(uint8_t)c] == 'u') {
+      s.push_back(escape[(uint8_t) c]);
+      if (escape[(uint8_t) c] == 'u') {
         s.push_back('0');
         s.push_back('0');
-        s.push_back(hexDigits[(uint8_t)c >> 4]);
-        s.push_back(hexDigits[(uint8_t)c & 0xF]);
+        s.push_back(hexDigits[(uint8_t) c >> 4]);
+        s.push_back(hexDigits[(uint8_t) c & 0xF]);
       }
     } else {
-      if ((uint16_t)c < 256) s.push_back((char)(uint8_t)c);
+      if ((uint16_t) c < 256) s.push_back((char) (uint8_t) c);
       else {
         s.push_back('\\');
         s.push_back('u');
-        s.push_back(hexDigits[(uint8_t)(c >> 12)]);
-        s.push_back(hexDigits[(uint8_t)((c >> 8) & 0x0F)]);
-        s.push_back(hexDigits[(uint8_t)((c >> 4) & 0x0F)]);
-        s.push_back(hexDigits[(uint8_t)(c & 0x0F)]);
+        s.push_back(hexDigits[(uint8_t) (c >> 12)]);
+        s.push_back(hexDigits[(uint8_t) ((c >> 8) & 0x0F)]);
+        s.push_back(hexDigits[(uint8_t) ((c >> 4) & 0x0F)]);
+        s.push_back(hexDigits[(uint8_t) (c & 0x0F)]);
       }
     }
   }
@@ -785,6 +802,18 @@ void JsonEncoder::encodeString(const std::shared_ptr<Variable>& variable, std::v
 
 #endif
 
+void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::ostringstream &s) {
+  auto variable_hex = std::make_shared<Variable>(VariableType::tString);
+  variable_hex->stringValue = "0x" + HelperFunctions::getHexString(variable->binaryValue);
+  encodeString(variable_hex, s);
+}
+
+void JsonEncoder::encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s) {
+  auto variable_hex = std::make_shared<Variable>(VariableType::tString);
+  variable_hex->stringValue = "0x" + HelperFunctions::getHexString(variable->binaryValue);
+  encodeString(variable_hex, s);
+}
+
 void JsonEncoder::encodeVoid(const std::shared_ptr<Variable> &variable, std::ostringstream &s) {
   s << "null";
 }
@@ -796,5 +825,4 @@ void JsonEncoder::encodeVoid(const std::shared_ptr<Variable> &variable, std::vec
   s.push_back('l');
 }
 
-}
 }

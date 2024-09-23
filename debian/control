@@ -3,12 +3,12 @@ Maintainer: Sathya Laufer <sathya@laufers.net>
 Section: misc
 Priority: optional
 Standards-Version: 3.9.6
-Build-Depends: debhelper (>= 8), libgcrypt20-dev, libgpg-error-dev (>= 1.10), libgnutls28-dev, zlib1g-dev
+Build-Depends: debhelper (>= 8), libgcrypt20-dev, libgpg-error-dev (>= 1.10), libgnutls28-dev, zlib1g-dev, libc1-net
 Homepage: https://homegear.eu
 
 Package: libhomegear-base
 Architecture: any
-Depends: ${misc:Depends}, libgcrypt20, libgnutlsxx28 | libgnutlsxx30, libgpg-error0 (>= 1.10), zlib1g
+Depends: ${misc:Depends}, libgcrypt20, libgnutls30 | libgnutls30t64 | libgnutlsxx28 | libgnutlsxx30, libgpg-error0 (>= 1.10), zlib1g, libc1-net
 Description: Base library for Homegear
  Homegear is a program to interface your home automation software 
  with your smart home devices.

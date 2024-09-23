@@ -83,7 +83,6 @@
 #include "Sockets/HttpClient.h"
 #include "Sockets/HttpServer.h"
 #include "Sockets/Modbus.h"
-#include "Sockets/TcpSocket.h"
 #include "Sockets/UdpSocket.h"
 
 namespace BaseLib {

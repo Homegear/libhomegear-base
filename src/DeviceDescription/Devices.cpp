@@ -1296,6 +1296,7 @@ std::shared_ptr<Variable> Devices::getParamsetDescription(PRpcClientInfo clientI
       }
 
       description->structValue->insert(StructElement("UNIT", std::make_shared<Variable>(i->second->unit)));
+      if (i->second->unit_code != UnitCode::kUndefined) description->structValue->insert(StructElement("UNIT_CODE", std::make_shared<Variable>((int32_t)i->second->unit_code)));
       if (i->second->mandatory) description->structValue->emplace("MANDATORY", std::make_shared<BaseLib::Variable>(i->second->mandatory));
       if (!i->second->formFieldType.empty()) description->structValue->insert(StructElement("FORM_FIELD_TYPE", std::make_shared<Variable>(i->second->formFieldType)));
       if (i->second->formPosition != -1) description->structValue->insert(StructElement("FORM_POSITION", std::make_shared<Variable>(i->second->formPosition)));

@@ -35,6 +35,8 @@
 #include <map>
 #include <cmath>
 #include <bitset>
+#include <array>
+#include <cstdint>
 
 namespace BaseLib {
 class Math {
@@ -418,6 +420,17 @@ class Math {
         };
     return e[exponent];
   }
+
+  /**
+   * Calculates the exponential moving average per time for performance metrics.
+   *
+   * @param interval The time since the last measurements. The time unit doesn't matter as long as it is the same unit as for `period`.
+   * @param period The time to average over (e. g. 60 seconds or 15 minutes). The time unit doesn't matter as long as it is the same as for `interval`.
+   * @param metric The current performance measurement.
+   * @param lastAverage The last output of this method. Pass `0` when this is the first call.
+   * @return Returns the average over the given time period.
+   */
+  static double metricExponentialMovingAverage(double interval, double period, double metric, double lastAverage);
  protected:
   /**
    * Map to faster convert hexadecimal numbers.

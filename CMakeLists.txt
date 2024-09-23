@@ -165,8 +165,6 @@ set(SOURCE_FILES
         src/Sockets/SocketExceptions.h
         src/Sockets/Ssdp.cpp
         src/Sockets/Ssdp.h
-        src/Sockets/TcpSocket.cpp
-        src/Sockets/TcpSocket.h
         src/Sockets/UdpSocket.cpp
         src/Sockets/UdpSocket.h
         src/Systems/DeviceFamily.cpp

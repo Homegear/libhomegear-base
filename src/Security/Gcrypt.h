@@ -35,6 +35,7 @@
 #include <gcrypt.h>
 
 #include <memory>
+#include <array>
 #include <vector>
 #include <cstdint>
 

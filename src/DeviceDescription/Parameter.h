@@ -35,6 +35,7 @@
 #include "Logical.h"
 #include "Physical.h"
 #include "../Systems/Role.h"
+#include "UnitCode.h"
 #include <string>
 #include <set>
 
@@ -102,6 +103,7 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
   bool internal = false;
   bool parameterGroupSelector = false;
   bool service = false;
+  bool serviceInverted = false;
   bool sticky = false;
   bool transform = false;
   bool isSignedSet = false;
@@ -116,6 +118,10 @@ class Parameter : public std::enable_shared_from_this<Parameter> {
    * The unit of the variable like "°C" or "km/h".
    */
   std::string unit;
+  /**
+   * The unit code (we use the BACnet codes)
+   */
+  UnitCode unit_code = UnitCode::kUndefined;
   bool mandatory = false;
   std::string formFieldType;
   int32_t formPosition = -1;
