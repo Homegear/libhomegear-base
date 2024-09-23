@@ -31,6 +31,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#include <cstdint>
 #include <string>
 #include <stdexcept>
 

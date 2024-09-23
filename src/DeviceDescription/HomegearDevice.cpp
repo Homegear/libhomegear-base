@@ -295,6 +295,16 @@ void HomegearDevice::saveDevice(xml_document *doc, xml_node *parentNode, Homegea
         subnode->append_attribute(attr);
       }
 
+      if (!(*i)->hardwareVersion.empty()) {
+        xml_node *deviceNode = doc->allocate_node(node_element, "hardwareVersion", doc->allocate_string((*i)->hardwareVersion.c_str(), (*i)->hardwareVersion.size() + 1));
+        subnode->append_node(deviceNode);
+      }
+
+      if (!(*i)->manufacturer.empty()) {
+        xml_node *deviceNode = doc->allocate_node(node_element, "manufacturer", doc->allocate_string((*i)->manufacturer.c_str(), (*i)->manufacturer.size() + 1));
+        subnode->append_node(deviceNode);
+      }
+
       xml_node *deviceNode = doc->allocate_node(node_element, "description", doc->allocate_string((*i)->description.c_str(), (*i)->description.size() + 1));
       subnode->append_node(deviceNode);
 
@@ -1087,6 +1097,12 @@ void HomegearDevice::saveParameter(xml_document *doc, xml_node *parentNode, PPar
 
     if (!parameter->unit.empty()) {
       xml_node *node = doc->allocate_node(node_element, "unit", doc->allocate_string(parameter->unit.c_str(), parameter->unit.size() + 1));
+      propertiesNode->append_node(node);
+    }
+
+    if (parameter->unit_code != UnitCode::kUndefined) {
+      tempString = std::to_string((int32_t)parameter->unit_code);
+      xml_node *node = doc->allocate_node(node_element, "unitCode", doc->allocate_string(tempString.c_str(), tempString.size() + 1));
       propertiesNode->append_node(node);
     }
 

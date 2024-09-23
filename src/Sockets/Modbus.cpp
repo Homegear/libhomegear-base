@@ -57,7 +57,6 @@ const uint8_t Modbus::_reverseByteMask[256] = {
 };
 
 Modbus::Modbus(BaseLib::SharedObjects *baseLib, Modbus::ModbusInfo &serverInfo) {
-  _bl = baseLib;
   _hostname = serverInfo.hostname;
   if (_hostname.empty()) throw ModbusException("The provided hostname is empty.");
   if (serverInfo.port > 0 && serverInfo.port < 65536) _port = serverInfo.port;
@@ -67,39 +66,46 @@ Modbus::Modbus(BaseLib::SharedObjects *baseLib, Modbus::ModbusInfo &serverInfo) 
 
   _keepAlive = serverInfo.keepAlive;
 
-  _socket = std::unique_ptr<BaseLib::TcpSocket>(new BaseLib::TcpSocket(_bl,
-                                                                       _hostname,
-                                                                       std::to_string(_port),
-                                                                       serverInfo.useSsl,
-                                                                       serverInfo.verifyCertificate,
-                                                                       serverInfo.caFile,
-                                                                       serverInfo.caData,
-                                                                       serverInfo.certFile,
-                                                                       serverInfo.certData,
-                                                                       serverInfo.keyFile,
-                                                                       serverInfo.keyData));
-  _socket->setAutoConnect(false);
-  _socket->setConnectionRetries(2);
-  _socket->setReadTimeout(serverInfo.timeout * 1000);
-  _socket->setWriteTimeout(serverInfo.timeout * 1000);
+  C1Net::TcpSocketInfo tcp_socket_info;
+  tcp_socket_info.read_timeout = serverInfo.timeout;
+  tcp_socket_info.write_timeout = serverInfo.timeout;
+
+  C1Net::TcpSocketHostInfo tcp_socket_host_info;
+  tcp_socket_host_info.host = _hostname;
+  tcp_socket_host_info.port = _port;
+  tcp_socket_host_info.auto_connect = false;
+  tcp_socket_host_info.connection_retries = 2;
+  tcp_socket_host_info.tls = serverInfo.useSsl;
+  tcp_socket_host_info.ca_file = serverInfo.caFile;
+  tcp_socket_host_info.ca_data = serverInfo.caData;
+  tcp_socket_host_info.verify_certificate = serverInfo.verifyCertificate;
+  tcp_socket_host_info.client_cert_file = serverInfo.certFile;
+  tcp_socket_host_info.client_cert_data = serverInfo.certData;
+  tcp_socket_host_info.client_key_file = serverInfo.keyFile;
+  if (serverInfo.keyData) tcp_socket_host_info.client_key_data = std::string(serverInfo.keyData->begin(), serverInfo.keyData->end());
+
+  _socket = std::make_unique<C1Net::TcpSocket>(tcp_socket_info, tcp_socket_host_info);
+
+  _packetSentCallback.swap(serverInfo.packetSentCallback);
+  _packetReceivedCallback.swap(serverInfo.packetReceivedCallback);
 }
 
 Modbus::~Modbus() {
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
   if (_socket) {
-    _socket->close();
+    _socket->Shutdown();
     _socket.reset();
   }
 }
 
 void Modbus::connect() {
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
-  if (_socket) _socket->open();
+  if (_socket) _socket->Open();
 }
 
 void Modbus::disconnect() {
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
-  if (_socket) _socket->close();
+  if (_socket) _socket->Shutdown();
 }
 
 void Modbus::insertHeader(std::vector<char> &packet, uint8_t functionCode, uint16_t payloadSize) {
@@ -119,14 +125,15 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
   if (packet.size() < 8) throw ModbusException("Could not send packet as it is invalid.");
 
   std::lock_guard<std::mutex> socketGuard(_socketMutex);
-  if (_debug) _bl->out.printMessage("Sending Modbus packet: " + BaseLib::HelperFunctions::getHexString(packet));
-  if (!_keepAlive) _socket->open();
-  _socket->proofwrite(packet);
+  if (!_keepAlive) _socket->Open();
+  _socket->Send((uint8_t *)packet.data(), packet.size());
+  if (_packetSentCallback) _packetSentCallback(packet);
 
-  uint32_t bytesread = 0;
+  std::size_t bytesread = 0;
   uint32_t size = 0;
+  bool more_data = false;
   while (true) {
-    bytesread += _socket->proofread(_readBuffer->data() + bytesread, _readBuffer->size() - bytesread);
+    bytesread += _socket->Read((uint8_t *)_readBuffer->data() + bytesread, _readBuffer->size() - bytesread, more_data);
     if (_readBuffer->size() == _readBuffer->capacity()) _readBuffer->resize(_readBuffer->size() + 1024);
     if (bytesread < 6) continue;
     if (size == 0) size = ((((uint16_t)(uint8_t)_readBuffer->operator[](4)) << 8) | _readBuffer->operator[](5)) + 6;
@@ -136,23 +143,20 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
 
   std::vector<char> response(_readBuffer->begin(), _readBuffer->begin() + bytesread);
 
-  if (_debug) _bl->out.printMessage("Modbus packet received: " + BaseLib::HelperFunctions::getHexString(response));
+  if (_packetReceivedCallback) _packetReceivedCallback(response);
 
   if (bytesread < 9) {
-    if (!_keepAlive) _socket->close();
+    if (!_keepAlive) _socket->Shutdown();
     throw ModbusException("Invalid Modbus packet received: " + BaseLib::HelperFunctions::getHexString(response));
-  }
-  else if ((_readBuffer->at(7) & 0x7F) != packet.at(7)) {
-    if (!_keepAlive) _socket->close();
+  } else if ((_readBuffer->at(7) & 0x7F) != packet.at(7)) {
+    if (!_keepAlive) _socket->Shutdown();
     throw ModbusException("Invalid response function code received: " + BaseLib::HelperFunctions::getHexString(response));
-  }
-  else if (_readBuffer->at(0) != packet.at(0) || _readBuffer->at(1) != packet.at(1)) {
-    if (!_keepAlive) _socket->close();
+  } else if (_readBuffer->at(0) != packet.at(0) || _readBuffer->at(1) != packet.at(1)) {
+    if (!_keepAlive) _socket->Shutdown();
     throw ModbusException("Response has invalid transaction ID.");
-  }
-  else if (_readBuffer->at(7) & 0x80) //Error response
+  } else if (_readBuffer->at(7) & 0x80) //Error response
   {
-    if (!_keepAlive) _socket->close();
+    if (!_keepAlive) _socket->Shutdown();
     uint8_t exceptionCode = _readBuffer->at(8);
     switch (exceptionCode) {
       case 1:throw ModbusException("Exception code 1: The function code (" + std::to_string(packet.at(7)) + ") is unknown by the server.", exceptionCode, response);
@@ -171,7 +175,7 @@ std::vector<char> Modbus::getResponse(std::vector<char> &packet) {
     }
   }
 
-  if (!_keepAlive) _socket->close();
+  if (!_keepAlive) _socket->Shutdown();
 
   return response;
 }
@@ -194,7 +198,7 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t> &buffer, u
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == coilBytes && response.size() == coilBytes + 9) break;
+      if ((uint8_t)response.at(8) >= coilBytes && response.size() >= coilBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus coils from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -209,8 +213,8 @@ void Modbus::readCoils(uint16_t startingAddress, std::vector<uint8_t> &buffer, u
     }
   }
 
-  if ((uint8_t)response.at(8) == coilBytes && response.size() == coilBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i++) {
+  if ((uint8_t)response.at(8) >= coilBytes && response.size() >= coilBytes + 9) {
+    for (uint32_t i = 9; i < coilBytes + 9; i++) {
       buffer.at(i - 9) = _reverseByteMask[(uint8_t)response.at(i)];
     }
   }
@@ -234,7 +238,7 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t> &
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == inputBytes && response.size() == inputBytes + 9) break;
+      if ((uint8_t)response.at(8) >= inputBytes && response.size() >= inputBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus inputs from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -249,8 +253,8 @@ void Modbus::readDiscreteInputs(uint16_t startingAddress, std::vector<uint8_t> &
     }
   }
 
-  if ((uint8_t)response.at(8) == inputBytes && response.size() == inputBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i++) {
+  if ((uint8_t)response.at(8) >= inputBytes && response.size() >= inputBytes + 9) {
+    for (uint32_t i = 9; i < inputBytes + 9; i++) {
       buffer.at(i - 9) = _reverseByteMask[(uint8_t)response.at(i)];
     }
   }
@@ -274,7 +278,7 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) break;
+      if ((uint8_t)response.at(8) == registerBytes && response.size() >= registerBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus holding registers from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (ModbusServerBusyException &ex) {
@@ -289,8 +293,8 @@ void Modbus::readHoldingRegisters(uint16_t startingAddress, std::vector<uint16_t
     }
   }
 
-  if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) {
+    for (uint32_t i = 9; i < registerBytes + 9; i += 2) {
       buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }
@@ -314,7 +318,7 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t> 
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) break;
+      if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read Modbus input registers from address 0x" + BaseLib::HelperFunctions::getHexString(startingAddress));
     }
     catch (const ModbusServerBusyException &ex) {
@@ -329,8 +333,8 @@ void Modbus::readInputRegisters(uint16_t startingAddress, std::vector<uint16_t> 
     }
   }
 
-  if ((uint8_t)response.at(8) == registerBytes && response.size() == registerBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= registerBytes && response.size() >= registerBytes + 9) {
+    for (uint32_t i = 9; i < registerBytes + 9; i += 2) {
       buffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }
@@ -504,7 +508,7 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
   for (int32_t i = 0; i < 5; i++) {
     try {
       response = getResponse(packet);
-      if ((uint8_t)response.at(8) == readRegisterBytes && response.size() == (uint32_t)readRegisterBytes + 9) break;
+      if ((uint8_t)response.at(8) >= readRegisterBytes && response.size() >= (uint32_t)readRegisterBytes + 9) break;
       else if (i == 4) throw ModbusException("Could not read/write Modbus registers at address 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (write) and 0x" + BaseLib::HelperFunctions::getHexString(readStartAddress) + " (read)");
     }
     catch (const ModbusServerBusyException &ex) {
@@ -519,8 +523,8 @@ void Modbus::readWriteMultipleRegisters(uint16_t readStartAddress, std::vector<u
     }
   }
 
-  if ((uint8_t)response.at(8) == readRegisterBytes && response.size() == (uint32_t)readRegisterBytes + 9) {
-    for (uint32_t i = 9; i < response.size(); i += 2) {
+  if ((uint8_t)response.at(8) >= readRegisterBytes && response.size() >= (uint32_t)readRegisterBytes + 9) {
+    for (uint32_t i = 9; i < (uint32_t)readRegisterBytes + 9; i += 2) {
       readBuffer.at((i - 9) / 2) = (((uint16_t)(uint8_t)response.at(i)) << 8) | (uint8_t)response.at(i + 1);
     }
   }

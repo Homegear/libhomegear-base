@@ -35,11 +35,12 @@ namespace BaseLib {
 namespace Rpc {
 
 RpcEncoder::RpcEncoder() {
-  strncpy(_packetStartRequest, "Bin", 4);
-  strncpy(_packetStartResponse, "Bin", 4);
+  memcpy(_packetStartRequest, "Bin", 4);
+  _packetStartRequest[3] = 0;
+  memcpy(_packetStartResponse, "Bin", 4);
   _packetStartResponse[3] = 1;
   _packetStartResponse[4] = 0;
-  strncpy(_packetStartError, "Bin", 4);
+  memcpy(_packetStartError, "Bin", 4);
   _packetStartError[3] = (char)(uint8_t)0xFF;
   _packetStartError[4] = 0;
 }

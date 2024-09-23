@@ -236,7 +236,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 			if(S_ISREG(statStruct.st_mode))
 			{
 				files.push_back(name);
-				if(files.size() == files.capacity()) files.reserve(files.size() + 100);
+				if(files.size() == files.capacity()) files.reserve(files.size() * 2);
 			}
 			else if(recursive && S_ISDIR(statStruct.st_mode))
 			{
@@ -244,7 +244,7 @@ std::vector<std::string> Io::getFiles(const std::string& path, bool recursive)
 				for(std::vector<std::string>::iterator i = subdirFiles.begin(); i != subdirFiles.end(); ++i)
 				{
 					files.push_back(name + '/' + *i);
-					if(files.size() == files.capacity()) files.reserve(files.size() + 100);
+					if(files.size() == files.capacity()) files.reserve(files.size() * 2);
 				}
 			}
 		}
@@ -277,14 +277,14 @@ std::vector<std::string> Io::getDirectories(const std::string& path, bool recurs
 			if(S_ISDIR(statStruct.st_mode))
 			{
 				directories.push_back(name + '/');
-				if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
+				if(directories.size() == directories.capacity()) directories.reserve(directories.size() * 2);
 				if(recursive)
 				{
 					std::vector<std::string> subdirs = getDirectories(fixedPath + name, recursive);
 					for(std::vector<std::string>::iterator i = subdirs.begin(); i != subdirs.end(); ++i)
 					{
 						directories.push_back(name + '/' + *i);
-						if(directories.size() == directories.capacity()) directories.reserve(directories.size() + 100);
+						if(directories.size() == directories.capacity()) directories.reserve(directories.size() * 2);
 					}
 				}
 			}
@@ -299,7 +299,7 @@ bool Io::copyFile(const std::string& source, const std::string& dest)
 {
 	try
 	{
-		int32_t in_fd = open(source.c_str(), O_RDONLY);
+		int32_t in_fd = open(source.c_str(), O_RDONLY | O_CLOEXEC);
 		if(in_fd == -1)
 		{
 			_bl->out.printError("Error copying file " + source + ": " + strerror(errno));
@@ -308,7 +308,7 @@ bool Io::copyFile(const std::string& source, const std::string& dest)
 
 		unlink(dest.c_str());
 
-		int32_t out_fd = open(dest.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
+		int32_t out_fd = open(dest.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | O_CLOEXEC);
 		if(out_fd == -1)
 		{
 			close(in_fd);
@@ -375,6 +375,7 @@ std::string Io::sha512(const std::string& file)
 		if(data.empty())
 		{
 			_bl->out.printError("Error: " + file + " is empty.");
+			gcry_md_close(stribogHandle);
 			return "";
 		}
 		gcry_md_write(stribogHandle, &data.at(0), data.size());

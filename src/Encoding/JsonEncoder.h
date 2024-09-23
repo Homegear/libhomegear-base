@@ -81,6 +81,8 @@ class JsonEncoder {
   static void encodeFloat(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
   static void encodeString(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
   static void encodeString(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
+  static void encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
+  static void encodeBinaryValue(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
   static void encodeVoid(const std::shared_ptr<Variable> &variable, std::ostringstream &s);
   static void encodeVoid(const std::shared_ptr<Variable> &variable, std::vector<char> &s);
 };

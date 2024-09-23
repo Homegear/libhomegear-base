@@ -94,6 +94,7 @@ void ServiceMessages::load() {
         switch (row->second.at(4)->intValue) {
           case 0: {
             _unreach = (bool)row->second.at(7)->intValue;
+            _unreachTime = row->second.at(6)->intValue;
             break;
           }
           case 1: {
@@ -403,7 +404,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("UNREACH"));
         element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
-        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.unreach", language)));
+        if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.unreach"));
+        else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.unreach", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.unreach"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
@@ -425,7 +427,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("STICKY_UNREACH"));
         element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
-        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.stickyUnreach", language)));
+        if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.stickyUnreach"));
+        else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.stickyUnreach", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.stickyUnreach"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
@@ -447,7 +450,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("CONFIG_PENDING"));
         element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kInfo));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_configPendingTime));
-        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.configPending", language)));
+        if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.configPending"));
+        else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.configPending", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.configPending"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
@@ -469,7 +473,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("LOWBAT"));
         element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_lowbatTime));
-        if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.lowbat", language)));
+        if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.lowbat"));
+        else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.lowbat", language)));
         else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage.lowbat"));
         element->structValue->emplace("VALUE", std::make_shared<Variable>(true));
         serviceMessages->arrayValue->push_back(element);
@@ -496,7 +501,8 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
           element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
           element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(inner.second.timestamp));
           auto variableName = inner.first;
-          if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName), language)));
+          if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName)));
+          else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName), language)));
           else element->structValue->emplace("MESSAGE", TranslationManager::getTranslations("l10n.common.serviceMessage." + HelperFunctions::toLower(variableName)));
           element->structValue->emplace("VALUE", std::make_shared<Variable>((uint32_t)inner.second.value));
           serviceMessages->arrayValue->push_back(element);
@@ -523,12 +529,18 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
     if (_bl->booting || _bl->shuttingDown) return;
     int64_t time = HelperFunctions::getTimeSeconds();
     if (cyclicTimeout > 0 && (time - lastPacketReceived) > cyclicTimeout) {
-      if (!_unreach) {
+      if (!_unreach || HelperFunctions::getTime() - last_unreach_event_ >= 86400000) {
         _unreach = true;
+        _unreachTime = HelperFunctions::getTimeSeconds();
         _stickyUnreach = true;
+        _stickyUnreachTime = HelperFunctions::getTimeSeconds();
+        last_unreach_event_ = HelperFunctions::getTime();
 
         _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is set to unreachable, because no packet was received within " + std::to_string(cyclicTimeout) + " seconds. The Last packet was received at "
                                + BaseLib::HelperFunctions::getTimeString(lastPacketReceived * 1000));
+
+        save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
+        save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, _stickyUnreach);
 
         std::vector<uint8_t> data = {1};
         raiseSaveParameter("UNREACH", 0, data);
@@ -543,6 +555,17 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
         std::string address = _peerSerial + ":" + std::to_string(0);
         raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
         raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
+
+        auto serviceMessage = std::make_shared<ServiceMessage>();
+        serviceMessage->type = ServiceMessageType::kDevice;
+        serviceMessage->timestamp = HelperFunctions::getTimeSeconds();
+        serviceMessage->peerId = _peerId;
+        serviceMessage->channel = 0;
+        serviceMessage->variable = "UNREACH";
+        serviceMessage->value = 1;
+        serviceMessage->priority = ServiceMessagePriority::kWarning;
+        serviceMessage->message = "l10n.common.serviceMessage.unreach";
+        raiseServiceMessageEvent(serviceMessage);
       }
     } else if (_unreach) endUnreach();
   }
@@ -553,11 +576,14 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
 
 void ServiceMessages::endUnreach() {
   try {
-    if (_unreach) {
+    if (_unreach || HelperFunctions::getTime() - last_unreach_event_ >= 86400000) {
+      if (_unreach) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is reachable again.");
+
       _unreach = false;
       _unreachResendCounter = 0;
+      last_unreach_event_ = HelperFunctions::getTime();
 
-      _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is reachable again.");
+      save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
 
       std::vector<uint8_t> data = {0};
       raiseSaveParameter("UNREACH", 0, data);
@@ -570,6 +596,17 @@ void ServiceMessages::endUnreach() {
       std::string address = _peerSerial + ":" + std::to_string(0);
       raiseEvent(eventSource, _peerId, 0, valueKeys, rpcValues);
       raiseRPCEvent(eventSource, _peerId, 0, address, valueKeys, rpcValues);
+
+      auto serviceMessage = std::make_shared<ServiceMessage>();
+      serviceMessage->type = ServiceMessageType::kDevice;
+      serviceMessage->timestamp = HelperFunctions::getTimeSeconds();
+      serviceMessage->peerId = _peerId;
+      serviceMessage->channel = 0;
+      serviceMessage->variable = "UNREACH";
+      serviceMessage->value = 0;
+      serviceMessage->priority = ServiceMessagePriority::kWarning;
+      serviceMessage->message = "l10n.common.serviceMessage.unreach";
+      raiseServiceMessageEvent(serviceMessage);
     }
   }
   catch (const std::exception &ex) {
@@ -624,7 +661,9 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       _unreachResendCounter = 0;
       _unreach = value;
       _unreachTime = HelperFunctions::getTimeSeconds();
+      _stickyUnreachTime = HelperFunctions::getTimeSeconds();
       save(ServiceMessagePriority::kWarning, _unreachTime, 0, value);
+      save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, value);
 
       if (value) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is unreachable.");
       std::vector<uint8_t> data = {(uint8_t)value};

@@ -77,7 +77,7 @@ void ThreadManager::testMaxThreadCount()
 			return;
 		}
 		threads.push_back(thread);
-		if(threads.size() > threads.capacity() - 10) threads.reserve(threads.size() + 1000);
+		if(threads.size() > threads.capacity() - 10) threads.reserve(threads.size() * 2);
 		_maxThreadCount++;
 	}
 }

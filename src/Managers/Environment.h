@@ -6,6 +6,7 @@
 #define LIBHOMEGEAR_BASE_ENVIRONMENT_H
 
 #include <mutex>
+#include <string>
 
 namespace BaseLib
 {

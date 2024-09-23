@@ -31,81 +31,65 @@
 #include "SupportedDevice.h"
 #include "../BaseLib.h"
 
-namespace BaseLib
-{
-namespace DeviceDescription
-{
+namespace BaseLib {
+namespace DeviceDescription {
 
-SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib)
-{
-	_bl = baseLib;
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects *baseLib) {
+  _bl = baseLib;
 }
 
-SupportedDevice::SupportedDevice(BaseLib::SharedObjects* baseLib, xml_node* node) : SupportedDevice(baseLib)
-{
-	for(xml_attribute* attr = node->first_attribute(); attr; attr = attr->next_attribute())
-	{
-		std::string attributeName(attr->name());
-		std::string attributeValue(attr->value());
-		if(attributeName == "id")
-		{
-			id = attributeValue;
-		}
-		else if(attributeName == "productId")
-        {
-		    productId = attributeValue;
-        }
-		else _bl->out.printWarning("Warning: Unknown attribute for \"supportedDevice\": " + attributeName);
-	}
-	for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
-	{
-		std::string nodeName(subNode->name());
-		std::string value(subNode->value());
-		if(nodeName == "longDescription") longDescription = value;
-		else if(nodeName == "serialPrefix") serialPrefix = value;
-		else if(nodeName == "description") description = value;
-		else if(nodeName == "typeNumber") typeNumber = Math::getUnsignedNumber64(value);
-		else if(nodeName == "minFirmwareVersion") minFirmwareVersion = Math::getUnsignedNumber(value);
-		else if(nodeName == "maxFirmwareVersion") maxFirmwareVersion = Math::getUnsignedNumber(value);
-		else _bl->out.printWarning("Warning: Unknown node in \"supportedDevice\": " + nodeName);
-	}
+SupportedDevice::SupportedDevice(BaseLib::SharedObjects *baseLib, xml_node *node) : SupportedDevice(baseLib) {
+  for (xml_attribute *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
+    std::string attributeName(attr->name());
+    std::string attributeValue(attr->value());
+    if (attributeName == "id") {
+      id = attributeValue;
+    } else if (attributeName == "productId") {
+      productId = attributeValue;
+    } else _bl->out.printWarning("Warning: Unknown attribute for \"supportedDevice\": " + attributeName);
+  }
+  for (xml_node *subNode = node->first_node(); subNode; subNode = subNode->next_sibling()) {
+    std::string nodeName(subNode->name());
+    std::string value(subNode->value());
+    if (nodeName == "hardwareVersion") hardwareVersion = value;
+    else if (nodeName == "manufacturer") manufacturer = value;
+    else if (nodeName == "longDescription") longDescription = value;
+    else if (nodeName == "serialPrefix") serialPrefix = value;
+    else if (nodeName == "description") description = value;
+    else if (nodeName == "typeNumber") typeNumber = Math::getUnsignedNumber64(value);
+    else if (nodeName == "minFirmwareVersion") minFirmwareVersion = Math::getUnsignedNumber(value);
+    else if (nodeName == "maxFirmwareVersion") maxFirmwareVersion = Math::getUnsignedNumber(value);
+    else _bl->out.printWarning("Warning: Unknown node in \"supportedDevice\": " + nodeName);
+  }
 }
 
-bool SupportedDevice::matches(uint64_t typeNumber, uint32_t firmwareVersion)
-{
-	try
-	{
-		if(typeNumber == this->typeNumber && checkFirmwareVersion(firmwareVersion)) return true;
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-    return false;
+bool SupportedDevice::matches(uint64_t typeNumber, uint32_t firmwareVersion) {
+  try {
+    if (typeNumber == this->typeNumber && checkFirmwareVersion(firmwareVersion)) return true;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  catch (...) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+  }
+  return false;
 }
 
-bool SupportedDevice::matches(const std::string& typeId)
-{
-	try
-	{
-		if(id == typeId) return true;
-	}
-	catch(const std::exception& ex)
-	{
-		_bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-    return false;
+bool SupportedDevice::matches(const std::string &typeId) {
+  try {
+    if (id == typeId) return true;
+  }
+  catch (const std::exception &ex) {
+    _bl->out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+  }
+  return false;
 }
 
-bool SupportedDevice::checkFirmwareVersion(int32_t version)
-{
-	if(version < 0) return true;
-	if((unsigned)version >= minFirmwareVersion && (maxFirmwareVersion == 0 || (unsigned)version <= maxFirmwareVersion)) return true;
-	return false;
+bool SupportedDevice::checkFirmwareVersion(int32_t version) {
+  if (version < 0) return true;
+  if ((unsigned)version >= minFirmwareVersion && (maxFirmwareVersion == 0 || (unsigned)version <= maxFirmwareVersion)) return true;
+  return false;
 }
 
 }

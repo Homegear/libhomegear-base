@@ -439,7 +439,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual HomegearDevice::ReceiveModes::Enum getRXModes();
   virtual bool isTeam() { return false; }
   virtual void setLastPacketReceived();
-  virtual uint32_t getLastPacketReceived() { return _lastPacketReceived; }
+  virtual int64_t getLastPacketReceived() { return _lastPacketReceived; }
   virtual bool pendingQueuesEmpty() { return true; }
   virtual void enqueuePendingQueues() {}
   virtual int32_t getChannelGroupedWith(int32_t channel) = 0;
@@ -527,6 +527,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
   virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, uint64_t id, int32_t remoteChannel = -1);
   virtual std::shared_ptr<BasicPeer> getPeer(int32_t channel, std::string serialNumber, int32_t remoteChannel = -1);
   virtual void updatePeer(uint64_t oldId, uint64_t newId);
+  virtual void updatePeer(const std::string &old_serial_number, const std::string &new_serial_number);
 
   virtual std::shared_ptr<ICentral> getCentral() = 0;
 
@@ -568,6 +569,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
    * @return Returns "RPC void" on success or RPC error "-100" when the new peer ID is invalid and error "-101" when the new peer ID is already in use.
    */
   virtual PVariable setId(PRpcClientInfo clientInfo, uint64_t newPeerID);
+  virtual PVariable setSerialNumber(PRpcClientInfo clientInfo, const std::string &new_serial_number);
   virtual PVariable setInterface(PRpcClientInfo clientInfo, std::string interfaceID) { return Variable::createError(-32601, "Method not implemented for this Peer."); }
   virtual PVariable setValue(PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, PVariable value, bool wait);
   //End RPC methods
@@ -618,7 +620,7 @@ class Peer : public ServiceMessages::IServiceEventSink, public IEvents {
 
   bool _disposing = false;
   bool _saveTeam = false;
-  uint32_t _lastPacketReceived = 0;
+  std::atomic<int64_t> _lastPacketReceived{0};
 
   // {{{ Event handling
   //Hooks

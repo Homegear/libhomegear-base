@@ -35,44 +35,52 @@
 #include <mutex>
 #include <atomic>
 
+#include <sys/epoll.h>
 #include <gnutls/gnutls.h>
 
-namespace BaseLib
-{
+namespace BaseLib {
 
 class SharedObjects;
 
-struct FileDescriptor
-{
-	int32_t id = -1;
-	std::atomic_int descriptor{-1};
-	gnutls_session_t tlsSession = nullptr;
-} __attribute__((aligned(16)));
+class FileDescriptor {
+ public:
+  int32_t id = 0;
+  std::atomic_int descriptor{-1};
+  std::atomic_int epoll_descriptor{-1};
+  gnutls_session_t tlsSession = nullptr;
+
+  ~FileDescriptor();
+  void Invalidate();
+  void Close();
+  void Shutdown();
+ private:
+  std::atomic_int closed_descriptor_{-1};
+};
 
 typedef std::shared_ptr<FileDescriptor> PFileDescriptor;
 
-class FileDescriptorManager
-{
-public:
-	FileDescriptorManager();
-	FileDescriptorManager(const FileDescriptorManager&) = delete; //Copy constructor
-	FileDescriptorManager(FileDescriptorManager&&) noexcept; //Move constructor
-	FileDescriptorManager& operator=(const FileDescriptorManager&) = delete; //Copy assignment operator
-	~FileDescriptorManager();
-	void dispose();
+class FileDescriptorManager {
+ public:
+  FileDescriptorManager();
+  FileDescriptorManager(const FileDescriptorManager &) = delete; //Copy constructor
+  FileDescriptorManager(FileDescriptorManager &&) noexcept; //Move constructor
+  FileDescriptorManager &operator=(const FileDescriptorManager &) = delete; //Copy assignment operator
+  ~FileDescriptorManager();
+  void dispose();
 
-	PFileDescriptor add(int fileDescriptor);
-	void remove(PFileDescriptor& descriptor);
-	void close(PFileDescriptor& descriptor);
-	void shutdown(PFileDescriptor& descriptor);
-	PFileDescriptor get(int fileDescriptor);
-	bool isValid(int fileDescriptor, int32_t id);
-	bool isValid(const PFileDescriptor& descriptor);
-	int32_t getMax();
-	std::unique_lock<std::mutex> getLock();
-private:
-	struct OpaquePointer;
-	std::unique_ptr<OpaquePointer> _opaquePointer;
+  PFileDescriptor add(int fileDescriptor);
+  PFileDescriptor add(int file_descriptor, int epoll_file_descriptor, uint32_t epoll_events);
+  void remove(PFileDescriptor &descriptor);
+  void close(PFileDescriptor &descriptor);
+  void shutdown(PFileDescriptor &descriptor);
+  PFileDescriptor get(int fileDescriptor);
+  bool isValid(int fileDescriptor, int32_t id);
+  bool isValid(const PFileDescriptor &descriptor);
+  int32_t getMax();
+  std::unique_lock<std::mutex> getLock();
+ private:
+  struct OpaquePointer;
+  std::unique_ptr<OpaquePointer> opaque_pointer_;
 
 };
 }

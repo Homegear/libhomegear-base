@@ -272,6 +272,7 @@ class IDatabaseController {
   virtual void deletePeerParameter(uint64_t peerID, DataRow &data) = 0;
 
   virtual bool peerExists(uint64_t peerId) = 0;
+  virtual bool peerExists(const std::string &serialNumber) = 0;
 
   /**
    * Changes the ID of a peer.
@@ -281,6 +282,7 @@ class IDatabaseController {
    * @return Returns "true" on success or "false" when the new ID is already in use.
    */
   virtual bool setPeerID(uint64_t oldPeerId, uint64_t newPeerId) = 0;
+  virtual bool setPeerSerialNumber(uint64_t peer_id, const std::string &new_serial_number) = 0;
   //End Peer
 
   //Service messages

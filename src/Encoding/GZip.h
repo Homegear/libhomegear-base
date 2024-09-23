@@ -34,8 +34,8 @@
 #include "../Exception.h"
 
 #include <zlib.h>
-
 #include <vector>
+#include <cstdint>
 
 namespace BaseLib
 {

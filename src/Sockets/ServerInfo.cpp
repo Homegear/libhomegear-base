@@ -46,7 +46,6 @@ PVariable ServerInfo::Info::serialize() {
   serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(caPath));
   serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(certPath));
   serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(keyPath));
-  serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(dhParamPath));
   serializedInfo->arrayValue->emplace_back(PVariable(new Variable((int32_t)authType)));
   serializedInfo->arrayValue->emplace_back(std::make_shared<Variable>(validGroups.size()));
   for (auto group : validGroups) {
@@ -85,8 +84,6 @@ void ServerInfo::Info::unserialize(PVariable data) {
   certPath = data->arrayValue->at(pos)->stringValue;
   pos++;
   keyPath = data->arrayValue->at(pos)->stringValue;
-  pos++;
-  dhParamPath = data->arrayValue->at(pos)->stringValue;
   pos++;
   authType = (AuthType)data->arrayValue->at(pos)->integerValue;
   pos++;
@@ -212,9 +209,6 @@ void ServerInfo::load(const std::string &filename) {
         } else if (name == "keypath") {
           info->keyPath = value;
           _bl->out.printDebug("Debug: keyPath of server " + info->name + " set to " + info->keyPath);
-        } else if (name == "dhparampath") {
-          info->dhParamPath = value;
-          _bl->out.printDebug("Debug: dhParamPath of server " + info->name + " set to " + info->dhParamPath);
         } else if (name == "authtype") {
           info->authType = Info::AuthType::undefined;
           HelperFunctions::toLower(value);
