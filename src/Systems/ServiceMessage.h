@@ -43,7 +43,8 @@ enum class ServiceMessageType {
 };
 
 enum class ServiceMessagePriority {
-  kUndefined = 0,
+  kUndefined = -1,
+  kOffline = 0,
   kCritical = 1,
   kError = 2,
   kWarning = 3,

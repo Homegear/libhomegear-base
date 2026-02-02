@@ -237,6 +237,7 @@ bool ServiceMessages::set(std::string id, bool value) {
         _unreachTime = HelperFunctions::getTimeSeconds();
         save(serviceMessage->priority, _unreachTime, 0, value);
       }
+      serviceMessage->priority = ServiceMessagePriority::kOffline;
       serviceMessage->message = "l10n.common.serviceMessage.unreach";
     } else if (id == "STICKY_UNREACH") {
       if (value != _stickyUnreach) {
@@ -245,6 +246,7 @@ bool ServiceMessages::set(std::string id, bool value) {
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
         save(serviceMessage->priority, _stickyUnreachTime, 1, value);
       }
+      serviceMessage->priority = ServiceMessagePriority::kOffline;
       serviceMessage->message = "l10n.common.serviceMessage.stickyUnreach";
     } else if (id == "CONFIG_PENDING") {
       serviceMessage->priority = ServiceMessagePriority::kInfo;
@@ -402,7 +404,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("UNREACH"));
-        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kOffline));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_unreachTime));
         if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.unreach"));
         else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.unreach", language)));
@@ -425,7 +427,7 @@ PVariable ServiceMessages::get(const PRpcClientInfo &clientInfo, bool returnId, 
         element->structValue->emplace("PEER_ID", std::make_shared<Variable>(_peerId));
         element->structValue->emplace("CHANNEL", std::make_shared<Variable>(0));
         element->structValue->emplace("VARIABLE", std::make_shared<Variable>("STICKY_UNREACH"));
-        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kWarning));
+        element->structValue->emplace("PRIORITY", std::make_shared<Variable>((int32_t)ServiceMessagePriority::kOffline));
         element->structValue->emplace("TIMESTAMP", std::make_shared<Variable>(_stickyUnreachTime));
         if (language == "code") element->structValue->emplace("MESSAGE", std::make_shared<Variable>("l10n.common.serviceMessage.stickyUnreach"));
         else if (!language.empty()) element->structValue->emplace("MESSAGE", std::make_shared<Variable>(TranslationManager::getTranslation("l10n.common.serviceMessage.stickyUnreach", language)));
@@ -539,8 +541,8 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
         _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is set to unreachable, because no packet was received within " + std::to_string(cyclicTimeout) + " seconds. The Last packet was received at "
                                + BaseLib::HelperFunctions::getTimeString(lastPacketReceived * 1000));
 
-        save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
-        save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, _stickyUnreach);
+        save(ServiceMessagePriority::kOffline, _unreachTime, 0, _unreach);
+        save(ServiceMessagePriority::kOffline, _stickyUnreachTime, 1, _stickyUnreach);
 
         std::vector<uint8_t> data = {1};
         raiseSaveParameter("UNREACH", 0, data);
@@ -563,7 +565,7 @@ void ServiceMessages::checkUnreach(int32_t cyclicTimeout, int64_t lastPacketRece
         serviceMessage->channel = 0;
         serviceMessage->variable = "UNREACH";
         serviceMessage->value = 1;
-        serviceMessage->priority = ServiceMessagePriority::kWarning;
+        serviceMessage->priority = ServiceMessagePriority::kOffline;
         serviceMessage->message = "l10n.common.serviceMessage.unreach";
         raiseServiceMessageEvent(serviceMessage);
       }
@@ -583,7 +585,7 @@ void ServiceMessages::endUnreach() {
       _unreachResendCounter = 0;
       last_unreach_event_ = HelperFunctions::getTime();
 
-      save(ServiceMessagePriority::kWarning, _unreachTime, 0, _unreach);
+      save(ServiceMessagePriority::kOffline, _unreachTime, 0, _unreach);
 
       std::vector<uint8_t> data = {0};
       raiseSaveParameter("UNREACH", 0, data);
@@ -604,7 +606,7 @@ void ServiceMessages::endUnreach() {
       serviceMessage->channel = 0;
       serviceMessage->variable = "UNREACH";
       serviceMessage->value = 0;
-      serviceMessage->priority = ServiceMessagePriority::kWarning;
+      serviceMessage->priority = ServiceMessagePriority::kOffline;
       serviceMessage->message = "l10n.common.serviceMessage.unreach";
       raiseServiceMessageEvent(serviceMessage);
     }
@@ -662,8 +664,8 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       _unreach = value;
       _unreachTime = HelperFunctions::getTimeSeconds();
       _stickyUnreachTime = HelperFunctions::getTimeSeconds();
-      save(ServiceMessagePriority::kWarning, _unreachTime, 0, value);
-      save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, value);
+      save(ServiceMessagePriority::kOffline, _unreachTime, 0, value);
+      save(ServiceMessagePriority::kOffline, _stickyUnreachTime, 1, value);
 
       if (value) _bl->out.printInfo("Info: Peer " + std::to_string(_peerId) + " is unreachable.");
       std::vector<uint8_t> data = {(uint8_t)value};
@@ -675,7 +677,7 @@ void ServiceMessages::setUnreach(bool value, bool requeue) {
       if (value) {
         _stickyUnreach = value;
         _stickyUnreachTime = HelperFunctions::getTimeSeconds();
-        save(ServiceMessagePriority::kWarning, _stickyUnreachTime, 1, value);
+        save(ServiceMessagePriority::kOffline, _stickyUnreachTime, 1, value);
         raiseSaveParameter("STICKY_UNREACH", 0, data);
 
         valueKeys->push_back("STICKY_UNREACH");
