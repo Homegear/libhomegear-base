@@ -48,7 +48,8 @@ enum class ServiceMessagePriority {
   kError = 2,
   kWarning = 3,
   kInfo = 4,
-  kDebug = 5
+  kDebug = 5,
+  kOffline = 0x100,
 };
 
 class ServiceMessage {
