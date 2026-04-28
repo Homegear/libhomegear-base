@@ -31,6 +31,8 @@
 #ifndef RUNPROGRAM_H_
 #define RUNPROGRAM_H_
 
+#include <cstdint>
+
 #include "JsonPayload.h"
 #include "BinaryPayload.h"
 #include "Parameter.h"

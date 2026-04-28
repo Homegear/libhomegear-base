@@ -31,6 +31,8 @@
 #ifndef ICENTRAL_H_
 #define ICENTRAL_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../IEvents.h"
 #include "../DeviceDescription/HomegearDevice.h"

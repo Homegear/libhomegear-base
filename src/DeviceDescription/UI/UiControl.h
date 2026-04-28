@@ -31,6 +31,8 @@
 #ifndef UICONTROL_H_
 #define UICONTROL_H_
 
+#include <cstdint>
+
 #include "../../Variable.h"
 #include <string>
 #include <unordered_map>

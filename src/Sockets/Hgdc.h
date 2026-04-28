@@ -31,6 +31,8 @@
 #ifndef LIBHOMEGEAR_BASE_HGDC_H
 #define LIBHOMEGEAR_BASE_HGDC_H
 
+#include <cstdint>
+
 #include "../Systems/Packet.h"
 #include "../Encoding/BinaryRpc.h"
 #include "../Encoding/RpcEncoder.h"

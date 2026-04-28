@@ -31,6 +31,8 @@
 #ifndef BASELIB_SECURITY_ACL_H_
 #define BASELIB_SECURITY_ACL_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Variable.h"
 #include "../Database/IDatabaseController.h"

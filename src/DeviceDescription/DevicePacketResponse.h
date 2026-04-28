@@ -31,6 +31,8 @@
 #ifndef DEVICEPACKETRESPONSE_H_
 #define DEVICEPACKETRESPONSE_H_
 
+#include <cstdint>
+
 #include <string>
 #include <memory>
 #include <vector>

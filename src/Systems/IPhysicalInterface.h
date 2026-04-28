@@ -31,6 +31,8 @@
 #ifndef IPHYSICALINTERFACE_H_
 #define IPHYSICALINTERFACE_H_
 
+#include <cstdint>
+
 #include "../IEvents.h"
 #include "PhysicalInterfaceSettings.h"
 #include "../Managers/FileDescriptorManager.h"

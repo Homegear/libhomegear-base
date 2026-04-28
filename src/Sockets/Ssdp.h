@@ -31,6 +31,8 @@
 #ifndef SSDP_H_
 #define SSDP_H_
 
+#include <cstdint>
+
 #include "../Encoding/Http.h"
 #include "../Variable.h"
 

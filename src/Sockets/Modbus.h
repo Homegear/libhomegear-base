@@ -31,6 +31,8 @@
 #ifndef LIBHOMEGEAR_BASE_MODBUS_H
 #define LIBHOMEGEAR_BASE_MODBUS_H
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Security/SecureVector.h"
 

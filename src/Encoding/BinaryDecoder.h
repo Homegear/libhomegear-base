@@ -31,6 +31,8 @@
 #ifndef BINARYDECODER_H_
 #define BINARYDECODER_H_
 
+#include <cstdint>
+
 #include "Ansi.h"
 #include "../Exception.h"
 

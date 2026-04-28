@@ -31,6 +31,8 @@
 #ifndef HOMEGEARNET_H_
 #define HOMEGEARNET_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 
 #include <string>

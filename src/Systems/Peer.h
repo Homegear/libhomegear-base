@@ -31,6 +31,8 @@
 #ifndef PEER_H_
 #define PEER_H_
 
+#include <cstdint>
+
 #include "../DeviceDescription/HomegearDevice.h"
 #include "../Database/DatabaseTypes.h"
 #include "../Sockets/RpcClientInfo.h"

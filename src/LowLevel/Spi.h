@@ -31,6 +31,8 @@
 #ifndef SPI_H_
 #define SPI_H_
 
+#include <cstdint>
+
 #ifdef SPISUPPORT
 
 #include "../Exception.h"

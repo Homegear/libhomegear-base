@@ -31,6 +31,8 @@
 #ifndef BASELIB_H_
 #define BASELIB_H_
 
+#include <cstdint>
+
 #include "Database/IDatabaseController.h"
 #include "Encoding/Ansi.h"
 #include "Encoding/XmlrpcDecoder.h"
