@@ -36,6 +36,7 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <cstdint>
 
 namespace BaseLib
 {
