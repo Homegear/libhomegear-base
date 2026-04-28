@@ -31,6 +31,8 @@
 #ifndef IDATABASECONTROLLER_H_
 #define IDATABASECONTROLLER_H_
 
+#include <cstdint>
+
 #include "DatabaseTypes.h"
 #include "../Variable.h"
 #include "../Sockets/RpcClientInfo.h"

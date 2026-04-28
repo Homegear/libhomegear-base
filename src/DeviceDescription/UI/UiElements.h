@@ -31,6 +31,8 @@
 #ifndef UIELEMENTS_H_
 #define UIELEMENTS_H_
 
+#include <cstdint>
+
 #include "HomegearUiElements.h"
 #include "../../Variable.h"
 

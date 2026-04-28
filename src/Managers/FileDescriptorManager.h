@@ -31,6 +31,8 @@
 #ifndef FILEDESCRIPTORMANAGER_H_
 #define FILEDESCRIPTORMANAGER_H_
 
+#include <cstdint>
+
 #include <memory>
 #include <mutex>
 #include <atomic>

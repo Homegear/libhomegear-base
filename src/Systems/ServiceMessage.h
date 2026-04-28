@@ -31,6 +31,8 @@
 #ifndef LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
 #define LIBHOMEGEAR_BASE_SRC_SYSTEMS_SERVICEMESSAGE_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../Managers/TranslationManager.h"
 

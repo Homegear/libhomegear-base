@@ -31,6 +31,8 @@
 #ifndef IEVENTS_H_
 #define IEVENTS_H_
 
+#include <cstdint>
+
 #include "Output/Output.h"
 
 #include <atomic>

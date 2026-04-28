@@ -31,6 +31,8 @@
 #ifndef HMDEVICE_H_
 #define HMDEVICE_H_
 
+#include <cstdint>
+
 #include <string>
 #include <vector>
 #include <map>

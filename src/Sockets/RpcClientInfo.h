@@ -31,6 +31,8 @@
 #ifndef RPCCLIENTINFO_H_
 #define RPCCLIENTINFO_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 
 #include <memory>

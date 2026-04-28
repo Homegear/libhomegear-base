@@ -31,6 +31,8 @@
 #ifndef HOMEGEARDEVICE_H_
 #define HOMEGEARDEVICE_H_
 
+#include <cstdint>
+
 #include "DevicePacket.h"
 #include "SupportedDevice.h"
 #include "RunProgram.h"

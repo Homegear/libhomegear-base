@@ -31,6 +31,8 @@
 #ifndef IQUEUE_H_
 #define IQUEUE_H_
 
+#include <cstdint>
+
 #include "IQueueBase.h"
 
 #include <vector>

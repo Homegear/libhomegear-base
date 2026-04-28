@@ -31,6 +31,8 @@
 #ifndef BINARYENCODER_H_
 #define BINARYENCODER_H_
 
+#include <cstdint>
+
 #include <memory>
 #include <cstring>
 #include <vector>

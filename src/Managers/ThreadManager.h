@@ -31,6 +31,8 @@
 #ifndef THREADS_H_
 #define THREADS_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Output/Output.h"
 #include <mutex>

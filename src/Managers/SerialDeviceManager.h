@@ -31,6 +31,8 @@
 #ifndef DEVICEMANAGER_H_
 #define DEVICEMANAGER_H_
 
+#include <cstdint>
+
 #include "../Sockets/SerialReaderWriter.h"
 
 #include <memory>

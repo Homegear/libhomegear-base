@@ -31,6 +31,8 @@
 #ifndef PHYSICALINTERFACESETTINGS_H_
 #define PHYSICALINTERFACESETTINGS_H_
 
+#include <cstdint>
+
 #include <string>
 #include <map>
 #include <unordered_map>

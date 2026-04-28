@@ -34,6 +34,7 @@
 #include "../Managers/FileDescriptorManager.h"
 
 #include <netdb.h>
+#include <cstdint>
 
 namespace BaseLib {
 

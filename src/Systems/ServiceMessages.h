@@ -31,6 +31,8 @@
 #ifndef SERVICEMESSAGES_H_
 #define SERVICEMESSAGES_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../Encoding/BinaryEncoder.h"
 #include "../Encoding/BinaryDecoder.h"

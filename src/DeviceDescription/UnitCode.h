@@ -30,6 +30,8 @@
 #ifndef LIBHOMEGEAR_BASE_SRC_DEVICEDESCRIPTION_UNITCODE_H_
 #define LIBHOMEGEAR_BASE_SRC_DEVICEDESCRIPTION_UNITCODE_H_
 
+#include <cstdint>
+
 namespace BaseLib::DeviceDescription {
 
 enum class UnitCode : int32_t {

@@ -31,6 +31,8 @@
 #ifndef DEVICEPARAMETERCAST_H_
 #define DEVICEPARAMETERCAST_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include <string>
 

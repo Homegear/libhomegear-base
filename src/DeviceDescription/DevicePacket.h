@@ -31,6 +31,8 @@
 #ifndef DEVICEPACKET_H_
 #define DEVICEPACKET_H_
 
+#include <cstdint>
+
 #include "JsonPayload.h"
 #include "BinaryPayload.h"
 #include "HttpPayload.h"

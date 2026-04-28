@@ -31,6 +31,8 @@
 #ifndef HTTP_H_
 #define HTTP_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../Exception.h"
 #include "../HelperFunctions/Math.h"

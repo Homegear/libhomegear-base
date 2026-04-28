@@ -31,6 +31,8 @@
 #ifndef SYSTEMSPHYSICALINTERFACES_H_
 #define SYSTEMSPHYSICALINTERFACES_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "PhysicalInterfaceSettings.h"
 

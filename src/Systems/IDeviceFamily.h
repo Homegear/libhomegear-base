@@ -31,6 +31,8 @@
 #ifndef IDEVICEFAMILY_H_
 #define IDEVICEFAMILY_H_
 
+#include <cstdint>
+
 #include "FamilySettings.h"
 #include "../Database/DatabaseTypes.h"
 #include "ICentral.h"

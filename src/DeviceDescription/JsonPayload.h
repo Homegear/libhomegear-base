@@ -31,6 +31,8 @@
 #ifndef JSONPAYLOAD_H_
 #define JSONPAYLOAD_H_
 
+#include <cstdint>
+
 #include <string>
 #include <vector>
 #include <memory>

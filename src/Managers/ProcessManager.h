@@ -31,6 +31,8 @@
 #ifndef LIBHOMEGEAR_BASE_PROCESSMANAGER_H
 #define LIBHOMEGEAR_BASE_PROCESSMANAGER_H
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "ThreadManager.h"
 #include "Environment.h"

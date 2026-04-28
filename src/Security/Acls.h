@@ -31,6 +31,8 @@
 #ifndef LIBHOMEGEAR_BASE_ACLS_H
 #define LIBHOMEGEAR_BASE_ACLS_H
 
+#include <cstdint>
+
 #include "Acl.h"
 #include "../Output/Output.h"
 

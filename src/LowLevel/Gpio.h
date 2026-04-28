@@ -31,6 +31,8 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
+#include <cstdint>
+
 #include <map>
 #include <mutex>
 #include <memory>
