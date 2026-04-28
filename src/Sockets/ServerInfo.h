@@ -31,6 +31,8 @@
 #ifndef SERVERINFO_H_
 #define SERVERINFO_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 
 #include <memory>

@@ -31,6 +31,8 @@
 #ifndef IQUEUEBASE_H_
 #define IQUEUEBASE_H_
 
+#include <cstdint>
+
 #include "Output/Output.h"
 
 #include <atomic>

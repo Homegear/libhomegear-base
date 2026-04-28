@@ -31,6 +31,8 @@
 #ifndef DEVICEPARAMETER_H_
 #define DEVICEPARAMETER_H_
 
+#include <cstdint>
+
 #include "ParameterCast.h"
 #include "Logical.h"
 #include "Physical.h"

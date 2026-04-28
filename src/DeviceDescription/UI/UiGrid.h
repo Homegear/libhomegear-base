@@ -31,6 +31,8 @@
 #ifndef UIGRID_H_
 #define UIGRID_H_
 
+#include <cstdint>
+
 #include "UiIcon.h"
 #include "UiText.h"
 #include "UiControl.h"

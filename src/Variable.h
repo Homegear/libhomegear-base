@@ -41,6 +41,7 @@
 #include <map>
 #include <list>
 #include <cmath>
+#include <cstdint>
 
 using namespace rapidxml;
 

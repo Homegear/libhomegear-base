@@ -31,6 +31,8 @@
 #ifndef DEVICEFUNCTION_H_
 #define DEVICEFUNCTION_H_
 
+#include <cstdint>
+
 #include "ParameterGroup.h"
 #include <string>
 #include <set>

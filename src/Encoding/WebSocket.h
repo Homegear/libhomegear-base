@@ -31,6 +31,8 @@
 #ifndef WEBSOCKET_H_
 #define WEBSOCKET_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 
 #include <memory>

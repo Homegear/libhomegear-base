@@ -31,6 +31,8 @@
 #ifndef ITIMEDQUEUE_H_
 #define ITIMEDQUEUE_H_
 
+#include <cstdint>
+
 #include "IQueueBase.h"
 
 #include <map>

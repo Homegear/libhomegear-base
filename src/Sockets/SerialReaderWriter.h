@@ -31,6 +31,8 @@
 #ifndef SERIALREADERWRITER_H_
 #define SERIALREADERWRITER_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../IEvents.h"

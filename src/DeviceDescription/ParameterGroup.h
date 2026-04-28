@@ -31,6 +31,8 @@
 #ifndef PARAMETERGROUP_H_
 #define PARAMETERGROUP_H_
 
+#include <cstdint>
+
 #include "Parameter.h"
 #include "Scenario.h"
 #include <string>

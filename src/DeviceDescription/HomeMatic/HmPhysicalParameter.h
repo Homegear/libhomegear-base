@@ -31,6 +31,8 @@
 #ifndef HMPHYSICALPARAMETER_H_
 #define HMPHYSICALPARAMETER_H_
 
+#include <cstdint>
+
 #include "../../HelperFunctions/HelperFunctions.h"
 
 #include <string>

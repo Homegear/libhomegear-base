@@ -31,6 +31,8 @@
 #ifndef DEVICEPARAMETERLOGICAL_H_
 #define DEVICEPARAMETERLOGICAL_H_
 
+#include <cstdint>
+
 #include <string>
 #include <memory>
 #include <unordered_map>

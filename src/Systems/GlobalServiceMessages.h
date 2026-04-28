@@ -31,6 +31,8 @@
 #ifndef GLOBALSERVICEMESSAGES_H_
 #define GLOBALSERVICEMESSAGES_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../Sockets/RpcClientInfo.h"
 #include "../Encoding/RpcDecoder.h"

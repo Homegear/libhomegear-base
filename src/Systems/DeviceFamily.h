@@ -31,6 +31,8 @@
 #ifndef DEVICEFAMILY_H_
 #define DEVICEFAMILY_H_
 
+#include <cstdint>
+
 #include "IDeviceFamily.h"
 
 namespace BaseLib {

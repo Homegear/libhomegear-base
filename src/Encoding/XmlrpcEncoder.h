@@ -31,6 +31,8 @@
 #ifndef XMLRPCENCODER_H_
 #define XMLRPCENCODER_H_
 
+#include <cstdint>
+
 #include <memory>
 #include <list>
 

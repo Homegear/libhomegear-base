@@ -31,6 +31,8 @@
 #ifndef HTTPCLIENT_H_
 #define HTTPCLIENT_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../Encoding/Http.h"

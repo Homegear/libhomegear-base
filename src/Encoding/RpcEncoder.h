@@ -31,6 +31,8 @@
 #ifndef RPCENCODER_H_
 #define RPCENCODER_H_
 
+#include <cstdint>
+
 #include "RpcHeader.h"
 #include "../Variable.h"
 #include "BinaryEncoder.h"

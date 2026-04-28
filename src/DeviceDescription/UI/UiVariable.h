@@ -37,6 +37,7 @@
 #include <map>
 #include <list>
 #include <memory>
+#include <cstdint>
 
 using namespace rapidxml;
 

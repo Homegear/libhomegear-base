@@ -31,6 +31,8 @@
 #ifndef UPDATEINFO_H_
 #define UPDATEINFO_H_
 
+#include <cstdint>
+
 #include <mutex>
 #include <map>
 #include <string>

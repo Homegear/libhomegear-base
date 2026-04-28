@@ -31,6 +31,8 @@
 #ifndef JSONENCODER_H_
 #define JSONENCODER_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Variable.h"
 

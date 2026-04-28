@@ -31,6 +31,8 @@
 #ifndef BINARYRPC_H_
 #define BINARYRPC_H_
 
+#include <cstdint>
+
 #include "../Variable.h"
 #include "../Exception.h"
 

@@ -31,6 +31,8 @@
 #ifndef DEVICES_H_
 #define DEVICES_H_
 
+#include <cstdint>
+
 #include <vector>
 #include <memory>
 #include <unordered_set>

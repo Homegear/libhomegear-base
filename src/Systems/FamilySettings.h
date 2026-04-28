@@ -31,6 +31,8 @@
 #ifndef FAMILYSETTINGS_H_
 #define FAMILYSETTINGS_H_
 
+#include <cstdint>
+
 #include "PhysicalInterfaceSettings.h"
 
 #include <memory>

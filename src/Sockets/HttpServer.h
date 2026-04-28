@@ -31,6 +31,8 @@
 #ifndef HTTPSERVER_H_
 #define HTTPSERVER_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Managers/FileDescriptorManager.h"
 #include "../Encoding/Http.h"

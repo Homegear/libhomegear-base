@@ -31,6 +31,8 @@
 #ifndef HTTPPAYLOAD_H_
 #define HTTPPAYLOAD_H_
 
+#include <cstdint>
+
 #include <string>
 #include <vector>
 #include <memory>

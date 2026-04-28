@@ -31,6 +31,8 @@
 #ifndef ISCRIPTINFO_H_
 #define ISCRIPTINFO_H_
 
+#include <cstdint>
+
 #include "../Sockets/ServerInfo.h"
 #include "../Encoding/Http.h"
 

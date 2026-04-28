@@ -31,6 +31,8 @@
 #ifndef JSONDECODER_H_
 #define JSONDECODER_H_
 
+#include <cstdint>
+
 #include "../Exception.h"
 #include "../Variable.h"
 #if __GNUC__ > 4

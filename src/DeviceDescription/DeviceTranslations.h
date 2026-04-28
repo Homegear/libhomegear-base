@@ -31,6 +31,8 @@
 #ifndef DEVICETRANSLATIONS_H_
 #define DEVICETRANSLATIONS_H_
 
+#include <cstdint>
+
 #include <vector>
 #include <memory>
 #include <mutex>
